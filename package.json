@@ -1,0 +1,24 @@
+{
+  "name": "welcome-embroidery",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "license": "GPL-3.0-or-later",
+  "scripts": {
+    "start": "node server.js",
+    "test:engine": "node --test test/*.test.js",
+    "test:mcp": "node scripts/test-mcp.mjs",
+    "test:e2e": "playwright test",
+    "test:e2e:webkit": "PW_BROWSER=webkit playwright test",
+    "build": "node scripts/build-static.mjs",
+    "test:dist": "npm run build && node scripts/test-dist.mjs",
+    "desktop:mac": "npm --prefix desktop/electron run package:mac"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "1.29.0",
+    "zod": "3.25.76"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.63.0"
+  }
+}

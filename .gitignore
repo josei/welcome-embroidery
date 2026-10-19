@@ -1,0 +1,10 @@
+node_modules/
+desktop/electron/
+dist/
+var/
+test-results/
+playwright-report/
+.claude/
+*.log
+.DS_Store
+docs/ORCHESTRATION.md

@@ -1,0 +1,1500 @@
+{
+  "schema": "welcom/reader-parity/1",
+  "oracle": "Ink/Stitch pystitch",
+  "repository": "https://github.com/inkstitch/pystitch",
+  "commit": "b72b557f2ebb1fdc51f30edc3c73ff6a851ea015",
+  "normalization": {
+    "coordinateScale": "integer coordinates are 1/10000 mm",
+    "jefTrimInference": "pystitch default interpolate_trims(trim_distance=3mm, clipping=true)",
+    "vp3OriginCorrection": "unconditionally call move_abs for every color block, including zero and no-op origins; raw guard is retained per fixture"
+  },
+  "fixtures": [
+    {
+      "path": "samples-6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random1-ew.jef",
+      "format": "jef",
+      "sha256": "313fca78327cc12e1674bf3655d0ba23d581bd57eb1fb86f949f7fb097d55291",
+      "stitchCount": 201,
+      "commandsSha256": "eee7b5f9075385753aa73c955821e8e8ba4b34a171a21e736e18996ed57b4d48",
+      "rawStitchCount": 201,
+      "rawCommandsSha256": "eee7b5f9075385753aa73c955821e8e8ba4b34a171a21e736e18996ed57b4d48",
+      "originCorrectionDiffers": false,
+      "commandCounts": {
+        "color": 9,
+        "end": 1,
+        "jump": 131,
+        "stitch": 30,
+        "trim": 30
+      },
+      "threads": [
+        "#595b61",
+        "#4f83ab",
+        "#523a97",
+        "#e4de79",
+        "#a0b8cc",
+        "#f9676b",
+        "#b2dd53",
+        "#4c5612",
+        "#cba21c",
+        "#ffe505"
+      ],
+      "bounds": [
+        -0.2,
+        -0.1,
+        94.7,
+        96.9
+      ]
+    },
+    {
+      "path": "samples-6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random1-janome.jef",
+      "format": "jef",
+      "sha256": "7600ec71faad2e044b63015f23ae1085de88d53e838d1a039c671ddd83e017f2",
+      "stitchCount": 150,
+      "commandsSha256": "0209d82b3767ecfa0b3bdf28224f1f2bfe3fdc806b72de8b0215142a15ab983c",
+      "rawStitchCount": 150,
+      "rawCommandsSha256": "0209d82b3767ecfa0b3bdf28224f1f2bfe3fdc806b72de8b0215142a15ab983c",
+      "originCorrectionDiffers": false,
+      "commandCounts": {
+        "color": 9,
+        "end": 1,
+        "jump": 95,
+        "stitch": 27,
+        "trim": 18
+      },
+      "threads": [
+        "#386a91",
+        "#523a97",
+        "#523a97",
+        "#b2dd53",
+        "#ac9cc7",
+        "#f9676b",
+        "#b2dd53",
+        "#595b61",
+        "#cba21c",
+        "#ffe505"
+      ],
+      "bounds": [
+        -47.9,
+        -50.0,
+        46.8,
+        46.9
+      ]
+    },
+    {
+      "path": "samples-6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random1-me.jef",
+      "format": "jef",
+      "sha256": "c63c64243bbf4e37f13e06ffe87c2376004cb1a0516ac5ff0a14db0b4cfab416",
+      "stitchCount": 177,
+      "commandsSha256": "7177e9ffde8952127d4df40241ed90fd76ce2c621aa3023ba93193cca27636a9",
+      "rawStitchCount": 177,
+      "rawCommandsSha256": "7177e9ffde8952127d4df40241ed90fd76ce2c621aa3023ba93193cca27636a9",
+      "originCorrectionDiffers": false,
+      "commandCounts": {
+        "color": 9,
+        "end": 1,
+        "jump": 107,
+        "stitch": 30,
+        "trim": 30
+      },
+      "threads": [
+        "#889b9b",
+        "#ac9cc7",
+        "#c3007e",
+        "#e4de79",
+        "#e5e5e5",
+        "#f33689",
+        "#4cbf8f",
+        "#986c80",
+        "#ffcb00",
+        "#ffe505"
+      ],
+      "bounds": [
+        -47.3,
+        -48.4,
+        47.4,
+        48.5
+      ]
+    },
+    {
+      "path": "samples-6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random1-me.vp3",
+      "format": "vp3",
+      "sha256": "bae47e8cf781e097b890544fe62b6f9df77c54a0b587bef27edc00fa26fdb36a",
+      "stitchCount": 80,
+      "commandsSha256": "6fe057d32fa5190c6b8aa35d88dd9d6ee0187e9abfb25f1121934b6aacfe7ea4",
+      "rawStitchCount": 79,
+      "rawCommandsSha256": "ba3b8cc9b7aa872feadb6cff65b72032886e0fd5ed59419d6078e9057e0d7447",
+      "originCorrectionDiffers": true,
+      "commandCounts": {
+        "color": 9,
+        "end": 1,
+        "jump": 10,
+        "stitch": 60
+      },
+      "threads": [
+        "#a6a695",
+        "#c089d8",
+        "#b612cd",
+        "#cfe774",
+        "#edccfb",
+        "#e90e86",
+        "#6bd38a",
+        "#808080",
+        "#feca15",
+        "#fed510"
+      ],
+      "bounds": [
+        -47.3,
+        -48.4,
+        47.4,
+        48.5
+      ]
+    },
+    {
+      "path": "samples-6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random1-premier.jef",
+      "format": "jef",
+      "sha256": "bc29d7080a2c1a3365913428176126dd38b0d440c8c8ae18eec63e552a0d3295",
+      "stitchCount": 265,
+      "commandsSha256": "3720aa49ffcb035b14be967a13af6e105490eac4b0f5d3924166b98ee4437756",
+      "rawStitchCount": 265,
+      "rawCommandsSha256": "3720aa49ffcb035b14be967a13af6e105490eac4b0f5d3924166b98ee4437756",
+      "originCorrectionDiffers": false,
+      "commandCounts": {
+        "color": 9,
+        "end": 1,
+        "jump": 196,
+        "stitch": 38,
+        "trim": 21
+      },
+      "threads": [
+        "#595b61",
+        "#595b61",
+        "#540571",
+        "#e4de79",
+        "#ac9cc7",
+        "#f0331f",
+        "#e4de79",
+        "#595b61",
+        "#fcb257",
+        "#fcb257"
+      ],
+      "bounds": [
+        -47.9,
+        -49.9,
+        46.9,
+        46.9
+      ]
+    },
+    {
+      "path": "samples-6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random1-wilcom.VP3",
+      "format": "vp3",
+      "sha256": "d8c9e2e3723888e4fc7e8023417c9a9cf6ff47b368958a9d0124471f7876ca8c",
+      "stitchCount": 61,
+      "commandsSha256": "1a02a82ad7c9c74973b7e79120864d39afee493fb02ec0a3f23a360b6df42ad3",
+      "rawStitchCount": 60,
+      "rawCommandsSha256": "72028c1dd30912d797e0e99eded135ca663a37a4359de98986340ebbb58d7304",
+      "originCorrectionDiffers": true,
+      "commandCounts": {
+        "color": 9,
+        "end": 1,
+        "jump": 10,
+        "stitch": 40,
+        "trim": 1
+      },
+      "threads": [
+        "#878787",
+        "#686ab0",
+        "#4e2990",
+        "#e3f35b",
+        "#b2afd4",
+        "#f73866",
+        "#9ed67d",
+        "#4f5556",
+        "#d0a660",
+        "#ffd911"
+      ],
+      "bounds": [
+        -47.9,
+        -50.1,
+        46.8,
+        46.8
+      ]
+    },
+    {
+      "path": "samples-6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random1.jef",
+      "format": "jef",
+      "sha256": "7bb60e046bce698f2f08d3155770abcf483e95e328a9c8c4bd71a099c7e38583",
+      "stitchCount": 167,
+      "commandsSha256": "21ff133372e4e532bfc60b94ef8f7b4b2147a528eee7fdb9f731b99f1cf887d1",
+      "rawStitchCount": 167,
+      "rawCommandsSha256": "21ff133372e4e532bfc60b94ef8f7b4b2147a528eee7fdb9f731b99f1cf887d1",
+      "originCorrectionDiffers": false,
+      "commandCounts": {
+        "color": 9,
+        "end": 1,
+        "jump": 107,
+        "stitch": 30,
+        "trim": 20
+      },
+      "threads": [
+        "#386a91",
+        "#523a97",
+        "#523a97",
+        "#b2dd53",
+        "#ac9cc7",
+        "#f9676b",
+        "#b2dd53",
+        "#595b61",
+        "#cba21c",
+        "#ffe505"
+      ],
+      "bounds": [
+        -47.9,
+        -50.0,
+        46.8,
+        46.9
+      ]
+    },
+    {
+      "path": "samples-6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random1.vp3",
+      "format": "vp3",
+      "sha256": "1c281f17ba1458c4b4be2744a8e2e9b9816a1b29b3c6b84c8b3dedf3a4204fa0",
+      "stitchCount": 51,
+      "commandsSha256": "19a62331f6f438c7dcf1494f006ad660e97cad9e9a7e49b2ea667144b365c2b4",
+      "rawStitchCount": 50,
+      "rawCommandsSha256": "0ada0de7cce62ff2c97e5047a32259658c3fd7e198bd19f6fab5060b5b9ae2d9",
+      "originCorrectionDiffers": true,
+      "commandCounts": {
+        "color": 9,
+        "end": 1,
+        "jump": 10,
+        "stitch": 30,
+        "trim": 1
+      },
+      "threads": [
+        "#5d727e",
+        "#6a5697",
+        "#5022c1",
+        "#a3e75b",
+        "#b0a2f6",
+        "#e85742",
+        "#a3fd56",
+        "#4f3e6a",
+        "#d6953a",
+        "#e0e126"
+      ],
+      "bounds": [
+        -47.9,
+        -49.9,
+        46.9,
+        46.9
+      ]
+    },
+    {
+      "path": "samples-6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random2-ew.jef",
+      "format": "jef",
+      "sha256": "a8425d8d8965907ea3bd9168db4350ff8dff143c5cac08ff80e7049a4961a0f8",
+      "stitchCount": 198,
+      "commandsSha256": "dad5c2c7eeac34311cb0ddfe34e95b7b437956ca2bdd5223cd57b64337b72b9d",
+      "rawStitchCount": 198,
+      "rawCommandsSha256": "dad5c2c7eeac34311cb0ddfe34e95b7b437956ca2bdd5223cd57b64337b72b9d",
+      "originCorrectionDiffers": false,
+      "commandCounts": {
+        "color": 9,
+        "end": 1,
+        "jump": 129,
+        "stitch": 30,
+        "trim": 29
+      },
+      "threads": [
+        "#ff9805",
+        "#4c5612",
+        "#000000",
+        "#e1add4",
+        "#595b61",
+        "#237336",
+        "#b1704e",
+        "#cba21c",
+        "#984161",
+        "#98692d"
+      ],
+      "bounds": [
+        0.0,
+        0.0,
+        94.6,
+        83.1
+      ]
+    },
+    {
+      "path": "samples-6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random2-janome.jef",
+      "format": "jef",
+      "sha256": "fd670efbdeb4c89fa0aab2571af6e1d98d91ace1193c6283cbaf718e3d668e9c",
+      "stitchCount": 153,
+      "commandsSha256": "aaf75394e6a69ea61b8b4086356b1ef3e38266ce24aba00fbf0cba5a2277bbce",
+      "rawStitchCount": 153,
+      "rawCommandsSha256": "aaf75394e6a69ea61b8b4086356b1ef3e38266ce24aba00fbf0cba5a2277bbce",
+      "originCorrectionDiffers": false,
+      "commandCounts": {
+        "color": 8,
+        "end": 1,
+        "jump": 98,
+        "stitch": 28,
+        "trim": 18
+      },
+      "threads": [
+        "#e3ac81",
+        "#595b61",
+        "#33200a",
+        "#ac9cc7",
+        "#986c80",
+        "#4cbf8f",
+        "#ff6600",
+        "#e4c35d",
+        "#984161"
+      ],
+      "bounds": [
+        -61.9,
+        -44.8,
+        32.4,
+        38.2
+      ]
+    },
+    {
+      "path": "samples-6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random2-me.jef",
+      "format": "jef",
+      "sha256": "02ced9ba7af122e722f5936b43b90384fb2bb7f7e0e8d23fdf429b67d199130d",
+      "stitchCount": 179,
+      "commandsSha256": "f160f8f5740b48fd3fba5b24cdea864c4536726409a538aec67f40682c5f1747",
+      "rawStitchCount": 179,
+      "rawCommandsSha256": "f160f8f5740b48fd3fba5b24cdea864c4536726409a538aec67f40682c5f1747",
+      "originCorrectionDiffers": false,
+      "commandCounts": {
+        "color": 9,
+        "end": 1,
+        "jump": 110,
+        "stitch": 30,
+        "trim": 29
+      },
+      "threads": [
+        "#ffcb00",
+        "#986c80",
+        "#4c881f",
+        "#e5e5e5",
+        "#889b9b",
+        "#5c941a",
+        "#fcb257",
+        "#ffe505",
+        "#cb8a1a",
+        "#b59474"
+      ],
+      "bounds": [
+        -47.1,
+        -41.5,
+        47.2,
+        41.5
+      ]
+    },
+    {
+      "path": "samples-6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random2-me.vp3",
+      "format": "vp3",
+      "sha256": "cf54f4fa84984ad69e4ee848b1e8ab41f7a3ad6be9baf388d64778f6a11f2da5",
+      "stitchCount": 79,
+      "commandsSha256": "01da2860c2fca7145ec4f84bcbe28b7a679b65f1d9b27240f028ea2d0d638b40",
+      "rawStitchCount": 78,
+      "rawCommandsSha256": "5ec7d5d0163f91ac5c80129d529b809ea57fca74b02fd801710f0df11ea44fda",
+      "originCorrectionDiffers": true,
+      "commandCounts": {
+        "color": 9,
+        "end": 1,
+        "jump": 10,
+        "stitch": 59
+      },
+      "threads": [
+        "#ffba04",
+        "#808080",
+        "#408615",
+        "#fdc4fa",
+        "#a6a695",
+        "#37a923",
+        "#e4995a",
+        "#feca15",
+        "#cf6829",
+        "#ba9c5f"
+      ],
+      "bounds": [
+        -47.1,
+        -41.5,
+        47.2,
+        41.5
+      ]
+    },
+    {
+      "path": "samples-6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random2-premier.jef",
+      "format": "jef",
+      "sha256": "d9fb19212b7ec906ca5d212bc1ea343804e558111073e579357241ff86809061",
+      "stitchCount": 252,
+      "commandsSha256": "4ce8ce67cefcff3c9fbae022b374d8ce4580682d1daa837a2b4dcc1ced313742",
+      "rawStitchCount": 252,
+      "rawCommandsSha256": "4ce8ce67cefcff3c9fbae022b374d8ce4580682d1daa837a2b4dcc1ced313742",
+      "originCorrectionDiffers": false,
+      "commandCounts": {
+        "color": 9,
+        "end": 1,
+        "jump": 185,
+        "stitch": 37,
+        "trim": 20
+      },
+      "threads": [
+        "#fcb257",
+        "#595b61",
+        "#003114",
+        "#ac9cc7",
+        "#889b9b",
+        "#5c941a",
+        "#ff6600",
+        "#e4de79",
+        "#984161",
+        "#5c941a"
+      ],
+      "bounds": [
+        -49.0,
+        -44.6,
+        45.1,
+        38.3
+      ]
+    },
+    {
+      "path": "samples-6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random2-premier.vp3",
+      "format": "vp3",
+      "sha256": "6584e438d011ba68de739427f07f675dea3b5b0a9eae6e934dd309bc49ee5c5c",
+      "stitchCount": 42,
+      "commandsSha256": "0d34c16f0c7e6120069efe3bdaee11e902fc19c4cc21111464640bb66cf1b082",
+      "rawStitchCount": 42,
+      "rawCommandsSha256": "0d34c16f0c7e6120069efe3bdaee11e902fc19c4cc21111464640bb66cf1b082",
+      "originCorrectionDiffers": false,
+      "commandCounts": {
+        "end": 1,
+        "jump": 1,
+        "stitch": 30,
+        "trim": 10
+      },
+      "threads": [
+        "#ecaa76"
+      ],
+      "bounds": [
+        -49.0,
+        -44.6,
+        45.1,
+        38.3
+      ]
+    },
+    {
+      "path": "samples-6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random2-wilcom.VP3",
+      "format": "vp3",
+      "sha256": "d17e4e87528d9f41d8a3fb255b59e28a3c3b47d8949c6e44f0cfcd8297937fe5",
+      "stitchCount": 61,
+      "commandsSha256": "33a071136216476118aa6ec57ab81cfaed3297da002a6bcbf1da1e71f9d61ad0",
+      "rawStitchCount": 60,
+      "rawCommandsSha256": "1d526eda7379262f087b7878ec1036d583e63d843795cb55d75d072e5ad13e98",
+      "originCorrectionDiffers": true,
+      "commandCounts": {
+        "color": 9,
+        "end": 1,
+        "jump": 10,
+        "stitch": 40,
+        "trim": 1
+      },
+      "threads": [
+        "#feb343",
+        "#4f5556",
+        "#132b1a",
+        "#e49acb",
+        "#878787",
+        "#66ba49",
+        "#d15c00",
+        "#d0a660",
+        "#b54c64",
+        "#7d6f00"
+      ],
+      "bounds": [
+        -49.1,
+        -44.7,
+        45.2,
+        38.3
+      ]
+    },
+    {
+      "path": "samples-6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random2.jef",
+      "format": "jef",
+      "sha256": "24dfe43b38152cb398197aeffdd5f0b1168e4820d576d63219865a8a023ce1e2",
+      "stitchCount": 170,
+      "commandsSha256": "f293214f92e3cc38e28abeae9c525b1e9f2cfecb8d89a777e973986ad20235e4",
+      "rawStitchCount": 170,
+      "rawCommandsSha256": "f293214f92e3cc38e28abeae9c525b1e9f2cfecb8d89a777e973986ad20235e4",
+      "originCorrectionDiffers": false,
+      "commandCounts": {
+        "color": 9,
+        "end": 1,
+        "jump": 111,
+        "stitch": 30,
+        "trim": 19
+      },
+      "threads": [
+        "#e3ac81",
+        "#595b61",
+        "#33200a",
+        "#ac9cc7",
+        "#986c80",
+        "#4cbf8f",
+        "#ff6600",
+        "#e4c35d",
+        "#984161",
+        "#5c941a"
+      ],
+      "bounds": [
+        -49.1,
+        -44.7,
+        45.2,
+        38.3
+      ]
+    },
+    {
+      "path": "samples-6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random2.vp3",
+      "format": "vp3",
+      "sha256": "ebd26cd131bb24220e5a0e3df3c349e03e79a9ad3e696983b8712e5b008b8364",
+      "stitchCount": 51,
+      "commandsSha256": "4174e80670904b0c507cc9e82beb7f58a708b5fa4e9a555b80e83f7683aca9a9",
+      "rawStitchCount": 50,
+      "rawCommandsSha256": "d094dbacebefaec4140da1e730231275d870cad0d57702dcf779673b31da147d",
+      "originCorrectionDiffers": true,
+      "commandCounts": {
+        "color": 9,
+        "end": 1,
+        "jump": 10,
+        "stitch": 30,
+        "trim": 1
+      },
+      "threads": [
+        "#ecaa76",
+        "#376968",
+        "#2b2c13",
+        "#c98cb5",
+        "#907ba5",
+        "#47e250",
+        "#e56531",
+        "#d2bd54",
+        "#825149",
+        "#5c8d03"
+      ],
+      "bounds": [
+        -49.0,
+        -44.6,
+        45.1,
+        38.3
+      ]
+    },
+    {
+      "path": "samples-6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random3-ew.jef",
+      "format": "jef",
+      "sha256": "81b406fa473df7dca32c70cc9e0d4ba5324ffec716615bb685787fc880a370b3",
+      "stitchCount": 206,
+      "commandsSha256": "a5d212c6b5fd55cfd7bfe6ec7c586ceef7a2f6f387d92adb1797960db6fa31f6",
+      "rawStitchCount": 206,
+      "rawCommandsSha256": "a5d212c6b5fd55cfd7bfe6ec7c586ceef7a2f6f387d92adb1797960db6fa31f6",
+      "originCorrectionDiffers": false,
+      "commandCounts": {
+        "color": 9,
+        "end": 1,
+        "jump": 137,
+        "stitch": 30,
+        "trim": 29
+      },
+      "threads": [
+        "#984161",
+        "#f33689",
+        "#523a97",
+        "#e1add4",
+        "#595b61",
+        "#98692d",
+        "#237336",
+        "#4c5612",
+        "#540571",
+        "#cb8a07"
+      ],
+      "bounds": [
+        -0.2,
+        0.0,
+        97.1,
+        90.4
+      ]
+    },
+    {
+      "path": "samples-6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random3-janome.jef",
+      "format": "jef",
+      "sha256": "b50391cbf7d80ef6a772dba9974d3ce9e334d7aaefd2c7ab1466054d06f52e38",
+      "stitchCount": 160,
+      "commandsSha256": "270593cd8de8994df72a85ed5c5e07843d337ea31266e3b2173cdd9ea2ab7e1c",
+      "rawStitchCount": 160,
+      "rawCommandsSha256": "270593cd8de8994df72a85ed5c5e07843d337ea31266e3b2173cdd9ea2ab7e1c",
+      "originCorrectionDiffers": false,
+      "commandCounts": {
+        "color": 9,
+        "end": 1,
+        "jump": 105,
+        "stitch": 27,
+        "trim": 18
+      },
+      "threads": [
+        "#984161",
+        "#de649e",
+        "#523a97",
+        "#ac9cc7",
+        "#986c80",
+        "#cb8a1a",
+        "#4cbf8f",
+        "#595b61",
+        "#523a97",
+        "#cb8a1a"
+      ],
+      "bounds": [
+        -49.1,
+        -40.8,
+        47.9,
+        49.5
+      ]
+    },
+    {
+      "path": "samples-6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random3-me.jef",
+      "format": "jef",
+      "sha256": "e6c21c21c062038c5d4d7a7d7f24f57e2c35b306ad61e49c9c3b44411051701e",
+      "stitchCount": 183,
+      "commandsSha256": "214fa77c9872e617db8ae1558fb1a876093a25ba77f96f7324345d748dc5b2d0",
+      "rawStitchCount": 183,
+      "rawCommandsSha256": "214fa77c9872e617db8ae1558fb1a876093a25ba77f96f7324345d748dc5b2d0",
+      "originCorrectionDiffers": false,
+      "commandCounts": {
+        "color": 9,
+        "end": 1,
+        "jump": 114,
+        "stitch": 30,
+        "trim": 29
+      },
+      "threads": [
+        "#cb8a1a",
+        "#f999b7",
+        "#de649e",
+        "#e5e5e5",
+        "#889b9b",
+        "#cb8a07",
+        "#4c881f",
+        "#986c80",
+        "#ab5a96",
+        "#cba21c"
+      ],
+      "bounds": [
+        -48.5,
+        -45.1,
+        48.5,
+        45.2
+      ]
+    },
+    {
+      "path": "samples-6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random3-me.vp3",
+      "format": "vp3",
+      "sha256": "2f1fe7577225d85bb8533a6aa7c0e1bb32233b5f18741eef058a3028f46dc622",
+      "stitchCount": 79,
+      "commandsSha256": "8a32f1ba74cefcc9352b01cb6ba91e7b8ccb16ddf7bbb89536b5525d7c238e15",
+      "rawStitchCount": 78,
+      "rawCommandsSha256": "53f3729eaefe1278a06916a0d64f2ec8818837331aad1d99a2abef67cdda7407",
+      "originCorrectionDiffers": true,
+      "commandCounts": {
+        "color": 9,
+        "end": 1,
+        "jump": 10,
+        "stitch": 59
+      },
+      "threads": [
+        "#cf6829",
+        "#ff99d7",
+        "#c832cd",
+        "#fdc4fa",
+        "#a6a695",
+        "#bf8200",
+        "#37a923",
+        "#808080",
+        "#cc48ab",
+        "#c1a941"
+      ],
+      "bounds": [
+        -48.5,
+        -45.1,
+        48.5,
+        45.2
+      ]
+    },
+    {
+      "path": "samples-6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random3-premier.jef",
+      "format": "jef",
+      "sha256": "fc6c5239e312244fd9ab94607ba570aa074436e5e70a93a8137a4228a6f4c66c",
+      "stitchCount": 271,
+      "commandsSha256": "01d3665e545c2343334166371916595d0079a3b73dab2de38557813ec7b8b420",
+      "rawStitchCount": 271,
+      "rawCommandsSha256": "01d3665e545c2343334166371916595d0079a3b73dab2de38557813ec7b8b420",
+      "originCorrectionDiffers": false,
+      "commandCounts": {
+        "color": 9,
+        "end": 1,
+        "jump": 201,
+        "stitch": 39,
+        "trim": 21
+      },
+      "threads": [
+        "#984161",
+        "#f669a0",
+        "#523a97",
+        "#e1add4",
+        "#595b61",
+        "#cb8a07",
+        "#5c941a",
+        "#595b61",
+        "#540571",
+        "#cb8a07"
+      ],
+      "bounds": [
+        -49.1,
+        -40.8,
+        47.9,
+        49.3
+      ]
+    },
+    {
+      "path": "samples-6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random3-premier.vp3",
+      "format": "vp3",
+      "sha256": "c418941b8099cb0be1e3a4f0409377b9bd3bf79850ed76d12a677b6a961dd516",
+      "stitchCount": 58,
+      "commandsSha256": "e00f76cb991eff9d7527a512182570553f688b62d9eceff50652169cd16bffc9",
+      "rawStitchCount": 58,
+      "rawCommandsSha256": "e00f76cb991eff9d7527a512182570553f688b62d9eceff50652169cd16bffc9",
+      "originCorrectionDiffers": false,
+      "commandCounts": {
+        "color": 9,
+        "end": 1,
+        "jump": 10,
+        "stitch": 37,
+        "trim": 1
+      },
+      "threads": [
+        "#b6303c",
+        "#e2798f",
+        "#721cbc",
+        "#caa1c1",
+        "#7a708d",
+        "#a5931d",
+        "#4fdf50",
+        "#414c73",
+        "#740ff6",
+        "#c38e16"
+      ],
+      "bounds": [
+        -49.1,
+        -40.8,
+        47.9,
+        49.3
+      ]
+    },
+    {
+      "path": "samples-6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random3-wilcom.VP3",
+      "format": "vp3",
+      "sha256": "e39f57992a3c42d36077f57eb44780b1bdd59b13b94932e9271a5938c1550ce8",
+      "stitchCount": 61,
+      "commandsSha256": "fe82944d66b5a012e376b0ffd92989b43f388d2266d071ae98f6f69f33fabc0b",
+      "rawStitchCount": 60,
+      "rawCommandsSha256": "362e8273057234d21117e9f427e9dcf4ff720b16c9cd64f17ca4c1366bc6f117",
+      "originCorrectionDiffers": true,
+      "commandCounts": {
+        "color": 9,
+        "end": 1,
+        "jump": 10,
+        "stitch": 40,
+        "trim": 1
+      },
+      "threads": [
+        "#b54c64",
+        "#f993bc",
+        "#6a1c8a",
+        "#e49acb",
+        "#878787",
+        "#b27624",
+        "#66ba49",
+        "#4f5556",
+        "#913697",
+        "#ba9800"
+      ],
+      "bounds": [
+        -49.1,
+        -40.8,
+        47.9,
+        49.5
+      ]
+    },
+    {
+      "path": "samples-6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random3.jef",
+      "format": "jef",
+      "sha256": "1bf994c205d8adc51cdd27bc4bd8317051e5d044ec7642aa60616575925c7da0",
+      "stitchCount": 174,
+      "commandsSha256": "b44f96930b123c165839277780a6faf2f2791034797fd50db184a80e3f040138",
+      "rawStitchCount": 174,
+      "rawCommandsSha256": "b44f96930b123c165839277780a6faf2f2791034797fd50db184a80e3f040138",
+      "originCorrectionDiffers": false,
+      "commandCounts": {
+        "color": 9,
+        "end": 1,
+        "jump": 115,
+        "stitch": 30,
+        "trim": 19
+      },
+      "threads": [
+        "#984161",
+        "#de649e",
+        "#523a97",
+        "#ac9cc7",
+        "#986c80",
+        "#cb8a1a",
+        "#4cbf8f",
+        "#595b61",
+        "#523a97",
+        "#cb8a1a"
+      ],
+      "bounds": [
+        -49.1,
+        -40.8,
+        47.9,
+        49.5
+      ]
+    },
+    {
+      "path": "samples-6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random3.vp3",
+      "format": "vp3",
+      "sha256": "a501747bb4b2024dd1dff7e5e1e3e1875f81115c638054edde652f26620c66a3",
+      "stitchCount": 51,
+      "commandsSha256": "4ee8302424fdf6b6951f018bc079f4139e6aa9ee1bd3d2032d0090316533e03e",
+      "rawStitchCount": 50,
+      "rawCommandsSha256": "a80aeaab82b6a7e75bc3d388677ab75f923984a45520d3ca5ae9da9ef31b5d10",
+      "originCorrectionDiffers": true,
+      "commandCounts": {
+        "color": 9,
+        "end": 1,
+        "jump": 10,
+        "stitch": 30,
+        "trim": 1
+      },
+      "threads": [
+        "#b6303c",
+        "#e2798f",
+        "#721cbc",
+        "#caa1c1",
+        "#7a708d",
+        "#a5931d",
+        "#4fdf50",
+        "#414c73",
+        "#740ff6",
+        "#c38e16"
+      ],
+      "bounds": [
+        -49.1,
+        -40.8,
+        47.9,
+        49.3
+      ]
+    },
+    {
+      "path": "samples-6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/scene-ew.jef",
+      "format": "jef",
+      "sha256": "dc13a3652389269133626b202d13355fc34d902f0888e2da0992aa9363390a98",
+      "stitchCount": 150,
+      "commandsSha256": "14183c2325e0e1f09a21026aad2a0d7e4153fd4a2f2a41010f51b905a76cc1f4",
+      "rawStitchCount": 150,
+      "rawCommandsSha256": "14183c2325e0e1f09a21026aad2a0d7e4153fd4a2f2a41010f51b905a76cc1f4",
+      "originCorrectionDiffers": false,
+      "commandCounts": {
+        "color": 2,
+        "end": 1,
+        "jump": 18,
+        "stitch": 125,
+        "trim": 4
+      },
+      "threads": [
+        "#386cae",
+        "#523a97",
+        "#de649e"
+      ],
+      "bounds": [
+        -59.0,
+        -58.0,
+        56.0,
+        54.6
+      ]
+    },
+    {
+      "path": "samples-6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/scene-me.jef",
+      "format": "jef",
+      "sha256": "1350c01464067e005a5d25d5120a59168f61006eb18a0b85844e5d29e90b017f",
+      "stitchCount": 151,
+      "commandsSha256": "a0b3c02304fd3d2a158d6c8f4dca9bcf2968c5b6775093bd4f6233f56148e62a",
+      "rawStitchCount": 151,
+      "rawCommandsSha256": "a0b3c02304fd3d2a158d6c8f4dca9bcf2968c5b6775093bd4f6233f56148e62a",
+      "originCorrectionDiffers": false,
+      "commandCounts": {
+        "color": 2,
+        "end": 1,
+        "jump": 18,
+        "stitch": 125,
+        "trim": 5
+      },
+      "threads": [
+        "#1e77ac",
+        "#c3007e",
+        "#f33689"
+      ],
+      "bounds": [
+        -57.5,
+        -56.3,
+        57.5,
+        56.3
+      ]
+    },
+    {
+      "path": "samples-6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/scene-me.vp3",
+      "format": "vp3",
+      "sha256": "7d97d670787ea8b64c3a1146e3436a9abf861c6c0576845c09fd48cd1bac659e",
+      "stitchCount": 140,
+      "commandsSha256": "d6c72cfaa6b9a34c2cd712d751cf9115a5a25ec9b2baec682c611e0363f46929",
+      "rawStitchCount": 139,
+      "rawCommandsSha256": "5121916b1a0a36fdd131d4d7793510115bd3f02e845b28604e4956deb63129a8",
+      "originCorrectionDiffers": true,
+      "commandCounts": {
+        "color": 4,
+        "end": 1,
+        "jump": 5,
+        "stitch": 130
+      },
+      "threads": [
+        "#0097df",
+        "#b612cd",
+        "#b612cd",
+        "#b612cd",
+        "#ff0060"
+      ],
+      "bounds": [
+        -57.5,
+        -56.3,
+        57.5,
+        56.3
+      ]
+    },
+    {
+      "path": "samples-6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/scene-premier.jef",
+      "format": "jef",
+      "sha256": "17c2c4efe849fafa8066939602248eceb93287c5e2482599845584cbe17a0234",
+      "stitchCount": 159,
+      "commandsSha256": "7ad4e6203100490f77a1bb2f10d79fd9848b11d7210d85e981f58719b9f0e854",
+      "rawStitchCount": 159,
+      "rawCommandsSha256": "7ad4e6203100490f77a1bb2f10d79fd9848b11d7210d85e981f58719b9f0e854",
+      "originCorrectionDiffers": false,
+      "commandCounts": {
+        "color": 2,
+        "end": 1,
+        "jump": 26,
+        "stitch": 128,
+        "trim": 2
+      },
+      "threads": [
+        "#e1add4",
+        "#98d6bd",
+        "#65c2c8"
+      ],
+      "bounds": [
+        -57.7,
+        -55.9,
+        57.3,
+        56.6
+      ]
+    },
+    {
+      "path": "samples-6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/scene-premier.vp3",
+      "format": "vp3",
+      "sha256": "cd1f76d64d9a79d3155807a3d3a8c457929a693d949d9d0eab44509cd74f0a48",
+      "stitchCount": 133,
+      "commandsSha256": "2c62a28a56751ee16284707c5bbf03e08d0ac6147840b4ab62277d1a0934815b",
+      "rawStitchCount": 132,
+      "rawCommandsSha256": "bad27ac3f0e8f5ff681cd29f58e66a306689401374c1de6be101b657a05b39c6",
+      "originCorrectionDiffers": true,
+      "commandCounts": {
+        "color": 2,
+        "end": 1,
+        "jump": 3,
+        "stitch": 126,
+        "trim": 1
+      },
+      "threads": [
+        "#b3b3c4",
+        "#71bdda",
+        "#3f6ad1"
+      ],
+      "bounds": [
+        -40.0,
+        -98.7,
+        75.0,
+        13.8
+      ]
+    },
+    {
+      "path": "samples-6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/scene-wilcom.VP3",
+      "format": "vp3",
+      "sha256": "aaf039656a10b76b08b8d82b9eb69e1756aa29248d6b1e2b783f02c260d8f1d8",
+      "stitchCount": 137,
+      "commandsSha256": "5d0d7c45f9d471b94b02e58517611b921906b599e370ad926908cd610e1c99ed",
+      "rawStitchCount": 136,
+      "rawCommandsSha256": "c38476b69037bcfa41cb1fb828e3dd8acfd5aab278bc2b39780b103ef23e6dfa",
+      "originCorrectionDiffers": true,
+      "commandCounts": {
+        "color": 2,
+        "end": 1,
+        "jump": 3,
+        "stitch": 130,
+        "trim": 1
+      },
+      "threads": [
+        "#095ba6",
+        "#4e2990",
+        "#f64a8a"
+      ],
+      "bounds": [
+        -4.0,
+        -98.7,
+        111.0,
+        13.9
+      ]
+    },
+    {
+      "path": "samples-6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/scene.jef",
+      "format": "jef",
+      "sha256": "974fa6cef5aedf72299b0005fea519822483582bf8dfa741c641fe131f683333",
+      "stitchCount": 145,
+      "commandsSha256": "d3de296b0b18f6a7ea5f6f24cda48f9630a7e13e9aca6f5a0503c804b737c0c7",
+      "rawStitchCount": 145,
+      "rawCommandsSha256": "d3de296b0b18f6a7ea5f6f24cda48f9630a7e13e9aca6f5a0503c804b737c0c7",
+      "originCorrectionDiffers": false,
+      "commandCounts": {
+        "color": 2,
+        "end": 1,
+        "jump": 15,
+        "stitch": 125,
+        "trim": 2
+      },
+      "threads": [
+        "#4c330b",
+        "#986c80",
+        "#f999a2"
+      ],
+      "bounds": [
+        -4.0,
+        -98.7,
+        111.0,
+        13.9
+      ]
+    },
+    {
+      "path": "samples-6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/scene.vp3",
+      "format": "vp3",
+      "sha256": "dc0c91454c340aaf28832f30c6e801b1ae5767d2ea5db87ff6efc0ed1081807f",
+      "stitchCount": 132,
+      "commandsSha256": "a03ed478c689015ba3bc715b2d7049f6a931f3ca1f78870ccf6c1674fd30c2a0",
+      "rawStitchCount": 131,
+      "rawCommandsSha256": "b56c3e4fb31ce584c7b6f86b78beda24afcfb0de7c6af7bd332315159c22c082",
+      "originCorrectionDiffers": true,
+      "commandCounts": {
+        "color": 2,
+        "end": 1,
+        "jump": 3,
+        "stitch": 125,
+        "trim": 1
+      },
+      "threads": [
+        "#b3b3c4",
+        "#71bdda",
+        "#3f6ad1"
+      ],
+      "bounds": [
+        -4.0,
+        -98.7,
+        111.0,
+        13.8
+      ]
+    },
+    {
+      "path": "samples-6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/spiralbox-ew.jef",
+      "format": "jef",
+      "sha256": "b39de845a846389e32fcaf4114cb50f6e5f4a636622485835b73d18572d3ccd4",
+      "stitchCount": 114,
+      "commandsSha256": "455693a3e2d2a43579b5a1868804f34216af37978d8de57b7926e634ad0eac12",
+      "rawStitchCount": 114,
+      "rawCommandsSha256": "455693a3e2d2a43579b5a1868804f34216af37978d8de57b7926e634ad0eac12",
+      "originCorrectionDiffers": false,
+      "commandCounts": {
+        "color": 15,
+        "end": 1,
+        "jump": 3,
+        "stitch": 79,
+        "trim": 16
+      },
+      "threads": [
+        "#e3311f",
+        "#071650",
+        "#003114",
+        "#595b61",
+        "#ffe505",
+        "#f999b7",
+        "#889b9b",
+        "#fffff2",
+        "#98692d",
+        "#f669a0",
+        "#80004b",
+        "#cba21c",
+        "#e1add4",
+        "#fcf294",
+        "#ff9805",
+        "#7fc21c"
+      ],
+      "bounds": [
+        0.0,
+        0.0,
+        36.3,
+        36.2
+      ]
+    },
+    {
+      "path": "samples-6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/spiralbox-janome.jef",
+      "format": "jef",
+      "sha256": "1505db88d3c81534a331fa63c8f78a5ebb4c33007ddad0e135aff3170b742080",
+      "stitchCount": 93,
+      "commandsSha256": "6b296ffa8b3b1eb56c87fd131562549c064f30942317976b61ca9357e3ab8076",
+      "rawStitchCount": 93,
+      "rawCommandsSha256": "6b296ffa8b3b1eb56c87fd131562549c064f30942317976b61ca9357e3ab8076",
+      "originCorrectionDiffers": false,
+      "commandCounts": {
+        "color": 15,
+        "end": 1,
+        "jump": 16,
+        "stitch": 61
+      },
+      "threads": [
+        "#ff0000",
+        "#0b2f84",
+        "#1a842d",
+        "#986c80",
+        "#ffcb00",
+        "#fffff2",
+        "#fcf294",
+        "#fffff2",
+        "#5c941a",
+        "#e3c4b4",
+        "#540571",
+        "#e3ac81",
+        "#f999b7",
+        "#ffffff",
+        "#f9676b",
+        "#7fc21c"
+      ],
+      "bounds": [
+        -25.7,
+        -13.1,
+        10.6,
+        23.1
+      ]
+    },
+    {
+      "path": "samples-6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/spiralbox-me.jef",
+      "format": "jef",
+      "sha256": "ebc494fd2172bb1b3b6f015ad0dc25310eba9387e58d7dc3592fcc697ab19b13",
+      "stitchCount": 130,
+      "commandsSha256": "8dac67ba534f7744c34340d5f53c26b4e19f0c2c781a0da243af779416f0f5ad",
+      "rawStitchCount": 130,
+      "rawCommandsSha256": "8dac67ba534f7744c34340d5f53c26b4e19f0c2c781a0da243af779416f0f5ad",
+      "originCorrectionDiffers": false,
+      "commandCounts": {
+        "color": 15,
+        "end": 1,
+        "jump": 15,
+        "stitch": 83,
+        "trim": 16
+      },
+      "threads": [
+        "#ff0000",
+        "#0b2f84",
+        "#1a842d",
+        "#889b9b",
+        "#ffcb00",
+        "#e5e5e5",
+        "#e4cf99",
+        "#fffff2",
+        "#b59474",
+        "#e2a188",
+        "#c3007e",
+        "#ffe505",
+        "#e1add4",
+        "#fcf294",
+        "#ff9805",
+        "#7fc21c"
+      ],
+      "bounds": [
+        -18.1,
+        -18.1,
+        18.2,
+        18.1
+      ]
+    },
+    {
+      "path": "samples-6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/spiralbox-me.vp3",
+      "format": "vp3",
+      "sha256": "3c40b7bb1898bc173bee613f577b8139a91994be20a8b264d53b8623f7a83ced",
+      "stitchCount": 131,
+      "commandsSha256": "d5a036f191728d315b22888a04113d3cd5c243b47c7a78ddd582c31036a00979",
+      "rawStitchCount": 130,
+      "rawCommandsSha256": "ddd5c0bbd8fe3a08842ff802a5569d9deb5912bebc92d2b2358c435ff53382cb",
+      "originCorrectionDiffers": true,
+      "commandCounts": {
+        "color": 15,
+        "end": 1,
+        "jump": 16,
+        "stitch": 99
+      },
+      "threads": [
+        "#ec0000",
+        "#001cdf",
+        "#00aa00",
+        "#a6a695",
+        "#fed510",
+        "#ffe3c6",
+        "#ffc896",
+        "#f0f0f0",
+        "#ba9c5f",
+        "#f39178",
+        "#df00b8",
+        "#feca15",
+        "#fdc4fa",
+        "#faf59e",
+        "#ffa704",
+        "#6cd900"
+      ],
+      "bounds": [
+        -18.1,
+        -18.1,
+        18.2,
+        18.1
+      ]
+    },
+    {
+      "path": "samples-6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/spiralbox-premier.jef",
+      "format": "jef",
+      "sha256": "6ab39e59b6e6b42ac3b5cad84139154d11c9754eccb78d8e9b5dbc43956c2c7f",
+      "stitchCount": 245,
+      "commandsSha256": "02b766117e65d8c5c71ac7c7245c0db532e0d448667ebf717ec8866b143bfc2e",
+      "rawStitchCount": 245,
+      "rawCommandsSha256": "02b766117e65d8c5c71ac7c7245c0db532e0d448667ebf717ec8866b143bfc2e",
+      "originCorrectionDiffers": false,
+      "commandCounts": {
+        "color": 15,
+        "end": 1,
+        "jump": 67,
+        "stitch": 97,
+        "trim": 65
+      },
+      "threads": [
+        "#e3311f",
+        "#540571",
+        "#1a842d",
+        "#889b9b",
+        "#ffe505",
+        "#e5e5e5",
+        "#fcf294",
+        "#e5e5e5",
+        "#98692d",
+        "#e1add4",
+        "#540571",
+        "#c9a480",
+        "#f999b7",
+        "#e5e5e5",
+        "#f669a0",
+        "#5c941a"
+      ],
+      "bounds": [
+        -25.5,
+        -13.0,
+        10.5,
+        23.0
+      ]
+    },
+    {
+      "path": "samples-6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/spiralbox-premier.vp3",
+      "format": "vp3",
+      "sha256": "2329628de8b045ea6fa23e92209d060e9eccf98e2ad6f05d978ce8d4880a49a2",
+      "stitchCount": 128,
+      "commandsSha256": "b92e20e6ea2af7dc4f5767f6c1346a68cdd4ff40a8a8cef3fde018362e0a05fa",
+      "rawStitchCount": 126,
+      "rawCommandsSha256": "589c8fbf63cb3867237a12060d50d5e5a80f26cd37b8f65433669163c95608c4",
+      "originCorrectionDiffers": true,
+      "commandCounts": {
+        "color": 15,
+        "end": 1,
+        "jump": 16,
+        "stitch": 95,
+        "trim": 1
+      },
+      "threads": [
+        "#ff0000",
+        "#0000ff",
+        "#008000",
+        "#808080",
+        "#ffd700",
+        "#fffff0",
+        "#f0e68c",
+        "#fdf5e6",
+        "#808000",
+        "#ffc0cb",
+        "#800080",
+        "#d2b48c",
+        "#ee82ee",
+        "#ffffff",
+        "#fa8072",
+        "#00ff00"
+      ],
+      "bounds": [
+        -25.5,
+        -13.0,
+        10.5,
+        23.0
+      ]
+    },
+    {
+      "path": "samples-6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/spiralbox-wilcom.VP3",
+      "format": "vp3",
+      "sha256": "ee6522c3d27ccac445d84625be815745b71617b5197bc1cde1126963f86db15c",
+      "stitchCount": 128,
+      "commandsSha256": "f755cb8c1a4171fb2f541d9820dff885b16c5e0a3f2884f6151bd5a081f4d396",
+      "rawStitchCount": 124,
+      "rawCommandsSha256": "9808ca43d4178dd438fb137818662e4a02fffe3c29a16e35bfc8a40667ba9a0b",
+      "originCorrectionDiffers": true,
+      "commandCounts": {
+        "color": 15,
+        "end": 1,
+        "jump": 16,
+        "stitch": 95,
+        "trim": 1
+      },
+      "threads": [
+        "#ed171f",
+        "#0b3d91",
+        "#2f7e20",
+        "#878787",
+        "#ffd911",
+        "#fee3c5",
+        "#ffc896",
+        "#f0f0f0",
+        "#7d6f00",
+        "#fcbbc4",
+        "#770176",
+        "#d0a660",
+        "#e49acb",
+        "#ffffb3",
+        "#fe9e32",
+        "#70bc1f"
+      ],
+      "bounds": [
+        -25.7,
+        -13.1,
+        10.6,
+        23.1
+      ]
+    },
+    {
+      "path": "samples-6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/spiralbox.jef",
+      "format": "jef",
+      "sha256": "08bbeca6d8b8bde6bb4f26c37f5a57d236362caf7595742bd1afa8718255bfc0",
+      "stitchCount": 111,
+      "commandsSha256": "7b84fc25eb080c030ac6e027385df3ae3dcdb319cccfbe5d14882dd6ad3d8c74",
+      "rawStitchCount": 111,
+      "rawCommandsSha256": "7b84fc25eb080c030ac6e027385df3ae3dcdb319cccfbe5d14882dd6ad3d8c74",
+      "originCorrectionDiffers": false,
+      "commandCounts": {
+        "color": 15,
+        "end": 1,
+        "jump": 15,
+        "stitch": 80
+      },
+      "threads": [
+        "#ff0000",
+        "#0b2f84",
+        "#1a842d",
+        "#986c80",
+        "#ffcb00",
+        "#fffff2",
+        "#fcf294",
+        "#fffff2",
+        "#5c941a",
+        "#e3c4b4",
+        "#540571",
+        "#e3ac81",
+        "#f999b7",
+        "#ffffff",
+        "#f9676b",
+        "#7fc21c"
+      ],
+      "bounds": [
+        -25.7,
+        -13.1,
+        10.6,
+        23.1
+      ]
+    },
+    {
+      "path": "samples-6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/spiralbox.vp3",
+      "format": "vp3",
+      "sha256": "32ee602060f48b46266a4b026fae2df45110d252cd24901a58460eb556e014e8",
+      "stitchCount": 113,
+      "commandsSha256": "e5614e2d29a1eecf0a48e84f2dc5487aad36851ef69cf947a1246015b6f27f91",
+      "rawStitchCount": 109,
+      "rawCommandsSha256": "09ba561ba25e017aeb4b43e246bb945e8c4f02c2e23f86ff4652854817739875",
+      "originCorrectionDiffers": true,
+      "commandCounts": {
+        "color": 15,
+        "end": 1,
+        "jump": 16,
+        "stitch": 80,
+        "trim": 1
+      },
+      "threads": [
+        "#ff0000",
+        "#0000ff",
+        "#008000",
+        "#808080",
+        "#ffd700",
+        "#fffff0",
+        "#f0e68c",
+        "#fdf5e6",
+        "#808000",
+        "#ffc0cb",
+        "#800080",
+        "#d2b48c",
+        "#ee82ee",
+        "#ffffff",
+        "#fa8072",
+        "#00ff00"
+      ],
+      "bounds": [
+        -25.5,
+        -13.0,
+        10.5,
+        23.0
+      ]
+    }
+  ]
+}

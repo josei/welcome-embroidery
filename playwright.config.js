@@ -1,0 +1,2 @@
+import {defineConfig} from '@playwright/test';
+export default defineConfig({testDir:'./test',testMatch:process.env.DBG?'dbg.spec.js':'editor.spec.js',timeout:45000,expect:{timeout:6000},reporter:'list',use:{baseURL:'http://127.0.0.1:18787',browserName:process.env.PW_BROWSER||'chromium',headless:true,viewport:{width:1600,height:1000}},webServer:{command:'npm run build && HOST=127.0.0.1 PORT=18787 node scripts/serve-dist.mjs',url:'http://127.0.0.1:18787/health',reuseExistingServer:false,timeout:30000}});

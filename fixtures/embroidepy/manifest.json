@@ -1,0 +1,4467 @@
+{
+  "schema": "welcom/fixture-source/1",
+  "reviewed": "2026-10-05",
+  "repository": "https://github.com/EmbroidePy/samples",
+  "commit": "6e65f1ae8599b1e04d3e082aae1b86abed52ec9e",
+  "license": "MIT",
+  "license_path": "LICENSE",
+  "archive_url": "https://codeload.github.com/EmbroidePy/samples/zip/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e",
+  "archive_sha256": "40f01ccd1d7922165f480d500dbab907e115bf5a65ebac80a83568dfd7f64fa3",
+  "file_count": 627,
+  "uncompressed_bytes": 2627853,
+  "counts_by_extension": {
+    "": 1,
+    ".00o": 10,
+    ".101": 5,
+    ".10o": 15,
+    ".bmp": 13,
+    ".bro": 9,
+    ".clf": 4,
+    ".col": 5,
+    ".csd": 6,
+    ".csv": 5,
+    ".ct0": 5,
+    ".dgf": 5,
+    ".dgt": 5,
+    ".dsb": 10,
+    ".dst": 25,
+    ".dsz": 10,
+    ".edr": 5,
+    ".emb": 15,
+    ".emd": 5,
+    ".exp": 35,
+    ".gcode": 5,
+    ".hp1": 5,
+    ".hqf": 5,
+    ".hus": 15,
+    ".inb": 5,
+    ".inf": 10,
+    ".jef": 24,
+    ".jef+": 5,
+    ".ksm": 10,
+    ".lt0": 5,
+    ".m3": 5,
+    ".md": 1,
+    ".mls": 5,
+    ".mon": 5,
+    ".ngs": 5,
+    ".pcd": 6,
+    ".pcm": 9,
+    ".pcq": 6,
+    ".pcs": 16,
+    ".pec": 25,
+    ".pes": 73,
+    ".pmu": 5,
+    ".pmv": 5,
+    ".png": 5,
+    ".pum": 5,
+    ".qli": 5,
+    ".sef": 5,
+    ".sew": 15,
+    ".shv": 10,
+    ".sst": 5,
+    ".stich": 1,
+    ".stx": 5,
+    ".svg": 5,
+    ".tap": 10,
+    ".tbf": 10,
+    ".txt": 5,
+    ".u01": 15,
+    ".vip": 15,
+    ".vp3": 19,
+    ".vp4": 5,
+    ".xxx": 29,
+    ".z01": 10
+  },
+  "files": [
+    {
+      "path": "LICENSE",
+      "bytes": 1067,
+      "sha256": "024f7cedfaea358051deea7abffd53cd9660d258c08dba53d3b293d8a2582528",
+      "extension": "",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/LICENSE"
+    },
+    {
+      "path": "RANDOM1-WILCOM.TBF",
+      "bytes": 2011,
+      "sha256": "4d4f4188edcd68ac4177ccd06e2f0a7d9fd08604cfa6e10df1c1abbdadf16b08",
+      "extension": ".tbf",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/RANDOM1-WILCOM.TBF"
+    },
+    {
+      "path": "RANDOM2-WILCOM.TBF",
+      "bytes": 2023,
+      "sha256": "9ee256c0821bf9656f1cb60d65ff036b7c31761b27ad122669c9fac23de9ff2c",
+      "extension": ".tbf",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/RANDOM2-WILCOM.TBF"
+    },
+    {
+      "path": "RANDOM3-WILCOM.TBF",
+      "bytes": 2035,
+      "sha256": "e26b5dbd61e0df5df5968e08c13784f7e43889816d8aeb06258b46b985582c3f",
+      "extension": ".tbf",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/RANDOM3-WILCOM.TBF"
+    },
+    {
+      "path": "README.md",
+      "bytes": 34,
+      "sha256": "9aba408e409bcab5fec19c92e8f763e09c180e06bea90e4ac9e35c9b3def2922",
+      "extension": ".md",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/README.md"
+    },
+    {
+      "path": "SCENE-WILCOM.TBF",
+      "bytes": 1990,
+      "sha256": "b9ef1fa8aadffa8efdf69b9db646e4dc5c012a86148d7a40e66056063957d7ee",
+      "extension": ".tbf",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/SCENE-WILCOM.TBF"
+    },
+    {
+      "path": "SPIRALBOX-WILCOM.TBF",
+      "bytes": 1918,
+      "sha256": "a0b8d2f9c8e1da5ea940380d321fbe5988e9d0b1ee5ed8feea68611a99a01459",
+      "extension": ".tbf",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/SPIRALBOX-WILCOM.TBF"
+    },
+    {
+      "path": "randoU01.bmp",
+      "bytes": 2518,
+      "sha256": "8b3b1952395e0189b6b77567a49489e67f8ca0663a1a358bbe408502f81087e8",
+      "extension": ".bmp",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/randoU01.bmp"
+    },
+    {
+      "path": "random1-brother-v1.pes",
+      "bytes": 4106,
+      "sha256": "ecf7b6c1aff1035a15f8e1da23c9b7250253b1d24d211acd569e3b2a93fff4f4",
+      "extension": ".pes",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random1-brother-v1.pes"
+    },
+    {
+      "path": "random1-brother-v2.pes",
+      "bytes": 4124,
+      "sha256": "6600bdf7900f9dbafbc624df6ad5e5626782296a35854229f56222fbd498b38b",
+      "extension": ".pes",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random1-brother-v2.pes"
+    },
+    {
+      "path": "random1-brother-v3.pes",
+      "bytes": 4128,
+      "sha256": "bd2bc73f4d087bab50c8cf1bf236f166309df2cdc8f46861d608acb8de4902df",
+      "extension": ".pes",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random1-brother-v3.pes"
+    },
+    {
+      "path": "random1-brother-v4.pes",
+      "bytes": 4271,
+      "sha256": "46965f42519095afdc9f647074b1d62c07c1a93e605f5eed8e31bf2f502aae91",
+      "extension": ".pes",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random1-brother-v4.pes"
+    },
+    {
+      "path": "random1-brother-v5.pes",
+      "bytes": 6093,
+      "sha256": "c47c60982068b6d0c80c866270c3af2e2e5aef7e504e44de844002575b7f25a5",
+      "extension": ".pes",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random1-brother-v5.pes"
+    },
+    {
+      "path": "random1-brother-v6.pes",
+      "bytes": 5675,
+      "sha256": "2bf708b8d742e0b1f3d730fb2fc9c2a40c84d4568aba51c84256bb5ddbf5e8e5",
+      "extension": ".pes",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random1-brother-v6.pes"
+    },
+    {
+      "path": "random1-ew-+.bmp",
+      "bytes": 40054,
+      "sha256": "3c687cdf455e0e4dae5db352b7f80513ce498dc6262e18049a2f59c43001ba7a",
+      "extension": ".bmp",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random1-ew-%2B.bmp"
+    },
+    {
+      "path": "random1-ew-+.exp",
+      "bytes": 616,
+      "sha256": "c74bc04025b6269bed37fefa4fb04961294dc7d678dc22f7c9ab721a97754802",
+      "extension": ".exp",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random1-ew-%2B.exp"
+    },
+    {
+      "path": "random1-ew-+.inf",
+      "bytes": 283,
+      "sha256": "5964f3d16676f543d4a21a583f3faa55585d198c982fffa0defcf431e19f13ec",
+      "extension": ".inf",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random1-ew-%2B.inf"
+    },
+    {
+      "path": "random1-ew.dst",
+      "bytes": 1052,
+      "sha256": "527ffa2bcb721e4ef18617ee74d4cda0e9b5f3e6339336ed3e551c361279b145",
+      "extension": ".dst",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random1-ew.dst"
+    },
+    {
+      "path": "random1-ew.edr",
+      "bytes": 40,
+      "sha256": "ede4ed394a9de0c8c393320f473aec98b7eec80c79e89df2f4f01535dfec96a0",
+      "extension": ".edr",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random1-ew.edr"
+    },
+    {
+      "path": "random1-ew.exp",
+      "bytes": 616,
+      "sha256": "c74bc04025b6269bed37fefa4fb04961294dc7d678dc22f7c9ab721a97754802",
+      "extension": ".exp",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random1-ew.exp"
+    },
+    {
+      "path": "random1-ew.jef",
+      "bytes": 858,
+      "sha256": "313fca78327cc12e1674bf3655d0ba23d581bd57eb1fb86f949f7fb097d55291",
+      "extension": ".jef",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random1-ew.jef"
+    },
+    {
+      "path": "random1-ew.pec",
+      "bytes": 3256,
+      "sha256": "92edd94e2d186bc1e8014d8f26a449c0077c980fbf40f643801686f11020f1ff",
+      "extension": ".pec",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random1-ew.pec"
+    },
+    {
+      "path": "random1-ew.pes",
+      "bytes": 3948,
+      "sha256": "e485791b78966a6725f9cd01f53fc41db455dc2c8a7b3e07a2535d2a9c408849",
+      "extension": ".pes",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random1-ew.pes"
+    },
+    {
+      "path": "random1-ew.stich",
+      "bytes": 102869,
+      "sha256": "125931e08bd1b47ad45a5d4b445b456a032e9288383ed359aee2d439e0bd28af",
+      "extension": ".stich",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random1-ew.stich"
+    },
+    {
+      "path": "random1-janome.clf",
+      "bytes": 68680,
+      "sha256": "c5e9aa862034d1d704f41716fd3de1f983bca4a324b51ac69c1fafa0383355bf",
+      "extension": ".clf",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random1-janome.clf"
+    },
+    {
+      "path": "random1-janome.jef",
+      "bytes": 668,
+      "sha256": "7600ec71faad2e044b63015f23ae1085de88d53e838d1a039c671ddd83e017f2",
+      "extension": ".jef",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random1-janome.jef"
+    },
+    {
+      "path": "random1-me.00O",
+      "bytes": 558,
+      "sha256": "e8ee113ffd37a335853744669d1ea50ddf3495318c8a0fa132809b5f9d422dcb",
+      "extension": ".00o",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random1-me.00O"
+    },
+    {
+      "path": "random1-me.101",
+      "bytes": 962,
+      "sha256": "9e46a64558b7905b8190ba7c9b5f312f95c544a36342bdc88a8314543d319e6a",
+      "extension": ".101",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random1-me.101"
+    },
+    {
+      "path": "random1-me.10O",
+      "bytes": 819,
+      "sha256": "7ea45e141a7ed75b8f1f902e3fb3d0df4537625cb306c81a0d6d9703f3396299",
+      "extension": ".10o",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random1-me.10O"
+    },
+    {
+      "path": "random1-me.HP1",
+      "bytes": 3072,
+      "sha256": "c88c856a5e059d63e0b555dd4a5612f93eec3fb3d44d3f00ea289ed59a676a31",
+      "extension": ".hp1",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random1-me.HP1"
+    },
+    {
+      "path": "random1-me.M3",
+      "bytes": 949,
+      "sha256": "5328876e7dcbf3efab9a76431888bf451c340305b57e148d8acfa87df08484cf",
+      "extension": ".m3",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random1-me.M3"
+    },
+    {
+      "path": "random1-me.TBF",
+      "bytes": 2203,
+      "sha256": "9320bcca814cc9aeee84832b0f69481c880bab97e1cae8808b1c0b40a5f0f074",
+      "extension": ".tbf",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random1-me.TBF"
+    },
+    {
+      "path": "random1-me.U01",
+      "bytes": 1090,
+      "sha256": "70f586c7984cbe081cbbb8167286b090be30e1ec3297bcd64f1f15718c636e4d",
+      "extension": ".u01",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random1-me.U01"
+    },
+    {
+      "path": "random1-me.Z01",
+      "bytes": 2349,
+      "sha256": "109b2c088072cdaab3c33379d11314e19c74cce8dd5d34ca70c5f4fdb50e2f7f",
+      "extension": ".z01",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random1-me.Z01"
+    },
+    {
+      "path": "random1-me.bmp",
+      "bytes": 7478,
+      "sha256": "7493f7d80e9f5415508bcbc5760e31d751ce51f10c594b110a173de5b87ae04a",
+      "extension": ".bmp",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random1-me.bmp"
+    },
+    {
+      "path": "random1-me.dsb",
+      "bytes": 1349,
+      "sha256": "d3d73cf049e8207b9bf5af438bb677117aef9102bf5361f34d718e6fdad13a12",
+      "extension": ".dsb",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random1-me.dsb"
+    },
+    {
+      "path": "random1-me.dst",
+      "bytes": 1424,
+      "sha256": "86a187e3422370e1343fed72e5bb98e309a3ce9a5fc196f072bfd26d05d20c2d",
+      "extension": ".dst",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random1-me.dst"
+    },
+    {
+      "path": "random1-me.dsz",
+      "bytes": 1205,
+      "sha256": "ca91628fc168195b9e94ee62066a889d6e63f0efad29a1d4c2cd15891a9d0b6a",
+      "extension": ".dsz",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random1-me.dsz"
+    },
+    {
+      "path": "random1-me.exp",
+      "bytes": 796,
+      "sha256": "3c7ec5fb009ee87a541aef60cfd55fb02f7a69ee2b35ea1ffc347c5b54b86c70",
+      "extension": ".exp",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random1-me.exp"
+    },
+    {
+      "path": "random1-me.hqf",
+      "bytes": 815,
+      "sha256": "a4683a20c45b875d6a7963b62be775c356c1a6a11a91de8532b40ee39fbf73c3",
+      "extension": ".hqf",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random1-me.hqf"
+    },
+    {
+      "path": "random1-me.hus",
+      "bytes": 365,
+      "sha256": "72942b12d65e8ab3f24c04d696fd43485b9068a2f790d9b734cf2884b0f40aba",
+      "extension": ".hus",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random1-me.hus"
+    },
+    {
+      "path": "random1-me.inf",
+      "bytes": 206,
+      "sha256": "3e5be012869a986bcf37b3f21d8323b42b9cb439550e14b0adbfdbf15cfc6b0f",
+      "extension": ".inf",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random1-me.inf"
+    },
+    {
+      "path": "random1-me.jef",
+      "bytes": 762,
+      "sha256": "c63c64243bbf4e37f13e06ffe87c2376004cb1a0516ac5ff0a14db0b4cfab416",
+      "extension": ".jef",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random1-me.jef"
+    },
+    {
+      "path": "random1-me.jef+",
+      "bytes": 1602,
+      "sha256": "26e5da1041a9dc8ed6eff6d4bdafd9ed881d6a6d63c16d46b1d6970f0904c69e",
+      "extension": ".jef+",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random1-me.jef%2B"
+    },
+    {
+      "path": "random1-me.ksm",
+      "bytes": 986,
+      "sha256": "5c58c04c97f34ea1f3c5f3f87c4d3c286c7d82e96b5d0efaced75efcf19b43e3",
+      "extension": ".ksm",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random1-me.ksm"
+    },
+    {
+      "path": "random1-me.mls",
+      "bytes": 15904,
+      "sha256": "b028ff0d956663b877636fad5970db157c5d0e66f9cea20fb0fe77c249284001",
+      "extension": ".mls",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random1-me.mls"
+    },
+    {
+      "path": "random1-me.ngs",
+      "bytes": 10752,
+      "sha256": "463ed2eca6bb1217f37fce61017f93120bff0fd366f7bbc3d588e9fc3c124a36",
+      "extension": ".ngs",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random1-me.ngs"
+    },
+    {
+      "path": "random1-me.pcm",
+      "bytes": 1356,
+      "sha256": "025ed71a6a1a806264554d5c8c28216393d91952304d756eda9d9f7c725449c2",
+      "extension": ".pcm",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random1-me.pcm"
+    },
+    {
+      "path": "random1-me.pcs",
+      "bytes": 1388,
+      "sha256": "176313c0e647dbeb65ed30e3999eae8493f248cad41d9b416fa458f0f6797c59",
+      "extension": ".pcs",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random1-me.pcs"
+    },
+    {
+      "path": "random1-me.pec",
+      "bytes": 3917,
+      "sha256": "8cc387aa8458c0de448a60d94848a5344ece75f879989471cf060419f1297456",
+      "extension": ".pec",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random1-me.pec"
+    },
+    {
+      "path": "random1-me.pes",
+      "bytes": 7640,
+      "sha256": "c32aa71d996724157df1f1769a5e8b56b15d51114d23a0c28cadef5b5efa6d2a",
+      "extension": ".pes",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random1-me.pes"
+    },
+    {
+      "path": "random1-me.qli",
+      "bytes": 8656,
+      "sha256": "6695f977696d9c19e21a4da784a9e5a074db353724bd812827bb92facb5f3f34",
+      "extension": ".qli",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random1-me.qli"
+    },
+    {
+      "path": "random1-me.sef",
+      "bytes": 3521,
+      "sha256": "b4a10850bff03456a1617e30f09d5c125071be8bc2b03edad164d96051cce2c9",
+      "extension": ".sef",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random1-me.sef"
+    },
+    {
+      "path": "random1-me.sew",
+      "bytes": 8376,
+      "sha256": "fc5404e4f9a7cb9963bb43be5d2ee7683cfe97501daf4d6e4d2d6f99d6fb2d42",
+      "extension": ".sew",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random1-me.sew"
+    },
+    {
+      "path": "random1-me.shv",
+      "bytes": 5680,
+      "sha256": "8cde803f0da455199b5527a723d5f2b986de04bdf2fbdcd10649055a4a1be13f",
+      "extension": ".shv",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random1-me.shv"
+    },
+    {
+      "path": "random1-me.sst",
+      "bytes": 811,
+      "sha256": "4d49edd7ed4c33e3defd9e8f5ec471a85371f8bd383c681bb10dfc4a72946a5b",
+      "extension": ".sst",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random1-me.sst"
+    },
+    {
+      "path": "random1-me.tap",
+      "bytes": 909,
+      "sha256": "5230cb81fd06801ee50661ecdb6212d9ac6d43d3c545731aa430930bd25dc442",
+      "extension": ".tap",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random1-me.tap"
+    },
+    {
+      "path": "random1-me.vip",
+      "bytes": 437,
+      "sha256": "3587dfd8d1b028ab9fe211a859473d454121642869fdc1535867ff3c981e4842",
+      "extension": ".vip",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random1-me.vip"
+    },
+    {
+      "path": "random1-me.vp3",
+      "bytes": 1110,
+      "sha256": "bae47e8cf781e097b890544fe62b6f9df77c54a0b587bef27edc00fa26fdb36a",
+      "extension": ".vp3",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random1-me.vp3"
+    },
+    {
+      "path": "random1-me.xxx",
+      "bytes": 1148,
+      "sha256": "5430ba2d0bc84631f4eef011d200eb69d91d563673e61370e789475253015a36",
+      "extension": ".xxx",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random1-me.xxx"
+    },
+    {
+      "path": "random1-premier-v10.pes",
+      "bytes": 2652,
+      "sha256": "0f9bdab4b088a4e72bfe8d5a6c2bfa935cae01274e5e174c53e74eb27bf277d8",
+      "extension": ".pes",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random1-premier-v10.pes"
+    },
+    {
+      "path": "random1-premier-v2.pes",
+      "bytes": 2245,
+      "sha256": "888120e0f31dc33cf2ebec6bd345e31fc4a34188026cb685f4b28ca81403a4e8",
+      "extension": ".pes",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random1-premier-v2.pes"
+    },
+    {
+      "path": "random1-premier-v4.pes",
+      "bytes": 2260,
+      "sha256": "f5a3ca048a33268d8e0038120446043572294e51c6fbd047292180d8190fd3df",
+      "extension": ".pes",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random1-premier-v4.pes"
+    },
+    {
+      "path": "random1-premier-v6.pes",
+      "bytes": 6360,
+      "sha256": "3d97664ea96eec15844c43c9f6a8a11ec676b4bc2c9a7bac10529f09a87d98ba",
+      "extension": ".pes",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random1-premier-v6.pes"
+    },
+    {
+      "path": "random1-premier-v9.pes",
+      "bytes": 6427,
+      "sha256": "b4dabda9b0afe37c4f6d0953345a43ac586816dcada40d189c0338246a562f73",
+      "extension": ".pes",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random1-premier-v9.pes"
+    },
+    {
+      "path": "random1-premier.10o",
+      "bytes": 735,
+      "sha256": "90095be0cb336566914a85a022a44d5652b14d9d2b56e54ef56d780531896f11",
+      "extension": ".10o",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random1-premier.10o"
+    },
+    {
+      "path": "random1-premier.dst",
+      "bytes": 1257,
+      "sha256": "5bcc7dcfad897592f65d0bc7581ad6cee219a026d2b23f52e722748b7d2f3a30",
+      "extension": ".dst",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random1-premier.dst"
+    },
+    {
+      "path": "random1-premier.exp",
+      "bytes": 908,
+      "sha256": "c1a569a97fdbf603647ba35dcd60e28e6bf6c89e73ef376ac616532532ebc8d8",
+      "extension": ".exp",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random1-premier.exp"
+    },
+    {
+      "path": "random1-premier.hus",
+      "bytes": 399,
+      "sha256": "61ae59d911799144cfd7729e4066982be28b3c6ce0673b8b0ce314aec6531e29",
+      "extension": ".hus",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random1-premier.hus"
+    },
+    {
+      "path": "random1-premier.jef",
+      "bytes": 1094,
+      "sha256": "bc29d7080a2c1a3365913428176126dd38b0d440c8c8ae18eec63e552a0d3295",
+      "extension": ".jef",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random1-premier.jef"
+    },
+    {
+      "path": "random1-premier.pcs",
+      "bytes": 498,
+      "sha256": "d411ce28d69c5405119f920a730b26c19ab54d4d5ab6720f78967082bade4937",
+      "extension": ".pcs",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random1-premier.pcs"
+    },
+    {
+      "path": "random1-premier.pec",
+      "bytes": 954,
+      "sha256": "28696cb05fe4f4117584010d0d33dc0dd3675b28f88ff7aa62323d98623dcaa5",
+      "extension": ".pec",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random1-premier.pec"
+    },
+    {
+      "path": "random1-premier.vip",
+      "bytes": 487,
+      "sha256": "f94821fca4ce236df8148139bf8fe3acb2a1ef19201ce66c52bbda47d57d1020",
+      "extension": ".vip",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random1-premier.vip"
+    },
+    {
+      "path": "random1-premier.vp4",
+      "bytes": 1443,
+      "sha256": "afd79bbdc5b1cfe2b3ff01fcf141d9652c28641195eba5787364e0266297ffde",
+      "extension": ".vp4",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random1-premier.vp4"
+    },
+    {
+      "path": "random1-premier.xxx",
+      "bytes": 2340,
+      "sha256": "23065959bae62d42af47d783495e921a11b1353690bd743a15af7a411a07e494",
+      "extension": ".xxx",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random1-premier.xxx"
+    },
+    {
+      "path": "random1-wilcom-a.BRO",
+      "bytes": 471,
+      "sha256": "481f16e5bea007a8b509b85e50dc15a2ef07bb4cfc4e5da56f2be18aedb50554",
+      "extension": ".bro",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random1-wilcom-a.BRO"
+    },
+    {
+      "path": "random1-wilcom-b.BRO",
+      "bytes": 287,
+      "sha256": "97a856d4c9fc942c2fda281f3d256df2537439fcd901eea7939877d2ce44e5f8",
+      "extension": ".bro",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random1-wilcom-b.BRO"
+    },
+    {
+      "path": "random1-wilcom-bernina.EXP",
+      "bytes": 544,
+      "sha256": "69cad39510f7e790e53ae7859501f4756dfc680cf4049c7905ff4c7ab257f6b9",
+      "extension": ".exp",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random1-wilcom-bernina.EXP"
+    },
+    {
+      "path": "random1-wilcom-c.XXX",
+      "bytes": 937,
+      "sha256": "7a91b41023ba87503da3d3286f1f9f2fae11e6e112a96d16498f63988d8014e8",
+      "extension": ".xxx",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random1-wilcom-c.XXX"
+    },
+    {
+      "path": "random1-wilcom-e1.EMB",
+      "bytes": 32256,
+      "sha256": "cc574b4029f3f0c30239b2954c554168fbd388ed59335146e5544a0e705a75f5",
+      "extension": ".emb",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random1-wilcom-e1.EMB"
+    },
+    {
+      "path": "random1-wilcom-e15.EMB",
+      "bytes": 32256,
+      "sha256": "f17cdfba33d753a569d877c55c3439b882985aa660074a12fffd3882f88be2a1",
+      "extension": ".emb",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random1-wilcom-e15.EMB"
+    },
+    {
+      "path": "random1-wilcom-e18.EMB",
+      "bytes": 32768,
+      "sha256": "fac3d859b0126aa6c63941fa588f0f25baab6d6ba7844a8fe920e357e33068fb",
+      "extension": ".emb",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random1-wilcom-e18.EMB"
+    },
+    {
+      "path": "random1-wilcom-e2.EMB",
+      "bytes": 42496,
+      "sha256": "202c8aeedcce3e80e4404ff7bbd1c2585ad1a7e2963b2fea3bea4163a91bb75b",
+      "extension": ".emb",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random1-wilcom-e2.EMB"
+    },
+    {
+      "path": "random1-wilcom-e2006.EMB",
+      "bytes": 30720,
+      "sha256": "9e299af29dcd47dd27a25d2a4de696fa53deb75b35689f98658f5d677a8bfacb",
+      "extension": ".emb",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random1-wilcom-e2006.EMB"
+    },
+    {
+      "path": "random1-wilcom-s.XXX",
+      "bytes": 937,
+      "sha256": "7a91b41023ba87503da3d3286f1f9f2fae11e6e112a96d16498f63988d8014e8",
+      "extension": ".xxx",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random1-wilcom-s.XXX"
+    },
+    {
+      "path": "random1-wilcom-v1.PES",
+      "bytes": 4248,
+      "sha256": "9cc50465d4720a4d6b961454d8f0f58bc3f632cd2dd17d006482ede9a9ca8b51",
+      "extension": ".pes",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random1-wilcom-v1.PES"
+    },
+    {
+      "path": "random1-wilcom-v4.PES",
+      "bytes": 4810,
+      "sha256": "8e1579f19efb6fa188a849634b56d54ba3ee746ebc7b150977871e89490ab5d9",
+      "extension": ".pes",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random1-wilcom-v4.PES"
+    },
+    {
+      "path": "random1-wilcom-v5.PES",
+      "bytes": 6569,
+      "sha256": "262a8285da1793862424538d3e1d0e9c8615ee40f37d5fa5582d472a12244ffc",
+      "extension": ".pes",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random1-wilcom-v5.PES"
+    },
+    {
+      "path": "random1-wilcom-v6.PES",
+      "bytes": 6583,
+      "sha256": "1ac00b2f50dd6da4f02b442e7ca86e729fba5732131de5ffae072ee80fc3021a",
+      "extension": ".pes",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random1-wilcom-v6.PES"
+    },
+    {
+      "path": "random1-wilcom.00O",
+      "bytes": 558,
+      "sha256": "d33d4f107ce29f7f43c9922d569445b60896446c9e86152f21daa1f5c06e6973",
+      "extension": ".00o",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random1-wilcom.00O"
+    },
+    {
+      "path": "random1-wilcom.10O",
+      "bytes": 444,
+      "sha256": "e514a88f78a817b464169ea4abd96959fe68cd40bc7ac4e491ff964b4d0aa0c1",
+      "extension": ".10o",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random1-wilcom.10O"
+    },
+    {
+      "path": "random1-wilcom.CSD",
+      "bytes": 573,
+      "sha256": "ba3466980040aaa1f3068de8eb07917188d903f4c1d1b14aab43c2a928ab7a1a",
+      "extension": ".csd",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random1-wilcom.CSD"
+    },
+    {
+      "path": "random1-wilcom.CT0",
+      "bytes": 1936,
+      "sha256": "7582d2e1889c551e2e4364dec5f502f4384c52abc545d8f680c4c2eb9fef6255",
+      "extension": ".ct0",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random1-wilcom.CT0"
+    },
+    {
+      "path": "random1-wilcom.DGF",
+      "bytes": 9358,
+      "sha256": "797b479870f819d14ae42ea06f012b1bf48a8c1e84a9712dd7ea7fbd5591f078",
+      "extension": ".dgf",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random1-wilcom.DGF"
+    },
+    {
+      "path": "random1-wilcom.DGT",
+      "bytes": 9358,
+      "sha256": "797b479870f819d14ae42ea06f012b1bf48a8c1e84a9712dd7ea7fbd5591f078",
+      "extension": ".dgt",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random1-wilcom.DGT"
+    },
+    {
+      "path": "random1-wilcom.DSB",
+      "bytes": 957,
+      "sha256": "ebe4238221a70506c6a7f195de44187f40ded6cc51bd394beb6a25380c86abfb",
+      "extension": ".dsb",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random1-wilcom.DSB"
+    },
+    {
+      "path": "random1-wilcom.DST",
+      "bytes": 1170,
+      "sha256": "e025e5f9654cac8c4c8a75479100ed2366c574e1c4ad9a1d00f28c9417d6b8ab",
+      "extension": ".dst",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random1-wilcom.DST"
+    },
+    {
+      "path": "random1-wilcom.DSZ",
+      "bytes": 1308,
+      "sha256": "7713b4ff617c37fe7bb4570df05d5b1414ffe7c2525b2c21b0f8ec71aee9ca2e",
+      "extension": ".dsz",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random1-wilcom.DSZ"
+    },
+    {
+      "path": "random1-wilcom.EMB",
+      "bytes": 43520,
+      "sha256": "5fd603988f919f75de97a01c118c68712cbdf60b81f87dfca9d0ef27262cb973",
+      "extension": ".emb",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random1-wilcom.EMB"
+    },
+    {
+      "path": "random1-wilcom.EMD",
+      "bytes": 610,
+      "sha256": "7d9fd029e7d2c138d040c94682ec68fcab1776d501fe119e1462e890868b1a70",
+      "extension": ".emd",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random1-wilcom.EMD"
+    },
+    {
+      "path": "random1-wilcom.EXP",
+      "bytes": 544,
+      "sha256": "69cad39510f7e790e53ae7859501f4756dfc680cf4049c7905ff4c7ab257f6b9",
+      "extension": ".exp",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random1-wilcom.EXP"
+    },
+    {
+      "path": "random1-wilcom.HUS",
+      "bytes": 374,
+      "sha256": "7370e7a4e47f0928c523383d65d7fa95143a6c0259056de8d6658e9f9afd0aed",
+      "extension": ".hus",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random1-wilcom.HUS"
+    },
+    {
+      "path": "random1-wilcom.INB",
+      "bytes": 8633,
+      "sha256": "0e4c81d91d8ae048c175aeb7ec3216a0f83d428ddc857fca18e57b2ccd33d1fb",
+      "extension": ".inb",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random1-wilcom.INB"
+    },
+    {
+      "path": "random1-wilcom.KSM",
+      "bytes": 965,
+      "sha256": "a06b73e1be664ab281477481dd4c4a840b30c6ee4b06aa5b6bd1a20c5f7437ef",
+      "extension": ".ksm",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random1-wilcom.KSM"
+    },
+    {
+      "path": "random1-wilcom.LT0",
+      "bytes": 1697,
+      "sha256": "3379c33c4e9dff57015ce8566447fffe15b02ca5b92d4d3bb6a00378c2cfeadf",
+      "extension": ".lt0",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random1-wilcom.LT0"
+    },
+    {
+      "path": "random1-wilcom.MON",
+      "bytes": 1024,
+      "sha256": "f8fe77d174a2fb6d712db0f2b0cbf1f151416f91eda9ba0c04de878a61369166",
+      "extension": ".mon",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random1-wilcom.MON"
+    },
+    {
+      "path": "random1-wilcom.PCD",
+      "bytes": 543,
+      "sha256": "9fc449b825320b9db0e3afdab09cd679a53ebd453c963d18cee4fc316a963f70",
+      "extension": ".pcd",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random1-wilcom.PCD"
+    },
+    {
+      "path": "random1-wilcom.PCQ",
+      "bytes": 543,
+      "sha256": "9fc449b825320b9db0e3afdab09cd679a53ebd453c963d18cee4fc316a963f70",
+      "extension": ".pcq",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random1-wilcom.PCQ"
+    },
+    {
+      "path": "random1-wilcom.PCS",
+      "bytes": 543,
+      "sha256": "9fc449b825320b9db0e3afdab09cd679a53ebd453c963d18cee4fc316a963f70",
+      "extension": ".pcs",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random1-wilcom.PCS"
+    },
+    {
+      "path": "random1-wilcom.PEC",
+      "bytes": 3196,
+      "sha256": "1f640c16d84de6bd1d3fa8593b2415b2d1b95eb4552f2a5887ec2ab945fb3d15",
+      "extension": ".pec",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random1-wilcom.PEC"
+    },
+    {
+      "path": "random1-wilcom.PMU",
+      "bytes": 11571,
+      "sha256": "e14515094b5e12e2d833a077c6ff393d3ac2f99b186c502dcdc92c18d61e123a",
+      "extension": ".pmu",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random1-wilcom.PMU"
+    },
+    {
+      "path": "random1-wilcom.PUM",
+      "bytes": 986,
+      "sha256": "36d01a8831323bacb5726885ead929d905fc10bd6a1a6fea246e97c6f7cf75c3",
+      "extension": ".pum",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random1-wilcom.PUM"
+    },
+    {
+      "path": "random1-wilcom.SEW",
+      "bytes": 8102,
+      "sha256": "f9e0cda3c9a5597517c757cc78805826eeb97cb7f3f39a243a920b97a081243a",
+      "extension": ".sew",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random1-wilcom.SEW"
+    },
+    {
+      "path": "random1-wilcom.SHV",
+      "bytes": 5215,
+      "sha256": "a53c586e762bed1624fbc9e85f24eb3f9587c9dcb9ad65ca92ef57c5f3640291",
+      "extension": ".shv",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random1-wilcom.SHV"
+    },
+    {
+      "path": "random1-wilcom.STX",
+      "bytes": 1154,
+      "sha256": "ef6b749a567fba47cd0e3e4481923e5297a0eab8fb6aa65c0640be8fab92af32",
+      "extension": ".stx",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random1-wilcom.STX"
+    },
+    {
+      "path": "random1-wilcom.TAP",
+      "bytes": 666,
+      "sha256": "78830eff4b4d15a02e01ea48028ad0cbb5a15291543d4c1dc2823622d1d9c931",
+      "extension": ".tap",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random1-wilcom.TAP"
+    },
+    {
+      "path": "random1-wilcom.U01",
+      "bytes": 700,
+      "sha256": "85b2219e9ddea0a94861192683ccc0b0a8cf4a06f59ce3cfb5448761a1a38036",
+      "extension": ".u01",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random1-wilcom.U01"
+    },
+    {
+      "path": "random1-wilcom.VIP",
+      "bytes": 471,
+      "sha256": "ab68b37c054b89d1cd9ab8764e0f38bf38d8fbb3a0c7437982fba9c60cb96964",
+      "extension": ".vip",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random1-wilcom.VIP"
+    },
+    {
+      "path": "random1-wilcom.VP3",
+      "bytes": 1048,
+      "sha256": "d8c9e2e3723888e4fc7e8023417c9a9cf6ff47b368958a9d0124471f7876ca8c",
+      "extension": ".vp3",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random1-wilcom.VP3"
+    },
+    {
+      "path": "random1-wilcom.Z01",
+      "bytes": 1768,
+      "sha256": "4f6da6e64dab55fcf8594a9a93033218d67022425013f5ab4cf9540e4c02ab39",
+      "extension": ".z01",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random1-wilcom.Z01"
+    },
+    {
+      "path": "random1-wilcom.col",
+      "bytes": 155,
+      "sha256": "8c5bbb8c2ea7dc2bd84af3ab3c23838f25ea5587ac8272dc46cec9ef98ec8260",
+      "extension": ".col",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random1-wilcom.col"
+    },
+    {
+      "path": "random1.csv",
+      "bytes": 3192,
+      "sha256": "74683e1ae7eba5166dd1d24eabaed3c0e33d312caae73b2c99c65eb5fbf6d4a4",
+      "extension": ".csv",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random1.csv"
+    },
+    {
+      "path": "random1.dst",
+      "bytes": 944,
+      "sha256": "22abdc627fdd74ce0ae315c9ed0780136787967e5bfd9d6016c78ee030a78dd2",
+      "extension": ".dst",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random1.dst"
+    },
+    {
+      "path": "random1.exp",
+      "bytes": 524,
+      "sha256": "9c442bf430424301d5865ca8daf5a99d04791d9568d549b027520160d2c41a47",
+      "extension": ".exp",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random1.exp"
+    },
+    {
+      "path": "random1.gcode",
+      "bytes": 1558,
+      "sha256": "ae467bff34281b27eda5551591703408f62db1ed271ae3837310701ea597fba9",
+      "extension": ".gcode",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random1.gcode"
+    },
+    {
+      "path": "random1.jef",
+      "bytes": 722,
+      "sha256": "7bb60e046bce698f2f08d3155770abcf483e95e328a9c8c4bd71a099c7e38583",
+      "extension": ".jef",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random1.jef"
+    },
+    {
+      "path": "random1.pec",
+      "bytes": 3236,
+      "sha256": "a2b4ea8a6f21463f8dcea74331c01868bc12f1c2376a91c0d0c7074fcb895ab5",
+      "extension": ".pec",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random1.pec"
+    },
+    {
+      "path": "random1.pes",
+      "bytes": 3736,
+      "sha256": "20f57b157d9370e577d191796ed1d42ce5cf9a297af9a120e1da57f9ea05ec35",
+      "extension": ".pes",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random1.pes"
+    },
+    {
+      "path": "random1.pmv",
+      "bytes": 472,
+      "sha256": "551e6d10361f2045e7f47466077a86c80ddbded36d05cd8d60b36f8527184bf0",
+      "extension": ".pmv",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random1.pmv"
+    },
+    {
+      "path": "random1.png",
+      "bytes": 17809,
+      "sha256": "078b8e33074de35660336dbf5c18527558b183f97aa2f6582fc804a39f23c7ea",
+      "extension": ".png",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random1.png"
+    },
+    {
+      "path": "random1.svg",
+      "bytes": 2022,
+      "sha256": "9a00c6c764e75576c05258aa317111290e4246993e3b4ffc6b4bdfd9f8229335",
+      "extension": ".svg",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random1.svg"
+    },
+    {
+      "path": "random1.txt",
+      "bytes": 2043,
+      "sha256": "2f81ff2bf2f97e29b3d7f03f823d67517cd49587b8587785900110d4fb2915a8",
+      "extension": ".txt",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random1.txt"
+    },
+    {
+      "path": "random1.u01",
+      "bytes": 670,
+      "sha256": "de71fd74fbd105f15b1c0784b81d6871aa273ae6e675b7781527078f572911c2",
+      "extension": ".u01",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random1.u01"
+    },
+    {
+      "path": "random1.vp3",
+      "bytes": 1038,
+      "sha256": "1c281f17ba1458c4b4be2744a8e2e9b9816a1b29b3c6b84c8b3dedf3a4204fa0",
+      "extension": ".vp3",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random1.vp3"
+    },
+    {
+      "path": "random1.xxx",
+      "bytes": 851,
+      "sha256": "0eb6c4da3072b9c62dd1be60791eb5fae9c152d9afd12ea83e47808cf557fedb",
+      "extension": ".xxx",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random1.xxx"
+    },
+    {
+      "path": "random2-brother-v1.pes",
+      "bytes": 4101,
+      "sha256": "b2b620108ba09ad68e8756309b237c901f23f5305bbeea58e5d9bc40e3e3ba3d",
+      "extension": ".pes",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random2-brother-v1.pes"
+    },
+    {
+      "path": "random2-brother-v2.pes",
+      "bytes": 4119,
+      "sha256": "aafb875281572e3231df43574580750a809414f143db7410e4f6febfe15e40d1",
+      "extension": ".pes",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random2-brother-v2.pes"
+    },
+    {
+      "path": "random2-brother-v3.pes",
+      "bytes": 4123,
+      "sha256": "cd47b25025e861911a51b41f1b2c976922cd295cf9caacbcdaffe278389dfdcb",
+      "extension": ".pes",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random2-brother-v3.pes"
+    },
+    {
+      "path": "random2-brother-v4.pes",
+      "bytes": 4266,
+      "sha256": "f223f79b527082203435bd5bf80b72ff17651116be12ac6ea8380c780a0bf431",
+      "extension": ".pes",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random2-brother-v4.pes"
+    },
+    {
+      "path": "random2-brother-v5.pes",
+      "bytes": 6059,
+      "sha256": "148735527e3e1080d67f716fe37db7f7afc19650c2cdb43df4a6fbae14436e06",
+      "extension": ".pes",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random2-brother-v5.pes"
+    },
+    {
+      "path": "random2-brother-v6.pes",
+      "bytes": 5641,
+      "sha256": "7d6540584a0424ff186db7194c7188712462bed58fd61c92ceaf57693d5758ab",
+      "extension": ".pes",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random2-brother-v6.pes"
+    },
+    {
+      "path": "random2-ew-+.bmp",
+      "bytes": 40054,
+      "sha256": "310b189d4e682b95217b911ab1f96c26e168264b69bceb411db2ccff07036ab0",
+      "extension": ".bmp",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random2-ew-%2B.bmp"
+    },
+    {
+      "path": "random2-ew-+.exp",
+      "bytes": 612,
+      "sha256": "2232f345e01a2fa31f22e5268f6a293a2391b54b68f1ffff33dcaea3077cb47c",
+      "extension": ".exp",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random2-ew-%2B.exp"
+    },
+    {
+      "path": "random2-ew-+.inf",
+      "bytes": 270,
+      "sha256": "905f42e47830c1bf782c7c52a73fac1a4c2376a2e799ff498a0c209ffe9f56ee",
+      "extension": ".inf",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random2-ew-%2B.inf"
+    },
+    {
+      "path": "random2-ew.DST.dst",
+      "bytes": 1052,
+      "sha256": "47cb5d4dc1793459f02e36607799ca9d500af4ff240527a046e8bd007c2b852b",
+      "extension": ".dst",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random2-ew.DST.dst"
+    },
+    {
+      "path": "random2-ew.DST.edr",
+      "bytes": 40,
+      "sha256": "aab279853b91b3bd9e900b84407db5a8c6a063c51b3f8fa52a49a2cb9651df5d",
+      "extension": ".edr",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random2-ew.DST.edr"
+    },
+    {
+      "path": "random2-ew.exp",
+      "bytes": 612,
+      "sha256": "2232f345e01a2fa31f22e5268f6a293a2391b54b68f1ffff33dcaea3077cb47c",
+      "extension": ".exp",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random2-ew.exp"
+    },
+    {
+      "path": "random2-ew.jef",
+      "bytes": 850,
+      "sha256": "a8425d8d8965907ea3bd9168db4350ff8dff143c5cac08ff80e7049a4961a0f8",
+      "extension": ".jef",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random2-ew.jef"
+    },
+    {
+      "path": "random2-ew.pec",
+      "bytes": 3256,
+      "sha256": "a477c40a760e5fe100eeac856df3b166e4e2c35e58900ee7980849182ab7534e",
+      "extension": ".pec",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random2-ew.pec"
+    },
+    {
+      "path": "random2-ew.pes",
+      "bytes": 3948,
+      "sha256": "a3152537959836d710a830990ea63e28b0e73f26bde9b8aa751e34e9faddc615",
+      "extension": ".pes",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random2-ew.pes"
+    },
+    {
+      "path": "random2-janome.clf",
+      "bytes": 68696,
+      "sha256": "8c60e5560fc441763137e4f2ca6a1cb4f37d234ceddd70fc9e9a3d9e966cc8f9",
+      "extension": ".clf",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random2-janome.clf"
+    },
+    {
+      "path": "random2-janome.jef",
+      "bytes": 672,
+      "sha256": "fd670efbdeb4c89fa0aab2571af6e1d98d91ace1193c6283cbaf718e3d668e9c",
+      "extension": ".jef",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random2-janome.jef"
+    },
+    {
+      "path": "random2-me-c.xxx",
+      "bytes": 1160,
+      "sha256": "e149096dd0de5e367ec077a04a8e515a79b9a98ea0bceba6ed841fd0626bcee1",
+      "extension": ".xxx",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random2-me-c.xxx"
+    },
+    {
+      "path": "random2-me-s.xxx",
+      "bytes": 1160,
+      "sha256": "52b2b33ba5ef954960eaa20fd998cfe95f5c7af7ee35181e4d7731d73916463c",
+      "extension": ".xxx",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random2-me-s.xxx"
+    },
+    {
+      "path": "random2-me.00O",
+      "bytes": 558,
+      "sha256": "dc4a03fc57ce51b856bf71612ebac9e45ab35c2de246cd41b8e06c70fb2c0ff2",
+      "extension": ".00o",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random2-me.00O"
+    },
+    {
+      "path": "random2-me.101",
+      "bytes": 990,
+      "sha256": "9b411bb66f3f43e88cb698b83229328628ccb4541b96d1aa2a6ba7b2068aab1f",
+      "extension": ".101",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random2-me.101"
+    },
+    {
+      "path": "random2-me.10O",
+      "bytes": 831,
+      "sha256": "02fb0392cf814d6c8849b3cd781404b489ea1a32f58e840f3fbdb9b5ca3193b3",
+      "extension": ".10o",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random2-me.10O"
+    },
+    {
+      "path": "random2-me.HP1",
+      "bytes": 3072,
+      "sha256": "b366492d5c66ef8ae72c205604c144b3e4a014cd1a114332d8a211bef2a8a80e",
+      "extension": ".hp1",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random2-me.HP1"
+    },
+    {
+      "path": "random2-me.M3",
+      "bytes": 957,
+      "sha256": "e8d52696510e7d10b2989485288fe9a41b12cf40990721852932fb50ce4f0409",
+      "extension": ".m3",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random2-me.M3"
+    },
+    {
+      "path": "random2-me.TBF",
+      "bytes": 2212,
+      "sha256": "548e0c2703f953c4cac9c43993467f1ceb4fb5a24761d3ee9d8a368ce64a6b42",
+      "extension": ".tbf",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random2-me.TBF"
+    },
+    {
+      "path": "random2-me.U01",
+      "bytes": 1108,
+      "sha256": "0465510ece2218daefd35264bf83b1b372c70b6fa17b4126d98c94e88469f0f8",
+      "extension": ".u01",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random2-me.U01"
+    },
+    {
+      "path": "random2-me.Z01",
+      "bytes": 2358,
+      "sha256": "f1de543f22c0220d72bc5b2196541592d1dc4cfe7fd0ca237d7c7e84068858a8",
+      "extension": ".z01",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random2-me.Z01"
+    },
+    {
+      "path": "random2-me.bmp",
+      "bytes": 7478,
+      "sha256": "7036a74e382e16f41e02e965a2a119d0423f27ab7344916589caa475405c3cc5",
+      "extension": ".bmp",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random2-me.bmp"
+    },
+    {
+      "path": "random2-me.dsb",
+      "bytes": 1367,
+      "sha256": "29820e791e5909b91179b4f52cbc60186674fe3f29a84d1ffc9fef2416c18ffe",
+      "extension": ".dsb",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random2-me.dsb"
+    },
+    {
+      "path": "random2-me.dst",
+      "bytes": 1433,
+      "sha256": "edb3df1711c89bbee0840698b876fc27f407651acca4613f3d321dd650084264",
+      "extension": ".dst",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random2-me.dst"
+    },
+    {
+      "path": "random2-me.dsz",
+      "bytes": 1226,
+      "sha256": "9683df3cdbd19eba4eb7ca5314e26d11a744b0fec5a86c97afafe8eb6d6f4bfd",
+      "extension": ".dsz",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random2-me.dsz"
+    },
+    {
+      "path": "random2-me.exp",
+      "bytes": 808,
+      "sha256": "f6a042f80cb467371c7a09a982483be96249d7b74b315cc7790652ee02844a29",
+      "extension": ".exp",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random2-me.exp"
+    },
+    {
+      "path": "random2-me.hqf",
+      "bytes": 818,
+      "sha256": "55cfa83bf5d46fc62aecfb253c69d80cd0f261bfe31695e9878427e41e78d1bf",
+      "extension": ".hqf",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random2-me.hqf"
+    },
+    {
+      "path": "random2-me.hus",
+      "bytes": 374,
+      "sha256": "3653ce23d03b46db995ab769fba106f2697a1bc0be649ed2c949ac1de9d37424",
+      "extension": ".hus",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random2-me.hus"
+    },
+    {
+      "path": "random2-me.inf",
+      "bytes": 206,
+      "sha256": "a27dc54a6bb907f46f0b0358dbfc444efa3500c2c1bbf36f4c2c2dd1631569a4",
+      "extension": ".inf",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random2-me.inf"
+    },
+    {
+      "path": "random2-me.jef",
+      "bytes": 774,
+      "sha256": "02ced9ba7af122e722f5936b43b90384fb2bb7f7e0e8d23fdf429b67d199130d",
+      "extension": ".jef",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random2-me.jef"
+    },
+    {
+      "path": "random2-me.jef+",
+      "bytes": 1626,
+      "sha256": "e3a710d133165a79c257ec8a8178413646fa91ab9bea15aa565a0dc5bc6a4dbf",
+      "extension": ".jef+",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random2-me.jef%2B"
+    },
+    {
+      "path": "random2-me.ksm",
+      "bytes": 995,
+      "sha256": "0ac6fbbd0610b15708b07caefab96ff2b0eb685a7e23f64d0920cf7018d08ef5",
+      "extension": ".ksm",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random2-me.ksm"
+    },
+    {
+      "path": "random2-me.mls",
+      "bytes": 4597,
+      "sha256": "42b5ddc6e7255497af4306f88e3357f656b89498279d0c2eb059ac156b8c0656",
+      "extension": ".mls",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random2-me.mls"
+    },
+    {
+      "path": "random2-me.ngs",
+      "bytes": 10240,
+      "sha256": "70119090e4e4a882e1a8c477b2ea0fb020385286eed8ce36748bbef0c08c153c",
+      "extension": ".ngs",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random2-me.ngs"
+    },
+    {
+      "path": "random2-me.pcm",
+      "bytes": 1401,
+      "sha256": "9973d208312eb801924872b7e64c6057236ff5901ec14337c55fd3281b595a2f",
+      "extension": ".pcm",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random2-me.pcm"
+    },
+    {
+      "path": "random2-me.pcs",
+      "bytes": 1433,
+      "sha256": "5e1ab6b55233329e6e187de623cf312f40c51b1d8c776d467f5ec78d19d79a0d",
+      "extension": ".pcs",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random2-me.pcs"
+    },
+    {
+      "path": "random2-me.pec",
+      "bytes": 3944,
+      "sha256": "d2690293e2ba3de5ee4682ccdb76e8c8a52775117c7aeb2d36f0fb21ce4e4cf6",
+      "extension": ".pec",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random2-me.pec"
+    },
+    {
+      "path": "random2-me.pes",
+      "bytes": 7699,
+      "sha256": "055879bea6011a56ddaa98cc29ff5c21a1103d0cebdd2b67b545ce0d01cf4f28",
+      "extension": ".pes",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random2-me.pes"
+    },
+    {
+      "path": "random2-me.qli",
+      "bytes": 8828,
+      "sha256": "c3df22f3ecdafa3ae5bb262f92c0b0a9ac6ef57cd8c3b3427d2d5df865ac91b4",
+      "extension": ".qli",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random2-me.qli"
+    },
+    {
+      "path": "random2-me.sef",
+      "bytes": 3459,
+      "sha256": "52ba0234e8ee2e9b1ad172a277a13a9e70a17706afce15332a0e085a233c6c38",
+      "extension": ".sef",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random2-me.sef"
+    },
+    {
+      "path": "random2-me.sew",
+      "bytes": 8396,
+      "sha256": "dd9484459d1e10acf74dc7430c9658b9f82424b3cac855972d83d569d045f091",
+      "extension": ".sew",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random2-me.sew"
+    },
+    {
+      "path": "random2-me.shv",
+      "bytes": 5047,
+      "sha256": "cbede4ff363df781cf628352214dd01a0a2354b9aa44b70ae748d6f3bb38daf3",
+      "extension": ".shv",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random2-me.shv"
+    },
+    {
+      "path": "random2-me.sst",
+      "bytes": 820,
+      "sha256": "9af5aef45689943379918d2a6c3445ed6addb49b38c55e58e294d845e8f41bb5",
+      "extension": ".sst",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random2-me.sst"
+    },
+    {
+      "path": "random2-me.tap",
+      "bytes": 918,
+      "sha256": "f7a69b74aaa44d69471e9da9719e9b08568864b1d560577f3d192f180bd654ce",
+      "extension": ".tap",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random2-me.tap"
+    },
+    {
+      "path": "random2-me.vip",
+      "bytes": 446,
+      "sha256": "543dd5545d03abb9f75bb84c88e0eb4a06bc7b5e412906d9584be17c9caaf846",
+      "extension": ".vip",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random2-me.vip"
+    },
+    {
+      "path": "random2-me.vp3",
+      "bytes": 1106,
+      "sha256": "cf54f4fa84984ad69e4ee848b1e8ab41f7a3ad6be9baf388d64778f6a11f2da5",
+      "extension": ".vp3",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random2-me.vp3"
+    },
+    {
+      "path": "random2-premier-v2.pes",
+      "bytes": 4315,
+      "sha256": "99e3e6a0f20ad35f05813a17def950e2508b5c9e094f717324e0ee3327235c64",
+      "extension": ".pes",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random2-premier-v2.pes"
+    },
+    {
+      "path": "random2-premier.10o",
+      "bytes": 699,
+      "sha256": "868834bf1a7bb03045ef72d6c10d5df7c12c38946dba664f299bda313bc2ec1c",
+      "extension": ".10o",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random2-premier.10o"
+    },
+    {
+      "path": "random2-premier.dst",
+      "bytes": 1221,
+      "sha256": "97d4641321fd3ede07af6cf877c22046e06efdbff04818e284b41d8ca72ab7d9",
+      "extension": ".dst",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random2-premier.dst"
+    },
+    {
+      "path": "random2-premier.exp",
+      "bytes": 862,
+      "sha256": "bca59deda67327b78f29c0a720d768f0d39c11ef671b6d53288c979562bd4cab",
+      "extension": ".exp",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random2-premier.exp"
+    },
+    {
+      "path": "random2-premier.hus",
+      "bytes": 388,
+      "sha256": "d3947faa4ef92f13c38f5994645baf9242a1d09274a89aeab3be42d40403a0a9",
+      "extension": ".hus",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random2-premier.hus"
+    },
+    {
+      "path": "random2-premier.jef",
+      "bytes": 1048,
+      "sha256": "d9fb19212b7ec906ca5d212bc1ea343804e558111073e579357241ff86809061",
+      "extension": ".jef",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random2-premier.jef"
+    },
+    {
+      "path": "random2-premier.pcs",
+      "bytes": 489,
+      "sha256": "bd83ad4228c941d19b007bfbe7802f71e2317fe4916c52d3f105899c30060214",
+      "extension": ".pcs",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random2-premier.pcs"
+    },
+    {
+      "path": "random2-premier.pec",
+      "bytes": 947,
+      "sha256": "6a730e061215262185c4cac6b1488eba51e45a38d89fa2cb37bb48b5ebf48421",
+      "extension": ".pec",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random2-premier.pec"
+    },
+    {
+      "path": "random2-premier.sew",
+      "bytes": 8412,
+      "sha256": "e191d45644b40cec7f2f61a7e7ac74e26c71bdc7b59963ae5826ac7248b6ce58",
+      "extension": ".sew",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random2-premier.sew"
+    },
+    {
+      "path": "random2-premier.vip",
+      "bytes": 476,
+      "sha256": "7d36fa524e4cae598d741d65f0ca5c6a2f22163dab5c32651f874c9c2e663bf3",
+      "extension": ".vip",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random2-premier.vip"
+    },
+    {
+      "path": "random2-premier.vp3",
+      "bytes": 551,
+      "sha256": "6584e438d011ba68de739427f07f675dea3b5b0a9eae6e934dd309bc49ee5c5c",
+      "extension": ".vp3",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random2-premier.vp3"
+    },
+    {
+      "path": "random2-premier.vp4",
+      "bytes": 1431,
+      "sha256": "890e4bc423dc208f11d73b1eb2d48cac87e680d6eb8f1db610e8a9f39ecbb649",
+      "extension": ".vp4",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random2-premier.vp4"
+    },
+    {
+      "path": "random2-premier.xxx",
+      "bytes": 2336,
+      "sha256": "2d2ed3e29a6a1293eae8afd70b15ce610934f53208012469ecb65a378bb9ea22",
+      "extension": ".xxx",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random2-premier.xxx"
+    },
+    {
+      "path": "random2-wilcom-a.BRO",
+      "bytes": 466,
+      "sha256": "b7cb411e8521066b90e93269e984e56a7ed7d1c724bcb343b77bc5a5a735d711",
+      "extension": ".bro",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random2-wilcom-a.BRO"
+    },
+    {
+      "path": "random2-wilcom-b.BRO",
+      "bytes": 287,
+      "sha256": "f0954a0ba3bafbf6e3945c62095fc47e55d3c281fd9bdad683679dc9e265d364",
+      "extension": ".bro",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random2-wilcom-b.BRO"
+    },
+    {
+      "path": "random2-wilcom-bernina.EXP",
+      "bytes": 560,
+      "sha256": "21980df004b7126f2855b67211974d14e966cfce0d3b5a05291b99ec8a9d47c8",
+      "extension": ".exp",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random2-wilcom-bernina.EXP"
+    },
+    {
+      "path": "random2-wilcom-c.XXX",
+      "bytes": 963,
+      "sha256": "cf38c758b90b82e88e72d6698d8290a826097b8c25fae5241b6bf24f71c328c4",
+      "extension": ".xxx",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random2-wilcom-c.XXX"
+    },
+    {
+      "path": "random2-wilcom-s.XXX",
+      "bytes": 963,
+      "sha256": "cf38c758b90b82e88e72d6698d8290a826097b8c25fae5241b6bf24f71c328c4",
+      "extension": ".xxx",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random2-wilcom-s.XXX"
+    },
+    {
+      "path": "random2-wilcom-v1.PES",
+      "bytes": 4224,
+      "sha256": "13d115f98602691f635dc814d8e0ddc7af02244353904cfdc53efd35d0195b5f",
+      "extension": ".pes",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random2-wilcom-v1.PES"
+    },
+    {
+      "path": "random2-wilcom-v4.PES",
+      "bytes": 4811,
+      "sha256": "44760906f16743caded2f02bd417489e8b573f6623dd34ef0a6e3fb292cc5423",
+      "extension": ".pes",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random2-wilcom-v4.PES"
+    },
+    {
+      "path": "random2-wilcom-v5.PES",
+      "bytes": 6570,
+      "sha256": "84386a2d787849a89cea78b64c35a63aeddf6b9738825d64f0c4856912c52f58",
+      "extension": ".pes",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random2-wilcom-v5.PES"
+    },
+    {
+      "path": "random2-wilcom-v6.PES",
+      "bytes": 6584,
+      "sha256": "591eb482a0c90e2afa9eb9d05c7a01396294bdcef6e6b3a6cce5f6e9f883995d",
+      "extension": ".pes",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random2-wilcom-v6.PES"
+    },
+    {
+      "path": "random2-wilcom.00O",
+      "bytes": 558,
+      "sha256": "6e9488400373141b2d3e58298a9d71b03be760a32f8b2717b3d82ed1a3d3b9e2",
+      "extension": ".00o",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random2-wilcom.00O"
+    },
+    {
+      "path": "random2-wilcom.10O",
+      "bytes": 456,
+      "sha256": "b60d4594e2efa9a67f56972c34fd639cf3f324bbb67cbc40c2776de406ade192",
+      "extension": ".10o",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random2-wilcom.10O"
+    },
+    {
+      "path": "random2-wilcom.CSD",
+      "bytes": 585,
+      "sha256": "e04ca8f1dd6d44b89b960926eb537e11bde0dc7f5c8ae43b145d13fe696016e6",
+      "extension": ".csd",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random2-wilcom.CSD"
+    },
+    {
+      "path": "random2-wilcom.CT0",
+      "bytes": 1936,
+      "sha256": "273d74833cae63dd4a4ea1cd74aeda9bb017a59fc33a4172e3864b4d996d01df",
+      "extension": ".ct0",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random2-wilcom.CT0"
+    },
+    {
+      "path": "random2-wilcom.DGF",
+      "bytes": 9358,
+      "sha256": "a9e26b862bbd684193b4ab51644a7c33c9562dbb861c0cec1eca64993f9ee495",
+      "extension": ".dgf",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random2-wilcom.DGF"
+    },
+    {
+      "path": "random2-wilcom.DGT",
+      "bytes": 9358,
+      "sha256": "6ffc14b8b95f5a680b9888ec6ba7aa75dc58e34a539bff32a3c99ebd295b4670",
+      "extension": ".dgt",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random2-wilcom.DGT"
+    },
+    {
+      "path": "random2-wilcom.DSB",
+      "bytes": 969,
+      "sha256": "aabe8892ea7028eb2b6ae2f837a9d08232a7ff7ca870e396782de8357ae1e676",
+      "extension": ".dsb",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random2-wilcom.DSB"
+    },
+    {
+      "path": "random2-wilcom.DST",
+      "bytes": 1167,
+      "sha256": "3f4b324d8e8f3fae41cb0bd6d2a94593322a591967d9b7ed642c57a71fbd24eb",
+      "extension": ".dst",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random2-wilcom.DST"
+    },
+    {
+      "path": "random2-wilcom.DSZ",
+      "bytes": 1320,
+      "sha256": "7159755132f96f6ffbfa1ba62905759edca2672e24fc6f2867f2be91b0167506",
+      "extension": ".dsz",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random2-wilcom.DSZ"
+    },
+    {
+      "path": "random2-wilcom.EMB",
+      "bytes": 44032,
+      "sha256": "576e390493766626b1fda3c5770b7cd9f7a6a9cccd709feb18d8b12f42937fd7",
+      "extension": ".emb",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random2-wilcom.EMB"
+    },
+    {
+      "path": "random2-wilcom.EMD",
+      "bytes": 610,
+      "sha256": "94ccea4cc86de9b9a1d557aa16a05aa83ed21aafa37815a98c475b265f2c8925",
+      "extension": ".emd",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random2-wilcom.EMD"
+    },
+    {
+      "path": "random2-wilcom.EXP",
+      "bytes": 560,
+      "sha256": "21980df004b7126f2855b67211974d14e966cfce0d3b5a05291b99ec8a9d47c8",
+      "extension": ".exp",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random2-wilcom.EXP"
+    },
+    {
+      "path": "random2-wilcom.HUS",
+      "bytes": 390,
+      "sha256": "32c6cc8bf0278c59d357e2c27c1e0cf0bf687659114fc32a6d9615563d9e12b5",
+      "extension": ".hus",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random2-wilcom.HUS"
+    },
+    {
+      "path": "random2-wilcom.INB",
+      "bytes": 8645,
+      "sha256": "8e55c55e655e31f332cbe47b0282c49e27e04c9a1eeffccc10970fbe549c5b70",
+      "extension": ".inb",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random2-wilcom.INB"
+    },
+    {
+      "path": "random2-wilcom.KSM",
+      "bytes": 977,
+      "sha256": "c658033139ec95eedbc137c4fdd22bb364ae0ee901d6f7ee876467354483c7c6",
+      "extension": ".ksm",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random2-wilcom.KSM"
+    },
+    {
+      "path": "random2-wilcom.LT0",
+      "bytes": 1697,
+      "sha256": "5c84365274c78eb8247cbe41623b65823878907dae9e0c14e77a9b602a74a7ed",
+      "extension": ".lt0",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random2-wilcom.LT0"
+    },
+    {
+      "path": "random2-wilcom.MON",
+      "bytes": 1024,
+      "sha256": "3763c40e2855d4adf0d4189c2f3386b441413f648396669573bec9e9bdc9dbed",
+      "extension": ".mon",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random2-wilcom.MON"
+    },
+    {
+      "path": "random2-wilcom.PCD",
+      "bytes": 543,
+      "sha256": "8d2ca59b5b02a409767bfe31ccff1ca751fb0cc9a28b585d94927c5335342a68",
+      "extension": ".pcd",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random2-wilcom.PCD"
+    },
+    {
+      "path": "random2-wilcom.PCM",
+      "bytes": 749,
+      "sha256": "0f8d592e240ca7410dc8113fc327f6657da04b659ae0e2368405afdaa01e224b",
+      "extension": ".pcm",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random2-wilcom.PCM"
+    },
+    {
+      "path": "random2-wilcom.PCQ",
+      "bytes": 543,
+      "sha256": "8d2ca59b5b02a409767bfe31ccff1ca751fb0cc9a28b585d94927c5335342a68",
+      "extension": ".pcq",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random2-wilcom.PCQ"
+    },
+    {
+      "path": "random2-wilcom.PCS",
+      "bytes": 543,
+      "sha256": "8d2ca59b5b02a409767bfe31ccff1ca751fb0cc9a28b585d94927c5335342a68",
+      "extension": ".pcs",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random2-wilcom.PCS"
+    },
+    {
+      "path": "random2-wilcom.PEC",
+      "bytes": 3196,
+      "sha256": "acc518eb5aeebe5139731f3b72b6cd193dd4fc5df9ea387a59570d434b1a276c",
+      "extension": ".pec",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random2-wilcom.PEC"
+    },
+    {
+      "path": "random2-wilcom.PMU",
+      "bytes": 11591,
+      "sha256": "f49c99bed4b9808ab1450ffaf9746dae8dc006d32fd1ba167ee4e65025058954",
+      "extension": ".pmu",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random2-wilcom.PMU"
+    },
+    {
+      "path": "random2-wilcom.PUM",
+      "bytes": 998,
+      "sha256": "32afb789833c8e2f91c205435a328174554e38173de24d07578bf9a34441cd0a",
+      "extension": ".pum",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random2-wilcom.PUM"
+    },
+    {
+      "path": "random2-wilcom.SEW",
+      "bytes": 8098,
+      "sha256": "e7dd92bc8592f105793c51515c7b1b8d8d9ca85254172e5b1409e51eb7ea4954",
+      "extension": ".sew",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random2-wilcom.SEW"
+    },
+    {
+      "path": "random2-wilcom.SHV",
+      "bytes": 4500,
+      "sha256": "c17f269286d692dfd19b25378070d2cddfe522ed2967cd54249a02508e43fef7",
+      "extension": ".shv",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random2-wilcom.SHV"
+    },
+    {
+      "path": "random2-wilcom.STX",
+      "bytes": 1170,
+      "sha256": "91f1d1158772fc37cfee4edd2ad6aec1f4ea6d6637a851e82d8d200353fb12a5",
+      "extension": ".stx",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random2-wilcom.STX"
+    },
+    {
+      "path": "random2-wilcom.TAP",
+      "bytes": 663,
+      "sha256": "b0bba37edb79ecf44598617a6e552127a5f39544761e75e6717ef91dc02d13c7",
+      "extension": ".tap",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random2-wilcom.TAP"
+    },
+    {
+      "path": "random2-wilcom.U01",
+      "bytes": 712,
+      "sha256": "ab54e49a3e4e856021ded17a773605e5f218a4474d45df406fdc4832f0a39fda",
+      "extension": ".u01",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random2-wilcom.U01"
+    },
+    {
+      "path": "random2-wilcom.VIP",
+      "bytes": 486,
+      "sha256": "931932935b6db86fe8ba244ade914a625f0330406056eeca636d9730f7f85b80",
+      "extension": ".vip",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random2-wilcom.VIP"
+    },
+    {
+      "path": "random2-wilcom.VP3",
+      "bytes": 1042,
+      "sha256": "d17e4e87528d9f41d8a3fb255b59e28a3c3b47d8949c6e44f0cfcd8297937fe5",
+      "extension": ".vp3",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random2-wilcom.VP3"
+    },
+    {
+      "path": "random2-wilcom.Z01",
+      "bytes": 1780,
+      "sha256": "f8f49c0c1f61ddc203c89cae141d3602077449177e725b2cc0210a2390769a5e",
+      "extension": ".z01",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random2-wilcom.Z01"
+    },
+    {
+      "path": "random2-wilcom.col",
+      "bytes": 147,
+      "sha256": "421ca9fe92e4410f7b560ec8502747ef1dce3e16ab41e84d5b2de645b5f96842",
+      "extension": ".col",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random2-wilcom.col"
+    },
+    {
+      "path": "random2.csv",
+      "bytes": 3199,
+      "sha256": "b607ba1196f9980bcf8919962ebfec42d3a1f57de8b2dae62b147dc8b56a88f6",
+      "extension": ".csv",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random2.csv"
+    },
+    {
+      "path": "random2.dst",
+      "bytes": 959,
+      "sha256": "faf7b8887a2b00f9074a12b7b1fdcca6f7a922638f431a6b89ed6a80995cf30b",
+      "extension": ".dst",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random2.dst"
+    },
+    {
+      "path": "random2.exp",
+      "bytes": 540,
+      "sha256": "95e223f5ea0836bafb37496d26455a3ad42f9f4acf6b87855feba8029626138b",
+      "extension": ".exp",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random2.exp"
+    },
+    {
+      "path": "random2.gcode",
+      "bytes": 1557,
+      "sha256": "fcd3faf04be75c599a25345c3fde78f46f9d4ef7703a8cae1ba4212f6b624eaa",
+      "extension": ".gcode",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random2.gcode"
+    },
+    {
+      "path": "random2.jef",
+      "bytes": 738,
+      "sha256": "24dfe43b38152cb398197aeffdd5f0b1168e4820d576d63219865a8a023ce1e2",
+      "extension": ".jef",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random2.jef"
+    },
+    {
+      "path": "random2.pec",
+      "bytes": 3236,
+      "sha256": "32abcac1c65b7d8aaae7892b0cb8074c8c9b196e80985b46dac4771be6a0e0be",
+      "extension": ".pec",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random2.pec"
+    },
+    {
+      "path": "random2.pes",
+      "bytes": 3736,
+      "sha256": "4b33890b9602cc6b91695b9eebb1af35c79ce3feb3c782b45dd338694aaf8c94",
+      "extension": ".pes",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random2.pes"
+    },
+    {
+      "path": "random2.pmv",
+      "bytes": 472,
+      "sha256": "09f9c9f400bd46a69f27e8a7b203e4b9375ef1d92edeb35f6f742d9bd4834f26",
+      "extension": ".pmv",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random2.pmv"
+    },
+    {
+      "path": "random2.png",
+      "bytes": 14026,
+      "sha256": "9984d07b9b6e661d162b7ef4d200876a5533294fa15ee57e31925eab63991abf",
+      "extension": ".png",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random2.png"
+    },
+    {
+      "path": "random2.svg",
+      "bytes": 2030,
+      "sha256": "6c7eaef0285e9e31e9a84174cd17004380a514248128105bd72e7a6f39c196ea",
+      "extension": ".svg",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random2.svg"
+    },
+    {
+      "path": "random2.txt",
+      "bytes": 2080,
+      "sha256": "9850ab4812b3ad4b8da05fb1b4417836dd11751bcab965bedb36eff4b3a7483e",
+      "extension": ".txt",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random2.txt"
+    },
+    {
+      "path": "random2.u01",
+      "bytes": 682,
+      "sha256": "6567553ee7eb72faf22a138c47d94b18fe000503c90f750af3d44a0991acd48b",
+      "extension": ".u01",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random2.u01"
+    },
+    {
+      "path": "random2.vp3",
+      "bytes": 1032,
+      "sha256": "ebd26cd131bb24220e5a0e3df3c349e03e79a9ad3e696983b8712e5b008b8364",
+      "extension": ".vp3",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random2.vp3"
+    },
+    {
+      "path": "random2.xxx",
+      "bytes": 868,
+      "sha256": "2c6f91b8a3a14668ba10638f0aaca24858e4640373276b5c514469925061099c",
+      "extension": ".xxx",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random2.xxx"
+    },
+    {
+      "path": "random3-brother-v1.pes",
+      "bytes": 4104,
+      "sha256": "66e75bba4a4553ce36f403919f3228fff12209ccf349b53c1e286bd388f5951f",
+      "extension": ".pes",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random3-brother-v1.pes"
+    },
+    {
+      "path": "random3-brother-v2.pes",
+      "bytes": 4122,
+      "sha256": "17accaeb02a92d87a56d2e5a7a5f5869fba98e566eac5cd8062029861d1c9e7c",
+      "extension": ".pes",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random3-brother-v2.pes"
+    },
+    {
+      "path": "random3-brother-v3.pes",
+      "bytes": 4126,
+      "sha256": "8780c13bb38fbf5111d2e398cf729d2226e65404cd90b582e69e58e0dba410b2",
+      "extension": ".pes",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random3-brother-v3.pes"
+    },
+    {
+      "path": "random3-brother-v4.pes",
+      "bytes": 4269,
+      "sha256": "811319ff4dd4faea7dcde1f996fdadc3e6f211333b17858f7f730af40b0ebed4",
+      "extension": ".pes",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random3-brother-v4.pes"
+    },
+    {
+      "path": "random3-brother-v5.pes",
+      "bytes": 6089,
+      "sha256": "44dfed3c24d1c3ac009e3ef4bf00a1a898e2fc08344d7e1c9700f6f4c55c15f9",
+      "extension": ".pes",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random3-brother-v5.pes"
+    },
+    {
+      "path": "random3-brother-v6.pes",
+      "bytes": 5671,
+      "sha256": "40da0e3f17175f3777a98cd0a38ca4b96311b158273958aefd8c17713588032e",
+      "extension": ".pes",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random3-brother-v6.pes"
+    },
+    {
+      "path": "random3-ew-+.bmp",
+      "bytes": 40054,
+      "sha256": "40d45047338c058abd56b7d63c5d17d68237a6196e083b71e11fe1c175df0dec",
+      "extension": ".bmp",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random3-ew-%2B.bmp"
+    },
+    {
+      "path": "random3-ew-+.exp",
+      "bytes": 640,
+      "sha256": "8df31c831f91fc4200dc89cf779c4db8c16d075ff08c7270059063105093312a",
+      "extension": ".exp",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random3-ew-%2B.exp"
+    },
+    {
+      "path": "random3-ew-+.inf",
+      "bytes": 265,
+      "sha256": "250fa9863d1f6638c15efb82d978f754298b91bafc72b34325b9092ffe6c8ecf",
+      "extension": ".inf",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random3-ew-%2B.inf"
+    },
+    {
+      "path": "random3-ew.DST.dst",
+      "bytes": 1067,
+      "sha256": "6cf810fc21e3df19fc99a36e4271d2d55ee8e6c4a3843dd0a5608781742ac057",
+      "extension": ".dst",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random3-ew.DST.dst"
+    },
+    {
+      "path": "random3-ew.DST.edr",
+      "bytes": 40,
+      "sha256": "159591ec904ab983aca9b06c4f692ec01123416cfddd4f9e727897a62f13a29b",
+      "extension": ".edr",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random3-ew.DST.edr"
+    },
+    {
+      "path": "random3-ew.exp",
+      "bytes": 640,
+      "sha256": "8df31c831f91fc4200dc89cf779c4db8c16d075ff08c7270059063105093312a",
+      "extension": ".exp",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random3-ew.exp"
+    },
+    {
+      "path": "random3-ew.jef",
+      "bytes": 882,
+      "sha256": "81b406fa473df7dca32c70cc9e0d4ba5324ffec716615bb685787fc880a370b3",
+      "extension": ".jef",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random3-ew.jef"
+    },
+    {
+      "path": "random3-ew.pec",
+      "bytes": 3256,
+      "sha256": "83d1800f40beb41dcd180676a6d9169c4a1de41bd6dfa27657a56af5617ba6d3",
+      "extension": ".pec",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random3-ew.pec"
+    },
+    {
+      "path": "random3-ew.pes",
+      "bytes": 3948,
+      "sha256": "af9af8352e84db0c199128ce0801e775f59716c2f9c521d86dc6c651d9d73f9a",
+      "extension": ".pes",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random3-ew.pes"
+    },
+    {
+      "path": "random3-janome.clf",
+      "bytes": 68712,
+      "sha256": "2aa4a956cdb161d31bd37c55e73891c35420cb1011aef7149b5f571beae9b4af",
+      "extension": ".clf",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random3-janome.clf"
+    },
+    {
+      "path": "random3-janome.jef",
+      "bytes": 708,
+      "sha256": "b50391cbf7d80ef6a772dba9974d3ce9e334d7aaefd2c7ab1466054d06f52e38",
+      "extension": ".jef",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random3-janome.jef"
+    },
+    {
+      "path": "random3-me-c.xxx",
+      "bytes": 1196,
+      "sha256": "5913775da5829c7aea2fdd59f8c9f72ff1a4972a699dcce906e93ee1eef79774",
+      "extension": ".xxx",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random3-me-c.xxx"
+    },
+    {
+      "path": "random3-me-s.xxx",
+      "bytes": 1196,
+      "sha256": "de5e66ec00cd3c3e9720376030bff5afa9ade289b0c0c18d9ff129bad779c0ed",
+      "extension": ".xxx",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random3-me-s.xxx"
+    },
+    {
+      "path": "random3-me.00O",
+      "bytes": 558,
+      "sha256": "f800e817abf4a57fdd8b0a80de8c280fe19343721a7336ff6f6e168c92b56078",
+      "extension": ".00o",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random3-me.00O"
+    },
+    {
+      "path": "random3-me.101",
+      "bytes": 1030,
+      "sha256": "91b5c8b7634e333c46cdc4ce94ac400c7cd02f4e33271286d28bc2732f9ae406",
+      "extension": ".101",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random3-me.101"
+    },
+    {
+      "path": "random3-me.10O",
+      "bytes": 879,
+      "sha256": "44173e09142ef2c31f9db00ba9458bdacc6679c799c8f5048594990d6c823893",
+      "extension": ".10o",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random3-me.10O"
+    },
+    {
+      "path": "random3-me.HP1",
+      "bytes": 3072,
+      "sha256": "1216e0c7091bb4be82ae03dad2ad2bb3048318004281250c43a86f5c91af1293",
+      "extension": ".hp1",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random3-me.HP1"
+    },
+    {
+      "path": "random3-me.M3",
+      "bytes": 993,
+      "sha256": "512705a9de9d0009dc9650fddbc9c4aed351242e266c24bb876c3264414f8ce1",
+      "extension": ".m3",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random3-me.M3"
+    },
+    {
+      "path": "random3-me.TBF",
+      "bytes": 2248,
+      "sha256": "15d0053e61fad314c34f56d7fb118f95b7df9bd3162360de57a6c7c8104e2fa6",
+      "extension": ".tbf",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random3-me.TBF"
+    },
+    {
+      "path": "random3-me.U01",
+      "bytes": 1150,
+      "sha256": "c48ba45497963d1efe860a10917c9a6bc35bfb468eafa8751c64dadc1d03b187",
+      "extension": ".u01",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random3-me.U01"
+    },
+    {
+      "path": "random3-me.Z01",
+      "bytes": 2385,
+      "sha256": "85926ef257974bf64bb3a194e61ddfd98fea054fbee761726bb9543d08d55cd4",
+      "extension": ".z01",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random3-me.Z01"
+    },
+    {
+      "path": "random3-me.bmp",
+      "bytes": 7478,
+      "sha256": "78bd7f6a56da9c55ba3d25d7a3df26ecbe745c5f582c659539851c66e40bf1fc",
+      "extension": ".bmp",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random3-me.bmp"
+    },
+    {
+      "path": "random3-me.dsb",
+      "bytes": 1409,
+      "sha256": "a24b4c6e2d52b62f994286e9fbe35e5d902424ed10a44341714b8bb58f7c5975",
+      "extension": ".dsb",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random3-me.dsb"
+    },
+    {
+      "path": "random3-me.dst",
+      "bytes": 1484,
+      "sha256": "adbe6fe5040f8133091da1c487c2f06e4c58fa42634dcd4ed0a50fed8c704d81",
+      "extension": ".dst",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random3-me.dst"
+    },
+    {
+      "path": "random3-me.dsz",
+      "bytes": 1265,
+      "sha256": "3cd6d6273560c412ecfeea07652f30ac88a01b92d29c30053af3e66f92a50b48",
+      "extension": ".dsz",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random3-me.dsz"
+    },
+    {
+      "path": "random3-me.exp",
+      "bytes": 844,
+      "sha256": "57a0ca04d95e40ad100ab415f64af25b7582611461c75830f834d638a16586c1",
+      "extension": ".exp",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random3-me.exp"
+    },
+    {
+      "path": "random3-me.hqf",
+      "bytes": 820,
+      "sha256": "b5859188f5efb435be010b0505d764f941ce4966bb1297752d1e82551932af4f",
+      "extension": ".hqf",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random3-me.hqf"
+    },
+    {
+      "path": "random3-me.hus",
+      "bytes": 361,
+      "sha256": "541c0903387592ebf4c16b5c08be6251f78789386e2e85401e94fe10aa4b6d2f",
+      "extension": ".hus",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random3-me.hus"
+    },
+    {
+      "path": "random3-me.inf",
+      "bytes": 206,
+      "sha256": "253a0c5ae7c5578d0d898dc403a82854d1c73f1505a4bf2b57e216e2223b1059",
+      "extension": ".inf",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random3-me.inf"
+    },
+    {
+      "path": "random3-me.jef",
+      "bytes": 790,
+      "sha256": "e6c21c21c062038c5d4d7a7d7f24f57e2c35b306ad61e49c9c3b44411051701e",
+      "extension": ".jef",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random3-me.jef"
+    },
+    {
+      "path": "random3-me.jef+",
+      "bytes": 1658,
+      "sha256": "db654ac8a0f152ad6cc5397e2095f394a1e4a2692014522ede4908fee07c0f6a",
+      "extension": ".jef+",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random3-me.jef%2B"
+    },
+    {
+      "path": "random3-me.ksm",
+      "bytes": 1007,
+      "sha256": "f66f68a83516fbded42034738118f9caccd7f697096bc4e8eed750a7c307ae5f",
+      "extension": ".ksm",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random3-me.ksm"
+    },
+    {
+      "path": "random3-me.mls",
+      "bytes": 5067,
+      "sha256": "a67d4bbd7e7036bc14ac3d82cd9ef870f964af998e6b76e5620b7c16b5a547e3",
+      "extension": ".mls",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random3-me.mls"
+    },
+    {
+      "path": "random3-me.ngs",
+      "bytes": 11776,
+      "sha256": "4bba02c67a51a05b87f9663191d9a82cfd9f996618a70eb129053a8fa2e59c9f",
+      "extension": ".ngs",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random3-me.ngs"
+    },
+    {
+      "path": "random3-me.pcm",
+      "bytes": 1437,
+      "sha256": "2158d382a6939d130fed355fa7f28b363039eefa6defc235bb8f8efc42a21f7f",
+      "extension": ".pcm",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random3-me.pcm"
+    },
+    {
+      "path": "random3-me.pcs",
+      "bytes": 1469,
+      "sha256": "23b0d281c3870fd309e6d58e68d80d1c8d2d95ba54c9164557db0e84c6ed3643",
+      "extension": ".pcs",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random3-me.pcs"
+    },
+    {
+      "path": "random3-me.pec",
+      "bytes": 3996,
+      "sha256": "bdffa43784dc6ca2701751b63f16e209786c469e1c28854784804b470a0cdc77",
+      "extension": ".pec",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random3-me.pec"
+    },
+    {
+      "path": "random3-me.pes",
+      "bytes": 7788,
+      "sha256": "08ac30f9f5ce172bf851e2c4a5fc78bb4cae5bf2e87fcf719248fe19285a7286",
+      "extension": ".pes",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random3-me.pes"
+    },
+    {
+      "path": "random3-me.qli",
+      "bytes": 9339,
+      "sha256": "b2f022b7bc2d35ce604822b0a454cb6850a6bf24af396528ad478dd405090f40",
+      "extension": ".qli",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random3-me.qli"
+    },
+    {
+      "path": "random3-me.sef",
+      "bytes": 3805,
+      "sha256": "8eb04f55b6c0fd84660179cbd4dded281022222001cdd816563ab9907475339c",
+      "extension": ".sef",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random3-me.sef"
+    },
+    {
+      "path": "random3-me.sew",
+      "bytes": 8452,
+      "sha256": "2bcfe3d9d4f761f5424bbf4c2f72f14f76022deb20593daefcf24e8cca226d0a",
+      "extension": ".sew",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random3-me.sew"
+    },
+    {
+      "path": "random3-me.shv",
+      "bytes": 5527,
+      "sha256": "60504d87b275386a9148550b5c32a3228a038bf74e49288583706bc0eabb73a4",
+      "extension": ".shv",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random3-me.shv"
+    },
+    {
+      "path": "random3-me.sst",
+      "bytes": 847,
+      "sha256": "11673fa321c9e456605a06e30b75ef305446b65465216ba61097fdfa17e7d011",
+      "extension": ".sst",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random3-me.sst"
+    },
+    {
+      "path": "random3-me.tap",
+      "bytes": 969,
+      "sha256": "b09ca46bf9381def950ed914b6368509a6b584cd57c581069c1023c343b7d725",
+      "extension": ".tap",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random3-me.tap"
+    },
+    {
+      "path": "random3-me.vip",
+      "bytes": 433,
+      "sha256": "bdb6cef5986c2cfb07884fb9d8a3db4bf8fc642b9f7927e392b8b4b3386a9157",
+      "extension": ".vip",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random3-me.vip"
+    },
+    {
+      "path": "random3-me.vp3",
+      "bytes": 1091,
+      "sha256": "2f1fe7577225d85bb8533a6aa7c0e1bb32233b5f18741eef058a3028f46dc622",
+      "extension": ".vp3",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random3-me.vp3"
+    },
+    {
+      "path": "random3-premier.10o",
+      "bytes": 753,
+      "sha256": "f6aea112524f079b6bc2f87e999d0fd5052816f9125359b43caaf5a927719854",
+      "extension": ".10o",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random3-premier.10o"
+    },
+    {
+      "path": "random3-premier.dst",
+      "bytes": 1275,
+      "sha256": "b9edcdf6a9dacc2aceab15261d864f8dfe0bdf7c7eb444cd35186d9f797ba6f2",
+      "extension": ".dst",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random3-premier.dst"
+    },
+    {
+      "path": "random3-premier.exp",
+      "bytes": 930,
+      "sha256": "5d83dffb28e94ad43417a164dcd92f099c8d8c696234a1b92b7cea508308307a",
+      "extension": ".exp",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random3-premier.exp"
+    },
+    {
+      "path": "random3-premier.hus",
+      "bytes": 395,
+      "sha256": "9ff6d9c48038351f5e86d6dfc3fbd4211d30df21256dd46941fc4981bb619eea",
+      "extension": ".hus",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random3-premier.hus"
+    },
+    {
+      "path": "random3-premier.jef",
+      "bytes": 1116,
+      "sha256": "fc6c5239e312244fd9ab94607ba570aa074436e5e70a93a8137a4228a6f4c66c",
+      "extension": ".jef",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random3-premier.jef"
+    },
+    {
+      "path": "random3-premier.pcs",
+      "bytes": 507,
+      "sha256": "bd1f385c503fb863cf4e8154d05979ff0a706b78798cfec064562179e40033ea",
+      "extension": ".pcs",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random3-premier.pcs"
+    },
+    {
+      "path": "random3-premier.pec",
+      "bytes": 954,
+      "sha256": "536e80733e2f39d9535c96ac3eb01aa5332ebea49f4b5e3a265299f5c1058cee",
+      "extension": ".pec",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random3-premier.pec"
+    },
+    {
+      "path": "random3-premier.pes",
+      "bytes": 4386,
+      "sha256": "3e615610153f54b12745b4743bc9ae5b6e9a256409a7e877dccabaa72dc127ef",
+      "extension": ".pes",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random3-premier.pes"
+    },
+    {
+      "path": "random3-premier.vip",
+      "bytes": 483,
+      "sha256": "05a1f0d44a51c1656e494aa8f804335193dfae1363c1a526cf49085c38265170",
+      "extension": ".vip",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random3-premier.vip"
+    },
+    {
+      "path": "random3-premier.vp3",
+      "bytes": 1006,
+      "sha256": "c418941b8099cb0be1e3a4f0409377b9bd3bf79850ed76d12a677b6a961dd516",
+      "extension": ".vp3",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random3-premier.vp3"
+    },
+    {
+      "path": "random3-premier.vp4",
+      "bytes": 1439,
+      "sha256": "c3f063819b08c6a7be6307b0097ded5448d6cc408db6159d890cfcadefd72d31",
+      "extension": ".vp4",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random3-premier.vp4"
+    },
+    {
+      "path": "random3-premier.xxx",
+      "bytes": 2349,
+      "sha256": "fbc2988b66e5d1483ec988d4d8b937649ba3a208d59c6339dec2a154f0feac6b",
+      "extension": ".xxx",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random3-premier.xxx"
+    },
+    {
+      "path": "random3-wilcom-a.BRO",
+      "bytes": 466,
+      "sha256": "ae338a30111401208e1183376622b37e706dd0250d31261e99149848a290ae02",
+      "extension": ".bro",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random3-wilcom-a.BRO"
+    },
+    {
+      "path": "random3-wilcom-b.BRO",
+      "bytes": 287,
+      "sha256": "91a7c80ffdb9719d00e7091c43d97c7a3d156c56e6ead15b4353664bff6611ef",
+      "extension": ".bro",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random3-wilcom-b.BRO"
+    },
+    {
+      "path": "random3-wilcom-bernina.EXP",
+      "bytes": 576,
+      "sha256": "952d3e20b1f00ab7df38e918c38da7fd871bdf71d57fdf17fca4715e00684ba6",
+      "extension": ".exp",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random3-wilcom-bernina.EXP"
+    },
+    {
+      "path": "random3-wilcom-c.XXX",
+      "bytes": 968,
+      "sha256": "5ec1f7d6e4b520548fa17d4a3a0aac024d02d2dc6e9b3f91bdf9651d0963d551",
+      "extension": ".xxx",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random3-wilcom-c.XXX"
+    },
+    {
+      "path": "random3-wilcom-e1.EMB",
+      "bytes": 33792,
+      "sha256": "387c33991ae3e5213e6192926ac58bb7ea9aa2a3d847608a402759cdae57ffe0",
+      "extension": ".emb",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random3-wilcom-e1.EMB"
+    },
+    {
+      "path": "random3-wilcom-e15.EMB",
+      "bytes": 33792,
+      "sha256": "c68a4658e46528d53ab8434c41833d050e4baccba2683193cbc05ecfe38ab5a6",
+      "extension": ".emb",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random3-wilcom-e15.EMB"
+    },
+    {
+      "path": "random3-wilcom-e18.EMB",
+      "bytes": 34304,
+      "sha256": "5ac366851a051b8f8a1af3775efed4d41f5247f8050b4cae01248b608a62cd07",
+      "extension": ".emb",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random3-wilcom-e18.EMB"
+    },
+    {
+      "path": "random3-wilcom-e2.EMB",
+      "bytes": 44032,
+      "sha256": "78afad408a633f2167953c6a1ba4c9afbf2eb355f01d83ad046b94289dd176a8",
+      "extension": ".emb",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random3-wilcom-e2.EMB"
+    },
+    {
+      "path": "random3-wilcom-e2006.EMB",
+      "bytes": 32256,
+      "sha256": "bcdac11a4f117fc1107184cfa30a40d44f3141b88433c1ab60dfdb9661cbb908",
+      "extension": ".emb",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random3-wilcom-e2006.EMB"
+    },
+    {
+      "path": "random3-wilcom-s.XXX",
+      "bytes": 968,
+      "sha256": "5ec1f7d6e4b520548fa17d4a3a0aac024d02d2dc6e9b3f91bdf9651d0963d551",
+      "extension": ".xxx",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random3-wilcom-s.XXX"
+    },
+    {
+      "path": "random3-wilcom-v1.PES",
+      "bytes": 4224,
+      "sha256": "991f09bc119f444e30ef2cbe7d6f0c25f394bab8026423ebfbe3095ac9d96a05",
+      "extension": ".pes",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random3-wilcom-v1.PES"
+    },
+    {
+      "path": "random3-wilcom-v4.PES",
+      "bytes": 4839,
+      "sha256": "12d872172dde3acabe4fb5afd674561432fba550932f84244fd1a78ecd89d0d7",
+      "extension": ".pes",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random3-wilcom-v4.PES"
+    },
+    {
+      "path": "random3-wilcom-v5.PES",
+      "bytes": 6598,
+      "sha256": "6652948f93a8ff77e56a7b46d309e215f9a77030555bd6117604d3d98805bad1",
+      "extension": ".pes",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random3-wilcom-v5.PES"
+    },
+    {
+      "path": "random3-wilcom-v6.PES",
+      "bytes": 6612,
+      "sha256": "3ce25a878d1aca201712dec423289466a1a864afa50163863d46a73e2d207833",
+      "extension": ".pes",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random3-wilcom-v6.PES"
+    },
+    {
+      "path": "random3-wilcom.00O",
+      "bytes": 558,
+      "sha256": "227ad0a085a6e63f8c3b13faa6e2cd2a9a2c16638bf0145926323461b9cd6713",
+      "extension": ".00o",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random3-wilcom.00O"
+    },
+    {
+      "path": "random3-wilcom.10O",
+      "bytes": 468,
+      "sha256": "459c2e2f0a11fbe1969758d6dc333a540ce8d641780492d49be3be7930ad0d76",
+      "extension": ".10o",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random3-wilcom.10O"
+    },
+    {
+      "path": "random3-wilcom.CSD",
+      "bytes": 597,
+      "sha256": "04999c3e33f02c69efdaaf751a31d6d66611556a28cce34223f60a80ff1a95b2",
+      "extension": ".csd",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random3-wilcom.CSD"
+    },
+    {
+      "path": "random3-wilcom.CT0",
+      "bytes": 1936,
+      "sha256": "0d303f84e7b749ecdbcc19d272a4c6e82c5fae68377bb5e24a3c62e8a057e3f6",
+      "extension": ".ct0",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random3-wilcom.CT0"
+    },
+    {
+      "path": "random3-wilcom.DGF",
+      "bytes": 9358,
+      "sha256": "9a21b717d6e9525a3a7ff3d7e801269003a9ca6b58830aa89513d26df4e7753d",
+      "extension": ".dgf",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random3-wilcom.DGF"
+    },
+    {
+      "path": "random3-wilcom.DGT",
+      "bytes": 9358,
+      "sha256": "9a21b717d6e9525a3a7ff3d7e801269003a9ca6b58830aa89513d26df4e7753d",
+      "extension": ".dgt",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random3-wilcom.DGT"
+    },
+    {
+      "path": "random3-wilcom.DSB",
+      "bytes": 981,
+      "sha256": "10ce9f1f5f4d97af02d97c2242a6b98f9f6c6659a8b6a317dc3a7b6fb552ce5b",
+      "extension": ".dsb",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random3-wilcom.DSB"
+    },
+    {
+      "path": "random3-wilcom.DST",
+      "bytes": 1134,
+      "sha256": "9188af553aa846a114e07f42e1d14d9652d4de83c55fe49ffeec1a16ae1cf919",
+      "extension": ".dst",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random3-wilcom.DST"
+    },
+    {
+      "path": "random3-wilcom.DSZ",
+      "bytes": 1350,
+      "sha256": "2ee7a65931a6361736c6f697963bd9de94035d2fbfdf321ce7de40de1e0b5677",
+      "extension": ".dsz",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random3-wilcom.DSZ"
+    },
+    {
+      "path": "random3-wilcom.EMB",
+      "bytes": 45056,
+      "sha256": "77303c117dace84b0bd52a4cbd4bd9a5188f5e333a82246bcc2e2efc7c6caa30",
+      "extension": ".emb",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random3-wilcom.EMB"
+    },
+    {
+      "path": "random3-wilcom.EMD",
+      "bytes": 626,
+      "sha256": "dbeb04abf80be14339512c038714c1ea04cc26bdc2c1313d998e3c00c7d5524b",
+      "extension": ".emd",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random3-wilcom.EMD"
+    },
+    {
+      "path": "random3-wilcom.EXP",
+      "bytes": 576,
+      "sha256": "952d3e20b1f00ab7df38e918c38da7fd871bdf71d57fdf17fca4715e00684ba6",
+      "extension": ".exp",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random3-wilcom.EXP"
+    },
+    {
+      "path": "random3-wilcom.HUS",
+      "bytes": 382,
+      "sha256": "22be8ba54b019ce2504c77d4ee3398dc4d6ba163cf05f77b65ea62124270daf4",
+      "extension": ".hus",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random3-wilcom.HUS"
+    },
+    {
+      "path": "random3-wilcom.INB",
+      "bytes": 8657,
+      "sha256": "6b4e93360511815b3f511e19b46988e4beb2aac7e67c1d03ac362d9d7d48f578",
+      "extension": ".inb",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random3-wilcom.INB"
+    },
+    {
+      "path": "random3-wilcom.KSM",
+      "bytes": 989,
+      "sha256": "209fe930ec22b353bd66ec1a031e08c65ced7f29af125e99a7ad407a34cb65e1",
+      "extension": ".ksm",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random3-wilcom.KSM"
+    },
+    {
+      "path": "random3-wilcom.LT0",
+      "bytes": 1697,
+      "sha256": "be0121da133feff91c80b8eeece84332842dd6d0160d3d80c59b0bd67d920d4b",
+      "extension": ".lt0",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random3-wilcom.LT0"
+    },
+    {
+      "path": "random3-wilcom.MON",
+      "bytes": 1024,
+      "sha256": "8cc84c0e670bafbae17be86399bd54f7404dc61cc45b4a6baccc05523f50b3ba",
+      "extension": ".mon",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random3-wilcom.MON"
+    },
+    {
+      "path": "random3-wilcom.PCD",
+      "bytes": 543,
+      "sha256": "dfdd5cf028224c3323bdeaf77d4e95b0e0ecdd79f659f5ab8ebf92241862d5f7",
+      "extension": ".pcd",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random3-wilcom.PCD"
+    },
+    {
+      "path": "random3-wilcom.PCM",
+      "bytes": 749,
+      "sha256": "f301a2922bd14d0d07da2105d24132faa71c39f78423fc184bd2244477378bad",
+      "extension": ".pcm",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random3-wilcom.PCM"
+    },
+    {
+      "path": "random3-wilcom.PCQ",
+      "bytes": 543,
+      "sha256": "dfdd5cf028224c3323bdeaf77d4e95b0e0ecdd79f659f5ab8ebf92241862d5f7",
+      "extension": ".pcq",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random3-wilcom.PCQ"
+    },
+    {
+      "path": "random3-wilcom.PCS",
+      "bytes": 543,
+      "sha256": "dfdd5cf028224c3323bdeaf77d4e95b0e0ecdd79f659f5ab8ebf92241862d5f7",
+      "extension": ".pcs",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random3-wilcom.PCS"
+    },
+    {
+      "path": "random3-wilcom.PEC",
+      "bytes": 3196,
+      "sha256": "2bbe518066eda4e0ae1bd9e291e54f351044f72927e82635dfef6ff9a9fdd5ef",
+      "extension": ".pec",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random3-wilcom.PEC"
+    },
+    {
+      "path": "random3-wilcom.PMU",
+      "bytes": 11611,
+      "sha256": "78750aa227e326a89e4dd9b934d73011fa7c6ecff513d350bdb124521b54d0e2",
+      "extension": ".pmu",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random3-wilcom.PMU"
+    },
+    {
+      "path": "random3-wilcom.PUM",
+      "bytes": 1010,
+      "sha256": "d8e9cd0669464fa5dd53f9220402e5f179b4e4a740633b7c679f62be4a4a9d1b",
+      "extension": ".pum",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random3-wilcom.PUM"
+    },
+    {
+      "path": "random3-wilcom.SEW",
+      "bytes": 8126,
+      "sha256": "167b1cda7f89866ce8a8f4bf029e487048666afe4b77158636ba9bdafb493416",
+      "extension": ".sew",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random3-wilcom.SEW"
+    },
+    {
+      "path": "random3-wilcom.SHV",
+      "bytes": 4917,
+      "sha256": "4f23c342dd78ae68d1b8f497343eda82de1ef250a4bf97dac8783036e87d2919",
+      "extension": ".shv",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random3-wilcom.SHV"
+    },
+    {
+      "path": "random3-wilcom.STX",
+      "bytes": 1186,
+      "sha256": "4b75377af68d36aa32ccfb1234dbdc4e37de8b1e394c4d4e0125cf1244ca2fee",
+      "extension": ".stx",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random3-wilcom.STX"
+    },
+    {
+      "path": "random3-wilcom.TAP",
+      "bytes": 630,
+      "sha256": "00ae62cff06008bd929863fc458bd4c63a323c645923ac8bb979ec128ac5d41f",
+      "extension": ".tap",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random3-wilcom.TAP"
+    },
+    {
+      "path": "random3-wilcom.U01",
+      "bytes": 724,
+      "sha256": "adc9d1958282a2e8930df5999b175b1fdf6131f61ce7730250b971512580fcac",
+      "extension": ".u01",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random3-wilcom.U01"
+    },
+    {
+      "path": "random3-wilcom.VIP",
+      "bytes": 480,
+      "sha256": "469079221fccae6b78cdffd88110a9901d15695f0bd8cb8f542d029bca9375a2",
+      "extension": ".vip",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random3-wilcom.VIP"
+    },
+    {
+      "path": "random3-wilcom.VP3",
+      "bytes": 1042,
+      "sha256": "e39f57992a3c42d36077f57eb44780b1bdd59b13b94932e9271a5938c1550ce8",
+      "extension": ".vp3",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random3-wilcom.VP3"
+    },
+    {
+      "path": "random3-wilcom.Z01",
+      "bytes": 1792,
+      "sha256": "4ba2b5d8643519fbe0f06765d6c1ed4a7ecd2131bb129859b61909b1a3e064db",
+      "extension": ".z01",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random3-wilcom.Z01"
+    },
+    {
+      "path": "random3-wilcom.col",
+      "bytes": 152,
+      "sha256": "b964f53ebe001503410a0e06809e22ee61391383833d466c9ec07f15b09f4da6",
+      "extension": ".col",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random3-wilcom.col"
+    },
+    {
+      "path": "random3.csv",
+      "bytes": 3192,
+      "sha256": "470baa1743a634c02845545310fd372d8215c6884d23f86d45ae4d96245622a9",
+      "extension": ".csv",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random3.csv"
+    },
+    {
+      "path": "random3.dst",
+      "bytes": 965,
+      "sha256": "48e478f7003d6fe2b6d43d34d852345dcaa9a4d0b0c6c1e41dfbb4b5eafb728a",
+      "extension": ".dst",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random3.dst"
+    },
+    {
+      "path": "random3.exp",
+      "bytes": 556,
+      "sha256": "07b36ee2bb69a5f5ccd3fe3f1d396ec9b5f307a21c6764d4b564b9546e2ca12f",
+      "extension": ".exp",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random3.exp"
+    },
+    {
+      "path": "random3.gcode",
+      "bytes": 1570,
+      "sha256": "d11fd27696b0b28b4af8c3072e769765724eeda705ba8a3a31f2a0e09594a2a6",
+      "extension": ".gcode",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random3.gcode"
+    },
+    {
+      "path": "random3.jef",
+      "bytes": 754,
+      "sha256": "1bf994c205d8adc51cdd27bc4bd8317051e5d044ec7642aa60616575925c7da0",
+      "extension": ".jef",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random3.jef"
+    },
+    {
+      "path": "random3.pec",
+      "bytes": 3236,
+      "sha256": "96787fa7a38eb3c4fc8f3a27a3df9caddb02fd6bab61118de35c06990ef07025",
+      "extension": ".pec",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random3.pec"
+    },
+    {
+      "path": "random3.pes",
+      "bytes": 3736,
+      "sha256": "641675149ae63ab0988fe5915c5077cdd4a3a21d7c472f0099822bc9dee33298",
+      "extension": ".pes",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random3.pes"
+    },
+    {
+      "path": "random3.pmv",
+      "bytes": 472,
+      "sha256": "e4d7b15da178043af5ed872222aae4f49e8031c3907f68b35c50d278302bf939",
+      "extension": ".pmv",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random3.pmv"
+    },
+    {
+      "path": "random3.png",
+      "bytes": 16572,
+      "sha256": "08b8b7bcc9bd4f1e04a65a6e5699e1a5509a3374e4e1ed38017b5481f38b8952",
+      "extension": ".png",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random3.png"
+    },
+    {
+      "path": "random3.svg",
+      "bytes": 2023,
+      "sha256": "cf42b813d404c68af392d16004ddbf68f30179f630b2c70af616cbfbb154b15d",
+      "extension": ".svg",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random3.svg"
+    },
+    {
+      "path": "random3.txt",
+      "bytes": 2074,
+      "sha256": "08b20839180ddf5481bdd97e208da5d53ff8fb077487464b0e11d4484875250d",
+      "extension": ".txt",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random3.txt"
+    },
+    {
+      "path": "random3.u01",
+      "bytes": 694,
+      "sha256": "c76551d9cbc83e9d423876b24c9f01295312b0379384632c443b1a17e8bbb940",
+      "extension": ".u01",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random3.u01"
+    },
+    {
+      "path": "random3.vp3",
+      "bytes": 1032,
+      "sha256": "a501747bb4b2024dd1dff7e5e1e3e1875f81115c638054edde652f26620c66a3",
+      "extension": ".vp3",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random3.vp3"
+    },
+    {
+      "path": "random3.xxx",
+      "bytes": 876,
+      "sha256": "d1003d2e619d5089364beaaf026fdc3ad8fcb2633e252e920b98337214811721",
+      "extension": ".xxx",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random3.xxx"
+    },
+    {
+      "path": "scene-brother-v1.pes",
+      "bytes": 2527,
+      "sha256": "192851217e53ca10e49fa5640fe89ce0357a5fede5fbca2716107685c7211042",
+      "extension": ".pes",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/scene-brother-v1.pes"
+    },
+    {
+      "path": "scene-brother-v2.pes",
+      "bytes": 2545,
+      "sha256": "e29794e8212700e43aa5fe37306b7acb95f1c8ec532edc126162d714e1f2aa55",
+      "extension": ".pes",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/scene-brother-v2.pes"
+    },
+    {
+      "path": "scene-brother-v3.pes",
+      "bytes": 2549,
+      "sha256": "a6fcd43822bdbfd9f639e233192f380acc67679a8cbbe617a26423efa426fbd0",
+      "extension": ".pes",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/scene-brother-v3.pes"
+    },
+    {
+      "path": "scene-brother-v4.pes",
+      "bytes": 2692,
+      "sha256": "11317582949ed9d480b583dd2b8c9286bf0d6d2735aa845c4e73209104a8d78d",
+      "extension": ".pes",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/scene-brother-v4.pes"
+    },
+    {
+      "path": "scene-brother-v5.pes",
+      "bytes": 3267,
+      "sha256": "87da473416bb310ca7fd24549ac8042737a87fde81102ec422f21aa05f5c00d7",
+      "extension": ".pes",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/scene-brother-v5.pes"
+    },
+    {
+      "path": "scene-brother-v6.pes",
+      "bytes": 3185,
+      "sha256": "666fab112f84bfc901c7ae77b7f953254a555e03e6d2b00010b787ed5d7c46e7",
+      "extension": ".pes",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/scene-brother-v6.pes"
+    },
+    {
+      "path": "scene-ew-+.bmp",
+      "bytes": 40054,
+      "sha256": "ab49b36e0699badfffc150e20a452ff79b2973220434bafcd0e65ccdd2e109d1",
+      "extension": ".bmp",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/scene-ew-%2B.bmp"
+    },
+    {
+      "path": "scene-ew-+.exp",
+      "bytes": 342,
+      "sha256": "9c4df7a05788f992e636ebb1684a4afcadaaa5e319c0bdee234081fe055b47b7",
+      "extension": ".exp",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/scene-ew-%2B.exp"
+    },
+    {
+      "path": "scene-ew-+.inf",
+      "bytes": 95,
+      "sha256": "26a9599a1ac6cea6a97085f2cc63a61bb87a52e2e25bf92f30da8a6ce6246fd0",
+      "extension": ".inf",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/scene-ew-%2B.inf"
+    },
+    {
+      "path": "scene-ew.DST.dst",
+      "bytes": 971,
+      "sha256": "ce86ceb9e51c9063932c93882b9fcfa9462f1a103947cbb75139b6f2dcdb4d28",
+      "extension": ".dst",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/scene-ew.DST.dst"
+    },
+    {
+      "path": "scene-ew.DST.edr",
+      "bytes": 12,
+      "sha256": "b2d0dd61d7d77daef51ec773379a690788b99630fbaa2bd9273fb680444a5701",
+      "extension": ".edr",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/scene-ew.DST.edr"
+    },
+    {
+      "path": "scene-ew.exp",
+      "bytes": 342,
+      "sha256": "9c4df7a05788f992e636ebb1684a4afcadaaa5e319c0bdee234081fe055b47b7",
+      "extension": ".exp",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/scene-ew.exp"
+    },
+    {
+      "path": "scene-ew.jef",
+      "bytes": 484,
+      "sha256": "dc13a3652389269133626b202d13355fc34d902f0888e2da0992aa9363390a98",
+      "extension": ".jef",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/scene-ew.jef"
+    },
+    {
+      "path": "scene-ew.pec",
+      "bytes": 1737,
+      "sha256": "30e5c0e0f6b384495d5dd33aad6317a97b7246e41f64e1762aabe1dccbe01eb7",
+      "extension": ".pec",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/scene-ew.pec"
+    },
+    {
+      "path": "scene-ew.pes",
+      "bytes": 2473,
+      "sha256": "b95c4de1b9a46b5a8816a5747bf0d6928f766696c948dc97f0734a9f2e99e331",
+      "extension": ".pes",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/scene-ew.pes"
+    },
+    {
+      "path": "scene-me-c.xxx",
+      "bytes": 722,
+      "sha256": "b0f49700bf1eeafa327cb8251186ca951256bbed8f4c41cd1bcb8c3bb09ec6be",
+      "extension": ".xxx",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/scene-me-c.xxx"
+    },
+    {
+      "path": "scene-me-s.xxx",
+      "bytes": 722,
+      "sha256": "766a7d441a0bf8db0d057bda6412842682269533b19df68313d0eb9bc09b141d",
+      "extension": ".xxx",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/scene-me-s.xxx"
+    },
+    {
+      "path": "scene-me.00O",
+      "bytes": 257,
+      "sha256": "aa48335391c52011be00c303a99a085dc1aa0369e4b20b015f4e71e66eaab967",
+      "extension": ".00o",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/scene-me.00O"
+    },
+    {
+      "path": "scene-me.101",
+      "bytes": 706,
+      "sha256": "29994adbb45e416a0ee1b766b235d3e086ab040757992d049346cfea940b560d",
+      "extension": ".101",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/scene-me.101"
+    },
+    {
+      "path": "scene-me.10O",
+      "bytes": 528,
+      "sha256": "57987b27e4615ca13312c672e940a404b5ab15c2b666a7443baef448f9fcf71c",
+      "extension": ".10o",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/scene-me.10O"
+    },
+    {
+      "path": "scene-me.HP1",
+      "bytes": 3072,
+      "sha256": "1db42e09d0e2d8dc2c25da2ac18ab5b63616e7b9acbedf0a0efa9f208a97e43b",
+      "extension": ".hp1",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/scene-me.HP1"
+    },
+    {
+      "path": "scene-me.M3",
+      "bytes": 405,
+      "sha256": "a6def66dbe3cb5c1eccc8df8e239a6f842168b93c24b9b70fa6ae16bb34c0121",
+      "extension": ".m3",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/scene-me.M3"
+    },
+    {
+      "path": "scene-me.TBF",
+      "bytes": 2014,
+      "sha256": "3545237c3221c96d60e00e7b779fc9cbf63d714d4329d5ff4db0fc8b829acd80",
+      "extension": ".tbf",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/scene-me.TBF"
+    },
+    {
+      "path": "scene-me.U01",
+      "bytes": 790,
+      "sha256": "6a535b5c06f19ca20b3d17992bdb2fa9315628bb14f19a8c17f2fc3acd921dfe",
+      "extension": ".u01",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/scene-me.U01"
+    },
+    {
+      "path": "scene-me.Z01",
+      "bytes": 2151,
+      "sha256": "0166b2dac8d2dae78d2fd0fed4b98144af05051c556d7490893aa0868f8c1256",
+      "extension": ".z01",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/scene-me.Z01"
+    },
+    {
+      "path": "scene-me.bmp",
+      "bytes": 7478,
+      "sha256": "e820b61b78a3d7327658e788ba86066217fc6fd9cdced9e9eef4ff5f6a8eca76",
+      "extension": ".bmp",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/scene-me.bmp"
+    },
+    {
+      "path": "scene-me.dsb",
+      "bytes": 1049,
+      "sha256": "2ebfbb6e1038ed57b96b02afbdd8420c0ccbe2ce378f1992951c8bebb87631a4",
+      "extension": ".dsb",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/scene-me.dsb"
+    },
+    {
+      "path": "scene-me.dst",
+      "bytes": 1073,
+      "sha256": "0281f78e11f63b5a4549b7bc2e31b8eee85114aa722b5221d34d894376797a67",
+      "extension": ".dst",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/scene-me.dst"
+    },
+    {
+      "path": "scene-me.dsz",
+      "bytes": 1043,
+      "sha256": "b6217edcbdd068ac38760f1d09b467d95e1406e0e4edb863cdbb506654289f3e",
+      "extension": ".dsz",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/scene-me.dsz"
+    },
+    {
+      "path": "scene-me.exp",
+      "bytes": 370,
+      "sha256": "7a4723e3a073e13b505c8eb0df5154708d5b776b5b6350f66a4f258250e94952",
+      "extension": ".exp",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/scene-me.exp"
+    },
+    {
+      "path": "scene-me.hqf",
+      "bytes": 3375,
+      "sha256": "bd27051327333c39d3f72d72d3b797a5cd127f6f425188d2c691b82a9139250d",
+      "extension": ".hqf",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/scene-me.hqf"
+    },
+    {
+      "path": "scene-me.hus",
+      "bytes": 240,
+      "sha256": "17c156ddcd4d30fa311550d2d4439ae57214e53f5baf1c81f1a5030bd457cb13",
+      "extension": ".hus",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/scene-me.hus"
+    },
+    {
+      "path": "scene-me.inf",
+      "bytes": 73,
+      "sha256": "e3363d0eb1517b74d67becf5847371121d1e40ca764ea6f18e9dd6fedbfd783b",
+      "extension": ".inf",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/scene-me.inf"
+    },
+    {
+      "path": "scene-me.jef",
+      "bytes": 484,
+      "sha256": "1350c01464067e005a5d25d5120a59168f61006eb18a0b85844e5d29e90b017f",
+      "extension": ".jef",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/scene-me.jef"
+    },
+    {
+      "path": "scene-me.jef+",
+      "bytes": 1046,
+      "sha256": "32d6c2708e74a12b74a38452f99775136608a73094b9a790baa7bd26b161e2b6",
+      "extension": ".jef+",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/scene-me.jef%2B"
+    },
+    {
+      "path": "scene-me.ksm",
+      "bytes": 947,
+      "sha256": "4a0a5fda61694c725f80ccc5d1a86939827f8bf93bf97a2c3e1d4c1ef2f8ca33",
+      "extension": ".ksm",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/scene-me.ksm"
+    },
+    {
+      "path": "scene-me.mls",
+      "bytes": 3247,
+      "sha256": "3aa0a18bf75e8c7d5fc3fa5e94c23a7b90bcd9607d33bae0e60c6365260b0f9b",
+      "extension": ".mls",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/scene-me.mls"
+    },
+    {
+      "path": "scene-me.ngs",
+      "bytes": 8192,
+      "sha256": "ddd961936572a46762ccb227743849f230ef71e506b1fea5bdbab28f11f5a551",
+      "extension": ".ngs",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/scene-me.ngs"
+    },
+    {
+      "path": "scene-me.pcm",
+      "bytes": 1383,
+      "sha256": "6a92de6be26dd43ad0f1d0c5338474236b27d0211b1784b43255aae3559d35fe",
+      "extension": ".pcm",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/scene-me.pcm"
+    },
+    {
+      "path": "scene-me.pcs",
+      "bytes": 1415,
+      "sha256": "556830469e9a823734c0d582e69a32c6546fb072ed880385bed6a1fe3481cbea",
+      "extension": ".pcs",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/scene-me.pcs"
+    },
+    {
+      "path": "scene-me.pec",
+      "bytes": 1894,
+      "sha256": "698cd21ce79d5ec63b2eaafd0f9b49399fbe3feb90db65b2c644c72e8756818e",
+      "extension": ".pec",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/scene-me.pec"
+    },
+    {
+      "path": "scene-me.pes",
+      "bytes": 3628,
+      "sha256": "35a9dfc657e01bc8d4f5c4b190d8ecf006c8289fda36ec785b1a09b5751b7461",
+      "extension": ".pes",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/scene-me.pes"
+    },
+    {
+      "path": "scene-me.qli",
+      "bytes": 3096,
+      "sha256": "fdffdf2167f490f7ea58e21eb79ad2adcc04888bfbe1c204053c2d7c0d5b2276",
+      "extension": ".qli",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/scene-me.qli"
+    },
+    {
+      "path": "scene-me.sef",
+      "bytes": 1704,
+      "sha256": "4398dec84c846c1c8d9d48cc1e77832d192c0db68c28e2e100b632baaa796cdc",
+      "extension": ".sef",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/scene-me.sef"
+    },
+    {
+      "path": "scene-me.sew",
+      "bytes": 7982,
+      "sha256": "6e95ea71fe71b9aa6d35ddc0f06660988a118ddd9db16cadbbc0c4362fa668aa",
+      "extension": ".sew",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/scene-me.sew"
+    },
+    {
+      "path": "scene-me.shv",
+      "bytes": 7095,
+      "sha256": "1f65faccd65cfc6da1737557277f0dc38a20aff9ede458d5a4e1175bcfa26536",
+      "extension": ".shv",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/scene-me.shv"
+    },
+    {
+      "path": "scene-me.sst",
+      "bytes": 658,
+      "sha256": "fa14f058853b3df07e6255d1948eb19d4bf3647f98bea6584b0332be09133209",
+      "extension": ".sst",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/scene-me.sst"
+    },
+    {
+      "path": "scene-me.tap",
+      "bytes": 558,
+      "sha256": "95165b37d744e082495d8712fa14a2232c2980399ce879484641fccb819e05fb",
+      "extension": ".tap",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/scene-me.tap"
+    },
+    {
+      "path": "scene-me.vip",
+      "bytes": 269,
+      "sha256": "23112f0b1b09df1f2a55296017c182e087d11ec78c28e2f7fad01d2804aef264",
+      "extension": ".vip",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/scene-me.vip"
+    },
+    {
+      "path": "scene-me.vp3",
+      "bytes": 806,
+      "sha256": "7d97d670787ea8b64c3a1146e3436a9abf861c6c0576845c09fd48cd1bac659e",
+      "extension": ".vp3",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/scene-me.vp3"
+    },
+    {
+      "path": "scene-premier.10o",
+      "bytes": 474,
+      "sha256": "4e22377ee6f0d65c7e27d5e4975c9e0fb3cd3cc26e6b34f3ef698c1c23442d1f",
+      "extension": ".10o",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/scene-premier.10o"
+    },
+    {
+      "path": "scene-premier.dst",
+      "bytes": 996,
+      "sha256": "d2dd50db7ca08c2c046d466b5b1e2b3ce2d5335e4f9d12dece90c62fa17ab8da",
+      "extension": ".dst",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/scene-premier.dst"
+    },
+    {
+      "path": "scene-premier.exp",
+      "bytes": 380,
+      "sha256": "8fa7b70e5c71a92e60a3c2fac7e1c3870b593a74f6c896bb89c3dd724e693d9b",
+      "extension": ".exp",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/scene-premier.exp"
+    },
+    {
+      "path": "scene-premier.hus",
+      "bytes": 253,
+      "sha256": "39a2cbed44b0edd7ab0de6f0c773de4e5f811c6ab307331b3264955f411d7717",
+      "extension": ".hus",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/scene-premier.hus"
+    },
+    {
+      "path": "scene-premier.jef",
+      "bytes": 510,
+      "sha256": "17c2c4efe849fafa8066939602248eceb93287c5e2482599845584cbe17a0234",
+      "extension": ".jef",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/scene-premier.jef"
+    },
+    {
+      "path": "scene-premier.pcs",
+      "bytes": 1245,
+      "sha256": "6648e496e5d78eedb0e56a90482c524254ab2d1f52c4ec653d7b98a2419692dd",
+      "extension": ".pcs",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/scene-premier.pcs"
+    },
+    {
+      "path": "scene-premier.pec",
+      "bytes": 1050,
+      "sha256": "4fe2635c9aed66d1a69863e008245fd92978613e3b8b077f889a6627deff859d",
+      "extension": ".pec",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/scene-premier.pec"
+    },
+    {
+      "path": "scene-premier.vip",
+      "bytes": 299,
+      "sha256": "c047078db79aa3a1b2b51af10f4f9c098a0d36210a18c12da78e74a0d2396c06",
+      "extension": ".vip",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/scene-premier.vip"
+    },
+    {
+      "path": "scene-premier.vp3",
+      "bytes": 674,
+      "sha256": "cd1f76d64d9a79d3155807a3d3a8c457929a693d949d9d0eab44509cd74f0a48",
+      "extension": ".vp3",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/scene-premier.vp3"
+    },
+    {
+      "path": "scene-premier.vp4",
+      "bytes": 1083,
+      "sha256": "04c56220fd1aadad170f4970aa9ad4a9c535fd5430444c917128156d4cbe9cb9",
+      "extension": ".vp4",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/scene-premier.vp4"
+    },
+    {
+      "path": "scene-premier.xxx",
+      "bytes": 2409,
+      "sha256": "d7a9d554863a1c16f175171b3002269b2bb1fac19d19901bbc9991856ed5987f",
+      "extension": ".xxx",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/scene-premier.xxx"
+    },
+    {
+      "path": "scene-wilcom-bernina.EXP",
+      "bytes": 336,
+      "sha256": "f8e592d4a2766e49673b2e98ec8f4f6500bd6c3827eb0986cb12d7732f0a6736",
+      "extension": ".exp",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/scene-wilcom-bernina.EXP"
+    },
+    {
+      "path": "scene-wilcom-c.XXX",
+      "bytes": 684,
+      "sha256": "59ccfde951f3e2e518eb74e42b5480887e8a506415b0e1738678a70b0fae9716",
+      "extension": ".xxx",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/scene-wilcom-c.XXX"
+    },
+    {
+      "path": "scene-wilcom-s.XXX",
+      "bytes": 684,
+      "sha256": "59ccfde951f3e2e518eb74e42b5480887e8a506415b0e1738678a70b0fae9716",
+      "extension": ".xxx",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/scene-wilcom-s.XXX"
+    },
+    {
+      "path": "scene-wilcom-v1.PES",
+      "bytes": 2501,
+      "sha256": "c7cfa420af4786fe9e33b5008093a91601492c671a27d4dc2af494a99328c050",
+      "extension": ".pes",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/scene-wilcom-v1.PES"
+    },
+    {
+      "path": "scene-wilcom-v4.PES",
+      "bytes": 2763,
+      "sha256": "42ad22715b59a226e74133fe3e110ea98510c1548db78288ba0ca3126f64711f",
+      "extension": ".pes",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/scene-wilcom-v4.PES"
+    },
+    {
+      "path": "scene-wilcom-v5.PES",
+      "bytes": 3311,
+      "sha256": "0ce4dc5935c59d7bb2e72fa37f52ed94d2d02a92d646486f1b577008863a3cb5",
+      "extension": ".pes",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/scene-wilcom-v5.PES"
+    },
+    {
+      "path": "scene-wilcom-v6.PES",
+      "bytes": 3325,
+      "sha256": "8822eba8fe6268cc114d5ceed667496d63283486e2421750910b449ad51e29c8",
+      "extension": ".pes",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/scene-wilcom-v6.PES"
+    },
+    {
+      "path": "scene-wilcom.00O",
+      "bytes": 257,
+      "sha256": "919413243a76d82185a6bf1d831ea647962b41cb63bc17a32ff18c49c1c54450",
+      "extension": ".00o",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/scene-wilcom.00O"
+    },
+    {
+      "path": "scene-wilcom.10O",
+      "bytes": 438,
+      "sha256": "df7b9023a60bbbff3c6d3d9a52740829ceba8e22d0175e7878773eef6058d6ce",
+      "extension": ".10o",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/scene-wilcom.10O"
+    },
+    {
+      "path": "scene-wilcom.BRO",
+      "bytes": 544,
+      "sha256": "ae956f2018289d3e6bae49925c5bb7a691a7622d0fe5ab4f91d812567635ad40",
+      "extension": ".bro",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/scene-wilcom.BRO"
+    },
+    {
+      "path": "scene-wilcom.CSD",
+      "bytes": 525,
+      "sha256": "e9cff43f08ea085ca28d6687087986a71566285b20a4507e11d2db6dd6495fb1",
+      "extension": ".csd",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/scene-wilcom.CSD"
+    },
+    {
+      "path": "scene-wilcom.CT0",
+      "bytes": 1936,
+      "sha256": "9a3d7d9db043eb26bcacd6c259e3c0959aed6629a6231021055a2462516fffa4",
+      "extension": ".ct0",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/scene-wilcom.CT0"
+    },
+    {
+      "path": "scene-wilcom.DGF",
+      "bytes": 9358,
+      "sha256": "656caf8475f94639f75b3c99680c871ec6d0c988fe803a465a7eaa90ca09a8f5",
+      "extension": ".dgf",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/scene-wilcom.DGF"
+    },
+    {
+      "path": "scene-wilcom.DGT",
+      "bytes": 9358,
+      "sha256": "656caf8475f94639f75b3c99680c871ec6d0c988fe803a465a7eaa90ca09a8f5",
+      "extension": ".dgt",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/scene-wilcom.DGT"
+    },
+    {
+      "path": "scene-wilcom.DSB",
+      "bytes": 951,
+      "sha256": "f975645dfef77ef5d4d5bd7507d651fff476a57d9fa47946aea7bfa57bffbb43",
+      "extension": ".dsb",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/scene-wilcom.DSB"
+    },
+    {
+      "path": "scene-wilcom.DST",
+      "bytes": 963,
+      "sha256": "6ed34c08b74560f0d58255b3e65b7783cb53b2d3758c5e97b4260f718a88008d",
+      "extension": ".dst",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/scene-wilcom.DST"
+    },
+    {
+      "path": "scene-wilcom.DSZ",
+      "bytes": 984,
+      "sha256": "503bc9c62a7128c48bd56d9c57e285cbcec24a9ffcf328f8e9d23f809fbd98b4",
+      "extension": ".dsz",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/scene-wilcom.DSZ"
+    },
+    {
+      "path": "scene-wilcom.EMB",
+      "bytes": 32256,
+      "sha256": "253cad3911885565ab768f05f1cb5c6a1710f8b2bbfea5bb3da834ebfdcd7c87",
+      "extension": ".emb",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/scene-wilcom.EMB"
+    },
+    {
+      "path": "scene-wilcom.EMD",
+      "bytes": 420,
+      "sha256": "1b72df7c3524cb0a6f780f8c142614df67ad2e43be7277c47d1787dd6b9dfd16",
+      "extension": ".emd",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/scene-wilcom.EMD"
+    },
+    {
+      "path": "scene-wilcom.EXP",
+      "bytes": 336,
+      "sha256": "f8e592d4a2766e49673b2e98ec8f4f6500bd6c3827eb0986cb12d7732f0a6736",
+      "extension": ".exp",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/scene-wilcom.EXP"
+    },
+    {
+      "path": "scene-wilcom.HUS",
+      "bytes": 227,
+      "sha256": "064acb65f0bd18d060272627d0cb17e834f138ca270181020e5c0d58aca0a040",
+      "extension": ".hus",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/scene-wilcom.HUS"
+    },
+    {
+      "path": "scene-wilcom.INB",
+      "bytes": 8630,
+      "sha256": "e6df8a45fec1686f921184be7d39fd7195e0a80acb8d35d2c2d8981a93af749c",
+      "extension": ".inb",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/scene-wilcom.INB"
+    },
+    {
+      "path": "scene-wilcom.KSM",
+      "bytes": 953,
+      "sha256": "5ef613853860598d6388f4be677a3feb193dc86800b02dd023fe1c26a4bbd8ee",
+      "extension": ".ksm",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/scene-wilcom.KSM"
+    },
+    {
+      "path": "scene-wilcom.LT0",
+      "bytes": 1697,
+      "sha256": "fec4b219ce2b3fdc02ddd19411763f0c41c6e8c044626d1a78a3606d04feb7ab",
+      "extension": ".lt0",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/scene-wilcom.LT0"
+    },
+    {
+      "path": "scene-wilcom.MON",
+      "bytes": 1024,
+      "sha256": "585544f42e565972fbff12341b5d9296f4b8e692cb7abd81991cccba670c9c13",
+      "extension": ".mon",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/scene-wilcom.MON"
+    },
+    {
+      "path": "scene-wilcom.PCD",
+      "bytes": 1290,
+      "sha256": "78f4a08f7673671de68e65066adfe9bd3a8e8d6130523488985ab7b004089d3f",
+      "extension": ".pcd",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/scene-wilcom.PCD"
+    },
+    {
+      "path": "scene-wilcom.PCM",
+      "bytes": 1280,
+      "sha256": "4a5e3e25bec46f09827d663ec9cf70806bdf8020a084bc992e5aea74d1619383",
+      "extension": ".pcm",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/scene-wilcom.PCM"
+    },
+    {
+      "path": "scene-wilcom.PCQ",
+      "bytes": 1290,
+      "sha256": "78f4a08f7673671de68e65066adfe9bd3a8e8d6130523488985ab7b004089d3f",
+      "extension": ".pcq",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/scene-wilcom.PCQ"
+    },
+    {
+      "path": "scene-wilcom.PCS",
+      "bytes": 1290,
+      "sha256": "78f4a08f7673671de68e65066adfe9bd3a8e8d6130523488985ab7b004089d3f",
+      "extension": ".pcs",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/scene-wilcom.PCS"
+    },
+    {
+      "path": "scene-wilcom.PEC",
+      "bytes": 1717,
+      "sha256": "b4ec73b3866b0523648c418b1424df09e49ffedb7b4ff1764b1dc7d0c10c22a0",
+      "extension": ".pec",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/scene-wilcom.PEC"
+    },
+    {
+      "path": "scene-wilcom.PMU",
+      "bytes": 11536,
+      "sha256": "97f25b3905b7d5c138418a037b0a6094a7cd28fc8a43cff0c7686c2052e5ba1e",
+      "extension": ".pmu",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/scene-wilcom.PMU"
+    },
+    {
+      "path": "scene-wilcom.PUM",
+      "bytes": 959,
+      "sha256": "bc3f9af30de893cea111f2db9cf7c63981902d8600ed9fcc2991cd5f61d0154e",
+      "extension": ".pum",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/scene-wilcom.PUM"
+    },
+    {
+      "path": "scene-wilcom.SEW",
+      "bytes": 7878,
+      "sha256": "2e7058926b5fce82385d0df86185ff004ad7d93f50f1caa84c1ae931de14d4fe",
+      "extension": ".sew",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/scene-wilcom.SEW"
+    },
+    {
+      "path": "scene-wilcom.SHV",
+      "bytes": 7007,
+      "sha256": "87a3882cf361ba307b527584375942c344fde7c2f36188ddd3a537364e7bf5b6",
+      "extension": ".shv",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/scene-wilcom.SHV"
+    },
+    {
+      "path": "scene-wilcom.STX",
+      "bytes": 946,
+      "sha256": "efb4131c29f92235128d19cfca72e67fc1d3568a1bf94e4784c84a1d86733711",
+      "extension": ".stx",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/scene-wilcom.STX"
+    },
+    {
+      "path": "scene-wilcom.TAP",
+      "bytes": 459,
+      "sha256": "d3d55808fab3575b93ed92954f9a23690111e4dbb1d28803d0133b70a6424d1d",
+      "extension": ".tap",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/scene-wilcom.TAP"
+    },
+    {
+      "path": "scene-wilcom.U01",
+      "bytes": 694,
+      "sha256": "96242aa8332a9b05d11d1938172669b062d85e1509137035943f45c3747b4af9",
+      "extension": ".u01",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/scene-wilcom.U01"
+    },
+    {
+      "path": "scene-wilcom.VIP",
+      "bytes": 279,
+      "sha256": "0d348cc9af8b578a145b26ceb747dcfee6af9e20a83afac9ae6fb9e171ce89e2",
+      "extension": ".vip",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/scene-wilcom.VIP"
+    },
+    {
+      "path": "scene-wilcom.VP3",
+      "bytes": 674,
+      "sha256": "aaf039656a10b76b08b8d82b9eb69e1756aa29248d6b1e2b783f02c260d8f1d8",
+      "extension": ".vp3",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/scene-wilcom.VP3"
+    },
+    {
+      "path": "scene-wilcom.Z01",
+      "bytes": 1209,
+      "sha256": "a73e6a4312456432d693065760678dc4605486ff9d5aa1549290a7719123ee4a",
+      "extension": ".z01",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/scene-wilcom.Z01"
+    },
+    {
+      "path": "scene-wilcom.col",
+      "bytes": 45,
+      "sha256": "5ca7185f6304329438a7bb52793f5a2e54f843f16adba5ca90d7b51e31f1e786",
+      "extension": ".col",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/scene-wilcom.col"
+    },
+    {
+      "path": "scene.csv",
+      "bytes": 7763,
+      "sha256": "10bca743c6ebb43da5caa514081c5a82987c7611cbbe371d3d7d192c4743e284",
+      "extension": ".csv",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/scene.csv"
+    },
+    {
+      "path": "scene.dst",
+      "bytes": 947,
+      "sha256": "72d40f5d47fc24dc86aeb75c8b501ebbb7b74e32269ec908eac04c948ad74eb7",
+      "extension": ".dst",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/scene.dst"
+    },
+    {
+      "path": "scene.exp",
+      "bytes": 330,
+      "sha256": "509f72c74a58bb999d7ddf98a893613dda90db076e794a0889fb3b4502fb1559",
+      "extension": ".exp",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/scene.exp"
+    },
+    {
+      "path": "scene.gcode",
+      "bytes": 4388,
+      "sha256": "4725357a0d868ad3fd1cdd755e5fa16177229b7694c1f648bef1089cea8b5061",
+      "extension": ".gcode",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/scene.gcode"
+    },
+    {
+      "path": "scene.jef",
+      "bytes": 468,
+      "sha256": "974fa6cef5aedf72299b0005fea519822483582bf8dfa741c641fe131f683333",
+      "extension": ".jef",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/scene.jef"
+    },
+    {
+      "path": "scene.pec",
+      "bytes": 1739,
+      "sha256": "0ee8c5c1330378e471234d4f3e34830c309d82d2c6657b0d94478a7767ba2039",
+      "extension": ".pec",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/scene.pec"
+    },
+    {
+      "path": "scene.pes",
+      "bytes": 2471,
+      "sha256": "4e21817df1d76afe5dae3f984344826c9076b24685b9db94392698d5b4eefdd4",
+      "extension": ".pes",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/scene.pes"
+    },
+    {
+      "path": "scene.pmv",
+      "bytes": 472,
+      "sha256": "27f2823a1d66e34ade630cb92002906550b489f1cfef9e65e5e07388c862e9e3",
+      "extension": ".pmv",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/scene.pmv"
+    },
+    {
+      "path": "scene.png",
+      "bytes": 7434,
+      "sha256": "63a03a2e50a6bfa265623147bb4dd9e0d186f2852faa74addee4f9623594f2f2",
+      "extension": ".png",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/scene.png"
+    },
+    {
+      "path": "scene.svg",
+      "bytes": 4863,
+      "sha256": "b748fee224593bdbb1d15f92656ee7dacfa06623b652b09c8751830d04e354f3",
+      "extension": ".svg",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/scene.svg"
+    },
+    {
+      "path": "scene.txt",
+      "bytes": 6792,
+      "sha256": "d84bbf1dcd7149e275f0129cc6634a1293020bc177e5c06a99f96be7f404bcc4",
+      "extension": ".txt",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/scene.txt"
+    },
+    {
+      "path": "scene.u01",
+      "bytes": 682,
+      "sha256": "fbe386e53938aec89a4d2e298ee88c743991e974ad014fe3cd3218ac7c17a084",
+      "extension": ".u01",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/scene.u01"
+    },
+    {
+      "path": "scene.vp3",
+      "bytes": 664,
+      "sha256": "dc0c91454c340aaf28832f30c6e801b1ae5767d2ea5db87ff6efc0ed1081807f",
+      "extension": ".vp3",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/scene.vp3"
+    },
+    {
+      "path": "scene.xxx",
+      "bytes": 662,
+      "sha256": "cf30a2a666c40f6a1866684cb017f5498a919f2f1d9b9d97dc3f4fec7cea792f",
+      "extension": ".xxx",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/scene.xxx"
+    },
+    {
+      "path": "sceneU01.bmp",
+      "bytes": 2518,
+      "sha256": "0848410d2f8543b81ced5e601a16fd1ba37ac61d72f713e38268576e25b0bc02",
+      "extension": ".bmp",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/sceneU01.bmp"
+    },
+    {
+      "path": "spiraU01.bmp",
+      "bytes": 2518,
+      "sha256": "2e0977a777468af991f7d03b0c37325665010a278a0b639c10e2d6f2f8d64d08",
+      "extension": ".bmp",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/spiraU01.bmp"
+    },
+    {
+      "path": "spiralb0.sew",
+      "bytes": 7780,
+      "sha256": "e0d78ad38a5bbeaf247770a956a05b8710d224681ff5b648be76f5350f9742ba",
+      "extension": ".sew",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/spiralb0.sew"
+    },
+    {
+      "path": "spiralb1.sew",
+      "bytes": 7598,
+      "sha256": "0ea787f0a2d1be094592949e4fccf452d9694b86fc233913f09b5fd350aefed6",
+      "extension": ".sew",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/spiralb1.sew"
+    },
+    {
+      "path": "spiralbox-brother-v1.pes",
+      "bytes": 6302,
+      "sha256": "3324aa3d30eac238857acdf4301e0e3c24922a9a962b0e502c5fb334f72b0598",
+      "extension": ".pes",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/spiralbox-brother-v1.pes"
+    },
+    {
+      "path": "spiralbox-brother-v2.pes",
+      "bytes": 6320,
+      "sha256": "0a244deb29c039be8918643ec705f6fa5801ae5d9a01f0e8f2f24cd10e893c1b",
+      "extension": ".pes",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/spiralbox-brother-v2.pes"
+    },
+    {
+      "path": "spiralbox-brother-v3.pes",
+      "bytes": 6324,
+      "sha256": "168954c4a28be940173dec28296a50d97893a38f60f4dd0fabe94b2d1ec11ddf",
+      "extension": ".pes",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/spiralbox-brother-v3.pes"
+    },
+    {
+      "path": "spiralbox-brother-v4.pes",
+      "bytes": 6467,
+      "sha256": "848b9733479642b8823aab4aca4f0db3086e5e38abf0eed6d2ba485668c2b14e",
+      "extension": ".pes",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/spiralbox-brother-v4.pes"
+    },
+    {
+      "path": "spiralbox-brother-v5.pes",
+      "bytes": 9313,
+      "sha256": "82481a9672e158760c835a367c5d83385a47cad0e6a990dd329a337d3ce1ee1a",
+      "extension": ".pes",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/spiralbox-brother-v5.pes"
+    },
+    {
+      "path": "spiralbox-brother-v6.pes",
+      "bytes": 8607,
+      "sha256": "bd34da72db46df0f1eeacabb01ffcd85ecd0db889a869fa554cbc6fd13a6322e",
+      "extension": ".pes",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/spiralbox-brother-v6.pes"
+    },
+    {
+      "path": "spiralbox-ew-+.bmp",
+      "bytes": 40054,
+      "sha256": "d3819f10bc27d08075c2c623d1f74fd746dea37bc2735fde81fe19a4b20b298a",
+      "extension": ".bmp",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/spiralbox-ew-%2B.bmp"
+    },
+    {
+      "path": "spiralbox-ew-+.exp",
+      "bytes": 230,
+      "sha256": "873c7dd1bbc371d4d8f0c0d9bbdb9b9194dce6a49adc04c6d11da14d4e0b2db3",
+      "extension": ".exp",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/spiralbox-ew-%2B.exp"
+    },
+    {
+      "path": "spiralbox-ew-+.inf",
+      "bytes": 413,
+      "sha256": "0b4d513afd424f4b1c184e3fb7c218ec853ef888c52fa36cc2ebde1a64e79aa5",
+      "extension": ".inf",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/spiralbox-ew-%2B.inf"
+    },
+    {
+      "path": "spiralbox-ew.DST.dst",
+      "bytes": 815,
+      "sha256": "6e90e1c4fc386857eb458dd6846500b1ccbedb725a9827a4aa5ee4f6d23771de",
+      "extension": ".dst",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/spiralbox-ew.DST.dst"
+    },
+    {
+      "path": "spiralbox-ew.DST.edr",
+      "bytes": 64,
+      "sha256": "b0adb6161f664e9f8121159997bd5cd6d72520e0d7c54afc7c8508938ebb94e1",
+      "extension": ".edr",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/spiralbox-ew.DST.edr"
+    },
+    {
+      "path": "spiralbox-ew.exp",
+      "bytes": 230,
+      "sha256": "873c7dd1bbc371d4d8f0c0d9bbdb9b9194dce6a49adc04c6d11da14d4e0b2db3",
+      "extension": ".exp",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/spiralbox-ew.exp"
+    },
+    {
+      "path": "spiralbox-ew.jef",
+      "bytes": 540,
+      "sha256": "b39de845a846389e32fcaf4114cb50f6e5f4a636622485835b73d18572d3ccd4",
+      "extension": ".jef",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/spiralbox-ew.jef"
+    },
+    {
+      "path": "spiralbox-ew.pec",
+      "bytes": 4874,
+      "sha256": "52568a81a7d4b12c0eb6a1c903a9a009bd6a328fa1692a74e68a88e34e94737e",
+      "extension": ".pec",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/spiralbox-ew.pec"
+    },
+    {
+      "path": "spiralbox-ew.pes",
+      "bytes": 6050,
+      "sha256": "4dc1e212911e014087234d082c8faedc795a6c3701d61839cae3f2ab33c381f9",
+      "extension": ".pes",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/spiralbox-ew.pes"
+    },
+    {
+      "path": "spiralbox-janome.clf",
+      "bytes": 68484,
+      "sha256": "e8d941456c5b756221662ed7d3a089a5a7af02f0be924bd9188400fc2c941ee0",
+      "extension": ".clf",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/spiralbox-janome.clf"
+    },
+    {
+      "path": "spiralbox-janome.jef",
+      "bytes": 492,
+      "sha256": "1505db88d3c81534a331fa63c8f78a5ebb4c33007ddad0e135aff3170b742080",
+      "extension": ".jef",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/spiralbox-janome.jef"
+    },
+    {
+      "path": "spiralbox-me-c.xxx",
+      "bytes": 830,
+      "sha256": "f41c0123b9c8da90e26c7429e1a1cdfc2353e8e29417c1caac50a01fe1ab4f9f",
+      "extension": ".xxx",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/spiralbox-me-c.xxx"
+    },
+    {
+      "path": "spiralbox-me-s.xxx",
+      "bytes": 830,
+      "sha256": "fbedcb0c516c4c0f924ef53fbe41283b5d4116e26fb7a5fafb9835e4979b1f9a",
+      "extension": ".xxx",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/spiralbox-me-s.xxx"
+    },
+    {
+      "path": "spiralbox-me.00O",
+      "bytes": 816,
+      "sha256": "defe5b2f749b6fc5267a6d43e70d77ee334ff04c96d9e9c0cbd2d0c3ea19a4c7",
+      "extension": ".00o",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/spiralbox-me.00O"
+    },
+    {
+      "path": "spiralbox-me.101",
+      "bytes": 522,
+      "sha256": "f947074552c78f711b6aa0b72c47265aed2281a78b0b484313a225605630f77e",
+      "extension": ".101",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/spiralbox-me.101"
+    },
+    {
+      "path": "spiralbox-me.10O",
+      "bytes": 489,
+      "sha256": "108b4fd571f8faaace5e2ada22a6403f35bbf542179de15553b37a9beb493854",
+      "extension": ".10o",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/spiralbox-me.10O"
+    },
+    {
+      "path": "spiralbox-me.HP1",
+      "bytes": 3072,
+      "sha256": "cb6968691df563efa962adf15b8183319213e707553129695098570fa42a2f51",
+      "extension": ".hp1",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/spiralbox-me.HP1"
+    },
+    {
+      "path": "spiralbox-me.M3",
+      "bytes": 819,
+      "sha256": "1ff59afcebaff219c165523097596b005e88d9aac1a21e94781afb83b1de0f12",
+      "extension": ".m3",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/spiralbox-me.M3"
+    },
+    {
+      "path": "spiralbox-me.TBF",
+      "bytes": 2023,
+      "sha256": "ebbf2bc157ad8977908a09838265ce14d48ff67b7bf2d701617574be1c9af170",
+      "extension": ".tbf",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/spiralbox-me.TBF"
+    },
+    {
+      "path": "spiralbox-me.U01",
+      "bytes": 754,
+      "sha256": "5cb8ae0fbc7118e6347c90742e1d8f6a7f7708b543a5b877b0e05cf8b8027058",
+      "extension": ".u01",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/spiralbox-me.U01"
+    },
+    {
+      "path": "spiralbox-me.Z01",
+      "bytes": 2208,
+      "sha256": "d30a63c73474ffba20b0e8494dec81d6f68a249ee591d21879163461401cdb0a",
+      "extension": ".z01",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/spiralbox-me.Z01"
+    },
+    {
+      "path": "spiralbox-me.bmp",
+      "bytes": 7478,
+      "sha256": "17737bda81a6902896e2fd4156d1a6d6c35e29ffd187e3f301df40f772ea9bde",
+      "extension": ".bmp",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/spiralbox-me.bmp"
+    },
+    {
+      "path": "spiralbox-me.dsb",
+      "bytes": 1013,
+      "sha256": "3bcc07cb542e637064282abd10f15f716daf0c43fd30afb94dbfea69e6c3c8ef",
+      "extension": ".dsb",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/spiralbox-me.dsb"
+    },
+    {
+      "path": "spiralbox-me.dst",
+      "bytes": 1058,
+      "sha256": "d13936f65905cca2fa2dbda208accaee1dfb921e389145300c1059d0bf3d838f",
+      "extension": ".dst",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/spiralbox-me.dst"
+    },
+    {
+      "path": "spiralbox-me.dsz",
+      "bytes": 893,
+      "sha256": "27c2200a528be438efb668c48017c1b0ff3c2227e131c4e58bf98663560189a6",
+      "extension": ".dsz",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/spiralbox-me.dsz"
+    },
+    {
+      "path": "spiralbox-me.exp",
+      "bytes": 478,
+      "sha256": "b00f72fd38f08f6319e50f2dec42e08ec19fcd461f764d1680895c1bc47e2ebf",
+      "extension": ".exp",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/spiralbox-me.exp"
+    },
+    {
+      "path": "spiralbox-me.hqf",
+      "bytes": 2243,
+      "sha256": "d93ec947573740218d8bd98dda0167ec59927bf5823a4a0c7a03b8199f1e2039",
+      "extension": ".hqf",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/spiralbox-me.hqf"
+    },
+    {
+      "path": "spiralbox-me.hus",
+      "bytes": 287,
+      "sha256": "7bdbbb37248e71c16d6c107c5a959674dc7993c7cef5413a2a5d6918a6968e80",
+      "extension": ".hus",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/spiralbox-me.hus"
+    },
+    {
+      "path": "spiralbox-me.inf",
+      "bytes": 320,
+      "sha256": "2cb9fa5cbbc435af8c9b792de6f618e89424f57c13c09d687926896bf5828858",
+      "extension": ".inf",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/spiralbox-me.inf"
+    },
+    {
+      "path": "spiralbox-me.jef",
+      "bytes": 596,
+      "sha256": "ebc494fd2172bb1b3b6f015ad0dc25310eba9387e58d7dc3592fcc697ab19b13",
+      "extension": ".jef",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/spiralbox-me.jef"
+    },
+    {
+      "path": "spiralbox-me.jef+",
+      "bytes": 1270,
+      "sha256": "045f8a460f21ce9637dd06b453dec1bf335a41bc56ef06ce1c15c37df201be10",
+      "extension": ".jef+",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/spiralbox-me.jef%2B"
+    },
+    {
+      "path": "spiralbox-me.ksm",
+      "bytes": 812,
+      "sha256": "8abda0440fc76a1d5516fbaa0da8d422879fc1cab52fb726b92b2cb9b8507354",
+      "extension": ".ksm",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/spiralbox-me.ksm"
+    },
+    {
+      "path": "spiralbox-me.mls",
+      "bytes": 8447,
+      "sha256": "71bcda84358c67ab940282515c4a577a142d0c3f81d41a5b75e6cf94a83745e0",
+      "extension": ".mls",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/spiralbox-me.mls"
+    },
+    {
+      "path": "spiralbox-me.ngs",
+      "bytes": 12288,
+      "sha256": "4635c912b421888664f4a1e0bad4792f51c4191ef2309fa69846c5e92621615f",
+      "extension": ".ngs",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/spiralbox-me.ngs"
+    },
+    {
+      "path": "spiralbox-me.pcm",
+      "bytes": 1077,
+      "sha256": "40f5b238389f2571f1d974c74c1251bd9450104b81f712ba546d415abd8567c6",
+      "extension": ".pcm",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/spiralbox-me.pcm"
+    },
+    {
+      "path": "spiralbox-me.pcs",
+      "bytes": 1109,
+      "sha256": "b10656e036b56b37dff606b08215ee55a3be0db38306ff6f929cdd62245772c0",
+      "extension": ".pcs",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/spiralbox-me.pcs"
+    },
+    {
+      "path": "spiralbox-me.pec",
+      "bytes": 4772,
+      "sha256": "b5c26dc75f3a5cce3e73c0b6f3f110e17b9e8cf6d27ede8eb7395e74a982a228",
+      "extension": ".pec",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/spiralbox-me.pec"
+    },
+    {
+      "path": "spiralbox-me.pes",
+      "bytes": 9229,
+      "sha256": "8b0f8eb91352ac0577c46f8d1f1af867c416ca16d9ddc7d1dfa7f2042b1dbdd7",
+      "extension": ".pes",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/spiralbox-me.pes"
+    },
+    {
+      "path": "spiralbox-me.qli",
+      "bytes": 4084,
+      "sha256": "a7ac031b5b50583d8b33c6f918043d496509222228a8cb2d8b31f5fcb3482eb0",
+      "extension": ".qli",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/spiralbox-me.qli"
+    },
+    {
+      "path": "spiralbox-me.sef",
+      "bytes": 3319,
+      "sha256": "39c8ccf65d93a87d27607c2c17030e0176f70e03e199bce3f073da3007a089f5",
+      "extension": ".sef",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/spiralbox-me.sef"
+    },
+    {
+      "path": "spiralbox-me.shv",
+      "bytes": 1334,
+      "sha256": "7f1d1953d2b487fec03b9a8b9af9242e73dc7dc8ecf9514c2926bfbca62cd686",
+      "extension": ".shv",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/spiralbox-me.shv"
+    },
+    {
+      "path": "spiralbox-me.sst",
+      "bytes": 652,
+      "sha256": "dfe15ba4533382a22c9405dc1aeab4673bcd590d46dcc8e3dd525df2989bc747",
+      "extension": ".sst",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/spiralbox-me.sst"
+    },
+    {
+      "path": "spiralbox-me.tap",
+      "bytes": 543,
+      "sha256": "6823063f9296d6a10bc941555d3b3eac5653ece8c76b4ae372e5a5aa01d50999",
+      "extension": ".tap",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/spiralbox-me.tap"
+    },
+    {
+      "path": "spiralbox-me.vip",
+      "bytes": 395,
+      "sha256": "895bf35329fd3c250e7938c3d343f1eb4dfacb752751d596ff2a6ba053c9cf13",
+      "extension": ".vip",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/spiralbox-me.vip"
+    },
+    {
+      "path": "spiralbox-me.vp3",
+      "bytes": 1468,
+      "sha256": "3c40b7bb1898bc173bee613f577b8139a91994be20a8b264d53b8623f7a83ced",
+      "extension": ".vp3",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/spiralbox-me.vp3"
+    },
+    {
+      "path": "spiralbox-premier.10o",
+      "bytes": 540,
+      "sha256": "c970610b744d6465bcf6da9ca47017a4db8d5dc9e64662d472d440c3f597266e",
+      "extension": ".10o",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/spiralbox-premier.10o"
+    },
+    {
+      "path": "spiralbox-premier.dst",
+      "bytes": 1062,
+      "sha256": "41a8bc879130fcc34a4bf1b327fb9165d645763fe3b2469cc5cdd3f0a01025d5",
+      "extension": ".dst",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/spiralbox-premier.dst"
+    },
+    {
+      "path": "spiralbox-premier.exp",
+      "bytes": 530,
+      "sha256": "3ec15e86a44d01d104dd1fbca2d507895264acf0edf83f99268cf016f84dc5ea",
+      "extension": ".exp",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/spiralbox-premier.exp"
+    },
+    {
+      "path": "spiralbox-premier.hus",
+      "bytes": 397,
+      "sha256": "3157486999ed3195ff1d921945c214b313584b6aed367de33e3dec9f27d622a6",
+      "extension": ".hus",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/spiralbox-premier.hus"
+    },
+    {
+      "path": "spiralbox-premier.jef",
+      "bytes": 768,
+      "sha256": "6ab39e59b6e6b42ac3b5cad84139154d11c9754eccb78d8e9b5dbc43956c2c7f",
+      "extension": ".jef",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/spiralbox-premier.jef"
+    },
+    {
+      "path": "spiralbox-premier.pcs",
+      "bytes": 1083,
+      "sha256": "e82e44b15854c2c91b8059b0190748817a18bdb73953e3cb2f9f59bfa6482143",
+      "extension": ".pcs",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/spiralbox-premier.pcs"
+    },
+    {
+      "path": "spiralbox-premier.pec",
+      "bytes": 1159,
+      "sha256": "3399ba806a60d6eb9f4e0a0a2b6316f62490a10ffe129c29dd5242a72010ed65",
+      "extension": ".pec",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/spiralbox-premier.pec"
+    },
+    {
+      "path": "spiralbox-premier.pes",
+      "bytes": 7337,
+      "sha256": "c082bce588af5fb6492f69ff0154980149d505b60856b8b8a555e237e5740821",
+      "extension": ".pes",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/spiralbox-premier.pes"
+    },
+    {
+      "path": "spiralbox-premier.vip",
+      "bytes": 521,
+      "sha256": "edb4903aba44ed28723b78105e8a5ce6167d509b990f55d4d183eaab4163a54d",
+      "extension": ".vip",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/spiralbox-premier.vip"
+    },
+    {
+      "path": "spiralbox-premier.vp3",
+      "bytes": 1350,
+      "sha256": "2329628de8b045ea6fa23e92209d060e9eccf98e2ad6f05d978ce8d4880a49a2",
+      "extension": ".vp3",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/spiralbox-premier.vp3"
+    },
+    {
+      "path": "spiralbox-premier.vp4",
+      "bytes": 1997,
+      "sha256": "5f2be0e9fff6d6e5ef14aa8f70eecb8ddc219bbc4e91ec2a657719efa75373e6",
+      "extension": ".vp4",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/spiralbox-premier.vp4"
+    },
+    {
+      "path": "spiralbox-premier.xxx",
+      "bytes": 2585,
+      "sha256": "f2571bf81f42fa55f8838b35523d7db4de9f1fb173df32a646ff92db56d22ee7",
+      "extension": ".xxx",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/spiralbox-premier.xxx"
+    },
+    {
+      "path": "spiralbox-premier_1.sew",
+      "bytes": 7946,
+      "sha256": "f3e9dd017370ae50c75c5f68bd5274dd6df9068f372752617d1e2b505dae9c23",
+      "extension": ".sew",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/spiralbox-premier_1.sew"
+    },
+    {
+      "path": "spiralbox-premier_2.sew",
+      "bytes": 7678,
+      "sha256": "360cc510ae551b01515e733125d40376ec0556c89bb4cd03bd5814b3b30c8a05",
+      "extension": ".sew",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/spiralbox-premier_2.sew"
+    },
+    {
+      "path": "spiralbox-wilcom-a.BRO",
+      "bytes": 415,
+      "sha256": "6a573739bbcaf7ce098766dea799a79c9fc9fca9a0d19a25824cd7fd8f4bf963",
+      "extension": ".bro",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/spiralbox-wilcom-a.BRO"
+    },
+    {
+      "path": "spiralbox-wilcom-a.CSD",
+      "bytes": 390,
+      "sha256": "8e72372693f4b3fdb6d8d324e31c61a85d620deebb1a50a2150329c123a613ba",
+      "extension": ".csd",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/spiralbox-wilcom-a.CSD"
+    },
+    {
+      "path": "spiralbox-wilcom-a.PCD",
+      "bytes": 1029,
+      "sha256": "495486bfbb72ada377ccb061db12db583aaa6505ded3890aa14c65efb4db7f34",
+      "extension": ".pcd",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/spiralbox-wilcom-a.PCD"
+    },
+    {
+      "path": "spiralbox-wilcom-a.PCQ",
+      "bytes": 1029,
+      "sha256": "495486bfbb72ada377ccb061db12db583aaa6505ded3890aa14c65efb4db7f34",
+      "extension": ".pcq",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/spiralbox-wilcom-a.PCQ"
+    },
+    {
+      "path": "spiralbox-wilcom-a.PCS",
+      "bytes": 1029,
+      "sha256": "495486bfbb72ada377ccb061db12db583aaa6505ded3890aa14c65efb4db7f34",
+      "extension": ".pcs",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/spiralbox-wilcom-a.PCS"
+    },
+    {
+      "path": "spiralbox-wilcom-a.SEW",
+      "bytes": 7784,
+      "sha256": "13fdd7086c5f80a56a9bd107f2fba65b5f8bdd383cd24cc8b9b2f33951e6a08b",
+      "extension": ".sew",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/spiralbox-wilcom-a.SEW"
+    },
+    {
+      "path": "spiralbox-wilcom-b.BRO",
+      "bytes": 383,
+      "sha256": "7e15e1f21ecb2daf968948a4bea01e850ec6f8e132f08de24049c9a0b64b7ceb",
+      "extension": ".bro",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/spiralbox-wilcom-b.BRO"
+    },
+    {
+      "path": "spiralbox-wilcom-b.CSD",
+      "bytes": 180,
+      "sha256": "d008211b696ae9d37e84ad8e45b8d3e420b92a216beef4030d0bf169bc018503",
+      "extension": ".csd",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/spiralbox-wilcom-b.CSD"
+    },
+    {
+      "path": "spiralbox-wilcom-b.PCD",
+      "bytes": 156,
+      "sha256": "7791b66721fe2e0037c10ad77a63f09a113fa1648739fb0207febffd1defb684",
+      "extension": ".pcd",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/spiralbox-wilcom-b.PCD"
+    },
+    {
+      "path": "spiralbox-wilcom-b.PCQ",
+      "bytes": 156,
+      "sha256": "7791b66721fe2e0037c10ad77a63f09a113fa1648739fb0207febffd1defb684",
+      "extension": ".pcq",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/spiralbox-wilcom-b.PCQ"
+    },
+    {
+      "path": "spiralbox-wilcom-b.PCS",
+      "bytes": 156,
+      "sha256": "7791b66721fe2e0037c10ad77a63f09a113fa1648739fb0207febffd1defb684",
+      "extension": ".pcs",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/spiralbox-wilcom-b.PCS"
+    },
+    {
+      "path": "spiralbox-wilcom-b.SEW",
+      "bytes": 7622,
+      "sha256": "78f387079084568789e177fb03d7198cdbcefb21dca3d5475114aefdb2ebf642",
+      "extension": ".sew",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/spiralbox-wilcom-b.SEW"
+    },
+    {
+      "path": "spiralbox-wilcom-bernina.EXP",
+      "bytes": 310,
+      "sha256": "c49631d8c503af274f7502cae80edcf36b93f35d6ef4fa5a4800524301393f5b",
+      "extension": ".exp",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/spiralbox-wilcom-bernina.EXP"
+    },
+    {
+      "path": "spiralbox-wilcom-c.XXX",
+      "bytes": 662,
+      "sha256": "207bc507bb5d1afa6b8414675fdddd56aa62b243c60f839b1ded50916eb43e19",
+      "extension": ".xxx",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/spiralbox-wilcom-c.XXX"
+    },
+    {
+      "path": "spiralbox-wilcom-s.XXX",
+      "bytes": 662,
+      "sha256": "207bc507bb5d1afa6b8414675fdddd56aa62b243c60f839b1ded50916eb43e19",
+      "extension": ".xxx",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/spiralbox-wilcom-s.XXX"
+    },
+    {
+      "path": "spiralbox-wilcom-v1.PES",
+      "bytes": 5684,
+      "sha256": "dbccdfcde27dcfb6f3982412d6d11baa171031a74d057fe4a99c94384d822efc",
+      "extension": ".pes",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/spiralbox-wilcom-v1.PES"
+    },
+    {
+      "path": "spiralbox-wilcom-v4.PES",
+      "bytes": 6188,
+      "sha256": "c63070588c659dd5938d8b196225db5502bbdbe0aa54bf1b212e5ecea53fdd71",
+      "extension": ".pes",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/spiralbox-wilcom-v4.PES"
+    },
+    {
+      "path": "spiralbox-wilcom-v5.PES",
+      "bytes": 8985,
+      "sha256": "3a0e6421bd6de521faf198ff8616fd7163a3de68b44d58e06e85843bd1eddf07",
+      "extension": ".pes",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/spiralbox-wilcom-v5.PES"
+    },
+    {
+      "path": "spiralbox-wilcom-v6.PES",
+      "bytes": 8999,
+      "sha256": "73dc35137c5a9b7d18110373a9472468c05714f2bb9b12cb3ffdcf1904925c2f",
+      "extension": ".pes",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/spiralbox-wilcom-v6.PES"
+    },
+    {
+      "path": "spiralbox-wilcom.00O",
+      "bytes": 816,
+      "sha256": "115c98d7d79659ca29296f3f81c7b7bc1ddf22505f883e7897f1f04f5d9973ea",
+      "extension": ".00o",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/spiralbox-wilcom.00O"
+    },
+    {
+      "path": "spiralbox-wilcom.10O",
+      "bytes": 333,
+      "sha256": "77b0f163128ca5ad55269da4d7966f165711ec572fdabab7fb28c62bc25e79c2",
+      "extension": ".10o",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/spiralbox-wilcom.10O"
+    },
+    {
+      "path": "spiralbox-wilcom.CT0",
+      "bytes": 1936,
+      "sha256": "b99af9815bd6a7343c18cf3d6812d984e0b352832c44e43ad387edd41c21812e",
+      "extension": ".ct0",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/spiralbox-wilcom.CT0"
+    },
+    {
+      "path": "spiralbox-wilcom.DGF",
+      "bytes": 9358,
+      "sha256": "5c28f162c5f093f4309fe286541d30b8a10e0d1d198ea4152d5342f2b32c6ca6",
+      "extension": ".dgf",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/spiralbox-wilcom.DGF"
+    },
+    {
+      "path": "spiralbox-wilcom.DGT",
+      "bytes": 9358,
+      "sha256": "5c28f162c5f093f4309fe286541d30b8a10e0d1d198ea4152d5342f2b32c6ca6",
+      "extension": ".dgt",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/spiralbox-wilcom.DGT"
+    },
+    {
+      "path": "spiralbox-wilcom.DSB",
+      "bytes": 846,
+      "sha256": "3a9537e32f07fdec0746bfbeb1499cad8470e03c8e6458c39ef3da65cbd84dd3",
+      "extension": ".dsb",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/spiralbox-wilcom.DSB"
+    },
+    {
+      "path": "spiralbox-wilcom.DST",
+      "bytes": 846,
+      "sha256": "7e82090159faf2dd0acaeec104da66a902886d4b614cf1ce2757587d3461dbaf",
+      "extension": ".dst",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/spiralbox-wilcom.DST"
+    },
+    {
+      "path": "spiralbox-wilcom.DSZ",
+      "bytes": 1080,
+      "sha256": "2bb874734a2da4300c682c3a6d8b9b175c7a03ddbfde3b5f11daa153872bdd39",
+      "extension": ".dsz",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/spiralbox-wilcom.DSZ"
+    },
+    {
+      "path": "spiralbox-wilcom.EMB",
+      "bytes": 53760,
+      "sha256": "918b3e920b42dcf8fd31f5f5374f5f989dd6f94b6c4404eb5404ff6c5bd51287",
+      "extension": ".emb",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/spiralbox-wilcom.EMB"
+    },
+    {
+      "path": "spiralbox-wilcom.EMD",
+      "bytes": 360,
+      "sha256": "10d46f24046caf19d092f84965fca129d87047a89e0b38b4e379f46434eb2b40",
+      "extension": ".emd",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/spiralbox-wilcom.EMD"
+    },
+    {
+      "path": "spiralbox-wilcom.EXP",
+      "bytes": 310,
+      "sha256": "c49631d8c503af274f7502cae80edcf36b93f35d6ef4fa5a4800524301393f5b",
+      "extension": ".exp",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/spiralbox-wilcom.EXP"
+    },
+    {
+      "path": "spiralbox-wilcom.HUS",
+      "bytes": 293,
+      "sha256": "299658decdfa674b1686da06c074584f3f63a6a67d568f822c41ad623a70d0bd",
+      "extension": ".hus",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/spiralbox-wilcom.HUS"
+    },
+    {
+      "path": "spiralbox-wilcom.INB",
+      "bytes": 8522,
+      "sha256": "212d0b1fe89e4a37cd8bc974b2534c5515e18c41b8d29b560e608afa57ebf66e",
+      "extension": ".inb",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/spiralbox-wilcom.INB"
+    },
+    {
+      "path": "spiralbox-wilcom.KSM",
+      "bytes": 857,
+      "sha256": "5a9840061e5c95c6633b51607051fe781449e935361b8ad4b41f93e9baca1cab",
+      "extension": ".ksm",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/spiralbox-wilcom.KSM"
+    },
+    {
+      "path": "spiralbox-wilcom.LT0",
+      "bytes": 1697,
+      "sha256": "5cd152bd3161caaf09f837ca46b4cd113fc51068a5af22472fed3a4a0747899c",
+      "extension": ".lt0",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/spiralbox-wilcom.LT0"
+    },
+    {
+      "path": "spiralbox-wilcom.MON",
+      "bytes": 1024,
+      "sha256": "77ff30f5a3eadabc579460df0c721bad4875d0b42575158077f78345073d5a6a",
+      "extension": ".mon",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/spiralbox-wilcom.MON"
+    },
+    {
+      "path": "spiralbox-wilcom.PCM",
+      "bytes": 1181,
+      "sha256": "eb156c32601cb6f97fc84b01898c2273318cf0401aef515d7cb8436e8433b1d5",
+      "extension": ".pcm",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/spiralbox-wilcom.PCM"
+    },
+    {
+      "path": "spiralbox-wilcom.PEC",
+      "bytes": 4748,
+      "sha256": "50a9a1e0d0e84112f1d202c60f7330a0eff60b5dbcabb1295fc9941602243dbe",
+      "extension": ".pec",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/spiralbox-wilcom.PEC"
+    },
+    {
+      "path": "spiralbox-wilcom.PMU",
+      "bytes": 11416,
+      "sha256": "f69599f642d29a99ad81a9f5d3b537e75d4e2d7e4f470d80c552b902247c5253",
+      "extension": ".pmu",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/spiralbox-wilcom.PMU"
+    },
+    {
+      "path": "spiralbox-wilcom.PUM",
+      "bytes": 893,
+      "sha256": "b20cc89049a721dca6f1da0064e9f75e701d46fcf5be6e0f9a30be335987e875",
+      "extension": ".pum",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/spiralbox-wilcom.PUM"
+    },
+    {
+      "path": "spiralbox-wilcom.SHV",
+      "bytes": 1270,
+      "sha256": "1125b673d590d093aade37baed379f1c0d04a3ae284f4167f98837ac0d7fb0f5",
+      "extension": ".shv",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/spiralbox-wilcom.SHV"
+    },
+    {
+      "path": "spiralbox-wilcom.STX",
+      "bytes": 920,
+      "sha256": "c2fe35d5b4ffaa35541950fa31fb6cc02588acd1fa942cd0dfdab98c09a10a71",
+      "extension": ".stx",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/spiralbox-wilcom.STX"
+    },
+    {
+      "path": "spiralbox-wilcom.TAP",
+      "bytes": 342,
+      "sha256": "2b8c7d854bad857eca14e1ca83e5c33fc472616bfa56f6602f8216ac016c9087",
+      "extension": ".tap",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/spiralbox-wilcom.TAP"
+    },
+    {
+      "path": "spiralbox-wilcom.U01",
+      "bytes": 589,
+      "sha256": "11a16d57556e6a704bf3ff27c560ffb00a8d2e2fc5d7755d1200bd403244f011",
+      "extension": ".u01",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/spiralbox-wilcom.U01"
+    },
+    {
+      "path": "spiralbox-wilcom.VIP",
+      "bytes": 430,
+      "sha256": "b15fd15259994afb3d24102136457efec79c61b662c769b1ea7bfbdeedca3f37",
+      "extension": ".vip",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/spiralbox-wilcom.VIP"
+    },
+    {
+      "path": "spiralbox-wilcom.VP3",
+      "bytes": 1314,
+      "sha256": "ee6522c3d27ccac445d84625be815745b71617b5197bc1cde1126963f86db15c",
+      "extension": ".vp3",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/spiralbox-wilcom.VP3"
+    },
+    {
+      "path": "spiralbox-wilcom.Z01",
+      "bytes": 2131,
+      "sha256": "c8ba761dfd2f3cf20f6e588ddc7887f785647e6256dd5eef3e7a689106e5cca7",
+      "extension": ".z01",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/spiralbox-wilcom.Z01"
+    },
+    {
+      "path": "spiralbox-wilcom.col",
+      "bytes": 244,
+      "sha256": "65d64761d3b189ee92ccc38e29c907bdf488d4efdf8e10523df7552a7a6ded93",
+      "extension": ".col",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/spiralbox-wilcom.col"
+    },
+    {
+      "path": "spiralbox.csv",
+      "bytes": 5227,
+      "sha256": "bdd68e4ac4be97e49065f6e272696660d21944218f240267f817bce6910b3f00",
+      "extension": ".csv",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/spiralbox.csv"
+    },
+    {
+      "path": "spiralbox.dst",
+      "bytes": 800,
+      "sha256": "267343a4e0a24af79a5dc1dd3ef4362a0e58c16ba4bdff02db6e1d5027376369",
+      "extension": ".dst",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/spiralbox.dst"
+    },
+    {
+      "path": "spiralbox.exp",
+      "bytes": 280,
+      "sha256": "899a35b35511ca7660fdb94ef4e6d8618a89df93b11c0c1b57eb961823d1ce5c",
+      "extension": ".exp",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/spiralbox.exp"
+    },
+    {
+      "path": "spiralbox.gcode",
+      "bytes": 3315,
+      "sha256": "a7a0b9e03d420c097b50d84652b1da969365661b140d12885f722539f2d9a09b",
+      "extension": ".gcode",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/spiralbox.gcode"
+    },
+    {
+      "path": "spiralbox.jef",
+      "bytes": 526,
+      "sha256": "08bbeca6d8b8bde6bb4f26c37f5a57d236362caf7595742bd1afa8718255bfc0",
+      "extension": ".jef",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/spiralbox.jef"
+    },
+    {
+      "path": "spiralbox.pec",
+      "bytes": 4840,
+      "sha256": "769d05a4bfd71124a692b67f15a873f2d15ed10dca533e4995858c79941ea5dc",
+      "extension": ".pec",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/spiralbox.pec"
+    },
+    {
+      "path": "spiralbox.pes",
+      "bytes": 5692,
+      "sha256": "4e6ca07e33132787c2211eb676443e8c9fc6629993e37be7b886bde21df3066c",
+      "extension": ".pes",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/spiralbox.pes"
+    },
+    {
+      "path": "spiralbox.pmv",
+      "bytes": 462,
+      "sha256": "eb5cf07eacdf4eeaf0ec44bf7b4735fe8f271e17159a08bcccfa0c64ba32afee",
+      "extension": ".pmv",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/spiralbox.pmv"
+    },
+    {
+      "path": "spiralbox.png",
+      "bytes": 8089,
+      "sha256": "be797098b5a1d54ded45e141629755f2c2b155d3c63370e41c835ffe7d885d61",
+      "extension": ".png",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/spiralbox.png"
+    },
+    {
+      "path": "spiralbox.svg",
+      "bytes": 4150,
+      "sha256": "67c4a58604bd1228f4400527398844f548d01bad71fe83946c4329b7a6b43aca",
+      "extension": ".svg",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/spiralbox.svg"
+    },
+    {
+      "path": "spiralbox.txt",
+      "bytes": 5056,
+      "sha256": "dfc4a99520fbbdfbfa1311edb6fca287c4c05d85784e5a076cb039cdc8c9bbab",
+      "extension": ".txt",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/spiralbox.txt"
+    },
+    {
+      "path": "spiralbox.u01",
+      "bytes": 547,
+      "sha256": "aafb69996f782764014e86fd04b84046695ec15f0da241d6d32a7380fbe2336f",
+      "extension": ".u01",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/spiralbox.u01"
+    },
+    {
+      "path": "spiralbox.vp3",
+      "bytes": 1300,
+      "sha256": "32ee602060f48b46266a4b026fae2df45110d252cd24901a58460eb556e014e8",
+      "extension": ".vp3",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/spiralbox.vp3"
+    },
+    {
+      "path": "spiralbox.xxx",
+      "bytes": 572,
+      "sha256": "f78540b919a741baebcb3f4bc251b0ccedfff84178030b25288b9d48e0aa0ac5",
+      "extension": ".xxx",
+      "url": "https://raw.githubusercontent.com/EmbroidePy/samples/6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/spiralbox.xxx"
+    }
+  ]
+}
