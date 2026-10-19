@@ -1,7 +1,7 @@
 import {compile,encode} from './engine.js';
 import {loadFont,getFont,isRegistryFont,documentFontIds,registerDocumentFonts} from './fonts.js';
 // Text uses fonts the worker may not have yet: fetch the bundled ones this document needs, and register the ones stored in it.
-const fontJson=path=>fetch('/'+path).then(r=>{if(!r.ok)throw Error(`Font file ${path} could not be loaded (${r.status}).`);return r.json();});
+const fontJson=path=>fetch(new URL('../'+path,import.meta.url)).then(r=>{if(!r.ok)throw Error(`Font file ${path} could not be loaded (${r.status}).`);return r.json();});
 async function ensureFonts(doc){registerDocumentFonts(doc);await Promise.all(documentFontIds(doc).filter(id=>!id.startsWith('custom/')&&!getFont(id)).map(id=>loadFont(id,fontJson)));}
 import {decodeEmbroidery} from './readers.js';
 function base64(bytes){let text='';for(let i=0;i<bytes.length;i+=0x8000)text+=String.fromCharCode(...bytes.subarray(i,Math.min(i+0x8000,bytes.length)));return btoa(text);}

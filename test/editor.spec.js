@@ -761,7 +761,9 @@ test('agents can see the reference picture: annotated view with grid, hoop and s
 });
 
 test('DST files import as stitch layers (a DST written by Welcome comes back)',async({page})=>{
- const {encode,compile:compileDoc,initialDocument:initDoc}=await import('../src/engine.js'),d=initDoc(),bytes=Buffer.from(encode(compileDoc(d),'dst',undefined,d.hoop,d));
+ const {encode,compile:compileDoc,initialDocument:initDoc}=await import('../src/engine.js'),{registerFont}=await import('../src/fonts.js'),fs=await import('node:fs/promises');
+ registerFont('ttf/greatvibes',JSON.parse(await fs.readFile(new URL('../fonts/ttf/greatvibes.json',import.meta.url),'utf8')));
+ const d=initDoc(),bytes=Buffer.from(encode(compileDoc(d),'dst',undefined,d.hoop,d));
  const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d2=>d2.accept());await page.locator('#new').click();
  await page.locator('#machineFile').setInputFiles({name:'badge.dst',mimeType:'application/octet-stream',buffer:bytes});
  await expect(page.locator('.object-row')).toHaveCount(1);await expect(page.locator('#sourceInfo')).toContainText(/DST/i);await expect(page.locator('#count')).toContainText('stitches');
@@ -841,7 +843,7 @@ test('keyboard shortcut list opens with ? and the listed tool keys really work; 
  await page.keyboard.press('?');await expect(page.locator('#keysDialog')).toBeVisible();await expect(page.locator('#keysList')).toContainText('Ctrl+G / Ctrl+Shift+G');await page.keyboard.press('Escape');await expect(page.locator('#keysDialog')).toBeHidden();
  await page.locator('#helpBtn').click();await expect(page.locator('#keysDialog')).toBeVisible();await page.keyboard.press('Escape');
  for(const [key,id] of [['n','path'],['p','pen'],['l','line'],['g','polygon'],['s','star'],['v','select']]){await page.locator('#art').hover();await page.keyboard.press(key);await expect(page.locator('#'+id)).toHaveClass(/active-tool/);}
- await page.locator('#secPlan summary').click();await expect(page.locator('#planList .plan-row')).toHaveCount(4);await expect(page.locator('#planList .plan-row').first()).toContainText('1.');await expect(page.locator('#planEmpty')).toBeHidden();
+ await page.locator('#secPlan summary').click();await expect(page.locator('#planList .plan-row')).toHaveCount(10);await expect(page.locator('#planList .plan-row').first()).toContainText('1.');await expect(page.locator('#planEmpty')).toBeHidden();
  expect(errors).toEqual([]);
 });
 

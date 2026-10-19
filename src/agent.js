@@ -10,7 +10,7 @@ export function createAgentBridge({getDocument,applyRemote,addLayerRemote,getRef
   const url=()=>session?`${location.origin}/mcp/${session.token}`:null;
   async function create(){
     let response;try{response=await fetch('/api/session',json({}));}catch{set({status:'unavailable',message:'The Welcome server is not reachable.'});return false;}
-    if(response.status===404||response.status===405){set({status:'unavailable',message:'This copy of Welcome is a static site without the agent relay. Run the Welcome server (self-host, desktop app) or use welcome.design.'});return false;}
+    if(response.status===404||response.status===405){set({status:'unavailable',message:'This copy of Welcome is a static site without the agent relay. Run the Welcome server or the desktop app to connect an agent.'});return false;}
     const body=await response.json().catch(()=>({}));if(!response.ok){set({status:'error',message:body.error||'Could not create an agent link.'});return false;}
     session={token:body.token,ownerKey:body.ownerKey};try{sessionStorage.setItem(KEY,JSON.stringify(session));}catch{}return true;
   }

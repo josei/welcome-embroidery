@@ -11,7 +11,7 @@ export const CATEGORIES=[['all','All',()=>true],['satin','Satin',f=>f.keywords?.
   ['serif','Serif',f=>f.keywords?.includes('serif')],['sans','Sans',f=>f.keywords?.some(k=>k==='sans_serif'||k==='sans')],['script','Script',f=>f.keywords?.some(k=>k==='handwriting'||k==='script')],['display','Display',f=>f.keywords?.some(k=>k==='display'||k==='monogram')],
   ['tt','TrueType',f=>f.kind==='outline'&&f.fid?.startsWith('ttf/')],['ink','Ink/Stitch',f=>f.fid?.startsWith('inkstitch/')],['custom','Loaded',f=>f.fid?.startsWith('custom/')]];
 
-export async function fetchFontIndex(){const out=[...LEGACY];for(const group of ['inkstitch','ttf']){try{const r=await fetch(`/fonts/${group}/index.json`);if(!r.ok)continue;for(const f of await r.json())out.push({...f,fid:`${group}/${f.id}`});}catch{}}return out;}
+export async function fetchFontIndex(){const out=[...LEGACY];for(const group of ['inkstitch','ttf']){try{const r=await fetch(new URL(`../fonts/${group}/index.json`,import.meta.url));if(!r.ok)continue;for(const f of await r.json())out.push({...f,fid:`${group}/${f.id}`});}catch{}}return out;}
 
 // Draw a font's rendering of `text` into an <svg>. Fills use even-odd rings, satin columns are shown as their band, running stitch as a thin line.
 export function drawPreview(svg,fid,text,color='#1d2925'){

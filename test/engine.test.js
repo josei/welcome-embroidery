@@ -32,7 +32,10 @@ test('document validation rejects unsupported schemas and out-of-hoop output',()
 test('JEF and VP3 files are deterministic and carry real format signatures',()=>{
  const p=compile(initialDocument()),jef=encode(p,'jef','#527461'),vp3=encode(p,'vp3','#527461');
  assert.deepEqual(encode(p,'jef','#527461'),jef);assert.deepEqual(encode(p,'vp3','#527461'),vp3);
- assert.equal(new DataView(jef.buffer).getUint32(0,true),116+compile(initialDocument()).colors.length*8);
+ // offset to the stitch data must equal 116 + 8 bytes per thread-change block (the JEF header's own declared thread count,
+ // field 24) -- not simply the count of distinct thread colours, since a colour sewn in two separate passes (e.g. a fill and
+ // its border, revisited later by another object) produces more blocks than unique colours.
+ assert.equal(new DataView(jef.buffer).getUint32(0,true),116+new DataView(jef.buffer).getUint32(24,true)*8);
  assert.equal(new TextDecoder().decode(vp3.slice(0,5)),'%vsm%');
  assert.ok(jef.byteLength>1000);assert.ok(vp3.byteLength>500);
 });

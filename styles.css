@@ -216,12 +216,13 @@ body{height:auto;min-height:0;overflow-x:hidden;overflow-y:auto}
 .layout>.panel:last-child{display:block;order:4;width:auto;overflow:visible;border-left:0;border-right:0;border-top:1px solid #e3e6e1}
 .layout>aside.panel:first-child{display:contents}
 .layout>aside.panel:first-child>h3{display:none}
-.layout .tool-row{order:0;display:grid;grid-template-columns:repeat(7,36px);justify-content:center;gap:4px;margin:0;padding:10px 10px 8px;background:#fff;border-top:1px solid #e3e6e1}
+.layout .tool-row{order:0;display:grid;grid-auto-flow:column;grid-auto-columns:36px;justify-content:start;gap:4px;margin:0;padding:10px 10px 8px;background:#fff;border-top:1px solid #e3e6e1;overflow-x:auto;scrollbar-width:none}
 #objects{order:2;margin:0;padding:0 10px}
 .layout .hoop-edit{order:3;margin:0;padding:8px 10px 14px}
 .layout .footer.hoop-edit{position:static}
 .canvas{height:62vh;height:62dvh;min-height:340px}
 .canvas .floating{left:8px;right:8px;top:28px;width:auto;max-width:none;transform:none;justify-content:start;overflow-x:auto;scrollbar-width:none;grid-template-columns:repeat(14,30px);gap:6px 4px;padding:6px}
+@media (min-width:601px) and (max-width:1100px){.canvas .floating{display:flex;flex-wrap:wrap;justify-content:center;align-content:center;overflow-x:visible}.canvas .floating #grid{width:64px;grid-column:auto}}
 .canvas .floating .icon-button{width:30px;min-width:30px;height:30px}
 .zoombar{left:8px;bottom:8px}
 .layout main>footer{height:auto;min-height:56px;flex-wrap:wrap;padding:8px 12px;gap:8px 10px}
