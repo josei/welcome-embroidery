@@ -1,0 +1,204 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Welcome Embroidery: design in your browser</title>
+<meta name="description" content="Draw, letter and digitize embroidery in the browser. Preview every stitch and export JEF or VP3 files. Free, open source, no account.">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<header class="top">
+  <a class="brand" href="./" aria-label="Welcome home" data-i18n-aria-label="a8"><img src="logo.svg" alt="Welcome" height="26" width="95"></a>
+  <nav>
+    <a href="#stitches" data-i18n="k0">Stitches</a>
+    <a href="#features" data-i18n="k1">Features</a>
+    <a href="#ai" data-i18n="k2">AI</a>
+    <a href="#how" data-i18n="k3">How it works</a>
+    <a href="https://github.com/josei/welcome-embroidery" data-i18n="k4">Source</a>
+  </nav>
+  <div class="lang" role="group" aria-label="Language" data-i18n-aria-label="lang">
+    <button type="button" data-lang="en" title="English" aria-label="English"><svg viewBox="0 0 60 40" aria-hidden="true"><clipPath id="ukc"><path d="M0 0h60v40H0z"/></clipPath><g clip-path="url(#ukc)"><path d="M0 0h60v40H0z" fill="#012169"/><path d="M0 0l60 40M60 0L0 40" stroke="#fff" stroke-width="8"/><path d="M0 0l60 40M60 0L0 40" stroke="#C8102E" stroke-width="3"/><path d="M30 0v40M0 20h60" stroke="#fff" stroke-width="13"/><path d="M30 0v40M0 20h60" stroke="#C8102E" stroke-width="8"/></g></svg></button>
+    <button type="button" data-lang="es" title="Español" aria-label="Español"><svg viewBox="0 0 60 40" aria-hidden="true"><path d="M0 0h60v40H0z" fill="#AA151B"/><path d="M0 10h60v20H0z" fill="#F1BF00"/></svg></button>
+  </div>
+  <a class="btn btn-small" href="app/" data-i18n="k5">Open the editor</a>
+</header>
+
+<main>
+  <section class="hero">
+    <svg class="thread" viewBox="0 0 1200 520" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+      <path class="t1" d="M-20 440C180 330 260 520 470 400S760 120 980 220s240 120 260 40"/>
+      <path class="t2" d="M-20 90C160 20 330 150 520 80S880 -40 1240 110"/>
+    </svg>
+    <div class="hero-copy">
+      <p class="eyebrow"><span></span><b data-i18n="k6">Free · open source · no account</b></p>
+      <h1 data-i18n="k7">Sew it on screen <em>before</em> you sew it on cloth.</h1>
+      <p class="lede" data-i18n="k8">Welcome is an embroidery editor that lives in your browser. Draw shapes, set lettering, fill with satin and tatami, and play back every stitch. Nothing to install, and your design never leaves your device.</p>
+      <div class="actions">
+        <a class="btn btn-primary btn-lg" href="app/" data-i18n="k9">Start designing <span aria-hidden="true">→</span></a>
+        <a class="btn btn-ghost btn-lg" href="https://github.com/josei/welcome-embroidery" data-i18n="k10">View the source</a>
+      </div>
+      <ul class="chips" aria-label="Highlights" data-i18n-aria-label="a9">
+        <li data-i18n="k11">Runs offline</li><li data-i18n="k12">JEF &amp; VP3 export</li><li data-i18n="k13">GPL-3.0-or-later</li>
+      </ul>
+    </div>
+    <figure class="shot">
+      <div class="bar" aria-hidden="true"><i></i><i></i><i></i></div>
+      <img src="assets/hero-editor.png" alt="The Welcome editor showing a botanical badge of a flower, leaf and script lettering in stitches, with a stitch count and thread colours." data-i18n-alt="a0" width="1600" height="1000">
+    </figure>
+  </section>
+
+  <section id="stitches" class="stitches">
+    <div class="sec-head">
+      <p class="eyebrow"><span></span><b data-i18n="k14">Stitch types</b></p>
+      <h2 data-i18n="k15">Three ways to lay thread, <em>all in your hands.</em></h2>
+    </div>
+    <div class="swatches">
+      <figure>
+        <svg viewBox="0 0 320 180" role="img" aria-label="A wavy line of running stitches" data-i18n-aria-label="a4">
+          <path class="run" d="M20 120C80 30 130 160 190 80S280 50 300 70"/>
+        </svg>
+        <figcaption><h3 data-i18n="k16">Running stitch</h3><p data-i18n="k17">Outlines, details and lettering strokes, with adjustable stitch length.</p></figcaption>
+      </figure>
+      <figure>
+        <svg viewBox="0 0 320 180" role="img" aria-label="A curved satin column made of tight parallel stitches" data-i18n-aria-label="a5">
+          <path class="satin" d="M30 130C90 40 150 150 210 80S280 60 296 70"/>
+        </svg>
+        <figcaption><h3 data-i18n="k18">Satin column</h3><p data-i18n="k19">Smooth, glossy bands for borders and narrow shapes, with pull compensation and underlay.</p></figcaption>
+      </figure>
+      <figure>
+        <svg viewBox="0 0 320 180" role="img" aria-label="An ellipse filled with staggered rows of tatami stitches" data-i18n-aria-label="a6">
+          <defs>
+            <clipPath id="el"><ellipse cx="160" cy="90" rx="110" ry="62"/></clipPath>
+            <pattern id="tat" width="14" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(32)">
+              <path d="M0 3H9" stroke="#1c7a67" stroke-width="2.4" stroke-linecap="round"/>
+              <path d="M9 0V6" stroke="none"/>
+            </pattern>
+          </defs>
+          <ellipse cx="160" cy="90" rx="110" ry="62" fill="url(#tat)"/>
+          <ellipse cx="160" cy="90" rx="110" ry="62" fill="none" stroke="#0f5a4b" stroke-width="2"/>
+          <ellipse cx="190" cy="80" rx="22" ry="14" fill="#f6f7f5" stroke="#0f5a4b" stroke-width="2" stroke-dasharray="4 3"/>
+        </svg>
+        <figcaption><h3 data-i18n="k20">Tatami fill</h3><p data-i18n="k21">Textured fills for large areas, with holes, row spacing, angle and needle stagger.</p></figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <section id="views" class="views">
+    <div class="sec-head">
+      <p class="eyebrow"><span></span><b data-i18n="n1">3D preview</b></p>
+      <h2 data-i18n="n2">Turn your design around <em>before you sew it.</em></h2>
+    </div>
+    <figure class="big">
+      <img src="assets/view-3d.png" width="1056" height="860" alt="The 3D preview of the botanical badge: a flower, leaf and lettering stitched on fabric seen at an angle." data-i18n-alt="a1" loading="lazy">
+      <figcaption><h3 data-i18n="k24">3D thread preview</h3><p data-i18n="k25">See fills and outlines as thread on fabric, and drag to orbit, scroll to zoom.</p></figcaption>
+    </figure>
+  </section>
+
+  <section id="features" class="features">
+    <div class="sec-head">
+      <p class="eyebrow"><span></span><b data-i18n="k1">Features</b></p>
+      <h2 data-i18n="k30">Everything for a finished design.</h2>
+    </div>
+    <div class="swatches feat">
+      <figure>
+        <svg viewBox="0 0 320 180" aria-hidden="true"><path d="M40 130C90 20 190 170 280 50" fill="none" stroke="#0f5a4b" stroke-width="3.5" stroke-linecap="round"/>
+<path d="M40 130L88 52M280 50L228 128" stroke="#1c7a67" stroke-width="1.5" stroke-dasharray="4 3"/>
+<circle cx="88" cy="52" r="5" fill="#fff" stroke="#1c7a67" stroke-width="2"/><circle cx="228" cy="128" r="5" fill="#fff" stroke="#1c7a67" stroke-width="2"/>
+<rect x="34" y="124" width="12" height="12" fill="#1c7a67"/><rect x="274" y="44" width="12" height="12" fill="#1c7a67"/>
+<rect x="150" y="62" width="12" height="12" fill="#fff" stroke="#1c7a67" stroke-width="2"/></svg>
+        <figcaption><h3 data-i18n="k31">Vector drawing</h3><p data-i18n="k32">Pen and Bézier paths, rectangles and ellipses, with align, group, flip and clipping masks. Edit nodes and handles while the cut previews live.</p></figcaption>
+      </figure>
+      <figure>
+        <svg viewBox="0 0 320 180" aria-hidden="true"><defs><pattern id="rows" width="12" height="7" patternUnits="userSpaceOnUse" patternTransform="rotate(-24)"><path d="M0 3.5H8" stroke="#1c7a67" stroke-width="2.4" stroke-linecap="round"/></pattern></defs>
+<rect x="60" y="34" width="200" height="112" rx="18" fill="url(#rows)"/>
+<rect x="60" y="34" width="200" height="112" rx="18" fill="none" stroke="#0f5a4b" stroke-width="2.5"/>
+<rect x="80" y="52" width="160" height="76" rx="10" fill="none" stroke="#0f5a4b" stroke-width="2" stroke-dasharray="3 4" opacity=".7"/></svg>
+        <figcaption><h3 data-i18n="k35">Stitch control</h3><p data-i18n="k36">Running stitches, satin columns and tatami fills, with holes, underlay, pull compensation and needle stagger.</p></figcaption>
+      </figure>
+      <figure>
+        <svg viewBox="0 0 320 180" aria-hidden="true"><path d="M30 130C80 40 120 150 170 90S250 50 290 80" fill="none" stroke="#b9c8c1" stroke-width="3" stroke-dasharray="9 6" stroke-linecap="round"/>
+<path d="M30 130C80 40 120 150 170 90" fill="none" stroke="#0f5a4b" stroke-width="3.5" stroke-dasharray="9 6" stroke-linecap="round"/>
+<path d="M170 90L190 60" stroke="#c0564a" stroke-width="1.8" stroke-dasharray="3 3"/>
+<circle cx="170" cy="90" r="6" fill="#1c7a67"/>
+<rect x="30" y="150" width="200" height="8" rx="4" fill="#fff"/><rect x="30" y="150" width="120" height="8" rx="4" fill="#1c7a67"/>
+<circle cx="268" cy="154" r="14" fill="#1c7a67"/><path d="M263 147L276 154L263 161z" fill="#fff"/></svg>
+        <figcaption><h3 data-i18n="k33">Stitch preview</h3><p data-i18n="k34">Play the sewing order stitch by stitch, with jumps and trims shown. Sewing tips flag fills that are too small or satin that is too narrow.</p></figcaption>
+      </figure>
+      <figure>
+        <svg viewBox="0 0 320 180" aria-hidden="true"><path id="lp" d="M36 150C96 62 224 62 284 150" fill="none" stroke="#1c7a67" stroke-width="1.5" stroke-dasharray="2 5" opacity=".55"/><text font-family="Iowan Old Style,Palatino Linotype,Palatino,Georgia,serif" font-size="46" font-weight="700" fill="#8f641030" stroke="#1c7a67" stroke-width="1.5" stroke-dasharray="3 2.5" stroke-linejoin="round" letter-spacing="2"><textPath href="#lp" startOffset="9%">Welcome</textPath></text></svg>
+        <figcaption><h3 data-i18n="k37">Lettering</h3><p data-i18n="k38">Bundled fonts with spacing, alignment and line height, placed on the design like any other object, or set along a path.</p></figcaption>
+      </figure>
+      <figure>
+        <svg viewBox="0 0 320 180" aria-hidden="true"><defs><radialGradient id="ph" cx=".4" cy=".35"><stop offset="0" stop-color="#cdd5cf"/><stop offset="1" stop-color="#e6eae6"/></radialGradient></defs>
+<rect x="44" y="26" width="232" height="128" rx="12" fill="url(#ph)" stroke="#b9c8c1"/>
+<path d="M80 130C80 80 120 50 170 56C220 62 250 100 220 130C180 150 110 150 80 130z" fill="#b8c2bb" opacity=".7"/>
+<path d="M80 130C80 80 120 50 170 56C220 62 250 100 220 130C180 150 110 150 80 130z" fill="none" stroke="#0f5a4b" stroke-width="2.6" stroke-dasharray="7 5" stroke-linecap="round"/>
+<circle cx="80" cy="130" r="4.5" fill="#fff" stroke="#1c7a67" stroke-width="2"/><circle cx="170" cy="56" r="4.5" fill="#fff" stroke="#1c7a67" stroke-width="2"/><circle cx="220" cy="130" r="4.5" fill="#fff" stroke="#1c7a67" stroke-width="2"/></svg>
+        <figcaption><h3 data-i18n="k39">Trace a picture</h3><p data-i18n="k40">Load a reference image and trace over it to digitize.</p></figcaption>
+      </figure>
+      <figure>
+        <svg viewBox="0 0 320 180" aria-hidden="true"><circle cx="90" cy="90" r="46" fill="#fff" stroke="#0f5a4b" stroke-width="3"/><circle cx="90" cy="90" r="36" fill="none" stroke="#1c7a67" stroke-width="2" stroke-dasharray="4 4"/>
+<path d="M150 90H190" stroke="#1c7a67" stroke-width="3" stroke-linecap="round"/><path d="M182 80L194 90L182 100" fill="none" stroke="#1c7a67" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+<g font-family="ui-monospace,Menlo,Consolas,monospace" font-size="13" font-weight="700" text-anchor="middle" fill="#0f5a4b"><path d="M206 38h46l14 14v40H206z" fill="#fff" stroke="#0f5a4b" stroke-width="2.5" stroke-linejoin="round"/><text x="236" y="76">.JEF</text><path d="M206 100h46l14 14v40H206z" fill="#fff" stroke="#0f5a4b" stroke-width="2.5" stroke-linejoin="round"/><text x="236" y="138">.VP3</text></g></svg>
+        <figcaption><h3 data-i18n="k41">Machine files</h3><p data-i18n="k42">Export JEF and VP3 files directly from the browser. Exports are checked by decoding them with pinned open-source readers.</p></figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <section class="private">
+    <div>
+      <h2 data-i18n="k43">Your design stays on your device.</h2>
+      <p data-i18n="k44">The editor is plain static files that run entirely in your browser. No account, no upload. Once it has loaded you can keep working with the network off.</p>
+    </div>
+    <a class="btn btn-light btn-lg" href="app/" data-i18n="k5">Open the editor</a>
+  </section>
+
+  <section id="ai" class="ai">
+    <div class="ai-copy">
+      <p class="eyebrow"><span></span><b data-i18n="k45">AI agents · MCP · desktop app</b></p>
+      <h2 data-i18n="k46">Design by talking to <em>your AI.</em></h2>
+      <p data-i18n="k47">The Welcome desktop app has a built-in MCP server. Press Agent, give the private link to Claude, ChatGPT or any assistant that supports MCP, and describe what you want. The agent draws, sets stitches, previews and exports in your open editor, and every change goes through undo and redo.</p>
+      <div class="actions">
+        <a class="btn btn-primary btn-lg" href="https://github.com/josei/welcome-embroidery/releases" data-i18n="k51">Download the desktop app <span aria-hidden="true">↓</span></a>
+      </div>
+    </div>
+    <div class="chat" role="img" aria-label="Illustration of a conversation with a generic AI assistant, which is not part of Welcome: a person asks it to draw a leaf badge and export a JEF file, and it calls Welcome's tools through MCP." data-i18n-aria-label="a7">
+      <div class="chat-top"><svg class="spark" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v18M3 12h18M5.6 5.6l12.8 12.8M18.4 5.6L5.6 18.4"/></svg><b data-i18n="CHATTOP">Your AI assistant<em>Illustration</em></b></div>
+      <div class="msg you" data-i18n="k53">Use the Welcome MCP on the live document to draw a leaf badge with lettering, then export JEF.</div>
+      <div class="msg bot">
+        <div class="via"><span data-i18n="n3">Calls Welcome's tools through MCP</span><img src="logo.svg" alt="" height="14" width="51"></div>
+        <div class="calls"><code>document_apply</code><code>embroidery_preview</code><code>embroidery_export</code></div>
+      </div>
+      <div class="agents" aria-hidden="true">
+        <span><svg viewBox="0 0 24 24"><path d="M4 5h16v11H9l-5 4z"/></svg><b data-i18n="c1">Assistants</b></span>
+        <span><svg viewBox="0 0 24 24"><path d="M9 3v5M15 3v5M6 8h12v4a6 6 0 0 1-12 0zM12 18v3"/></svg><b data-i18n="c2">MCP</b></span>
+        <span><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="13" rx="2"/><path d="M8 21h8M12 17v4"/></svg><b data-i18n="c3">Desktop</b></span>
+      </div>
+    </div>
+  </section>
+
+  <section id="how" class="how">
+    <div class="sec-head">
+      <p class="eyebrow"><span></span><b data-i18n="k3">How it works</b></p>
+      <h2 data-i18n="k54">From idea to machine file in three steps.</h2>
+    </div>
+    <ol>
+      <li><span>1</span><h3 data-i18n="k55">Draw or trace</h3><p data-i18n="k56">Start from shapes, paths and lettering, or trace over a reference picture you load.</p></li>
+      <li><span>2</span><h3 data-i18n="k57">Digitize</h3><p data-i18n="k58">Choose a stitch type and density for each object, and set the sewing order.</p></li>
+      <li><span>3</span><h3 data-i18n="k59">Preview and export</h3><p data-i18n="k60">Check the simulation, then download a JEF or VP3 file for your machine.</p></li>
+    </ol>
+  </section>
+
+  <section class="cta">
+    <h2 data-i18n="k61">Make your first badge.</h2>
+    <a class="btn btn-primary btn-lg" href="app/" data-i18n="k62">Open the editor <span aria-hidden="true">→</span></a>
+  </section>
+</main>
+
+<footer>
+  <p>Welcome Embroidery is free software under GPL-3.0-or-later. <a href="app/THIRD_PARTY_NOTICES.md">Third-party notices</a> · <a href="https://github.com/josei/welcome-embroidery">GitHub</a></p>
+</footer>
+<script src="i18n.js" defer></script>
+</body>
+</html>

@@ -12,7 +12,9 @@
     "test:e2e:webkit": "PW_BROWSER=webkit playwright test",
     "build": "node scripts/build-static.mjs",
     "test:dist": "npm run build && node scripts/test-dist.mjs",
-    "desktop:mac": "npm --prefix desktop/electron run package:mac"
+    "desktop:mac": "npm --prefix desktop/electron run package:mac",
+    "build:pages": "node scripts/build-pages.mjs",
+    "test:pages": "npm run build:pages && node scripts/test-pages.mjs"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "1.29.0",
