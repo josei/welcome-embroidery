@@ -719,3 +719,12 @@ test('motif loops sew a small loop every few mm along a path',()=>{
  validateDocument(doc);
  assert.ok(compile(doc).count>run*3,'each loop adds about twelve stitches');
 });
+
+test('needle stagger splits fill rows into tiled phases',()=>{
+ const doc=initialDocument();doc.objects=[];
+ applyOperations(doc,[{op:'add_shape',id:'f',kind:'rect',x:-15,y:-10,width:30,height:20,thread:'#527461',stitch:'fill'}]);
+ const four=JSON.stringify(compile(doc).stitches);
+ applyOperations(doc,[{op:'set_object',id:'f',stagger:2}]);
+ validateDocument(doc);
+ assert.notEqual(JSON.stringify(compile(doc).stitches),four,'two phases tile differently from four');
+});

@@ -70,6 +70,10 @@ Updated 2026-10-06. This source provides a working static editor, local MCP serv
 - Open or closed paths can use the Motif loops stitch type: a 0.8 mm radius loop every 4 mm along the path, sewn as one run. Spacing and size are fixed for now; there are no sidebar controls yet. Stored as `stitch: "motif"`; not in the MCP schema.
 - Covered by an engine test and an e2e test.
 
+## 2026-10-20 program split
+
+- Program split tiling is the existing Needle stagger (2 or 4 phases) on fills. Lettering fills use the same planner, so they tile the same way. There is no separate program-split mode; an engine test checks that stagger changes the fill tiling.
+
 ## Known limits
 
 - The compiler is original JavaScript, not extracted/pinned Ink/Stitch digitizing code. Tie-in/tie-off and trim are simple defaults with no machine-specific trim rules, and pull compensation is a single widening rather than a per-machine model.

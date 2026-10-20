@@ -89,7 +89,7 @@ Reference: Wilcom EmbroideryStudio, the commercial digitizing suite. Its feature
 | Digitizing | Auto-digitizing from artwork (shape detection, stitch assignment, underlay) | Partial (raster tracing and photo stitch) |
 | Lettering | Fonts with satin, fill and run lettering, text on a path | Built |
 | Digitizing | Satin raised effects (thick underlay under the satin) | Built |
-| Lettering | Program split fills for lettering | Not started |
+| Lettering | Program split fills for lettering (tiled needle phases, via Needle stagger on fills, including lettering) | Built |
 | Motifs | Motif loops repeated along a path (first step: fixed loops every 4 mm) | Built (basic) |
 | Motifs | Paired motif fills that follow column widths | Not started |
 | Motifs | 3D warp distortion of motifs | Not started |
