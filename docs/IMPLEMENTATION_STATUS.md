@@ -45,6 +45,21 @@ Updated 2026-10-06. This source provides a working static editor, local MCP serv
 - `node /tmp/welcom-review/writers.mjs && python3 /tmp/welcom-review/compare.py` — all eight synthetic JEF/VP3 needle-coordinate comparisons match the compiler plan.
 - The supervisor's public MCP example exports decode to 3,162 identical needle stitches and bounds in MCP and offline browser output. Public UI screenshot: `design/progress/public-preview.png`; source playback screenshot: `design/progress/simulation-review.png`. Public snapshot and tunnel are supervisor-owned.
 
+## 2026-10-20 continue digitizing
+
+- Select a path and press "Continue digitizing" in the path panel: new clicks extend the same object instead of creating one. Clicking the first point closes it again (keeping its fill), Enter leaves it open as a run. Engine op `continue_path`; it is not in the MCP operation schema, so agents don't gain it.
+- Covered by an engine test and an e2e test.
+
+## 2026-10-20 raised satin
+
+- Satin columns have a Raised option ("Raised satin (thick underlay)" in the satin row). It adds a centre run and a zigzag underlay under the column, even when underlay is off. Stored as `raised` on the object; not in the MCP schema.
+- Covered by an engine test and an e2e test.
+
+## 2026-10-20 redwork
+
+- Run objects have a Redwork (out and back) style: the run goes along the path and returns over it, as in classic redwork. Stored as `runStyle: "redwork"`. Validator accepts it; not in the MCP schema.
+- Covered by an engine test and an e2e test.
+
 ## Known limits
 
 - The compiler is original JavaScript, not extracted/pinned Ink/Stitch digitizing code. Tie-in/tie-off and trim are simple defaults with no machine-specific trim rules, and pull compensation is a single widening rather than a per-machine model.

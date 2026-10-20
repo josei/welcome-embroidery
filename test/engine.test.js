@@ -671,3 +671,33 @@ test('architecture guard: the browser code never imports server modules and only
   if(f!=='agent.js')assert.ok(!/['"`]\/api\//.test(src),`${f} must not call the relay API`);}
  const app=fs.readFileSync(new URL('app.js',dir),'utf8');const mentions=[...app.matchAll(/\/artifacts\//g)].length;assert.ok(mentions<=2,'only the "open this design from an agent link" path reads an artifact');
 });
+
+test('continue digitizing extends a closed path in place, opens it, and closes it again',()=>{
+ const doc=initialDocument();doc.objects=[];
+ applyOperations(doc,[{op:'add_path',id:'p',x:0,y:0,points:[[-10,-10],[10,-10],[0,10]],closed:true,stitch:'fill'}]);
+ applyOperations(doc,[{op:'continue_path',id:'p',points:[[-10,-10],[10,-10],[0,10],[0,20]],closed:false,stitch:'run'}]);
+ assert.equal(doc.objects.length,1);
+ assert.deepEqual([doc.objects[0].points.length,doc.objects[0].closed,doc.objects[0].stitch],[4,false,'run']);
+ validateDocument(doc);
+ applyOperations(doc,[{op:'continue_path',id:'p',points:[...doc.objects[0].points,[-10,25]],closed:true,stitch:'fill'}]);
+ assert.deepEqual([doc.objects[0].points.length,doc.objects[0].closed,doc.objects[0].stitch],[5,true,'fill']);
+ validateDocument(doc);assert.ok(compile(doc).count>0);
+});
+
+test('raised satin adds a centre run and zigzag underlay under the same column',()=>{
+ const doc=initialDocument();doc.objects=[];doc.settings.underlay=false;
+ applyOperations(doc,[{op:'add_path',id:'s',x:0,y:0,points:[[-20,0],[0,0],[20,0]],stitch:'satin',satinWidth:4}]);
+ const flat=compile(doc).count;
+ applyOperations(doc,[{op:'set_object',id:'s',raised:true}]);
+ assert.equal(doc.objects[0].raised,true);validateDocument(doc);
+ assert.ok(compile(doc).count>flat,'raised satin has more stitches (underlay)');
+});
+
+test('redwork sews a run out and back along the same path',()=>{
+ const doc=initialDocument();doc.objects=[];
+ applyOperations(doc,[{op:'add_path',id:'r',x:0,y:0,points:[[-20,0],[0,0],[20,0]],stitch:'run'}]);
+ const single=compile(doc).count;
+ applyOperations(doc,[{op:'set_object',id:'r',runStyle:'redwork'}]);
+ validateDocument(doc);
+ assert.ok(compile(doc).count>single*1.8,'redwork roughly doubles the run');
+});

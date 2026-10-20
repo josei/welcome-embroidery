@@ -73,6 +73,47 @@ A useful later image feature is a locked reference image for manual tracing. It 
 
 Open follow-ups: none in this roadmap; mask nodes and handles are edited in place with a live cut preview.
 
+## Long-term roadmap: Wilcom feature parity (proposed 2026-10-20)
+
+Reference: Wilcom EmbroideryStudio, the commercial digitizing suite. Its feature set is taken from [Wilcom's EmbroideryStudio pages](https://www.wilcom.com/e42), its [help on lettering stitch types](https://docs.wilcom.com/embroiderystudio/28/en/OnlineHelp/Lettering/lettering_advanced/lettering_advanced-7.htm), its [motif and sequin modules](https://docs.wilcom.com/embroiderystudio/27/en/OnlineHelp/Release/elements/elements-1.htm) and [Swing Design's feature summary](https://www.swingdesign.com/products/wilcom-embroiderystudio-decorating-software-2026-full-license). EMB stays out of scope under the standing rules.
+
+| Area | Feature | Welcome status |
+| --- | --- | --- |
+| Digitizing | Running, satin, tatami and fill stitches with underlay and pull compensation | Built |
+| Digitizing | Fill patterns: contour, spiral, meander, guided, cross, ripple | Built |
+| Digitizing | Appliqué, bean run, run length variation | Built |
+| Digitizing | Multi-colour blends and gradients (Wilcom Multi Blend) | Built (up to five colours) |
+| Digitizing | Clipping masks and holes | Built |
+| Digitizing | Snap to objects and guides | Built |
+| Digitizing | Continue digitizing from a closed object without starting a new one | Built |
+| Digitizing | Auto-digitizing from artwork (shape detection, stitch assignment, underlay) | Partial (raster tracing and photo stitch) |
+| Lettering | Fonts with satin, fill and run lettering, text on a path | Built |
+| Digitizing | Satin raised effects (thick underlay under the satin) | Built |
+| Lettering | Program split fills for lettering | Not started |
+| Motifs | Motif runs and paired motif fills that follow column widths | Not started |
+| Motifs | 3D warp distortion of motifs | Not started |
+| Embellishment | Sequins (single and twin-sequin machines), beading and bling | Not started |
+| Embellishment | Redwork (out-and-back run) | Built |
+| Embellishment | Buttonholes | Not started |
+| Sequencing | Object order, start and end points, jumps and trims | Built |
+| Sequencing | Batch production across hoops and matrix layouts | Not started |
+| Preview | 3D preview and stitch playback | Built |
+| Files | JEF and VP3 export and import, DST import and export | Built |
+| Files | Other machine formats (PES, EXP, and so on) | Not started |
+| Libraries | Thread brand libraries | Not started (licensed data) |
+| Automation | Headless MCP document sessions for agents | Built |
+
+## Desktop app roadmap (Tauri, proposed 2026-10-20)
+
+Decided: Tauri replaces Electron for desktop packaging. Not started yet.
+
+| Item | What it means | Status |
+| --- | --- | --- |
+| Tauri shell | A desktop app around the static editor and the local Welcome server; the Linux build is tested locally | Proposed |
+| CI builds | GitHub Actions builds the Linux app (tested here) and the macOS and Windows bundles; macOS builds stay unsigned | Proposed |
+| Local MCP | The MCP server runs on the user's own machine and is exposed locally only; per-tab token links stay revocable | Proposed |
+| Repository hygiene | Desktop build output is never committed; CI artifacts carry the bundles | Proposed |
+
 ## Essential user journeys
 
 0. **Open a local design:** choose a file from the device → validate and load locally → edit → Save or Save As. New documents start untitled. Browser recovery is separate from saving the actual file.
@@ -114,7 +155,7 @@ Gate 1 starts only after this planning/design iteration. Do not quietly make ser
 | Elna and Pfaff profiles | Decided: defaults come from public manuals and upstream behaviour (`docs/RESEARCH.md`); user model names may refine coverage later |
 | License | Decided: GPL-3.0-or-later for the application (`LICENSE`), with third-party licence files kept alongside |
 | Browser stitch runtime | Decided: an original JavaScript compiler runs in the browser, with no Pyodide worker; exports are checked by decoding with pinned pyembroidery. Move to WASM or ports only if a measured budget fails |
-| Desktop packaging | Decided: Electron (`desktop/electron/`) with the bundled Welcome server; arm64 and x64 bundles are produced by `npm run desktop:mac`, unsigned and not run on a Mac |
+| Desktop packaging | Decided: Tauri, built in GitHub Actions for Linux, macOS and Windows; the Linux build is tested locally, macOS bundles stay unsigned. Electron is retired (`desktop/electron/` is gitignored and not maintained) |
 | Desktop asset updates | Decided: deferred. The desktop app ships its bundled assets; the signed-manifest update path in `docs/RESEARCH.md` is outside the first release |
 | Online MCP sessions | Decided and built: a paired live tab through revocable per-tab token links, plus isolated headless document sessions; no hosted persistent library |
 | Visual direction | Decided and built: warm neutral canvas, restrained teal accent, thread colours in the artwork |

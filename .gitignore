@@ -9,3 +9,5 @@ playwright-report/
 .DS_Store
 docs/ORCHESTRATION.md
 _site/
+src-tauri/target/
+src-tauri/gen/

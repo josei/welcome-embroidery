@@ -944,3 +944,30 @@ test('selection handles resize and rotate from the keyboard',async({page})=>{
  await expect(page.locator('[data-handle="rot"]')).toBeFocused();
  await expect.poll(async()=>Number(await page.locator('#rotation').inputValue())).toBeCloseTo(16,0);
 });
+
+test('continue digitizing adds points to the same path instead of starting a new object',async({page})=>{
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());await page.locator('#new').click();
+ await page.locator('#path').click();const m=await ctm(page);for(const [x,y] of [[-30,30],[0,25],[30,30]]){const s=toScreen(m,x,y);await page.mouse.click(s.x,s.y);}
+ const first=toScreen(m,-30,30);await page.mouse.click(first.x,first.y);
+ const rows=page.locator('.object-row');const before=await rows.count();await expect(page.locator('.object-row.selected')).toContainText('fill');
+ await page.locator('#continueDig').click();const mid=toScreen(m,0,0);await page.mouse.click(mid.x,mid.y);await page.keyboard.press('Enter');
+ await expect(rows).toHaveCount(before);await expect(page.locator('.object-row.selected')).toContainText('run');expect(errors).toEqual([]);
+});
+
+test('raised satin adds an underlay under a satin column',async({page})=>{
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());await page.locator('#new').click();
+ await page.locator('#path').click();const m=await ctm(page);for(const [x,y] of [[-20,0],[0,0],[20,0]]){const s=toScreen(m,x,y);await page.mouse.click(s.x,s.y);}await page.keyboard.press('Enter');
+ await page.locator('#type').selectOption('satin');await expect(page.locator('#satinRaisedRow')).toBeVisible();
+ const count=async()=>Number(((await page.locator('#count').textContent()).match(/^([\d,]+) stitches/)||[,'0'])[1].replace(/,/g,''));
+ const flat=await count();await page.locator('#satinRaised').check();
+ await expect.poll(count).toBeGreaterThan(flat);expect(errors).toEqual([]);
+});
+
+test('redwork run sews the path out and back',async({page})=>{
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());await page.locator('#new').click();
+ await page.locator('#path').click();const m=await ctm(page);for(const [x,y] of [[-20,0],[0,0],[20,0]]){const s=toScreen(m,x,y);await page.mouse.click(s.x,s.y);}await page.keyboard.press('Enter');
+ await expect(page.locator('#runStyleRow')).toBeVisible();
+ const count=async()=>Number(((await page.locator('#count').textContent()).match(/^([\d,]+) stitches/)||[,'0'])[1].replace(/,/g,''));
+ const single=await count();await page.locator('#runStyle').selectOption('redwork');
+ await expect.poll(count).toBeGreaterThan(single*1.8);expect(errors).toEqual([]);
+});
