@@ -701,3 +701,12 @@ test('redwork sews a run out and back along the same path',()=>{
  validateDocument(doc);
  assert.ok(compile(doc).count>single*1.8,'redwork roughly doubles the run');
 });
+
+test('buttonhole adds a bar tack at each end of an open satin column',()=>{
+ const doc=initialDocument();doc.objects=[];
+ applyOperations(doc,[{op:'add_path',id:'b',x:0,y:0,points:[[-15,0],[15,0]],stitch:'satin',satinWidth:3}]);
+ const plain=compile(doc).count;
+ applyOperations(doc,[{op:'set_object',id:'b',buttonhole:true}]);
+ validateDocument(doc);
+ assert.ok(compile(doc).count>plain+8,'bar tacks add stitches at both ends');
+});

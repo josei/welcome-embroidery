@@ -60,6 +60,11 @@ Updated 2026-10-06. This source provides a working static editor, local MCP serv
 - Run objects have a Redwork (out and back) style: the run goes along the path and returns over it, as in classic redwork. Stored as `runStyle: "redwork"`. Validator accepts it; not in the MCP schema.
 - Covered by an engine test and an e2e test.
 
+## 2026-10-20 buttonholes
+
+- An open satin path can be a buttonhole: a bar tack (short zigzag across the column) is sewn at each end. Stored as `buttonhole: true`; the satin row shows the option only for open satin paths. Not in the MCP schema.
+- Covered by an engine test and an e2e test. Bar tacks are a simple zigzag, not Wilcom's tuned shapes.
+
 ## Known limits
 
 - The compiler is original JavaScript, not extracted/pinned Ink/Stitch digitizing code. Tie-in/tie-off and trim are simple defaults with no machine-specific trim rules, and pull compensation is a single widening rather than a per-machine model.

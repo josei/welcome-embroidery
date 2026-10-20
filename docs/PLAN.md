@@ -94,7 +94,7 @@ Reference: Wilcom EmbroideryStudio, the commercial digitizing suite. Its feature
 | Motifs | 3D warp distortion of motifs | Not started |
 | Embellishment | Sequins (single and twin-sequin machines), beading and bling | Not started |
 | Embellishment | Redwork (out-and-back run) | Built |
-| Embellishment | Buttonholes | Not started |
+| Embellishment | Buttonholes (satin with bar tacks at both ends) | Built |
 | Sequencing | Object order, start and end points, jumps and trims | Built |
 | Sequencing | Batch production across hoops and matrix layouts | Not started |
 | Preview | 3D preview and stitch playback | Built |

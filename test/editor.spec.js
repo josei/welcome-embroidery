@@ -971,3 +971,12 @@ test('redwork run sews the path out and back',async({page})=>{
  const single=await count();await page.locator('#runStyle').selectOption('redwork');
  await expect.poll(count).toBeGreaterThan(single*1.8);expect(errors).toEqual([]);
 });
+
+test('buttonhole satin adds bar tacks at both ends',async({page})=>{
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());await page.locator('#new').click();
+ await page.locator('#path').click();const m=await ctm(page);for(const [x,y] of [[-15,0],[15,0]]){const s=toScreen(m,x,y);await page.mouse.click(s.x,s.y);}await page.keyboard.press('Enter');
+ await page.locator('#type').selectOption('satin');await expect(page.locator('#satinButtonholeRow')).toBeVisible();
+ const count=async()=>Number(((await page.locator('#count').textContent()).match(/^([\d,]+) stitches/)||[,'0'])[1].replace(/,/g,''));
+ const plain=await count();await page.locator('#satinButtonhole').check();
+ await expect.poll(count).toBeGreaterThan(plain+8);expect(errors).toEqual([]);
+});
