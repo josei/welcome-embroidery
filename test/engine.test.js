@@ -745,5 +745,5 @@ test('motif fill covers a closed shape with a staggered grid of loops',()=>{
  applyOperations(doc,[{op:'add_shape',id:'q',kind:'rect',x:-15,y:-15,width:30,height:30,thread:'#527461',stitch:'fill'},{op:'set_object',id:'q',fillMethod:'motif'}]);
  validateDocument(doc);
  const plan=compile(doc);assert.deepEqual(plan.errors,[]);
- assert.ok(plan.count>150,'many loops fill the square ('+plan.count+')');
+ assert.ok(plan.count>150&&plan.count<3000,'loops every 4 mm fill the square ('+plan.count+')');
 });
