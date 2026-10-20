@@ -79,6 +79,11 @@ Updated 2026-10-06. This source provides a working static editor, local MCP serv
 - Motif loops can be paired: one loop on each side of the centre line, half the satin width away, every 4 mm. The option is "Paired loops across the width" and uses the object's Satin width (4 mm if none is set). Stored as `motifPair`; not in the MCP schema. Fills of motifs (a shape filled with loops) are still not started.
 - Covered by an engine test and an e2e test.
 
+## 2026-10-21 motif fill
+
+- Fill pattern "Motif loops": a closed shape is covered by 0.6 mm loops on a grid, every row offset by half a spacing (4 mm by default), kept inside the shape. Stored as `fillMethod: "motif"`; not in the MCP schema. Loops on the outline can poke slightly past it, and the spacing is fixed.
+- Covered by an engine test and an e2e test.
+
 ## Known limits
 
 - The compiler is original JavaScript, not extracted/pinned Ink/Stitch digitizing code. Tie-in/tie-off and trim are simple defaults with no machine-specific trim rules, and pull compensation is a single widening rather than a per-machine model.

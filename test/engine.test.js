@@ -739,3 +739,11 @@ test('paired motif loops sit on both sides of the column, at the satin width',()
  assert.ok(plan.count>single*1.8,'pairs roughly double the loops');
  const ys=plan.stitches.filter(s=>s.cmd==='stitch').map(s=>s.y);assert.ok(Math.max(...ys)>2.5&&Math.min(...ys)<-2.5,'loops sit about 3 mm either side');
 });
+
+test('motif fill covers a closed shape with a staggered grid of loops',()=>{
+ const doc=initialDocument();doc.objects=[];
+ applyOperations(doc,[{op:'add_shape',id:'q',kind:'rect',x:-15,y:-15,width:30,height:30,thread:'#527461',stitch:'fill'},{op:'set_object',id:'q',fillMethod:'motif'}]);
+ validateDocument(doc);
+ const plan=compile(doc);assert.deepEqual(plan.errors,[]);
+ assert.ok(plan.count>150,'many loops fill the square ('+plan.count+')');
+});
