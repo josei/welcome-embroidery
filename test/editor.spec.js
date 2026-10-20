@@ -980,3 +980,11 @@ test('buttonhole satin adds bar tacks at both ends',async({page})=>{
  const plain=await count();await page.locator('#satinButtonhole').check();
  await expect.poll(count).toBeGreaterThan(plain+8);expect(errors).toEqual([]);
 });
+
+test('motif loops are a stitch type that loops along the path',async({page})=>{
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());await page.locator('#new').click();
+ await page.locator('#path').click();const m=await ctm(page);for(const [x,y] of [[-20,0],[20,0]]){const s=toScreen(m,x,y);await page.mouse.click(s.x,s.y);}await page.keyboard.press('Enter');
+ const count=async()=>Number(((await page.locator('#count').textContent()).match(/^([\d,]+) stitches/)||[,'0'])[1].replace(/,/g,''));
+ const run=await count();await page.locator('#type').selectOption('motif');
+ await expect.poll(count).toBeGreaterThan(run*3);expect(errors).toEqual([]);
+});

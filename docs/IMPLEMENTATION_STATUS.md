@@ -65,6 +65,11 @@ Updated 2026-10-06. This source provides a working static editor, local MCP serv
 - An open satin path can be a buttonhole: a bar tack (short zigzag across the column) is sewn at each end. Stored as `buttonhole: true`; the satin row shows the option only for open satin paths. Not in the MCP schema.
 - Covered by an engine test and an e2e test. Bar tacks are a simple zigzag, not Wilcom's tuned shapes.
 
+## 2026-10-20 motif loops
+
+- Open or closed paths can use the Motif loops stitch type: a 0.8 mm radius loop every 4 mm along the path, sewn as one run. Spacing and size are fixed for now; there are no sidebar controls yet. Stored as `stitch: "motif"`; not in the MCP schema.
+- Covered by an engine test and an e2e test.
+
 ## Known limits
 
 - The compiler is original JavaScript, not extracted/pinned Ink/Stitch digitizing code. Tie-in/tie-off and trim are simple defaults with no machine-specific trim rules, and pull compensation is a single widening rather than a per-machine model.

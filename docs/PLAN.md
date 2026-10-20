@@ -90,7 +90,8 @@ Reference: Wilcom EmbroideryStudio, the commercial digitizing suite. Its feature
 | Lettering | Fonts with satin, fill and run lettering, text on a path | Built |
 | Digitizing | Satin raised effects (thick underlay under the satin) | Built |
 | Lettering | Program split fills for lettering | Not started |
-| Motifs | Motif runs and paired motif fills that follow column widths | Not started |
+| Motifs | Motif loops repeated along a path (first step: fixed loops every 4 mm) | Built (basic) |
+| Motifs | Paired motif fills that follow column widths | Not started |
 | Motifs | 3D warp distortion of motifs | Not started |
 | Embellishment | Sequins (single and twin-sequin machines), beading and bling | Not started |
 | Embellishment | Redwork (out-and-back run) | Built |

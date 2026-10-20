@@ -710,3 +710,12 @@ test('buttonhole adds a bar tack at each end of an open satin column',()=>{
  validateDocument(doc);
  assert.ok(compile(doc).count>plain+8,'bar tacks add stitches at both ends');
 });
+
+test('motif loops sew a small loop every few mm along a path',()=>{
+ const doc=initialDocument();doc.objects=[];
+ applyOperations(doc,[{op:'add_path',id:'m',x:0,y:0,points:[[-20,0],[20,0]],stitch:'run'}]);
+ const run=compile(doc).count;
+ applyOperations(doc,[{op:'set_object',id:'m',stitch:'motif'}]);
+ validateDocument(doc);
+ assert.ok(compile(doc).count>run*3,'each loop adds about twelve stitches');
+});
