@@ -74,6 +74,11 @@ Updated 2026-10-06. This source provides a working static editor, local MCP serv
 
 - Program split tiling is the existing Needle stagger (2 or 4 phases) on fills. Lettering fills use the same planner, so they tile the same way. There is no separate program-split mode; an engine test checks that stagger changes the fill tiling.
 
+## 2026-10-21 paired motif loops
+
+- Motif loops can be paired: one loop on each side of the centre line, half the satin width away, every 4 mm. The option is "Paired loops across the width" and uses the object's Satin width (4 mm if none is set). Stored as `motifPair`; not in the MCP schema. Fills of motifs (a shape filled with loops) are still not started.
+- Covered by an engine test and an e2e test.
+
 ## Known limits
 
 - The compiler is original JavaScript, not extracted/pinned Ink/Stitch digitizing code. Tie-in/tie-off and trim are simple defaults with no machine-specific trim rules, and pull compensation is a single widening rather than a per-machine model.

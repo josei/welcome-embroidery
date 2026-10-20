@@ -91,7 +91,7 @@ Reference: Wilcom EmbroideryStudio, the commercial digitizing suite. Its feature
 | Digitizing | Satin raised effects (thick underlay under the satin) | Built |
 | Lettering | Program split fills for lettering (tiled needle phases, via Needle stagger on fills, including lettering) | Built |
 | Motifs | Motif loops repeated along a path (first step: fixed loops every 4 mm) | Built (basic) |
-| Motifs | Paired motif fills that follow column widths | Not started |
+| Motifs | Paired motif loops that follow column widths (one loop each side at the satin width) | Built (basic) |
 | Motifs | 3D warp distortion of motifs | Not started |
 | Embellishment | Sequins (single and twin-sequin machines), beading and bling | Not started |
 | Embellishment | Redwork (out-and-back run) | Built |

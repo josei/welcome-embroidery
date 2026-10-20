@@ -728,3 +728,14 @@ test('needle stagger splits fill rows into tiled phases',()=>{
  validateDocument(doc);
  assert.notEqual(JSON.stringify(compile(doc).stitches),four,'two phases tile differently from four');
 });
+
+test('paired motif loops sit on both sides of the column, at the satin width',()=>{
+ const doc=initialDocument();doc.objects=[];
+ applyOperations(doc,[{op:'add_path',id:'p',x:0,y:0,points:[[-20,0],[20,0]],satinWidth:6},{op:'set_object',id:'p',stitch:'motif'}]);
+ const single=compile(doc).count;
+ applyOperations(doc,[{op:'set_object',id:'p',motifPair:true}]);
+ validateDocument(doc);
+ const plan=compile(doc);
+ assert.ok(plan.count>single*1.8,'pairs roughly double the loops');
+ const ys=plan.stitches.filter(s=>s.cmd==='stitch').map(s=>s.y);assert.ok(Math.max(...ys)>2.5&&Math.min(...ys)<-2.5,'loops sit about 3 mm either side');
+});
