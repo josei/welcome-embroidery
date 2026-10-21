@@ -164,6 +164,12 @@ Updated 2026-10-06. This source provides a working static editor, local MCP serv
 - A clipped run can close its cut ends: with Close edges at the mask on, each place a mask cuts the run gets a short back-stitch over its last segment. This is opt-in (`edgeClose`, off by default), so existing output does not change. Decision: closing is a back-stitch, not a border of extra stitches; it covers clipped satin as well as runs. Needs a sew-out check before it is turned on by default.
 - Covered by an engine test and an e2e test.
 
+## 2026-10-21 editor palette tokens
+
+- styles.css has a `:root` token block (teal, teal-deep, teal-soft, coral, coral-soft, gold, gold-soft, gold-deep, warn, warn-soft, warn-line) and the repeated hex values now use it. Teal is the action colour; #1c725d (the export button) is merged into --teal, the one visible change (a barely different green). Warning text and the issues button use the separate warn tokens; their values are unchanged.
+- Coral and gold are defined but not applied to the editor chrome: the editor is a tool, so the landing page carries the brand accents. Gold is decorative only and must use --gold-deep for text or thin strokes.
+- Screenshot check: the editor and 3D preview differ from before by 296 pixels (status text and the language button outline). The landing images site/assets/hero-editor.png and view-3d.png were retaken from the default design after the change.
+
 ## Known limits
 
 - The compiler is original JavaScript, not extracted/pinned Ink/Stitch digitizing code. Tie-in/tie-off and trim are simple defaults with no machine-specific trim rules, and pull compensation is a single widening rather than a per-machine model.
