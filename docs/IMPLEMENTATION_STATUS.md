@@ -161,7 +161,7 @@ Updated 2026-10-06. This source provides a working static editor, local MCP serv
 
 ## 2026-10-21 edge closing for clipped runs
 
-- A clipped run can close its cut ends: with Close edges at the mask on, each place a mask cuts the run gets a short back-stitch over its last segment. This is opt-in (`edgeClose`, off by default), so existing output does not change. Decision: closing is a back-stitch, not a border of extra stitches; satin is not covered yet. Needs a sew-out check before it is turned on by default.
+- A clipped run can close its cut ends: with Close edges at the mask on, each place a mask cuts the run gets a short back-stitch over its last segment. This is opt-in (`edgeClose`, off by default), so existing output does not change. Decision: closing is a back-stitch, not a border of extra stitches; it covers clipped satin as well as runs. Needs a sew-out check before it is turned on by default.
 - Covered by an engine test and an e2e test.
 
 ## Known limits

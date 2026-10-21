@@ -880,3 +880,13 @@ test('edge closing adds a back-stitch at each cut end of a clipped run, and is o
  applyOperations(doc,[{op:'set_object',id:'r',edgeClose:'yes'}]);
  assert.throws(()=>validateDocument(doc),/edgeClose/);
 });
+
+test('edge closing also applies to clipped satin columns',()=>{
+ const doc=initialDocument();doc.objects=[];
+ applyOperations(doc,[{op:'add_shape',id:'mask',kind:'rect',x:-10,y:-10,width:20,height:20,thread:'#527461',stitch:'fill'},{op:'add_path',id:'s',x:0,y:0,points:[[-30,0],[30,0]],stitch:'satin',satinWidth:3}]);
+ applyOperations(doc,[{op:'clip',ids:['s'],maskId:'mask'}]);
+ const open=compile(doc).count;
+ applyOperations(doc,[{op:'set_object',id:'s',edgeClose:true}]);
+ validateDocument(doc);
+ assert.ok(compile(doc).count>open,'closing adds stitches to a clipped satin column');
+});
