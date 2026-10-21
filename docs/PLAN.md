@@ -114,6 +114,17 @@ Reference: Wilcom EmbroideryStudio, the commercial digitizing suite. Its feature
 | Libraries | Thread brand libraries | Not started (licensed data) |
 | Automation | Headless MCP document sessions for agents | Built |
 
+## Roadmap status (decided 2026-10-21)
+
+Everything in the feature list is built, partly built, or deliberately out of scope. What remains open, and why it is not built here:
+
+- Closing edge stitches on clipped satin and run objects: needs a sew-out check on a machine; deferred.
+- Thread brand libraries: licensed data; out of scope.
+- Several live document slots per agent link: would broaden agent permissions; out of scope.
+- A real Safari device check: needs a device.
+- macOS and Windows desktop builds: built by CI on a tag or manual run; not run yet.
+- Bling stone shapes and a library, and a true 3D surface warp: not started; the basic forms are built.
+
 ## Desktop app roadmap (Tauri, proposed 2026-10-20)
 
 Decided: Tauri replaces Electron for desktop packaging.
