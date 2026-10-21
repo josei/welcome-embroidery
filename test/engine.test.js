@@ -747,3 +747,14 @@ test('motif fill covers a closed shape with a staggered grid of loops',()=>{
  const plan=compile(doc);assert.deepEqual(plan.errors,[]);
  assert.ok(plan.count>150&&plan.count<3000,'loops every 4 mm fill the square ('+plan.count+')');
 });
+
+test('motif spacing and size change how many loops are sewn',()=>{
+ const doc=initialDocument();doc.objects=[];
+ applyOperations(doc,[{op:'add_path',id:'m',x:0,y:0,points:[[-20,0],[20,0]]},{op:'set_object',id:'m',stitch:'motif'}]);
+ const wide=compile(doc).count;
+ applyOperations(doc,[{op:'set_object',id:'m',motifSpacing:2}]);
+ validateDocument(doc);
+ assert.ok(compile(doc).count>wide*1.6,'a 2 mm spacing sews more loops than 4 mm');
+ applyOperations(doc,[{op:'set_object',id:'m',motifSpacing:4,motifSize:3}]);
+ applyOperations(doc,[{op:'set_object',id:'m',motifSize:9}]);assert.throws(()=>validateDocument(doc),/motif spacing or size/);
+});

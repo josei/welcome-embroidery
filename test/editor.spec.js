@@ -1016,3 +1016,12 @@ test('fill pattern buttons include motif loops inside the panel',async({page})=>
  expect(box.x+box.width).toBeLessThanOrEqual(panel.x+panel.width);
  await motif.click();await expect(motif).toHaveAttribute('aria-pressed','true');expect(errors).toEqual([]);
 });
+
+test('motif spacing can be changed in the panel and sews more loops when smaller',async({page})=>{
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());await page.locator('#new').click();
+ await page.locator('#path').click();const m=await ctm(page);for(const [x,y] of [[-20,0],[20,0]]){const s=toScreen(m,x,y);await page.mouse.click(s.x,s.y);}await page.keyboard.press('Enter');
+ await page.locator('#type').selectOption('motif');await expect(page.locator('#motifSpacingRow')).toBeVisible();
+ const count=async()=>Number(((await page.locator('#count').textContent()).match(/^([\d,]+) stitches/)||[,'0'])[1].replace(/,/g,''));
+ const wide=await count();await page.locator('#motifSpacing').fill('2');await page.locator('#motifSpacing').press('Tab');
+ await expect.poll(count).toBeGreaterThan(wide*1.6);expect(errors).toEqual([]);
+});
