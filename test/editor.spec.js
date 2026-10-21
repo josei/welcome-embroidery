@@ -1058,3 +1058,10 @@ test('batch plan in the Array section says how many copies fit one hoop',async({
  await expect(page.locator('#batchInfo')).toContainText('400 copies');
  expect(errors).toEqual([]);
 });
+
+test('batch export downloads one JEF file per hoop',async({page})=>{
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());await page.locator('#new').click();
+ await page.locator('#rect').click();await page.locator('#secArray summary').click();await page.locator('#arrCount').fill('3');await page.locator('#arrCount').press('Tab');
+ const download=page.waitForEvent('download');await page.locator('#batchExport').click();
+ const file=await download;expect(file.suggestedFilename()).toMatch(/-hoop1\.jef$/);expect(errors).toEqual([]);
+});

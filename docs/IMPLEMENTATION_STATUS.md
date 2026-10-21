@@ -114,6 +114,11 @@ Updated 2026-10-06. This source provides a working static editor, local MCP serv
 - The Array section shows a batch plan for the current design: its size, how many copies fit one hoop with a 3 mm gap, and how many hoops the Copies count needs. It is a summary only; copies are not split into one file per hoop yet.
 - Covered by an engine test and an e2e test.
 
+## 2026-10-21 batch export
+
+- Export batch (JEF) in the Array section writes one JEF file per hoop: copies are laid out on the batch grid (3 mm gap) and split across hoops, and each hoop is compiled and downloaded as `<name>-hoopN.jef`. Only JEF for now, and imported machine files are not supported in a batch. Not in the MCP schema.
+- Covered by an engine test and an e2e test. The planner summary now also reports the grid origin.
+
 ## Known limits
 
 - The compiler is original JavaScript, not extracted/pinned Ink/Stitch digitizing code. Tie-in/tie-off and trim are simple defaults with no machine-specific trim rules, and pull compensation is a single widening rather than a per-machine model.

@@ -791,3 +791,12 @@ test('batch plan counts copies per hoop and hoops needed',async()=>{
  assert.deepEqual(p.design,[20,10]);assert.equal(p.perHoop,p.cols*p.rows);assert.equal(p.hoopsNeeded,Math.ceil(100/p.perHoop));
  assert.ok(p.perHoop>=20,'a 20 × 10 mm design packs many copies into 110 mm');
 });
+
+test('batch documents lay copies out per hoop and every hoop compiles',async()=>{
+ const {batchDocuments}=await import('../src/engine.js');
+ const doc=initialDocument();doc.objects=[];
+ applyOperations(doc,[{op:'add_shape',id:'r',kind:'rect',x:-10,y:-5,width:20,height:10,thread:'#527461',stitch:'fill'}]);
+ const docs=batchDocuments(doc,{copies:40});
+ assert.equal(docs.length,2);assert.equal(docs[0].objects.length+docs[1].objects.length,40);
+ for(const d of docs){const plan=compile(d);assert.deepEqual(plan.errors,[]);}
+});
