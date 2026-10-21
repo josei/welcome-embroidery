@@ -845,3 +845,14 @@ test('paired motif loops follow a tapered satin width',()=>{
  const taper=compile(doc).bounds;
  assert.ok(taper[3]>flat[3]+2,'the wide end pushes the loops further out ('+taper[3]+' vs '+flat[3]+')');
 });
+
+test('PES v6 export has its own signature, a thread table and the PEC block it points to',async()=>{
+ const {encodePesV6}=await import('../src/engine.js');
+ const doc=initialDocument();doc.objects=[];
+ applyOperations(doc,[{op:'add_shape',id:'r',kind:'rect',x:-8,y:-6,width:16,height:12,thread:'#527461',stitch:'run'}]);
+ const bytes=encodePesV6(compile(doc),'Badge');
+ assert.equal(String.fromCharCode(...bytes.slice(0,8)),'#PES0060');
+ const text=String.fromCharCode(...bytes);assert.ok(text.includes('CEmbOne')&&text.includes('CSewSeg'));
+ const pec=bytes[8]|(bytes[9]<<8)|(bytes[10]<<16)|(bytes[11]<<24);
+ assert.equal(String.fromCharCode(...bytes.slice(pec,pec+3)),'LA:');
+});

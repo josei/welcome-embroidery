@@ -139,6 +139,11 @@ Updated 2026-10-06. This source provides a working static editor, local MCP serv
 - Paired motif loops follow the satin width at each point, so a column that tapers (End width, or width stops from the editor) spreads its loops to match. The End width field now shows for paired motif paths. This is a width warp, not a surface warp. Not in the MCP schema.
 - Covered by an engine test and an e2e test.
 
+## 2026-10-21 PES version 6 export
+
+- PES version 6 export (`#PES0060`): the v6 header with the design colours as the thread table (no catalog names, descriptions or brands), the same sew segments and colour log plus the v6 node records, the PEC block, and the colour addendum. Exports are checked by decoding with pyembroidery: every planned position appears in order in the decoded path and the thread count matches. Machine acceptance is not verified; the thread table is minimal. Not in the MCP schema. The download uses the .pes extension.
+- Covered by an engine structure test and an e2e test. The pyembroidery check is a manual step.
+
 ## Known limits
 
 - The compiler is original JavaScript, not extracted/pinned Ink/Stitch digitizing code. Tie-in/tie-off and trim are simple defaults with no machine-specific trim rules, and pull compensation is a single widening rather than a per-machine model.

@@ -1094,3 +1094,10 @@ test('paired motif loops can taper with the end width in the panel',async({page}
  await expect(page.locator('#satinEndRow')).toBeVisible();await page.locator('#satinWidthEnd').fill('8');await page.locator('#satinWidthEnd').press('Tab');
  await expect(page.locator('#satinWidthEnd')).toHaveValue('8');expect(errors).toEqual([]);
 });
+
+test('PES v6 is an export format and downloads as a .pes file',async({page})=>{
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());await page.locator('#new').click();
+ await page.locator('#rect').click();await page.locator('#export').click();await page.locator('#format').selectOption('pes6');
+ const download=page.waitForEvent('download');await page.locator('#download').click();
+ expect((await download).suggestedFilename()).toMatch(/\.pes$/);expect(errors).toEqual([]);
+});
