@@ -99,6 +99,11 @@ Updated 2026-10-06. This source provides a working static editor, local MCP serv
 - Sequins is a stitch type on paths: each sequin is a centre stitch with a fixing loop, every 8 mm by default with a 3 mm loop. The spacing and loop size controls apply (labels now read Spacing and Loop size). Stored as `stitch: "sequin"`; not in the MCP schema. No twin-sequin or dispensing control yet.
 - Covered by an engine test and an e2e test.
 
+## 2026-10-21 beads
+
+- Beads is a stitch type on paths: three short passes back and forth across the path at each point, every 6 mm by default with a 2 mm length. The spacing and size controls apply (the size control now reads Size). Stored as `stitch: "bead"`; not in the MCP schema. Bling stays not started.
+- Covered by an engine test and an e2e test.
+
 ## Known limits
 
 - The compiler is original JavaScript, not extracted/pinned Ink/Stitch digitizing code. Tie-in/tie-off and trim are simple defaults with no machine-specific trim rules, and pull compensation is a single widening rather than a per-machine model.

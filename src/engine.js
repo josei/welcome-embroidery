@@ -475,7 +475,7 @@ export function validateDocument(doc){
     if(o.join!==undefined&&!['round','miter','bevel'].includes(o.join)||o.cap!==undefined&&!['butt','round','square'].includes(o.cap))fail(`object ${o.id} has an invalid cap or join.`);
     if(o.widthStops!==undefined&&!(o.kind==='path'&&o.stitch==='satin'&&Array.isArray(o.widthStops)&&o.widthStops.length>=1&&o.widthStops.length<=50&&o.widthStops.every((st,i)=>Array.isArray(st)&&st.length===2&&Number.isFinite(st[0])&&st[0]>=0&&st[0]<=1&&Number.isFinite(st[1])&&st[1]>=.5&&st[1]<=12&&(!i||st[0]>=o.widthStops[i-1][0]))))fail(`object ${o.id} width stops must be 1–50 sorted [position 0–1, width 0.5–12 mm] pairs on a satin path.`);
     if(o.borderWidth!==undefined&&!(Number.isFinite(o.borderWidth)&&o.borderWidth>=0&&o.borderWidth<=12))fail(`object ${o.id} border width must be 0–12 mm.`);
-    if(!color.test(o.thread)||!['fill','run','satin','motif','sequin'].includes(o.stitch))fail(`object ${o.id} has an invalid thread color or stitch type.`);if(o.stitch==='satin'&&(o.kind!=='path'||(o.satinWidth!==undefined&&!(Number.isFinite(o.satinWidth)&&o.satinWidth>=.5&&o.satinWidth<=12))))fail(`satin stitching needs a path and a column width of 0.5–12 mm (${o.id}).`);if(o.satinWidth!==undefined&&o.kind!=='path')fail(`object ${o.id} cannot have a satin width.`);
+    if(!color.test(o.thread)||!['fill','run','satin','motif','sequin','bead'].includes(o.stitch))fail(`object ${o.id} has an invalid thread color or stitch type.`);if(o.stitch==='satin'&&(o.kind!=='path'||(o.satinWidth!==undefined&&!(Number.isFinite(o.satinWidth)&&o.satinWidth>=.5&&o.satinWidth<=12))))fail(`satin stitching needs a path and a column width of 0.5–12 mm (${o.id}).`);if(o.satinWidth!==undefined&&o.kind!=='path')fail(`object ${o.id} cannot have a satin width.`);
     if(!Number.isFinite(o.rotation??0)||(o.rotation??0)<-360||(o.rotation??0)>360)fail(`object ${o.id} has invalid rotation.`);
     if(![o.x,o.y].every(Number.isFinite)||Math.abs(o.x)>1000||Math.abs(o.y)>1000)fail(`object ${o.id} has invalid coordinates.`);
     if(o.groupId!==undefined&&(typeof o.groupId!=='string'||!o.groupId||o.groupId.length>100))fail(`object ${o.id} has an invalid group.`);
@@ -584,6 +584,8 @@ function motifPairLoops(line,width,spacing=4,radius=.8){const pts=sampleRun(line
 function motifFillRuns(rings,spacing,radius=.8){const inside=makeInside(rings);let x0=Infinity,y0=Infinity,x1=-Infinity,y1=-Infinity;for(const r of rings)for(const [x,y] of r){x0=Math.min(x0,x);y0=Math.min(y0,y);x1=Math.max(x1,x);y1=Math.max(y1,y);}const out=[];let row=0;for(let y=y0+spacing/2;y<=y1;y+=spacing,row++)for(let x=x0+(row%2?spacing/2:0);x<=x1;x+=spacing)if(inside([x,y],[x+.01,y]))out.push({pts:Array.from({length:13},(_,k)=>{const t=k/12*Math.PI*2;return [x+Math.cos(t)*radius,y+Math.sin(t)*radius];}),jump:false});return out;}
 // Sequins: a centre stitch with a fixing loop around it, every few mm along the path.
 function sequinRuns(line,spacing=8,radius=1.5){return sampleRun(line,spacing).flatMap(p=>[{pts:[p,[p[0]+.01,p[1]]],jump:false},{pts:Array.from({length:13},(_,k)=>{const t=k/12*Math.PI*2;return [p[0]+Math.cos(t)*radius,p[1]+Math.sin(t)*radius];}),jump:false}]);}
+// Beads: short passes back and forth across the path at each point, the way beads are sewn on.
+function beadRuns(line,spacing=6,length=2){const pts=sampleRun(line,spacing),out=[];pts.forEach((p,i)=>{const q=pts[Math.min(i+1,pts.length-1)],r=pts[Math.max(i-1,0)],dx=q[0]-r[0],dy=q[1]-r[1],l=Math.hypot(dx,dy)||1,ux=dx/l*length/2,uy=dy/l*length/2;for(let k=0;k<3;k++)out.push({pts:[[p[0]-ux,p[1]-uy],[p[0]+ux,p[1]+uy]],jump:false});});return out;}
 // Bar tack across the end of a buttonhole: a short zigzag between the two rails, stepping outwards from the column.
 function bartack(a,b,na,nb,jump){const dx=a[0]-na[0],dy=a[1]-na[1],l=Math.hypot(dx,dy)||1,ux=dx/l,uy=dy/l,pts=[];for(let k=0;k<6;k++){const p=k%2?b:a,s=Math.floor(k/2)*.35;pts.push([p[0]+ux*s,p[1]+uy*s]);}return [{pts,jump}];}
 function satinRuns(a,b,rungs,o,doc,spacing,comp,from=null){
@@ -710,6 +712,7 @@ export function compile(doc) {
         else{const {under,top:t}=fillRuns(pr.rings,o,doc,comp,from);const all=[...under,...t];if(all.length)all[0].jump=true;top.push(...all);}
       }
     }
+    else if(o.stitch==='bead'){lines.forEach(line=>{if(line.length>1)top.push(...beadRuns(line,o.motifSpacing??6,o.motifSize??2));});}
     else if(o.stitch==='sequin'){lines.forEach(line=>{if(line.length>1)top.push(...sequinRuns(line,o.motifSpacing??8,(o.motifSize??3)/2));});}
     else if(o.stitch==='motif'){lines.forEach(line=>{if(line.length>1)top.push(...(o.motifPair&&o.satinWidth?motifPairLoops(line,o.satinWidth,o.motifSpacing??4,(o.motifSize??1.6)/2):motifLoops(line,o.motifSpacing??4,(o.motifSize??1.6)/2)));});}
     else if(!filled){lines.forEach((line,i)=>{if(line.length>1)top.push(asRun(line,o.kind==='text'&&i>=0));});}

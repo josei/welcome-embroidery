@@ -766,3 +766,11 @@ test('sequins sew a centre stitch with a fixing loop every few mm',()=>{
  const plan=compile(doc);assert.deepEqual(plan.errors,[]);
  assert.ok(plan.count>20,'sequins are sewn ('+plan.count+')');
 });
+
+test('beads sew short passes across the path at each point',()=>{
+ const doc=initialDocument();doc.objects=[];
+ applyOperations(doc,[{op:'add_path',id:'b',x:0,y:0,points:[[-20,0],[20,0]]},{op:'set_object',id:'b',stitch:'bead'}]);
+ validateDocument(doc);
+ const plan=compile(doc);assert.deepEqual(plan.errors,[]);
+ assert.ok(plan.count>20,'beads are sewn ('+plan.count+')');
+});
