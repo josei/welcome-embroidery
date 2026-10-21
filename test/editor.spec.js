@@ -1006,3 +1006,13 @@ test('motif fill fills a closed shape with loops',async({page})=>{
  const rows=await count();await page.locator('#fillMethod').selectOption('motif');
  await expect.poll(count).toBeGreaterThan(rows*2);expect(errors).toEqual([]);
 });
+
+test('fill pattern buttons include motif loops inside the panel',async({page})=>{
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());await page.locator('#new').click();
+ await page.locator('#path').click();const m=await ctm(page);for(const [x,y] of [[-20,-20],[20,-20],[20,20]]){const s=toScreen(m,x,y);await page.mouse.click(s.x,s.y);}
+ const first=toScreen(m,-20,-20);await page.mouse.click(first.x,first.y);
+ const motif=page.locator('#fillMethod + .icon-seg button[data-value=motif]');await expect(motif).toBeVisible();
+ const box=await motif.boundingBox();const panel=await page.locator('.layout > aside.panel').last().boundingBox();
+ expect(box.x+box.width).toBeLessThanOrEqual(panel.x+panel.width);
+ await motif.click();await expect(motif).toHaveAttribute('aria-pressed','true');expect(errors).toEqual([]);
+});

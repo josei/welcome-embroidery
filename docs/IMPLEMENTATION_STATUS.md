@@ -84,6 +84,11 @@ Updated 2026-10-06. This source provides a working static editor, local MCP serv
 - Fill pattern "Motif loops": a closed shape is covered by 0.6 mm loops on a grid, every row offset by half a spacing (4 mm by default), kept inside the shape. Stored as `fillMethod: "motif"`; not in the MCP schema. Loops on the outline can poke slightly past it, and the spacing is fixed.
 - Covered by an engine test and an e2e test.
 
+## 2026-10-21 fill pattern buttons
+
+- The Fill pattern buttons now include Motif loops: the button group wraps instead of clipping the last button in the inspector, and the selection follows the motif fill.
+- Covered by an e2e test.
+
 ## Known limits
 
 - The compiler is original JavaScript, not extracted/pinned Ink/Stitch digitizing code. Tie-in/tie-off and trim are simple defaults with no machine-specific trim rules, and pull compensation is a single widening rather than a per-machine model.
