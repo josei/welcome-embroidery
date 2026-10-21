@@ -134,6 +134,11 @@ Updated 2026-10-06. This source provides a working static editor, local MCP serv
 - PES version 1 export: `#PES0001`, the PEC block offset, the version 1 header, the CEmbOne and CSewSeg blocks (one section per jump or stitch run, with colour log), then the PEC block used by PEC export. Exports are checked by decoding with pyembroidery: every planned position appears in order in the decoded path and the thread count matches. Version 6, import and the thread-name metadata are not supported. PES is not in the MCP schema.
 - Covered by an engine structure test and an e2e test. The pyembroidery check is a manual step.
 
+## 2026-10-21 motif warp along a taper
+
+- Paired motif loops follow the satin width at each point, so a column that tapers (End width, or width stops from the editor) spreads its loops to match. The End width field now shows for paired motif paths. This is a width warp, not a surface warp. Not in the MCP schema.
+- Covered by an engine test and an e2e test.
+
 ## Known limits
 
 - The compiler is original JavaScript, not extracted/pinned Ink/Stitch digitizing code. Tie-in/tie-off and trim are simple defaults with no machine-specific trim rules, and pull compensation is a single widening rather than a per-machine model.

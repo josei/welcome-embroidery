@@ -835,3 +835,13 @@ test('PES export has the PES signature, sew segment sections and the PEC block i
  const pec=bytes[8]|(bytes[9]<<8)|(bytes[10]<<16)|(bytes[11]<<24);
  assert.equal(String.fromCharCode(...bytes.slice(pec,pec+3)),'LA:');
 });
+
+test('paired motif loops follow a tapered satin width',()=>{
+ const doc=initialDocument();doc.objects=[];
+ applyOperations(doc,[{op:'add_path',id:'p',x:0,y:0,points:[[-20,0],[20,0]],satinWidth:2},{op:'set_object',id:'p',stitch:'motif',motifPair:true}]);
+ const flat=compile(doc).bounds;
+ applyOperations(doc,[{op:'set_object',id:'p',widthStops:[[0,2],[1,8]]}]);
+ validateDocument(doc);
+ const taper=compile(doc).bounds;
+ assert.ok(taper[3]>flat[3]+2,'the wide end pushes the loops further out ('+taper[3]+' vs '+flat[3]+')');
+});

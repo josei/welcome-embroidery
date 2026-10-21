@@ -1086,3 +1086,11 @@ test('PES is an export format and downloads as a .pes file',async({page})=>{
  const download=page.waitForEvent('download');await page.locator('#download').click();
  expect((await download).suggestedFilename()).toMatch(/\.pes$/);expect(errors).toEqual([]);
 });
+
+test('paired motif loops can taper with the end width in the panel',async({page})=>{
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());await page.locator('#new').click();
+ await page.locator('#path').click();const m=await ctm(page);for(const [x,y] of [[-20,0],[20,0]]){const s=toScreen(m,x,y);await page.mouse.click(s.x,s.y);}await page.keyboard.press('Enter');
+ await page.locator('#type').selectOption('motif');await page.locator('#motifPair').check();
+ await expect(page.locator('#satinEndRow')).toBeVisible();await page.locator('#satinWidthEnd').fill('8');await page.locator('#satinWidthEnd').press('Tab');
+ await expect(page.locator('#satinWidthEnd')).toHaveValue('8');expect(errors).toEqual([]);
+});

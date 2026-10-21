@@ -93,7 +93,8 @@ Reference: Wilcom EmbroideryStudio, the commercial digitizing suite. Its feature
 | Motifs | Motif loops repeated along a path (first step: fixed loops every 4 mm) | Built (basic) |
 | Motifs | Paired motif loops that follow column widths (one loop each side at the satin width) | Built (basic) |
 | Motifs | Motif fill: loops on a staggered grid inside a closed shape | Built (basic) |
-| Motifs | 3D warp distortion of motifs | Not started |
+| Motifs | Motif warp along a tapered column: paired loops follow the satin width, including its end width | Built (basic) |
+| Motifs | 3D warp distortion of motifs (surface warp, not only width) | Not started |
 | Embellishment | Sequins as a stitch type: a centre stitch with a fixing loop every few mm (single-sequin placement; no twin-sequin or dispensing control) | Built (basic) |
 | Embellishment | Beads as a stitch type: short passes across the path at each point (basic beading; no bead-shape or dispensing control) | Built (basic) |
 | Embellishment | Bling as a stitch type: a stone at each point, a centre stitch with two fixing rings (no stone shapes, settings or library) | Built (basic) |
