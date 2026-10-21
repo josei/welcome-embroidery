@@ -820,6 +820,44 @@ function sourceMatches(decoded,o){if(JSON.stringify(decoded.bounds)!==JSON.strin
 function vp3LayerHasUnsupportedTravel(stitches){for(let i=0;i<stitches.length;i++){const p=stitches[i],prev=stitches[i-1],next=stitches[i+1];if(p.cmd==='trim'||p.cmd==='stop')return true;if(p.cmd==='jump'){const blockOrigin=i===0||prev?.cmd==='color'||next?.cmd==='color',noOp=prev&&p.x===prev.x&&p.y===prev.y;if(!blockOrigin&&!noOp)return true;}}return false;}
 // Tajima DST writer, following pyembroidery's DstWriter/encode_record: 512-byte ASCII header, balanced-ternary 3-byte records
 // (max 12.1 mm per record), long jumps split, a trim is three small alternating jumps, colour change and stop are 0xC3, end is 0xF3.
+// Brother PEC thread chart, 1-based: the machine stores these indices for each colour block.
+const PEC_CHART=[[14,31,124],[10,85,163],[0,135,119],[75,107,175],[237,23,31],[209,92,0],[145,54,151],[228,154,203],[145,95,172],[158,214,125],[232,169,0],[254,186,53],[255,255,0],[112,188,31],[186,152,0],[168,168,168],[125,111,0],[255,255,179],[79,85,86],[0,0,0],[11,61,145],[119,1,118],[41,49,51],[42,19,1],[246,74,138],[178,118,36],[252,187,197],[254,55,15],[240,240,240],[106,28,138],[168,221,196],[37,132,187],[254,179,67],[255,243,107],[208,166,96],[209,84,0],[102,186,73],[19,74,70],[135,135,135],[216,204,198],[67,86,7],[253,217,222],[249,147,188],[0,56,34],[178,175,212],[104,106,176],[239,227,185],[247,56,102],[181,75,100],[19,43,26],[199,1,86],[254,158,50],[168,222,235],[0,103,62],[78,41,144],[47,126,32],[255,204,204],[255,217,17],[9,91,166],[240,249,112],[227,243,91],[255,153,0],[255,240,141],[255,200,200]];
+const pecChartIndex=hex=>{const m=/^#?([0-9a-f]{6})$/i.exec(hex||"")||[0,"527461"];const n=parseInt(m[1],16),c=[n>>16&255,n>>8&255,n&255];let best=0,bd=Infinity;PEC_CHART.forEach((r,i)=>{const d=(r[0]-c[0])**2+(r[1]-c[1])**2+(r[2]-c[2])**2;if(d<bd){bd=d;best=i;}});return best+1;};
+// PEC (Brother): 512-byte header with palette indices, a stitch block in 0.1 mm, then blank 48 x 38 icons (one overview, one per colour).
+export function encodePec(plan,name="Welcome"){
+ if(plan.errors.length)throw Error(plan.errors.join(" "));
+ const seq=[];for(const p of plan.stitches){if(p.cmd==="end")continue;if(p.thread&&seq.at(-1)!==p.thread)seq.push(p.thread);}
+ if(!seq.length)seq.push("#527461");
+ const indices=seq.slice(0,255).map(pecChartIndex);
+ const body=[];const value=(v,long,flag)=>{if(!long&&v>-64&&v<63){body.push(v&0x7F);return;}let x=v&0x0FFF;x|=0x8000;x|=flag<<8;body.push((x>>8)&0xFF,x&0xFF);};
+ let xx=0,yy=0,jumping=true,init=true,colourTwo=true;
+ const chunks=(dx,dy,f)=>{let rx=dx,ry=dy;do{const sx=Math.max(-2047,Math.min(2047,rx)),sy=Math.max(-2047,Math.min(2047,ry));f(sx,sy);rx-=sx;ry-=sy;}while(rx!==0||ry!==0);};
+ let minX=Infinity,minY=Infinity,maxX=-Infinity,maxY=-Infinity;
+ for(const p of plan.stitches){
+  if(p.cmd==="end"){body.push(0xFF);break;}
+  const nx=Math.round(p.x*10),ny=Math.round(p.y*10);
+  minX=Math.min(minX,nx);maxX=Math.max(maxX,nx);minY=Math.min(minY,ny);maxY=Math.max(maxY,ny);
+  if(p.cmd==="stitch"){if(jumping){if(nx-xx!==0&&ny-yy!==0){value(0,false,0);value(0,false,0);}jumping=false;}chunks(nx-xx,ny-yy,(sx,sy)=>{value(sx,false,0);value(sy,false,0);});xx=nx;yy=ny;}
+  else if(p.cmd==="jump"){jumping=true;const flag=init?0x10:0x20;chunks(nx-xx,ny-yy,(sx,sy)=>{value(sx,true,flag);value(sy,true,flag);});xx=nx;yy=ny;}
+  else if(p.cmd==="color"||p.cmd==="stop"){if(jumping){value(0,false,0);value(0,false,0);jumping=false;}body.push(0xFE,0xB0,colourTwo?2:1);colourTwo=!colourTwo;}
+  else if(p.cmd==="trim"){}
+  else throw Error(`Unsupported stitch command for PEC: ${p.cmd}`);
+  init=false;
+ }
+ if(body.at(-1)!==0xFF)body.push(0xFF);
+ const width=Math.max(0,Math.round(maxX-minX)),height=Math.max(0,Math.round(maxY-minY));
+ const out=[];const put=(...bs)=>out.push(...bs);put(...Array.from("#PEC0001",c=>c.charCodeAt(0)));
+ const str=(s,n)=>[...String(s).replace(/[^\x20-\x7e]/g,"?").padEnd(n," ").slice(0,n)].map(c=>c.charCodeAt(0));
+ put(...str("LA:"+String(name).replace(/[^\x20-\x7e]/g,"?").slice(0,16).padEnd(16," "),19),13);
+ put(...new Array(12).fill(0x20),0xFF,0x00,0x06,0x26,...new Array(12).fill(0x20));
+ put(indices.length-1,...indices);
+ while(out.length<520)out.push(0x20);
+ const blockLen=16+body.length;
+ put(0x00,0x00,blockLen&0xFF,(blockLen>>8)&0xFF,(blockLen>>16)&0xFF,0x31,0xFF,0xF0,width&0xFF,(width>>8)&0xFF,height&0xFF,(height>>8)&0xFF,0xE0,0x01,0xB0,0x01);
+ for(const b of body)out.push(b);
+ for(let i=0;i<=indices.length;i++)for(let k=0;k<6*38;k++)out.push(0);
+ return Uint8Array.from(out);
+}
 // EXP (Melco): signed byte pairs in 0.1 mm, y negated; 80 04 = jump, 80 01 = colour change, 80 80 07 00 = trim, no header.
 export function encodeExp(plan){if(plan.errors.length)throw Error(plan.errors.join(' '));const out=[];let x=0,y=0;const move=(nx,ny,jump)=>{let dx=nx-x,dy=ny-y;while(dx!==0||dy!==0){const sx=Math.max(-127,Math.min(127,dx)),sy=Math.max(-127,Math.min(127,dy));if(jump)out.push(0x80,0x04);out.push(sx&0xff,(-sy)&0xff);dx-=sx;dy-=sy;x+=sx;y+=sy;}};for(const p of plan.stitches){const nx=Math.round(p.x*10),ny=Math.round(p.y*10);if(p.cmd==='end')continue;if(p.cmd==='color'||p.cmd==='stop'){out.push(0x80,0x01,0,0);move(nx,ny,true);}else if(p.cmd==='jump')move(nx,ny,true);else if(p.cmd==='trim')out.push(0x80,0x80,0x07,0x00);else if(p.cmd==='stitch')move(nx,ny,false);else throw Error(`Unsupported stitch command for EXP: ${p.cmd}`);}return Uint8Array.from(out);}
 export function encodeDst(plan,name='Welcome'){
@@ -844,7 +882,7 @@ export function encodeDst(plan,name='Welcome'){
 }
 export function encode(plan,format,color,hoop=110,document=null){
   if(document)hoop=hoopSize(document);
-  if(!(['jef','vp3','dst','exp'].includes(format)))throw Error(`Unsupported machine format: ${format}. Choose JEF, VP3, DST or EXP.`);
+  if(!(['jef','vp3','dst','exp','pec'].includes(format)))throw Error(`Unsupported machine format: ${format}. Choose JEF, VP3, DST, EXP or PEC.`);
   if(plan.errors.length)throw Error(plan.errors.join(' '));
   const layers=(document?.objects||[]).filter(o=>o.visible!==false&&o.kind==='stitch_layer');
   if(layers.length===1&&document.objects.length===1&&layerCanPassThrough(layers[0],format)){
@@ -852,7 +890,7 @@ export function encode(plan,format,color,hoop=110,document=null){
     if(bytes.byteLength===layers[0].source.size){try{const checked=decodeEmbroidery(bytes,format);if(sourceMatches(checked,layers[0]))return bytes;}catch{}}
   }
   if(format==='vp3'&&layers.some(o=>vp3LayerHasUnsupportedTravel(o.stitches)))throw Error('This VP3 design contains intra-block travel, trim, or stop commands the current VP3 writer cannot preserve after edits. Leading color-block origin moves and no-op moves are preserved. Export JEF or restore the unchanged VP3 source.');
-  if(format==='jef')return encodeJef(plan,color,hoop);if(format==='dst')return encodeDst(plan,document?.name||'Welcome');if(format==='exp')return encodeExp(plan);return encodeVp3(plan,color);
+  if(format==='jef')return encodeJef(plan,color,hoop);if(format==='dst')return encodeDst(plan,document?.name||'Welcome');if(format==='exp')return encodeExp(plan);if(format==='pec')return encodePec(plan,document?.name||'Welcome');return encodeVp3(plan,color);
 }
 export {geometry,objectBounds};
 

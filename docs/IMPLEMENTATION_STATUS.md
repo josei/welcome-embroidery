@@ -124,6 +124,11 @@ Updated 2026-10-06. This source provides a working static editor, local MCP serv
 - EXP (Melco) export: signed byte pairs in 0.1 mm, jumps as 80 04, colour changes as 80 01, trims as 80 80 07 00, no header. Long moves are split into 12.7 mm chunks. Exports are checked by decoding them with pyembroidery (installed locally in a venv): every planned needle and jump position appears in order in the decoded path. Import is not supported. EXP is not in the MCP schema.
 - Covered by an engine round-trip test and an e2e test. The pyembroidery check is a manual step, not part of the test suite.
 
+## 2026-10-21 PEC export
+
+- PEC (Brother) export: `#PEC0001`, a 512-byte header with the colour blocks as Brother chart indices (the chart is the 64-colour PEC thread chart, matched to the nearest colour), a stitch block in 0.1 mm with short and long values and jump and trim flags, and blank 48 x 38 icons. Long moves are split to 2047 units. Exports are checked by decoding with pyembroidery: every planned position appears in order in the decoded path and the thread count matches. Import and PES are not supported. PEC is not in the MCP schema.
+- Covered by an engine structure test and an e2e test. The pyembroidery check is a manual step.
+
 ## Known limits
 
 - The compiler is original JavaScript, not extracted/pinned Ink/Stitch digitizing code. Tie-in/tie-off and trim are simple defaults with no machine-specific trim rules, and pull compensation is a single widening rather than a per-machine model.

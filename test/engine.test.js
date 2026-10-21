@@ -813,3 +813,13 @@ test('EXP export decodes back to the planned stitch path',async()=>{
  const last=decoded.at(-1);const lastPlanned=plan.stitches.filter(s=>s.cmd!=='end').at(-1);
  assert.ok(Math.abs(last[0]-Math.round(lastPlanned.x*10))<=1&&Math.abs(last[1]-Math.round(lastPlanned.y*10))<=1,'the last decoded needle matches the last planned needle');
 });
+
+test('PEC export starts with the PEC signature and a 512-byte header before the stitch block',async()=>{
+ const {encodePec}=await import('../src/engine.js');
+ const doc=initialDocument();doc.objects=[];
+ applyOperations(doc,[{op:'add_shape',id:'r',kind:'rect',x:-8,y:-6,width:16,height:12,thread:'#527461',stitch:'run'}]);
+ const bytes=encodePec(compile(doc),'Badge');
+ assert.equal(String.fromCharCode(...bytes.slice(0,8)),'#PEC0001');
+ assert.equal(String.fromCharCode(...bytes.slice(8,11)),'LA:');
+ assert.equal(bytes[520],0x00);assert.equal(bytes[521],0x00);assert.equal(bytes[525],0x31);
+});

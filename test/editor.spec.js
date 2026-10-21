@@ -1072,3 +1072,10 @@ test('EXP is an export format and downloads as an .exp file',async({page})=>{
  const download=page.waitForEvent('download');await page.locator('#download').click();
  expect((await download).suggestedFilename()).toMatch(/\.exp$/);expect(errors).toEqual([]);
 });
+
+test('PEC is an export format and downloads as a .pec file',async({page})=>{
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());await page.locator('#new').click();
+ await page.locator('#rect').click();await page.locator('#export').click();await page.locator('#format').selectOption('pec');
+ const download=page.waitForEvent('download');await page.locator('#download').click();
+ expect((await download).suggestedFilename()).toMatch(/\.pec$/);expect(errors).toEqual([]);
+});
