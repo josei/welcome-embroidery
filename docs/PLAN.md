@@ -94,7 +94,8 @@ Reference: Wilcom EmbroideryStudio, the commercial digitizing suite. Its feature
 | Motifs | Paired motif loops that follow column widths (one loop each side at the satin width) | Built (basic) |
 | Motifs | Motif fill: loops on a staggered grid inside a closed shape | Built (basic) |
 | Motifs | 3D warp distortion of motifs | Not started |
-| Embellishment | Sequins (single and twin-sequin machines), beading and bling | Not started |
+| Embellishment | Sequins as a stitch type: a centre stitch with a fixing loop every few mm (single-sequin placement; no twin-sequin or dispensing control) | Built (basic) |
+| Embellishment | Beading and bling | Not started |
 | Embellishment | Redwork (out-and-back run) | Built |
 | Embellishment | Buttonholes (satin with bar tacks at both ends) | Built |
 | Sequencing | Object order, start and end points, jumps and trims | Built |

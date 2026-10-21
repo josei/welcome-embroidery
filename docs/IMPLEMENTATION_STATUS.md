@@ -94,6 +94,11 @@ Updated 2026-10-06. This source provides a working static editor, local MCP serv
 - Motif loops, paired loops and motif fills take Motif spacing (1–20 mm, default 4) and Motif size (0.4–6 mm, default 1.6) from the object, set in the panel. Stored as `motifSpacing` and `motifSize`; not in the MCP schema. Out-of-range values fail validation.
 - Covered by an engine test and an e2e test.
 
+## 2026-10-21 sequins
+
+- Sequins is a stitch type on paths: each sequin is a centre stitch with a fixing loop, every 8 mm by default with a 3 mm loop. The spacing and loop size controls apply (labels now read Spacing and Loop size). Stored as `stitch: "sequin"`; not in the MCP schema. No twin-sequin or dispensing control yet.
+- Covered by an engine test and an e2e test.
+
 ## Known limits
 
 - The compiler is original JavaScript, not extracted/pinned Ink/Stitch digitizing code. Tie-in/tie-off and trim are simple defaults with no machine-specific trim rules, and pull compensation is a single widening rather than a per-machine model.

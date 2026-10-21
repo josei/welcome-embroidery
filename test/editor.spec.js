@@ -1025,3 +1025,11 @@ test('motif spacing can be changed in the panel and sews more loops when smaller
  const wide=await count();await page.locator('#motifSpacing').fill('2');await page.locator('#motifSpacing').press('Tab');
  await expect.poll(count).toBeGreaterThan(wide*1.6);expect(errors).toEqual([]);
 });
+
+test('sequins are a stitch type that sews fixing loops along the path',async({page})=>{
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());await page.locator('#new').click();
+ await page.locator('#path').click();const m=await ctm(page);for(const [x,y] of [[-20,0],[20,0]]){const s=toScreen(m,x,y);await page.mouse.click(s.x,s.y);}await page.keyboard.press('Enter');
+ const count=async()=>Number(((await page.locator('#count').textContent()).match(/^([\d,]+) stitches/)||[,'0'])[1].replace(/,/g,''));
+ const run=await count();await page.locator('#type').selectOption('sequin');
+ await expect(page.locator('#motifSpacingRow')).toBeVisible();await expect.poll(count).toBeGreaterThan(run*2);expect(errors).toEqual([]);
+});

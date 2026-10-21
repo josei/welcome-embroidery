@@ -758,3 +758,11 @@ test('motif spacing and size change how many loops are sewn',()=>{
  applyOperations(doc,[{op:'set_object',id:'m',motifSpacing:4,motifSize:3}]);
  applyOperations(doc,[{op:'set_object',id:'m',motifSize:9}]);assert.throws(()=>validateDocument(doc),/motif spacing or size/);
 });
+
+test('sequins sew a centre stitch with a fixing loop every few mm',()=>{
+ const doc=initialDocument();doc.objects=[];
+ applyOperations(doc,[{op:'add_path',id:'s',x:0,y:0,points:[[-20,0],[20,0]]},{op:'set_object',id:'s',stitch:'sequin'}]);
+ validateDocument(doc);
+ const plan=compile(doc);assert.deepEqual(plan.errors,[]);
+ assert.ok(plan.count>20,'sequins are sewn ('+plan.count+')');
+});
