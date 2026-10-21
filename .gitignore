@@ -11,3 +11,4 @@ docs/ORCHESTRATION.md
 _site/
 src-tauri/target/
 src-tauri/gen/
+src-tauri/resources/
