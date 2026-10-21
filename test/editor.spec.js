@@ -1101,3 +1101,10 @@ test('PES v6 is an export format and downloads as a .pes file',async({page})=>{
  const download=page.waitForEvent('download');await page.locator('#download').click();
  expect((await download).suggestedFilename()).toMatch(/\.pes$/);expect(errors).toEqual([]);
 });
+
+test('motif loop shape can be set to leaf in the panel',async({page})=>{
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());await page.locator('#new').click();
+ await page.locator('#path').click();const m=await ctm(page);for(const [x,y] of [[-20,0],[20,0]]){const s=toScreen(m,x,y);await page.mouse.click(s.x,s.y);}await page.keyboard.press('Enter');
+ await page.locator('#type').selectOption('motif');await expect(page.locator('#motifShapeRow')).toBeVisible();
+ await page.locator('#motifShape').selectOption('leaf');await expect(page.locator('#motifShape')).toHaveValue('leaf');expect(errors).toEqual([]);
+});

@@ -144,6 +144,11 @@ Updated 2026-10-06. This source provides a working static editor, local MCP serv
 - PES version 6 export (`#PES0060`): the v6 header with the design colours as the thread table (no catalog names, descriptions or brands), the same sew segments and colour log plus the v6 node records, the PEC block, and the colour addendum. Exports are checked by decoding with pyembroidery: every planned position appears in order in the decoded path and the thread count matches. Machine acceptance is not verified; the thread table is minimal. Not in the MCP schema. The download uses the .pes extension.
 - Covered by an engine structure test and an e2e test. The pyembroidery check is a manual step.
 
+## 2026-10-21 leaf motif loops
+
+- Motif loops and paired loops have a Loop shape: Circle (default) or Leaf. A leaf loop is an ellipse about 1.6 times longer along the path than across it, so it turns with the curve. Stored as `motifShape`; not in the MCP schema. This is a decision: the surface-style warp is realised as oriented loops, not a 3D surface.
+- Covered by an engine test and an e2e test.
+
 ## Known limits
 
 - The compiler is original JavaScript, not extracted/pinned Ink/Stitch digitizing code. Tie-in/tie-off and trim are simple defaults with no machine-specific trim rules, and pull compensation is a single widening rather than a per-machine model.

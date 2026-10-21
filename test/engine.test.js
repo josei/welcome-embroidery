@@ -856,3 +856,15 @@ test('PES v6 export has its own signature, a thread table and the PEC block it p
  const pec=bytes[8]|(bytes[9]<<8)|(bytes[10]<<16)|(bytes[11]<<24);
  assert.equal(String.fromCharCode(...bytes.slice(pec,pec+3)),'LA:');
 });
+
+test('leaf motif loops are elongated along the path, circles are round',()=>{
+ const doc=initialDocument();doc.objects=[];
+ applyOperations(doc,[{op:'add_path',id:'m',x:0,y:0,points:[[-20,0],[20,0]]},{op:'set_object',id:'m',stitch:'motif',motifSize:4}]);
+ const circle=compile(doc).bounds;
+ applyOperations(doc,[{op:'set_object',id:'m',motifShape:'leaf'}]);
+ validateDocument(doc);
+ const leaf=compile(doc).bounds;
+ assert.ok(leaf[3]-leaf[1]<circle[3]-circle[1]-.5,'a leaf is narrower across the path than a circle');
+ applyOperations(doc,[{op:'set_object',id:'m',motifShape:'star'}]);
+ assert.throws(()=>validateDocument(doc),/motif shape/);
+});
