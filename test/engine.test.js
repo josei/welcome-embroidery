@@ -800,3 +800,16 @@ test('batch documents lay copies out per hoop and every hoop compiles',async()=>
  assert.equal(docs.length,2);assert.equal(docs[0].objects.length+docs[1].objects.length,40);
  for(const d of docs){const plan=compile(d);assert.deepEqual(plan.errors,[]);}
 });
+
+test('EXP export decodes back to the planned stitch path',async()=>{
+ const {encodeExp}=await import('../src/engine.js');
+ const doc=initialDocument();doc.objects=[];
+ applyOperations(doc,[{op:'add_shape',id:'r',kind:'rect',x:-8,y:-6,width:16,height:12,thread:'#527461',stitch:'run'}]);
+ const plan=compile(doc);const bytes=encodeExp(plan);
+ let x=0,y=0,i=0;const decoded=[];
+ while(i+1<bytes.length){if(bytes[i]!==0x80){const dx=(bytes[i]<<24)>>24,dy=-((bytes[i+1]<<24)>>24);x+=dx;y+=dy;decoded.push([x,y,'s']);i+=2;continue;}const control=bytes[i+1];const dx=(bytes[i+2]<<24)>>24,dy=-((bytes[i+3]<<24)>>24);i+=4;if(control===0x80)continue;if(control===0x01)continue;if(control===0x04){x+=dx;y+=dy;continue;}}
+ const planned=plan.stitches.filter(s=>s.cmd==='stitch').map(s=>[Math.round(s.x*10),Math.round(s.y*10)]);
+ assert.ok(decoded.length>0&&planned.length>0);
+ const last=decoded.at(-1);const lastPlanned=plan.stitches.filter(s=>s.cmd!=='end').at(-1);
+ assert.ok(Math.abs(last[0]-Math.round(lastPlanned.x*10))<=1&&Math.abs(last[1]-Math.round(lastPlanned.y*10))<=1,'the last decoded needle matches the last planned needle');
+});

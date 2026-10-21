@@ -104,7 +104,8 @@ Reference: Wilcom EmbroideryStudio, the commercial digitizing suite. Its feature
 | Sequencing | Batch export: one JEF file per hoop (copies laid out on the batch grid) | Built (JEF only) |
 | Preview | 3D preview and stitch playback | Built |
 | Files | JEF and VP3 export and import, DST import and export | Built |
-| Files | Other machine formats (PES, EXP, and so on) | Not started |
+| Files | EXP (Melco) export | Built (export only; checked by decoding with pyembroidery) |
+| Files | Other machine formats (PES, and so on) | Not started |
 | Libraries | Thread brand libraries | Not started (licensed data) |
 | Automation | Headless MCP document sessions for agents | Built |
 

@@ -820,6 +820,8 @@ function sourceMatches(decoded,o){if(JSON.stringify(decoded.bounds)!==JSON.strin
 function vp3LayerHasUnsupportedTravel(stitches){for(let i=0;i<stitches.length;i++){const p=stitches[i],prev=stitches[i-1],next=stitches[i+1];if(p.cmd==='trim'||p.cmd==='stop')return true;if(p.cmd==='jump'){const blockOrigin=i===0||prev?.cmd==='color'||next?.cmd==='color',noOp=prev&&p.x===prev.x&&p.y===prev.y;if(!blockOrigin&&!noOp)return true;}}return false;}
 // Tajima DST writer, following pyembroidery's DstWriter/encode_record: 512-byte ASCII header, balanced-ternary 3-byte records
 // (max 12.1 mm per record), long jumps split, a trim is three small alternating jumps, colour change and stop are 0xC3, end is 0xF3.
+// EXP (Melco): signed byte pairs in 0.1 mm, y negated; 80 04 = jump, 80 01 = colour change, 80 80 07 00 = trim, no header.
+export function encodeExp(plan){if(plan.errors.length)throw Error(plan.errors.join(' '));const out=[];let x=0,y=0;const move=(nx,ny,jump)=>{let dx=nx-x,dy=ny-y;while(dx!==0||dy!==0){const sx=Math.max(-127,Math.min(127,dx)),sy=Math.max(-127,Math.min(127,dy));if(jump)out.push(0x80,0x04);out.push(sx&0xff,(-sy)&0xff);dx-=sx;dy-=sy;x+=sx;y+=sy;}};for(const p of plan.stitches){const nx=Math.round(p.x*10),ny=Math.round(p.y*10);if(p.cmd==='end')continue;if(p.cmd==='color'||p.cmd==='stop'){out.push(0x80,0x01,0,0);move(nx,ny,true);}else if(p.cmd==='jump')move(nx,ny,true);else if(p.cmd==='trim')out.push(0x80,0x80,0x07,0x00);else if(p.cmd==='stitch')move(nx,ny,false);else throw Error(`Unsupported stitch command for EXP: ${p.cmd}`);}return Uint8Array.from(out);}
 export function encodeDst(plan,name='Welcome'){
   if(plan.errors.length)throw Error(plan.errors.join(' '));
   const XBITS={p81:2,n81:3,p27:2,n27:3,p9:2,n9:3,p3:0,n3:1,p1:0,n1:1},YBITS={p81:5,n81:4,p27:5,n27:4,p9:5,n9:4,p3:7,n3:6,p1:7,n1:6};
@@ -842,7 +844,7 @@ export function encodeDst(plan,name='Welcome'){
 }
 export function encode(plan,format,color,hoop=110,document=null){
   if(document)hoop=hoopSize(document);
-  if(!['jef','vp3','dst'].includes(format))throw Error(`Unsupported machine format: ${format}. Choose JEF, VP3 or DST.`);
+  if(!(['jef','vp3','dst','exp'].includes(format)))throw Error(`Unsupported machine format: ${format}. Choose JEF, VP3, DST or EXP.`);
   if(plan.errors.length)throw Error(plan.errors.join(' '));
   const layers=(document?.objects||[]).filter(o=>o.visible!==false&&o.kind==='stitch_layer');
   if(layers.length===1&&document.objects.length===1&&layerCanPassThrough(layers[0],format)){
@@ -850,7 +852,7 @@ export function encode(plan,format,color,hoop=110,document=null){
     if(bytes.byteLength===layers[0].source.size){try{const checked=decodeEmbroidery(bytes,format);if(sourceMatches(checked,layers[0]))return bytes;}catch{}}
   }
   if(format==='vp3'&&layers.some(o=>vp3LayerHasUnsupportedTravel(o.stitches)))throw Error('This VP3 design contains intra-block travel, trim, or stop commands the current VP3 writer cannot preserve after edits. Leading color-block origin moves and no-op moves are preserved. Export JEF or restore the unchanged VP3 source.');
-  if(format==='jef')return encodeJef(plan,color,hoop);if(format==='dst')return encodeDst(plan,document?.name||'Welcome');return encodeVp3(plan,color);
+  if(format==='jef')return encodeJef(plan,color,hoop);if(format==='dst')return encodeDst(plan,document?.name||'Welcome');if(format==='exp')return encodeExp(plan);return encodeVp3(plan,color);
 }
 export {geometry,objectBounds};
 
