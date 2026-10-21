@@ -1108,3 +1108,12 @@ test('motif loop shape can be set to leaf in the panel',async({page})=>{
  await page.locator('#type').selectOption('motif');await expect(page.locator('#motifShapeRow')).toBeVisible();
  await page.locator('#motifShape').selectOption('leaf');await expect(page.locator('#motifShape')).toHaveValue('leaf');expect(errors).toEqual([]);
 });
+
+test('edge closing can be turned on for a clipped run in the panel',async({page})=>{
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());await page.locator('#new').click();
+ await page.locator('#path').click();const m=await ctm(page);for(const [x,y] of [[-30,0],[30,0]]){const s=toScreen(m,x,y);await page.mouse.click(s.x,s.y);}await page.keyboard.press('Enter');
+ await page.locator('#type').selectOption('run');
+ await page.locator('#ellipse').click();await page.keyboard.press('Control+a');await expect(page.locator('#clipBtn')).toBeEnabled();await page.locator('#clipBtn').click();
+ await page.locator('.object-row').first().click();await expect(page.locator('#edgeCloseRow')).toBeVisible();
+ await page.locator('#edgeClose').check();await expect(page.locator('#edgeClose')).toBeChecked();expect(errors).toEqual([]);
+});

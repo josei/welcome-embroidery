@@ -118,7 +118,8 @@ Reference: Wilcom EmbroideryStudio, the commercial digitizing suite. Its feature
 
 Everything in the feature list is built, partly built, or deliberately out of scope. What remains open, and why it is not built here:
 
-- Closing edge stitches on clipped satin and run objects: needs a sew-out check on a machine; deferred.
+- Closing edge stitches on clipped run objects: built as an opt-in setting (Close edges at the mask); off by default until a sew-out check.
+- Closing edge stitches on clipped satin: not built yet.
 - Thread brand libraries: licensed data; out of scope.
 - Several live document slots per agent link: would broaden agent permissions; out of scope.
 - A real Safari device check: needs a device.

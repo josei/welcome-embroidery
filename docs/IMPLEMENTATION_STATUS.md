@@ -159,6 +159,11 @@ Updated 2026-10-06. This source provides a working static editor, local MCP serv
 - The desktop bundle includes the Node runtime that ran the build (`npm run desktop:prepare` copies it to `runtime/`, with a NODE-NOTICE.txt). The app prefers that runtime and falls back to a system `node`. Decision: the runtime comes from the build machine, so each CI platform bundles its own Node (about 125 MB; the bundle is large). Verified on Linux with no Node on the PATH: the server started and the window opened.
 - Not automated; macOS and Windows bundles are built by CI and have not run yet.
 
+## 2026-10-21 edge closing for clipped runs
+
+- A clipped run can close its cut ends: with Close edges at the mask on, each place a mask cuts the run gets a short back-stitch over its last segment. This is opt-in (`edgeClose`, off by default), so existing output does not change. Decision: closing is a back-stitch, not a border of extra stitches; satin is not covered yet. Needs a sew-out check before it is turned on by default.
+- Covered by an engine test and an e2e test.
+
 ## Known limits
 
 - The compiler is original JavaScript, not extracted/pinned Ink/Stitch digitizing code. Tie-in/tie-off and trim are simple defaults with no machine-specific trim rules, and pull compensation is a single widening rather than a per-machine model.

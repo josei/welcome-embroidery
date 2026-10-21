@@ -868,3 +868,15 @@ test('leaf motif loops are elongated along the path, circles are round',()=>{
  applyOperations(doc,[{op:'set_object',id:'m',motifShape:'star'}]);
  assert.throws(()=>validateDocument(doc),/motif shape/);
 });
+
+test('edge closing adds a back-stitch at each cut end of a clipped run, and is off by default',()=>{
+ const doc=initialDocument();doc.objects=[];
+ applyOperations(doc,[{op:'add_shape',id:'mask',kind:'rect',x:-10,y:-10,width:20,height:20,thread:'#527461',stitch:'fill'},{op:'add_path',id:'r',x:0,y:0,points:[[-30,0],[30,0]],stitch:'run'}]);
+ applyOperations(doc,[{op:'clip',ids:['r'],maskId:'mask'}]);
+ const open=compile(doc).count;
+ applyOperations(doc,[{op:'set_object',id:'r',edgeClose:true}]);
+ validateDocument(doc);
+ assert.ok(compile(doc).count>open,'closing adds stitches at the two cut ends');
+ applyOperations(doc,[{op:'set_object',id:'r',edgeClose:'yes'}]);
+ assert.throws(()=>validateDocument(doc),/edgeClose/);
+});
