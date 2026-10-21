@@ -96,7 +96,7 @@ Reference: Wilcom EmbroideryStudio, the commercial digitizing suite. Its feature
 | Motifs | 3D warp distortion of motifs | Not started |
 | Embellishment | Sequins as a stitch type: a centre stitch with a fixing loop every few mm (single-sequin placement; no twin-sequin or dispensing control) | Built (basic) |
 | Embellishment | Beads as a stitch type: short passes across the path at each point (basic beading; no bead-shape or dispensing control) | Built (basic) |
-| Embellishment | Bling (stones and their settings) | Not started |
+| Embellishment | Bling as a stitch type: a stone at each point, a centre stitch with two fixing rings (no stone shapes, settings or library) | Built (basic) |
 | Embellishment | Redwork (out-and-back run) | Built |
 | Embellishment | Buttonholes (satin with bar tacks at both ends) | Built |
 | Sequencing | Object order, start and end points, jumps and trims | Built |

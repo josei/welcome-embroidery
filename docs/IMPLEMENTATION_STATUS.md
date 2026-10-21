@@ -104,6 +104,11 @@ Updated 2026-10-06. This source provides a working static editor, local MCP serv
 - Beads is a stitch type on paths: three short passes back and forth across the path at each point, every 6 mm by default with a 2 mm length. The spacing and size controls apply (the size control now reads Size). Stored as `stitch: "bead"`; not in the MCP schema. Bling stays not started.
 - Covered by an engine test and an e2e test.
 
+## 2026-10-21 bling
+
+- Bling is a stitch type on paths: each stone is a centre stitch with two concentric fixing rings, every 8 mm by default with a 4 mm size. The spacing and size controls apply. Stored as `stitch: "bling"`; not in the MCP schema. There are no stone shapes, bling settings or stone library.
+- Covered by an engine test and an e2e test.
+
 ## Known limits
 
 - The compiler is original JavaScript, not extracted/pinned Ink/Stitch digitizing code. Tie-in/tie-off and trim are simple defaults with no machine-specific trim rules, and pull compensation is a single widening rather than a per-machine model.

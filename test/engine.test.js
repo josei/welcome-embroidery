@@ -774,3 +774,11 @@ test('beads sew short passes across the path at each point',()=>{
  const plan=compile(doc);assert.deepEqual(plan.errors,[]);
  assert.ok(plan.count>20,'beads are sewn ('+plan.count+')');
 });
+
+test('bling sews a stone with a centre stitch and two fixing rings',()=>{
+ const doc=initialDocument();doc.objects=[];
+ applyOperations(doc,[{op:'add_path',id:'g',x:0,y:0,points:[[-20,0],[20,0]]},{op:'set_object',id:'g',stitch:'bling'}]);
+ validateDocument(doc);
+ const plan=compile(doc);assert.deepEqual(plan.errors,[]);
+ assert.ok(plan.count>40,'bling stones are sewn ('+plan.count+')');
+});
