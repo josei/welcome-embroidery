@@ -106,7 +106,8 @@ Reference: Wilcom EmbroideryStudio, the commercial digitizing suite. Its feature
 | Files | JEF and VP3 export and import, DST import and export | Built |
 | Files | EXP (Melco) export | Built (export only; checked by decoding with pyembroidery) |
 | Files | PEC (Brother) export | Built (export only; checked by decoding with pyembroidery) |
-| Files | PES and other machine formats | Not started |
+| Files | PES (version 1) export | Built (export only; checked by decoding with pyembroidery) |
+| Files | Other machine formats (for example PES version 6) | Not started |
 | Libraries | Thread brand libraries | Not started (licensed data) |
 | Automation | Headless MCP document sessions for agents | Built |
 

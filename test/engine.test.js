@@ -823,3 +823,15 @@ test('PEC export starts with the PEC signature and a 512-byte header before the 
  assert.equal(String.fromCharCode(...bytes.slice(8,11)),'LA:');
  assert.equal(bytes[520],0x00);assert.equal(bytes[521],0x00);assert.equal(bytes[525],0x31);
 });
+
+test('PES export has the PES signature, sew segment sections and the PEC block it points to',async()=>{
+ const {encodePes}=await import('../src/engine.js');
+ const doc=initialDocument();doc.objects=[];
+ applyOperations(doc,[{op:'add_shape',id:'r',kind:'rect',x:-8,y:-6,width:16,height:12,thread:'#527461',stitch:'run'}]);
+ const bytes=encodePes(compile(doc),'Badge');
+ const text=String.fromCharCode(...bytes.slice(0,bytes.length));
+ assert.equal(String.fromCharCode(...bytes.slice(0,8)),'#PES0001');
+ assert.ok(text.includes('CEmbOne')&&text.includes('CSewSeg'));
+ const pec=bytes[8]|(bytes[9]<<8)|(bytes[10]<<16)|(bytes[11]<<24);
+ assert.equal(String.fromCharCode(...bytes.slice(pec,pec+3)),'LA:');
+});
