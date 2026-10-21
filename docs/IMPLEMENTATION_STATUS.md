@@ -154,6 +154,11 @@ Updated 2026-10-06. This source provides a working static editor, local MCP serv
 - The Tauri app starts `node server.js` from its bundled `welcome/` folder on a free 127.0.0.1 port, sets DATA_DIR to the app data folder, and opens the window at that address, so the local MCP and agent links work in the desktop app. If Node is missing or the server does not start within 15 s, it opens the bundled static editor instead. The server exits when the app's stdin pipe closes, so killing the app does not leave it running (checked on Linux). `npm run desktop:prepare` stages the server with production dependencies only; the Node runtime is still the system one (decision for now; bundling Node per platform is the next step). CI builds for macOS and Windows have not run yet.
 - Covered by a manual Linux launch test (window and local server), not by the automated suites.
 
+## 2026-10-21 bundled Node runtime
+
+- The desktop bundle includes the Node runtime that ran the build (`npm run desktop:prepare` copies it to `runtime/`, with a NODE-NOTICE.txt). The app prefers that runtime and falls back to a system `node`. Decision: the runtime comes from the build machine, so each CI platform bundles its own Node (about 125 MB; the bundle is large). Verified on Linux with no Node on the PATH: the server started and the window opened.
+- Not automated; macOS and Windows bundles are built by CI and have not run yet.
+
 ## Known limits
 
 - The compiler is original JavaScript, not extracted/pinned Ink/Stitch digitizing code. Tie-in/tie-off and trim are simple defaults with no machine-specific trim rules, and pull compensation is a single widening rather than a per-machine model.

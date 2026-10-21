@@ -13,9 +13,9 @@ fn free_port() -> Option<u16> {
     TcpListener::bind("127.0.0.1:0").ok()?.local_addr().ok().map(|a| a.port())
 }
 
-fn start_server(dir: &PathBuf, data: &PathBuf, port: u16) -> Option<Child> {
+fn start_server(node: &PathBuf, dir: &PathBuf, data: &PathBuf, port: u16) -> Option<Child> {
     std::fs::create_dir_all(data).ok()?;
-    let mut child = Command::new("node")
+    let mut child = Command::new(node)
         .arg("server.js")
         .current_dir(dir)
         .env("PORT", port.to_string())
@@ -47,8 +47,11 @@ fn main() {
             let staged = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("resources").join("welcome");
             let dir = if bundled.join("server.js").exists() { bundled } else { staged };
             let data = app.path().app_data_dir()?;
+            let node_name = if cfg!(windows) { "node.exe" } else { "node" };
+            let bundled_node = dir.join("runtime").join(node_name);
+            let node = if bundled_node.exists() { bundled_node } else { PathBuf::from(node_name) };
             let started = match free_port() {
-                Some(port) if dir.join("server.js").exists() => start_server(&dir, &data, port).map(|child| (child, port)),
+                Some(port) if dir.join("server.js").exists() => start_server(&node, &dir, &data, port).map(|child| (child, port)),
                 _ => None,
             };
             let url = match started {
