@@ -109,6 +109,11 @@ Updated 2026-10-06. This source provides a working static editor, local MCP serv
 - Bling is a stitch type on paths: each stone is a centre stitch with two concentric fixing rings, every 8 mm by default with a 4 mm size. The spacing and size controls apply. Stored as `stitch: "bling"`; not in the MCP schema. There are no stone shapes, bling settings or stone library.
 - Covered by an engine test and an e2e test.
 
+## 2026-10-21 batch plan
+
+- The Array section shows a batch plan for the current design: its size, how many copies fit one hoop with a 3 mm gap, and how many hoops the Copies count needs. It is a summary only; copies are not split into one file per hoop yet.
+- Covered by an engine test and an e2e test.
+
 ## Known limits
 
 - The compiler is original JavaScript, not extracted/pinned Ink/Stitch digitizing code. Tie-in/tie-off and trim are simple defaults with no machine-specific trim rules, and pull compensation is a single widening rather than a per-machine model.

@@ -100,7 +100,8 @@ Reference: Wilcom EmbroideryStudio, the commercial digitizing suite. Its feature
 | Embellishment | Redwork (out-and-back run) | Built |
 | Embellishment | Buttonholes (satin with bar tacks at both ends) | Built |
 | Sequencing | Object order, start and end points, jumps and trims | Built |
-| Sequencing | Batch production across hoops and matrix layouts | Not started |
+| Sequencing | Batch planning: copies that fit one hoop and hoops needed (no separate hoop files yet) | Built (planner) |
+| Sequencing | Batch export: one file per hoop | Not started |
 | Preview | 3D preview and stitch playback | Built |
 | Files | JEF and VP3 export and import, DST import and export | Built |
 | Files | Other machine formats (PES, EXP, and so on) | Not started |

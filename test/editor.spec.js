@@ -1049,3 +1049,12 @@ test('bling is a stitch type that sews stones along the path',async({page})=>{
  const run=await count();await page.locator('#type').selectOption('bling');
  await expect(page.locator('#motifSpacingRow')).toBeVisible();await expect.poll(count).toBeGreaterThan(run*2);expect(errors).toEqual([]);
 });
+
+test('batch plan in the Array section says how many copies fit one hoop',async({page})=>{
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());await page.locator('#new').click();
+ await page.locator('#rect').click();await page.locator('#secArray summary').click();
+ await expect(page.locator('#batchInfo')).toContainText('copies fit one');
+ await page.locator('#arrCount').fill('400');await page.locator('#arrCount').press('Tab');
+ await expect(page.locator('#batchInfo')).toContainText('400 copies');
+ expect(errors).toEqual([]);
+});

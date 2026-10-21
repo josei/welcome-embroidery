@@ -782,3 +782,12 @@ test('bling sews a stone with a centre stitch and two fixing rings',()=>{
  const plan=compile(doc);assert.deepEqual(plan.errors,[]);
  assert.ok(plan.count>40,'bling stones are sewn ('+plan.count+')');
 });
+
+test('batch plan counts copies per hoop and hoops needed',async()=>{
+ const {batchPlan}=await import('../src/engine.js');
+ const doc=initialDocument();doc.objects=[];
+ applyOperations(doc,[{op:'add_shape',id:'r',kind:'rect',x:-10,y:-5,width:20,height:10,thread:'#527461',stitch:'fill'}]);
+ const p=batchPlan(doc,{copies:100});
+ assert.deepEqual(p.design,[20,10]);assert.equal(p.perHoop,p.cols*p.rows);assert.equal(p.hoopsNeeded,Math.ceil(100/p.perHoop));
+ assert.ok(p.perHoop>=20,'a 20 × 10 mm design packs many copies into 110 mm');
+});
