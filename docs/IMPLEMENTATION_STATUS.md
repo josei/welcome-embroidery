@@ -178,6 +178,11 @@ Updated 2026-10-06. This source provides a working static editor, local MCP serv
 
 - `npm run bench:compile` times compile and JEF encode for 100 filled squares. Measured: 26k stitches compile in 126 ms and encode in 10 ms; 146k stitches compile in 206 ms and encode in 33 ms (heap 45 MiB). These are Node numbers; browser timings are still to measure.
 
+## 2026-10-22 feature screenshots
+
+- `node scripts/feature-shots.mjs [url]` writes one screenshot per feature to design/progress/features/ (sequins, beads, bling, motif loops as leaves, paired motif taper, motif fill, redwork, buttonhole, raised satin, batch plan, PES v6 export). The heartbeat adds a case for every new feature and commits its PNG.
+- Decision: screenshots show the editor state after the feature is set, not a stitch preview; loops and stitches are visible in the Stitches view.
+
 ## Known limits
 
 - The compiler is original JavaScript, not extracted/pinned Ink/Stitch digitizing code. Tie-in/tie-off and trim are simple defaults with no machine-specific trim rules, and pull compensation is a single widening rather than a per-machine model.
