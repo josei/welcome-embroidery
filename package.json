@@ -16,7 +16,8 @@
     "test:pages": "npm run build:pages && node scripts/test-pages.mjs",
     "desktop:build": "tauri build",
     "tauri": "tauri",
-    "desktop:prepare": "node scripts/prepare-desktop.mjs"
+    "desktop:prepare": "node scripts/prepare-desktop.mjs",
+    "bench:compile": "node scripts/bench-compile.mjs"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "1.29.0",

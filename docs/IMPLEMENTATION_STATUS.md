@@ -170,6 +170,14 @@ Updated 2026-10-06. This source provides a working static editor, local MCP serv
 - Coral and gold are defined but not applied to the editor chrome: the editor is a tool, so the landing page carries the brand accents. Gold is decorative only and must use --gold-deep for text or thin strokes.
 - Screenshot check: the editor and 3D preview differ from before by 296 pixels (status text and the language button outline). The landing images site/assets/hero-editor.png and view-3d.png were retaken from the default design after the change.
 
+## 2026-10-22 compile and encode baseline
+
+- `npm run bench:compile` times compile and JEF encode for 100 filled squares. Measured: 26k stitches compiles in 126 ms and encodes in 10 ms; 146k stitches compiles in 206 ms and encodes in 33 ms (heap 45 MiB). These are Node numbers; browser timings are still to measure.
+
+## 2026-10-22 compile and encode baseline
+
+- `npm run bench:compile` times compile and JEF encode for 100 filled squares. Measured: 26k stitches compile in 126 ms and encode in 10 ms; 146k stitches compile in 206 ms and encode in 33 ms (heap 45 MiB). These are Node numbers; browser timings are still to measure.
+
 ## Known limits
 
 - The compiler is original JavaScript, not extracted/pinned Ink/Stitch digitizing code. Tie-in/tie-off and trim are simple defaults with no machine-specific trim rules, and pull compensation is a single widening rather than a per-machine model.
