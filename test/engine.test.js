@@ -823,7 +823,7 @@ test('bling stones are round by default, square on request, and only known shape
  validateDocument(doc);
  const square=compile(doc);assert.deepEqual(square.errors,[]);
  assert.notEqual(square.count,round.count,'square stones sew different fixing rings ('+square.count+' vs '+round.count+')');
- applyOperations(doc,[{op:'set_object',id:'g',blingShape:'hexagon'}]);
+ applyOperations(doc,[{op:'set_object',id:'g',blingShape:'triangle'}]);
  assert.throws(()=>validateDocument(doc),/bling shape/);
 });
 
@@ -837,6 +837,17 @@ test('oval bling stones turn with the path: narrow across it, long along it',()=
  const tallOval=sewn([[0,-20],[0,20]],'oval'),tallRound=sewn([[0,-20],[0,20]],'round');
  assert.ok(size(tallRound.bounds).w>5.5,'round stones are 6 mm wide on a vertical path');
  assert.ok(size(tallOval.bounds).w<4.5,'oval stones on a vertical path are about 4 mm across it, so they turn with the path');
+});
+
+test('hexagon bling stones are six-sided and as wide as round ones, and sew the same stitch count',()=>{
+ const size=(b)=>({w:b[2]-b[0],h:b[3]-b[1]});
+ const sewn=(points,shape)=>{const doc=initialDocument();doc.objects=[];applyOperations(doc,[{op:'add_path',id:'g',x:0,y:0,points},{op:'set_object',id:'g',stitch:'bling',motifSize:6,blingShape:shape}]);validateDocument(doc);const plan=compile(doc);assert.deepEqual(plan.errors,[]);return {count:plan.count,bounds:plan.bounds};};
+ const flatRound=sewn([[-20,0],[20,0]],'round'),flatHex=sewn([[-20,0],[20,0]],'hexagon');
+ // A hexagon outline has six sides where a round stone has twelve segments, so each hexagon stone sews fewer stitches.
+ assert.ok(flatHex.count>0&&flatHex.count<flatRound.count,'hexagon stones sew fewer stitches than round ones');
+ // On a horizontal path the stones run along x, so their size across the path shows in h: corners point along the path, flats face across it.
+ assert.ok(Math.abs(size(flatRound.bounds).h-6)<0.2,'round stones are 6 mm across the path');
+ assert.ok(Math.abs(size(flatHex.bounds).h-6*Math.sqrt(3)/2)<0.2,'hexagon stones are 5.2 mm flat to flat across the path');
 });
 
 test('batch plan counts copies per hoop and hoops needed',async()=>{

@@ -471,3 +471,9 @@ Based on direct feedback that editing felt far from a vector program:
 - Export batch now takes imported machine files (JEF, VP3, DST, SEW, PEC and EXP stitch layers) as well as shapes. Each copy of a layer is moved to its grid cell like a vector object, and its stitches are kept in source coordinates. The copy drops the source bytes, so every hoop is encoded from the layer's stitches by the writer for the chosen batch format, never passed through.
 - Covered by an engine test (`test/import-integration.test.js`: three imported JEF copies, one per hoop, each compile without errors, carry no source bytes, are not byte-identical to the source and decode with the source's stitch count), and an e2e test (the picker imports a JEF, the batch exports `-hoop1.jef`, `-hoop2.jef`, `-hoop3.jef`).
 - Limits: a batch copy keeps the layer's own thread colours rather than a per-hoop colour choice. Each copy is a clone, so its rotation, thread and thread overrides are the layer's own, and only its position changes.
+
+## 2026-10-23 hexagon bling stones
+
+- Bling has a fourth stone shape: Hexagon, next to Round, Square and Oval. Each hexagon is a six-point outline with a corner on the path's direction and a flat side across it, and its fixing ring is two-thirds the size. Stored as `blingShape: 'hexagon'`; the engine rejects unknown shapes. Spanish label: Hexágono. Not in the MCP schema yet.
+- Covered by an engine test (hexagon stones sew fewer stitches than round ones, the stone is six millimetres corner to corner across the path against 5.2 millimetres flat to flat) and the existing e2e bling shape test, which now also selects Hexagon. Screenshot: `design/progress/features/bling-hexagon.png`.
+- Limits: a plain hexagon with no facets or stone library; the stones do not turn with an oval-style direction, so on a curved path they keep their orientation.
