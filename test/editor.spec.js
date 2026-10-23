@@ -1093,6 +1093,16 @@ test('bling stone shape switches between round and square stones',async({page})=
  await page.locator('#blingShape').selectOption('star');await expect(page.locator('#blingShape')).toHaveValue('star');expect(errors).toEqual([]);
 });
 
+test('stone turn checkbox shows for turning stone shapes and is on by default',async({page})=>{
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());await page.locator('#new').click();
+ await page.locator('#path').click();const m=await ctm(page);for(const [x,y] of [[-20,0],[20,0]]){const s=toScreen(m,x,y);await page.mouse.click(s.x,s.y);}await page.keyboard.press('Enter');
+ await page.locator('#type').selectOption('bling');await page.locator('#blingShape').selectOption('hexagon');
+ await expect(page.locator('#stoneTurnRow')).toBeVisible();await expect(page.locator('#stoneTurn')).toBeChecked();
+ await page.locator('#stoneTurn').uncheck();await expect(page.locator('#stoneTurn')).not.toBeChecked();
+ await page.locator('#blingShape').selectOption('round');await expect(page.locator('#stoneTurnRow')).toBeHidden();
+ expect(errors).toEqual([]);
+});
+
 test('batch plan in the Array section says how many copies fit one hoop',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());await page.locator('#new').click();
  await page.locator('#rect').click();await page.locator('#secArray summary').click();

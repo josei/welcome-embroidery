@@ -509,3 +509,10 @@ Based on direct feedback that editing felt far from a vector program:
 - Documents that already contain beads will compile to fewer stitches and a different machine file after this change. Nothing else in the stitch model moves.
 - Covered by the engine test (a 40 mm bead path sews 10 to 30 stitches, one pass per bead) and the existing e2e bead test. Screenshot: `design/progress/features/beads.png`.
 - Limits: a bead is still one pass with no bead shape or multi-pass option. The fix only removes repeated stitches; it does not add a dispensing or bead-shape control.
+
+## 2026-10-24 stones turn with the path
+
+- Square, hexagon and star stones are drawn in a frame that follows the path direction at each point, the way the oval always has. The new `stoneTurn` option (checkbox "Turn stones with the path", shown for square, hexagon and star) defaults to on; `stoneTurn: false` keeps a stone in one orientation on every path, which was the old behaviour. Settable over MCP. A non-boolean value is rejected.
+- On a horizontal path the output is unchanged, because the path direction is already the fixed frame there. On other paths, existing square, hexagon and star stones compile in their turned orientation; the stitch count does not change.
+- Covered by an engine test (a hexagon is 5.2 mm across a vertical path turned, 6 mm fixed, with the same stitch count either way; `stoneTurn` must be true or false) and an e2e test (the checkbox shows for square, hexagon and star only, is on by default, and can be unchecked). Screenshot: `design/progress/features/stone-turn.png`.
+- Limits: a square looks the same turned, so on axis-aligned paths the option makes no visible difference; it shows on diagonal and curved paths. Round stones have no orientation and are unaffected. The oval always turns and has no switch.

@@ -868,6 +868,18 @@ test('star bling stones are five-pointed: they sew their own stitch count and st
  assert.ok(Math.abs(size(star.bounds).h-5.8)<0.3,'star stones are about 5.8 mm across a horizontal path ('+size(star.bounds).h+')');
 });
 
+test('square, hexagon and star stones turn with the path unless stoneTurn is false, and the stitch count does not change',()=>{
+ const across=(shape,stoneTurn)=>{const doc=initialDocument();doc.objects=[];const op={op:'set_object',id:'g',stitch:'bling',motifSize:6,blingShape:shape};if(stoneTurn!==undefined)op.stoneTurn=stoneTurn;applyOperations(doc,[{op:'add_path',id:'g',x:0,y:0,points:[[0,-20],[0,20]]},op]);validateDocument(doc);const plan=compile(doc);assert.deepEqual(plan.errors,[]);return {w:plan.bounds[2]-plan.bounds[0],count:plan.count};};
+ // On a vertical path a hexagon turned with the path has its flats across it (5.2 mm); fixed, its corners point across it (6 mm).
+ const turned=across('hexagon'),fixed=across('hexagon',false);
+ assert.ok(Math.abs(turned.w-5.2)<0.2,'a turned hexagon is 5.2 mm across a vertical path ('+turned.w+')');
+ assert.ok(Math.abs(fixed.w-6)<0.2,'a fixed hexagon is 6 mm across a vertical path ('+fixed.w+')');
+ assert.equal(turned.count,fixed.count,'turning a stone changes its shape, not its stitch count');
+ assert.equal(across('hexagon',true).count,turned.count,'stoneTurn true is the default');
+ const doc=initialDocument();doc.objects=[];applyOperations(doc,[{op:'add_path',id:'g',x:0,y:0,points:[[-20,0],[20,0]]},{op:'set_object',id:'g',stitch:'bling',stoneTurn:'yes'}]);
+ assert.throws(()=>validateDocument(doc),/stoneTurn/);
+});
+
 test('twin sequins sew two sequins side by side across the path, and only accept true or false',()=>{
  const sewn=(extra)=>{const doc=initialDocument();doc.objects=[];applyOperations(doc,[{op:'add_path',id:'s',x:0,y:0,points:[[-20,0],[20,0]]},{op:'set_object',id:'s',stitch:'sequin',...extra}]);validateDocument(doc);const plan=compile(doc);assert.deepEqual(plan.errors,[]);return plan;};
  const single=sewn({}),twin=sewn({sequinTwin:true});

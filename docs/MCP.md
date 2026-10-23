@@ -46,6 +46,7 @@ Example prompt: "Use the Welcome MCP on the live document to draw a leaf badge w
 
 ## Embellishment and motif keys
 `stitch` on `add_path` and `set_object` takes `motif` (loops along a path), `sequin`, `bead` or `bling` as well as `fill`, `run` and `satin`. `set_object` then accepts `motifShape` (`circle` or `leaf`), `motifSpacing` (1–20 mm between loops, stones or beads), `motifSize` (0.4–6 mm), `motifWarp` (`none`, `x`, `y` or `along`; `along` shrinks the loops from the start of a path to the end), `motifPair` (loops on each side of a satin column; needs `satinWidth`) and `blingShape` (`round`, `square`, `oval`, `hexagon` or `star`). Sequins and beads use the same `motifSpacing` and `motifSize`, with their own defaults when omitted. `sequinTwin: true` sews sequins in pairs, side by side across the path, each pair a sequin's width apart.
+`stoneTurn: false` keeps square, hexagon and star stones in one orientation; the default turns them to follow the path (oval stones always do).
 `fillMethod: "motif"` fills a closed shape with the motif loops on a staggered grid, using the same `motifSpacing` and `motifSize`.
 
 ## Reference image
