@@ -45,7 +45,7 @@ Example prompt: "Use the Welcome MCP on the live document to draw a leaf badge w
 `photo.thread2` (hex colour) makes a two-tone photo: that thread sews the light tones first, the main thread adds the dark detail.
 
 ## Embellishment and motif keys
-`stitch` on `add_path` and `set_object` takes `motif` (loops along a path), `sequin`, `bead` or `bling` as well as `fill`, `run` and `satin`. `set_object` then accepts `motifShape` (`circle` or `leaf`), `motifSpacing` (1–20 mm between loops, stones or beads), `motifSize` (0.4–6 mm), `motifWarp` (`none`, `x`, `y` or `along`; `along` shrinks the loops from the start of a path to the end), `motifPair` (loops on each side of a satin column; needs `satinWidth`) and `blingShape` (`round`, `square`, `oval`, `hexagon` or `star`). Sequins and beads use the same `motifSpacing` and `motifSize`, with their own defaults when omitted.
+`stitch` on `add_path` and `set_object` takes `motif` (loops along a path), `sequin`, `bead` or `bling` as well as `fill`, `run` and `satin`. `set_object` then accepts `motifShape` (`circle` or `leaf`), `motifSpacing` (1–20 mm between loops, stones or beads), `motifSize` (0.4–6 mm), `motifWarp` (`none`, `x`, `y` or `along`; `along` shrinks the loops from the start of a path to the end), `motifPair` (loops on each side of a satin column; needs `satinWidth`) and `blingShape` (`round`, `square`, `oval`, `hexagon` or `star`). Sequins and beads use the same `motifSpacing` and `motifSize`, with their own defaults when omitted. `sequinTwin: true` sews sequins in pairs, side by side across the path, each pair a sequin's width apart.
 `fillMethod: "motif"` fills a closed shape with the motif loops on a staggered grid, using the same `motifSpacing` and `motifSize`.
 
 ## Reference image

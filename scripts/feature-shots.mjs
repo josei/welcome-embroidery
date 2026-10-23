@@ -32,6 +32,7 @@ const cases={
   'beads': async p=>{await drawPath(p,line);await p.locator('#type').selectOption('bead');},
   'bling': async p=>{await drawPath(p,line);await p.locator('#type').selectOption('bling');},
   'bling-hexagon': async p=>{await drawPath(p,line);await p.locator('#type').selectOption('bling');await p.locator('#blingShape').selectOption('hexagon');await p.locator('button[data-view="stitches"]').click();},
+  'sequin-twin': async p=>{await drawPath(p,line);await p.locator('#type').selectOption('sequin');await p.locator('#sequinTwin').check();await p.locator('button[data-view="stitches"]').click();},
   'bling-star': async p=>{await drawPath(p,line);await p.locator('#type').selectOption('bling');await p.locator('#blingShape').selectOption('star');await p.locator('button[data-view="stitches"]').click();},
   'bling-oval': async p=>{await drawPath(p,line);await p.locator('#type').selectOption('bling');await p.locator('#blingShape').selectOption('oval');await p.locator('button[data-view="stitches"]').click();},
   'bling-square': async p=>{await drawPath(p,line);await p.locator('#type').selectOption('bling');await p.locator('#blingShape').selectOption('square');},

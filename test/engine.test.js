@@ -867,6 +867,18 @@ test('star bling stones are five-pointed: they sew their own stitch count and st
  assert.ok(Math.abs(size(star.bounds).h-5.8)<0.3,'star stones are about 5.8 mm across a horizontal path ('+size(star.bounds).h+')');
 });
 
+test('twin sequins sew two sequins side by side across the path, and only accept true or false',()=>{
+ const sewn=(extra)=>{const doc=initialDocument();doc.objects=[];applyOperations(doc,[{op:'add_path',id:'s',x:0,y:0,points:[[-20,0],[20,0]]},{op:'set_object',id:'s',stitch:'sequin',...extra}]);validateDocument(doc);const plan=compile(doc);assert.deepEqual(plan.errors,[]);return plan;};
+ const single=sewn({}),twin=sewn({sequinTwin:true});
+ const height=(b)=>b[3]-b[1];
+ // One sequin is 3 mm across, so a single row is 3 mm tall; twins sit a sequin's width either side of the path, so they are 6 mm tall together.
+ assert.ok(Math.abs(height(single.bounds)-3)<0.3,'a single sequin row is about 3 mm across ('+height(single.bounds)+')');
+ assert.ok(Math.abs(height(twin.bounds)-6)<0.3,'twin sequins are about 6 mm across the path ('+height(twin.bounds)+')');
+ assert.ok(twin.count>1.8*single.count&&twin.count<2.2*single.count,'twins sew about twice the stitches ('+twin.count+' vs '+single.count+')');
+ const doc=initialDocument();doc.objects=[];applyOperations(doc,[{op:'add_path',id:'s',x:0,y:0,points:[[-20,0],[20,0]]},{op:'set_object',id:'s',stitch:'sequin',sequinTwin:'yes'}]);
+ assert.throws(()=>validateDocument(doc),/sequinTwin/);
+});
+
 test('batch plan counts copies per hoop and hoops needed',async()=>{
  const {batchPlan}=await import('../src/engine.js');
  const doc=initialDocument();doc.objects=[];

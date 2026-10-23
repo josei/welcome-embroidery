@@ -496,3 +496,9 @@ Based on direct feedback that editing felt far from a vector program:
 - `fillMethod: "motif"` (the Motif loops fill pattern, already in the editor and the engine) is accepted by `set_object` over MCP, with `motifSpacing` and `motifSize`. The MCP enum had left it out.
 - Covered by `npm run test:mcp`, which applies a motif fill and compiles it with no errors. The embellishment screenshot `design/progress/features/mcp-embellishments.png` now includes a motif-filled rectangle.
 - Limits: the same as the editor's motif fill; no MCP-only settings.
+
+## 2026-10-24 twin sequins
+
+- Sequins have a Twin sequins option (`sequinTwin: true`, a checkbox shown for sequins only, also settable over MCP). Each point gets two sequins side by side across the path, one either side of the centre line, with centres a sequin's width apart so they touch. The spacing, size and fixing loop are the same as for a single sequin.
+- Covered by an engine test (a single row is 3 mm across, the twins 6 mm across a horizontal path, and twins sew about twice the stitches; a non-boolean `sequinTwin` is rejected) and by the e2e sequin test, which ticks the box and checks that the stitch count roughly doubles. Screenshot: `design/progress/features/sequin-twin.png`.
+- Limits: the pair is across the path, not along it; there is no per-sequin offset or twin spacing control; sequins are still placed one per point along the path.

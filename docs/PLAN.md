@@ -98,7 +98,7 @@ Reference: Wilcom EmbroideryStudio, the commercial digitizing suite. Its feature
 | Motifs | Motif size warp across a fill: loops shrink from one edge to the other (a pseudo-depth cue, not a 3D surface) | Built (basic) |
 | Motifs | Motif size warp along a path: loops shrink from the start of the path to the end (a pseudo-depth cue, not a 3D surface) | Built (basic) |
 | Motifs | True 3D surface warp of motifs | Not started |
-| Embellishment | Sequins as a stitch type: a centre stitch with a fixing loop every few mm (single-sequin placement; no twin-sequin or dispensing control) | Built (basic) |
+| Embellishment | Sequins as a stitch type: a centre stitch with a fixing loop every few mm, single or in side-by-side twins (no dispensing control) | Built (basic) |
 | Embellishment | Beads as a stitch type: short passes across the path at each point (basic beading; no bead-shape or dispensing control) | Built (basic) |
 | Embellishment | Bling as a stitch type: a stone at each point, a centre stitch with two fixing rings; Round, Square, Oval, Hexagon or Star stone shape, where the oval turns with the path (no other settings or library) | Built (basic) |
 | Embellishment | Redwork (out-and-back run) | Built |
