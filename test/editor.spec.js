@@ -1145,3 +1145,17 @@ test('edge closing can be turned on for a clipped run in the panel',async({page}
  await page.locator('.object-row').first().click();await expect(page.locator('#edgeCloseRow')).toBeVisible();
  await page.locator('#edgeClose').check();await expect(page.locator('#edgeClose')).toBeChecked();expect(errors).toEqual([]);
 });
+
+test('the stitch worker compiles the benchmark fixture to the same stitch count as the engine',async({page})=>{
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');
+ const result=await page.evaluate(async()=>{
+  const {initialDocument,applyOperations}=await import('/src/engine.js');
+  const doc=initialDocument();doc.objects=[];doc.hoop=400;const cols=10,step=16,ops=[];
+  for(let i=0;i<100;i++){const c=i%cols,r=Math.floor(i/cols);ops.push({op:'add_shape',id:`s${i}`,kind:'rect',x:-(cols*step)/2+c*step,y:-(cols*step)/2+r*step,width:12,height:12,thread:'#527461',stitch:'fill'});}
+  applyOperations(doc,ops);
+  const worker=new Worker('/src/worker.js',{type:'module'});
+  const reply=await new Promise((resolve,reject)=>{worker.onmessage=e=>e.data.ok?resolve(e.data):reject(Error(e.data.error));worker.onerror=reject;worker.postMessage({id:1,generation:1,type:'compile',document:doc});});
+  worker.terminate();return {stitches:reply.plan.count};
+ });
+ expect(result.stitches).toBe(26463);expect(errors).toEqual([]);
+});

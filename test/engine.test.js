@@ -936,3 +936,10 @@ test('edge closing also applies to clipped satin columns',()=>{
  validateDocument(doc);
  assert.ok(compile(doc).count>open,'closing adds stitches to a clipped satin column');
 });
+
+test('the browser benchmark fixture (100 filled squares) compiles to the pinned stitch counts',()=>{
+ // Same fixture as scripts/bench-compile.mjs and scripts/bench-browser.mjs; the counts are the Node baseline in docs/PLAN.md.
+ const squares=size=>{const doc=initialDocument();doc.objects=[];doc.hoop=400;const cols=10,step=size+4,ops=[];for(let i=0;i<100;i++){const c=i%cols,r=Math.floor(i/cols);ops.push({op:'add_shape',id:`s${i}`,kind:'rect',x:-(cols*step)/2+c*step,y:-(cols*step)/2+r*step,width:size,height:size,thread:'#527461',stitch:'fill'});}applyOperations(doc,ops);return doc;};
+ assert.equal(compile(squares(12)).count,26463);
+ assert.equal(compile(squares(34)).count,145700);
+});

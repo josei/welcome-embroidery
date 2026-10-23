@@ -399,3 +399,15 @@ Based on direct feedback that editing felt far from a vector program:
 - Motif fill can shrink its loops across the shape: Loop size warp is None (default), Left to right or Top to bottom. Loops keep their grid positions and count; the size falls linearly from the full Size at the low edge to 40% of it at the far edge, so the far side reads as further away. Stored as `motifWarp`; the sidebar shows the select only for a single motif-filled object. Unknown values are rejected by the engine. Not in the MCP schema.
 - This is a pseudo-depth cue along one axis, not a true 3D surface: there is no curvature, no falloff curve and no per-loop height. The 40% floor and the axis choice are fixed.
 - Covered by an engine test (loop count unchanged, far-edge loops smaller on the chosen axis, unknown warp rejected) and an e2e test (the row shows for motif fill and the warp can be set and cleared). Screenshot: `design/progress/features/motif-fill-warp.png`.
+
+## 2026-10-23 browser compile benchmark
+
+- `npm run bench:browser` (`scripts/bench-browser.mjs`) runs the same 100-square fixtures as `npm run bench:compile` through the app's real stitch worker (`src/worker.js`) in headless Chromium, on a static build served locally. It reports the median of 5 runs after a warm-up: compile round trip, compile plus JEF encode, the longest main-thread gap (a 5 ms timer while the worker is busy), and JS heap where the browser reports it (Chromium only).
+- Measured on the build machine (darwin arm64, headless Chromium, 2026-10-23): 12 mm squares, 26,463 stitches, compile 51 ms, compile + JEF 55 ms, longest main-thread gap 6 ms, heap 11 MiB; 34 mm squares, 145,700 stitches, compile 119 ms, compile + JEF 143 ms, longest main-thread gap 6 ms, heap 11 MiB. Stitch counts match the Node baseline exactly.
+- Limits: this is headless Chromium on one Mac, not Safari or a device. WebKit (`PW_BROWSER=webkit`) would not launch on the build machine after installing its Playwright build, so no WebKit numbers exist yet. Cancellation and outdated-result rejection are not timed. Ordinary badges and the 100k-stitch stress target are not measured here.
+- Covered by an engine test (the squares fixture compiles to the pinned 26,463 and 145,700 stitch counts) and an e2e test (the stitch worker returns 26,463 stitches for the 12 mm fixture).
+
+## Desktop CI matrix (2026-10-23)
+
+- `.github/workflows/desktop.yml` already builds Linux (ubuntu-22.04), macOS (macos-14) and Windows (windows-latest) in one matrix, on a `v*` tag or manual dispatch, and uploads each `src-tauri/target/release/bundle/` as an artifact. No workflow change was needed.
+- Not verified: no CI run of the macOS or Windows jobs has been observed yet. Signing and notarization are still not configured, so the macOS bundles are unsigned.
