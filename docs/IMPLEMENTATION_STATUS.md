@@ -484,3 +484,9 @@ Based on direct feedback that editing felt far from a vector program:
 - Bug fixed on the way: `add_path` turned every open path into a running stitch unless it was satin, so `stitch: "bling"` (or motif, sequin, bead) on an open path was silently sewn as running stitches. Open paths now keep those four types; other open paths still become running stitches.
 - Covered by an engine test (the four types are kept on open paths, fill still becomes run) and by `npm run test:mcp`, which sews bling, motif, sequin and bead paths over MCP, and rejects an unknown bling shape and a motif size of 9 mm. Screenshot: `design/progress/features/mcp-embellishments.png`, rendered by `scripts/mcp-embellishment-shot.mjs` through an anonymous MCP session, not from the browser UI.
 - Limits: the schema mirrors the engine's own ranges; sequins and beads have no MCP-only defaults beyond the engine's. `motifPair` still needs a satin width, as in the editor. No MCP tool for a stone library.
+
+## 2026-10-23 star bling stones
+
+- Bling has a fifth stone shape: Star, next to Round, Square, Oval and Hexagon. Each star is a five-pointed outline with outer points three millimetres from the centre at the default size and inner points halfway in; its fixing ring is two-thirds the size. The stars keep a fixed orientation, one point along the path, as hexagons do. Stored as `blingShape: 'star'`; the engine rejects unknown shapes. Spanish label: Estrella (already used by the star tool). Settable over MCP.
+- Covered by an engine test (a star sews a different stitch count from a round stone, and stands 5.8 mm across a horizontal path) and the e2e bling shape test, which now also selects Star. Screenshot: `design/progress/features/bling-star.png`.
+- Limits: a plain outline with no facets or stone library; its outer points reach the same radius as a round stone of the same size.

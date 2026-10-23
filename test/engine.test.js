@@ -858,6 +858,15 @@ test('add_path keeps embellishment stitch types on open paths, and still turns o
  validateDocument(doc);assert.deepEqual(compile(doc).errors,[]);
 });
 
+test('star bling stones are five-pointed: they sew their own stitch count and stand about 5.8 mm across a horizontal path',()=>{
+ const size=(b)=>({w:b[2]-b[0],h:b[3]-b[1]});
+ const sewn=(shape)=>{const doc=initialDocument();doc.objects=[];applyOperations(doc,[{op:'add_path',id:'g',x:0,y:0,points:[[-20,0],[20,0]]},{op:'set_object',id:'g',stitch:'bling',motifSize:6,blingShape:shape}]);validateDocument(doc);const plan=compile(doc);assert.deepEqual(plan.errors,[]);return plan;};
+ const round=sewn('round'),star=sewn('star');
+ assert.notEqual(star.count,round.count,'star stones sew a different number of stitches from round ones');
+ // Outer points are 3 mm from the centre; the points at 72° and 288° reach 2.85 mm off the path, so the stone is about 5.8 mm across it.
+ assert.ok(Math.abs(size(star.bounds).h-5.8)<0.3,'star stones are about 5.8 mm across a horizontal path ('+size(star.bounds).h+')');
+});
+
 test('batch plan counts copies per hoop and hoops needed',async()=>{
  const {batchPlan}=await import('../src/engine.js');
  const doc=initialDocument();doc.objects=[];

@@ -1088,7 +1088,8 @@ test('bling stone shape switches between round and square stones',async({page})=
  const round=await count();
  await page.locator('#blingShape').selectOption('square');await expect(page.locator('#blingShape')).toHaveValue('square');
  await expect.poll(count).not.toBe(round);await page.locator('#blingShape').selectOption('oval');await expect(page.locator('#blingShape')).toHaveValue('oval');
- await page.locator('#blingShape').selectOption('hexagon');await expect(page.locator('#blingShape')).toHaveValue('hexagon');await expect.poll(count).not.toBe(round);expect(errors).toEqual([]);
+ await page.locator('#blingShape').selectOption('hexagon');await expect(page.locator('#blingShape')).toHaveValue('hexagon');await expect.poll(count).not.toBe(round);
+ await page.locator('#blingShape').selectOption('star');await expect(page.locator('#blingShape')).toHaveValue('star');expect(errors).toEqual([]);
 });
 
 test('batch plan in the Array section says how many copies fit one hoop',async({page})=>{
