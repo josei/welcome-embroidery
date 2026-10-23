@@ -110,6 +110,7 @@ Reference: Wilcom EmbroideryStudio, the commercial digitizing suite. Its feature
 | Files | PEC (Brother) export | Built (export only; checked by decoding with pyembroidery) |
 | Files | PES (version 1) export | Built (export only; checked by decoding with pyembroidery) |
 | Files | PES version 6 export | Built (export only; checked by decoding with pyembroidery; thread names omitted) |
+| Files | SEW (Janome native) export | Built (export only; checked by decoding with pyembroidery; trims not written, no design header) |
 | Files | Other machine formats | Not started |
 | Libraries | Thread brand libraries | Not started (licensed data) |
 | Automation | Headless MCP document sessions for agents | Built |

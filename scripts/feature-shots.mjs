@@ -39,9 +39,13 @@ const cases={
   'raised-satin': async p=>{await drawPath(p,[[-20,0],[20,0]]);await p.locator('#type').selectOption('satin');await p.locator('#satinRaised').check();},
   'batch-plan': async p=>{await p.locator('#rect').click();await p.locator('#secArray summary').click();await p.locator('#arrCount').fill('400');await p.locator('#arrCount').press('Tab');},
   'export-pes6': async p=>{await p.locator('#rect').click();await p.locator('#export').click();await p.locator('#format').selectOption('pes6');},
+  'export-sew': async p=>{await p.locator('#rect').click();await p.locator('#export').click();await p.locator('#format').selectOption('sew');},
 };
 const done=[];
+// ONLY=export-sew,redwork re-shoots just the named features (the others keep their existing PNGs).
+const only=process.env.ONLY?new Set(process.env.ONLY.split(',')):null;
 for(const [name,setup] of Object.entries(cases)){
+  if(only&&!only.has(name))continue;
   const page=await fresh();
   try{await setup(page);await page.waitForTimeout(800);await page.screenshot({path:path.join(out,`${name}.png`)});done.push(name);}
   catch(e){console.log('skipped',name,String(e.message).split('\n')[0]);}

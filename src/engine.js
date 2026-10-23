@@ -939,6 +939,23 @@ function pesWriter(plan,name,version){
 }
 export function encodePes(plan,name="Welcome"){return pesWriter(plan,name,1);}
 export function encodePesV6(plan,name="Welcome"){return pesWriter(plan,name,6);}
+// Janome SEW thread set (pyembroidery's 79-entry EmbThreadSew list, 0-based): the file stores indices into it.
+const SEW_CHART=[[0,0,0],[0,0,0],[255,255,255],[255,255,23],[250,160,96],[92,118,73],[64,192,48],[101,194,200],[172,128,190],[245,188,203],[255,0,0],[192,128,0],[0,0,240],[228,195,93],[165,42,42],[213,176,212],[252,242,148],[240,208,192],[255,192,0],[201,164,128],[155,61,75],[160,184,204],[127,194,28],[185,185,185],[160,160,160],[152,214,189],[184,240,240],[54,139,160],[79,131,171],[56,106,145],[0,32,107],[229,197,202],[249,103,107],[227,49,31],[226,161,136],[181,148,116],[228,207,153],[225,203,0],[225,173,212],[195,0,126],[128,0,75],[160,96,176],[192,64,32],[202,224,192],[137,152,86],[0,170,0],[33,138,33],[93,174,148],[76,191,143],[0,119,114],[112,112,112],[242,255,255],[177,88,24],[203,138,7],[247,146,123],[152,105,45],[162,113,72],[123,85,74],[79,57,70],[82,58,151],[0,0,160],[0,150,222],[178,221,83],[250,143,187],[222,100,158],[181,80,102],[94,87,71],[76,136,31],[228,220,121],[203,138,26],[198,170,66],[236,176,44],[248,128,64],[255,229,5],[250,122,122],[107,224,0],[56,108,174],[208,186,176],[227,190,129]];
+const sewChartIndex=hex=>{const m=/^#?([0-9a-f]{6})$/i.exec(hex||"")||[0,"527461"];const n=parseInt(m[1],16),c=[n>>16&255,n>>8&255,n&255];let best=0,bd=Infinity;SEW_CHART.forEach((r,i)=>{const d=(r[0]-c[0])**2+(r[1]-c[1])**2+(r[2]-c[2])**2;if(d<bd){bd=d;best=i;}});return best;};
+// SEW (Janome native): a 2-byte colour count and 2-byte thread-chart indices, zeros up to offset 0x1D78, then the EXP-style stitch stream
+// (signed byte pairs in 0.1 mm, y negated; 80 04 = jump, 80 01 = colour change, 80 00 = end). The pyembroidery SewReader has no trim record,
+// so trims are not written and the next jump still moves the needle. Export only; checked by decoding with pyembroidery (scripts/verify-sew.mjs).
+export function encodeSew(plan){
+ if(plan.errors.length)throw Error(plan.errors.join(' '));
+ const blocks=[plan.stitches.find(p=>p.cmd!=='end'&&p.thread)?.thread||'#527461'];
+ for(const p of plan.stitches)if(p.cmd==='color'||p.cmd==='stop')blocks.push(p.thread||blocks.at(-1));
+ if(blocks.length>255)throw Error('SEW supports up to 255 colour blocks.');
+ const out=[blocks.length&0xff,blocks.length>>8];for(const hex of blocks){const i=sewChartIndex(hex);out.push(i&0xff,i>>8);}
+ while(out.length<0x1D78)out.push(0);
+ let x=0,y=0;const move=(nx,ny,jump)=>{let dx=nx-x,dy=ny-y;while(dx!==0||dy!==0){const sx=Math.max(-127,Math.min(127,dx)),sy=Math.max(-127,Math.min(127,dy));if(jump)out.push(0x80,0x04);out.push(sx&0xff,(-sy)&0xff);dx-=sx;dy-=sy;x+=sx;y+=sy;}};
+ for(const p of plan.stitches){const nx=Math.round(p.x*10),ny=Math.round(p.y*10);if(p.cmd==='end')continue;if(p.cmd==='color'||p.cmd==='stop'){out.push(0x80,0x01,0,0);move(nx,ny,true);}else if(p.cmd==='jump')move(nx,ny,true);else if(p.cmd==='trim')continue;else if(p.cmd==='stitch')move(nx,ny,false);else throw Error(`Unsupported stitch command for SEW: ${p.cmd}`);}
+ out.push(0x80,0x00,0,0);return Uint8Array.from(out);
+}
 // EXP (Melco): signed byte pairs in 0.1 mm, y negated; 80 04 = jump, 80 01 = colour change, 80 80 07 00 = trim, no header.
 export function encodeExp(plan){if(plan.errors.length)throw Error(plan.errors.join(' '));const out=[];let x=0,y=0;const move=(nx,ny,jump)=>{let dx=nx-x,dy=ny-y;while(dx!==0||dy!==0){const sx=Math.max(-127,Math.min(127,dx)),sy=Math.max(-127,Math.min(127,dy));if(jump)out.push(0x80,0x04);out.push(sx&0xff,(-sy)&0xff);dx-=sx;dy-=sy;x+=sx;y+=sy;}};for(const p of plan.stitches){const nx=Math.round(p.x*10),ny=Math.round(p.y*10);if(p.cmd==='end')continue;if(p.cmd==='color'||p.cmd==='stop'){out.push(0x80,0x01,0,0);move(nx,ny,true);}else if(p.cmd==='jump')move(nx,ny,true);else if(p.cmd==='trim')out.push(0x80,0x80,0x07,0x00);else if(p.cmd==='stitch')move(nx,ny,false);else throw Error(`Unsupported stitch command for EXP: ${p.cmd}`);}return Uint8Array.from(out);}
 export function encodeDst(plan,name='Welcome'){
@@ -963,7 +980,7 @@ export function encodeDst(plan,name='Welcome'){
 }
 export function encode(plan,format,color,hoop=110,document=null){
   if(document)hoop=hoopSize(document);
-  if(!(['jef','vp3','dst','exp','pec','pes','pes6'].includes(format)))throw Error(`Unsupported machine format: ${format}. Choose JEF, VP3, DST, EXP, PEC, PES or PES v6.`);
+  if(!(['jef','vp3','dst','exp','pec','pes','pes6','sew'].includes(format)))throw Error(`Unsupported machine format: ${format}. Choose JEF, VP3, DST, EXP, PEC, PES, PES v6 or SEW.`);
   if(plan.errors.length)throw Error(plan.errors.join(' '));
   const layers=(document?.objects||[]).filter(o=>o.visible!==false&&o.kind==='stitch_layer');
   if(layers.length===1&&document.objects.length===1&&layerCanPassThrough(layers[0],format)){
@@ -971,7 +988,7 @@ export function encode(plan,format,color,hoop=110,document=null){
     if(bytes.byteLength===layers[0].source.size){try{const checked=decodeEmbroidery(bytes,format);if(sourceMatches(checked,layers[0]))return bytes;}catch{}}
   }
   if(format==='vp3'&&layers.some(o=>vp3LayerHasUnsupportedTravel(o.stitches)))throw Error('This VP3 design contains intra-block travel, trim, or stop commands the current VP3 writer cannot preserve after edits. Leading color-block origin moves and no-op moves are preserved. Export JEF or restore the unchanged VP3 source.');
-  if(format==='jef')return encodeJef(plan,color,hoop);if(format==='dst')return encodeDst(plan,document?.name||'Welcome');if(format==='exp')return encodeExp(plan);if(format==='pec')return encodePec(plan,document?.name||'Welcome');if(format==='pes')return encodePes(plan,document?.name||'Welcome');if(format==='pes6')return encodePesV6(plan,document?.name||'Welcome');return encodeVp3(plan,color);
+  if(format==='jef')return encodeJef(plan,color,hoop);if(format==='dst')return encodeDst(plan,document?.name||'Welcome');if(format==='exp')return encodeExp(plan);if(format==='pec')return encodePec(plan,document?.name||'Welcome');if(format==='pes')return encodePes(plan,document?.name||'Welcome');if(format==='pes6')return encodePesV6(plan,document?.name||'Welcome');if(format==='sew')return encodeSew(plan);return encodeVp3(plan,color);
 }
 export {geometry,objectBounds};
 

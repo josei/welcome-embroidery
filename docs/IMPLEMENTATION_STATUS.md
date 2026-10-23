@@ -155,6 +155,12 @@ Updated 2026-10-06. This source provides a working static editor, local MCP serv
 - This is a basic pair of shapes, not a stone library: no baguette, teardrop or faceted settings, and no per-stone rotation along the path.
 - Covered by an engine test (round default, square geometry differs, unknown shape rejected) and an e2e test (sidebar row, switching the shape changes the stitch count).
 
+## 2026-10-23 SEW export (Janome native)
+
+- SEW export: a 2-byte colour count and 2-byte indices into pyembroidery's 79-entry Janome thread set (each colour block matched to the nearest entry), zeros up to offset 0x1D78, then the EXP-style stitch stream in 0.1 mm: signed byte pairs with y negated, jumps as 80 04, colour changes as 80 01, end as 80 00. Long moves are split into 12.7 mm records. Trims are not written, because the SEW reader has no trim record; the next jump is the only sign of a cut. Export only. SEW is in the export dialog and MCP `embroidery_export`.
+- No pyembroidery SEW writer exists to port: the layout is taken from its `SewReader.py`, and the export is checked by decoding it with pyembroidery (`PYEMBROIDERY_PYTHON=… node scripts/verify-sew.mjs`): every planned point appears in order, and the colour blocks and thread count agree. Not verified: that a Janome machine accepts these files. The header carries only the colour table (no design name, size or hoop data), and the thread indices are list positions in the reader's table, not checked against a machine.
+- Covered by an engine test (colour header, zero padding to 0x1D78, stream decodes back to the planned points), an e2e test (downloads as `.sew`) and the MCP smoke test. `ONLY=name,…` in `scripts/feature-shots.mjs` re-shoots just the named features; `export-sew` is the new one.
+
 ## 2026-10-21 desktop local server
 
 - The Tauri app starts `node server.js` from its bundled `welcome/` folder on a free 127.0.0.1 port, sets DATA_DIR to the app data folder, and opens the window at that address, so the local MCP and agent links work in the desktop app. If Node is missing or the server does not start within 15 s, it opens the bundled static editor instead. The server exits when the app's stdin pipe closes, so killing the app does not leave it running (checked on Linux). `npm run desktop:prepare` stages the server with production dependencies only; the Node runtime is still the system one (decision for now; bundling Node per platform is the next step). CI builds for macOS and Windows have not run yet.

@@ -869,6 +869,24 @@ test('PES v6 export has its own signature, a thread table and the PEC block it p
  assert.equal(String.fromCharCode(...bytes.slice(pec,pec+3)),'LA:');
 });
 
+test('SEW export has a colour header, zero padding to 0x1D78 and decodes back to the planned path',async()=>{
+ const {encodeSew}=await import('../src/engine.js');
+ const doc=initialDocument();doc.objects=[];
+ applyOperations(doc,[{op:'add_shape',id:'a',kind:'rect',x:-30,y:-20,width:24,height:14,thread:'#527461',stitch:'fill'},{op:'add_path',id:'b',x:0,y:0,points:[[-30,10],[0,10],[30,10]],thread:'#d9897e',stitch:'run'}]);
+ const plan=compile(doc),bytes=encodeSew(plan);
+ const count=bytes[0]|(bytes[1]<<8),indices=[...Array(count)].map((_,k)=>bytes[2+2*k]|(bytes[3+2*k]<<8));
+ assert.equal(count,2,'one colour change gives two colour blocks');
+ assert.notEqual(indices[0],indices[1]);assert.ok(indices.every(i=>i>=0&&i<79),'indices point into the 79-entry Janome thread set');
+ assert.ok(bytes.length>0x1D78);assert.ok(bytes.slice(2+2*count,0x1D78).every(b=>b===0),'header padding is zero');
+ assert.deepEqual([...bytes.slice(-4)],[0x80,0,0,0],'the stream ends with the end record');
+ let x=0,y=0,i=0x1D78,colours=0;const decoded=[];
+ while(i+1<bytes.length){if(bytes[i]!==0x80){x+=(bytes[i]<<24)>>24;y-=(bytes[i+1]<<24)>>24;decoded.push([x,y]);i+=2;continue;}const control=bytes[i+1];const dx=(bytes[i+2]<<24)>>24,dy=(bytes[i+3]<<24)>>24;i+=4;if(control&1){colours++;continue;}if(control===0x04){x+=dx;y-=dy;decoded.push([x,y]);continue;}break;}
+ assert.equal(colours,count-1,'colour change records match the header');
+ const planned=plan.stitches.filter(s=>['stitch','jump','color'].includes(s.cmd)).map(s=>[Math.round(s.x*10),Math.round(s.y*10)]).filter((p,k,a)=>k===0||p[0]!==a[k-1][0]||p[1]!==a[k-1][1]);
+ let next=0;for(const [px,py] of decoded)if(next<planned.length&&planned[next][0]===px&&planned[next][1]===py)next++;
+ assert.equal(next,planned.length,'every planned point appears in order (long moves may add intermediate jump records)');
+});
+
 test('leaf motif loops are elongated along the path, circles are round',()=>{
  const doc=initialDocument();doc.objects=[];
  applyOperations(doc,[{op:'add_path',id:'m',x:0,y:0,points:[[-20,0],[20,0]]},{op:'set_object',id:'m',stitch:'motif',motifSize:4}]);
