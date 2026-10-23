@@ -29,7 +29,7 @@ async function drawShape(page,pts){
 const line=[[-30,-10],[0,10],[30,-10]];
 const cases={
   'sequins': async p=>{await drawPath(p,line);await p.locator('#type').selectOption('sequin');},
-  'beads': async p=>{await drawPath(p,line);await p.locator('#type').selectOption('bead');},
+  'beads': async p=>{await drawPath(p,line);await p.locator('#type').selectOption('bead');await p.locator('button[data-view="stitches"]').click();},
   'bling': async p=>{await drawPath(p,line);await p.locator('#type').selectOption('bling');},
   'bling-hexagon': async p=>{await drawPath(p,line);await p.locator('#type').selectOption('bling');await p.locator('#blingShape').selectOption('hexagon');await p.locator('button[data-view="stitches"]').click();},
   'sequin-twin': async p=>{await drawPath(p,line);await p.locator('#type').selectOption('sequin');await p.locator('#sequinTwin').check();await p.locator('button[data-view="stitches"]').click();},

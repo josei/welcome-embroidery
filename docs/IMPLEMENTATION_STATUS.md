@@ -502,3 +502,10 @@ Based on direct feedback that editing felt far from a vector program:
 - Sequins have a Twin sequins option (`sequinTwin: true`, a checkbox shown for sequins only, also settable over MCP). Each point gets two sequins side by side across the path, one either side of the centre line, with centres a sequin's width apart so they touch. The spacing, size and fixing loop are the same as for a single sequin.
 - Covered by an engine test (a single row is 3 mm across, the twins 6 mm across a horizontal path, and twins sew about twice the stitches; a non-boolean `sequinTwin` is rejected) and by the e2e sequin test, which ticks the box and checks that the stitch count roughly doubles. Screenshot: `design/progress/features/sequin-twin.png`.
 - Limits: the pair is across the path, not along it; there is no per-sequin offset or twin spacing control; sequins are still placed one per point along the path.
+
+## 2026-10-24 beads sewn once
+
+- Each bead is one short pass across the path at its point. `beadRuns` used to push the same back-and-forth segment three times, so every bead was sewn three times over one line. A 40 mm bead path now compiles to 16 stitches; it was 64. Bead positions, length and spacing are unchanged.
+- Documents that already contain beads will compile to fewer stitches and a different machine file after this change. Nothing else in the stitch model moves.
+- Covered by the engine test (a 40 mm bead path sews 10 to 30 stitches, one pass per bead) and the existing e2e bead test. Screenshot: `design/progress/features/beads.png`.
+- Limits: a bead is still one pass with no bead shape or multi-pass option. The fix only removes repeated stitches; it does not add a dispensing or bead-shape control.

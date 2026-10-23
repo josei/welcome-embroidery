@@ -799,12 +799,13 @@ test('sequins sew a centre stitch with a fixing loop every few mm',()=>{
  assert.ok(plan.count>20,'sequins are sewn ('+plan.count+')');
 });
 
-test('beads sew short passes across the path at each point',()=>{
+test('beads sew one short pass across the path at each point',()=>{
  const doc=initialDocument();doc.objects=[];
  applyOperations(doc,[{op:'add_path',id:'b',x:0,y:0,points:[[-20,0],[20,0]]},{op:'set_object',id:'b',stitch:'bead'}]);
  validateDocument(doc);
  const plan=compile(doc);assert.deepEqual(plan.errors,[]);
- assert.ok(plan.count>20,'beads are sewn ('+plan.count+')');
+ // A 40 mm path with beads every 6 mm sews one short pass per bead (about 16 stitches with travel). Three identical passes sewed 64.
+ assert.ok(plan.count>=10&&plan.count<=30,'each bead is sewn once ('+plan.count+' stitches)');
 });
 
 test('bling sews a stone with a centre stitch and two fixing rings',()=>{
