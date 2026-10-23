@@ -867,6 +867,22 @@ test('batch documents encode to JEF, VP3 and DST, one file per hoop',async()=>{
  }
 });
 
+test('batch documents encode to SEW and every hoop decodes back to its planned needles',async()=>{
+ const {batchDocuments}=await import('../src/engine.js');const {decodeEmbroidery}=await import('../src/readers.js');
+ const doc=initialDocument();doc.objects=[];
+ applyOperations(doc,[{op:'add_shape',id:'r',kind:'rect',x:-10,y:-5,width:20,height:10,thread:'#527461',stitch:'fill'}]);
+ const docs=batchDocuments(doc,{copies:40});assert.ok(docs.length>1,'the copies span more than one hoop');
+ const tenths=s=>[Math.round(s.x*10),Math.round(s.y*10)];
+ for(const d of docs){
+  const plan=compile(d),back=decodeEmbroidery(encode(plan,'sew','#527461',110,d),'sew');
+  const [x0,y0,x1,y1]=back.bounds;assert.ok(x0>=-55&&y0>=-55&&x1<=55&&y1<=55,'every SEW hoop stays inside the 110 mm hoop');
+  // A zero-length step leaves no SEW record, so a repeated planned point is written once, and a stitch that starts where a jump ends is that jump's record.
+  const want=plan.stitches.filter(s=>s.cmd==='stitch').map(tenths).filter((p,i,all)=>i===0||p[0]!==all[i-1][0]||p[1]!==all[i-1][1]),got=back.stitches.filter(s=>s.cmd==='stitch'||s.cmd==='jump').map(tenths);let next=0;
+  for(const p of got)if(next<want.length&&want[next][0]===p[0]&&want[next][1]===p[1])next++;
+  assert.equal(next,want.length,'every planned needle point is written, in order');
+ }
+});
+
 test('EXP export decodes back to the planned stitch path',async()=>{
  const {encodeExp}=await import('../src/engine.js');
  const doc=initialDocument();doc.objects=[];

@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {writeFileSync} from 'node:fs';
 import {decodeEmbroidery} from '../src/readers.js';
-import {compile,encode,importStitchLayer,initialDocument,applyOperations,validateDocument} from '../src/engine.js';
+import {compile,encode,importStitchLayer,initialDocument,applyOperations,validateDocument,batchDocuments} from '../src/engine.js';
 import {pinnedMachineFixture,readMachineFixtures} from './fixture-archive.js';
 
 test('pinned JEF imports as preserved stitch data and exports the exact untouched source',()=>{
@@ -83,6 +83,44 @@ test('a true JEF STOP imports, edits and re-exports as a stop with its own threa
  const plan=compile(doc);assert.deepEqual(plan.errors,[]);assert.equal(plan.stitches.filter(s=>s.cmd==='stop').length,1);
  const out=encode(plan,'jef','#527461',doc.hoop,doc),back=decodeEmbroidery(out,'jef');assert.equal(back.stitches.filter(s=>s.cmd==='stop').length,1,'the stop survives a write/read round trip');
  assert.equal(back.stitches.filter(s=>s.cmd==='stitch').length,plan.stitches.filter(s=>s.cmd==='stitch').length);
+});
+
+test('pinned PEC imports with its thread-chart colours, exports the untouched source and re-encodes after a move',()=>{
+  const {fileName,bytes}=pinnedMachineFixture('pec'),decoded=decodeEmbroidery(bytes,'pec'),doc=initialDocument(),layer=importStitchLayer(bytes,'pec',{fileName});doc.objects=[layer];
+  assert.deepEqual(layer.stitches,decoded.stitches);
+  assert.ok(decoded.threads.length>1&&decoded.threads.every(t=>/^#[0-9a-f]{6}$/i.test(t.color)),'every PEC colour resolves to a thread-chart colour');
+  assert.deepEqual(compile(doc).errors,[]);assert.deepEqual(encode(compile(doc),'pec','#527461',doc.hoop,doc),bytes);
+  applyOperations(doc,[{op:'transform',id:layer.id,x:layer.x+1,y:layer.y-1}]);const plan=compile(doc);assert.deepEqual(plan.errors,[]);
+  const output=encode(plan,'pec','#527461',doc.hoop,doc),back=decodeEmbroidery(output,'pec'),tenths=s=>[Math.round(s.x*10),Math.round(s.y*10)];
+  const want=plan.stitches.filter(s=>s.cmd==='stitch').map(tenths),got=back.stitches.filter(s=>s.cmd==='stitch').map(tenths);let next=0;
+  for(const [x,y] of got)if(next<want.length&&want[next][0]===x&&want[next][1]===y)next++;
+  assert.equal(next,want.length,'every planned needle point is written, in order');
+});
+
+test('pinned EXP imports with placeholder colours, exports the untouched source and re-encodes after a move',()=>{
+  const {fileName,bytes}=pinnedMachineFixture('exp'),decoded=decodeEmbroidery(bytes,'exp'),doc=initialDocument(),layer=importStitchLayer(bytes,'exp',{fileName});doc.objects=[layer];
+  assert.deepEqual(layer.stitches,decoded.stitches);
+  assert.ok(decoded.threads.length>1&&decoded.threads.every(t=>/^#[0-9a-f]{6}$/i.test(t.color)),'every EXP colour block has a placeholder colour');
+  assert.match(layer.source.warnings.join(' '),/no thread colours/);
+  assert.deepEqual(compile(doc).errors,[]);assert.deepEqual(encode(compile(doc),'exp','#527461',doc.hoop,doc),bytes);
+  applyOperations(doc,[{op:'transform',id:layer.id,x:layer.x+1,y:layer.y-1}]);const plan=compile(doc);assert.deepEqual(plan.errors,[]);
+  const output=encode(plan,'exp','#527461',doc.hoop,doc),back=decodeEmbroidery(output,'exp'),tenths=s=>[Math.round(s.x*10),Math.round(s.y*10)];
+  // A zero-length step leaves no EXP record, so repeated planned points are written once.
+  const want=plan.stitches.filter(s=>s.cmd==='stitch').map(tenths).filter((p,i,all)=>i===0||p[0]!==all[i-1][0]||p[1]!==all[i-1][1]),got=back.stitches.filter(s=>s.cmd==='stitch').map(tenths);let next=0;
+  for(const [x,y] of got)if(next<want.length&&want[next][0]===x&&want[next][1]===y)next++;
+  assert.equal(next,want.length,'every planned needle point is written, in order');
+});
+
+test('batch export copies an imported machine file into each hoop and encodes every hoop from its stitches',()=>{
+  const {fileName,bytes}=pinnedMachineFixture('jef'),decoded=decodeEmbroidery(bytes,'jef'),doc=initialDocument(),layer=importStitchLayer(bytes,'jef',{fileName});doc.objects=[layer];
+  const docs=batchDocuments(doc,{copies:3});assert.equal(docs.length,3,'one imported copy per hoop');
+  const sewn=s=>s.cmd==='stitch';
+  for(const d of docs){
+    assert.equal(d.objects.length,1);assert.equal(d.objects[0].source.originalBytesBase64,null,'the source bytes are not carried into the hoop');
+    assert.deepEqual(compile(d).errors,[]);
+    const out=encode(compile(d),'jef','#527461',d.hoop,d);assert.notDeepEqual(out,bytes,'the hoop is encoded from the layer stitches, not passed through');
+    assert.equal(decodeEmbroidery(out,'jef').stitches.filter(sewn).length,decoded.stitches.filter(sewn).length);
+  }
 });
 
 test('pinned SEW imports with its thread-chart colours, exports the untouched source and re-encodes after a move',()=>{

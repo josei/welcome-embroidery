@@ -105,11 +105,11 @@ Reference: Wilcom EmbroideryStudio, the commercial digitizing suite. Its feature
 | Embellishment | Buttonholes (satin with bar tacks at both ends) | Built |
 | Sequencing | Object order, start and end points, jumps and trims | Built |
 | Sequencing | Batch planning: copies that fit one hoop and hoops needed (no separate hoop files yet) | Built (planner) |
-| Sequencing | Batch export: one file per hoop in JEF, VP3 or DST (copies laid out on the batch grid) | Built (JEF, VP3, DST) |
+| Sequencing | Batch export: one file per hoop in JEF, VP3, DST or SEW (copies laid out on the batch grid, imported machine files included) | Built (JEF, VP3, DST, SEW; imported layers re-encoded per hoop) |
 | Preview | 3D preview and stitch playback | Built |
-| Files | JEF and VP3 export and import, DST import and export, SEW import and export | Built |
-| Files | EXP (Melco) export | Built (export only; checked by decoding with pyembroidery) |
-| Files | PEC (Brother) export | Built (export only; checked by decoding with pyembroidery) |
+| Files | JEF and VP3 export and import, DST import and export, SEW import and export, PEC and EXP import | Built |
+| Files | EXP (Melco) export and import | Built (export checked by decoding with pyembroidery; import checked against all 35 pinned samples; placeholder colours) |
+| Files | PEC (Brother) export and import | Built (export checked by decoding with pyembroidery; import checked against all 25 pinned samples; no PES-embedded PEC) |
 | Files | PES (version 1) export | Built (export only; checked by decoding with pyembroidery) |
 | Files | PES version 6 export | Built (export only; checked by decoding with pyembroidery; thread names omitted) |
 | Files | SEW (Janome native) export and import | Built (export checked by decoding with pyembroidery; import checked against all 15 pinned samples; trims not written, no design header) |

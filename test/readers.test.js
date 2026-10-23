@@ -83,6 +83,45 @@ test('all 15 pinned SEW samples decode to the pyembroidery command and coordinat
   }
 });
 
+const pecParity=JSON.parse(readFileSync(new URL('../scripts/pec-parity.json', import.meta.url),'utf8'));
+test('all 25 pinned PEC samples decode to the pyembroidery command, thread and coordinate digests',()=>{
+  assert.equal(pecParity.schema,'welcom/pec-parity/1');
+  const pecFiles=zipEntries(archive,name=>/\.pec$/i.test(name));
+  assert.equal(pecFiles.size,25);
+  assert.equal(pecParity.fixtures.length,25);
+  for(const fixture of pecParity.fixtures){
+    const bytes=pecFiles.get(fixture.path); assert.ok(bytes,fixture.path);
+    assert.equal(sha(bytes),fixture.sha256,`${fixture.path} fixture pin`);
+    const decoded=decodeEmbroidery(bytes,'pec');
+    const counts={};for(const s of decoded.stitches)counts[s.cmd]=(counts[s.cmd]||0)+1;
+    assert.deepEqual(counts,fixture.commandCounts,`${fixture.path} command counts`);
+    assert.equal(decoded.threads.length,fixture.threads,`${fixture.path} thread count`);
+    assert.equal(sha(Buffer.from(canonical(decoded.stitches.map(s=>[Math.round(s.x*10),Math.round(s.y*10),s.cmd])))),fixture.commandsSha256,`${fixture.path} command/coordinate parity`);
+  }
+});
+
+const expParity=JSON.parse(readFileSync(new URL('../scripts/exp-parity.json', import.meta.url),'utf8'));
+test('all 35 pinned EXP samples decode to the pyembroidery command, colour block and coordinate digests',()=>{
+  assert.equal(expParity.schema,'welcom/exp-parity/1');
+  const expFiles=zipEntries(archive,name=>/\.exp$/i.test(name));
+  assert.equal(expFiles.size,35);
+  assert.equal(expParity.fixtures.length,35);
+  for(const fixture of expParity.fixtures){
+    const bytes=expFiles.get(fixture.path); assert.ok(bytes,fixture.path);
+    assert.equal(sha(bytes),fixture.sha256,`${fixture.path} fixture pin`);
+    const decoded=decodeEmbroidery(bytes,'exp');
+    const counts={};for(const s of decoded.stitches)counts[s.cmd]=(counts[s.cmd]||0)+1;
+    assert.deepEqual(counts,fixture.commandCounts,`${fixture.path} command counts`);
+    assert.equal(decoded.threads.length,fixture.threads,`${fixture.path} colour block count`);
+    assert.equal(sha(Buffer.from(canonical(decoded.stitches.map(s=>[Math.round(s.x*10),Math.round(s.y*10),s.cmd])))),fixture.commandsSha256,`${fixture.path} command/coordinate parity`);
+  }
+});
+
+test('PEC signature, label and truncated headers are rejected',()=>{
+  assert.throws(()=>decodeEmbroidery(new Uint8Array(0x217),'pec'),/truncated/);
+  assert.throws(()=>decodeEmbroidery(new Uint8Array(0x218),'pec'),/signature/);
+});
+
 test('SEW colour count and truncated headers are rejected',()=>{
   assert.throws(()=>decodeEmbroidery(new Uint8Array(0x1D78-1),'sew'),/truncated/);
   const none=new Uint8Array(0x1D78);

@@ -41,11 +41,15 @@ const cases={
   'redwork': async p=>{await drawPath(p,[[-30,-10],[-10,10],[10,-10],[30,10]]);await p.locator('#runStyle').selectOption('redwork');},
   'buttonhole': async p=>{await drawPath(p,[[-20,0],[20,0]]);await p.locator('#type').selectOption('satin');await p.locator('#satinButtonhole').check();},
   'raised-satin': async p=>{await drawPath(p,[[-20,0],[20,0]]);await p.locator('#type').selectOption('satin');await p.locator('#satinRaised').check();},
+  'batch-sew': async p=>{await p.locator('#rect').click();await p.locator('#secArray summary').click();await p.locator('#arrCount').fill('400');await p.locator('#arrCount').press('Tab');await p.locator('#batchFormat').selectOption('sew');},
   'batch-formats': async p=>{await p.locator('#rect').click();await p.locator('#secArray summary').click();await p.locator('#arrCount').fill('400');await p.locator('#arrCount').press('Tab');await p.locator('#batchFormat').selectOption('vp3');},
   'batch-plan': async p=>{await p.locator('#rect').click();await p.locator('#secArray summary').click();await p.locator('#arrCount').fill('400');await p.locator('#arrCount').press('Tab');},
   'export-pes6': async p=>{await p.locator('#rect').click();await p.locator('#export').click();await p.locator('#format').selectOption('pes6');},
   'thread-worksheet': async p=>{await p.locator('#rect').click();await p.locator('#thread').selectOption('#d9897e');await p.locator('#ellipse').click();await p.locator('#thread').selectOption('#527461');await p.locator('#secPlan summary').click();await p.locator('#secPlan').scrollIntoViewIfNeeded();},
   'import-sew': async p=>{const f=pinnedMachineFixture('sew');await p.locator('#machineFile').setInputFiles({name:'sample.sew',mimeType:'application/octet-stream',buffer:Buffer.from(f.bytes)});await p.locator('button[data-view="stitches"]').click();},
+  'import-pec': async p=>{const f=pinnedMachineFixture('pec');await p.locator('#machineFile').setInputFiles({name:'sample.pec',mimeType:'application/octet-stream',buffer:Buffer.from(f.bytes)});await p.locator('button[data-view="stitches"]').click();},
+  'import-exp': async p=>{const f=pinnedMachineFixture('exp');await p.locator('#machineFile').setInputFiles({name:'sample.exp',mimeType:'application/octet-stream',buffer:Buffer.from(f.bytes)});await p.locator('button[data-view="stitches"]').click();},
+  'batch-imported': async p=>{const f=pinnedMachineFixture('jef');await p.locator('#machineFile').setInputFiles({name:'sample.jef',mimeType:'application/octet-stream',buffer:Buffer.from(f.bytes)});await p.locator('#secArray summary').click();await p.locator('#arrCount').fill('3');await p.locator('#arrCount').press('Tab');},
   'export-sew': async p=>{await p.locator('#rect').click();await p.locator('#export').click();await p.locator('#format').selectOption('sew');},
 };
 const done=[];

@@ -1114,6 +1114,22 @@ test('a SEW file imports from the machine picker as a stitch layer',async({page}
  await expect(page.locator('#sourceInfo')).toContainText('commands');expect(errors).toEqual([]);
 });
 
+test('a PEC file imports from the machine picker as a stitch layer',async({page})=>{
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));page.on('dialog',d=>d.accept());
+ const fixture=pinnedMachineFixture('pec');await page.goto('/');await page.locator('#new').click();
+ await page.locator('#machineFile').setInputFiles({name:'sample.pec',mimeType:'application/octet-stream',buffer:Buffer.from(fixture.bytes)});
+ await expect(page.locator('#sourceInfo')).toContainText('PEC stitch layer');await expect(page.locator('.object-row')).toHaveCount(1);
+ await expect(page.locator('#sourceInfo')).toContainText('commands');expect(errors).toEqual([]);
+});
+
+test('an EXP file imports from the machine picker as a stitch layer with placeholder colours',async({page})=>{
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));page.on('dialog',d=>d.accept());
+ const fixture=pinnedMachineFixture('exp');await page.goto('/');await page.locator('#new').click();
+ await page.locator('#machineFile').setInputFiles({name:'sample.exp',mimeType:'application/octet-stream',buffer:Buffer.from(fixture.bytes)});
+ await expect(page.locator('#sourceInfo')).toContainText('EXP stitch layer');await expect(page.locator('.object-row')).toHaveCount(1);
+ await expect(page.locator('#sourceInfo')).toContainText('commands');expect(errors).toEqual([]);
+});
+
 test('batch export can write VP3 and DST files instead of JEF',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());await page.locator('#new').click();
  await page.locator('#rect').click();await page.locator('#secArray summary').click();await page.locator('#arrCount').fill('3');await page.locator('#arrCount').press('Tab');
@@ -1123,6 +1139,27 @@ test('batch export can write VP3 and DST files instead of JEF',async({page})=>{
  await page.locator('#batchFormat').selectOption('dst');
  const dst=page.waitForEvent('download');await page.locator('#batchExport').click();
  expect((await dst).suggestedFilename()).toMatch(/-hoop1\.dst$/);expect(errors).toEqual([]);
+});
+
+test('batch export can write SEW files',async({page})=>{
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());await page.locator('#new').click();
+ await page.locator('#rect').click();await page.locator('#secArray summary').click();await page.locator('#arrCount').fill('3');await page.locator('#arrCount').press('Tab');
+ await page.locator('#batchFormat').selectOption('sew');
+ const sew=page.waitForEvent('download');await page.locator('#batchExport').click();
+ expect((await sew).suggestedFilename()).toMatch(/-hoop1\.sew$/);expect(errors).toEqual([]);
+});
+
+test('an imported JEF file batch-exports one JEF per hoop',async({page})=>{
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));page.on('dialog',d=>d.accept());
+ const fixture=pinnedMachineFixture('jef');await page.goto('/');await page.locator('#new').click();
+ await page.locator('#machineFile').setInputFiles({name:'sample.jef',mimeType:'application/octet-stream',buffer:Buffer.from(fixture.bytes)});
+ await expect(page.locator('#sourceInfo')).toContainText('JEF stitch layer');
+ await page.locator('#secArray summary').click();await page.locator('#arrCount').fill('3');await page.locator('#arrCount').press('Tab');
+ await page.locator('#batchFormat').selectOption('jef');
+ const names=[];page.on('download',d=>names.push(d.suggestedFilename()));
+ await page.locator('#batchExport').click();
+ await expect.poll(()=>names.length).toBe(3);
+ expect(names.map(n=>n.match(/-hoop(\d+)\.jef$/)?.[1])).toEqual(['1','2','3']);expect(errors).toEqual([]);
 });
 
 test('EXP is an export format and downloads as an .exp file',async({page})=>{
