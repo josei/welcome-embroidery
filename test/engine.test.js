@@ -748,6 +748,22 @@ test('motif fill covers a closed shape with a staggered grid of loops',()=>{
  assert.ok(plan.count>150&&plan.count<3000,'loops every 4 mm fill the square ('+plan.count+')');
 });
 
+test('motif warp shrinks the loops across the fill along the chosen axis',()=>{
+ const doc=initialDocument();doc.objects=[];
+ applyOperations(doc,[{op:'add_shape',id:'q',kind:'rect',x:-15,y:-15,width:30,height:30,thread:'#527461',stitch:'fill'},{op:'set_object',id:'q',fillMethod:'motif',motifSize:3}]);
+ const flat=compile(doc),y1=flat.bounds[3];
+ applyOperations(doc,[{op:'set_object',id:'q',motifWarp:'x'}]);
+ validateDocument(doc);
+ const warpX=compile(doc);
+ assert.equal(warpX.count,flat.count,'the warp changes loop size, not the loop count');
+ assert.ok(warpX.bounds[2]<flat.bounds[2]-.3,'the far right loops are smaller than the left loops');
+ applyOperations(doc,[{op:'set_object',id:'q',motifWarp:'y'}]);
+ const warpY=compile(doc);
+ assert.ok(warpY.bounds[3]<y1-.3,'the bottom loops are smaller than the top loops');
+ applyOperations(doc,[{op:'set_object',id:'q',motifWarp:'diagonal'}]);
+ assert.throws(()=>validateDocument(doc),/motif warp/);
+});
+
 test('motif spacing and size change how many loops are sewn',()=>{
  const doc=initialDocument();doc.objects=[];
  applyOperations(doc,[{op:'add_path',id:'m',x:0,y:0,points:[[-20,0],[20,0]]},{op:'set_object',id:'m',stitch:'motif'}]);

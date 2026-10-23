@@ -393,3 +393,9 @@ Based on direct feedback that editing felt far from a vector program:
 - Still missing: thread brand libraries (the palette is generic), EMB export, signed macOS builds.
 - Three-tone photo stitch (`photo.thread3` with `thread2`): light, mid and dark threads on interleaved rows. Four-tone photo stitch (`photo.thread4` with `thread3`): light, light-mid, mid-dark and the main thread for the darkest detail, each on its own offset rows.
 - Sewing tips in the editor: the same checks agents get over MCP (fills too small or narrow, satin under 1 mm or over 7 mm, tiny lettering, duplicates, objects outside the hoop) now show as a count next to the issues in the status bar (click to jump from object to object) and as a yellow "Sewing tips" box in the sidebar for the selected object. The messages are translated in the Spanish interface.
+
+## 2026-10-23 motif size warp across a fill
+
+- Motif fill can shrink its loops across the shape: Loop size warp is None (default), Left to right or Top to bottom. Loops keep their grid positions and count; the size falls linearly from the full Size at the low edge to 40% of it at the far edge, so the far side reads as further away. Stored as `motifWarp`; the sidebar shows the select only for a single motif-filled object. Unknown values are rejected by the engine. Not in the MCP schema.
+- This is a pseudo-depth cue along one axis, not a true 3D surface: there is no curvature, no falloff curve and no per-loop height. The 40% floor and the axis choice are fixed.
+- Covered by an engine test (loop count unchanged, far-edge loops smaller on the chosen axis, unknown warp rejected) and an e2e test (the row shows for motif fill and the warp can be set and cleared). Screenshot: `design/progress/features/motif-fill-warp.png`.

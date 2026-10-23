@@ -95,6 +95,7 @@ Reference: Wilcom EmbroideryStudio, the commercial digitizing suite. Its feature
 | Motifs | Motif fill: loops on a staggered grid inside a closed shape | Built (basic) |
 | Motifs | Motif warp along a tapered column: paired loops follow the satin width, including its end width | Built (basic) |
 | Motifs | Motif shape warp: leaf loops whose long axis follows the path (a surface-style warp; no true 3D surface) | Built (basic) |
+| Motifs | Motif size warp across a fill: loops shrink from one edge to the other (a pseudo-depth cue, not a 3D surface) | Built (basic) |
 | Motifs | True 3D surface warp of motifs | Not started |
 | Embellishment | Sequins as a stitch type: a centre stitch with a fixing loop every few mm (single-sequin placement; no twin-sequin or dispensing control) | Built (basic) |
 | Embellishment | Beads as a stitch type: short passes across the path at each point (basic beading; no bead-shape or dispensing control) | Built (basic) |

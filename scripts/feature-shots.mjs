@@ -34,6 +34,7 @@ const cases={
   'motif-loops-leaf': async p=>{await drawPath(p,line);await p.locator('#type').selectOption('motif');await p.locator('#motifShape').selectOption('leaf');},
   'motif-pairs-taper': async p=>{await drawPath(p,line);await p.locator('#type').selectOption('motif');await p.locator('#motifPair').check();await p.locator('#satinWidthEnd').fill('8');await p.locator('#satinWidthEnd').press('Tab');},
   'motif-fill': async p=>{await drawShape(p,[[-20,-20],[20,-20],[20,20],[-20,20]]);await p.locator('#fillMethod').selectOption('motif');},
+  'motif-fill-warp': async p=>{await drawShape(p,[[-20,-20],[20,-20],[20,20],[-20,20]]);await p.locator('#fillMethod').selectOption('motif');await p.locator('#motifWarp').selectOption('x');},
   'redwork': async p=>{await drawPath(p,[[-30,-10],[-10,10],[10,-10],[30,10]]);await p.locator('#runStyle').selectOption('redwork');},
   'buttonhole': async p=>{await drawPath(p,[[-20,0],[20,0]]);await p.locator('#type').selectOption('satin');await p.locator('#satinButtonhole').check();},
   'raised-satin': async p=>{await drawPath(p,[[-20,0],[20,0]]);await p.locator('#type').selectOption('satin');await p.locator('#satinRaised').check();},

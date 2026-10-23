@@ -1026,6 +1026,15 @@ test('motif spacing can be changed in the panel and sews more loops when smaller
  await expect.poll(count).toBeGreaterThan(wide*1.6);expect(errors).toEqual([]);
 });
 
+test('motif fill loops can shrink across the fill in the panel',async({page})=>{
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());await page.locator('#new').click();
+ await page.locator('#path').click();const m=await ctm(page);for(const [x,y] of [[-20,-20],[20,-20],[20,20]]){const s=toScreen(m,x,y);await page.mouse.click(s.x,s.y);}
+ const first=toScreen(m,-20,-20);await page.mouse.click(first.x,first.y);
+ await page.locator('#fillMethod').selectOption('motif');await expect(page.locator('#motifWarpRow')).toBeVisible();
+ await page.locator('#motifWarp').selectOption('x');await expect(page.locator('#motifWarp')).toHaveValue('x');
+ await page.locator('#motifWarp').selectOption('none');await expect(page.locator('#motifWarp')).toHaveValue('none');expect(errors).toEqual([]);
+});
+
 test('sequins are a stitch type that sews fixing loops along the path',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());await page.locator('#new').click();
  await page.locator('#path').click();const m=await ctm(page);for(const [x,y] of [[-20,0],[20,0]]){const s=toScreen(m,x,y);await page.mouse.click(s.x,s.y);}await page.keyboard.press('Enter');
