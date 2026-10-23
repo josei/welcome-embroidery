@@ -1011,3 +1011,20 @@ export function designWarnings(doc){
   }
   return out;
 }
+
+// Thread plan: the colours in sewing order. A block starts at the first stitch after a colour change or stop, so the same colour sewn twice gives two blocks, as the editor shows it.
+export function threadPlan(plan){const blocks=[];let cur=null;for(const s of plan.stitches){if(s.cmd==='color'||s.cmd==='stop'){cur=null;continue;}if(s.cmd!=='stitch')continue;if(!cur||cur.thread!==s.thread){cur={thread:s.thread,stitches:0};blocks.push(cur);}cur.stitches++;}return blocks;}
+// Sewing time in seconds: 600 stitches a minute, 20 s per colour change or stop, 8 s per trim.
+export function sewingSeconds(plan){return plan.count/600*60+plan.stitches.filter(s=>s.cmd==='color'||s.cmd==='stop').length*20+plan.stitches.filter(s=>s.cmd==='trim').length*8;}
+const sewingLabel=sec=>{const m=Math.max(1,Math.round(sec/60));return m>=60?`${Math.floor(m/60)} h ${m%60} min`:`${m} min`;};
+// Printable sewing worksheet for a compiled plan: the thread blocks in sewing order with stitch counts, and the time estimate. Format 'text' or 'svg'. Threads are shown as hex values because the engine has no colour names.
+export function sewingWorksheet(doc,plan,format='text'){
+  if(format!=='text'&&format!=='svg')throw Error(`Unsupported worksheet format: ${format}. Choose text or svg.`);
+  const blocks=threadPlan(plan),total=blocks.reduce((n,b)=>n+b.stitches,0),time=sewingLabel(sewingSeconds(plan)),name=doc.name||'Untitled',hoop=hoopLabel(hoopSize(doc)),fmt=n=>n.toLocaleString('en-US');
+  const note=`Estimate: about ${time} (600 stitches a minute, 20 s per colour change or stop, 8 s per trim).`;
+  if(format==='text'){const rows=blocks.map((b,i)=>`${String(i+1).padStart(3)}  ${b.thread.padEnd(9)}  ${fmt(b.stitches).padStart(10)}`);
+    return [`Sewing worksheet: ${name}`,`Hoop: ${hoop}`,`Revision ${plan.revision}`,'',`${'No.'.padStart(3)}  ${'Thread'.padEnd(9)}  ${'Stitches'.padStart(10)}`,...rows,'',`Threads: ${blocks.length}   Stitches: ${fmt(total)}`,note,''].join('\n');}
+  const esc=t=>String(t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])),rowH=8,top=24,H=top+blocks.length*rowH+22;
+  const rows=blocks.map((b,i)=>{const y=top+i*rowH;return `<rect x="6" y="${y-4}" width="6" height="6" fill="${esc(b.thread)}" stroke="#333" stroke-width=".2"/><text x="16" y="${y+1}">${i+1}. ${esc(b.thread)}</text><text x="114" y="${y+1}" text-anchor="end">${fmt(b.stitches)}</text>`;}).join('\n');
+  return `<?xml version="1.0" encoding="UTF-8"?>\n<svg xmlns="http://www.w3.org/2000/svg" width="120mm" height="${H}mm" viewBox="0 0 120 ${H}" font-family="sans-serif" font-size="4" fill="#111">\n<title>${esc(name)}</title>\n<text x="6" y="8" font-size="5" font-weight="bold">Sewing worksheet: ${esc(name)}</text>\n<text x="6" y="14">Hoop: ${esc(hoop)} · Revision ${plan.revision}</text>\n<text x="114" y="${top-4}" text-anchor="end">Stitches</text>\n${rows}\n<text x="6" y="${H-12}">Threads: ${blocks.length} · Stitches: ${fmt(total)}</text>\n<text x="6" y="${H-6}">${esc(note)}</text>\n</svg>\n`;
+}

@@ -40,6 +40,7 @@ const cases={
   'raised-satin': async p=>{await drawPath(p,[[-20,0],[20,0]]);await p.locator('#type').selectOption('satin');await p.locator('#satinRaised').check();},
   'batch-plan': async p=>{await p.locator('#rect').click();await p.locator('#secArray summary').click();await p.locator('#arrCount').fill('400');await p.locator('#arrCount').press('Tab');},
   'export-pes6': async p=>{await p.locator('#rect').click();await p.locator('#export').click();await p.locator('#format').selectOption('pes6');},
+  'thread-worksheet': async p=>{await p.locator('#rect').click();await p.locator('#thread').selectOption('#d9897e');await p.locator('#ellipse').click();await p.locator('#thread').selectOption('#527461');await p.locator('#secPlan summary').click();await p.locator('#secPlan').scrollIntoViewIfNeeded();},
   'export-sew': async p=>{await p.locator('#rect').click();await p.locator('#export').click();await p.locator('#format').selectOption('sew');},
 };
 const done=[];

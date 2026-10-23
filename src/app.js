@@ -6,7 +6,7 @@ import {createCanvas} from './canvas.js';
 import {getFont,registerFont,loadFont,isRegistryFont,documentFontIds,registerDocumentFonts} from './fonts.js';
 import {createFontPicker,fetchFontIndex,LEGACY} from './fontui.js';
 import {ttfToFont} from './ttf.js';
-import {batchDocuments,batchPlan,designWarnings,widthAt,nodeFraction,initialDocument,geometry,applyOperations,validateDocument,measureText,parseSvgPath,makeStitchLayer,objectBounds,hoopSize,jefWarnings,exportSvg,textPrimitives} from './engine.js';
+import {batchDocuments,batchPlan,designWarnings,widthAt,nodeFraction,initialDocument,geometry,applyOperations,validateDocument,measureText,parseSvgPath,makeStitchLayer,objectBounds,hoopSize,jefWarnings,exportSvg,textPrimitives,threadPlan,sewingSeconds,sewingWorksheet} from './engine.js';
 const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)],svgNS='http://www.w3.org/2000/svg';
 const withSavedHoop=d=>{try{const h=JSON.parse((localStorage.getItem('welcome.hoop')??localStorage.getItem('welcom.hoop'))||'null');if(h&&Number.isFinite(h.w)&&Number.isFinite(h.h)&&h.w>=10&&h.w<=400&&h.h>=10&&h.h<=400){d.hoop=h.w;if(h.h===h.w)delete d.hoopH;else d.hoopH=h.h;}}catch{}return d;};let doc=withSavedHoop(initialDocument()),selected=null,history=[],future=[],plan=null,dirty=true,worker=new Worker(new URL('./worker.js',import.meta.url),{type:'module'}),workerFailure=null,seq=0,generation=0,pending=new Map(),nodeDrag=null,selNodes=new Set(),canvasText=null,editMode=false,canvasView=null,collapsed=new Set(),clipboard=null,multi=new Set(),selNode=null,snapOn=false,gridSize=1,view='design',playIndex=null,playbackTimer=null;
 worker.onmessage=e=>{if(e.data.generation!==generation)return;const p=pending.get(e.data.id);if(!p)return;pending.delete(e.data.id);e.data.ok?p.resolve(e.data):p.reject(Error(e.data.error));};
@@ -556,7 +556,7 @@ async function referenceForAgent({view='annotated',includeShapes=true}={}){
  document.addEventListener('focusin',e=>{if(e.target.matches?.('[data-tooltip]:focus-visible'))show(e.target);});document.addEventListener('focusout',hide);document.addEventListener('keydown',e=>{if(e.key==='Escape')hide();});}
 
 // Sewing time: 600 stitches a minute, 20 s per colour change or stop, 8 s per trim.
-function sewTime(p){const c=p.stitches,sec=p.count/600*60+c.filter(s=>s.cmd==='color'||s.cmd==='stop').length*20+c.filter(s=>s.cmd==='trim').length*8,m=Math.max(1,Math.round(sec/60));return m>=60?`${Math.floor(m/60)} h ${m%60} min`:`${m} min`;}
+function sewTime(p){const m=Math.max(1,Math.round(sewingSeconds(p)/60));return m>=60?`${Math.floor(m/60)} h ${m%60} min`:`${m} min`;}
 
 // Thread colours: a swatch button per colour select opens a palette (plus recent and custom colours); the select stays as the value holder.
 const THREAD_PALETTE=[['White','#ffffff'],['Ivory','#f3ead7'],['Cream','#efe0b9'],['Light grey','#c9cccf'],['Silver','#a4a8ae'],['Grey','#7a7f87'],['Charcoal','#3f4349'],['Black','#111111'],
@@ -597,9 +597,11 @@ threadsReady=true;syncThreads();
 }
 
 // Thread plan: the colours in sewing order with their stitch counts.
-function renderPlan(){const list=$('#planList');if(!list)return;list.replaceChildren();$('#planEmpty').hidden=Boolean(plan);if(!plan)return;const blocks=[];let cur=null;
-  for(const s of plan.stitches){if(s.cmd==='color'||s.cmd==='stop'){cur=null;if(s.cmd==='color'||!blocks.length){}continue;}if(s.cmd!=='stitch')continue;if(!cur||cur.thread!==s.thread){cur={thread:s.thread,n:0};blocks.push(cur);}cur.n++;}
-  blocks.slice(0,60).forEach((b,i)=>{const row=document.createElement('div');row.className='plan-row';const sw=document.createElement('span');sw.className='sw';sw.style.background=b.thread;const nm=document.createElement('span');nm.textContent=`${i+1}. ${threadName(b.thread)}`;const n=document.createElement('span');n.className='n';n.textContent=t('{n} stitches',{n:b.n.toLocaleString()});row.append(sw,nm,n);list.append(row);});}
+function renderPlan(){const list=$('#planList');if(!list)return;list.replaceChildren();$('#planEmpty').hidden=Boolean(plan);if(!plan)return;const blocks=threadPlan(plan);
+  blocks.slice(0,60).forEach((b,i)=>{const row=document.createElement('div');row.className='plan-row';const sw=document.createElement('span');sw.className='sw';sw.style.background=b.thread;const nm=document.createElement('span');nm.textContent=`${i+1}. ${threadName(b.thread)}`;const n=document.createElement('span');n.className='n';n.textContent=t('{n} stitches',{n:b.stitches.toLocaleString()});row.append(sw,nm,n);list.append(row);});}
+// Sewing worksheet: the thread plan as printable text or SVG. Compiles first when the plan is missing or older than the document.
+$('#worksheetDownload').onclick=async e=>{e.preventDefault();if(!plan||plan.revision!==doc.revision)await compileNow(true);if(!plan||plan.revision!==doc.revision){toast(compileError||t('Compile the design first.'));return;}
+  const fmt=$('#worksheetFormat').value,base=safeProjectFilename(doc.name).replace(/\.welcom[e]?$/i,'');download(sewingWorksheet(doc,plan,fmt),`${base}-worksheet.${fmt==='svg'?'svg':'txt'}`,fmt==='svg'?'image/svg+xml':'text/plain');toast(t('Sewing worksheet downloaded.'));};
 // Keyboard shortcuts
 const SHORTCUTS=[['Tools',[['V','Select'],['R','Rectangle'],['O','Ellipse'],['T','Lettering'],['N','Draw path'],['P','Pen with curves'],['L','Line'],['G','Polygon'],['S','Star'],['Enter','Edit nodes / finish a path'],['Esc','Cancel, go back to select']]],
  ['Edit',[['Ctrl+Z / Ctrl+Y','Undo / redo'],['Ctrl+C / X / V','Copy, cut, paste'],['Ctrl+D','Duplicate'],['Ctrl+Alt+C / V','Copy / paste style'],['Del','Delete'],['Ctrl+A','Select all'],['Ctrl+G / Ctrl+Shift+G','Group / ungroup'],['Ctrl+Shift+C','Convert to path'],['Arrow keys','Nudge (Shift = 5 mm, Alt = 0.1 mm)'],['Ctrl+Arrows','Resize'],['Ctrl+Alt+← / →','Rotate']]],

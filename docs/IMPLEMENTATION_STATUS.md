@@ -411,3 +411,10 @@ Based on direct feedback that editing felt far from a vector program:
 
 - `.github/workflows/desktop.yml` already builds Linux (ubuntu-22.04), macOS (macos-14) and Windows (windows-latest) in one matrix, on a `v*` tag or manual dispatch, and uploads each `src-tauri/target/release/bundle/` as an artifact. No workflow change was needed.
 - Not verified: no CI run of the macOS or Windows jobs has been observed yet. Signing and notarization are still not configured, so the macOS bundles are unsigned.
+
+## 2026-10-23 sewing worksheet
+
+- The Thread plan section has a format select (Text `.txt` or SVG) and a Download sewing worksheet button. The worksheet lists each thread block in sewing order with its stitch count, the total, the hoop and revision, and the sewing-time estimate (the same formula as the stats line: 600 stitches a minute, 20 s per colour change or stop, 8 s per trim). Over MCP the same worksheet is `embroidery_worksheet` (text or SVG artifact).
+- The shared engine functions `threadPlan`, `sewingSeconds` and `sewingWorksheet` in `src/engine.js` now drive both the editor's plan list and the file, so the two cannot disagree. The button compiles first when the plan is missing or older than the document.
+- Limits: threads are written as hex values, because the engine has no colour names (the editor's names come from its UI palette only). No thread brand or product numbers, no thread length, and no per-object breakdown. The SVG is a plain sheet with no paper-size styling. The time figure is the editor's rough rule, not a machine measurement. The file text is English; only the button labels are translated.
+- Covered by an engine test (block order matches the sewing order, block totals equal the plan count, the time formula, escaping of the document name, unknown format rejected), an MCP smoke check (text and SVG artifacts, stale revision rejected) and an e2e test (both downloads from the browser). Screenshot: `design/progress/features/thread-worksheet.png`.

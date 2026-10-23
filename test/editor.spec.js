@@ -1,4 +1,5 @@
 import {test,expect} from '@playwright/test';
+import {readFileSync} from 'node:fs';
 import {pinnedMachineFixture,readMachineFixtures} from './fixture-archive.js';
 import {decodeEmbroidery} from '../src/readers.js';
 import {initialDocument,importStitchLayer,applyOperations,compile,geometry} from '../src/engine.js';
@@ -844,6 +845,24 @@ test('keyboard shortcut list opens with ? and the listed tool keys really work; 
  await page.locator('#helpBtn').click();await expect(page.locator('#keysDialog')).toBeVisible();await page.keyboard.press('Escape');
  for(const [key,id] of [['n','path'],['p','pen'],['l','line'],['g','polygon'],['s','star'],['v','select']]){await page.locator('#art').hover();await page.keyboard.press(key);await expect(page.locator('#'+id)).toHaveClass(/active-tool/);}
  await page.locator('#secPlan summary').click();await expect(page.locator('#planList .plan-row')).toHaveCount(10);await expect(page.locator('#planList .plan-row').first()).toContainText('1.');await expect(page.locator('#planEmpty')).toBeHidden();
+ expect(errors).toEqual([]);
+});
+
+test('the thread plan downloads a sewing worksheet as text or SVG',async({page})=>{
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));
+ await page.goto('/');page.on('dialog',d=>d.accept());await page.locator('#new').click();
+ await page.locator('#rect').click();await page.locator('#thread').selectOption('#d9897e');
+ await page.locator('#ellipse').click();await page.locator('#thread').selectOption('#527461');
+ await page.locator('#secPlan summary').click();await expect(page.locator('#planList .plan-row')).toHaveCount(2);
+ const [txt]=await Promise.all([page.waitForEvent('download'),page.locator('#worksheetDownload').click()]);
+ expect(txt.suggestedFilename()).toMatch(/-worksheet\.txt$/);
+ const text=readFileSync(await txt.path(),'utf8');
+ expect(text).toMatch(/^Sewing worksheet: /);expect(text).toContain('Threads: 2');expect(text.indexOf('#d9897e')).toBeLessThan(text.indexOf('#527461'));expect(text).toContain('Estimate: about');
+ await page.locator('#worksheetFormat').selectOption('svg');
+ const [svg]=await Promise.all([page.waitForEvent('download'),page.locator('#worksheetDownload').click()]);
+ expect(svg.suggestedFilename()).toMatch(/-worksheet\.svg$/);
+ const sheet=readFileSync(await svg.path(),'utf8');
+ expect(sheet.startsWith('<?xml')).toBe(true);expect(sheet).toContain('fill="#527461"');expect(sheet).toContain('Threads: 2');
  expect(errors).toEqual([]);
 });
 

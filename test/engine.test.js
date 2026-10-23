@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import neonGlyphs from '../fonts/neon_blinking/glyphs.json' with {type:'json'};
 import {pinnedMachineFixture} from './fixture-archive.js';
-import {initialDocument,compile,encode,applyOperations,geometry,objectBounds,validateDocument,jefWarnings,exportSvg,importStitchLayer,measureText} from '../src/engine.js';
+import {initialDocument,compile,encode,applyOperations,geometry,objectBounds,validateDocument,jefWarnings,exportSvg,importStitchLayer,measureText,threadPlan,sewingSeconds,sewingWorksheet} from '../src/engine.js';
 
 test('browser and MCP semantic operations share editable document behavior',()=>{
  const doc=initialDocument();doc.objects=[];
@@ -942,4 +942,22 @@ test('the browser benchmark fixture (100 filled squares) compiles to the pinned 
  const squares=size=>{const doc=initialDocument();doc.objects=[];doc.hoop=400;const cols=10,step=size+4,ops=[];for(let i=0;i<100;i++){const c=i%cols,r=Math.floor(i/cols);ops.push({op:'add_shape',id:`s${i}`,kind:'rect',x:-(cols*step)/2+c*step,y:-(cols*step)/2+r*step,width:size,height:size,thread:'#527461',stitch:'fill'});}applyOperations(doc,ops);return doc;};
  assert.equal(compile(squares(12)).count,26463);
  assert.equal(compile(squares(34)).count,145700);
+});
+
+test('sewing worksheet lists thread blocks in sewing order with stitch counts and the time estimate',()=>{
+ const d=blank();d.name='Badge <A> & B';applyOperations(d,[{op:'add_shape',id:'a',kind:'rect',x:-30,y:0,width:10,height:10,thread:'#d9897e',stitch:'fill'},{op:'add_shape',id:'b',kind:'rect',x:0,y:0,width:10,height:10,thread:'#527461',stitch:'fill'},{op:'add_shape',id:'c',kind:'rect',x:30,y:0,width:10,height:10,thread:'#d9897e',stitch:'fill'}]);
+ const p=compile(d),blocks=threadPlan(p);
+ assert.deepEqual(blocks.map(b=>b.thread),['#d9897e','#527461','#d9897e']);
+ assert.equal(blocks.reduce((n,b)=>n+b.stitches,0),p.count);
+ const stops=p.stitches.filter(s=>s.cmd==='color'||s.cmd==='stop').length,trims=p.stitches.filter(s=>s.cmd==='trim').length;
+ assert.equal(sewingSeconds(p),p.count/600*60+stops*20+trims*8);
+ const text=sewingWorksheet(d,p,'text');
+ assert.match(text,/^Sewing worksheet: Badge <A> & B\nHoop: 110 mm\n/);
+ assert.ok(text.includes(`Threads: 3   Stitches: ${p.count.toLocaleString('en-US')}`));
+ assert.ok(text.indexOf('#d9897e')<text.indexOf('#527461'));
+ const svg=sewingWorksheet(d,p,'svg');
+ assert.ok(svg.startsWith('<?xml'));assert.match(svg,/<svg xmlns="http:\/\/www\.w3\.org\/2000\/svg" width="120mm"/);
+ assert.ok(svg.includes('<title>Badge &lt;A&gt; &amp; B</title>'));assert.equal(svg.match(/<rect /g).length,3);
+ assert.throws(()=>sewingWorksheet(d,p,'pdf'),/Unsupported worksheet format/);
+ const empty={revision:0,count:0,stitches:[]};assert.equal(threadPlan(empty).length,0);assert.match(sewingWorksheet(blank(),empty,'text'),/Threads: 0   Stitches: 0\nEstimate: about 1 min/);
 });
