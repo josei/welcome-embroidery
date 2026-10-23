@@ -101,7 +101,7 @@ Updated 2026-10-06. This source provides a working static editor, local MCP serv
 
 ## 2026-10-21 beads
 
-- Beads is a stitch type on paths: three short passes back and forth across the path at each point, every 6 mm by default with a 2 mm length. The spacing and size controls apply (the size control now reads Size). Stored as `stitch: "bead"`; not in the MCP schema. Bling stays not started.
+- Beads is a stitch type on paths: one short pass across the path at each point (it was three identical passes until 2026-10-24, see the beads entry at the end), every 6 mm by default with a 2 mm length. The spacing and size controls apply (the size control now reads Size). Stored as `stitch: "bead"`; not in the MCP schema. Bling stays not started.
 - Covered by an engine test and an e2e test.
 
 ## 2026-10-21 bling
