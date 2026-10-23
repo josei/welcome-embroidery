@@ -96,22 +96,23 @@ Reference: Wilcom EmbroideryStudio, the commercial digitizing suite. Its feature
 | Motifs | Motif warp along a tapered column: paired loops follow the satin width, including its end width | Built (basic) |
 | Motifs | Motif shape warp: leaf loops whose long axis follows the path (a surface-style warp; no true 3D surface) | Built (basic) |
 | Motifs | Motif size warp across a fill: loops shrink from one edge to the other (a pseudo-depth cue, not a 3D surface) | Built (basic) |
+| Motifs | Motif size warp along a path: loops shrink from the start of the path to the end (a pseudo-depth cue, not a 3D surface) | Built (basic) |
 | Motifs | True 3D surface warp of motifs | Not started |
 | Embellishment | Sequins as a stitch type: a centre stitch with a fixing loop every few mm (single-sequin placement; no twin-sequin or dispensing control) | Built (basic) |
 | Embellishment | Beads as a stitch type: short passes across the path at each point (basic beading; no bead-shape or dispensing control) | Built (basic) |
-| Embellishment | Bling as a stitch type: a stone at each point, a centre stitch with two fixing rings; Round or Square stone shape (no other settings or library) | Built (basic) |
+| Embellishment | Bling as a stitch type: a stone at each point, a centre stitch with two fixing rings; Round, Square or Oval stone shape, where the oval turns with the path (no other settings or library) | Built (basic) |
 | Embellishment | Redwork (out-and-back run) | Built |
 | Embellishment | Buttonholes (satin with bar tacks at both ends) | Built |
 | Sequencing | Object order, start and end points, jumps and trims | Built |
 | Sequencing | Batch planning: copies that fit one hoop and hoops needed (no separate hoop files yet) | Built (planner) |
-| Sequencing | Batch export: one JEF file per hoop (copies laid out on the batch grid) | Built (JEF only) |
+| Sequencing | Batch export: one file per hoop in JEF, VP3 or DST (copies laid out on the batch grid) | Built (JEF, VP3, DST) |
 | Preview | 3D preview and stitch playback | Built |
-| Files | JEF and VP3 export and import, DST import and export | Built |
+| Files | JEF and VP3 export and import, DST import and export, SEW import and export | Built |
 | Files | EXP (Melco) export | Built (export only; checked by decoding with pyembroidery) |
 | Files | PEC (Brother) export | Built (export only; checked by decoding with pyembroidery) |
 | Files | PES (version 1) export | Built (export only; checked by decoding with pyembroidery) |
 | Files | PES version 6 export | Built (export only; checked by decoding with pyembroidery; thread names omitted) |
-| Files | SEW (Janome native) export | Built (export only; checked by decoding with pyembroidery; trims not written, no design header) |
+| Files | SEW (Janome native) export and import | Built (export checked by decoding with pyembroidery; import checked against all 15 pinned samples; trims not written, no design header) |
 | Files | Other machine formats | Not started |
 | Libraries | Thread brand libraries | Not started (licensed data) |
 | Automation | Headless MCP document sessions for agents | Built |
@@ -125,7 +126,7 @@ Everything in the feature list is built, partly built, or deliberately out of sc
 - Several live document slots per agent link: would broaden agent permissions; out of scope.
 - A real Safari device check: needs a device.
 - macOS and Windows desktop builds: built by CI on a tag or manual run; not run yet.
-- Bling stone library (more shapes and settings beyond Round and Square), and a true 3D surface warp: not started; the basic forms are built.
+- Bling stone library (more shapes and settings beyond Round, Square and Oval), and a true 3D surface warp: not started; the basic forms are built.
 
 ## Desktop app roadmap (Tauri, proposed 2026-10-20)
 
@@ -170,7 +171,7 @@ Gate 1 starts only after this planning/design iteration. Do not quietly make ser
 - Freeze reference versions, format settings, random seeds and font versions. Compare byte output where deterministic; normalize only documented volatile fields and otherwise compare decoded commands, coordinates, threads and metadata. Keep intentional format losses explicit.
 - Browser responsiveness is measured while compiling. Cancellation and outdated-result rejection are required.
 - Measured baseline (2026-10-22, Node 24 on the build machine, `npm run bench:compile`): 100 filled squares of 12 mm, 26,463 stitches, compile 126 ms, JEF encode 10 ms, heap 13 MiB; 100 filled squares of 34 mm, 145,700 stitches, compile 206 ms, JEF encode 33 ms, heap 45 MiB.
-- Measured browser baseline (2026-10-23, headless Chromium on darwin arm64, `npm run bench:browser`, the app's stitch worker, median of 5): 100 filled squares of 12 mm, 26,463 stitches, compile 51 ms, compile + JEF 55 ms, longest main-thread gap 6 ms; 100 filled squares of 34 mm, 145,700 stitches, compile 119 ms, compile + JEF 143 ms, longest main-thread gap 6 ms. Safari/WebKit timings are not measured yet (WebKit would not launch on the build machine).
+- Measured browser baseline (2026-10-23, headless Chromium on darwin arm64, `npm run bench:browser`, the app's stitch worker, median of 5): 100 filled squares of 12 mm, 26,463 stitches, compile 51 ms, compile + JEF 55 ms, longest main-thread gap 6 ms; 100 filled squares of 34 mm, 145,700 stitches, compile 119 ms, compile + JEF 143 ms, longest main-thread gap 6 ms. Measured WebKit baseline (2026-10-23, same machine and fixtures, idle, median of 5, driven by Playwright-core 1.58.2 against the frozen macOS 14 WebKit build (Playwright 1.63 cannot open a page in it); see the 2026-10-23 WebKit entry in `docs/IMPLEMENTATION_STATUS.md`): 12 mm squares, 26,463 stitches, compile 52 ms, compile + JEF 54 ms, longest main-thread gap 9 ms; 34 mm squares, 145,700 stitches, compile 128 ms, compile + JEF 140 ms, longest main-thread gap 10 ms. JS heap is not reported by WebKit. This is not Safari on a device.
 - Proposed benchmark: ordinary badges around 20k stitches and stress designs around 100k. Establish actual load/memory/time budgets during Gate 1 on named hardware, including Safari; no unmeasured performance claims.
 - Export blockers include invalid geometry/numbers, unsupported commands without an accepted conversion, and stitches outside the selected sewing area. Advisories include unusually short stitches, risky density, long travel, and lettering outside its digitized size range.
 

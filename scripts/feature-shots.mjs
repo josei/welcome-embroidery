@@ -1,6 +1,7 @@
 import {chromium} from 'playwright';
 import {mkdirSync} from 'node:fs';
 import path from 'node:path';
+import {pinnedMachineFixture} from '../test/fixture-archive.js';
 const base=process.argv[2]||'http://127.0.0.1:8790/';
 const out='design/progress/features';mkdirSync(out,{recursive:true});
 const browser=await chromium.launch();
@@ -30,17 +31,21 @@ const cases={
   'sequins': async p=>{await drawPath(p,line);await p.locator('#type').selectOption('sequin');},
   'beads': async p=>{await drawPath(p,line);await p.locator('#type').selectOption('bead');},
   'bling': async p=>{await drawPath(p,line);await p.locator('#type').selectOption('bling');},
+  'bling-oval': async p=>{await drawPath(p,line);await p.locator('#type').selectOption('bling');await p.locator('#blingShape').selectOption('oval');await p.locator('button[data-view="stitches"]').click();},
   'bling-square': async p=>{await drawPath(p,line);await p.locator('#type').selectOption('bling');await p.locator('#blingShape').selectOption('square');},
   'motif-loops-leaf': async p=>{await drawPath(p,line);await p.locator('#type').selectOption('motif');await p.locator('#motifShape').selectOption('leaf');},
   'motif-pairs-taper': async p=>{await drawPath(p,line);await p.locator('#type').selectOption('motif');await p.locator('#motifPair').check();await p.locator('#satinWidthEnd').fill('8');await p.locator('#satinWidthEnd').press('Tab');},
   'motif-fill': async p=>{await drawShape(p,[[-20,-20],[20,-20],[20,20],[-20,20]]);await p.locator('#fillMethod').selectOption('motif');},
-  'motif-fill-warp': async p=>{await drawShape(p,[[-20,-20],[20,-20],[20,20],[-20,20]]);await p.locator('#fillMethod').selectOption('motif');await p.locator('#motifWarp').selectOption('x');},
+  'motif-path-warp': async p=>{await drawPath(p,[[-40,0],[0,12],[40,0]]);await p.locator('#type').selectOption('motif');await p.locator('#motifWarp').selectOption('along');await p.locator('button[data-view="stitches"]').click();},
+  'motif-fill-warp':async p=>{await drawShape(p,[[-20,-20],[20,-20],[20,20],[-20,20]]);await p.locator('#fillMethod').selectOption('motif');await p.locator('#motifWarp').selectOption('x');},
   'redwork': async p=>{await drawPath(p,[[-30,-10],[-10,10],[10,-10],[30,10]]);await p.locator('#runStyle').selectOption('redwork');},
   'buttonhole': async p=>{await drawPath(p,[[-20,0],[20,0]]);await p.locator('#type').selectOption('satin');await p.locator('#satinButtonhole').check();},
   'raised-satin': async p=>{await drawPath(p,[[-20,0],[20,0]]);await p.locator('#type').selectOption('satin');await p.locator('#satinRaised').check();},
+  'batch-formats': async p=>{await p.locator('#rect').click();await p.locator('#secArray summary').click();await p.locator('#arrCount').fill('400');await p.locator('#arrCount').press('Tab');await p.locator('#batchFormat').selectOption('vp3');},
   'batch-plan': async p=>{await p.locator('#rect').click();await p.locator('#secArray summary').click();await p.locator('#arrCount').fill('400');await p.locator('#arrCount').press('Tab');},
   'export-pes6': async p=>{await p.locator('#rect').click();await p.locator('#export').click();await p.locator('#format').selectOption('pes6');},
   'thread-worksheet': async p=>{await p.locator('#rect').click();await p.locator('#thread').selectOption('#d9897e');await p.locator('#ellipse').click();await p.locator('#thread').selectOption('#527461');await p.locator('#secPlan summary').click();await p.locator('#secPlan').scrollIntoViewIfNeeded();},
+  'import-sew': async p=>{const f=pinnedMachineFixture('sew');await p.locator('#machineFile').setInputFiles({name:'sample.sew',mimeType:'application/octet-stream',buffer:Buffer.from(f.bytes)});await p.locator('button[data-view="stitches"]').click();},
   'export-sew': async p=>{await p.locator('#rect').click();await p.locator('#export').click();await p.locator('#format').selectOption('sew');},
 };
 const done=[];

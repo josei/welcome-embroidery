@@ -10,7 +10,7 @@ const oracle = JSON.parse(readFileSync(new URL('../scripts/reader-parity.json', 
 const sha = b => createHash('sha256').update(b).digest('hex');
 const canonical = v => JSON.stringify(v);
 
-function zipEntries(bytes) {
+function zipEntries(bytes, accept=name=>/\.(jef|vp3)$/i.test(name)) {
   let eocd=-1;
   for(let p=bytes.length-22;p>=Math.max(0,bytes.length-65557);p--) if(bytes.readUInt32LE(p)===0x06054b50){eocd=p;break;}
   assert.notEqual(eocd,-1,'fixture ZIP has end-of-central-directory record');
@@ -19,7 +19,7 @@ function zipEntries(bytes) {
     assert.equal(bytes.readUInt32LE(p),0x02014b50,'valid ZIP central directory');
     const method=bytes.readUInt16LE(p+10), compressed=bytes.readUInt32LE(p+20), nameLen=bytes.readUInt16LE(p+28), extraLen=bytes.readUInt16LE(p+30), commentLen=bytes.readUInt16LE(p+32), local=bytes.readUInt32LE(p+42);
     const name=bytes.subarray(p+46,p+46+nameLen).toString('utf8');
-    if(name.toLowerCase().endsWith('.jef')||name.toLowerCase().endsWith('.vp3')){
+    if(accept(name)){
       assert.equal(bytes.readUInt32LE(local),0x04034b50,'valid ZIP local record');
       const localName=bytes.readUInt16LE(local+26),localExtra=bytes.readUInt16LE(local+28),start=local+30+localName+localExtra;
       const packed=bytes.subarray(start,start+compressed);
@@ -64,6 +64,31 @@ test('all 43 pinned JEF and VP3 fixtures match corrected pystitch command and co
     assert.deepEqual(decoded.bounds.map(round),fixture.bounds,`${fixture.path} stitch bounds`);
     assert.deepEqual(decoded.threads.map(t=>t.color),fixture.threads,`${fixture.path} thread colors/order`);
   }
+});
+
+const sewParity=JSON.parse(readFileSync(new URL('../scripts/sew-parity.json', import.meta.url),'utf8'));
+test('all 15 pinned SEW samples decode to the pyembroidery command and coordinate digests',()=>{
+  assert.equal(sewParity.schema,'welcom/sew-parity/1');
+  const sewFiles=zipEntries(archive,name=>/\.sew$/i.test(name));
+  assert.equal(sewFiles.size,15);
+  assert.equal(sewParity.fixtures.length,15);
+  for(const fixture of sewParity.fixtures){
+    const bytes=sewFiles.get(fixture.path); assert.ok(bytes,fixture.path);
+    assert.equal(sha(bytes),fixture.sha256,`${fixture.path} fixture pin`);
+    const decoded=decodeEmbroidery(bytes,'sew');
+    const counts={};for(const s of decoded.stitches)counts[s.cmd]=(counts[s.cmd]||0)+1;
+    assert.deepEqual(counts,fixture.commandCounts,`${fixture.path} command counts`);
+    assert.equal(decoded.threads.length,fixture.threads,`${fixture.path} thread count`);
+    assert.equal(sha(Buffer.from(canonical(decoded.stitches.map(s=>[Math.round(s.x*10),Math.round(s.y*10),s.cmd])))),fixture.commandsSha256,`${fixture.path} command/coordinate parity`);
+  }
+});
+
+test('SEW colour count and truncated headers are rejected',()=>{
+  assert.throws(()=>decodeEmbroidery(new Uint8Array(0x1D78-1),'sew'),/truncated/);
+  const none=new Uint8Array(0x1D78);
+  assert.throws(()=>decodeEmbroidery(none,'sew'),/colour count/);
+  none[0]=1;
+  assert.throws(()=>decodeEmbroidery(none,'sew'),/no stitch commands|no sewable/);
 });
 
 test('validates input type, format, truncation, size, and malformed control data',()=>{

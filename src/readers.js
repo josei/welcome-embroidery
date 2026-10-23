@@ -1,4 +1,4 @@
-// Bounded browser-side JEF, VP3 and DST stitch readers.
+// Bounded browser-side JEF, VP3, DST and SEW stitch readers.
 // Codec behavior follows the MIT-licensed Ink/Stitch pystitch readers pinned in
 // docs/READER_STATUS.md; this is an independently written JavaScript port.
 const MAX_FILE_BYTES = 64 * 1024 * 1024;
@@ -29,6 +29,8 @@ class Reader {
 
 const jefColors = [null,0x000000,0xffffff,0xffff17,0xff6600,0x2f5933,0x237336,0x65c2c8,0xab5a96,0xf669a0,0xff0000,0xb1704e,0x0b2f84,0xe4c35d,0x481a05,0xac9cc7,0xfcf294,0xf999b7,0xfab381,0xc9a480,0x970533,0xa0b8cc,0x7fc21c,0xe5e5e5,0x889b9b,0x98d6bd,0xb2e1e3,0x368ba0,0x4f83ab,0x386a91,0x071650,0xf999a2,0xf9676b,0xe3311f,0xe2a188,0xb59474,0xe4cf99,0xffcb00,0xe1add4,0xc3007e,0x80004b,0x540571,0xb10525,0xcae0c0,0x899856,0x5c941a,0x003114,0x5dae94,0x4cbf8f,0x007772,0x595b61,0xfffff2,0xb15818,0xcb8a07,0x986c80,0x98692d,0x4d3419,0x4c330b,0x33200a,0x523a97,0x0d217e,0x1e77ac,0xb2dd53,0xf33689,0xde649e,0x984161,0x4c5612,0x4c881f,0xe4de79,0xcb8a1a,0xcba21c,0xff9805,0xfcb257,0xffe505,0xf0331f,0x1a842d,0x386cae,0xe3c4b4,0xe3ac81];
 const hex = n => `#${(n >>> 0).toString(16).padStart(6,'0')}`;
+// Janome SEW thread set (pyembroidery's 79-entry EmbThreadSew list, 0-based): the file stores indices into it.
+export const SEW_CHART=[[0,0,0],[0,0,0],[255,255,255],[255,255,23],[250,160,96],[92,118,73],[64,192,48],[101,194,200],[172,128,190],[245,188,203],[255,0,0],[192,128,0],[0,0,240],[228,195,93],[165,42,42],[213,176,212],[252,242,148],[240,208,192],[255,192,0],[201,164,128],[155,61,75],[160,184,204],[127,194,28],[185,185,185],[160,160,160],[152,214,189],[184,240,240],[54,139,160],[79,131,171],[56,106,145],[0,32,107],[229,197,202],[249,103,107],[227,49,31],[226,161,136],[181,148,116],[228,207,153],[225,203,0],[225,173,212],[195,0,126],[128,0,75],[160,96,176],[192,64,32],[202,224,192],[137,152,86],[0,170,0],[33,138,33],[93,174,148],[76,191,143],[0,119,114],[112,112,112],[242,255,255],[177,88,24],[203,138,7],[247,146,123],[152,105,45],[162,113,72],[123,85,74],[79,57,70],[82,58,151],[0,0,160],[0,150,222],[178,221,83],[250,143,187],[222,100,158],[181,80,102],[94,87,71],[76,136,31],[228,220,121],[203,138,26],[198,170,66],[236,176,44],[248,128,64],[255,229,5],[250,122,122],[107,224,0],[56,108,174],[208,186,176],[227,190,129]];
 function result(stitches, threads, warnings=[]) {
   if (!stitches.length) fail('no stitch commands');
   const sew = stitches.some(s => s.cmd === 'stitch');
@@ -171,11 +173,43 @@ function readDst(bytes) {
   return result(stitches,threads,['DST files carry no thread colours: placeholder colours were assigned.']);
 }
 
+// SEW (Janome native), as read by pyembroidery's SewReader: a 2-byte colour count and 2-byte thread-chart indices, then the stitch stream from byte 0x1D78.
+// A record is two bytes: a plain pair is a stitch, and 80 xx starts a control record whose own two bytes are its coordinates (or zeros for a colour change).
+// 80 01 is a colour change, 80 02 and 80 04 a jump, 80 10 a stitch; any other control ends the stream. Coordinates are relative, in 0.1 mm, with y negated.
+function readSew(bytes) {
+  if (bytes.length < 0x1D78) fail('SEW header is truncated');
+  const colours = bytes[0] | bytes[1] << 8;
+  if (colours < 1 || colours > MAX_THREADS) fail('invalid SEW colour count');
+  const threads = [];
+  for (let i = 0; i < colours; i++) {
+    const [r, g, b] = SEW_CHART[(bytes[2 + 2*i] | bytes[3 + 2*i] << 8) % SEW_CHART.length];
+    threads.push({index:i, color:hex(r << 16 | g << 8 | b), brand:'SEW', catalogNumber:null, name:null});
+  }
+  const s8 = n => n > 127 ? n - 256 : n;
+  const stitches = [];
+  let x = 0, y = 0, block = 0, p = 0x1D78;
+  while (p + 2 <= bytes.length) {
+    const a = bytes[p], b = bytes[p+1];
+    p += 2;
+    if (a !== 0x80) { x += s8(a); y -= s8(b); push(stitches, x, y, 'stitch', block); continue; }
+    if (p + 2 > bytes.length) break;
+    const dx = s8(bytes[p]), dy = s8(bytes[p+1]);
+    p += 2;
+    if (b & 1) { block++; if (block >= colours) fail('more colour changes than colours'); push(stitches, x, y, 'color', block); continue; }
+    if (b === 0x02 || b === 0x04) { x += dx; y -= dy; push(stitches, x, y, 'jump', block); continue; }
+    if (b === 0x10) { x += dx; y -= dy; push(stitches, x, y, 'stitch', block); continue; }
+    break;
+  }
+  push(stitches, x, y, 'end', block);
+  return result(stitches, threads);
+}
+
 export function decodeEmbroidery(input, format) {
   const bytes=asBytes(input);
   if(bytes.byteLength>MAX_FILE_BYTES) fail('file exceeds 64 MiB limit');
   if(format==='jef') return readJef(bytes);
   if(format==='vp3') return readVp3(bytes);
   if(format==='dst') return readDst(bytes);
-  fail('format must be jef, vp3 or dst');
+  if(format==='sew') return readSew(bytes);
+  fail('format must be jef, vp3, dst or sew');
 }

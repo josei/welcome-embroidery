@@ -49,7 +49,7 @@ Example prompt: "Use the Welcome MCP on the live document to draw a leaf badge w
 
 `reference_image {documentId, view: "annotated" | "raw", includeShapes}` returns the placement in millimetres (x right, y down, origin at the hoop centre) and the picture as an MCP image. `annotated` (live document) shows the picture where it sits with a millimetre grid (labels every 20 mm), the red dashed hoop outline, the origin and, optionally, the current shapes as coloured outlines; the text part gives the image's `imageBox` and `pixelsPerMm` so a pixel can be converted to millimetres. `raw` returns just the picture, which fills `placement.w × placement.h` mm from `placement.x, placement.y`. `document_inspect` reports the placement too.
 
-`document_import_embroidery` now reads DST as well as JEF and VP3; DST has no thread colours, so placeholder colours are assigned.
+`document_import_embroidery` now reads DST as well as JEF and VP3; DST has no thread colours, so placeholder colours are assigned. It also reads SEW, whose colours come from the Janome thread chart.
 
 ## Agent experience tools
 - `document_create` returns the `documentId` in its text as well as in structured content; `document_list` lists the live document and every headless one.

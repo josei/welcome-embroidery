@@ -84,3 +84,17 @@ test('a true JEF STOP imports, edits and re-exports as a stop with its own threa
  const out=encode(plan,'jef','#527461',doc.hoop,doc),back=decodeEmbroidery(out,'jef');assert.equal(back.stitches.filter(s=>s.cmd==='stop').length,1,'the stop survives a write/read round trip');
  assert.equal(back.stitches.filter(s=>s.cmd==='stitch').length,plan.stitches.filter(s=>s.cmd==='stitch').length);
 });
+
+test('pinned SEW imports with its thread-chart colours, exports the untouched source and re-encodes after a move',()=>{
+  const {fileName,bytes}=pinnedMachineFixture('sew'),decoded=decodeEmbroidery(bytes,'sew'),doc=initialDocument(),layer=importStitchLayer(bytes,'sew',{fileName});doc.objects=[layer];
+  assert.deepEqual(layer.stitches,decoded.stitches);
+  assert.ok(decoded.threads.length>1&&decoded.threads.every(t=>/^#[0-9a-f]{6}$/i.test(t.color)),'every SEW colour resolves to a thread-chart colour');
+  assert.deepEqual(compile(doc).errors,[]);assert.deepEqual(encode(compile(doc),'sew','#527461',doc.hoop,doc),bytes);
+  applyOperations(doc,[{op:'transform',id:layer.id,x:layer.x+1,y:layer.y-1}]);const plan=compile(doc);assert.deepEqual(plan.errors,[]);
+  const output=encode(plan,'sew','#527461',doc.hoop,doc),back=decodeEmbroidery(output,'sew'),tenths=s=>[Math.round(s.x*10),Math.round(s.y*10)];
+  // Zero-length steps leave no SEW record, and moves longer than 12.7 mm are split into several, so every planned needle that moves must appear in order.
+  const steps=plan.stitches.filter(s=>s.cmd!=='end'&&s.cmd!=='trim').map(s=>({cmd:s.cmd,p:tenths(s)})).filter((s,i,a)=>i===0||s.p[0]!==a[i-1].p[0]||s.p[1]!==a[i-1].p[1]);
+  const want=steps.filter(s=>s.cmd==='stitch').map(s=>s.p),got=back.stitches.filter(s=>s.cmd==='stitch').map(tenths);let next=0;
+  for(const [x,y] of got)if(next<want.length&&want[next][0]===x&&want[next][1]===y)next++;
+  assert.equal(next,want.length,'every planned needle point is written, in order');
+});

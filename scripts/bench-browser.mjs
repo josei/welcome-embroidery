@@ -1,7 +1,8 @@
 // In-browser compile benchmark: the same fixtures as scripts/bench-compile.mjs, run through the app's real stitch worker (src/worker.js).
 // Usage: npm run bench:browser [--runs=5] [--sizes=12,34]   (PW_BROWSER=webkit for the WebKit engine)
+// On macOS 14 the WebKit build is frozen and newer Playwright clients cannot open a page in it. Use an older client and that build:
+//   PW_BROWSER=webkit PW_DRIVER=/path/to/playwright-core/index.mjs WEBKIT_EXECUTABLE=/path/to/webkit/pw_run.sh npm run bench:browser
 // Measures round trips from the page (compile, and compile + JEF encode), the longest main-thread gap while the worker is busy, and JS heap where the browser reports it.
-import {chromium,webkit} from 'playwright';
 import {execFileSync,spawn} from 'node:child_process';
 import {fileURLToPath} from 'node:url';
 import path from 'node:path';
@@ -10,12 +11,13 @@ const args=Object.fromEntries(process.argv.slice(2).map(a=>{const [k,v='1']=a.re
 const runs=Number(args.runs||5),sizes=String(args.sizes||'12,34').split(',').map(Number);
 const port=Number(process.env.BENCH_PORT||18791),base=`http://127.0.0.1:${port}`;
 const engineName=process.env.PW_BROWSER||'chromium';
+const {chromium,webkit}=process.env.PW_DRIVER?await import(process.env.PW_DRIVER):await import('playwright');
 execFileSync(process.execPath,[path.join(root,'scripts/build-static.mjs')],{cwd:root,stdio:'inherit'});
 const server=spawn(process.execPath,[path.join(root,'scripts/serve-dist.mjs')],{cwd:root,env:{...process.env,HOST:'127.0.0.1',PORT:String(port)},stdio:['ignore','inherit','inherit']});
 try{
  for(let i=0;;i++){try{if((await fetch(`${base}/health`)).ok)break;}catch{}if(i>100)throw Error('static server did not start');await new Promise(r=>setTimeout(r,100));}
  const launcher=engineName==='webkit'?webkit:chromium;
- const browser=await launcher.launch();
+ const browser=await launcher.launch(engineName==='webkit'&&process.env.WEBKIT_EXECUTABLE?{executablePath:process.env.WEBKIT_EXECUTABLE}:{});
  const page=await browser.newPage();
  await page.goto(`${base}/health`);
  const results=await page.evaluate(async({sizes,runs})=>{

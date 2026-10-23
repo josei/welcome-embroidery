@@ -1087,7 +1087,7 @@ test('bling stone shape switches between round and square stones',async({page})=
  await expect(page.locator('#blingShapeRow')).toBeVisible();await expect(page.locator('#blingShape')).toHaveValue('round');
  const round=await count();
  await page.locator('#blingShape').selectOption('square');await expect(page.locator('#blingShape')).toHaveValue('square');
- await expect.poll(count).not.toBe(round);expect(errors).toEqual([]);
+ await expect.poll(count).not.toBe(round);await page.locator('#blingShape').selectOption('oval');await expect(page.locator('#blingShape')).toHaveValue('oval');expect(errors).toEqual([]);
 });
 
 test('batch plan in the Array section says how many copies fit one hoop',async({page})=>{
@@ -1104,6 +1104,25 @@ test('batch export downloads one JEF file per hoop',async({page})=>{
  await page.locator('#rect').click();await page.locator('#secArray summary').click();await page.locator('#arrCount').fill('3');await page.locator('#arrCount').press('Tab');
  const download=page.waitForEvent('download');await page.locator('#batchExport').click();
  const file=await download;expect(file.suggestedFilename()).toMatch(/-hoop1\.jef$/);expect(errors).toEqual([]);
+});
+
+test('a SEW file imports from the machine picker as a stitch layer',async({page})=>{
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));page.on('dialog',d=>d.accept());
+ const fixture=pinnedMachineFixture('sew');await page.goto('/');await page.locator('#new').click();
+ await page.locator('#machineFile').setInputFiles({name:'sample.sew',mimeType:'application/octet-stream',buffer:Buffer.from(fixture.bytes)});
+ await expect(page.locator('#sourceInfo')).toContainText('SEW stitch layer');await expect(page.locator('.object-row')).toHaveCount(1);
+ await expect(page.locator('#sourceInfo')).toContainText('commands');expect(errors).toEqual([]);
+});
+
+test('batch export can write VP3 and DST files instead of JEF',async({page})=>{
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());await page.locator('#new').click();
+ await page.locator('#rect').click();await page.locator('#secArray summary').click();await page.locator('#arrCount').fill('3');await page.locator('#arrCount').press('Tab');
+ await page.locator('#batchFormat').selectOption('vp3');
+ const vp3=page.waitForEvent('download');await page.locator('#batchExport').click();
+ expect((await vp3).suggestedFilename()).toMatch(/-hoop1\.vp3$/);
+ await page.locator('#batchFormat').selectOption('dst');
+ const dst=page.waitForEvent('download');await page.locator('#batchExport').click();
+ expect((await dst).suggestedFilename()).toMatch(/-hoop1\.dst$/);expect(errors).toEqual([]);
 });
 
 test('EXP is an export format and downloads as an .exp file',async({page})=>{
@@ -1147,6 +1166,15 @@ test('SEW is an export format and downloads as a .sew file',async({page})=>{
  await page.locator('#rect').click();await page.locator('#export').click();await page.locator('#format').selectOption('sew');
  const download=page.waitForEvent('download');await page.locator('#download').click();
  expect((await download).suggestedFilename()).toMatch(/\.sew$/);expect(errors).toEqual([]);
+});
+
+test('motif loops on a path can shrink along the path in the panel',async({page})=>{
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());await page.locator('#new').click();
+ await page.locator('#path').click();const m=await ctm(page);for(const [x,y] of [[-30,-10],[0,10],[30,-10]]){const s=toScreen(m,x,y);await page.mouse.click(s.x,s.y);}await page.keyboard.press('Enter');
+ await page.locator('#type').selectOption('motif');await expect(page.locator('#motifWarpRow')).toBeVisible();
+ await expect(page.locator('#motifWarp option[value="x"]')).toHaveAttribute('disabled');await expect(page.locator('#motifWarp option[value="along"]')).not.toHaveAttribute('disabled');
+ await page.locator('#motifWarp').selectOption('along');await expect(page.locator('#motifWarp')).toHaveValue('along');
+ await page.locator('#motifWarp').selectOption('none');await expect(page.locator('#motifWarp')).toHaveValue('none');expect(errors).toEqual([]);
 });
 
 test('motif loop shape can be set to leaf in the panel',async({page})=>{

@@ -764,6 +764,22 @@ test('motif warp shrinks the loops across the fill along the chosen axis',()=>{
  assert.throws(()=>validateDocument(doc),/motif warp/);
 });
 
+test('motif warp along a path shrinks the loops from start to end',()=>{
+ const doc=initialDocument();doc.objects=[];
+ applyOperations(doc,[{op:'add_path',id:'m',x:0,y:0,points:[[0,0],[60,0]]},{op:'set_object',id:'m',stitch:'motif',motifSize:3}]);
+ const flat=compile(doc);
+ applyOperations(doc,[{op:'set_object',id:'m',motifWarp:'along'}]);
+ validateDocument(doc);
+ const warped=compile(doc);
+ assert.equal(warped.count,flat.count,'the warp changes loop size, not the loop count');
+ assert.equal(warped.bounds[0],flat.bounds[0],'the start loop keeps its full size');
+ assert.ok(warped.bounds[2]<flat.bounds[2]-.5,'the end loop is smaller than the start loop');
+ applyOperations(doc,[{op:'add_path',id:'p',x:0,y:0,points:[[0,30],[60,30]]},{op:'set_object',id:'p',stitch:'motif',motifPair:true,satinWidth:4,motifSize:3}]);
+ const pairFlat=compile(doc);
+ applyOperations(doc,[{op:'set_object',id:'p',motifWarp:'along'}]);
+ assert.ok(compile(doc).bounds[2]<pairFlat.bounds[2]-.5,'paired loops also shrink towards the end of the path');
+});
+
 test('motif spacing and size change how many loops are sewn',()=>{
  const doc=initialDocument();doc.objects=[];
  applyOperations(doc,[{op:'add_path',id:'m',x:0,y:0,points:[[-20,0],[20,0]]},{op:'set_object',id:'m',stitch:'motif'}]);
@@ -811,6 +827,18 @@ test('bling stones are round by default, square on request, and only known shape
  assert.throws(()=>validateDocument(doc),/bling shape/);
 });
 
+test('oval bling stones turn with the path: narrow across it, long along it',()=>{
+ const size=(b)=>({w:b[2]-b[0],h:b[3]-b[1]});
+ const sewn=(points,shape)=>{const doc=initialDocument();doc.objects=[];applyOperations(doc,[{op:'add_path',id:'g',x:0,y:0,points},{op:'set_object',id:'g',stitch:'bling',motifSize:6,blingShape:shape}]);validateDocument(doc);const plan=compile(doc);assert.deepEqual(plan.errors,[]);return plan;};
+ const flatRound=sewn([[-20,0],[20,0]],'round'),flatOval=sewn([[-20,0],[20,0]],'oval');
+ assert.equal(flatOval.count,flatRound.count,'oval stones sew the same number of stitches as round ones');
+ assert.ok(size(flatRound.bounds).h>5.5,'round stones are 6 mm across');
+ assert.ok(size(flatOval.bounds).h<4.5,'oval stones on a horizontal path are about 4 mm across it');
+ const tallOval=sewn([[0,-20],[0,20]],'oval'),tallRound=sewn([[0,-20],[0,20]],'round');
+ assert.ok(size(tallRound.bounds).w>5.5,'round stones are 6 mm wide on a vertical path');
+ assert.ok(size(tallOval.bounds).w<4.5,'oval stones on a vertical path are about 4 mm across it, so they turn with the path');
+});
+
 test('batch plan counts copies per hoop and hoops needed',async()=>{
  const {batchPlan}=await import('../src/engine.js');
  const doc=initialDocument();doc.objects=[];
@@ -827,6 +855,16 @@ test('batch documents lay copies out per hoop and every hoop compiles',async()=>
  const docs=batchDocuments(doc,{copies:40});
  assert.equal(docs.length,2);assert.equal(docs[0].objects.length+docs[1].objects.length,40);
  for(const d of docs){const plan=compile(d);assert.deepEqual(plan.errors,[]);}
+});
+
+test('batch documents encode to JEF, VP3 and DST, one file per hoop',async()=>{
+ const {batchDocuments}=await import('../src/engine.js');
+ const doc=initialDocument();doc.objects=[];
+ applyOperations(doc,[{op:'add_shape',id:'r',kind:'rect',x:-10,y:-5,width:20,height:10,thread:'#527461',stitch:'fill'}]);
+ const docs=batchDocuments(doc,{copies:40});
+ for(const format of ['jef','vp3','dst']){
+  for(const d of docs){const bytes=encode(compile(d),format,'#527461',110,d);assert.ok(bytes.length>100,format+' file has content');}
+ }
 });
 
 test('EXP export decodes back to the planned stitch path',async()=>{
