@@ -490,3 +490,9 @@ Based on direct feedback that editing felt far from a vector program:
 - Bling has a fifth stone shape: Star, next to Round, Square, Oval and Hexagon. Each star is a five-pointed outline with outer points three millimetres from the centre at the default size and inner points halfway in; its fixing ring is two-thirds the size. The stars keep a fixed orientation, one point along the path, as hexagons do. Stored as `blingShape: 'star'`; the engine rejects unknown shapes. Spanish label: Estrella (already used by the star tool). Settable over MCP.
 - Covered by an engine test (a star sews a different stitch count from a round stone, and stands 5.8 mm across a horizontal path) and the e2e bling shape test, which now also selects Star. Screenshot: `design/progress/features/bling-star.png`.
 - Limits: a plain outline with no facets or stone library; its outer points reach the same radius as a round stone of the same size.
+
+## 2026-10-23 motif fill over MCP
+
+- `fillMethod: "motif"` (the Motif loops fill pattern, already in the editor and the engine) is accepted by `set_object` over MCP, with `motifSpacing` and `motifSize`. The MCP enum had left it out.
+- Covered by `npm run test:mcp`, which applies a motif fill and compiles it with no errors. The embellishment screenshot `design/progress/features/mcp-embellishments.png` now includes a motif-filled rectangle.
+- Limits: the same as the editor's motif fill; no MCP-only settings.

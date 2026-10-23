@@ -9,7 +9,7 @@ try{
  for(let i=0;i<100;i++){try{if((await fetch(`${base}/health`)).ok)break;}catch{}await new Promise(r=>setTimeout(r,100));}
  const client=new Client({name:'embellishment-shot',version:'1.0.0'});
  await client.connect(new StreamableHTTPClientTransport(new URL(`${base}/mcp`)));
- const id=(await client.callTool({name:'document_create',arguments:{name:'Agent embellishments',hoop:110}})).structuredContent.documentId;
+ const id=(await client.callTool({name:'document_create',arguments:{name:'Agent embellishments',hoop:200}})).structuredContent.documentId;
  const ops=[
   {op:'add_path',id:'bling',x:0,y:0,points:[[-45,-40],[-15,-40],[15,-40],[45,-40]],stitch:'bling'},
   {op:'set_object',id:'bling',blingShape:'hexagon',motifSize:6,motifSpacing:10},
@@ -18,7 +18,9 @@ try{
   {op:'add_path',id:'leaf',x:0,y:0,points:[[-45,15],[45,15]],stitch:'motif'},
   {op:'set_object',id:'leaf',motifShape:'leaf',motifWarp:'along',motifSpacing:6,motifSize:4},
   {op:'add_path',id:'seq',x:0,y:0,points:[[-45,35],[45,35]],stitch:'sequin'},
-  {op:'add_path',id:'bead',x:0,y:0,points:[[-45,50],[45,50]],stitch:'bead'}];
+  {op:'add_path',id:'bead',x:0,y:0,points:[[-45,50],[45,50]],stitch:'bead'},
+  {op:'add_shape',id:'mf',kind:'rect',x:-45,y:60,width:90,height:25},
+  {op:'set_object',id:'mf',fillMethod:'motif',motifSpacing:4,motifSize:1.6}];
  const applied=await client.callTool({name:'document_apply',arguments:{documentId:id,expectedRevision:0,operations:ops}});
  if(applied.isError)throw Error(JSON.stringify(applied.content));
  const r=await client.callTool({name:'document_render',arguments:{documentId:id,view:'stitches',size:900}});
