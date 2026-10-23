@@ -441,7 +441,7 @@ Based on direct feedback that editing felt far from a vector program:
 
 ## 2026-10-23 oval bling stones
 
-- Bling has a third stone shape: Oval, next to Round and Square. Each oval is a 13-point ring with its long axis along the path (it turns with the curve, like the leaf loop), half as long again as it is across, and its fixing ring is two-thirds the size. Stored as `blingShape: 'oval'`; the engine rejects unknown shapes. Not in the MCP schema.
+- Bling has a third stone shape: Oval, next to Round and Square. Each oval is a 13-point ring with its long axis along the path (it turns with the curve, like the leaf loop), half as long again as it is across, and its fixing ring is two-thirds the size. Stored as `blingShape: 'oval'`; the engine rejects unknown shapes. Settable over MCP since the MCP embellishment entry below.
 - Limits: the shape is a plain ellipse with no stone facets, and the stone sizes are the same as for round and square (Size is the stone's length along the path). There is still no stone library with brand sizes.
 - Covered by an engine test (the same stitch count as round stones, four-millimetre width across the path for the oval against six for round, on both a horizontal and a vertical path) and an e2e test (the Stone shape select accepts Oval). Screenshot: `design/progress/features/bling-oval.png`.
 
@@ -474,6 +474,13 @@ Based on direct feedback that editing felt far from a vector program:
 
 ## 2026-10-23 hexagon bling stones
 
-- Bling has a fourth stone shape: Hexagon, next to Round, Square and Oval. Each hexagon is a six-point outline with a corner on the path's direction and a flat side across it, and its fixing ring is two-thirds the size. Stored as `blingShape: 'hexagon'`; the engine rejects unknown shapes. Spanish label: Hexágono. Not in the MCP schema yet.
+- Bling has a fourth stone shape: Hexagon, next to Round, Square and Oval. Each hexagon is a six-point outline with a corner on the path's direction and a flat side across it, and its fixing ring is two-thirds the size. Stored as `blingShape: 'hexagon'`; the engine rejects unknown shapes. Spanish label: Hexágono. Settable over MCP (see the MCP embellishment entry below).
 - Covered by an engine test (hexagon stones sew fewer stitches than round ones, the stone is six millimetres corner to corner across the path against 5.2 millimetres flat to flat) and the existing e2e bling shape test, which now also selects Hexagon. Screenshot: `design/progress/features/bling-hexagon.png`.
 - Limits: a plain hexagon with no facets or stone library; the stones do not turn with an oval-style direction, so on a curved path they keep their orientation.
+
+## 2026-10-23 embellishment and motif keys over MCP
+
+- `add_path` and `set_object` accept `stitch: "motif"`, `"sequin"`, `"bead"` or `"bling"` as well as fill, run and satin. `set_object` accepts `blingShape` `oval` and `hexagon`, `motifShape`, `motifWarp` (none, x, y, along), `motifSize` (0.4–6), `motifSpacing` (1–20) and `motifPair`. The embellishment help text in `embroidery_help` and the new "Embellishment and motif keys" section of `docs/MCP.md` describe them.
+- Bug fixed on the way: `add_path` turned every open path into a running stitch unless it was satin, so `stitch: "bling"` (or motif, sequin, bead) on an open path was silently sewn as running stitches. Open paths now keep those four types; other open paths still become running stitches.
+- Covered by an engine test (the four types are kept on open paths, fill still becomes run) and by `npm run test:mcp`, which sews bling, motif, sequin and bead paths over MCP, and rejects an unknown bling shape and a motif size of 9 mm. Screenshot: `design/progress/features/mcp-embellishments.png`, rendered by `scripts/mcp-embellishment-shot.mjs` through an anonymous MCP session, not from the browser UI.
+- Limits: the schema mirrors the engine's own ranges; sequins and beads have no MCP-only defaults beyond the engine's. `motifPair` still needs a satin width, as in the editor. No MCP tool for a stone library.

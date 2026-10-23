@@ -850,6 +850,14 @@ test('hexagon bling stones are six-sided and as wide as round ones, and sew the 
  assert.ok(Math.abs(size(flatHex.bounds).h-6*Math.sqrt(3)/2)<0.2,'hexagon stones are 5.2 mm flat to flat across the path');
 });
 
+test('add_path keeps embellishment stitch types on open paths, and still turns other open paths into running stitches',()=>{
+ const doc=initialDocument();doc.objects=[];
+ applyOperations(doc,[{op:'add_path',id:'b',x:0,y:0,points:[[-20,0],[20,0]],stitch:'bling'},{op:'add_path',id:'m',x:0,y:0,points:[[-20,5],[20,5]],stitch:'motif'},{op:'add_path',id:'s',x:0,y:0,points:[[-20,10],[20,10]],stitch:'sequin'},{op:'add_path',id:'be',x:0,y:0,points:[[-20,15],[20,15]],stitch:'bead'},{op:'add_path',id:'f',x:0,y:0,points:[[-20,20],[20,20]],stitch:'fill'}]);
+ const stitchOf=(id)=>doc.objects.find(o=>o.id===id).stitch;
+ assert.deepEqual(['b','m','s','be','f'].map(stitchOf),['bling','motif','sequin','bead','run']);
+ validateDocument(doc);assert.deepEqual(compile(doc).errors,[]);
+});
+
 test('batch plan counts copies per hoop and hoops needed',async()=>{
  const {batchPlan}=await import('../src/engine.js');
  const doc=initialDocument();doc.objects=[];
