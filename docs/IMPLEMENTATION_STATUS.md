@@ -149,6 +149,12 @@ Updated 2026-10-06. This source provides a working static editor, local MCP serv
 - Motif loops and paired loops have a Loop shape: Circle (default) or Leaf. A leaf loop is an ellipse about 1.6 times longer along the path than across it, so it turns with the curve. Stored as `motifShape`; not in the MCP schema. This is a decision: the surface-style warp is realised as oriented loops, not a 3D surface.
 - Covered by an engine test and an e2e test.
 
+## 2026-10-23 bling stone shapes
+
+- Bling stones have a Stone shape: Round (default, the existing two circular fixing rings) or Square (the same centre stitch and a square outer ring of the stone width, with an inner square at two thirds of that width). Stored as `blingShape`; the sidebar shows the select only for bling objects, and MCP `set_object` accepts `blingShape`. Unknown shapes are rejected by the engine. Size and spacing still come from the bling settings.
+- This is a basic pair of shapes, not a stone library: no baguette, teardrop or faceted settings, and no per-stone rotation along the path.
+- Covered by an engine test (round default, square geometry differs, unknown shape rejected) and an e2e test (sidebar row, switching the shape changes the stitch count).
+
 ## 2026-10-21 desktop local server
 
 - The Tauri app starts `node server.js` from its bundled `welcome/` folder on a free 127.0.0.1 port, sets DATA_DIR to the app data folder, and opens the window at that address, so the local MCP and agent links work in the desktop app. If Node is missing or the server does not start within 15 s, it opens the bundled static editor instead. The server exits when the app's stdin pipe closes, so killing the app does not leave it running (checked on Linux). `npm run desktop:prepare` stages the server with production dependencies only; the Node runtime is still the system one (decision for now; bundling Node per platform is the next step). CI builds for macOS and Windows have not run yet.

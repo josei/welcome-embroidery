@@ -98,7 +98,7 @@ Reference: Wilcom EmbroideryStudio, the commercial digitizing suite. Its feature
 | Motifs | True 3D surface warp of motifs | Not started |
 | Embellishment | Sequins as a stitch type: a centre stitch with a fixing loop every few mm (single-sequin placement; no twin-sequin or dispensing control) | Built (basic) |
 | Embellishment | Beads as a stitch type: short passes across the path at each point (basic beading; no bead-shape or dispensing control) | Built (basic) |
-| Embellishment | Bling as a stitch type: a stone at each point, a centre stitch with two fixing rings (no stone shapes, settings or library) | Built (basic) |
+| Embellishment | Bling as a stitch type: a stone at each point, a centre stitch with two fixing rings; Round or Square stone shape (no other settings or library) | Built (basic) |
 | Embellishment | Redwork (out-and-back run) | Built |
 | Embellishment | Buttonholes (satin with bar tacks at both ends) | Built |
 | Sequencing | Object order, start and end points, jumps and trims | Built |
@@ -123,7 +123,7 @@ Everything in the feature list is built, partly built, or deliberately out of sc
 - Several live document slots per agent link: would broaden agent permissions; out of scope.
 - A real Safari device check: needs a device.
 - macOS and Windows desktop builds: built by CI on a tag or manual run; not run yet.
-- Bling stone shapes and a library, and a true 3D surface warp: not started; the basic forms are built.
+- Bling stone library (more shapes and settings beyond Round and Square), and a true 3D surface warp: not started; the basic forms are built.
 
 ## Desktop app roadmap (Tauri, proposed 2026-10-20)
 

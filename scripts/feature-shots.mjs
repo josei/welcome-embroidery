@@ -30,6 +30,7 @@ const cases={
   'sequins': async p=>{await drawPath(p,line);await p.locator('#type').selectOption('sequin');},
   'beads': async p=>{await drawPath(p,line);await p.locator('#type').selectOption('bead');},
   'bling': async p=>{await drawPath(p,line);await p.locator('#type').selectOption('bling');},
+  'bling-square': async p=>{await drawPath(p,line);await p.locator('#type').selectOption('bling');await p.locator('#blingShape').selectOption('square');},
   'motif-loops-leaf': async p=>{await drawPath(p,line);await p.locator('#type').selectOption('motif');await p.locator('#motifShape').selectOption('leaf');},
   'motif-pairs-taper': async p=>{await drawPath(p,line);await p.locator('#type').selectOption('motif');await p.locator('#motifPair').check();await p.locator('#satinWidthEnd').fill('8');await p.locator('#satinWidthEnd').press('Tab');},
   'motif-fill': async p=>{await drawShape(p,[[-20,-20],[20,-20],[20,20],[-20,20]]);await p.locator('#fillMethod').selectOption('motif');},

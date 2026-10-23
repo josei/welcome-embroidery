@@ -783,6 +783,18 @@ test('bling sews a stone with a centre stitch and two fixing rings',()=>{
  assert.ok(plan.count>40,'bling stones are sewn ('+plan.count+')');
 });
 
+test('bling stones are round by default, square on request, and only known shapes are accepted',()=>{
+ const doc=initialDocument();doc.objects=[];
+ applyOperations(doc,[{op:'add_path',id:'g',x:0,y:0,points:[[-20,0],[20,0]]},{op:'set_object',id:'g',stitch:'bling'}]);
+ const round=compile(doc);assert.deepEqual(round.errors,[]);
+ applyOperations(doc,[{op:'set_object',id:'g',blingShape:'square'}]);
+ validateDocument(doc);
+ const square=compile(doc);assert.deepEqual(square.errors,[]);
+ assert.notEqual(square.count,round.count,'square stones sew different fixing rings ('+square.count+' vs '+round.count+')');
+ applyOperations(doc,[{op:'set_object',id:'g',blingShape:'hexagon'}]);
+ assert.throws(()=>validateDocument(doc),/bling shape/);
+});
+
 test('batch plan counts copies per hoop and hoops needed',async()=>{
  const {batchPlan}=await import('../src/engine.js');
  const doc=initialDocument();doc.objects=[];
