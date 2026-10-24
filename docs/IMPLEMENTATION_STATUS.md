@@ -738,3 +738,10 @@ Based on direct feedback that editing felt far from a vector program:
 - Parity: `scripts/machine-reference.py dsb` writes `scripts/dsb-parity.json`, and `test/readers.test.js` decodes all 10 DSB samples and matches every digest. The reference maps pyembroidery's needle-change command to `color`, since the editor treats a needle change as a colour change.
 - Covered by the parity test, an integration test (`test/import-integration.test.js`: one placeholder per colour block and a DST encoding of the SpiralBox sample, which is the same design as the PES sample), and an e2e test (the picker imports a DSB file). Screenshot: `design/progress/features/import-dsb.png`.
 - Limits: import only; no DSB export; the first pinned sample in the corpus has a single stitch, so the screenshot and integration test use the SpiralBox sample instead.
+
+## 2026-10-24 Barudan DSZ import
+
+- `.dsz` files import from the machine picker and the MCP import tool (format `dsz`) as stitch layers, keeping the source bytes. The reader ports pyembroidery 1.5.1's `DszReader`. It has the DSB header and 3-byte records, but the bytes are y, x, control; the control codes are 0x82 stop, 0x9B trim and 0x83 to 0x9A needle change, and the file has no end code (it stops at the last whole record).
+- The colour blocks share DSB's placeholder rule: one placeholder colour per needle change block, reported as a warning when there is more than one block. The two readers share the helper.
+- Parity: `scripts/machine-reference.py dsz` writes `scripts/dsz-parity.json`; `test/readers.test.js` matches all 10 DSZ samples. Covered by the parity test, an integration test (the SpiralBox DSZ: placeholders per block and a DST encoding), and an e2e test (the picker imports a DSZ file). Screenshot: `design/progress/features/import-dsz.png`.
+- Limits: import only; no DSZ export; placeholder colours are not the machine's own.
