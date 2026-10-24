@@ -632,3 +632,9 @@ Based on direct feedback that editing felt far from a vector program:
 - Also fixed: the editor showed the motif defaults (spacing 4, size 1.6) for bling and sequin fills, while the engine sews 8 and 4 (sequin fill 8 and 3). The editor now shows what is sewn. The e2e bling fill test checks the displayed defaults.
 - Covered by an engine test (the bling fill stays near the shape; round bling sews more than sequins; an unknown stone shape is refused), the e2e test (the Bling fill option appears, its defaults show, and changing the stone shape changes the count), and `npm run test:mcp`. Screenshot: `design/progress/features/bling-fill.png` (hexagon stones).
 - Limits: stones in a fixed orientation (no turning on a fill); no per-stone spacing; the stones do not stop at the edge, so an outline can reach about a stone's radius past the shape.
+
+## 2026-10-24 name drop batch
+
+- The batch export has a Name drop box: one name per line. Each name becomes one copy; the copy's first lettering object (in design order) is given that name, and the batch info line counts the names. Copies are laid out on the batch grid and written one file per hoop, as before. A design with no lettering is refused with "Name drop needs a lettering object in the design." An empty box keeps the plain batch.
+- Covered by an engine test (three names give three copies carrying the names in order, each compiles, and a design with no lettering is refused) and an e2e test (three names download a `-hoop1` file and the info line says "3 copies need"; a design without lettering shows the refusal). Screenshot: `design/progress/features/name-drop.png`.
+- Limits: only the first lettering object takes the names; the names box is not in MCP; names are not checked for the bundled font's glyphs beyond the normal lettering check (an unsupported character is refused by the existing validation); the design view still shows one copy.

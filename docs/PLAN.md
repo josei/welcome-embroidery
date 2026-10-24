@@ -110,6 +110,7 @@ Reference: Wilcom EmbroideryStudio, the commercial digitizing suite. Its feature
 | Embellishment | Buttonholes (satin with bar tacks at both ends) | Built |
 | Sequencing | Object order, start and end points, jumps and trims | Built |
 | Sequencing | Batch planning: copies that fit one hoop and hoops needed (no separate hoop files yet) | Built (planner) |
+| Sequencing | Name drop: a batch export with one name per line, each copy's first lettering set to the next name | Built (basic; first lettering only) |
 | Sequencing | Batch export: one file per hoop in JEF, VP3, DST or SEW (copies laid out on the batch grid, imported machine files included) | Built (JEF, VP3, DST, SEW; imported layers re-encoded per hoop) |
 | Preview | 3D preview and stitch playback | Built |
 | Files | JEF and VP3 export and import, DST import and export, SEW import and export, PEC and EXP import | Built |

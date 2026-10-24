@@ -1251,6 +1251,18 @@ test('stone turn checkbox shows for turning stone shapes and is on by default',a
  expect(errors).toEqual([]);
 });
 
+test('name drop batch exports one file per hoop, and refuses a design with no lettering',async({page})=>{
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());
+ await page.locator('.object-row').first().click();await page.locator('#secArray summary').click();
+ await page.locator('#batchNames').fill('Ana\nBen\nCarla');await expect(page.locator('#batchInfo')).toContainText('3 copies need');
+ const download=page.waitForEvent('download');await page.locator('#batchExport').click();const file=await download;expect(file.suggestedFilename()).toMatch(/-hoop1\.jef$/);
+ await expect(page.locator('#toast, .toast, [role="status"]').filter({hasText:'files exported'}).first()).toBeVisible();
+ await page.locator('#new').click();await page.locator('#rect').click();
+ await page.locator('#batchNames').fill('Ana');await page.locator('#batchExport').click();
+ await expect(page.locator('#toast, .toast, [role="status"]').filter({hasText:'lettering'}).first()).toBeVisible();
+ expect(errors).toEqual([]);
+});
+
 test('batch plan in the Array section says how many copies fit one hoop',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());await page.locator('#new').click();
  await page.locator('#rect').click();await page.locator('#secArray summary').click();

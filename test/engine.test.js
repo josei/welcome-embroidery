@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import neonGlyphs from '../fonts/neon_blinking/glyphs.json' with {type:'json'};
 import {pinnedMachineFixture} from './fixture-archive.js';
-import {initialDocument,compile,encode,applyOperations,geometry,objectBounds,validateDocument,jefWarnings,exportSvg,exportPrintTemplate,HOOP_PRESETS,hoopSize,importStitchLayer,measureText,threadPlan,sewingSeconds,sewingWorksheet} from '../src/engine.js';
+import {initialDocument,compile,encode,applyOperations,geometry,objectBounds,validateDocument,jefWarnings,exportSvg,exportPrintTemplate,HOOP_PRESETS,batchDocuments,hoopSize,importStitchLayer,measureText,threadPlan,sewingSeconds,sewingWorksheet} from '../src/engine.js';
 
 test('browser and MCP semantic operations share editable document behavior',()=>{
  const doc=initialDocument();doc.objects=[];
@@ -1069,6 +1069,16 @@ test('bling fill lays stones on a staggered grid inside a closed shape; round st
  for(const plan of [square,round])assert.ok(plan.bounds[0]>=-22&&plan.bounds[2]<=22&&plan.bounds[1]>=-16&&plan.bounds[3]<=16,'stones stay within a stone of the shape ('+plan.bounds.join(' ')+')');
  const doc=initialDocument();doc.objects=[];applyOperations(doc,[{op:'add_shape',id:'r',kind:'rect',x:-20,y:-15,width:40,height:30,stitch:'fill'},{op:'set_object',id:'r',fillMethod:'bling',blingShape:'triangle'}]);
  assert.throws(()=>validateDocument(doc),/bling shape/);
+});
+
+test('name drop batch gives each copy the next name in its first lettering, and needs lettering',()=>{
+ const doc=initialDocument();doc.objects=[];applyOperations(doc,[{op:'add_text',id:'t',text:'Old',x:0,y:0,height:8}]);validateDocument(doc);
+ const docs=batchDocuments(doc,{names:['Ana','Ben','Carla']});
+ const texts=docs.flatMap(d=>d.objects.filter(o=>o.kind==='text').map(o=>o.text));
+ assert.deepEqual(texts,['Ana','Ben','Carla'],'each of the three copies carries its name, in order');
+ for(const d of docs)assert.deepEqual(compile(d).errors,[]);
+ const plain=initialDocument();plain.objects=[];applyOperations(plain,[{op:'add_shape',id:'r',kind:'rect',x:0,y:0,width:10,height:10}]);validateDocument(plain);
+ assert.throws(()=>batchDocuments(plain,{names:['Ana']}),/lettering/);
 });
 
 test('batch plan counts copies per hoop and hoops needed',async()=>{
