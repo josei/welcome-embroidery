@@ -80,6 +80,7 @@ Reference: Wilcom EmbroideryStudio, the commercial digitizing suite. Its feature
 | Area | Feature | Welcome status |
 | --- | --- | --- |
 | Digitizing | Running, satin, tatami and fill stitches with underlay and pull compensation; satin pull set separately on the left and right rails | Built |
+| Digitizing | Laydown underlay for towelling and fleece: a light fill at 4 mm rows under a fill (fills only; satin has no closed area to cover) | Built (basic) |
 | Digitizing | Fill patterns: contour, spiral, meander, guided, cross, ripple | Built |
 | Digitizing | Appliqué, bean run, run length variation | Built |
 | Digitizing | Multi-colour blends and gradients (Wilcom Multi Blend) | Built (up to five colours) |

@@ -954,6 +954,16 @@ test('satin pull can be set on each side: the right rail moves out by pullRight 
  assert.throws(()=>validateDocument(doc),/pull/);
 });
 
+test('laydown underlay sews a light fill at wide rows under a fill, stays inside the shape, and is for fills only',()=>{
+ const sewn=(u)=>{const doc=initialDocument();doc.objects=[];applyOperations(doc,[{op:'add_shape',id:'r',kind:'rect',x:-20,y:-15,width:40,height:30,stitch:'fill'},{op:'set_object',id:'r',underlayType:u}]);validateDocument(doc);const plan=compile(doc);assert.deepEqual(plan.errors,[]);return plan;};
+ const none=sewn('none'),laydown=sewn('laydown');
+ assert.ok(laydown.count>none.count,'laydown adds stitches under the fill ('+laydown.count+' vs '+none.count+')');
+ // The laydown is inset from the outline like the other underlays, so nothing sews outside the 40 x 30 mm rectangle.
+ assert.ok(laydown.bounds[0]>=-20.5&&laydown.bounds[2]<=20.5&&laydown.bounds[1]>=-15.5&&laydown.bounds[3]<=15.5,'laydown stays inside the shape ('+laydown.bounds.join(' ')+')');
+ const doc=initialDocument();doc.objects=[];applyOperations(doc,[{op:'add_path',id:'s',x:0,y:0,points:[[-20,0],[20,0]],stitch:'satin',satinWidth:4},{op:'set_object',id:'s',underlayType:'laydown'}]);
+ assert.throws(()=>validateDocument(doc),/laydown underlay/);
+});
+
 test('batch plan counts copies per hoop and hoops needed',async()=>{
  const {batchPlan}=await import('../src/engine.js');
  const doc=initialDocument();doc.objects=[];

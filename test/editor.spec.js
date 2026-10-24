@@ -1105,6 +1105,16 @@ test('twin beads add a second bead either side of the centre line',async({page})
  expect(errors).toEqual([]);
 });
 
+test('laydown underlay is offered for fills and adds a light fill under them',async({page})=>{
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());await page.locator('#new').click();
+ await page.locator('#path').click();const m=await ctm(page);for(const [x,y] of [[-20,-15],[20,-15],[20,15],[-20,15],[-20,-15]]){const s=toScreen(m,x,y);await page.mouse.click(s.x,s.y);}await page.keyboard.press('Enter');
+ const count=async()=>Number(((await page.locator('#count').textContent()).match(/^([\d,]+) stitches/)||[,'0'])[1].replace(/,/g,''));
+ await page.locator('#type').selectOption('fill');await expect(page.locator('#underlayType option[value="laydown"]')).toHaveCount(1);
+ await page.locator('#underlayType').selectOption('none');await expect.poll(count).toBeGreaterThan(0);const none=await count();
+ await page.locator('#underlayType').selectOption('laydown');await expect.poll(count).toBeGreaterThan(none);
+ expect(errors).toEqual([]);
+});
+
 test('satin pull fields show for satin paths only, and a typed value is kept',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());await page.locator('#new').click();
  await page.locator('#path').click();const m=await ctm(page);for(const [x,y] of [[-20,0],[20,0]]){const s=toScreen(m,x,y);await page.mouse.click(s.x,s.y);}await page.keyboard.press('Enter');

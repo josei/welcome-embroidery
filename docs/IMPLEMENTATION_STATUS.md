@@ -550,3 +550,10 @@ Based on direct feedback that editing felt far from a vector program:
 - Default output is unchanged: with neither side set, the satin column compiles as it did.
 - Covered by an engine test (an unpulled 4 mm column spans -2 to 2 across the path; pullRight moves only the right rail, pullLeft only the left, both together take their own pulls; an unset side uses the object's compensation; out-of-range values are rejected) and an e2e test (the fields show for satin only and a typed value is kept). Screenshot: `design/progress/features/satin-pull.png`.
 - Limits: fills keep one pull compensation; the pull is a shift of the needle points, not a change of the stitch angle. The sign of "right" follows the screen (y down), so a path drawn the other way swaps the rails.
+
+## 2026-10-24 laydown underlay
+
+- Fills have a Laydown (wide rows) underlay type. It sews one light fill at 4 mm rows, across the grain of the top fill (the top fill's angle plus 90°), inset from the outline like the other underlays, to flatten the pile of towelling and fleece. The underlay type is a single choice, so laydown replaces the other underlays rather than adding to them; `contour+laydown` is not a valid type. Stored as `underlayType: 'laydown'`; settable over MCP.
+- Laydown is rejected on satin paths, because a satin path is open and has no closed area for the fill. The row spacing is fixed at 4 mm for now; the underlay spacing setting does not change it.
+- Covered by an engine test (laydown adds stitches to a 40 by 30 mm fill, stays inside the shape, and is rejected on a satin path) and an e2e test (the option is offered for fills, and sewing a closed square with laydown adds stitches compared with None). Screenshot: `design/progress/features/fill-laydown.png`.
+- Limits: a single rate of 4 mm for every fabric; no tatami-style combination with the top fill; no laydown for satin or lettering.
