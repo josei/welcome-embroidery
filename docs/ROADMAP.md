@@ -8,8 +8,8 @@ Rules for the supervisor: verify tests actually pass and diffs match commit mess
 
 ## Current preview
 
-- Public URL: https://advanced-study-accurate-restructuring.trycloudflare.com (unchanged; quick tunnel, a cloudflared process forwarding to `http://127.0.0.1:8790`). Verified HTTP 200 for `/` and `/health` on 2026-10-24 by the supervisor review. The 8790 server was restarted on `c235695` (TAP import, the last code change) and reads the working tree from disk. Checked 200 for `/` and `/health` on both the local port and the public URL on 2026-10-24 by the builder run.
-- GitHub Pages: https://josei.github.io/welcome-embroidery/ (pages.yml run 40086392891 on `1394ae8` succeeded; HTTP 200 on 2026-10-24). The desktop build (`desktop.yml` run 40086392891) also passed on Linux, macOS and Windows at `1394ae8`.
+- Public URL: https://advanced-study-accurate-restructuring.trycloudflare.com (unchanged; quick tunnel, a cloudflared process forwarding to `http://127.0.0.1:8790`). Verified HTTP 200 for `/` and `/health` on the public URL and the local port on 2026-10-24 by the supervisor review. The 8790 server was restarted on `c235695` (TAP import, the last code change) and reads the working tree from disk. Checked 200 for `/` and `/health` on both the local port and the public URL on 2026-10-24 by the builder run.
+- GitHub Pages: https://josei.github.io/welcome-embroidery/ (pages.yml run 40112213375 on `0ffac47` succeeded; HTTP 200 on 2026-10-24 by the supervisor review). The desktop build (`desktop.yml` run 40086392891 on `1394ae8`) passed on Linux, macOS and Windows; no desktop build has run since, because it runs only on a tag or a manual dispatch.
 - Latest screenshot set: `design/progress/features/`. Latest feature shots: `import-tap.png`, `import-dsz.png`, `import-dsb.png`, `import-xxx.png`, `import-hus.png`, `bling-teardrop.png`, `bling-baguette.png`, `sewing-tips-settings.png` and `pes-metadata.png` (2026-10-24 builder runs).
 
 ## Ready to build
