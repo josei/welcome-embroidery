@@ -116,6 +116,22 @@ test('all 73 pinned PES samples (versions 1 to 10) decode to the pyembroidery co
     assert.equal(sha(Buffer.from(canonical(decoded.stitches.map(s=>[Math.round(s.x*10),Math.round(s.y*10),s.cmd])))),fixture.commandsSha256,`${fixture.path} command/coordinate parity`);
   }
 });
+test('all 15 pinned HUS samples decode to the pyembroidery command, thread and coordinate digests',()=>{
+  const husParity=JSON.parse(readFileSync(new URL('../scripts/hus-parity.json', import.meta.url), 'utf8'));
+  assert.equal(husParity.schema,'welcom/hus-parity/1');
+  const husFiles=zipEntries(archive,name=>/\.hus$/i.test(name));
+  assert.equal(husFiles.size,15);
+  assert.equal(husParity.fixtures.length,15);
+  for(const fixture of husParity.fixtures){
+    const bytes=husFiles.get(fixture.path); assert.ok(bytes,fixture.path);
+    assert.equal(sha(bytes),fixture.sha256,`${fixture.path} fixture pin`);
+    const decoded=decodeEmbroidery(bytes,'hus');
+    const counts={};for(const s of decoded.stitches)counts[s.cmd]=(counts[s.cmd]||0)+1;
+    assert.deepEqual(counts,fixture.commandCounts,`${fixture.path} command counts`);
+    assert.equal(decoded.threads.length,fixture.threads,`${fixture.path} thread count`);
+    assert.equal(sha(Buffer.from(canonical(decoded.stitches.map(s=>[Math.round(s.x*10),Math.round(s.y*10),s.cmd])))),fixture.commandsSha256,`${fixture.path} command/coordinate parity`);
+  }
+});
 assert.throws(()=>decodeEmbroidery(new Uint8Array(12),'pes'),/signature/);
 const expParity=JSON.parse(readFileSync(new URL('../scripts/exp-parity.json', import.meta.url),'utf8'));
 test('all 35 pinned EXP samples decode to the pyembroidery command, colour block and coordinate digests',()=>{

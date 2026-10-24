@@ -97,6 +97,14 @@ test('pinned PEC imports with its thread-chart colours, exports the untouched so
   assert.equal(next,want.length,'every planned needle point is written, in order');
 });
 
+test('pinned HUS imports with its own thread colours and compiles to DST',()=>{
+  const {fileName,bytes}=pinnedMachineFixture('hus'),decoded=decodeEmbroidery(bytes,'hus'),doc=initialDocument(),layer=importStitchLayer(bytes,'hus',{fileName});doc.objects=[layer];
+  assert.deepEqual(layer.stitches,decoded.stitches);
+  assert.ok(decoded.threads.length>1&&decoded.threads.every(t=>/^#[0-9a-f]{6}$/i.test(t.color)&&t.brand==='HUS'&&t.catalogNumber),'every HUS colour comes from the HUS chart with its code');
+  assert.equal(layer.source.warnings.length,0,'HUS carries thread colours, so there are no placeholder warnings');
+  assert.deepEqual(compile(doc).errors,[]);assert.ok(encode(compile(doc),'dst','#527461',doc.hoop,doc).length>100);
+});
+
 test('pinned EXP imports with placeholder colours, exports the untouched source and re-encodes after a move',()=>{
   const {fileName,bytes}=pinnedMachineFixture('exp'),decoded=decodeEmbroidery(bytes,'exp'),doc=initialDocument(),layer=importStitchLayer(bytes,'exp',{fileName});doc.objects=[layer];
   assert.deepEqual(layer.stitches,decoded.stitches);
