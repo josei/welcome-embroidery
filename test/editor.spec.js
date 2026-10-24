@@ -1146,6 +1146,15 @@ test('redwork outline adds a redwork run that follows a closed shape',async({pag
  expect(errors).toEqual([]);
 });
 
+test('satin end inset field shows for satin paths and a typed value is kept',async({page})=>{
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());await page.locator('#new').click();
+ await page.locator('#path').click();const m=await ctm(page);for(const [x,y] of [[-20,0],[20,0]]){const s=toScreen(m,x,y);await page.mouse.click(s.x,s.y);}await page.keyboard.press('Enter');
+ await page.locator('#type').selectOption('satin');await expect(page.locator('#endInsetRow')).toBeVisible();
+ await page.locator('#endInset').fill('1');await page.locator('#endInset').press('Tab');await expect(page.locator('#endInset')).toHaveValue('1');
+ await page.locator('#type').selectOption('run');await expect(page.locator('#endInsetRow')).toBeHidden();
+ expect(errors).toEqual([]);
+});
+
 test('satin pull fields show for satin paths only, and a typed value is kept',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());await page.locator('#new').click();
  await page.locator('#path').click();const m=await ctm(page);for(const [x,y] of [[-20,0],[20,0]]){const s=toScreen(m,x,y);await page.mouse.click(s.x,s.y);}await page.keyboard.press('Enter');

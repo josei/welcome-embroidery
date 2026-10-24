@@ -1006,6 +1006,17 @@ test('redwork outline runs around a closed shape out and back, and refuses open 
  assert.throws(()=>applyOperations(open,[{op:'redwork_outline',id:'l'}]),/closed shape/);
 });
 
+test('satin end inset moves the first and last needle inward along the column, leaves the stitch count alone, and is limited to 0-2 mm',()=>{
+ const ends=(extra)=>{const doc=initialDocument();doc.objects=[];applyOperations(doc,[{op:'add_path',id:'s',x:0,y:0,points:[[-30,0],[30,0]],stitch:'satin',satinWidth:4},{op:'set_object',id:'s',compensation:0,underlayType:'none',...extra}]);validateDocument(doc);const plan=compile(doc);assert.deepEqual(plan.errors,[]);const xs=plan.stitches.filter(s=>s.cmd==='stitch').map(s=>s.x);return {first:xs[0],last:xs.at(-1),count:plan.count};};
+ const none=ends({}),inset=ends({endInset:1});
+ // Each end's needle moves 1 mm towards the middle of the column; the stitch count is unchanged.
+ assert.ok(Math.abs((inset.first-none.first)-1)<0.2,'the start needle moves 1 mm inward ('+none.first+' -> '+inset.first+')');
+ assert.ok(Math.abs((none.last-inset.last)-1)<0.2,'the end needle moves 1 mm inward ('+none.last+' -> '+inset.last+')');
+ assert.equal(inset.count,none.count,'an end inset does not change the stitch count');
+ const doc=initialDocument();doc.objects=[];applyOperations(doc,[{op:'add_path',id:'s',x:0,y:0,points:[[-30,0],[30,0]],stitch:'satin',satinWidth:4},{op:'set_object',id:'s',endInset:3}]);
+ assert.throws(()=>validateDocument(doc),/end inset/);
+});
+
 test('batch plan counts copies per hoop and hoops needed',async()=>{
  const {batchPlan}=await import('../src/engine.js');
  const doc=initialDocument();doc.objects=[];

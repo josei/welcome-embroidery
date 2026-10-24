@@ -576,3 +576,10 @@ Based on direct feedback that editing felt far from a vector program:
 - Shape and path tools have a Redwork outline button. For a selected closed shape (a rectangle, an ellipse, or a closed path) it adds a new run object, named `<name> redwork`, that goes once around the shape's outline and is sewn back over itself in Redwork (out and back) style. The original shape is kept. Settable over MCP as `redwork_outline { id }`. An open path is refused with a message.
 - Covered by an engine test (the new object is a closed run in Redwork style; it sews about twice a plain run around the same points; an open path is refused) and an e2e test (the button adds one redwork row to the list). Screenshot: `design/progress/features/redwork-outline.png`.
 - Limits: the new run is a copy of the outline, not linked to the shape, so moving or editing the shape later does not update it; the stitches are the Redwork style's out-and-back run, with no separate underlay.
+
+## 2026-10-24 satin end inset
+
+- A satin path has a Satin end inset field (0–2 mm, empty to clear; `endInset` over MCP). It moves the first and last needle of the column inward along the column by that amount, so the stitches at each end are shorter. The rest of the column, the stitch count and the underlay do not change.
+- Found on the way: the last needle pairs of a column sit at the same spot, so the inward direction at the end came out as zero and the end did not move. The direction is now taken from the nearest pair whose midpoint differs.
+- Covered by an engine test (with a 1 mm inset the first and last needle each move 1 mm inward, the stitch count is unchanged, and 3 mm is rejected) and an e2e test (the field shows for satin only and a typed value is kept). Screenshot: `design/progress/features/satin-end-inset.png` (the field at 1.5 mm; at this zoom the shortening is subtle).
+- Limits: one value for both ends; the underlay is not inset by it; Ink/Stitch's multi-value short stitch inset is not implemented.
