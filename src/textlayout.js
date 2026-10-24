@@ -14,11 +14,13 @@ function arclengthResample(pts,n){const cum=[0];for(let i=1;i<pts.length;i++)cum
 
 // Layout in font units first (so tracking, kerning and italic stay exact), then scale to mm.
 export function layoutText(obj,font,{buffer}={}){
-  const h=num(obj.h,font.size),scale=h/font.unitsPerEm,lines=normaliseText(obj,font),tracking=num(obj.tracking,0)/scale,wordSp=num(obj.wordSpacing,0)/scale,
+  const h=num(obj.h,font.size),scale=h/font.unitsPerEm,normal=normaliseText(obj,font),
+    // Vertical lettering: one character per row, stacked at the line height and centred on the lettering's x position.
+    lines=obj.vertical?[...(normal[0]??'')].map(c=>c):normal,tracking=num(obj.tracking,0)/scale,wordSp=num(obj.wordSpacing,0)/scale,
     shear=Math.tan(Math.max(0,Math.min(35,num(obj.italic,0)))*Math.PI/180),lead=(font.leading||font.unitsPerEm*1.2)*Math.max(.5,Math.min(3,num(obj.lineHeight,1))),bold=Math.max(0,Math.min(3,num(obj.bold,0))),asOutline=font.kind==='outline'&&obj.stitch==='run';
   const rows=lines.map(line=>{let x=0,prev=null;const placed=[];for(const ch of [...line]){const g=font.glyphs[ch];if(prev!==null&&font.kern){const k=font.kern[prev+ch];if(Number.isFinite(k))x+=k;}placed.push({ch,g,x});x+=(g?g.a:font.defaultAdvance)+tracking+(ch===' '?wordSp:0);prev=ch;}return {placed,width:Math.max(0,x-(line.length?tracking:0))};});
   const maxW=Math.max(0,...rows.map(r=>r.width)),natural=maxW*scale,stretch=num(obj.w,0)>0&&natural>0&&Math.abs(obj.w/natural-1)>1e-3?obj.w/natural:1,prims=[];
-  rows.forEach((row,li)=>{const off=obj.align==='center'?(maxW-row.width)/2:obj.align==='right'?maxW-row.width:0;
+  rows.forEach((row,li)=>{const off=obj.vertical?-row.width/2:obj.align==='center'?(maxW-row.width)/2:obj.align==='right'?maxW-row.width:0;
     const map=(gx,gy,px)=>{const v=gy-font.baseline+li*lead,u=px+off+gx-v*shear;return [obj.x+u*scale*stretch,obj.y+v*scale];};
     for(const {g,x} of row.placed){if(!g)continue;for(const pr of g.p){
       if(pr[0]==='r')prims.push({t:'r',pts:pairs(pr[1]).map(([a,b])=>map(a,b,x))});

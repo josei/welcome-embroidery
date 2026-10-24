@@ -1115,6 +1115,19 @@ test('a document can hold up to 16 custom fonts, and a 17th is refused',()=>{
  assert.throws(()=>validateDocument(tooMany),/at most 16 fonts/);
 });
 
+test('vertical lettering stacks one letter under another, centred on its x position, and refuses multi-line, path and legacy-font use',()=>{
+ const extent=(b)=>({w:b[2]-b[0],h:b[3]-b[1]});
+ const stitched=(extra)=>{const d=textDoc('ttf/lato',{text:'ABC',height:10,...extra});validateDocument(d);const p=compile(d);assert.deepEqual(p.errors,[]);return p;};
+ const across=stitched({}),down=stitched({vertical:true});
+ assert.ok(extent(down.bounds).h>extent(across.bounds).h*1.5,'a vertical word is much taller than the same word across ('+extent(down.bounds).h+' vs '+extent(across.bounds).h+')');
+ assert.ok(extent(down.bounds).w<extent(across.bounds).w/2,'and much narrower (one letter wide)');
+ // textDoc places its lettering at x = -40, so the column's middle should be there.
+ assert.ok(Math.abs((down.bounds[0]+down.bounds[2])/2+40)<1,'the column is centred on the lettering x position (its middle is at x = -40, the lettering position)');
+ assert.throws(()=>{const d=textDoc('ttf/lato',{text:'A\nB',vertical:true});validateDocument(d);},/one line/);
+ assert.throws(()=>{const d=textDoc('ttf/lato',{text:'AB'});applyOperations(d,[{op:'add_path',id:'p',x:0,y:0,points:[[-20,0],[20,0]]},{op:'text_on_path',textId:'t',pathId:'p'}]);d.objects.find(o=>o.id==='t').vertical=true;validateDocument(d);},/cannot follow a path/);
+ assert.throws(()=>{const d=textDoc('welcom-mono/1',{text:'AB',vertical:true});validateDocument(d);},/bundled or loaded font/);
+});
+
 test('batch plan counts copies per hoop and hoops needed',async()=>{
  const {batchPlan}=await import('../src/engine.js');
  const doc=initialDocument();doc.objects=[];

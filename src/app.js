@@ -269,9 +269,9 @@ function syncTextInspector(o){
  const lo=f?+(f.size*f.minScale).toFixed(2):legacyNeon?20:isRegistryFont(fid)?2:4,hi=f?+(f.size*f.maxScale).toFixed(2):legacyNeon?60:isRegistryFont(fid)?200:16;$('#letteringHeight').min=lo;$('#letteringHeight').max=hi;$('#letteringHeight').title=`${lo}–${hi} mm for this font`;
  if(![...$('#font').options].some(op=>op.value===fid)){const op=document.createElement('option');op.value=fid;op.textContent=fid;$('#font').append(op);}$('#font').value=fid;$('#font').disabled=false;
  const set=(id,v)=>{if(document.activeElement!==$('#'+id))$('#'+id).value=v;};set('tracking',o?.tracking??0);set('wordSpacing',o?.wordSpacing??0);set('lineHeight',o?.lineHeight??1);set('boldMm',o?.bold??0);set('italicDeg',o?.italic??0);
- const registry=isRegistryFont(fid);for(const id of ['tracking','wordSpacing','lineHeight','boldMm','italicDeg','textBold','textItalic','alignLeft','alignCenter','alignRight'])$('#'+id).disabled=!isText||!registry;
+ const registry=isRegistryFont(fid);for(const id of ['tracking','wordSpacing','lineHeight','textVertical','boldMm','italicDeg','textBold','textItalic','alignLeft','alignCenter','alignRight'])$('#'+id).disabled=!isText||!registry;
  $('#textBold').setAttribute('aria-pressed',String(Boolean(o?.bold>0)));$('#textItalic').setAttribute('aria-pressed',String(Boolean(o?.italic>0)));for(const b of $$('[data-align-text]'))b.setAttribute('aria-pressed',String((o?.align||'left')===b.dataset.alignText));
- $('#textStitchRow').hidden=!(isText&&f?.kind==='outline');$('#textStitch').value=o?.stitch==='run'?'run':'fill';
+ $('#textStitchRow').hidden=!(isText&&f?.kind==='outline');$('#textVertical').checked=Boolean(o?.vertical);$('#textStitch').value=o?.stitch==='run'?'run':'fill';
  const info=$('#fontInfo'),entry=fontIndex.find(x=>x.fid===fid),custom=fid.startsWith('custom/')?doc.customFonts?.[fid.slice(7)]:null;info.hidden=!(entry||custom);info.textContent=custom?`${custom.name} — loaded from a file; stored inside this project. ${custom.license||'Check the licence of the font file before sharing the design.'}`:entry?`${entry.name} — ${entry.license||''}${entry.original&&entry.original!==entry.name?` · ${t('based on')} ${entry.original}`:''}${!registry?' · '+t('single-line font: spacing, bold and italic apply to bundled outline/stitch fonts; pick a satin or fill font to set the stitch density'):''}`:'';
  fontPicker?.refreshButton();
 }
@@ -290,6 +290,7 @@ $('#textBold').onclick=()=>{const o=textObj();if(o)edit([{op:'set_object',id:o.i
 $('#textItalic').onclick=()=>{const o=textObj();if(o)edit([{op:'set_object',id:o.id,italic:o.italic>0?0:12}]);};
 for(const b of $$('[data-align-text]'))b.onclick=()=>{const o=textObj();if(o)edit([{op:'set_object',id:o.id,align:b.dataset.alignText}]);};
 $('#textStitch').onchange=e=>{const o=textObj();if(o)edit([{op:'set_object',id:o.id,stitch:e.target.value}]);};
+$('#textVertical').onchange=e=>{const o=textObj();if(o)edit([{op:'set_object',id:o.id,vertical:e.target.checked}]);};
 async function loadFontFile(file){
  try{if(file.size>12_000_000)throw Error('Font files over 12 MB are not supported.');const bytes=new Uint8Array(await file.arrayBuffer()),base=file.name.replace(/\.[^.]+$/,'').replace(/[^A-Za-z0-9_.-]+/g,'_').slice(0,32)||'font';let id=base,n=1;while(doc.customFonts?.[id]||getFont(`custom/${id}`))id=`${base}_${++n}`;
   const font=ttfToFont(bytes,{id,name:file.name.replace(/\.[^.]+$/,''),license:'Loaded from a local file — check its licence',keywords:['truetype','outline','custom']});if(Object.keys(font.glyphs).length<10)throw Error('That font has too few Latin glyphs.');delete font.id;
