@@ -9,7 +9,7 @@ Rules for the supervisor: verify tests actually pass and diffs match commit mess
 ## Current preview
 
 - Public URL: https://advanced-study-accurate-restructuring.trycloudflare.com (unchanged; quick tunnel, a cloudflared process forwarding to `http://127.0.0.1:8790`). Verified HTTP 200 for `/` and `/health` on 2026-10-24 by the supervisor review. The 8790 server serves the tree at `a46fa83` (the last code change); later commits are docs and roadmap only.
-- GitHub Pages: https://josei.github.io/welcome-embroidery/ (pages.yml run on `8341663` succeeded; the Pages site serves the last pushed build).
+- GitHub Pages: https://josei.github.io/welcome-embroidery/ (pages.yml run 40086392891 on `1394ae8` succeeded; HTTP 200 on 2026-10-24). The desktop build (`desktop.yml` run 40086392891) also passed on Linux, macOS and Windows at `1394ae8`.
 - Latest screenshot set: `design/progress/features/`. Latest feature shots: `pes-import.png` (2026-10-24 builder run).
 
 ## Ready to build
@@ -124,3 +124,4 @@ _(none: the 2026-10-24 supervisor review moved everything below into History and
   - Custom font cap raised to 16 and MCP request limit raised to 8 MB (`c38b2b9`)
   - Brother PES import, all versions 1 to 10, pinned to pyembroidery (`a46fa83`)
   - Roadmap and record-only commits in the range (`79114c8`'s follow-ups, `3304e53`, `ee2c6f4`, and the others)
+- 2026-10-24 12:40 CEST supervisor review (Claude Haiku 5.5): pushed `fad1d71..1394ae8`; Pages and the desktop build passed on `1394ae8`. Refilled the queue to six items. The 8790 server serves `a46fa83` (static files and the engine are unchanged since the last restart).
