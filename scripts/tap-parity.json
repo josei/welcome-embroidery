@@ -1,0 +1,135 @@
+{
+ "schema": "welcom/tap-parity/1",
+ "oracle": "pyembroidery 1.5.1 reader for .tap (positions as pyembroidery reports them)",
+ "coordinates": "integer 0.1 mm exactly as pyembroidery reports positions",
+ "fixtures": [
+  {
+   "path": "samples-6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random1-me.tap",
+   "sha256": "5230cb81fd06801ee50661ecdb6212d9ac6d43d3c545731aa430930bd25dc442",
+   "threads": 0,
+   "commandCounts": {
+    "color": 9,
+    "end": 1,
+    "jump": 261,
+    "stitch": 30,
+    "trim": 20
+   },
+   "commandsSha256": "a79becdc7ca826bb276c7b5e3e2b78924961fb41fdb8dc79084858867ae75265"
+  },
+  {
+   "path": "samples-6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random1-wilcom.TAP",
+   "sha256": "78830eff4b4d15a02e01ea48028ad0cbb5a15291543d4c1dc2823622d1d9c931",
+   "threads": 0,
+   "commandCounts": {
+    "color": 9,
+    "end": 1,
+    "jump": 178,
+    "stitch": 32,
+    "trim": 19
+   },
+   "commandsSha256": "babcc97224fcf115c656c903f913d35daf552ad60b03b9a933104abbf6ec5530"
+  },
+  {
+   "path": "samples-6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random2-me.tap",
+   "sha256": "f7a69b74aaa44d69471e9da9719e9b08568864b1d560577f3d192f180bd654ce",
+   "threads": 0,
+   "commandCounts": {
+    "color": 9,
+    "end": 1,
+    "jump": 264,
+    "stitch": 30,
+    "trim": 17
+   },
+   "commandsSha256": "5c2b5bbc06786c4fc8f28b08e838973dcef0cef676c6baee4f5f8c294a0bbebb"
+  },
+  {
+   "path": "samples-6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random2-wilcom.TAP",
+   "sha256": "b0bba37edb79ecf44598617a6e552127a5f39544761e75e6717ef91dc02d13c7",
+   "threads": 0,
+   "commandCounts": {
+    "color": 9,
+    "end": 1,
+    "jump": 177,
+    "stitch": 32,
+    "trim": 17
+   },
+   "commandsSha256": "c9294331ec5802276d1d46854ae274e442a210ea4b67025f58a75fed659e890d"
+  },
+  {
+   "path": "samples-6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random3-me.tap",
+   "sha256": "b09ca46bf9381def950ed914b6368509a6b584cd57c581069c1023c343b7d725",
+   "threads": 0,
+   "commandCounts": {
+    "color": 9,
+    "end": 1,
+    "jump": 281,
+    "stitch": 30,
+    "trim": 19
+   },
+   "commandsSha256": "b04ad38f2858b7cd3eaf9dc7bdbfb247a2affd35eba04ec84e727e13c4cb9e84"
+  },
+  {
+   "path": "samples-6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random3-wilcom.TAP",
+   "sha256": "00ae62cff06008bd929863fc458bd4c63a323c645923ac8bb979ec128ac5d41f",
+   "threads": 0,
+   "commandCounts": {
+    "color": 9,
+    "end": 1,
+    "jump": 166,
+    "stitch": 32,
+    "trim": 16
+   },
+   "commandsSha256": "47a266582729d2ab487dc0a18fab8f72695d4519402564d5cb60840ea9b92cee"
+  },
+  {
+   "path": "samples-6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/scene-me.tap",
+   "sha256": "95165b37d744e082495d8712fa14a2232c2980399ce879484641fccb819e05fb",
+   "threads": 0,
+   "commandCounts": {
+    "color": 2,
+    "end": 1,
+    "jump": 48,
+    "stitch": 125,
+    "trim": 2
+   },
+   "commandsSha256": "8b033c4323b1f3a05cd2b444bdde15c8c4bbdd4ebb5ba665bed8e0fb08526ca1"
+  },
+  {
+   "path": "samples-6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/scene-wilcom.TAP",
+   "sha256": "d3d55808fab3575b93ed92954f9a23690111e4dbb1d28803d0133b70a6424d1d",
+   "threads": 0,
+   "commandCounts": {
+    "color": 2,
+    "end": 1,
+    "jump": 21,
+    "stitch": 127,
+    "trim": 2
+   },
+   "commandsSha256": "c42b17b3efb7fb01f4ce9b6b1fc7fa517324b23f5de42574cc1ea6de8c94fd74"
+  },
+  {
+   "path": "samples-6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/spiralbox-me.tap",
+   "sha256": "6823063f9296d6a10bc941555d3b3eac5653ece8c76b4ae372e5a5aa01d50999",
+   "threads": 0,
+   "commandCounts": {
+    "color": 15,
+    "end": 1,
+    "jump": 80,
+    "stitch": 83
+   },
+   "commandsSha256": "9b7b2930e17e8728db40a08e204673d05327d0402b212b752907a32a215372ed"
+  },
+  {
+   "path": "samples-6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/spiralbox-wilcom.TAP",
+   "sha256": "2b8c7d854bad857eca14e1ca83e5c33fc472616bfa56f6602f8216ac016c9087",
+   "threads": 0,
+   "commandCounts": {
+    "color": 15,
+    "end": 1,
+    "jump": 15,
+    "stitch": 82
+   },
+   "commandsSha256": "c95f95c4910a3412da9b55ea1e956fec2f77aa0bf68f820d2bf1a76946faf6e3"
+  }
+ ]
+}

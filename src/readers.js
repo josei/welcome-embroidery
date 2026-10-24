@@ -563,6 +563,65 @@ function readDsz(bytes) {
   return blockResult(stitches, block, 'DSZ');
 }
 
+// Tajima-style TAP, read as pyembroidery 1.5.1 does (TapReader): DST records with no header, then pyembroidery's trim pass. A jump run of three or more jumps after stitching gets a trim at its start, and zero-length jump runs are removed. Sequin codes are refused: the editor has no sequin commands to map them to.
+function readTap(bytes) {
+  const CMD = {STITCH: 0, JUMP: 1, TRIM: 2, END: 4, COLOR: 5, SEQUIN_MODE: 6, SEQUIN_EJECT: 7};
+  const bit = (b, n) => (b >> n) & 1;
+  const dxOf = (b0, b1, b2) => 81 * bit(b2, 2) - 81 * bit(b2, 3) + 27 * bit(b1, 2) - 27 * bit(b1, 3) + 9 * bit(b0, 2) - 9 * bit(b0, 3) + 3 * bit(b1, 0) - 3 * bit(b1, 1) + bit(b0, 0) - bit(b0, 1);
+  const dyOf = (b0, b1, b2) => -(81 * bit(b2, 5) - 81 * bit(b2, 4) + 27 * bit(b1, 5) - 27 * bit(b1, 4) + 9 * bit(b0, 5) - 9 * bit(b0, 4) + 3 * bit(b1, 7) - 3 * bit(b1, 6) + bit(b0, 7) - bit(b0, 6));
+  const st = [];
+  let x = 0, y = 0;
+  for (let p = 0; p + 3 <= bytes.length; p += 3) {
+    const b0 = bytes[p], b1 = bytes[p + 1], b2 = bytes[p + 2];
+    if ((b2 & 0xF3) === 0xF3) break;
+    x += dxOf(b0, b1, b2); y += dyOf(b0, b1, b2);
+    if ((b2 & 0xC3) === 0xC3) st.push({x, y, cmd: CMD.COLOR});
+    else if ((b2 & 0x43) === 0x43) fail('TAP sequin codes are not supported');
+    else if ((b2 & 0x83) === 0x83) st.push({x, y, cmd: CMD.JUMP});
+    else st.push({x, y, cmd: CMD.STITCH});
+  }
+  st.push({x, y, cmd: CMD.END});
+  interpolateTrims(st, 3, true);
+  const stitches = [];
+  let block = 0;
+  for (const s of st) {
+    if (s.cmd === CMD.COLOR) { block++; if (block >= MAX_THREADS) fail('too many colour changes'); push(stitches, s.x, s.y, 'color', block); }
+    else if (s.cmd === CMD.STITCH) push(stitches, s.x, s.y, 'stitch', block);
+    else if (s.cmd === CMD.JUMP) push(stitches, s.x, s.y, 'jump', block);
+    else if (s.cmd === CMD.TRIM) push(stitches, s.x, s.y, 'trim', block);
+    else push(stitches, s.x, s.y, 'end', block);
+  }
+  return blockResult(stitches, block, 'TAP');
+}
+// pyembroidery's EmbPattern.interpolate_trims on a list of absolute {x, y, cmd} stitches, edited in place: a run of jumps after stitching gets a trim at its start once it reaches jumpsRequired jumps, and a zero-displacement run is deleted when clipping.
+function interpolateTrims(st, jumpsRequired, clipping) {
+  const JUMP = 1, STITCH = 0, TRIM = 2, COLOR = 5;
+  let i = -1, ie = st.length - 1, x = 0, y = 0, jumpCount = 0, jumpStart = 0, jumpDx = 0, jumpDy = 0, jumping = false, trimmed = true;
+  while (i < ie) {
+    i++;
+    const s = st[i];
+    const dx = s.x - x, dy = s.y - y;
+    x = s.x; y = s.y;
+    if (s.cmd === STITCH) { trimmed = false; jumping = false; }
+    else if (s.cmd === COLOR || s.cmd === TRIM) { trimmed = true; jumping = false; }
+    if (s.cmd !== JUMP) continue;
+    if (!jumping) { jumpDx = 0; jumpDy = 0; jumpCount = 0; jumpStart = i; jumping = true; }
+    jumpCount++; jumpDx += dx; jumpDy += dy;
+    if (!trimmed && jumpCount === jumpsRequired) {
+      // The trim takes the position of the stitch before the jump run, as pyembroidery's insert_stitch_relative does.
+      const before = jumpStart > 0 ? st[jumpStart - 1] : {x: 0, y: 0};
+      st.splice(jumpStart, 0, {x: before.x, y: before.y, cmd: TRIM});
+      jumpStart++; i++; ie++;
+      trimmed = true;
+    }
+    if (clipping && jumpDx === 0 && jumpDy === 0) {
+      st.splice(jumpStart, i + 1 - jumpStart);
+      i = jumpStart - 1;
+      ie = st.length - 1;
+    }
+  }
+}
+
 export function decodeEmbroidery(input, format) {
   const bytes=asBytes(input);
   if(bytes.byteLength>MAX_FILE_BYTES) fail('file exceeds 64 MiB limit');
@@ -577,5 +636,6 @@ export function decodeEmbroidery(input, format) {
   if(format==='xxx') return readXxx(bytes);
   if(format==='dsb') return readDsb(bytes);
   if(format==='dsz') return readDsz(bytes);
-  fail('format must be jef, vp3, dst, sew, pec, pes, exp, hus, xxx, dsb or dsz');
+  if(format==='tap') return readTap(bytes);
+  fail('format must be jef, vp3, dst, sew, pec, pes, exp, hus, xxx, dsb, dsz or tap');
 }
