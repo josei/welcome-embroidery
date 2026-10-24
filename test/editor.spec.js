@@ -1166,6 +1166,15 @@ test('sequin fill is a fill pattern that lays sequins inside a closed shape',asy
  expect(errors).toEqual([]);
 });
 
+test('hoop preset select sets the hoop, and a typed size moves it to custom',async({page})=>{
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());await page.locator('#new').click();
+ await page.locator('#hoopPreset').selectOption('180x130');
+ await expect(page.locator('#hoopW')).toHaveValue('180');await expect(page.locator('#hoopH')).toHaveValue('130');
+ await page.locator('#hoopW').fill('120');await page.locator('#hoopW').press('Tab');
+ await expect(page.locator('#hoopPreset')).toHaveValue('custom');
+ expect(errors).toEqual([]);
+});
+
 test('satin pull fields show for satin paths only, and a typed value is kept',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());await page.locator('#new').click();
  await page.locator('#path').click();const m=await ctm(page);for(const [x,y] of [[-20,0],[20,0]]){const s=toScreen(m,x,y);await page.mouse.click(s.x,s.y);}await page.keyboard.press('Enter');

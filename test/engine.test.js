@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import neonGlyphs from '../fonts/neon_blinking/glyphs.json' with {type:'json'};
 import {pinnedMachineFixture} from './fixture-archive.js';
-import {initialDocument,compile,encode,applyOperations,geometry,objectBounds,validateDocument,jefWarnings,exportSvg,exportPrintTemplate,importStitchLayer,measureText,threadPlan,sewingSeconds,sewingWorksheet} from '../src/engine.js';
+import {initialDocument,compile,encode,applyOperations,geometry,objectBounds,validateDocument,jefWarnings,exportSvg,exportPrintTemplate,HOOP_PRESETS,hoopSize,importStitchLayer,measureText,threadPlan,sewingSeconds,sewingWorksheet} from '../src/engine.js';
 
 test('browser and MCP semantic operations share editable document behavior',()=>{
  const doc=initialDocument();doc.objects=[];
@@ -1023,6 +1023,13 @@ test('sequin fill lays sequins on a staggered grid inside a closed shape, far fe
  // Each sequin is a centre stitch and a 3 mm fixing ring whose centre lies inside the 40 x 30 mm shape, so the sewn area stays within about a sequin's radius of it.
  assert.ok(sequin.bounds[0]>=-22&&sequin.bounds[2]<=22&&sequin.bounds[1]>=-16.5&&sequin.bounds[3]<=16.5,'sequins stay within a sequin of the shape ('+sequin.bounds.join(' ')+')');
  assert.ok(sequin.count>150&&sequin.count<rows.count/2,'a sequin fill sews a few sequins, far fewer stitches than tatami ('+sequin.count+' vs '+rows.count+')');
+});
+
+test('hoop presets are the default and the Brother 4x4, 5x7 and 6x10 hoops, each set as the document hoop',()=>{
+ assert.deepEqual(HOOP_PRESETS.map(p=>[p.w,p.h]),[[110,110],[100,100],[180,130],[260,160]]);
+ for(const p of HOOP_PRESETS){const doc=initialDocument();doc.objects=[];applyOperations(doc,[{op:'set_hoop',width:p.w,height:p.h}]);validateDocument(doc);assert.deepEqual(hoopSize(doc),{w:p.w,h:p.h},p.key+' is stored as the hoop');}
+ const doc=initialDocument();doc.objects=[];
+ assert.throws(()=>applyOperations(doc,[{op:'set_hoop',width:500,height:160}]),/Hoop width and height/);
 });
 
 test('batch plan counts copies per hoop and hoops needed',async()=>{

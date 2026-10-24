@@ -14,6 +14,8 @@ const GLYPHS = {
 
 // Fabric presets: values written into the document settings by set_settings { fabric }. Underlay is 'auto' so fills and satin both keep the right underlay; an explicit key in the same operation overrides a preset.
 export const FABRIC_PRESETS={woven:{compensation:.2,underlay:true,underlayType:'auto',stitchLength:3,stagger:4},knit:{compensation:.5,underlay:true,underlayType:'auto',stitchLength:3,stagger:4},towel:{compensation:.4,underlay:true,underlayType:'auto',stitchLength:2.5,stagger:8}};
+// Hoop presets. 100 x 100 mm is Brother's 4x4 hoop (SA443) and 180 x 130 mm its 5x7 hoop (SA444, listed as 180mm x 130mm); 260 x 160 mm is the 6x10 hoop, listed as 160 x 260 mm by one retailer guide. The long side is the width. The 110 x 110 mm default is Welcome's own.
+export const HOOP_PRESETS=[{key:'110x110',w:110,h:110},{key:'100x100',w:100,h:100},{key:'180x130',w:180,h:130},{key:'260x160',w:260,h:160}];
 export function hoopSize(d){const w=Number(d.hoop);return {w,h:Number(d.hoopH??w)};}
 export const hoopLabel=({w,h})=>w===h?`${w} mm`:`${w} × ${h} mm`;
 // Plain SVG for Inkscape and friends: millimetre units, origin at the hoop centre, one element per object (fills with even-odd
