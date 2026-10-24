@@ -14,6 +14,8 @@ const GLYPHS = {
 
 // Fabric presets: values written into the document settings by set_settings { fabric }. Underlay is 'auto' so fills and satin both keep the right underlay; an explicit key in the same operation overrides a preset.
 export const FABRIC_PRESETS={woven:{compensation:.2,underlay:true,underlayType:'auto',stitchLength:3,stagger:4},knit:{compensation:.5,underlay:true,underlayType:'auto',stitchLength:3,stagger:4},towel:{compensation:.4,underlay:true,underlayType:'auto',stitchLength:2.5,stagger:8}};
+// Organize fonts: each custom font in the document, with the lettering objects that use it.
+export function customFontUsage(doc){return Object.entries(doc.customFonts||{}).map(([id,f])=>({id,name:f.name||id,uses:doc.objects.filter(o=>o.kind==='text'&&o.font===`custom/${id}`).map(o=>o.name||'Lettering')}));}
 // Hoop presets. 100 x 100 mm is Brother's 4x4 hoop (SA443) and 180 x 130 mm its 5x7 hoop (SA444, listed as 180mm x 130mm); 260 x 160 mm is the 6x10 hoop, listed as 160 x 260 mm by one retailer guide. The long side is the width. The 110 x 110 mm default is Welcome's own.
 export const HOOP_PRESETS=[{key:'110x110',w:110,h:110},{key:'100x100',w:100,h:100},{key:'180x130',w:180,h:130},{key:'260x160',w:260,h:160}];
 export function hoopSize(d){const w=Number(d.hoop);return {w,h:Number(d.hoopH??w)};}
@@ -126,6 +128,7 @@ export function applyOperations(doc,operations) {
     else if(op.op==='flip')flipObjects(doc,op.ids,op.axis,op.pivot);
     else if(op.op==='translate'){const dx=Number(op.dx),dy=Number(op.dy);if(![dx,dy].every(Number.isFinite))throw Error('Translate needs numeric dx and dy.');for(const id of op.ids)translateObject(objById(doc,id),dx,dy);}
     else if(op.op==='to_path'){for(const id of op.ids)toPathObject(doc,id);}
+    else if(op.op==='remove_unused_fonts'){const used=new Set(doc.objects.filter(o=>o.kind==='text'&&String(o.font||'').startsWith('custom/')).map(o=>o.font.slice(7)));for(const id of Object.keys(doc.customFonts||{}))if(!used.has(id))delete doc.customFonts[id];}
     else if(op.op==='redwork_outline'){const o=objById(doc,op.id);if(!(o.kind==='rect'||o.kind==='ellipse'||(o.kind==='path'&&o.closed)))throw Error('Redwork outline needs a closed shape (a rectangle, an ellipse or a closed path).');const ring=geometry(o,0)[0]||[];const pts=ring.length>1&&Math.hypot(ring[0][0]-ring.at(-1)[0],ring[0][1]-ring.at(-1)[1])<1e-6?ring.slice(0,-1):ring;if(pts.length<3)throw Error('Redwork outline needs an outline to follow.');const obj={id:op.newId||crypto.randomUUID(),name:`${o.name||o.kind} redwork`,kind:'path',x:0,y:0,w:0,h:0,points:[...pts,pts[0]].map(p=>[p[0],p[1]]),thread:o.thread,stitch:'run',runStyle:'redwork',closed:false};refreshPathBounds(obj);doc.objects.push(obj);}
     else if(op.op==='offset')offsetShape(doc,op.id,op.distance);
     else if(op.op==='stroke_to_shape')strokeToShape(doc,op.id,op.width);

@@ -1221,6 +1221,21 @@ test('a DXF file opens through the file picker and imports its lines and shapes'
  expect(errors).toEqual([]);
 });
 
+test('organize fonts lists a loaded font with its lettering, and removes it only once no lettering uses it',async({page})=>{
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());await page.locator('#new').click();
+ await page.locator('#letter').click();await page.waitForTimeout(300);
+ await page.locator('#fontButton').click();await page.locator('#fontFile').setInputFiles('test/fixtures/BebasNeue-Regular.ttf');await expect(page.locator('#toast')).toContainText('Loaded');
+ await page.locator('details#secDoc').evaluate(d=>{d.open=true;});
+ await page.locator('#organizeFonts').click();await expect(page.locator('#fontsList')).toContainText('BebasNeue-Regular: used by 1 lettering object');
+ await expect(page.locator('#removeUnusedFonts')).toBeDisabled();
+ await page.keyboard.press('Escape');
+ await page.locator('.object-row').first().click();await page.keyboard.press('Delete');
+ await page.locator('#organizeFonts').click();await expect(page.locator('#fontsList')).toContainText('used by 0 lettering objects');
+ await page.locator('#removeUnusedFonts').click();await expect(page.locator('#toast')).toContainText('Removed 1 unused font');
+ await expect(page.locator('#fontsEmpty')).toBeVisible();
+ expect(errors).toEqual([]);
+});
+
 test('satin pull fields show for satin paths only, and a typed value is kept',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());await page.locator('#new').click();
  await page.locator('#path').click();const m=await ctm(page);for(const [x,y] of [[-20,0],[20,0]]){const s=toScreen(m,x,y);await page.mouse.click(s.x,s.y);}await page.keyboard.press('Enter');

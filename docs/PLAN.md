@@ -34,6 +34,7 @@ The interface should feel familiar to people using Figma, Sketch, or Miro: direc
 | Digitizing | Running and repeated running stitches; manually defined satin columns with rails/rungs; tatami fills with angle and holes; underlay, pull compensation, stitch length and spacing |
 | Sequence | Explicit object sewing order, thread blocks, start/end points, jumps, trims, tie-in/tie-off, color changes and stops subject to machine capabilities |
 | Lettering | A small audited set of digitized fonts; editable text, spacing, alignment and line height; missing-glyph and supported-size feedback |
+| Lettering | Organize fonts: list the custom fonts in a document with the lettering that uses them, and remove the ones no lettering uses (Ink/Stitch 3.3 Organize Glyphs, the same idea) | Built (basic; custom fonts only) |
 | Preview | Vector view, actual generated stitch paths, stitch-by-stitch playback, jump/trim overlays, counts and issue navigation |
 | Files | Open/save local versioned `.welcome` projects; local SVG import; Save As; machine export; thread list and printable sewing worksheet |
 | Machines | JEF and VP3 first; automate parity with pinned Ink/Stitch/pystitch behavior and documented hoop/format profiles |

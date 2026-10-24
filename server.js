@@ -89,6 +89,7 @@ const HELP={"overview": "Welcome designs embroidery as objects (shapes, paths, l
   z.object({op:z.literal('flip'),ids:z.array(z.string()).min(1).max(100),axis:z.enum(['horizontal','vertical']),pivot:z.number().min(-1000).max(1000).optional()}),
   z.object({op:z.literal('translate'),ids:z.array(z.string()).min(1).max(100),dx:z.number().min(-2000).max(2000),dy:z.number().min(-2000).max(2000)}),
   z.object({op:z.literal('to_path'),ids:z.array(z.string()).min(1).max(100)}),
+  z.object({op:z.literal('remove_unused_fonts')}),
   z.object({op:z.literal('redwork_outline'),id:z.string()}),
   z.object({op:z.literal('move_path_points'),id:z.string(),indexes:z.array(z.number().int().min(0).max(999)).min(1).max(1000),dx:z.number().min(-2000).max(2000),dy:z.number().min(-2000).max(2000)}),
   z.object({op:z.literal('delete_path_points'),id:z.string(),indexes:z.array(z.number().int().min(0).max(999)).min(1).max(1000)}),

@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import neonGlyphs from '../fonts/neon_blinking/glyphs.json' with {type:'json'};
 import {pinnedMachineFixture} from './fixture-archive.js';
-import {initialDocument,compile,encode,applyOperations,geometry,objectBounds,validateDocument,jefWarnings,exportSvg,exportPrintTemplate,HOOP_PRESETS,batchDocuments,hoopSize,importStitchLayer,measureText,threadPlan,sewingSeconds,sewingWorksheet} from '../src/engine.js';
+import {initialDocument,compile,encode,applyOperations,geometry,objectBounds,validateDocument,jefWarnings,exportSvg,exportPrintTemplate,HOOP_PRESETS,batchDocuments,customFontUsage,hoopSize,importStitchLayer,measureText,threadPlan,sewingSeconds,sewingWorksheet} from '../src/engine.js';
 
 test('browser and MCP semantic operations share editable document behavior',()=>{
  const doc=initialDocument();doc.objects=[];
@@ -1092,6 +1092,19 @@ test('satin end inset can differ at each end: a start value moves only the first
  assert.equal(startOnly.count,base.count,'a per-end inset does not change the stitch count');
  const doc=initialDocument();doc.objects=[];applyOperations(doc,[{op:'add_path',id:'s',x:0,y:0,points:[[-30,0],[30,0]],stitch:'satin',satinWidth:4},{op:'set_object',id:'s',endInsetStart:3}]);
  assert.throws(()=>validateDocument(doc),/start inset/);
+});
+
+test('organize fonts lists custom fonts with the lettering that uses them, and remove unused drops only the fonts no lettering uses',()=>{
+ const font=(name)=>({name,glyphs:{},unitsPerEm:1000,baseline:0,size:10});
+ const doc=initialDocument();doc.objects=[];doc.customFonts={kept:font('Kept'),spare:font('Spare')};
+ applyOperations(doc,[{op:'add_text',id:'t',text:'A',x:0,y:0,height:8,font:'custom/kept'}]);
+ validateDocument(doc);
+ assert.deepEqual(customFontUsage(doc).map(f=>[f.id,f.uses.length]),[['kept',1],['spare',0]]);
+ applyOperations(doc,[{op:'remove_unused_fonts'}]);
+ assert.deepEqual(Object.keys(doc.customFonts),['kept'],'the used font is kept and the unused one is removed');
+ validateDocument(doc);
+ applyOperations(doc,[{op:'remove_unused_fonts'}]);
+ assert.deepEqual(Object.keys(doc.customFonts),['kept'],'running it again changes nothing');
 });
 
 test('batch plan counts copies per hoop and hoops needed',async()=>{
