@@ -1,6 +1,6 @@
 // ASCII DXF import: LINE and LWPOLYLINE entities become path objects. Units are taken as millimetres; DXF's y axis points up, so y is flipped to match the editor.
 // Other entities are counted and reported, not imported. Binary DXF is refused.
-import {validateDocument} from './engine.js';
+import {validateDocument,geometry} from './engine.js';
 
 const MAX_POINTS=1000,MAX_TOTAL_POINTS=5000;
 
@@ -51,4 +51,26 @@ export function dxfDocument(source){
   const doc={schema:'welcom/1',name:'Imported DXF',revision:0,hoop:110,settings:{spacing:.4,angle:32,underlay:true,compensation:.2},objects};
   validateDocument(doc);
   return {doc,skipped,bulged};
+}
+
+// Export: each visible object's outline in millimetres, y flipped to DXF's y-up. Two-point open lines become LINE entities; other outlines become LWPOLYLINE entities, closed when the outline is a closed shape. Stitch layers have no outline, so they are counted as skipped.
+export function exportDxf(doc){
+  const f=v=>Number(v).toFixed(4),entities=[],skipped={};let count=0;
+  for(const o of doc.objects){
+    if(o.visible===false)continue;
+    if(o.kind==='stitch_layer'){skipped[o.kind]=(skipped[o.kind]||0)+1;continue;}
+    const closed=o.kind!=='path'||Boolean(o.closed);
+    for(let line of geometry(o,0)){
+      let pts=line.map(([x,y])=>[x,-y]);
+      if(pts.length>2&&Math.abs(pts[0][0]-pts.at(-1)[0])<1e-9&&Math.abs(pts[0][1]-pts.at(-1)[1])<1e-9)pts=pts.slice(0,-1);
+      if(pts.length<2)continue;
+      count++;
+      if(pts.length===2&&!closed)entities.push(['LINE',[[10,f(pts[0][0])],[20,f(pts[0][1])],[11,f(pts[1][0])],[21,f(pts[1][1])]]]);
+      else entities.push(['LWPOLYLINE',[[90,String(pts.length)],[70,closed?'1':'0'],...pts.flatMap(([x,y])=>[[10,f(x)],[20,f(y)]])]]);
+    }
+  }
+  const out=['0','SECTION','2','HEADER','9','$INSUNITS','70','4','0','ENDSEC','0','SECTION','2','ENTITIES'];
+  for(const [type,codes] of entities){out.push('0',type,'8','0');for(const [c,v] of codes)out.push(String(c),v);}
+  out.push('0','ENDSEC','0','EOF');
+  return {text:out.join('\n')+'\n',count,skipped};
 }

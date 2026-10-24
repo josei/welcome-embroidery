@@ -1263,6 +1263,16 @@ test('an SVG stroke at least 0.3 mm wide imports as a satin column, and a thinne
  expect(errors).toEqual([]);
 });
 
+test('DXF export downloads the design outlines as a DXF file',async({page})=>{
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());
+ const download=page.waitForEvent('download');await page.locator('#export').click();await page.locator('#format').selectOption('dxf');await page.locator('#download').click();
+ const file=await download;expect(file.suggestedFilename()).toMatch(/\.dxf$/);await file.saveAs('/tmp/welcom-export.dxf');
+ const text=(await import('node:fs')).readFileSync('/tmp/welcom-export.dxf','utf8');
+ expect(text).toContain('LWPOLYLINE');expect(text.trimEnd().endsWith('EOF')).toBe(true);
+ await expect(page.locator('#toast')).toContainText('DXF exported');
+ expect(errors).toEqual([]);
+});
+
 test('satin pull fields show for satin paths only, and a typed value is kept',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());await page.locator('#new').click();
  await page.locator('#path').click();const m=await ctm(page);for(const [x,y] of [[-20,0],[20,0]]){const s=toScreen(m,x,y);await page.mouse.click(s.x,s.y);}await page.keyboard.press('Enter');
