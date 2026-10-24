@@ -1041,6 +1041,16 @@ test('raised fill adds a second tatami underlay inside the shape, and a raised f
  assert.throws(()=>validateDocument(doc),/raised/);
 });
 
+test('accordion spacing makes the rows dense at the start of the fill and open at the end, and needs both values',()=>{
+ const rowsOf=(extra)=>{const doc=initialDocument();doc.objects=[];applyOperations(doc,[{op:'add_shape',id:'r',kind:'rect',x:-20,y:-15,width:40,height:30,stitch:'fill'},{op:'set_object',id:'r',angle:0,underlayType:'none',...extra}]);validateDocument(doc);const plan=compile(doc);assert.deepEqual(plan.errors,[]);const ys=[...new Set(plan.stitches.filter(s=>s.cmd==='stitch').map(s=>Math.round(s.y*10)/10))];return {above:ys.filter(y=>y<0).length,below:ys.filter(y=>y>0).length,total:ys.length};};
+ const uniform=rowsOf({spacing:0.4}),accordion=rowsOf({accordionStart:0.4,accordionEnd:1.2});
+ assert.ok(Math.abs(uniform.above-uniform.below)<=2,'a uniform fill has about the same rows on each side ('+uniform.above+' above, '+uniform.below+' below)');
+ assert.ok(accordion.above>accordion.below*1.5,'accordion rows are dense at the start (top) and open at the end ('+accordion.above+' above, '+accordion.below+' below)');
+ assert.ok(accordion.total<uniform.total*0.75,'an accordion fill sews fewer rows than a uniform one at the start spacing ('+accordion.total+' vs '+uniform.total+')');
+ const doc=initialDocument();doc.objects=[];applyOperations(doc,[{op:'add_shape',id:'r',kind:'rect',x:-20,y:-15,width:40,height:30,stitch:'fill'},{op:'set_object',id:'r',accordionStart:0.4}]);
+ assert.throws(()=>validateDocument(doc),/accordion/);
+});
+
 test('batch plan counts copies per hoop and hoops needed',async()=>{
  const {batchPlan}=await import('../src/engine.js');
  const doc=initialDocument();doc.objects=[];

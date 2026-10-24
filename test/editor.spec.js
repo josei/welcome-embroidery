@@ -1185,6 +1185,20 @@ test('raised fill checkbox shows for fills and adds an underlay',async({page})=>
  expect(errors).toEqual([]);
 });
 
+test('accordion spacing fields show for rows fills and a start value gives the end the same value',async({page})=>{
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());await page.locator('#new').click();
+ await page.locator('#path').click();const m=await ctm(page);for(const [x,y] of [[-20,-15],[20,-15],[20,15],[-20,15],[-20,-15]]){const s=toScreen(m,x,y);await page.mouse.click(s.x,s.y);}await page.keyboard.press('Enter');
+ const count=async()=>Number(((await page.locator('#count').textContent()).match(/^([\d,]+) stitches/)||[,'0'])[1].replace(/,/g,''));
+ await page.locator('#type').selectOption('fill');await expect(page.locator('#accordionStartRow')).toBeVisible();await expect(page.locator('#accordionEndRow')).toBeVisible();
+ await expect.poll(count).toBeGreaterThan(0);const even=await count();
+ await page.locator('#accordionStart').fill('1');await page.locator('#accordionStart').press('Tab');
+ await expect(page.locator('#accordionEnd')).toHaveValue('1');
+ await page.locator('#accordionEnd').fill('0.4');await page.locator('#accordionEnd').press('Tab');
+ await expect(page.locator('#accordionStart')).toHaveValue('1');await expect.poll(count).toBeLessThan(even);
+ await page.locator('#fillMethod').selectOption('spiral');await expect(page.locator('#accordionStartRow')).toBeHidden();
+ expect(errors).toEqual([]);
+});
+
 test('satin pull fields show for satin paths only, and a typed value is kept',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());await page.locator('#new').click();
  await page.locator('#path').click();const m=await ctm(page);for(const [x,y] of [[-20,0],[20,0]]){const s=toScreen(m,x,y);await page.mouse.click(s.x,s.y);}await page.keyboard.press('Enter');

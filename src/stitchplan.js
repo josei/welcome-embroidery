@@ -43,11 +43,14 @@ function rowXs(x0,x1,len,phase,reverse){
 export function makeInside(rings){const closed=rings.map(closedRing).filter(r=>r.length>=4);const pointIn=p=>{let inside=false;for(const ring of closed)for(let i=0,j=ring.length-2;i<ring.length-1;j=i++){const [xi,yi]=ring[i],[xj,yj]=ring[j];if((yi>p[1])!==(yj>p[1])&&p[0]<(xj-xi)*(p[1]-yi)/(yj-yi)+xi)inside=!inside;}return inside;};return (a,b)=>{const n=Math.max(2,Math.ceil(dist(a,b)/.4));for(let i=0;i<=n;i++){const t=i/n;if(!pointIn([a[0]+(b[0]-a[0])*t,a[1]+(b[1]-a[1])*t]))return false;}return true;};}
 // Merge consecutive runs whose gap is at most maxGap (and for which okLine allows the straight connection) into one run.
 export function chainRuns(runs,maxGap,okLine=null){const out=[];for(const r of runs){const prev=out.at(-1);if(prev&&!r.jump){const a=prev.pts.at(-1),b=r.pts[0],d=dist(a,b);if(d<=maxGap&&(!okLine||okLine(a,b))){prev.pts.push(...sampleRun([a,b],2.5).slice(1),...r.pts.slice(1));continue;}}out.push({...r,pts:[...r.pts]});}return out;}
-export function planFill(rings,{spacing=.4,angle=0,length=3,stagger=4,maxTravel=40,travelStep=2.2,linkTol=Math.max(3.5,spacing*3),insideTravel=8,from=null,rowPick=null,variance=0,underpath=false}={}){
+export function planFill(rings,{spacing=.4,angle=0,length=3,stagger=4,maxTravel=40,travelStep=2.2,linkTol=Math.max(3.5,spacing*3),insideTravel=8,from=null,rowPick=null,variance=0,underpath=false,accordion=null}={}){
   const closed=rings.map(closedRing).filter(r=>r.length>=4);if(!closed.length)return [];
   const rad=angle*Math.PI/180,c=Math.cos(rad),s=Math.sin(rad),rot=([x,y])=>[x*c+y*s,-x*s+y*c],un=([x,y])=>[x*c-y*s,x*s+y*c];
   const R=closed.map(r=>r.map(rot)),ys=R.flat().map(p=>p[1]),minY=Math.min(...ys),maxY=Math.max(...ys);
-  const rowYs=[];if(maxY-minY<=spacing)rowYs.push((minY+maxY)/2);else for(let y=minY+spacing/2;y<maxY;y+=spacing)rowYs.push(y);
+  const rowYs=[];
+  // Accordion spacing: the row spacing changes linearly from accordion[0] at the top of the fill (minY) to accordion[1] at the bottom (maxY), in the rotated frame.
+  if(accordion){const [a0,a1]=accordion,gap=t=>a0+(a1-a0)*Math.max(0,Math.min(1,t));let y=minY+gap(0)/2;while(y<maxY){rowYs.push(y);y+=gap((y-minY)/((maxY-minY)||1));}if(!rowYs.length)rowYs.push((minY+maxY)/2);}
+  else if(maxY-minY<=spacing)rowYs.push((minY+maxY)/2);else for(let y=minY+spacing/2;y<maxY;y+=spacing)rowYs.push(y);
   // 1. grating: even-odd intersections of every row with every ring
   const segs=[],byRow=[];
   rowYs.forEach((y,k)=>{const xs=[];for(const ring of R)for(let i=0;i<ring.length-1;i++){const [x1,y1]=ring[i],[x2,y2]=ring[i+1];if((y1<=y&&y2>y)||(y2<=y&&y1>y))xs.push(x1+(y-y1)*(x2-x1)/(y2-y1));}xs.sort((a,b)=>a-b);
