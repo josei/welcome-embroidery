@@ -1182,6 +1182,7 @@ test('raised fill checkbox shows for fills and adds an underlay',async({page})=>
  await page.locator('#type').selectOption('fill');await expect(page.locator('#fillRaisedRow')).toBeVisible();await expect(page.locator('#satinRaisedRow')).toBeHidden();
  await page.locator('#underlayType').selectOption('none');await expect.poll(count).toBeGreaterThan(0);const flat=await count();
  await page.locator('#fillRaised').check();await expect.poll(count).toBeGreaterThan(flat);
+ await expect(page.locator('#raisedSpacingRow')).toBeVisible();const raised2=await count();await page.locator('#raisedSpacing').fill('4');await page.locator('#raisedSpacing').press('Tab');await expect.poll(count).toBeLessThan(raised2);
  expect(errors).toEqual([]);
 });
 

@@ -617,3 +617,9 @@ Based on direct feedback that editing felt far from a vector program:
 - The Hoop preset select now shows short labels that fit its 76 px width: Custom, Default, 4×4 in, 5×7 in and 6×10 in. The full names (Brother 4×4 · 100 × 100 and so on) are in the select's tooltip. The values and the hoop sizes are unchanged. This fixes the truncation noted in the hoop presets entry.
 - Covered by the e2e hoop preset test, which now checks the visible label (`5×7 in` after choosing 5×7). Screenshot: `design/progress/features/hoop-preset.png`, where the footer reads `6×10 in`.
 - Limits: the labels are short, so the size is shown by the width and height fields; the names in full are only in the tooltip.
+
+## 2026-10-24 raised spacing
+
+- The raised fill's extra underlay has a Raised spacing (mm) field (1–4 mm, empty for the 2 mm default), shown when Raised fill is on. It is stored as `raisedSpacing` and settable over MCP. It replaces the fixed 2 mm row spacing of the raised layer from `74f8c8e`.
+- Covered by an engine test (a 4 mm raised spacing sews fewer than 70% of the raised stitches of the 2 mm default, measured above a plain fill; 5 mm is rejected) and the e2e raised fill test, which ticks Raised fill, then sets the spacing to 4 mm and checks that the count falls. Screenshot: `design/progress/features/fill-raised.png` (4 mm).
+- Limits: one spacing for the raised layer; it still stacks on the chosen underlay.

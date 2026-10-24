@@ -1051,6 +1051,15 @@ test('accordion spacing makes the rows dense at the start of the fill and open a
  assert.throws(()=>validateDocument(doc),/accordion/);
 });
 
+test('raised spacing sets the rows of the raised underlay, 1 to 4 mm',()=>{
+ const sewn=(extra)=>{const doc=initialDocument();doc.objects=[];applyOperations(doc,[{op:'add_shape',id:'r',kind:'rect',x:-20,y:-15,width:40,height:30,stitch:'fill'},{op:'set_object',id:'r',underlayType:'none',raised:true,...extra}]);validateDocument(doc);const plan=compile(doc);assert.deepEqual(plan.errors,[]);return plan;};
+const plain=sewn({raised:false}),two=sewn({}),four=sewn({raisedSpacing:4});
+ // Compare only the raised layer's own stitches (the total minus a plain fill): 4 mm rows give about half as many as 2 mm rows.
+ assert.ok(four.count-plain.count<(two.count-plain.count)*0.7,'a 4 mm raised spacing sews far fewer raised stitches than the 2 mm default ('+(four.count-plain.count)+' vs '+(two.count-plain.count)+')');
+ const doc=initialDocument();doc.objects=[];applyOperations(doc,[{op:'add_shape',id:'r',kind:'rect',x:-20,y:-15,width:40,height:30,stitch:'fill'},{op:'set_object',id:'r',raisedSpacing:5}]);
+ assert.throws(()=>validateDocument(doc),/raised spacing/);
+});
+
 test('batch plan counts copies per hoop and hoops needed',async()=>{
  const {batchPlan}=await import('../src/engine.js');
  const doc=initialDocument();doc.objects=[];
