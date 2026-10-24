@@ -114,6 +114,7 @@ Reference: Wilcom EmbroideryStudio, the commercial digitizing suite. Its feature
 | Files | PES (version 1) export | Built (export only; checked by decoding with pyembroidery) |
 | Files | PES version 6 export | Built (export only; checked by decoding with pyembroidery; thread names omitted) |
 | Files | SEW (Janome native) export and import | Built (export checked by decoding with pyembroidery; import checked against all 15 pinned samples; trims not written, no design header) |
+| Files | Print template: a 1:1 millimetre SVG placement sheet of the hoop with the design outline, a centre cross and a 10 mm scale bar | Built (basic; not a printer calibration) |
 | Files | Other machine formats | Not started |
 | Libraries | Thread brand libraries | Not started (licensed data) |
 | Automation | Headless MCP document sessions for agents | Built |

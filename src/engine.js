@@ -380,6 +380,22 @@ function neonLines(obj){
   const out=[];let cursor=0;for(const ch of requested){const glyph=neonFont.glyphs[ch];if(!glyph){cursor+=neonFont.glyphs[' '].advance*scale;continue;}for(const sourcePath of glyph.paths)for(const pts of parseSvgPath(sourcePath.d))out.push(pts.map(([x,y])=>[obj.x+(cursor+x*scale),obj.y+(y-151.18)*scale]));cursor+=glyph.advance*scale;}
   const natural=cursor;if(obj.w>0&&natural>0){const sx=obj.w/natural;return out.map(line=>line.map(([x,y])=>[obj.x+(x-obj.x)*sx,y]));}return out;
 }
+// Print template: a 1:1 placement sheet in millimetres (the sheet is the hoop, origin at its centre). Design outlines in green, the hoop dashed red, a centre cross, and a 10 mm scale bar to check the printer's scale before placing fabric.
+export function exportPrintTemplate(doc){
+  const {w,h}=hoopSize(doc),f=v=>+Number(v).toFixed(3),esc=t=>String(t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])),x0=-w/2,y0=-h/2,ink='#2f5d4a',d=lines=>lines.map(l=>'M'+l.map(([x,y])=>`${f(x)} ${f(y)}`).join('L')).join('');
+  const out=[];
+  for(const o of doc.objects){if(o.visible===false)continue;
+    if(o.kind==='stitch_layer'){out.push(`<rect x="${f(o.x)}" y="${f(o.y)}" width="${f(o.w)}" height="${f(o.h)}" fill="none" stroke="${ink}" stroke-width="0.2"/>`);continue;}
+    const lines=geometry(o,0);if(lines.length)out.push(`<path d="${d(lines)}" fill="none" stroke="${ink}" stroke-width="0.2" stroke-linejoin="round"/>`);}
+  return `<?xml version="1.0" encoding="UTF-8"?>\n<svg xmlns="http://www.w3.org/2000/svg" width="${f(w)}mm" height="${f(h)}mm" viewBox="${f(x0)} ${f(y0)} ${f(w)} ${f(h)}">`+
+    `<title>${esc(doc.name||'Design')} print template</title>`+
+    `<rect x="${f(x0)}" y="${f(y0)}" width="${f(w)}" height="${f(h)}" fill="none" stroke="#c0392b" stroke-width="0.3" stroke-dasharray="2 1"/>`+
+    `<path d="M-5 0H5M0 -5V5" fill="none" stroke="#c0392b" stroke-width="0.2"/>`+
+    out.join('')+
+    `<path d="M${f(x0+5)} ${f(y0+h-5)}H${f(x0+15)}" fill="none" stroke="#000" stroke-width="0.3"/>`+
+    `<text x="${f(x0+5)}" y="${f(y0+h-7)}" font-size="2.5" font-family="sans-serif">10 mm</text>`+
+    `<text x="${f(x0+3)}" y="${f(y0+4)}" font-size="2.5" font-family="sans-serif">${esc(doc.name||'Design')} · 1:1 placement sheet</text></svg>\n`;
+}
 export function parseSvgPath(d){
   const t=d.match(/[-+]?(?:\d*\.\d+|\d+\.?\d*)(?:[eE][-+]?\d+)?|[a-zA-Z]/g)||[];let i=0,cmd=null,x=0,y=0,sx=0,sy=0,lastC=null,lines=[],line=[];
   const num=()=>Number(t[i++]),point=(a,b)=>{x=a;y=b;line.push([x,y]);},flush=()=>{if(line.length>1)lines.push(line);line=[];};

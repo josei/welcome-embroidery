@@ -1115,6 +1115,15 @@ test('laydown underlay is offered for fills and adds a light fill under them',as
  expect(errors).toEqual([]);
 });
 
+test('print template export downloads a 1:1 millimetre placement sheet',async({page})=>{
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());await page.locator('#new').click();
+ const download=page.waitForEvent('download');await page.locator('#export').click();await page.locator('#format').selectOption('print');await page.locator('#download').click();
+ const file=await download;expect(file.suggestedFilename()).toMatch(/-template\.svg$/);await file.saveAs('/tmp/welcom-print-template.svg');
+ const svg=readFileSync('/tmp/welcom-print-template.svg','utf8');
+ expect(svg).toContain('width="110mm" height="110mm" viewBox="-55 -55 110 110"');expect(svg).toContain('10 mm');
+ expect(errors).toEqual([]);
+});
+
 test('satin pull fields show for satin paths only, and a typed value is kept',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());await page.locator('#new').click();
  await page.locator('#path').click();const m=await ctm(page);for(const [x,y] of [[-20,0],[20,0]]){const s=toScreen(m,x,y);await page.mouse.click(s.x,s.y);}await page.keyboard.press('Enter');

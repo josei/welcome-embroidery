@@ -557,3 +557,9 @@ Based on direct feedback that editing felt far from a vector program:
 - Laydown is rejected on satin paths, because a satin path is open and has no closed area for the fill. The row spacing is fixed at 4 mm for now; the underlay spacing setting does not change it.
 - Covered by an engine test (laydown adds stitches to a 40 by 30 mm fill, stays inside the shape, and is rejected on a satin path) and an e2e test (the option is offered for fills, and sewing a closed square with laydown adds stitches compared with None). Screenshot: `design/progress/features/fill-laydown.png`.
 - Limits: a single rate of 4 mm for every fabric; no tatami-style combination with the top fill; no laydown for satin or lettering.
+
+## 2026-10-24 print template
+
+- Export has a Print template · 1:1 SVG option (Plantilla para imprimir in Spanish). It downloads `<name>-template.svg`: a placement sheet in millimetres, the size of the hoop (`width` and `height` in mm, the viewBox centred on the hoop's centre), with the design's outlines in green, the hoop outline dashed red, a centre cross, and a 10 mm scale bar and the design name at the top left. Stitch layers appear as their bounding box.
+- Covered by an engine test (the sheet is the hoop in millimetres, centred; a shape's outline stays inside the hoop; the scale bar is 10 mm long at the bottom left and labelled) and an e2e test (the export downloads a `-template.svg` with the hoop's size and the scale bar label). Screenshot: `design/progress/features/print-template.png`, which renders the downloaded sheet itself (`scripts/print-template-shot.mjs`).
+- Limits: the sheet is for placement, not printer calibration: printers scale pages unless set to 100%, so the scale bar is the check. Only the outlines are drawn, not the stitches. The hoop shown is the design's hoop, not a machine's hoop shape.

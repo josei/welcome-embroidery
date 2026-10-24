@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import neonGlyphs from '../fonts/neon_blinking/glyphs.json' with {type:'json'};
 import {pinnedMachineFixture} from './fixture-archive.js';
-import {initialDocument,compile,encode,applyOperations,geometry,objectBounds,validateDocument,jefWarnings,exportSvg,importStitchLayer,measureText,threadPlan,sewingSeconds,sewingWorksheet} from '../src/engine.js';
+import {initialDocument,compile,encode,applyOperations,geometry,objectBounds,validateDocument,jefWarnings,exportSvg,exportPrintTemplate,importStitchLayer,measureText,threadPlan,sewingSeconds,sewingWorksheet} from '../src/engine.js';
 
 test('browser and MCP semantic operations share editable document behavior',()=>{
  const doc=initialDocument();doc.objects=[];
@@ -962,6 +962,20 @@ test('laydown underlay sews a light fill at wide rows under a fill, stays inside
  assert.ok(laydown.bounds[0]>=-20.5&&laydown.bounds[2]<=20.5&&laydown.bounds[1]>=-15.5&&laydown.bounds[3]<=15.5,'laydown stays inside the shape ('+laydown.bounds.join(' ')+')');
  const doc=initialDocument();doc.objects=[];applyOperations(doc,[{op:'add_path',id:'s',x:0,y:0,points:[[-20,0],[20,0]],stitch:'satin',satinWidth:4},{op:'set_object',id:'s',underlayType:'laydown'}]);
  assert.throws(()=>validateDocument(doc),/laydown underlay/);
+});
+
+test('print template is a 1:1 millimetre sheet the size of the hoop, with the design outline inside it and a 10 mm scale bar',()=>{
+ const doc=initialDocument();doc.objects=[];doc.hoop=100;doc.hoopH=80;
+ applyOperations(doc,[{op:'add_shape',id:'r',kind:'rect',x:-10,y:-5,width:20,height:10}]);
+ const svg=exportPrintTemplate(doc);
+ assert.match(svg,/width="100mm" height="80mm" viewBox="-50 -40 100 80"/,'the sheet is the hoop in millimetres, centred on the origin');
+ // Design outlines are the green paths; every point must sit inside the hoop (|x| <= 50, |y| <= 40).
+ const design=[...svg.matchAll(/<path d="([^"]+)" fill="none" stroke="#2f5d4a"/g)].map(m=>m[1]);
+ assert.equal(design.length,1,'one design outline for the one shape');
+ const nums=design[0].match(/-?\d+(\.\d+)?/g).map(Number);
+ for(let i=0;i<nums.length;i+=2)assert.ok(Math.abs(nums[i])<=50&&Math.abs(nums[i+1])<=40,'design point '+nums[i]+','+nums[i+1]+' is inside the hoop');
+ assert.match(svg,/M-45 35H-35/,'the 10 mm scale bar sits at the bottom left, 10 mm long');
+ assert.match(svg,/>10 mm</,'the scale bar is labelled');
 });
 
 test('batch plan counts copies per hoop and hoops needed',async()=>{
