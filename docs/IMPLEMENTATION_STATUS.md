@@ -685,3 +685,10 @@ Based on direct feedback that editing felt far from a vector program:
 - An SVG path, line or polyline with no fill and a stroke, and a `stroke-width` attribute of at least 0.3 mm after the viewBox scale (the scale that fits the file to the 110 mm hoop), imports as a satin column of that width in the stroke's colour. A narrower stroke, or a path with no `stroke-width`, still imports as a running stitch, as before. Widths are clamped to the satin range (0.5 to 12 mm).
 - Covered by an e2e test (`test/fixtures/strokes.svg`: a 4 mm stroke becomes one satin row, a 0.2 mm stroke and an unset stroke stay running stitches). Screenshot: `design/progress/features/svg-stroke-satin.png`.
 - Limit: the engine test the queue asked for is not possible, because the SVG importer runs in the browser (it uses DOMParser), so the check is the e2e test. Filled shapes and text are unchanged; no MCP import of SVG strokes.
+
+## 2026-10-24 DXF export of paths
+
+- The Export dialog has a DXF option ("DXF · paths (CAD)"). It writes an ASCII DXF of every visible object's outline, as returned by the engine's geometry function: rectangles, ellipses, paths, and lettering outlines. A two-point open path is written as a LINE; every other outline is an LWPOLYLINE, with the closed flag (70 = 1) set for closed paths and the closing vertex not repeated. Coordinates are millimetres, with y flipped back to y-up (the importer's inverse). The header sets `$INSUNITS` to 4 (millimetres).
+- Stitch layers have no outline, so they are not written and are counted as skipped. The download message reports the number of paths written and the layers skipped.
+- Covered by unit tests in `test/dxf.test.js`: a closed rectangle exported and read back by the importer gives the same four points, and a stitch layer is counted as skipped. An e2e test downloads a `.dxf` file and checks for an LWPOLYLINE, the EOF marker and the "DXF exported" message. Screenshot: `design/progress/features/dxf-export.png`.
+- Limits: outlines only, so no stitches, layers, colours or arcs (the geometry is polyline); no MCP export tool; the option label is clipped by the dialog's select width.

@@ -126,6 +126,7 @@ Reference: Wilcom EmbroideryStudio, the commercial digitizing suite. Its feature
 | Files | Print template: a 1:1 millimetre SVG placement sheet of the hoop with the design outline, a centre cross and a 10 mm scale bar | Built (basic; not a printer calibration) |
 | Files | Hoop presets: Brother 4×4, 5×7 and 6×10 hoops plus the default, chosen from the footer | Built (basic; sizes checked against Brother and retailer listings, see the hoop status entry) |
 | Files | ASCII DXF import: LINE and LWPOLYLINE entities become paths (millimetres, y flipped, centred on the hoop); other entities are reported as skipped; binary DXF refused | Built (basic; no arcs, text or layers) |
+| Files | ASCII DXF export: each visible object's outline as LINE or LWPOLYLINE (millimetres, y flipped back to y-up); stitch layers skipped and counted | Built (basic; outlines only, no layers, no arcs or splines) |
 | Files | Other machine formats | Not started |
 | Libraries | Thread brand libraries | Not started (licensed data) |
 | Automation | Headless MCP document sessions for agents | Built |
