@@ -714,3 +714,11 @@ Based on direct feedback that editing felt far from a vector program:
 - Checked against pyembroidery 1.5.1: a sample with name, author and comments written in imports with the same fields and the same 96 stitches.
 - Covered by engine tests (the category filter; the PES metadata round trip and refusal), an e2e test for the tip checkboxes and saved choice, and an e2e test for a PES upload. Screenshots: `sewing-tips-settings.png`, `pes-metadata.png`. The metadata sample is built in the tests by `test/pes-with-metadata.js`, because the pinned PES samples have empty fields.
 - Limits: the tips list is per browser, not per document; keywords and category are read but not shown; the MCP has no tip filter.
+
+## 2026-10-24 Husqvarna HUS import
+
+- `.hus` files import from the machine picker and the MCP `document_import_embroidery` tool (format `hus`) as stitch layers, keeping the source bytes like the other machine formats. The thread colours come from the HUS chart of 29 colours, with the chart's name and code on each thread.
+- The reader ports pyembroidery 1.5.1's `HusReader` and its `EmbCompress` decoder (a Huffman and back-reference scheme over three streams: commands, x and y). Coordinates are 0.1 mm with y stored negated, as pyembroidery reports them. Trims are a move then a trim; colour changes and the end code follow pyembroidery's handling. Malformed streams (bad codes, offsets out of order, unknown thread index, back-references before the start) are refused with a HUS message.
+- Parity: `scripts/hus-reference.py` writes `scripts/hus-parity.json`, one digest per sample (file SHA-256, command counts, thread count, and a SHA-256 of every command and 0.1 mm position) from pyembroidery 1.5.1. `test/readers.test.js` decodes all 15 HUS samples in `fixtures/embroidepy/samples.zip` (MIT, EmbroidePy) and matches every digest.
+- Covered by the parity test, an integration test (`test/import-integration.test.js`: thread colours, no placeholder warnings, the layer compiles and encodes to DST), and an e2e test (the picker imports a HUS file as a HUS stitch layer). Screenshot: `design/progress/features/import-hus.png`.
+- Limits: import only, there is no HUS export (HUS is not in the export list); no per-stitch metadata beyond the chart; the thread chart is the 29 colours pyembroidery uses, so a thread outside it is refused rather than guessed.
