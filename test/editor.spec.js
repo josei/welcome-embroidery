@@ -1094,6 +1094,15 @@ test('bling stone shape switches between round and square stones',async({page})=
  await page.locator('#blingShape').selectOption('heart');await expect(page.locator('#blingShape')).toHaveValue('heart');await expect(page.locator('#stoneTurnRow')).toBeHidden();expect(errors).toEqual([]);
 });
 
+test('bling fixing rings: one ring halves the stitches of a stone, two is the default',async({page})=>{
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());await page.locator('#new').click();
+ await page.locator('#path').click();const m=await ctm(page);for(const [x,y] of [[-20,0],[20,0]]){const s=toScreen(m,x,y);await page.mouse.click(s.x,s.y);}await page.keyboard.press('Enter');
+ const count=async()=>Number(((await page.locator('#count').textContent()).match(/^([\d,]+) stitches/)||[,'0'])[1].replace(/,/g,''));
+ await page.locator('#type').selectOption('bling');await expect(page.locator('#blingRingsRow')).toBeVisible();await expect(page.locator('#blingRings')).toHaveValue('2');
+ await expect.poll(count).toBeGreaterThan(0);const two=await count();await page.locator('#blingRings').selectOption('1');await expect.poll(count).toBeLessThan(two);
+ expect(errors).toEqual([]);
+});
+
 test('stone turn checkbox shows for turning stone shapes and is on by default',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());await page.locator('#new').click();
  await page.locator('#path').click();const m=await ctm(page);for(const [x,y] of [[-20,0],[20,0]]){const s=toScreen(m,x,y);await page.mouse.click(s.x,s.y);}await page.keyboard.press('Enter');

@@ -523,3 +523,9 @@ Based on direct feedback that editing felt far from a vector program:
 - Like the oval, a heart always turns to follow the path, so it has no Turn stones with the path checkbox.
 - Covered by an engine test (a heart stone is 6 mm across a horizontal path, sews its own stitch count, and is 6 mm across a vertical path, which proves it turns; a fixed heart would be about 5.4 mm) and by the e2e bling shape test, which now also selects Heart and checks the turn checkbox is hidden. Screenshot: `design/progress/features/bling-heart.png`.
 - Limits: 21 points per outline, so curves are smooth at stone sizes of a few millimetres but would show facets at much larger sizes; no facets or stone library.
+
+## 2026-10-24 bling fixing rings
+
+- Bling stones have a Fixing rings select (Two rings or One ring, shown for bling). Two is the default and sews exactly what it did before. One ring sews only the outer ring of each stone, so the stone keeps its size and a bling stone sews half the stitches. Stored as `blingRings`; the engine accepts only 1 or 2. Settable over MCP.
+- Covered by an engine test (one ring keeps the stone's bounds and halves the stitch count of the square stones; 3 is rejected) and an e2e test (the select shows for bling, defaults to two rings, and one ring sews fewer stitches). Screenshot: `design/progress/features/bling-one-ring.png`.
+- Limits: the choice applies to every stone shape, including the round ones; a single ring has no backing, so on some fabrics a stone can lift at its edge. No other fixing layouts.

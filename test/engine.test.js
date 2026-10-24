@@ -903,6 +903,16 @@ test('heart bling stones are six millimetres across the path, turn with it, and 
  assert.ok(Math.abs(width(tall.bounds)-6)<0.2,'a heart turns to 6 mm across a vertical path ('+width(tall.bounds)+')');
 });
 
+test('bling stones sew one or two fixing rings; one ring keeps the stone size and halves the stitches, and only 1 or 2 are accepted',()=>{
+ const sewn=(rings)=>{const doc=initialDocument();doc.objects=[];applyOperations(doc,[{op:'add_path',id:'g',x:0,y:0,points:[[-20,0],[20,0]]},{op:'set_object',id:'g',stitch:'bling',motifSize:6,blingShape:'square',blingRings:rings}]);validateDocument(doc);const plan=compile(doc);assert.deepEqual(plan.errors,[]);return plan;};
+ const two=sewn(2),one=sewn(1);
+ // The outer ring is the same in both, so the stones keep their size; the inner fixing ring is what goes.
+ assert.deepEqual(one.bounds.map(v=>Math.round(v*100)),two.bounds.map(v=>Math.round(v*100)),'one ring keeps the stone size');
+ assert.equal(one.count*2,two.count,'one fixing ring sews half the stitches of two');
+ const doc=initialDocument();doc.objects=[];applyOperations(doc,[{op:'add_path',id:'g',x:0,y:0,points:[[-20,0],[20,0]]},{op:'set_object',id:'g',stitch:'bling',blingRings:3}]);
+ assert.throws(()=>validateDocument(doc),/blingRings/);
+});
+
 test('batch plan counts copies per hoop and hoops needed',async()=>{
  const {batchPlan}=await import('../src/engine.js');
  const doc=initialDocument();doc.objects=[];
