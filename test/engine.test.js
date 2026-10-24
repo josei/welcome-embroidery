@@ -851,6 +851,15 @@ test('bling stones are round by default, square on request, and only known shape
  assert.throws(()=>validateDocument(doc),/bling shape/);
 });
 
+test('teardrop and baguette stones compile and validate; the baguette keeps its turn setting',()=>{
+ const doc=initialDocument();doc.objects=[];
+ applyOperations(doc,[{op:'add_path',id:'g',x:0,y:0,points:[[-20,0],[20,0]]},{op:'set_object',id:'g',stitch:'bling',blingShape:'teardrop'}]);
+ validateDocument(doc);const drop=compile(doc);assert.deepEqual(drop.errors,[]);assert.ok(drop.count>40,'teardrop stones are sewn ('+drop.count+')');
+ applyOperations(doc,[{op:'set_object',id:'g',blingShape:'baguette',stoneTurn:true}]);validateDocument(doc);
+ const bag=compile(doc);assert.deepEqual(bag.errors,[]);assert.ok(bag.count>40,'baguette stones are sewn ('+bag.count+')');
+ assert.equal(doc.objects[0].stoneTurn,true);
+});
+
 test('oval bling stones turn with the path: narrow across it, long along it',()=>{
  const size=(b)=>({w:b[2]-b[0],h:b[3]-b[1]});
  const sewn=(points,shape)=>{const doc=initialDocument();doc.objects=[];applyOperations(doc,[{op:'add_path',id:'g',x:0,y:0,points},{op:'set_object',id:'g',stitch:'bling',motifSize:6,blingShape:shape}]);validateDocument(doc);const plan=compile(doc);assert.deepEqual(plan.errors,[]);return plan;};

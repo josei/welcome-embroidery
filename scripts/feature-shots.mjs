@@ -80,6 +80,8 @@ const cases={
   'export-sew': async p=>{await p.locator('#rect').click();await p.locator('#export').click();await p.locator('#format').selectOption('sew');},
   'sewing-tips-settings': async p=>{await p.locator('#rect').click();await p.locator('#rect').click();await p.locator('#tipsSettings summary').click();},
   'pes-metadata': async p=>{const sample=new Uint8Array(readFileSync(new URL('../test/fixtures/spiralbox-brother-v6.pes',import.meta.url)));const bytes=withPesMetadata(sample,{name:'Spiral box',author:'Jose Ignacio',comments:'Test note'});await p.locator('#machineFile').setInputFiles({name:'spiral-box.pes',mimeType:'application/octet-stream',buffer:Buffer.from(bytes)});await p.locator('.object-row').first().click();},
+  'bling-teardrop': async p=>{await drawPath(p,[[-40,0],[40,0]]);await p.locator('#type').selectOption('bling');await p.locator('#blingShape').selectOption('teardrop');await p.locator('button[data-view="stitches"]').click();},
+  'bling-baguette': async p=>{await drawPath(p,[[-40,0],[40,0]]);await p.locator('#type').selectOption('bling');await p.locator('#blingShape').selectOption('baguette');await p.locator('button[data-view="stitches"]').click();},
   'rotate-pivot': async p=>{await p.locator('#rect').click();await p.locator('.object-row').first().click();await p.locator('#posX').fill('10');await p.locator('#posX').press('Enter');await p.locator('#posY').fill('-10');await p.locator('#posY').press('Enter');await p.locator('#pivotPick').click();const m=await p.evaluate(()=>{const c=document.querySelector('#art').getScreenCTM();return {a:c.a,d:c.d,e:c.e,f:c.f};});await p.mouse.click(m.a*-30+m.e,m.d*-20+m.f);await p.locator('#rotation').fill('30');await p.locator('#rotation').press('Enter');},
 };
 const done=[];

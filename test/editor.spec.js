@@ -1130,6 +1130,17 @@ test('bling stone shape switches between round and square stones',async({page})=
  await page.locator('#blingShape').selectOption('heart');await expect(page.locator('#blingShape')).toHaveValue('heart');await expect(page.locator('#stoneTurnRow')).toBeHidden();expect(errors).toEqual([]);
 });
 
+test('teardrop and baguette stones are offered in the stone shape list; only the baguette turns with the path',async({page})=>{
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());await page.locator('#new').click();
+ await page.locator('#path').click();const m=await ctm(page);for(const [x,y] of [[-20,0],[20,0]]){const s=toScreen(m,x,y);await page.mouse.click(s.x,s.y);}await page.keyboard.press('Enter');
+ const count=async()=>Number(((await page.locator('#count').textContent()).match(/^([\d,]+) stitches/)||[,'0'])[1].replace(/,/g,''));
+ await page.locator('#type').selectOption('bling');await expect(page.locator('#blingShapeRow')).toBeVisible();
+ await page.locator('#blingShape').selectOption('teardrop');await expect(page.locator('#blingShape')).toHaveValue('teardrop');await expect(page.locator('#stoneTurnRow')).toBeHidden();
+ await expect.poll(count).toBeGreaterThan(40);
+ await page.locator('#blingShape').selectOption('baguette');await expect(page.locator('#blingShape')).toHaveValue('baguette');await expect(page.locator('#stoneTurnRow')).toBeVisible();
+ await expect(page.locator('#count')).toContainText('stitches');expect(errors).toEqual([]);
+});
+
 test('twin beads add a second bead either side of the centre line',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());await page.locator('#new').click();
  await page.locator('#path').click();const m=await ctm(page);for(const [x,y] of [[-20,0],[20,0]]){const s=toScreen(m,x,y);await page.mouse.click(s.x,s.y);}await page.keyboard.press('Enter');
