@@ -570,3 +570,9 @@ Based on direct feedback that editing felt far from a vector program:
 - Decision: the towel preset uses the auto underlay instead of the centre underlay the queue item suggested. A centre underlay applies to satin only, so as a document setting it would drop the underlay from every fill. Recorded in the roadmap.
 - Covered by an engine test (knit and towel set the expected settings, a towel plan differs from a woven one, an explicit compensation after a preset wins, an unknown fabric is rejected) and an e2e test (the select sets the compensation field to 0.4 and changes the stitch count). Screenshot: `design/progress/features/fabric-towel.png`.
 - Limits: three presets only; choosing a preset does not lock the other settings, and changing them later leaves the Fabric select showing the last preset chosen.
+
+## 2026-10-24 redwork outline
+
+- Shape and path tools have a Redwork outline button. For a selected closed shape (a rectangle, an ellipse, or a closed path) it adds a new run object, named `<name> redwork`, that goes once around the shape's outline and is sewn back over itself in Redwork (out and back) style. The original shape is kept. Settable over MCP as `redwork_outline { id }`. An open path is refused with a message.
+- Covered by an engine test (the new object is a closed run in Redwork style; it sews about twice a plain run around the same points; an open path is refused) and an e2e test (the button adds one redwork row to the list). Screenshot: `design/progress/features/redwork-outline.png`.
+- Limits: the new run is a copy of the outline, not linked to the shape, so moving or editing the shape later does not update it; the stitches are the Redwork style's out-and-back run, with no separate underlay.

@@ -102,7 +102,7 @@ Reference: Wilcom EmbroideryStudio, the commercial digitizing suite. Its feature
 | Embellishment | Sequins as a stitch type: a centre stitch with a fixing loop every few mm, single or in side-by-side twins (no dispensing control) | Built (basic) |
 | Embellishment | Beads as a stitch type: a dash across the path at each point, or a dot (a small round bead) with the dash/dot shape setting; twin beads sew a second one either side of the centre line (basic beading; no bead-shape or dispensing control) | Built (basic) |
 | Embellishment | Bling as a stitch type: a stone at each point, a centre stitch with two fixing rings; Round, Square, Oval, Hexagon, Star or Heart stone shape, with one or two fixing rings; the oval and the heart always turn with the path, and square, hexagon and star turn with it by default (Turn stones with the path); no other settings or library | Built (basic) |
-| Embellishment | Redwork (out-and-back run) | Built |
+| Embellishment | Redwork (out-and-back run), and a redwork outline that follows a closed shape in one step | Built |
 | Embellishment | Buttonholes (satin with bar tacks at both ends) | Built |
 | Sequencing | Object order, start and end points, jumps and trims | Built |
 | Sequencing | Batch planning: copies that fit one hoop and hoops needed (no separate hoop files yet) | Built (planner) |

@@ -124,6 +124,7 @@ export function applyOperations(doc,operations) {
     else if(op.op==='flip')flipObjects(doc,op.ids,op.axis,op.pivot);
     else if(op.op==='translate'){const dx=Number(op.dx),dy=Number(op.dy);if(![dx,dy].every(Number.isFinite))throw Error('Translate needs numeric dx and dy.');for(const id of op.ids)translateObject(objById(doc,id),dx,dy);}
     else if(op.op==='to_path'){for(const id of op.ids)toPathObject(doc,id);}
+    else if(op.op==='redwork_outline'){const o=objById(doc,op.id);if(!(o.kind==='rect'||o.kind==='ellipse'||(o.kind==='path'&&o.closed)))throw Error('Redwork outline needs a closed shape (a rectangle, an ellipse or a closed path).');const ring=geometry(o,0)[0]||[];const pts=ring.length>1&&Math.hypot(ring[0][0]-ring.at(-1)[0],ring[0][1]-ring.at(-1)[1])<1e-6?ring.slice(0,-1):ring;if(pts.length<3)throw Error('Redwork outline needs an outline to follow.');const obj={id:op.newId||crypto.randomUUID(),name:`${o.name||o.kind} redwork`,kind:'path',x:0,y:0,w:0,h:0,points:[...pts,pts[0]].map(p=>[p[0],p[1]]),thread:o.thread,stitch:'run',runStyle:'redwork',closed:false};refreshPathBounds(obj);doc.objects.push(obj);}
     else if(op.op==='offset')offsetShape(doc,op.id,op.distance);
     else if(op.op==='stroke_to_shape')strokeToShape(doc,op.id,op.width);
     else if(op.op==='array')arrayCopies(doc,op);

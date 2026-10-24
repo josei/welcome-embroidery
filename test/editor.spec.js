@@ -1136,6 +1136,16 @@ test('fabric select sets the document stitch settings and changes the stitch pla
  expect(errors).toEqual([]);
 });
 
+test('redwork outline adds a redwork run that follows a closed shape',async({page})=>{
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());await page.locator('#new').click();
+ await page.locator('#path').click();const m=await ctm(page);for(const [x,y] of [[-20,-15],[20,-15],[20,15],[-20,15],[-20,-15]]){const s=toScreen(m,x,y);await page.mouse.click(s.x,s.y);}await page.keyboard.press('Enter');
+ const rows=async()=>page.locator('.object-row').count();const before=await rows();
+ await page.locator('details:has(#redworkOutline)').evaluate(d=>{d.open=true;});
+ await page.locator('#redworkOutline').click();await expect.poll(rows).toBe(before+1);
+ await expect(page.locator('.object-row',{hasText:'redwork'})).toHaveCount(1);
+ expect(errors).toEqual([]);
+});
+
 test('satin pull fields show for satin paths only, and a typed value is kept',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());await page.locator('#new').click();
  await page.locator('#path').click();const m=await ctm(page);for(const [x,y] of [[-20,0],[20,0]]){const s=toScreen(m,x,y);await page.mouse.click(s.x,s.y);}await page.keyboard.press('Enter');

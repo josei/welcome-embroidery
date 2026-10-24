@@ -993,6 +993,19 @@ test('fabric presets set the document stitch settings, explicit settings still w
  assert.throws(()=>applyOperations(doc,[{op:'set_settings',fabric:'silk'}]),/Unknown fabric/);
 });
 
+test('redwork outline runs around a closed shape out and back, and refuses open paths',()=>{
+ const doc=initialDocument();doc.objects=[];applyOperations(doc,[{op:'add_shape',id:'r',kind:'rect',x:-20,y:-15,width:40,height:30,stitch:'fill'},{op:'redwork_outline',id:'r',newId:'rw'}]);validateDocument(doc);
+ const o=doc.objects.find(x=>x.id==='rw');
+ assert.equal(o.kind,'path');assert.equal(o.stitch,'run');assert.equal(o.runStyle,'redwork');
+ assert.deepEqual(o.points[0],o.points.at(-1),'the redwork run closes on its start point');
+ doc.objects=[o];const plan=compile(doc);assert.deepEqual(plan.errors,[]);
+ // Out and back: the outline is sewn once there and once back, so about twice a plain run around the same points.
+ const plainDoc=initialDocument();plainDoc.objects=[];applyOperations(plainDoc,[{op:'add_path',id:'p',x:0,y:0,points:o.points,stitch:'run'}]);validateDocument(plainDoc);const plain=compile(plainDoc);
+ assert.ok(plan.count>1.8*plain.count&&plan.count<2.2*plain.count,'redwork sews about twice a plain outline ('+plan.count+' vs '+plain.count+')');
+ const open=initialDocument();open.objects=[];applyOperations(open,[{op:'add_path',id:'l',x:0,y:0,points:[[-20,0],[20,0]],stitch:'run'}]);
+ assert.throws(()=>applyOperations(open,[{op:'redwork_outline',id:'l'}]),/closed shape/);
+});
+
 test('batch plan counts copies per hoop and hoops needed',async()=>{
  const {batchPlan}=await import('../src/engine.js');
  const doc=initialDocument();doc.objects=[];
