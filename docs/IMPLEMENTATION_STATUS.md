@@ -583,3 +583,9 @@ Based on direct feedback that editing felt far from a vector program:
 - Found on the way: the last needle pairs of a column sit at the same spot, so the inward direction at the end came out as zero and the end did not move. The direction is now taken from the nearest pair whose midpoint differs.
 - Covered by an engine test (with a 1 mm inset the first and last needle each move 1 mm inward, the stitch count is unchanged, and 3 mm is rejected) and an e2e test (the field shows for satin only and a typed value is kept). Screenshot: `design/progress/features/satin-end-inset.png` (the field at 1.5 mm; at this zoom the shortening is subtle).
 - Limits: one value for both ends; the underlay is not inset by it; Ink/Stitch's multi-value short stitch inset is not implemented.
+
+## 2026-10-24 sequin fill
+
+- Fill pattern Sequin fill (fillMethod `sequin`) covers a closed shape with sequins on a staggered grid, every row offset by half a spacing, each sequin a centre stitch and a fixing ring. It reuses the motif fill layout; spacing is `motifSpacing` (default 8 mm) and sequin size `motifSize` (default 3 mm). Settable over MCP.
+- Covered by an engine test (a 40 by 30 mm sequin fill stays within a sequin of the shape and sews well under half the stitches of a tatami fill) and an e2e test (the option is offered for fills, and choosing it lowers the stitch count). Screenshot: `design/progress/features/sequin-fill.png`.
+- Limits: the sequin rings reach about a sequin radius past the edge of the shape, as the motif fill's loops do; there is no twin option or dispensing control for fills.

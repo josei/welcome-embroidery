@@ -1155,6 +1155,17 @@ test('satin end inset field shows for satin paths and a typed value is kept',asy
  expect(errors).toEqual([]);
 });
 
+test('sequin fill is a fill pattern that lays sequins inside a closed shape',async({page})=>{
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());await page.locator('#new').click();
+ await page.locator('#path').click();const m=await ctm(page);for(const [x,y] of [[-20,-15],[20,-15],[20,15],[-20,15],[-20,-15]]){const s=toScreen(m,x,y);await page.mouse.click(s.x,s.y);}await page.keyboard.press('Enter');
+ const count=async()=>Number(((await page.locator('#count').textContent()).match(/^([\d,]+) stitches/)||[,'0'])[1].replace(/,/g,''));
+ await page.locator('#type').selectOption('fill');await expect(page.locator('#fillMethod option[value="sequin"]')).toHaveCount(1);
+ await expect.poll(count).toBeGreaterThan(0);const rows=await count();
+ await page.locator('#fillMethod').selectOption('sequin');await expect(page.locator('#fillMethod')).toHaveValue('sequin');
+ await expect.poll(count).toBeLessThan(rows);
+ expect(errors).toEqual([]);
+});
+
 test('satin pull fields show for satin paths only, and a typed value is kept',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());await page.locator('#new').click();
  await page.locator('#path').click();const m=await ctm(page);for(const [x,y] of [[-20,0],[20,0]]){const s=toScreen(m,x,y);await page.mouse.click(s.x,s.y);}await page.keyboard.press('Enter');

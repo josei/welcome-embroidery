@@ -83,7 +83,7 @@ Reference: Wilcom EmbroideryStudio, the commercial digitizing suite. Its feature
 | Digitizing | Satin end inset: the first and last needle of a satin column move inward, so the end stitches are shorter (Ink/Stitch's short stitch inset, one value) | Built (basic) |
 | Digitizing | Fabric presets (woven, knit, towel or fleece) that set pull compensation, stitch length, stagger and underlay for the document | Built (basic; three presets) |
 | Digitizing | Laydown underlay for towelling and fleece: a light fill at 4 mm rows under a fill (fills only; satin has no closed area to cover) | Built (basic) |
-| Digitizing | Fill patterns: contour, spiral, meander, guided, cross, ripple | Built |
+| Digitizing | Fill patterns: contour, spiral, meander, guided, cross, ripple, sequin fill (sequins on a staggered grid) | Built |
 | Digitizing | Appliqué, bean run, run length variation | Built |
 | Digitizing | Multi-colour blends and gradients (Wilcom Multi Blend) | Built (up to five colours) |
 | Digitizing | Clipping masks and holes | Built |

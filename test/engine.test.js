@@ -1017,6 +1017,14 @@ test('satin end inset moves the first and last needle inward along the column, l
  assert.throws(()=>validateDocument(doc),/end inset/);
 });
 
+test('sequin fill lays sequins on a staggered grid inside a closed shape, far fewer stitches than tatami',()=>{
+ const sewn=(fm)=>{const doc=initialDocument();doc.objects=[];applyOperations(doc,[{op:'add_shape',id:'r',kind:'rect',x:-20,y:-15,width:40,height:30,stitch:'fill'},{op:'set_object',id:'r',fillMethod:fm,underlayType:'none'}]);validateDocument(doc);const plan=compile(doc);assert.deepEqual(plan.errors,[]);return plan;};
+ const sequin=sewn('sequin'),rows=sewn('rows');
+ // Each sequin is a centre stitch and a 3 mm fixing ring whose centre lies inside the 40 x 30 mm shape, so the sewn area stays within about a sequin's radius of it.
+ assert.ok(sequin.bounds[0]>=-22&&sequin.bounds[2]<=22&&sequin.bounds[1]>=-16.5&&sequin.bounds[3]<=16.5,'sequins stay within a sequin of the shape ('+sequin.bounds.join(' ')+')');
+ assert.ok(sequin.count>150&&sequin.count<rows.count/2,'a sequin fill sews a few sequins, far fewer stitches than tatami ('+sequin.count+' vs '+rows.count+')');
+});
+
 test('batch plan counts copies per hoop and hoops needed',async()=>{
  const {batchPlan}=await import('../src/engine.js');
  const doc=initialDocument();doc.objects=[];
