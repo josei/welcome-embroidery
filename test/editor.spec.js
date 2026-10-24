@@ -1090,7 +1090,8 @@ test('bling stone shape switches between round and square stones',async({page})=
  await page.locator('#blingShape').selectOption('square');await expect(page.locator('#blingShape')).toHaveValue('square');
  await expect.poll(count).not.toBe(round);await page.locator('#blingShape').selectOption('oval');await expect(page.locator('#blingShape')).toHaveValue('oval');
  await page.locator('#blingShape').selectOption('hexagon');await expect(page.locator('#blingShape')).toHaveValue('hexagon');await expect.poll(count).not.toBe(round);
- await page.locator('#blingShape').selectOption('star');await expect(page.locator('#blingShape')).toHaveValue('star');expect(errors).toEqual([]);
+ await page.locator('#blingShape').selectOption('star');await expect(page.locator('#blingShape')).toHaveValue('star');
+ await page.locator('#blingShape').selectOption('heart');await expect(page.locator('#blingShape')).toHaveValue('heart');await expect(page.locator('#stoneTurnRow')).toBeHidden();expect(errors).toEqual([]);
 });
 
 test('stone turn checkbox shows for turning stone shapes and is on by default',async({page})=>{

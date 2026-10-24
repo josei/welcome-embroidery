@@ -892,6 +892,17 @@ test('twin sequins sew two sequins side by side across the path, and only accept
  assert.throws(()=>validateDocument(doc),/sequinTwin/);
 });
 
+test('heart bling stones are six millimetres across the path, turn with it, and sew their own stitch count',()=>{
+ const sewn=(points,shape)=>{const doc=initialDocument();doc.objects=[];applyOperations(doc,[{op:'add_path',id:'g',x:0,y:0,points},{op:'set_object',id:'g',stitch:'bling',motifSize:6,blingShape:shape}]);validateDocument(doc);const plan=compile(doc);assert.deepEqual(plan.errors,[]);return plan;};
+ const width=(b)=>b[2]-b[0],height=(b)=>b[3]-b[1];
+ const flat=sewn([[-20,0],[20,0]],'heart'),round=sewn([[-20,0],[20,0]],'round');
+ assert.ok(Math.abs(height(flat.bounds)-6)<0.2,'a heart stone is 6 mm across a horizontal path ('+height(flat.bounds)+')');
+ assert.notEqual(flat.count,round.count,'heart stones sew their own stitch count');
+ // A heart turns with the path like an oval: on a vertical path it is 6 mm across it, where a fixed heart would be about 5.4 mm.
+ const tall=sewn([[0,-20],[0,20]],'heart');
+ assert.ok(Math.abs(width(tall.bounds)-6)<0.2,'a heart turns to 6 mm across a vertical path ('+width(tall.bounds)+')');
+});
+
 test('batch plan counts copies per hoop and hoops needed',async()=>{
  const {batchPlan}=await import('../src/engine.js');
  const doc=initialDocument();doc.objects=[];

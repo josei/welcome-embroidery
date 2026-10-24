@@ -516,3 +516,10 @@ Based on direct feedback that editing felt far from a vector program:
 - On a horizontal path the output is unchanged, because the path direction is already the fixed frame there. On other paths, existing square, hexagon and star stones compile in their turned orientation; the stitch count does not change.
 - Covered by an engine test (a hexagon is 5.2 mm across a vertical path turned, 6 mm fixed, with the same stitch count either way; `stoneTurn` must be true or false) and an e2e test (the checkbox shows for square, hexagon and star only, is on by default, and can be unchecked). Screenshot: `design/progress/features/stone-turn.png`.
 - Limits: a square looks the same turned, so on axis-aligned paths the option makes no visible difference; it shows on diagonal and curved paths. Round stones have no orientation and are unaffected. The oval always turns and has no switch.
+
+## 2026-10-24 heart bling stones
+
+- Bling has a sixth stone shape: Heart (Spanish label Corazón), next to Round, Square, Oval, Hexagon and Star. The outline is the standard parametric heart, 21 points, scaled so the stone is its size across the path (point along the path, lobes to the back) with its fixing ring at two-thirds size. Stored as `blingShape: 'heart'`; the engine rejects unknown shapes. Settable over MCP.
+- Like the oval, a heart always turns to follow the path, so it has no Turn stones with the path checkbox.
+- Covered by an engine test (a heart stone is 6 mm across a horizontal path, sews its own stitch count, and is 6 mm across a vertical path, which proves it turns; a fixed heart would be about 5.4 mm) and by the e2e bling shape test, which now also selects Heart and checks the turn checkbox is hidden. Screenshot: `design/progress/features/bling-heart.png`.
+- Limits: 21 points per outline, so curves are smooth at stone sizes of a few millimetres but would show facets at much larger sizes; no facets or stone library.
