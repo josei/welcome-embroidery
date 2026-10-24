@@ -153,9 +153,9 @@ Decided: Tauri replaces Electron for desktop packaging.
 | Item | What it means | Status |
 | --- | --- | --- |
 | Tauri shell | The app starts the bundled Welcome server (Node, on a free 127.0.0.1 port) and opens its window at that address; if Node or the server is missing it falls back to the bundled static editor. The Linux build is tested here. | Built (Linux tested) |
-| CI builds | GitHub Actions builds the Linux app (tested here) and the macOS and Windows bundles; macOS builds stay unsigned | Proposed |
+| CI builds | GitHub Actions builds the Linux app (tested here) and the macOS and Windows bundles; macOS builds stay unsigned | Built (`desktop.yml` run 40086392891 passed on Linux, macOS and Windows at `1394ae8`; macOS builds unsigned) |
 | Local MCP | The MCP server runs on the user's machine through the local server, bound to 127.0.0.1; per-tab token links stay revocable; no anonymous MCP. Decision: The desktop bundle includes the Node runtime of the build machine (per platform, from CI); the system Node is used only if the bundled one is missing. | Built (Linux tested; bundled Node) |
-| Repository hygiene | Desktop build output is never committed; CI artifacts carry the bundles | Proposed |
+| Repository hygiene | Desktop build output is never committed; CI artifacts carry the bundles | Built (build output is ignored and untracked; checked by the 2026-10-24 supervisor review) |
 
 ## Essential user journeys
 
