@@ -121,7 +121,7 @@ const HELP={"overview": "Welcome designs embroidery as objects (shapes, paths, l
  mcp.registerTool('document_save',{description:'Save editable source and return a same-origin link that opens it in the Welcome browser editor.',inputSchema:{documentId:z.string()}},async({documentId})=>{const d=await getDoc(documentId),id=crypto.randomUUID();await fs.writeFile(path.join(artifacts,`${id}.welcome`),JSON.stringify(d,null,2));const openUrl=`/?open=${id}`;return {content:[{type:'text',text:`Saved editable project. Open in Welcome: ${openUrl}`}],structuredContent:{documentId,revision:d.revision,artifactUrl:`/artifacts/${id}.welcome`,openUrl}};});
  return mcp;
 }
-async function bodyJson(req,limit=2_000_000){let raw='';for await(const c of req){raw+=c;if(raw.length>limit)throw Error(`Request body exceeds ${Math.round(limit/1e6)} MB.`);}return raw?JSON.parse(raw):undefined;}
+async function bodyJson(req,limit=8_000_000){let raw='';for await(const c of req){raw+=c;if(raw.length>limit)throw Error(`Request body exceeds ${Math.round(limit/1e6)} MB.`);}return raw?JSON.parse(raw):undefined;}
 const sendJson=(res,status,body)=>{res.writeHead(status,{'content-type':'application/json','cache-control':'no-store'});res.end(JSON.stringify(body));};
 async function mcpRequest(req,res,ctx){const mcp=serverForRequest(ctx),transport=new StreamableHTTPServerTransport({sessionIdGenerator:undefined,enableJsonResponse:true});await mcp.connect(transport);const body=await bodyJson(req);await transport.handleRequest(req,res,body);setTimeout(()=>{transport.close().catch(()=>{});mcp.close().catch(()=>{});},0);}
 const clientIp=req=>String(req.headers['cf-connecting-ip']||req.headers['x-forwarded-for']||req.socket.remoteAddress||'unknown').split(',')[0].trim();

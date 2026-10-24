@@ -657,3 +657,11 @@ Based on direct feedback that editing felt far from a vector program:
 - The document stitch settings have an Organize fonts button. It opens a dialog listing each custom font in the document (a TrueType font loaded from a file and stored in the project), with the lettering objects that use it. Remove unused fonts deletes the custom fonts that no lettering uses; it is one undoable step, and it is disabled when every font is in use. Over MCP: `remove_unused_fonts`.
 - Covered by an engine test (the listing shows a used font with one use and an unused font with none; removing unused fonts keeps the used one, and running it again changes nothing) and an e2e test (load a font, the dialog lists it used by one lettering, Remove is disabled; delete the lettering, the dialog shows zero uses, and Remove drops the font with a toast). Screenshot: `design/progress/features/organize-fonts.png`.
 - Limits: bundled fonts are not listed (they are not stored in the document); no rename or merge; the dialog and its messages are English-only apart from the button labels.
+
+## 2026-10-24 font and MCP request limits raised
+
+- A document can hold up to 16 custom fonts (was 8). The per-font cap of 400 glyphs is unchanged.
+- The MCP request body limit is 8 MB (was 2 MB). The limit applies to `/mcp` requests through `bodyJson`; the relay's own limits are unchanged.
+- Why these numbers: a stored custom font of 200 glyphs measures about 96.5 KB of JSON (Bebas Neue, from a 61 KB `.ttf`, measured 2026-10-24). Sixteen fonts at the 400-glyph cap come to roughly 3 MB, which fits in 8 MB with room for objects and a reference picture (up to 1.5 MB of base64 data). At 8 fonts and 2 MB, a font-heavy design could not be sent through MCP alongside a reference picture.
+- Covered by an engine test (16 custom fonts validate, a 17th is refused) and the MCP smoke test, which sends a 3 MB request and checks the server does not reject it for size. The same test fails with the old 2 MB limit ("Request body exceeds 2 MB."), which was checked by restoring the old value briefly.
+- Limits: no UI change; the editor itself has no font-count message beyond the validation error. Font files of up to 12 MB can still be loaded in the picker, as before.

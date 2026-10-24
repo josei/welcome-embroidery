@@ -1107,6 +1107,14 @@ test('organize fonts lists custom fonts with the lettering that uses them, and r
  assert.deepEqual(Object.keys(doc.customFonts),['kept'],'running it again changes nothing');
 });
 
+test('a document can hold up to 16 custom fonts, and a 17th is refused',()=>{
+ const font=(i)=>({name:'F'+i,glyphs:{},unitsPerEm:1000,baseline:0,size:10});
+ const fonts=(n)=>Object.fromEntries(Array.from({length:n},(_,i)=>['f'+i,font(i)]));
+ const ok=initialDocument();ok.objects=[];ok.customFonts=fonts(16);validateDocument(ok);
+ const tooMany=initialDocument();tooMany.objects=[];tooMany.customFonts=fonts(17);
+ assert.throws(()=>validateDocument(tooMany),/at most 16 fonts/);
+});
+
 test('batch plan counts copies per hoop and hoops needed',async()=>{
  const {batchPlan}=await import('../src/engine.js');
  const doc=initialDocument();doc.objects=[];
