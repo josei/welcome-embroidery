@@ -447,6 +447,20 @@ test('keyboard resize and rotate: Ctrl+Arrows change size, Ctrl+Alt+Left/Right r
  await page.keyboard.press('Control+Alt+ArrowRight');expect(Number(await page.locator('#rotation').inputValue())).toBe(1);await page.keyboard.press('Control+Alt+Shift+ArrowLeft');expect(Number(await page.locator('#rotation').inputValue())).toBe(-14);
 });
 
+test('rotation pivot: Set pivot then click the canvas, and the rotation field turns the rectangle about that point',async({page})=>{
+ await page.goto('/');page.on('dialog',d=>d.accept());await page.locator('#new').click();await page.locator('#rect').click();await page.locator('.object-row').first().click();
+ await page.locator('#posX').fill('20');await page.locator('#posX').press('Enter');await page.locator('#posY').fill('5');await page.locator('#posY').press('Enter');
+ await page.locator('#pivotPick').click();await expect(page.locator('#pivotPick')).toHaveAttribute('aria-pressed','true');await expect(page.locator('#pivotInfo')).toContainText('Click the canvas');
+ const box=await page.locator('#art').boundingBox();await page.mouse.click(box.x+box.width*.3,box.y+box.height*.3);
+ await expect(page.locator('#pivotPick')).toHaveAttribute('aria-pressed','false');await expect(page.locator('#overlay .pivot-mark')).toHaveCount(1);
+ const [, px, py]=(await page.locator('#pivotInfo').textContent()).match(/Pivot at (-?[\d.]+), (-?[\d.]+) mm/),P=[Number(px),Number(py)];
+ const read=async()=>{const x=Number(await page.locator('#posX').inputValue()),y=Number(await page.locator('#posY').inputValue()),w=Number(await page.locator('#sizeW').inputValue()),h=Number(await page.locator('#sizeH').inputValue());return [x+w/2,y+h/2];};
+ const c0=await read();await page.locator('#rotation').fill('90');await page.locator('#rotation').press('Enter');
+ const c1=await read(),want=[P[0]-(c0[1]-P[1]),P[1]+(c0[0]-P[0])];
+ expect(Math.abs(c1[0]-want[0])).toBeLessThan(.15);expect(Math.abs(c1[1]-want[1])).toBeLessThan(.15);expect(Number(await page.locator('#rotation').inputValue())).toBe(90);
+ await page.locator('#pivotReset').click();await expect(page.locator('#pivotInfo')).toHaveText('');await expect(page.locator('#overlay .pivot-mark')).toHaveCount(0);
+});
+
 test('rename compatibility: projects saved as .welcom still open, new saves use .welcome, branding says Welcome',async({page})=>{
  await page.goto('/');page.on('dialog',d=>d.accept());await expect(page).toHaveTitle('Welcome Embroidery');await expect(page.locator('header.top .logo')).toHaveAttribute('aria-label','Welcome');
  await page.locator('#new').click();await page.locator('#rect').click();const saved=page.waitForEvent('download');await page.locator('#save').click();const file=await saved;expect(file.suggestedFilename()).toMatch(/\.welcome$/);

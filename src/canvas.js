@@ -93,7 +93,8 @@ export function createCanvas(api){
   let keyFocus=null;
   function refresh(f0=null,note=null){
     drawGuides();overlay.replaceChildren();if(api.tool()!=='select'||state?.type==='marquee'||state?.type==='nodemarquee')return;
-    const f=f0||frame();if(!f||api.isEditing())return;const k=1/vp.s,hs=4*k;
+    const f=f0||frame();if(!f||api.isEditing())return;const k=1/vp.s,hs=4*k,pv=api.pivot?.();
+    if(pv)overlay.append(el('circle',{class:'pivot-mark',cx:pv[0],cy:pv[1],r:5*k}),el('line',{class:'sel-stem',x1:pv[0]-10*k,y1:pv[1],x2:pv[0]+10*k,y2:pv[1]}),el('line',{class:'sel-stem',x1:pv[0],y1:pv[1]-10*k,x2:pv[0],y2:pv[1]+10*k}));
     const corners=[[-.5,-.5],[.5,-.5],[.5,.5],[-.5,.5]].map(([a,b])=>toWorld(f,a*f.W,b*f.H));
     overlay.append(el('polygon',{class:'sel-box',points:corners.map(p=>p.join(',')).join(' '),fill:'none'}));
     for(const [name,fx,fy] of HANDLES){if(name.length===1&&((name==='n'||name==='s')?f.W*vp.s<30:f.H*vp.s<30))continue;const [x,y]=toWorld(f,(fx-.5)*f.W,(fy-.5)*f.H);overlay.append(el('rect',{class:'sel-handle','data-handle':name,tabindex:0,role:'button','aria-label':HANDLE_LABEL[name],x:x-hs,y:y-hs,width:hs*2,height:hs*2,transform:f.rot?`rotate(${f.rot*180/Math.PI} ${x} ${y})`:''}));}
@@ -132,6 +133,7 @@ export function createCanvas(api){
     if(e.pointerType==='touch'&&touches.size>0)return;
     if(e.button===1||(e.button===0&&(spaceDown||handMode))){e.preventDefault();state={type:'pan',x:e.clientX,y:e.clientY,cx:vp.cx,cy:vp.cy,pid:e.pointerId};container.classList.add('panning');svg.setPointerCapture?.(e.pointerId);return;}
     if(e.button!==0||api.tool()!=='select')return;
+    if(api.pickPivot?.(coord(e))){e.preventDefault();e.stopPropagation();return;}
     if(e.target.closest?.('.path-node,.path-handle'))return;
     closeMenu();
     const handle=e.target.closest?.('[data-handle]');if(handle){e.preventDefault();startHandle(e,handle.dataset.handle);return;}

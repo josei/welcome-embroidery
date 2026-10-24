@@ -76,6 +76,7 @@ const cases={
   'import-exp': async p=>{const f=pinnedMachineFixture('exp');await p.locator('#machineFile').setInputFiles({name:'sample.exp',mimeType:'application/octet-stream',buffer:Buffer.from(f.bytes)});await p.locator('button[data-view="stitches"]').click();},
   'batch-imported': async p=>{const f=pinnedMachineFixture('jef');await p.locator('#machineFile').setInputFiles({name:'sample.jef',mimeType:'application/octet-stream',buffer:Buffer.from(f.bytes)});await p.locator('#secArray summary').click();await p.locator('#arrCount').fill('3');await p.locator('#arrCount').press('Tab');},
   'export-sew': async p=>{await p.locator('#rect').click();await p.locator('#export').click();await p.locator('#format').selectOption('sew');},
+  'rotate-pivot': async p=>{await p.locator('#rect').click();await p.locator('.object-row').first().click();await p.locator('#posX').fill('10');await p.locator('#posX').press('Enter');await p.locator('#posY').fill('-10');await p.locator('#posY').press('Enter');await p.locator('#pivotPick').click();const m=await p.evaluate(()=>{const c=document.querySelector('#art').getScreenCTM();return {a:c.a,d:c.d,e:c.e,f:c.f};});await p.mouse.click(m.a*-30+m.e,m.d*-20+m.f);await p.locator('#rotation').fill('30');await p.locator('#rotation').press('Enter');},
 };
 const done=[];
 // ONLY=export-sew,redwork re-shoots just the named features (the others keep their existing PNGs).

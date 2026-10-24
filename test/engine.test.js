@@ -299,6 +299,16 @@ test('TrueType parser: Lato outlines convert to filled rings with holes, and cus
  const gone=structuredClone(d);delete gone.customFonts;assert.throws(()=>validateDocument(gone),/font/);assert.throws(()=>{const bad=structuredClone(d);bad.customFonts.mylato.glyphs=null;validateDocument(bad);},/custom font/);
 });
 
+test('rotation about a pivot: each centre moves about the point, rotating about its own centre keeps it, and transform takes a pivot key',()=>{
+ const mk=()=>{const d=blank();d.hoop=250;return d;},centre=o=>{const b=objectBounds(o);return [(b[0]+b[2])/2,(b[1]+b[3])/2];},near=(p,q)=>assert.ok(Math.abs(p[0]-q[0])<.01&&Math.abs(p[1]-q[1])<.01,`${p} != ${q}`);
+ let d=mk();applyOperations(d,[{op:'add_shape',id:'a',kind:'rect',x:9,y:-1,width:2,height:2},{op:'add_shape',id:'b',kind:'rect',x:-1,y:9,width:2,height:2},{op:'rotate',ids:['a','b'],angle:90,cx:0,cy:0}]);
+ near(centre(d.objects[0]),[0,10]);near(centre(d.objects[1]),[-10,0]);assert.equal(d.objects[0].rotation,90,'each object turns by the angle');
+ d=mk();applyOperations(d,[{op:'add_shape',id:'a',kind:'rect',x:9,y:-1,width:2,height:2},{op:'rotate',ids:['a'],angle:45,cx:10,cy:0}]);near(centre(d.objects[0]),[10,0]);
+ d=mk();applyOperations(d,[{op:'add_shape',id:'a',kind:'rect',x:9,y:-1,width:2,height:2},{op:'transform',id:'a',rotation:90,pivot:{x:0,y:0}}]);validateDocument(d);near(centre(d.objects[0]),[0,10]);assert.equal(d.objects[0].rotation,90);
+ applyOperations(d,[{op:'transform',id:'a',rotation:180,pivot:{x:0,y:0}}]);near(centre(d.objects[0]),[-10,0]);assert.equal(d.objects[0].rotation,180,'the pivot key turns by the change in rotation, not to an absolute centre');
+ applyOperations(d,[{op:'transform',id:'a',rotation:-180}]);assert.equal(d.objects[0].rotation,-180,'without a pivot the rotation is set as before');
+});
+
 test('direct manipulation ops: scale, rotate about a pivot, flip, translate, to_path and lock/hide',()=>{
  const mk=()=>{const d=blank();d.hoop=250;return d;};
  let d=mk();applyOperations(d,[{op:'add_shape',id:'r',kind:'rect',x:10,y:10,width:20,height:10},{op:'scale',ids:['r'],sx:2,sy:3,ox:10,oy:10}]);validateDocument(d);assert.deepEqual([d.objects[0].x,d.objects[0].y,d.objects[0].w,d.objects[0].h],[10,10,40,30],'scale about the top-left corner');

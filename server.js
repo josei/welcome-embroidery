@@ -100,7 +100,7 @@ const HELP={"overview": "Welcome designs embroidery as objects (shapes, paths, l
   z.object({op:z.literal('align'),ids:z.array(z.string()).min(1).max(100),edge:z.enum(['left','hcenter','right','top','vcenter','bottom']),to:z.enum(['selection','hoop']).optional()}),
   z.object({op:z.literal('distribute'),ids:z.array(z.string()).min(3).max(100),axis:z.enum(['horizontal','vertical'])}),
   z.object({op:z.literal('set_path_point'),id:z.string(),index:z.number().int().min(0).max(999),x:z.number().finite().min(-1000).max(1000),y:z.number().finite().min(-1000).max(1000)}),
-  z.object({op:z.literal('transform'),id:z.string(),x:z.number().optional(),y:z.number().optional(),width:z.number().positive().optional(),height:z.number().positive().optional(),rotation:z.number().min(-360).max(360).optional()}),
+  z.object({op:z.literal('transform'),id:z.string(),x:z.number().optional(),y:z.number().optional(),width:z.number().positive().optional(),height:z.number().positive().optional(),rotation:z.number().min(-360).max(360).optional(),pivot:z.object({x:z.number().min(-1000).max(1000),y:z.number().min(-1000).max(1000)}).optional()}),
   z.object({op:z.literal('delete'),id:z.string()}),
   z.object({op:z.literal('duplicate'),id:z.string(),newId:z.string().optional(),name:z.string().optional(),dx:z.number().optional(),dy:z.number().optional()})
  ])).min(1).max(40)}},applyHandler);
