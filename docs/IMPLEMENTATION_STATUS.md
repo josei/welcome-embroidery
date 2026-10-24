@@ -611,3 +611,9 @@ Based on direct feedback that editing felt far from a vector program:
 - Source and spec: Wilcom's help documents this as Accordion Spacing (Shading and Open Fills add-on): it works best on tatami fill, overrides the auto and fractional spacing while the stitch angle still applies, takes a density at each end of a gradient, and is best used without auto underlay. Wilcom's placement algorithm is not published, so this is Welcome's own linear version of that behaviour.
 - Covered by an engine test (on a 40 by 30 mm fill, rows above the centre line outnumber rows below by more than 1.5 times with a start of 0.4 and end of 1.2, against an even split for uniform spacing; the accordion fill sews fewer than 75% of the rows of a uniform 0.4 fill; a single value is rejected) and an e2e test (the fields show for rows fills only; setting the start copies it to the end; changing the end lowers the stitch count). Measured: 27 rows above and 15 below, 42 in total, against 38, 38 and 76 for uniform 0.4. Screenshot: `design/progress/features/accordion-fill.png`.
 - Limits: linear only (Wilcom's presets and two-way profiles are not built); rows pattern only; the auto underlay is not turned off for you (set it yourself, as Wilcom advises).
+
+## 2026-10-24 hoop preset label fits the footer
+
+- The Hoop preset select now shows short labels that fit its 76 px width: Custom, Default, 4×4 in, 5×7 in and 6×10 in. The full names (Brother 4×4 · 100 × 100 and so on) are in the select's tooltip. The values and the hoop sizes are unchanged. This fixes the truncation noted in the hoop presets entry.
+- Covered by the e2e hoop preset test, which now checks the visible label (`5×7 in` after choosing 5×7). Screenshot: `design/progress/features/hoop-preset.png`, where the footer reads `6×10 in`.
+- Limits: the labels are short, so the size is shown by the width and height fields; the names in full are only in the tooltip.

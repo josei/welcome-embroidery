@@ -1168,7 +1168,7 @@ test('sequin fill is a fill pattern that lays sequins inside a closed shape',asy
 
 test('hoop preset select sets the hoop, and a typed size moves it to custom',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());await page.locator('#new').click();
- await page.locator('#hoopPreset').selectOption('180x130');
+ await page.locator('#hoopPreset').selectOption('180x130');await expect(page.locator('#hoopPreset option:checked')).toHaveText('5×7 in');
  await expect(page.locator('#hoopW')).toHaveValue('180');await expect(page.locator('#hoopH')).toHaveValue('130');
  await page.locator('#hoopW').fill('120');await page.locator('#hoopW').press('Tab');
  await expect(page.locator('#hoopPreset')).toHaveValue('custom');
