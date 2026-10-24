@@ -132,6 +132,25 @@ test('all 15 pinned HUS samples decode to the pyembroidery command, thread and c
     assert.equal(sha(Buffer.from(canonical(decoded.stitches.map(s=>[Math.round(s.x*10),Math.round(s.y*10),s.cmd])))),fixture.commandsSha256,`${fixture.path} command/coordinate parity`);
   }
 });
+test('all 29 pinned XXX samples decode to the pyembroidery command, thread and coordinate digests',()=>{
+  const xxxParity=JSON.parse(readFileSync(new URL('../scripts/xxx-parity.json', import.meta.url), 'utf8'));
+  assert.equal(xxxParity.schema,'welcom/xxx-parity/1');
+  const xxxFiles=zipEntries(archive,name=>/\.xxx$/i.test(name));
+  assert.equal(xxxFiles.size,29);
+  assert.equal(xxxParity.fixtures.length,29);
+  for(const fixture of xxxParity.fixtures){
+    const bytes=xxxFiles.get(fixture.path); assert.ok(bytes,fixture.path);
+    assert.equal(sha(bytes),fixture.sha256,`${fixture.path} fixture pin`);
+    const decoded=decodeEmbroidery(bytes,'xxx');
+    const counts={};for(const s of decoded.stitches)counts[s.cmd]=(counts[s.cmd]||0)+1;
+    assert.deepEqual(counts,fixture.commandCounts,`${fixture.path} command counts`);
+    // Colour blocks beyond the colour table get placeholder colours, reported as a warning.
+    const blocks=(counts.color||0)+1;
+    assert.equal(decoded.threads.length,Math.max(fixture.threads,blocks),`${fixture.path} thread count`);
+    if(fixture.threads<blocks)assert.match(decoded.warnings.join(' '),/placeholder colours/);
+    assert.equal(sha(Buffer.from(canonical(decoded.stitches.map(s=>[Math.round(s.x*10),Math.round(s.y*10),s.cmd])))),fixture.commandsSha256,`${fixture.path} command/coordinate parity`);
+  }
+});
 assert.throws(()=>decodeEmbroidery(new Uint8Array(12),'pes'),/signature/);
 const expParity=JSON.parse(readFileSync(new URL('../scripts/exp-parity.json', import.meta.url),'utf8'));
 test('all 35 pinned EXP samples decode to the pyembroidery command, colour block and coordinate digests',()=>{

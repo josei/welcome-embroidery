@@ -1,14 +1,15 @@
 #!/usr/bin/env python3
-"""Generate the checked-in HUS reader digest using pinned pyembroidery.
+"""Generate a checked-in machine-format reader digest using pinned pyembroidery.
 
-Usage: python3 -I scripts/hus-reference.py  (run inside a venv with pyembroidery==1.5.1 installed)
-Writes scripts/hus-parity.json: one entry per HUS sample in fixtures/embroidepy/samples.zip, with the SHA-256
+Usage: python3 -I scripts/machine-reference.py FORMAT  (FORMAT is an extension such as hus or xxx; run inside a venv with pyembroidery==1.5.1)
+Writes scripts/FORMAT-parity.json: one entry per FORMAT sample in fixtures/embroidepy/samples.zip, with the SHA-256
 of the file, the command counts, the thread count and a digest of every decoded (x, y, command) in 0.1 mm.
 src/readers.js must decode each sample to the same digest (test/readers.test.js).
 """
 import hashlib
 import json
 import os
+import sys
 import tempfile
 import zipfile
 from collections import Counter
@@ -19,17 +20,20 @@ import pyembroidery as pe
 PYEMBROIDERY_VERSION = "1.5.1"
 ROOT = Path(__file__).resolve().parents[1]
 ARCHIVE = ROOT / "fixtures/embroidepy/samples.zip"
-OUTPUT = ROOT / "scripts/hus-parity.json"
 COMMANDS = {pe.STITCH: "stitch", pe.JUMP: "jump", pe.TRIM: "trim", pe.STOP: "stop", pe.END: "end", pe.COLOR_CHANGE: "color"}
 
 
 def main():
+    if len(sys.argv) != 2 or not sys.argv[1].isalnum():
+        sys.exit("usage: machine-reference.py FORMAT")
+    fmt = sys.argv[1].lower()
+    output = ROOT / f"scripts/{fmt}-parity.json"
     entries = []
     with zipfile.ZipFile(ARCHIVE) as archive, tempfile.TemporaryDirectory() as scratch:
-        names = sorted(n for n in archive.namelist() if n.lower().endswith(".hus"))
+        names = sorted(n for n in archive.namelist() if n.lower().endswith("." + fmt))
         for name in names:
             data = archive.read(name)
-            path = os.path.join(scratch, "sample.hus")
+            path = os.path.join(scratch, "sample." + fmt)
             with open(path, "wb") as f:
                 f.write(data)
             pattern = pe.read(path)
@@ -44,13 +48,13 @@ def main():
                 "commandsSha256": hashlib.sha256(blob).hexdigest(),
             })
     out = {
-        "schema": "welcom/hus-parity/1",
-        "oracle": f"pyembroidery {PYEMBROIDERY_VERSION} HusReader (EmbCompress expand; y stored negated; trim as move then trim)",
+        "schema": f"welcom/{fmt}-parity/1",
+        "oracle": f"pyembroidery {PYEMBROIDERY_VERSION} reader for .{fmt} (positions as pyembroidery reports them)",
         "coordinates": "integer 0.1 mm exactly as pyembroidery reports positions",
         "fixtures": entries,
     }
-    OUTPUT.write_text(json.dumps(out, indent=1) + "\n", encoding="utf-8")
-    print(f"wrote {len(entries)} HUS entries to {OUTPUT.relative_to(ROOT)}")
+    output.write_text(json.dumps(out, indent=1) + "\n", encoding="utf-8")
+    print(f"wrote {len(entries)} {fmt.upper()} entries to {output.relative_to(ROOT)}")
 
 
 if __name__ == "__main__":

@@ -10,7 +10,7 @@ export function readMachineFixtures(){
   for(let i=0;i<count;i++){
     if(archive.readUInt32LE(p)!==0x02014b50)throw Error('Pinned fixture ZIP central directory is corrupt.');
     const method=archive.readUInt16LE(p+10),packedLength=archive.readUInt32LE(p+20),nameLength=archive.readUInt16LE(p+28),extraLength=archive.readUInt16LE(p+30),commentLength=archive.readUInt16LE(p+32),local=archive.readUInt32LE(p+42),name=archive.subarray(p+46,p+46+nameLength).toString('utf8');
-    if(/\.(jef|vp3|sew|pec|exp|hus)$/i.test(name)){
+    if(/\.(jef|vp3|sew|pec|exp|hus|xxx)$/i.test(name)){
       if(archive.readUInt32LE(local)!==0x04034b50)throw Error(`Pinned fixture entry is corrupt: ${name}`);
       const start=local+30+archive.readUInt16LE(local+26)+archive.readUInt16LE(local+28),slice=archive.subarray(start,start+packedLength);
       const bytes=method===0?Buffer.from(slice):method===8?inflateRawSync(slice):null;if(!bytes)throw Error(`Unsupported fixture compression method ${method}.`);

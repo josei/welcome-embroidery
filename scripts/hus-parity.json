@@ -1,6 +1,6 @@
 {
  "schema": "welcom/hus-parity/1",
- "oracle": "pyembroidery 1.5.1 HusReader (EmbCompress expand; y stored negated; trim as move then trim)",
+ "oracle": "pyembroidery 1.5.1 reader for .hus (positions as pyembroidery reports them)",
  "coordinates": "integer 0.1 mm exactly as pyembroidery reports positions",
  "fixtures": [
   {

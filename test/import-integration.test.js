@@ -105,6 +105,16 @@ test('pinned HUS imports with its own thread colours and compiles to DST',()=>{
   assert.deepEqual(compile(doc).errors,[]);assert.ok(encode(compile(doc),'dst','#527461',doc.hoop,doc).length>100);
 });
 
+test('pinned XXX imports with its colour table, and a sample with no colour table gets reported placeholder colours',()=>{
+  const {fileName,bytes}=pinnedMachineFixture('xxx'),decoded=decodeEmbroidery(bytes,'xxx'),doc=initialDocument(),layer=importStitchLayer(bytes,'xxx',{fileName});doc.objects=[layer];
+  assert.deepEqual(layer.stitches,decoded.stitches);
+  assert.ok(decoded.threads.length>1&&decoded.threads.every(t=>/^#[0-9a-f]{6}$/i.test(t.color)&&t.brand==='XXX'),'every XXX colour comes from the colour table');
+  assert.deepEqual(compile(doc).errors,[]);assert.ok(encode(compile(doc),'dst','#527461',doc.hoop,doc).length>100);
+  const [noTableName,noTable]=[...readMachineFixtures()].find(([name])=>name.endsWith('-premier.xxx')),bare=importStitchLayer(noTable,'xxx',{fileName:noTableName});
+  assert.equal(bare.threads.length,decodeEmbroidery(noTable,'xxx').stitches.filter(st=>st.cmd==='color').length+1,'one placeholder colour per colour block');assert.match(bare.source.warnings.join(' '),/no colour table/);
+  const bareDoc=initialDocument();bareDoc.objects=[bare];assert.deepEqual(compile(bareDoc).errors,[]);
+});
+
 test('pinned EXP imports with placeholder colours, exports the untouched source and re-encodes after a move',()=>{
   const {fileName,bytes}=pinnedMachineFixture('exp'),decoded=decodeEmbroidery(bytes,'exp'),doc=initialDocument(),layer=importStitchLayer(bytes,'exp',{fileName});doc.objects=[layer];
   assert.deepEqual(layer.stitches,decoded.stitches);
