@@ -130,6 +130,7 @@ Reference: Wilcom EmbroideryStudio, the commercial digitizing suite. Its feature
 | Files | Husqvarna HUS import (read-only): stitches and the HUS thread chart, checked against 15 pinned samples | Built (import only) |
 | Files | Singer XXX import (read-only): stitches and the colour table, checked against 29 pinned samples | Built (import only; placeholder colours where the table is missing) |
 | Files | Barudan DSB and DSZ import (read-only): stitches and needle changes, checked against 10 pinned samples each | Built (import only; placeholder colours per colour block) |
+| Files | Tajima-style TAP import (read-only): DST records with pyembroidery's trim pass, checked against 10 pinned samples | Built (import only; sequin codes refused) |
 | Files | Other machine formats | Not started |
 | Libraries | Thread brand libraries | Not started (licensed data) |
 | Automation | Headless MCP document sessions for agents | Built |

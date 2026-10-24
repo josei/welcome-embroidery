@@ -745,3 +745,12 @@ Based on direct feedback that editing felt far from a vector program:
 - The colour blocks share DSB's placeholder rule: one placeholder colour per needle change block, reported as a warning when there is more than one block. The two readers share the helper.
 - Parity: `scripts/machine-reference.py dsz` writes `scripts/dsz-parity.json`; `test/readers.test.js` matches all 10 DSZ samples. Covered by the parity test, an integration test (the SpiralBox DSZ: placeholders per block and a DST encoding), and an e2e test (the picker imports a DSZ file). Screenshot: `design/progress/features/import-dsz.png`.
 - Limits: import only; no DSZ export; placeholder colours are not the machine's own.
+
+## 2026-10-24 TAP import
+
+- `.tap` files import from the machine picker and the MCP import tool (format `tap`) as stitch layers, keeping the source bytes. TAP is DST's record encoding with no header.
+- The reader ports pyembroidery 1.5.1's `TapReader` and `EmbPattern.interpolate_trims` (count 3, no distance rule, clipping on): a run of three jumps after stitching gets a trim at its start, placed at the stitch before the run; a run whose jumps sum to zero is deleted. Sequin codes are refused with a clear message, because the editor has no sequin commands; none of the pinned samples has one.
+- Colour changes get placeholder colours, one per colour block, as in the DSB and DSZ imports, and the layer's source warnings say so.
+- Parity: `scripts/machine-reference.py tap` writes `scripts/tap-parity.json`; `test/readers.test.js` matches all 10 TAP samples, trims included.
+- Covered by the parity test, an integration test (placeholders per block and a DST encoding of the first sample), and an e2e test (the picker imports a TAP file). Screenshot: `design/progress/features/import-tap.png`.
+- Limits: import only; sequin files are refused; placeholder colours are not the machine's own; the trim rule is pyembroidery's default settings, not a per-file option.
