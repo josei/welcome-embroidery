@@ -89,7 +89,7 @@ export function applyOperations(doc,operations) {
     else if(op.op==='clear_reference'){delete doc.reference;}
     else if(op.op==='set_settings'){for(const k of ['spacing','angle','underlay','compensation','ties','trims','stitchLength','stagger','underlayType'])if(op[k]!==undefined)doc.settings[k]=op[k];}
     else if(op.op==='rename_document')doc.name=op.name;
-    else if(op.op==='set_object'){const o=doc.objects.find(v=>v.id===op.id);if(!o)throw Error(`Unknown object: ${op.id}`);for(const k of ['stitch','thread','name','text','font','border','borderThread','satinWidth','angle','spacing','visible','locked','stitchLength','stagger','underlayType','underlayInset','underlaySpacing','startAt','endAt','fillMethod','guide','radius','satinWidthEnd','raised','buttonhole','motifPair','motifSpacing','motifSize','motifShape','motifWarp','blingShape','sequinTwin','stoneTurn','blingRings','beadShape','beadTwin','edgeClose','borderWidth','join','cap','widthStops','blendThread','blendPalette','blendStart','blendEnd','blendAngle','rippleCenter','photo','compensation','underpath','runStyle','lengthVariance','crossSize','applique','appliqueWidth',...TEXT_OPTION_KEYS])if(op[k]!==undefined){if(op[k]===null)delete o[k];else o[k]=op[k];}
+    else if(op.op==='set_object'){const o=doc.objects.find(v=>v.id===op.id);if(!o)throw Error(`Unknown object: ${op.id}`);for(const k of ['stitch','thread','name','text','font','border','borderThread','satinWidth','angle','spacing','visible','locked','stitchLength','stagger','underlayType','underlayInset','underlaySpacing','startAt','endAt','fillMethod','guide','radius','satinWidthEnd','raised','buttonhole','motifPair','motifSpacing','motifSize','motifShape','motifWarp','blingShape','sequinTwin','stoneTurn','blingRings','beadShape','beadTwin','edgeClose','borderWidth','join','cap','widthStops','blendThread','blendPalette','blendStart','blendEnd','blendAngle','rippleCenter','photo','compensation','pullLeft','pullRight','underpath','runStyle','lengthVariance','crossSize','applique','appliqueWidth',...TEXT_OPTION_KEYS])if(op[k]!==undefined){if(op[k]===null)delete o[k];else o[k]=op[k];}
       if(o.kind==='text'&&(['text','font',...TEXT_OPTION_KEYS].some(k=>op[k]!==undefined))){const f=isRegistryFont(o.font)?getFont(o.font):null;if(f&&op.font!==undefined&&op.h===undefined&&!(o.h>=f.size*f.minScale&&o.h<=f.size*f.maxScale))o.h=f.size;o.w=measureText(o.text,o.font||'welcom-mono/1',o.h,o);if(op.text!==undefined&&typeof op.text==='string')o.name=`Lettering: ${op.text.split('\n')[0]}`;}if(o.kind==='stitch_layer'&&op.thread!==undefined)o.threadOverrides=Object.fromEntries(o.threads.map((_,i)=>[i,op.thread]));}
     else if(op.op==='set_path_point'){const o=doc.objects.find(v=>v.id===op.id);if(!o||o.kind!=='path'||!Number.isInteger(op.index)||!o.points[op.index])throw Error(`Unknown path point: ${op.id}[${op.index}].`);{const old=o.points[op.index],dx=op.x-old[0],dy=op.y-old[1],h=o.handles?.[op.index];o.points[op.index]=[op.x,op.y];if(h){h.i=[h.i[0]+dx,h.i[1]+dy];h.o=[h.o[0]+dx,h.o[1]+dy];}}refreshPathBounds(o);}
     else if(op.op==='transform'){const o=doc.objects.find(v=>v.id===op.id);if(!o)throw Error(`Unknown object: ${op.id}`);const oldX=o.x,oldY=o.y,oldW=o.w||0,oldH=o.h||0,nx=op.x??oldX,ny=op.y??oldY,nw=op.width??oldW,nh=op.height??oldH;if(o.along)o.along.points=o.along.points.map(([x,y])=>[x+nx-oldX,y+ny-oldY]);if(o.kind==='path')mapPathPoints(o,([x,y])=>[nx+(oldW?(x-oldX)*nw/oldW:x-oldX),ny+(oldH?(y-oldY)*nh/oldH:y-oldY)]);o.x=nx;o.y=ny;o.w=nw;o.h=nh;if(op.rotation!==undefined)o.rotation=op.rotation;}
@@ -285,7 +285,7 @@ export function textPrimitives(obj){
   return prims;
 }
 // Two-rail satin: needles alternate between the rails every `spacing` mm of rail length; pull compensation widens the column.
-export function satinFromRails(a,b,spacing,comp,rungs=[]){
+export function satinFromRails(a,b,spacing,comp,rungs=[],compB=comp){
   const cum=r=>{const c=[0];for(let i=1;i<r.length;i++)c.push(c[i-1]+Math.hypot(r[i][0]-r[i-1][0],r[i][1]-r[i-1][1]));return c;},ca=cum(a),cb=cum(b),La=ca.at(-1),Lb=cb.at(-1);if(Math.max(La,Lb)<.2)return {zig:[],centre:[],pairs:[]};
   const at=(r,c,t)=>{let i=1;while(i<c.length-1&&c[i]<t)i++;const seg=c[i]-c[i-1]||1,f=Math.max(0,Math.min(1,(t-c[i-1])/seg));return [r[i-1][0]+(r[i][0]-r[i-1][0])*f,r[i-1][1]+(r[i][1]-r[i-1][1])*f];};
   // Rungs pair a position on rail A with one on rail B; between two rungs the rails advance in proportion, so letters whose rails differ in length do not twist.
@@ -304,7 +304,7 @@ export function satinFromRails(a,b,spacing,comp,rungs=[]){
   if(globalThis.__dbgAnchors)globalThis.__dbgAnchors(anchors,ca,cb);
   const zig=[],centre=[],pairs=[];let flip=0;
   for(let s=1;s<anchors.length;s++){const [a0,b0]=anchors[s-1],[a1,b1]=anchors[s],len=Math.max(a1-a0,b1-b0);if(len<1e-6&&s<anchors.length-1)continue;const n=Math.max(1,Math.ceil(len/spacing));
-    for(let k=(s===1?0:1);k<=n;k++){const f=k/n,pa=at(a,ca,a0+(a1-a0)*f),pb=at(b,cb,b0+(b1-b0)*f),dx=pa[0]-pb[0],dy=pa[1]-pb[1],l=Math.hypot(dx,dy)||1;pairs.push([pa,pb]);centre.push([(pa[0]+pb[0])/2,(pa[1]+pb[1])/2]);zig.push(flip++%2?[pb[0]-dx/l*comp,pb[1]-dy/l*comp]:[pa[0]+dx/l*comp,pa[1]+dy/l*comp]);}}
+    for(let k=(s===1?0:1);k<=n;k++){const f=k/n,pa=at(a,ca,a0+(a1-a0)*f),pb=at(b,cb,b0+(b1-b0)*f),dx=pa[0]-pb[0],dy=pa[1]-pb[1],l=Math.hypot(dx,dy)||1;pairs.push([pa,pb]);centre.push([(pa[0]+pb[0])/2,(pa[1]+pb[1])/2]);zig.push(flip++%2?[pb[0]-dx/l*compB,pb[1]-dy/l*compB]:[pa[0]+dx/l*comp,pa[1]+dy/l*comp]);}}
   return {zig,centre,pairs};
 }
 
@@ -490,7 +490,7 @@ export function validateDocument(doc){
       if(o.rippleCenter!==undefined&&!(Array.isArray(o.rippleCenter)&&o.rippleCenter.length===2&&o.rippleCenter.every(v=>Number.isFinite(v)&&v>=-1&&v<=2)))fail(`object ${o.id} rippleCenter must be [x, y] fractions of the object's bounding box.`);
       if(o.guide!==undefined&&!(Array.isArray(o.guide)&&o.guide.length>=2&&o.guide.length<=50&&o.guide.every(p=>Array.isArray(p)&&p.length===2&&p.every(v=>Number.isFinite(v)&&v>=-1&&v<=2))))fail(`object ${o.id} guide needs 2–50 [x, y] points as fractions of the object's bounding box.`);
       for(const k of ['startAt','endAt'])if(o[k]!==undefined&&!(Array.isArray(o[k])&&o[k].length===2&&o[k].every(v=>Number.isFinite(v)&&v>=0&&v<=1)))fail(`object ${o.id} ${k} must be [x, y] fractions (0–1) of the object's bounding box.`);
-      if(o.compensation!==undefined&&!inRange(o.compensation,0,2))fail(`object ${o.id} needs a pull compensation of 0–2 mm.`);
+      if(o.compensation!==undefined&&!inRange(o.compensation,0,2))fail(`object ${o.id} needs a pull compensation of 0–2 mm.`);if((o.pullLeft!==undefined&&!inRange(o.pullLeft,0,2))||(o.pullRight!==undefined&&!inRange(o.pullRight,0,2)))fail(`object ${o.id} needs a left and right satin pull of 0–2 mm.`);
       if(o.photo!==undefined){const ph=o.photo;if(!(o.kind==='rect'&&o.stitch==='fill')||!ph||typeof ph!=='object'||!Number.isInteger(ph.pw)||!Number.isInteger(ph.ph)||ph.pw<2||ph.ph<2||ph.pw>320||ph.ph>320||typeof ph.data!=='string'||!/^[A-Za-z0-9+/]+={0,2}$/.test(ph.data)||Math.floor(ph.data.length*3/4)<ph.pw*ph.ph-2||ph.data.length>140000)fail(`object ${o.id} has an invalid photo (a rectangle with a grey picture of up to 320 × 320 samples).`);
         if(ph.thread2!==undefined&&!color.test(ph.thread2)||ph.thread3!==undefined&&(!color.test(ph.thread3)||ph.thread2===undefined))fail(`object ${o.id} has an invalid photo second or third thread (a third thread needs a second).`);
         if(ph.thread4!==undefined&&(!color.test(ph.thread4)||ph.thread3===undefined))fail(`object ${o.id} has an invalid photo fourth thread (a fourth thread needs a third).`);
@@ -603,7 +603,7 @@ function blingRuns(line,spacing=8,size=4,shape='round',turn=true,rings=2){const 
 function bartack(a,b,na,nb,jump){const dx=a[0]-na[0],dy=a[1]-na[1],l=Math.hypot(dx,dy)||1,ux=dx/l,uy=dy/l,pts=[];for(let k=0;k<6;k++){const p=k%2?b:a,s=Math.floor(k/2)*.35;pts.push([p[0]+ux*s,p[1]+uy*s]);}return [{pts,jump}];}
 function satinRuns(a,b,rungs,o,doc,spacing,comp,from=null){
   const sPt=pinPoint(o,o.startAt),ePt=pinPoint(o,o.endAt);if(sPt)from=sPt;
-  const {zig,pairs}=satinFromRails(a,b,spacing,comp,rungs);if(zig.length<2)return {under:[],top:[]};
+  const {zig,pairs}=satinFromRails(a,b,spacing,o.pullRight??comp,rungs,o.pullLeft??comp);if(zig.length<2)return {under:[],top:[]};
   // Rails that cannot be paired sensibly (stitches longer than a machine accepts) are reported so the caller can sew the column as a fill instead.
   if(zig.some((p,i)=>i&&distP(p,zig[i-1])>12.2))return {bad:true,under:[],top:[]};
   const widths=pairs.map(([p,q])=>distP(p,q)).sort((x,y)=>x-y),w=widths[Math.floor(widths.length/2)]||0,types=underlayTypes(o,doc,'satin',w),inset=Math.min(o.underlayInset??.35,w*.22),towards=(p,q,d)=>{const l=distP(p,q)||1;return [p[0]+(q[0]-p[0])/l*d,p[1]+(q[1]-p[1])/l*d];};

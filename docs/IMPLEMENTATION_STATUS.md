@@ -543,3 +543,10 @@ Based on direct feedback that editing felt far from a vector program:
 - Scope note: the engine's dash runs along the path, not across it as an older comment said; the twin dashes are therefore side by side across the path. The default output (twin off, dash) is unchanged.
 - Covered by an engine test (a single dot is 2 mm across the path, twin dots 4 mm, about twice the stitches; twin dashes 2 mm across; `beadTwin` must be true or false) and an e2e test (the checkbox shows for beads only, is off by default, and turning it on adds stitches). Screenshot: `design/progress/features/bead-twin.png`.
 - Limits: the two beads are the same shape and size; no per-bead offset control.
+
+## 2026-10-24 per-side pull on satin
+
+- A satin path takes a Satin pull on the right and a Satin pull on the left (0–2 mm, shown for satin paths only; `pullRight` and `pullLeft` over MCP, null clears). The right and left rails are the two sides of the column as seen walking along the path on screen; each rail moves out by its own pull, and an unset side uses the object's pull compensation as before.
+- Default output is unchanged: with neither side set, the satin column compiles as it did.
+- Covered by an engine test (an unpulled 4 mm column spans -2 to 2 across the path; pullRight moves only the right rail, pullLeft only the left, both together take their own pulls; an unset side uses the object's compensation; out-of-range values are rejected) and an e2e test (the fields show for satin only and a typed value is kept). Screenshot: `design/progress/features/satin-pull.png`.
+- Limits: fills keep one pull compensation; the pull is a shift of the needle points, not a change of the stitch angle. The sign of "right" follows the screen (y down), so a path drawn the other way swaps the rails.

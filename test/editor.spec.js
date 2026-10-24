@@ -1105,6 +1105,15 @@ test('twin beads add a second bead either side of the centre line',async({page})
  expect(errors).toEqual([]);
 });
 
+test('satin pull fields show for satin paths only, and a typed value is kept',async({page})=>{
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());await page.locator('#new').click();
+ await page.locator('#path').click();const m=await ctm(page);for(const [x,y] of [[-20,0],[20,0]]){const s=toScreen(m,x,y);await page.mouse.click(s.x,s.y);}await page.keyboard.press('Enter');
+ await page.locator('#type').selectOption('satin');await expect(page.locator('#pullRightRow')).toBeVisible();await expect(page.locator('#pullLeftRow')).toBeVisible();
+ await page.locator('#pullRight').fill('1.5');await page.locator('#pullRight').press('Tab');await expect(page.locator('#pullRight')).toHaveValue('1.5');
+ await page.locator('#type').selectOption('run');await expect(page.locator('#pullRightRow')).toBeHidden();
+ expect(errors).toEqual([]);
+});
+
 test('bead shape: dash by default, dot sews a small round bead at each point',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());await page.locator('#new').click();
  await page.locator('#path').click();const m=await ctm(page);for(const [x,y] of [[-20,0],[20,0]]){const s=toScreen(m,x,y);await page.mouse.click(s.x,s.y);}await page.keyboard.press('Enter');

@@ -98,7 +98,7 @@ function syncSections(){
   $('#runStyleRow').hidden=!runPick;if(o)$('#runStyle').value=o.runStyle||'single';
   $('#varianceRow').hidden=!(single&&fillable&&['rows','guided'].includes(method));if(o&&document.activeElement!==$('#lengthVariance'))$('#lengthVariance').value=Math.round((o.lengthVariance??0)*100);
   $('#appliqueRow').hidden=!(single&&fillable);$('#applique').checked=Boolean(o?.applique);$('#appliqueWidthRow').hidden=!(single&&fillable&&o.applique);if(o&&document.activeElement!==$('#appliqueWidth'))$('#appliqueWidth').value=o.appliqueWidth??2.5;
-  $('#compRow').hidden=!(single&&(fillable||o.stitch==='satin'));if(o&&document.activeElement!==$('#compensation'))$('#compensation').value=o.compensation??'';}
+  $('#compRow').hidden=!(single&&(fillable||o.stitch==='satin'));$('#pullRightRow').hidden=!(single&&o.kind==='path'&&o.stitch==='satin');$('#pullLeftRow').hidden=$('#pullRightRow').hidden;if(o&&document.activeElement!==$('#pullRight'))$('#pullRight').value=o.pullRight??'';if(o&&document.activeElement!==$('#pullLeft'))$('#pullLeft').value=o.pullLeft??'';if(o&&document.activeElement!==$('#compensation'))$('#compensation').value=o.compensation??'';}
   {const single2=n===1&&o&&o.kind!=='text'&&o.kind!=='stitch_layer';$('#pinCenter').hidden=!(single2&&fillable&&o.fillMethod==='ripple');
   $('#underpathRow').hidden=!(single2&&fillable&&!o.photo&&!o.applique&&['rows',undefined].includes(o.fillMethod));$('#underpath').checked=o?.underpath!==false;
   $('#maskRow').hidden=!(n===1&&o?.clipId);
@@ -462,6 +462,8 @@ $('#runStyle').addEventListener('change',e=>{if(selected)edit([{op:'set_object',
 $('#lengthVariance').onchange=e=>{if(selected)edit([{op:'set_object',id:selected,lengthVariance:Math.max(0,Math.min(50,Number(e.target.value)||0))/100||null}]);};
 $('#applique').onchange=e=>{if(selected)edit([{op:'set_object',id:selected,applique:e.target.checked?true:null}]);};
 $('#appliqueWidth').onchange=e=>{if(selected)edit([{op:'set_object',id:selected,appliqueWidth:Number(e.target.value)}]);};
+$('#pullRight').onchange=e=>{if(selected)edit([{op:'set_object',id:selected,pullRight:e.target.value===''?null:Number(e.target.value)}]);};
+$('#pullLeft').onchange=e=>{if(selected)edit([{op:'set_object',id:selected,pullLeft:e.target.value===''?null:Number(e.target.value)}]);};
 $('#compensation').onchange=e=>{if(selected)edit([{op:'set_object',id:selected,compensation:e.target.value===''?null:Number(e.target.value)}]);};
 
 // Photo stitch: a picture becomes a rectangle with grey samples; the zigzag rows are planned at compile time.

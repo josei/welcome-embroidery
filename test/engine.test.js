@@ -939,6 +939,21 @@ test('twin beads sit one either side of the centre line, side by side across the
  assert.throws(()=>validateDocument(doc),/beadTwin/);
 });
 
+test('satin pull can be set on each side: the right rail moves out by pullRight and the left by pullLeft, and an unset side uses the pull compensation',()=>{
+ // Walking along a path east, the right-hand rail is the one at +y on screen (y is down): a satin column 4 mm wide spans -2..2 across it.
+ const span=(extra)=>{const doc=initialDocument();doc.objects=[];applyOperations(doc,[{op:'add_path',id:'s',x:0,y:0,points:[[-30,0],[30,0]],stitch:'satin',satinWidth:4},{op:'set_object',id:'s',compensation:0,...extra}]);validateDocument(doc);const plan=compile(doc);assert.deepEqual(plan.errors,[]);return {minY:plan.bounds[1],maxY:plan.bounds[3]};};
+ const none=span({}),right=span({pullRight:1.5}),left=span({pullLeft:1.5}),both=span({pullRight:1,pullLeft:0.5});
+ const near=(a,b)=>Math.abs(a-b)<0.15;
+ assert.ok(near(none.maxY,2)&&near(none.minY,-2),'an unpulled 4 mm satin spans -2 to 2 ('+none.minY+', '+none.maxY+')');
+ assert.ok(near(right.maxY,3.5)&&near(right.minY,-2),'pullRight moves only the right rail, out by 1.5 mm ('+right.minY+', '+right.maxY+')');
+ assert.ok(near(left.minY,-3.5)&&near(left.maxY,2),'pullLeft moves only the left rail, out by 1.5 mm ('+left.minY+', '+left.maxY+')');
+ assert.ok(near(both.maxY,3)&&near(both.minY,-2.5),'each side takes its own pull ('+both.minY+', '+both.maxY+')');
+ const comp=(()=>{const doc=initialDocument();doc.objects=[];applyOperations(doc,[{op:'add_path',id:'s',x:0,y:0,points:[[-30,0],[30,0]],stitch:'satin',satinWidth:4},{op:'set_object',id:'s',compensation:0.5}]);validateDocument(doc);const b=compile(doc).bounds;return {minY:b[1],maxY:b[3]};})();
+ assert.ok(near(comp.maxY,2.5)&&near(comp.minY,-2.5),'an unset side uses the object pull compensation on both sides');
+ const doc=initialDocument();doc.objects=[];applyOperations(doc,[{op:'add_path',id:'s',x:0,y:0,points:[[-30,0],[30,0]],stitch:'satin',satinWidth:4},{op:'set_object',id:'s',pullRight:3}]);
+ assert.throws(()=>validateDocument(doc),/pull/);
+});
+
 test('batch plan counts copies per hoop and hoops needed',async()=>{
  const {batchPlan}=await import('../src/engine.js');
  const doc=initialDocument();doc.objects=[];
