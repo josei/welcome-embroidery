@@ -123,6 +123,14 @@ test('pinned DSB imports with one placeholder colour per needle change, and comp
   assert.deepEqual(compile(doc).errors,[]);assert.ok(encode(compile(doc),'dst','#527461',doc.hoop,doc).length>100);
 });
 
+test('pinned DSZ imports with one placeholder colour per needle change, and compiles to DST',()=>{
+  const [fileName,bytes]=[...readMachineFixtures()].find(([name])=>name.endsWith('spiralbox-wilcom.DSZ')),decoded=decodeEmbroidery(bytes,'dsz'),doc=initialDocument(),layer=importStitchLayer(bytes,'dsz',{fileName});doc.objects=[layer];
+  assert.deepEqual(layer.stitches,decoded.stitches);
+  const blocks=decoded.stitches.filter(s=>s.cmd==='color').length+1;
+  assert.equal(layer.threads.length,blocks,'one placeholder colour per colour block');
+  assert.deepEqual(compile(doc).errors,[]);assert.ok(encode(compile(doc),'dst','#527461',doc.hoop,doc).length>100);
+});
+
 test('pinned EXP imports with placeholder colours, exports the untouched source and re-encodes after a move',()=>{
   const {fileName,bytes}=pinnedMachineFixture('exp'),decoded=decodeEmbroidery(bytes,'exp'),doc=initialDocument(),layer=importStitchLayer(bytes,'exp',{fileName});doc.objects=[layer];
   assert.deepEqual(layer.stitches,decoded.stitches);

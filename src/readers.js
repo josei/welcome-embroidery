@@ -534,9 +534,33 @@ function readDsb(bytes) {
     break;
   }
   push(stitches, x, y, 'end', block);
+  return blockResult(stitches, block, 'DSB');
+}
+// Colour blocks in a file with no colour table: one placeholder colour per block, reported as a warning when there is more than one block.
+function blockResult(stitches, block, brand) {
   const threads = [];
-  for (let i = 0; i <= block; i++) threads.push({index: i, color: '#527461', brand: 'DSB', catalogNumber: null, name: `Colour ${i + 1}`});
-  return result(stitches, threads, block ? ['DSB files carry no thread colours: placeholder colours were assigned.'] : []);
+  for (let i = 0; i <= block; i++) threads.push({index: i, color: '#527461', brand, catalogNumber: null, name: `Colour ${i + 1}`});
+  return result(stitches, threads, block ? [`${brand} files carry no thread colours: placeholder colours were assigned.`] : []);
+}
+// Barudan-style DSZ (pyembroidery's DszReader): the same header and 3-byte records as DSB, with the bytes in another order (y, x, control), other control codes (0x82 stop, 0x9B trim, 0x83 to 0x9A needle change) and no end code: the file simply stops.
+function readDsz(bytes) {
+  if (bytes.length < 512) fail('DSZ header is truncated');
+  const stitches = [];
+  let x = 0, y = 0, block = 0;
+  for (let p = 512; p + 3 <= bytes.length; p += 3) {
+    const ctrl = bytes[p + 2];
+    let dy = -bytes[p], dx = bytes[p + 1];
+    if (ctrl & 0x40) dx = -dx;
+    if (ctrl & 0x20) dy = -dy;
+    if ((ctrl & 0x1F) === 0) { x += dx; y += dy; push(stitches, x, y, 'stitch', block); continue; }
+    if ((ctrl & 0x1F) === 1) { x += dx; y += dy; push(stitches, x, y, 'jump', block); continue; }
+    if (ctrl === 0x82) { push(stitches, x, y, 'stop', block); continue; }
+    if (ctrl === 0x9B) { push(stitches, x, y, 'trim', block); continue; }
+    if (ctrl >= 0x83 && ctrl <= 0x9A) { block++; if (block >= MAX_THREADS) fail('too many colour changes'); push(stitches, x, y, 'color', block); continue; }
+    break;
+  }
+  push(stitches, x, y, 'end', block);
+  return blockResult(stitches, block, 'DSZ');
 }
 
 export function decodeEmbroidery(input, format) {
@@ -552,5 +576,6 @@ export function decodeEmbroidery(input, format) {
   if(format==='hus') return readHus(bytes);
   if(format==='xxx') return readXxx(bytes);
   if(format==='dsb') return readDsb(bytes);
-  fail('format must be jef, vp3, dst, sew, pec, pes, exp, hus, xxx or dsb');
+  if(format==='dsz') return readDsz(bytes);
+  fail('format must be jef, vp3, dst, sew, pec, pes, exp, hus, xxx, dsb or dsz');
 }
