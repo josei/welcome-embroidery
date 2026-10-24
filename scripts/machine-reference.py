@@ -20,7 +20,8 @@ import pyembroidery as pe
 PYEMBROIDERY_VERSION = "1.5.1"
 ROOT = Path(__file__).resolve().parents[1]
 ARCHIVE = ROOT / "fixtures/embroidepy/samples.zip"
-COMMANDS = {pe.STITCH: "stitch", pe.JUMP: "jump", pe.TRIM: "trim", pe.STOP: "stop", pe.END: "end", pe.COLOR_CHANGE: "color"}
+# A needle change (NEEDLE_SET, with the needle packed above the low byte) is a colour change to the editor, so it is named "color".
+COMMANDS = {pe.STITCH: "stitch", pe.JUMP: "jump", pe.TRIM: "trim", pe.STOP: "stop", pe.END: "end", pe.COLOR_CHANGE: "color", pe.NEEDLE_SET: "color"}
 
 
 def main():

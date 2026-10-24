@@ -1,7 +1,7 @@
 import {chromium} from 'playwright';
 import {mkdirSync} from 'node:fs';
 import path from 'node:path';
-import {pinnedMachineFixture} from '../test/fixture-archive.js';
+import {pinnedMachineFixture,readMachineFixtures} from '../test/fixture-archive.js';
 import {withPesMetadata} from '../test/pes-with-metadata.js';
 import {readFileSync} from 'node:fs';
 const base=process.argv[2]||'http://127.0.0.1:8790/';
@@ -75,6 +75,7 @@ const cases={
   'thread-worksheet': async p=>{await p.locator('#rect').click();await p.locator('#thread').selectOption('#d9897e');await p.locator('#ellipse').click();await p.locator('#thread').selectOption('#527461');await p.locator('#secPlan summary').click();await p.locator('#secPlan').scrollIntoViewIfNeeded();},
   'import-sew': async p=>{const f=pinnedMachineFixture('sew');await p.locator('#machineFile').setInputFiles({name:'sample.sew',mimeType:'application/octet-stream',buffer:Buffer.from(f.bytes)});await p.locator('button[data-view="stitches"]').click();},
   'import-pec': async p=>{const f=pinnedMachineFixture('pec');await p.locator('#machineFile').setInputFiles({name:'sample.pec',mimeType:'application/octet-stream',buffer:Buffer.from(f.bytes)});await p.locator('button[data-view="stitches"]').click();},
+  'import-dsb': async p=>{const [name,bytes]=[...readMachineFixtures()].find(([n])=>n.endsWith('spiralbox-wilcom.DSB'));await p.locator('#machineFile').setInputFiles({name:'spiralbox-wilcom.dsb',mimeType:'application/octet-stream',buffer:Buffer.from(bytes)});await p.locator('button[data-view="stitches"]').click();},
   'import-xxx': async p=>{const f=pinnedMachineFixture('xxx');await p.locator('#machineFile').setInputFiles({name:'sample.xxx',mimeType:'application/octet-stream',buffer:Buffer.from(f.bytes)});await p.locator('button[data-view="stitches"]').click();},
   'import-hus': async p=>{const f=pinnedMachineFixture('hus');await p.locator('#machineFile').setInputFiles({name:'sample.hus',mimeType:'application/octet-stream',buffer:Buffer.from(f.bytes)});await p.locator('button[data-view="stitches"]').click();},
   'import-exp': async p=>{const f=pinnedMachineFixture('exp');await p.locator('#machineFile').setInputFiles({name:'sample.exp',mimeType:'application/octet-stream',buffer:Buffer.from(f.bytes)});await p.locator('button[data-view="stitches"]').click();},

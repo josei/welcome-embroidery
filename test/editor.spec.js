@@ -1427,6 +1427,14 @@ test('an XXX file imports from the machine picker as a stitch layer',async({page
  await expect(page.locator('#sourceInfo')).toContainText('source threads');expect(errors).toEqual([]);
 });
 
+test('a DSB file imports from the machine picker as a stitch layer',async({page})=>{
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));page.on('dialog',d=>d.accept());
+ const fixture=pinnedMachineFixture('dsb');await page.goto('/');await page.locator('#new').click();
+ await page.locator('#machineFile').setInputFiles({name:'sample.dsb',mimeType:'application/octet-stream',buffer:Buffer.from(fixture.bytes)});
+ await expect(page.locator('#sourceInfo')).toContainText('DSB stitch layer');await expect(page.locator('.object-row')).toHaveCount(1);
+ await expect(page.locator('#sourceInfo')).toContainText('source threads');expect(errors).toEqual([]);
+});
+
 test('batch export can write VP3 and DST files instead of JEF',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());await page.locator('#new').click();
  await page.locator('#rect').click();await page.locator('#secArray summary').click();await page.locator('#arrCount').fill('3');await page.locator('#arrCount').press('Tab');

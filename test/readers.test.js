@@ -151,6 +151,24 @@ test('all 29 pinned XXX samples decode to the pyembroidery command, thread and c
     assert.equal(sha(Buffer.from(canonical(decoded.stitches.map(s=>[Math.round(s.x*10),Math.round(s.y*10),s.cmd])))),fixture.commandsSha256,`${fixture.path} command/coordinate parity`);
   }
 });
+test('all 10 pinned DSB samples decode to the pyembroidery command, colour block and coordinate digests',()=>{
+  const dsbParity=JSON.parse(readFileSync(new URL('../scripts/dsb-parity.json', import.meta.url), 'utf8'));
+  assert.equal(dsbParity.schema,'welcom/dsb-parity/1');
+  const dsbFiles=zipEntries(archive,name=>/\.dsb$/i.test(name));
+  assert.equal(dsbFiles.size,10);
+  assert.equal(dsbParity.fixtures.length,10);
+  for(const fixture of dsbParity.fixtures){
+    const bytes=dsbFiles.get(fixture.path); assert.ok(bytes,fixture.path);
+    assert.equal(sha(bytes),fixture.sha256,`${fixture.path} fixture pin`);
+    const decoded=decodeEmbroidery(bytes,'dsb');
+    const counts={};for(const s of decoded.stitches)counts[s.cmd]=(counts[s.cmd]||0)+1;
+    assert.deepEqual(counts,fixture.commandCounts,`${fixture.path} command counts`);
+    // Each needle change starts a colour block; the file has no colour table, so each block gets a placeholder colour.
+    const blocks=(counts.color||0)+1;
+    assert.equal(decoded.threads.length,Math.max(fixture.threads,blocks),`${fixture.path} colour block count`);
+    assert.equal(sha(Buffer.from(canonical(decoded.stitches.map(s=>[Math.round(s.x*10),Math.round(s.y*10),s.cmd])))),fixture.commandsSha256,`${fixture.path} command/coordinate parity`);
+  }
+});
 assert.throws(()=>decodeEmbroidery(new Uint8Array(12),'pes'),/signature/);
 const expParity=JSON.parse(readFileSync(new URL('../scripts/exp-parity.json', import.meta.url),'utf8'));
 test('all 35 pinned EXP samples decode to the pyembroidery command, colour block and coordinate digests',()=>{

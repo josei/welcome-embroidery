@@ -514,6 +514,31 @@ function readXxx(bytes) {
   return result(stitches, threads, warnings);
 }
 
+// Barudan-style DSB, read as pyembroidery 1.5.1 does (DsbReader): a 512-byte DST-style header, then 3-byte records. The control byte gives the command, and its 0x40 and 0x20 bits flip y and x. Coordinates are read as unsigned bytes, as pyembroidery does. There is no colour table: each needle change starts a colour block.
+function readDsb(bytes) {
+  if (bytes.length < 512) fail('DSB header is truncated');
+  const stitches = [];
+  let x = 0, y = 0, block = 0;
+  let p = 512;
+  for (; p + 3 <= bytes.length; p += 3) {
+    const ctrl = bytes[p];
+    let dy = -bytes[p + 1], dx = bytes[p + 2];
+    if (ctrl & 0x40) dy = -dy;
+    if (ctrl & 0x20) dx = -dx;
+    if ((ctrl & 0x1F) === 0) { x += dx; y += dy; push(stitches, x, y, 'stitch', block); continue; }
+    if ((ctrl & 0x1F) === 1) { x += dx; y += dy; push(stitches, x, y, 'jump', block); continue; }
+    if (ctrl === 0xF8) break;
+    if (ctrl === 0xE7) { push(stitches, x, y, 'trim', block); continue; }
+    if (ctrl === 0xE8) { push(stitches, x, y, 'stop', block); continue; }
+    if (ctrl >= 0xE9 && ctrl < 0xF8) { block++; if (block >= MAX_THREADS) fail('too many colour changes'); push(stitches, x, y, 'color', block); continue; }
+    break;
+  }
+  push(stitches, x, y, 'end', block);
+  const threads = [];
+  for (let i = 0; i <= block; i++) threads.push({index: i, color: '#527461', brand: 'DSB', catalogNumber: null, name: `Colour ${i + 1}`});
+  return result(stitches, threads, block ? ['DSB files carry no thread colours: placeholder colours were assigned.'] : []);
+}
+
 export function decodeEmbroidery(input, format) {
   const bytes=asBytes(input);
   if(bytes.byteLength>MAX_FILE_BYTES) fail('file exceeds 64 MiB limit');
@@ -526,5 +551,6 @@ export function decodeEmbroidery(input, format) {
   if(format==='exp') return readExp(bytes);
   if(format==='hus') return readHus(bytes);
   if(format==='xxx') return readXxx(bytes);
-  fail('format must be jef, vp3, dst, sew, pec, pes, exp, hus or xxx');
+  if(format==='dsb') return readDsb(bytes);
+  fail('format must be jef, vp3, dst, sew, pec, pes, exp, hus, xxx or dsb');
 }
