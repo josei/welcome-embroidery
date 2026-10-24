@@ -1081,6 +1081,19 @@ test('name drop batch gives each copy the next name in its first lettering, and 
  assert.throws(()=>batchDocuments(plain,{names:['Ana']}),/lettering/);
 });
 
+test('satin end inset can differ at each end: a start value moves only the first needle, an end value only the last, and an explicit end value overrides the single value',()=>{
+ const ends=(extra)=>{const doc=initialDocument();doc.objects=[];applyOperations(doc,[{op:'add_path',id:'s',x:0,y:0,points:[[-30,0],[30,0]],stitch:'satin',satinWidth:4},{op:'set_object',id:'s',compensation:0,underlayType:'none',...extra}]);validateDocument(doc);const plan=compile(doc);assert.deepEqual(plan.errors,[]);const xs=plan.stitches.filter(s=>s.cmd==='stitch').map(s=>s.x);return {first:xs[0],last:xs.at(-1),count:plan.count};};
+ const base=ends({}),startOnly=ends({endInsetStart:1}),endOnly=ends({endInsetEnd:1}),both=ends({endInsetStart:1,endInsetEnd:1}),single=ends({endInset:1}),override=ends({endInset:1,endInsetEnd:0});
+ const near=(a,b)=>Math.abs(a-b)<0.15;
+ assert.ok(near(startOnly.first-base.first,1)&&near(startOnly.last,base.last),'a start inset moves only the first needle ('+startOnly.first+', '+startOnly.last+')');
+ assert.ok(near(endOnly.first,base.first)&&near(base.last-endOnly.last,1),'an end inset moves only the last needle ('+endOnly.first+', '+endOnly.last+')');
+ assert.deepEqual([both.first,both.last],[single.first,single.last],'both per-end values match the single value on both ends');
+ assert.ok(near(override.first-base.first,1)&&near(override.last,base.last),'an explicit end value of 0 overrides the single value at the end only');
+ assert.equal(startOnly.count,base.count,'a per-end inset does not change the stitch count');
+ const doc=initialDocument();doc.objects=[];applyOperations(doc,[{op:'add_path',id:'s',x:0,y:0,points:[[-30,0],[30,0]],stitch:'satin',satinWidth:4},{op:'set_object',id:'s',endInsetStart:3}]);
+ assert.throws(()=>validateDocument(doc),/start inset/);
+});
+
 test('batch plan counts copies per hoop and hoops needed',async()=>{
  const {batchPlan}=await import('../src/engine.js');
  const doc=initialDocument();doc.objects=[];
