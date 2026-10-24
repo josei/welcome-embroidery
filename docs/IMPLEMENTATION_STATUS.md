@@ -529,3 +529,10 @@ Based on direct feedback that editing felt far from a vector program:
 - Bling stones have a Fixing rings select (Two rings or One ring, shown for bling). Two is the default and sews exactly what it did before. One ring sews only the outer ring of each stone, so the stone keeps its size and a bling stone sews half the stitches. Stored as `blingRings`; the engine accepts only 1 or 2. Settable over MCP.
 - Covered by an engine test (one ring keeps the stone's bounds and halves the stitch count of the square stones; 3 is rejected) and an e2e test (the select shows for bling, defaults to two rings, and one ring sews fewer stitches). Screenshot: `design/progress/features/bling-one-ring.png`.
 - Limits: the choice applies to every stone shape, including the round ones; a single ring has no backing, so on some fabrics a stone can lift at its edge. No other fixing layouts.
+
+## 2026-10-24 bead shape: dash or dot
+
+- Beads have a Bead shape select: Dash (the default, the one pass across the path at each point) or Dot. A dot is a small round bead, a 13-point ring as wide as the bead size (`motifSize`, 2 mm by default), so it sits on the path at each point. Stored as `beadShape`; the engine accepts only dash or dot. Settable over MCP.
+- Scope decision: the queued item said a dot sews one stitch at each point. One stitch is not visible on the fabric, so a dot is a small round bead instead. Recorded in the roadmap.
+- Covered by an engine test (a dot path is 2 mm tall and sews more stitches than the dash path; a dash path has no height; an unknown bead shape is rejected) and an e2e test (the Bead shape select shows for beads only, defaults to dash, and dot sews more stitches). Screenshot: `design/progress/features/bead-dot.png`.
+- Limits: a dot is a plain ring; there is no bead-size control separate from the bead size, and no dispensing control.

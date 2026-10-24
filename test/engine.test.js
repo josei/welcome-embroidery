@@ -913,6 +913,18 @@ test('bling stones sew one or two fixing rings; one ring keeps the stone size an
  assert.throws(()=>validateDocument(doc),/blingRings/);
 });
 
+test('dot beads are small round beads the size of the bead length; dash beads stay one pass across the path',()=>{
+ const sewn=(extra)=>{const doc=initialDocument();doc.objects=[];applyOperations(doc,[{op:'add_path',id:'b',x:0,y:0,points:[[-20,0],[20,0]]},{op:'set_object',id:'b',stitch:'bead',motifSize:2,...extra}]);validateDocument(doc);const plan=compile(doc);assert.deepEqual(plan.errors,[]);return plan;};
+ const dash=sewn({}),dot=sewn({beadShape:'dot'});
+ const height=(b)=>b[3]-b[1];
+ // A dot is a 13-point ring 2 mm across, so the path is 2 mm tall; a dash is a line across the path, which has no height.
+ assert.ok(Math.abs(height(dot.bounds)-2)<0.2,'dot beads are 2 mm across ('+height(dot.bounds)+')');
+ assert.ok(height(dash.bounds)<0.2,'dash beads lie across the path, so the path has no height');
+ assert.ok(dot.count>dash.count,'a dot ring sews more stitches than a dash ('+dot.count+' vs '+dash.count+')');
+ const doc=initialDocument();doc.objects=[];applyOperations(doc,[{op:'add_path',id:'b',x:0,y:0,points:[[-20,0],[20,0]]},{op:'set_object',id:'b',stitch:'bead',beadShape:'star'}]);
+ assert.throws(()=>validateDocument(doc),/bead shape/);
+});
+
 test('batch plan counts copies per hoop and hoops needed',async()=>{
  const {batchPlan}=await import('../src/engine.js');
  const doc=initialDocument();doc.objects=[];
