@@ -1032,6 +1032,15 @@ test('hoop presets are the default and the Brother 4x4, 5x7 and 6x10 hoops, each
  assert.throws(()=>applyOperations(doc,[{op:'set_hoop',width:500,height:160}]),/Hoop width and height/);
 });
 
+test('raised fill adds a second tatami underlay inside the shape, and a raised fill takes a true or false value',()=>{
+ const sewn=(extra)=>{const doc=initialDocument();doc.objects=[];applyOperations(doc,[{op:'add_shape',id:'r',kind:'rect',x:-20,y:-15,width:40,height:30,stitch:'fill'},{op:'set_object',id:'r',underlayType:'none',...extra}]);validateDocument(doc);const plan=compile(doc);assert.deepEqual(plan.errors,[]);return plan;};
+ const flat=sewn({}),raised=sewn({raised:true});
+ assert.ok(raised.count>flat.count*1.1,'a raised fill sews extra underlay stitches ('+raised.count+' vs '+flat.count+')');
+ assert.ok(raised.bounds[0]>=-20.5&&raised.bounds[2]<=20.5&&raised.bounds[1]>=-15.5&&raised.bounds[3]<=15.5,'the raised underlay stays inside the shape ('+raised.bounds.join(' ')+')');
+ const doc=initialDocument();doc.objects=[];applyOperations(doc,[{op:'add_shape',id:'r',kind:'rect',x:-20,y:-15,width:40,height:30,stitch:'fill'},{op:'set_object',id:'r',raised:'yes'}]);
+ assert.throws(()=>validateDocument(doc),/raised/);
+});
+
 test('batch plan counts copies per hoop and hoops needed',async()=>{
  const {batchPlan}=await import('../src/engine.js');
  const doc=initialDocument();doc.objects=[];

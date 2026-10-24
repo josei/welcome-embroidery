@@ -1175,6 +1175,16 @@ test('hoop preset select sets the hoop, and a typed size moves it to custom',asy
  expect(errors).toEqual([]);
 });
 
+test('raised fill checkbox shows for fills and adds an underlay',async({page})=>{
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());await page.locator('#new').click();
+ await page.locator('#path').click();const m=await ctm(page);for(const [x,y] of [[-20,-15],[20,-15],[20,15],[-20,15],[-20,-15]]){const s=toScreen(m,x,y);await page.mouse.click(s.x,s.y);}await page.keyboard.press('Enter');
+ const count=async()=>Number(((await page.locator('#count').textContent()).match(/^([\d,]+) stitches/)||[,'0'])[1].replace(/,/g,''));
+ await page.locator('#type').selectOption('fill');await expect(page.locator('#fillRaisedRow')).toBeVisible();await expect(page.locator('#satinRaisedRow')).toBeHidden();
+ await page.locator('#underlayType').selectOption('none');await expect.poll(count).toBeGreaterThan(0);const flat=await count();
+ await page.locator('#fillRaised').check();await expect.poll(count).toBeGreaterThan(flat);
+ expect(errors).toEqual([]);
+});
+
 test('satin pull fields show for satin paths only, and a typed value is kept',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());await page.locator('#new').click();
  await page.locator('#path').click();const m=await ctm(page);for(const [x,y] of [[-20,0],[20,0]]){const s=toScreen(m,x,y);await page.mouse.click(s.x,s.y);}await page.keyboard.press('Enter');

@@ -597,3 +597,10 @@ Based on direct feedback that editing felt far from a vector program:
 - Decision: no MCP key for presets. `set_hoop` already sets any size, so an agent can use the same sizes; a preset name would only add a second way to say the same thing.
 - Covered by an engine test (the four presets are exactly these sizes, each is stored by `set_hoop` and validates, and an out-of-range width is rejected) and an e2e test (choosing 5×7 sets both fields, and typing a width moves the select to Custom size). Screenshot: `design/progress/features/hoop-preset.png` (the 6×10 preset).
 - Limits: in the narrow footer the select truncates its label ("Brother 6" in the screenshot); the title tooltip has the full name. Queued as a follow-up.
+
+## 2026-10-24 raised fill
+
+- Fills have a Raised fill checkbox (extra tatami underlay). It adds a second tatami underlay at 2 mm rows, at the same 90° to the top fill as the fill underlay, inside the shape, so the fill stands up. It is stored as the existing `raised` flag, which satin already uses for its centre run and zigzag. Settable over MCP for fills and satin.
+- Decision: the queued item asked for the raised underlay to sit over the usual underlay and under the top fill, at 90°. It does, but when the Underlay select also includes the tatami fill (auto for large shapes), the two layers are the same direction and add up. That is the intended stacking for a higher lift, and it is in the limits below.
+- Covered by an engine test (a raised 40 by 30 mm fill sews more than 1.1 times the stitches of the same fill; the extra stays inside the shape; a non-boolean value is rejected) and an e2e test (the checkbox shows for fills only and ticking it with no other underlay adds stitches). Screenshot: `design/progress/features/fill-raised.png`.
+- Limits: the raised layer uses a fixed 2 mm spacing, not a setting; it stacks on whatever underlay is chosen, so with auto underlay on a large shape the stitch count rises noticeably; not sew-tested on a machine.
