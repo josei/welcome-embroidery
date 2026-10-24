@@ -169,7 +169,7 @@ Updated 2026-10-06. This source provides a working static editor, local MCP serv
 ## 2026-10-21 bundled Node runtime
 
 - The desktop bundle includes the Node runtime that ran the build (`npm run desktop:prepare` copies it to `runtime/`, with a NODE-NOTICE.txt). The app prefers that runtime and falls back to a system `node`. Decision: the runtime comes from the build machine, so each CI platform bundles its own Node (about 125 MB; the bundle is large). Verified on Linux with no Node on the PATH: the server started and the window opened.
-- Not automated; macOS and Windows bundles are built by CI and have not run yet.
+- Not automated; the desktop bundles are built by CI (`desktop.yml`) on a tag or a manual run. The manual run on `036109f` passed on Linux, macOS and Windows (run 40035382088); the first manual run had failed on Windows (`spawnSync npm ENOENT`), fixed in `036109f`.
 
 ## 2026-10-21 edge closing for clipped runs
 
@@ -593,7 +593,7 @@ Based on direct feedback that editing felt far from a vector program:
 ## 2026-10-24 hoop size presets
 
 - The hoop size in the footer has a Hoop preset select: Custom size, Default 110 × 110, Brother 4×4 · 100 × 100, Brother 5×7 · 180 × 130, Brother 6×10 · 260 × 160. Choosing one sets the document hoop through the existing `set_hoop` operation; typing a different size moves the select to Custom size. The sizes live in `HOOP_PRESETS` in `src/engine.js`.
-- Sources, checked 2026-10-24: 100 × 100 mm is Brother's 4×4 hoop (SA443, "100mm X 100mm (approx. 4" X 4")", Allstitch's kit page). 180 × 130 mm is the 5×7 hoop (SA444, listed by Sew Jersey as "180mm x 130mm"; Echidna Sewing's table gives 5" × 7"). 260 × 160 mm is the 6×10 hoop: Echidna's table gives 6" × 10" for 160 × 260 mm, and one retailer's slide-on 6×10 hoop is listed for it. That is one guide, not Brother's own specification, so the sizes are flagged for a second source. The long side is the width. The queued 150 × 240 mm size was dropped: no source lists it.
+- Sources, checked 2026-10-24: 100 × 100 mm is Brother's 4×4 hoop (SA443, "100mm X 100mm (approx. 4" X 4")", Allstitch's kit page). 180 × 130 mm is the 5×7 hoop (SA444, listed by Sew Jersey as "180mm x 130mm"; Echidna Sewing's table gives 5" × 7"). 260 × 160 mm is the 6×10 hoop: Echidna's table gives 6" × 10" for 160 × 260 mm, and one retailer's slide-on 6×10 hoop is listed for it. That was one guide; a second source was then found: Brother's SA441 6×10 hoop is listed with a 10.5 × 6.25 inch embroidery field (about 267 × 159 mm), matching a frame of about 160 × 260 mm. Confirmed 2026-10-24 by the supervisor review. The long side is the width. The queued 150 × 240 mm size was dropped: no source lists it.
 - Decision: no MCP key for presets. `set_hoop` already sets any size, so an agent can use the same sizes; a preset name would only add a second way to say the same thing.
 - Covered by an engine test (the four presets are exactly these sizes, each is stored by `set_hoop` and validates, and an out-of-range width is rejected) and an e2e test (choosing 5×7 sets both fields, and typing a width moves the select to Custom size). Screenshot: `design/progress/features/hoop-preset.png` (the 6×10 preset).
 - Limits: in the narrow footer the select truncates its label ("Brother 6" in the screenshot); the title tooltip has the full name. Queued as a follow-up.

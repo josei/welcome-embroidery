@@ -118,7 +118,7 @@ Reference: Wilcom EmbroideryStudio, the commercial digitizing suite. Its feature
 | Files | PES version 6 export | Built (export only; checked by decoding with pyembroidery; thread names omitted) |
 | Files | SEW (Janome native) export and import | Built (export checked by decoding with pyembroidery; import checked against all 15 pinned samples; trims not written, no design header) |
 | Files | Print template: a 1:1 millimetre SVG placement sheet of the hoop with the design outline, a centre cross and a 10 mm scale bar | Built (basic; not a printer calibration) |
-| Files | Hoop presets: Brother 4×4, 5×7 and 6×10 hoops plus the default, chosen from the footer | Built (basic; 6×10 size from one retailer guide) |
+| Files | Hoop presets: Brother 4×4, 5×7 and 6×10 hoops plus the default, chosen from the footer | Built (basic; sizes checked against Brother and retailer listings, see the hoop status entry) |
 | Files | Other machine formats | Not started |
 | Libraries | Thread brand libraries | Not started (licensed data) |
 | Automation | Headless MCP document sessions for agents | Built |
@@ -131,7 +131,7 @@ Everything in the feature list is built, partly built, or deliberately out of sc
 - Thread brand libraries: licensed data; out of scope.
 - Several live document slots per agent link: would broaden agent permissions; out of scope.
 - A real Safari device check: needs a device.
-- macOS and Windows desktop builds: built by CI on a tag or manual run; not run yet.
+- macOS and Windows desktop builds: built by CI (`desktop.yml`) on a tag or a manual run. The manual run on `036109f` passed on Linux, macOS and Windows (run 40035382088), after the Windows npm fix.
 - Bling stone library (more shapes and settings beyond Round, Square, Oval, Hexagon, Star and Heart; turn and fixing rings are now settings), and a true 3D surface warp: not started; the basic forms are built.
 
 ## Desktop app roadmap (Tauri, proposed 2026-10-20)
