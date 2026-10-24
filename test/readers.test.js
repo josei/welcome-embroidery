@@ -100,6 +100,23 @@ test('all 25 pinned PEC samples decode to the pyembroidery command, thread and c
   }
 });
 
+const pesParity=JSON.parse(readFileSync(new URL('../scripts/pes-parity.json', import.meta.url),'utf8'));
+test('all 73 pinned PES samples (versions 1 to 10) decode to the pyembroidery command, thread and coordinate digests',()=>{
+  assert.equal(pesParity.schema,'welcom/pes-parity/1');
+  const pesFiles=zipEntries(archive,name=>/\.pes$/i.test(name));
+  assert.equal(pesFiles.size,73);
+  assert.equal(pesParity.fixtures.length,73);
+  for(const fixture of pesParity.fixtures){
+    const bytes=pesFiles.get(fixture.path); assert.ok(bytes,fixture.path);
+    assert.equal(sha(bytes),fixture.sha256,`${fixture.path} fixture pin`);
+    const decoded=decodeEmbroidery(bytes,'pes');
+    const counts={};for(const s of decoded.stitches)counts[s.cmd]=(counts[s.cmd]||0)+1;
+    assert.deepEqual(counts,fixture.commandCounts,`${fixture.path} command counts`);
+    assert.equal(decoded.threads.length,fixture.threads,`${fixture.path} thread count`);
+    assert.equal(sha(Buffer.from(canonical(decoded.stitches.map(s=>[Math.round(s.x*10),Math.round(s.y*10),s.cmd])))),fixture.commandsSha256,`${fixture.path} command/coordinate parity`);
+  }
+});
+assert.throws(()=>decodeEmbroidery(new Uint8Array(12),'pes'),/signature/);
 const expParity=JSON.parse(readFileSync(new URL('../scripts/exp-parity.json', import.meta.url),'utf8'));
 test('all 35 pinned EXP samples decode to the pyembroidery command, colour block and coordinate digests',()=>{
   assert.equal(expParity.schema,'welcom/exp-parity/1');

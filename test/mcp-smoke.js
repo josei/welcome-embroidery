@@ -1,3 +1,4 @@
+import {readFileSync} from 'node:fs';
 import assert from 'node:assert/strict';
 import {Client} from '@modelcontextprotocol/sdk/client/index.js';
 import {StreamableHTTPClientTransport} from '@modelcontextprotocol/sdk/client/streamableHttp.js';
@@ -130,5 +131,7 @@ const sv=await client.callTool({name:'document_export_svg',arguments:{documentId
 for(const topic of ['overview','coordinates','workflow','operations','stitching','sewing-rules','lettering']){const h=await client.callTool({name:'embroidery_help',arguments:{topic}});assert.ok(h.content[0].text.length>150,topic);}
 const ops=await client.callTool({name:'embroidery_help',arguments:{topic:'operations'}});assert.ok(/set_path_node_type/.test(ops.content[0].text),'the full operation list moved into help');
 const tools=await client.listTools();const applyDesc=tools.tools.find(t=>t.name==='document_apply').description;assert.ok(applyDesc.length<1500&&/TOP-LEFT/.test(applyDesc)&&/DOWN/.test(applyDesc)&&/BASELINE/.test(applyDesc),'the apply description is short and states the coordinate conventions');
+const pesDoc=(await client.callTool({name:'document_create',arguments:{name:'PES import',hoop:200}})).structuredContent.documentId;
+const pesImport=await client.callTool({name:'document_import_embroidery',arguments:{documentId:pesDoc,expectedRevision:0,fileName:'brother-v6.pes',format:'pes',dataBase64:readFileSync(new URL('./fixtures/brother-v6.pes',import.meta.url)).toString('base64')}});assert.ok(!pesImport.isError,JSON.stringify(pesImport.content));
 const bigRequest=await client.callTool({name:'embroidery_help',arguments:{topic:'x'.repeat(3_000_000)}});assert.ok(!JSON.stringify(bigRequest).includes('Request body exceeds'),'a 3 MB request is within the 8 MB MCP body limit');
 await client.close();console.log(JSON.stringify({protocol:client.getServerVersion(),tools:listed.tools.length,documentId,revision:2,staleRevisionRejected:true,stitches:compiled.structuredContent.count,previewArtifact:true,sourceEditable:true,openUrl:openUrl.href,vectorOps:{stitches:vecPlan.structuredContent.count},formats:['jef','vp3'],pinnedImport:{jef:{commands:201,needleStitches:30,untouchedPassthrough:true,transformedExportDecoded:true,sourceRetained:true,malformedRejected:true},vp3:{commands:70,needleStitches:60,untouchedPassthrough:true,transformedExportDecoded:true,travelTrimRejected:true}}}));

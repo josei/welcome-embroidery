@@ -209,6 +209,18 @@ export const PEC_CHART=[[14,31,124],[10,85,163],[0,135,119],[75,107,175],[237,23
 // PEC (Brother), as read by pyembroidery's PecReader: '#PEC0001', 'LA:' and a 16-byte label, the colour count minus one at 0x38 and one palette byte per colour,
 // then the stitch stream at 0x218. Values are 0.1 mm relative moves: a byte below 0x80 is a 7-bit step, 0x80 starts a 12-bit step whose flags are 0x20 trim and 0x10 jump.
 // FE B0 xx is a colour change; FF 00 ends the stream. Palette bytes index the chart modulo 65, where 0 is no thread (pyembroidery's reader behaves the same way).
+// PES (Brother): every version starts '#PES' + a four-digit version, and bytes 8-11 hold the offset of its PEC block, which is read as a PEC file.
+function readPes(bytes) {
+  if (bytes.length < 12) fail('PES header is truncated');
+  if (new TextDecoder().decode(bytes.subarray(0, 4)) !== '#PES') fail('invalid PES signature');
+  const offset = (bytes[8] | bytes[9] << 8 | bytes[10] << 16 | bytes[11] << 24) >>> 0;
+  if (offset >= bytes.length) fail('PES PEC block offset is outside the file');
+  // The offset points at the PEC label 'LA:', which is byte 8 of a PEC block; a PES file has no '#PEC0001' header of its own, so one is put in front.
+  const block = new Uint8Array(8 + bytes.length - offset);
+  block.set(new TextEncoder().encode('#PEC0001'), 0);
+  block.set(bytes.subarray(offset), 8);
+  return readPec(block);
+}
 function readPec(bytes) {
   if (bytes.length < 0x218) fail('PEC header is truncated');
   if (new TextDecoder().decode(bytes.subarray(0, 3)) !== '#PE' || new TextDecoder().decode(bytes.subarray(8, 11)) !== 'LA:') fail('invalid PEC signature');
@@ -303,6 +315,7 @@ export function decodeEmbroidery(input, format) {
   if(format==='dst') return readDst(bytes);
   if(format==='sew') return readSew(bytes);
   if(format==='pec') return readPec(bytes);
+  if(format==='pes') return readPes(bytes);
   if(format==='exp') return readExp(bytes);
-  fail('format must be jef, vp3, dst, sew, pec or exp');
+  fail('format must be jef, vp3, dst, sew, pec, pes or exp');
 }

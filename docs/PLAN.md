@@ -114,9 +114,10 @@ Reference: Wilcom EmbroideryStudio, the commercial digitizing suite. Its feature
 | Sequencing | Name drop: a batch export with one name per line, each copy's first lettering set to the next name | Built (basic; first lettering only) |
 | Sequencing | Batch export: one file per hoop in JEF, VP3, DST or SEW (copies laid out on the batch grid, imported machine files included) | Built (JEF, VP3, DST, SEW; imported layers re-encoded per hoop) |
 | Preview | 3D preview and stitch playback | Built |
-| Files | JEF and VP3 export and import, DST import and export, SEW import and export, PEC and EXP import | Built |
+| Files | JEF and VP3 export and import, DST import and export, SEW import and export, PEC, PES and EXP import | Built |
 | Files | EXP (Melco) export and import | Built (export checked by decoding with pyembroidery; import checked against all 35 pinned samples; placeholder colours) |
-| Files | PEC (Brother) export and import | Built (export checked by decoding with pyembroidery; import checked against all 25 pinned samples; no PES-embedded PEC) |
+| Files | PEC (Brother) export and import | Built (export checked by decoding with pyembroidery; import checked against all 25 pinned samples) |
+| Files | PES (Brother) import, all versions 1 to 10: the PEC block at the offset in bytes 8-11 | Built (import checked against all 73 pinned samples; JEF export refuses samples with steps over 12.7 mm) |
 | Files | PES (version 1) export | Built (export only; checked by decoding with pyembroidery) |
 | Files | PES version 6 export | Built (export only; checked by decoding with pyembroidery; thread names omitted) |
 | Files | SEW (Janome native) export and import | Built (export checked by decoding with pyembroidery; import checked against all 15 pinned samples; trims not written, no design header) |

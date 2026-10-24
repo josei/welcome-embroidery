@@ -1236,6 +1236,14 @@ test('organize fonts lists a loaded font with its lettering, and removes it only
  expect(errors).toEqual([]);
 });
 
+test('a PES machine file opens through the machine picker as a stitch layer',async({page})=>{
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());await page.locator('#new').click();await expect(page.locator('.object-row')).toHaveCount(0);
+ await page.locator('#importMachine').click();await page.locator('#machineFile').setInputFiles('test/fixtures/spiralbox-brother-v6.pes');
+ await expect(page.locator('.object-row')).toHaveCount(1);const layer=page.locator('.object-row').last();await expect(layer).toContainText('machine stitches');
+ await expect(page.locator('#sourceInfo')).toContainText('PES');await expect(page.locator('#sourceInfo')).toContainText('96 commands');
+ expect(errors).toEqual([]);
+});
+
 test('satin pull fields show for satin paths only, and a typed value is kept',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());await page.locator('#new').click();
  await page.locator('#path').click();const m=await ctm(page);for(const [x,y] of [[-20,0],[20,0]]){const s=toScreen(m,x,y);await page.mouse.click(s.x,s.y);}await page.keyboard.press('Enter');
