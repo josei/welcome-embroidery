@@ -14,7 +14,7 @@ Rules for the supervisor: verify tests actually pass and diffs match commit mess
 
 ## Ready to build
 
-Empty. The 2026-10-24 builder run pulled the Husqvarna HUS import from the PLAN open work (see Done this cycle). The open work left in `docs/PLAN.md` is out of reach for one run: thread brand libraries are licensed data, the Safari check needs a physical device, the true 3D surface warp is not started, and the other machine formats are not started (EMB needs a feasibility track). The next items come from the supervisor's research refill.
+Empty. The 2026-10-24 builder runs pulled the machine-format import items from PLAN open work (HUS, XXX, DSB and DSZ; see Done this cycle). What is left in `docs/PLAN.md` is out of reach for one run: thread brand libraries are licensed data, the Safari check needs a physical device, the true 3D surface warp is not started, and the remaining machine formats (EMB needs a feasibility track; the rest are not started). The next items come from the supervisor's research refill.
 
 ## Decisions
 
