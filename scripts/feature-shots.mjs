@@ -2,6 +2,8 @@ import {chromium} from 'playwright';
 import {mkdirSync} from 'node:fs';
 import path from 'node:path';
 import {pinnedMachineFixture} from '../test/fixture-archive.js';
+import {withPesMetadata} from '../test/pes-with-metadata.js';
+import {readFileSync} from 'node:fs';
 const base=process.argv[2]||'http://127.0.0.1:8790/';
 const out='design/progress/features';mkdirSync(out,{recursive:true});
 const browser=await chromium.launch();
@@ -76,6 +78,8 @@ const cases={
   'import-exp': async p=>{const f=pinnedMachineFixture('exp');await p.locator('#machineFile').setInputFiles({name:'sample.exp',mimeType:'application/octet-stream',buffer:Buffer.from(f.bytes)});await p.locator('button[data-view="stitches"]').click();},
   'batch-imported': async p=>{const f=pinnedMachineFixture('jef');await p.locator('#machineFile').setInputFiles({name:'sample.jef',mimeType:'application/octet-stream',buffer:Buffer.from(f.bytes)});await p.locator('#secArray summary').click();await p.locator('#arrCount').fill('3');await p.locator('#arrCount').press('Tab');},
   'export-sew': async p=>{await p.locator('#rect').click();await p.locator('#export').click();await p.locator('#format').selectOption('sew');},
+  'sewing-tips-settings': async p=>{await p.locator('#rect').click();await p.locator('#rect').click();await p.locator('#tipsSettings summary').click();},
+  'pes-metadata': async p=>{const sample=new Uint8Array(readFileSync(new URL('../test/fixtures/spiralbox-brother-v6.pes',import.meta.url)));const bytes=withPesMetadata(sample,{name:'Spiral box',author:'Jose Ignacio',comments:'Test note'});await p.locator('#machineFile').setInputFiles({name:'spiral-box.pes',mimeType:'application/octet-stream',buffer:Buffer.from(bytes)});await p.locator('.object-row').first().click();},
   'rotate-pivot': async p=>{await p.locator('#rect').click();await p.locator('.object-row').first().click();await p.locator('#posX').fill('10');await p.locator('#posX').press('Enter');await p.locator('#posY').fill('-10');await p.locator('#posY').press('Enter');await p.locator('#pivotPick').click();const m=await p.evaluate(()=>{const c=document.querySelector('#art').getScreenCTM();return {a:c.a,d:c.d,e:c.e,f:c.f};});await p.mouse.click(m.a*-30+m.e,m.d*-20+m.f);await p.locator('#rotation').fill('30');await p.locator('#rotation').press('Enter');},
 };
 const done=[];

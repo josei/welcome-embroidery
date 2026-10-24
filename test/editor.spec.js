@@ -2,6 +2,7 @@ import {test,expect} from '@playwright/test';
 import {readFileSync} from 'node:fs';
 import {pinnedMachineFixture,readMachineFixtures} from './fixture-archive.js';
 import {decodeEmbroidery} from '../src/readers.js';
+import {withPesMetadata} from './pes-with-metadata.js';
 import {initialDocument,importStitchLayer,applyOperations,compile,geometry} from '../src/engine.js';
 
 test('browser design, settings, history, local project and offline compilation/export',async({page})=>{
@@ -459,6 +460,27 @@ test('rotation pivot: Set pivot then click the canvas, and the rotation field tu
  const c1=await read(),want=[P[0]-(c0[1]-P[1]),P[1]+(c0[0]-P[0])];
  expect(Math.abs(c1[0]-want[0])).toBeLessThan(.15);expect(Math.abs(c1[1]-want[1])).toBeLessThan(.15);expect(Number(await page.locator('#rotation').inputValue())).toBe(90);
  await page.locator('#pivotReset').click();await expect(page.locator('#pivotInfo')).toHaveText('');await expect(page.locator('#overlay .pivot-mark')).toHaveCount(0);
+});
+
+test('sewing tips to show: unticking a category hides its tips from the panel and the count, and the choice is saved in this browser',async({page})=>{
+ await page.goto('/');page.on('dialog',d=>d.accept());await page.locator('#new').click();await page.locator('#rect').click();await page.locator('#rect').click();
+ await expect(page.locator('#sewTips')).toContainText('is a duplicate');await expect(page.locator('#issuesBtn')).toContainText('1 sewing tip');
+ await page.locator('#tipsSettings summary').click();const dup=page.locator('#tipsList label',{hasText:'Duplicate objects'}).locator('input');await expect(dup).toBeChecked();
+ await dup.uncheck();
+ await expect(page.locator('#sewTips')).toBeHidden();await expect(page.locator('#issuesBtn')).toBeHidden();
+ expect(await page.evaluate(()=>localStorage.getItem('welcome.hiddenTips'))).toBe('["duplicate"]');
+ await dup.check();await expect(page.locator('#sewTips')).toContainText('is a duplicate');await expect(page.locator('#issuesBtn')).toContainText('1 sewing tip');
+ expect(await page.evaluate(()=>localStorage.getItem('welcome.hiddenTips'))).toBe('[]');
+});
+
+test('a PES file with header metadata names its layer after the file and shows the author in the info panel',async({page})=>{
+ const sample=new Uint8Array(readFileSync(new URL('./fixtures/spiralbox-brother-v6.pes',import.meta.url)));
+ const bytes=withPesMetadata(sample,{name:'Spiral box',author:'Jose Ignacio',comments:'Test note'});
+ await page.goto('/');page.on('dialog',d=>d.accept());await page.locator('#new').click();
+ await page.locator('#machineFile').setInputFiles({name:'spiral-box.pes',mimeType:'application/octet-stream',buffer:Buffer.from(bytes)});
+ await expect(page.locator('.object-row').first()).toContainText('Spiral box');
+ await page.locator('.object-row').first().click();
+ await expect(page.locator('#sourceInfo')).toContainText('Spiral box · by Jose Ignacio');
 });
 
 test('rename compatibility: projects saved as .welcom still open, new saves use .welcome, branding says Welcome',async({page})=>{

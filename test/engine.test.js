@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import neonGlyphs from '../fonts/neon_blinking/glyphs.json' with {type:'json'};
 import {pinnedMachineFixture} from './fixture-archive.js';
-import {initialDocument,compile,encode,applyOperations,geometry,objectBounds,validateDocument,jefWarnings,exportSvg,exportPrintTemplate,HOOP_PRESETS,batchDocuments,customFontUsage,hoopSize,importStitchLayer,measureText,threadPlan,sewingSeconds,sewingWorksheet} from '../src/engine.js';
+import {initialDocument,compile,encode,applyOperations,geometry,objectBounds,validateDocument,jefWarnings,exportSvg,exportPrintTemplate,HOOP_PRESETS,batchDocuments,customFontUsage,hoopSize,importStitchLayer,measureText,threadPlan,sewingSeconds,sewingWorksheet,designWarnings,TIP_CATEGORIES,visibleTips} from '../src/engine.js';
 
 test('browser and MCP semantic operations share editable document behavior',()=>{
  const doc=initialDocument();doc.objects=[];
@@ -307,6 +307,19 @@ test('rotation about a pivot: each centre moves about the point, rotating about 
  d=mk();applyOperations(d,[{op:'add_shape',id:'a',kind:'rect',x:9,y:-1,width:2,height:2},{op:'transform',id:'a',rotation:90,pivot:{x:0,y:0}}]);validateDocument(d);near(centre(d.objects[0]),[0,10]);assert.equal(d.objects[0].rotation,90);
  applyOperations(d,[{op:'transform',id:'a',rotation:180,pivot:{x:0,y:0}}]);near(centre(d.objects[0]),[-10,0]);assert.equal(d.objects[0].rotation,180,'the pivot key turns by the change in rotation, not to an absolute centre');
  applyOperations(d,[{op:'transform',id:'a',rotation:-180}]);assert.equal(d.objects[0].rotation,-180,'without a pivot the rotation is set as before');
+});
+
+test('sewing tips carry a category, and hiding a category drops only its tips',()=>{
+ const d=blank();d.hoop=100;
+ applyOperations(d,[{op:'add_shape',id:'out',kind:'rect',x:60,y:-5,width:20,height:10},{op:'add_shape',id:'tiny',kind:'rect',x:-40,y:-40,width:1,height:1},{op:'add_shape',id:'dup1',kind:'rect',x:-20,y:0,width:10,height:10},{op:'add_shape',id:'dup2',kind:'rect',x:-20,y:0,width:10,height:10}]);
+ const tips=designWarnings(d),cats=new Set(tips.map(t=>t.category));
+ assert.ok(cats.has('hoop')&&cats.has('fill')&&cats.has('duplicate'),'the design gives hoop, fill and duplicate tips');
+ for(const t of tips)assert.ok(TIP_CATEGORIES.some(c=>c.id===t.category),`${t.category} is a known category`);
+ const fills=tips.filter(t=>t.category==='fill').length;
+ assert.equal(visibleTips(tips,['fill']).length,tips.length-fills,'hiding fill drops only the fill tips');
+ assert.ok(visibleTips(tips,['fill']).every(t=>t.category!=='fill'));
+ assert.equal(visibleTips(tips,['bogus']).length,tips.length,'an unknown category is ignored');
+ assert.equal(visibleTips(tips).length,tips.length,'nothing hidden shows every tip');
 });
 
 test('direct manipulation ops: scale, rotate about a pivot, flip, translate, to_path and lock/hide',()=>{

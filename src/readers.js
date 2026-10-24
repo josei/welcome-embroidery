@@ -219,7 +219,26 @@ function readPes(bytes) {
   const block = new Uint8Array(8 + bytes.length - offset);
   block.set(new TextEncoder().encode('#PEC0001'), 0);
   block.set(bytes.subarray(offset), 8);
-  return readPec(block);
+  const result = readPec(block);
+  const metadata = pesMetadata(bytes, offset);
+  if (metadata) result.metadata = metadata;
+  return result;
+}
+// PES headers from version 4 on (pyembroidery's PesReader) hold five length-prefixed strings after the 16-byte prefix: name, category, author, keywords and comments. Each is one length byte then the text; an empty field is a zero length. Versions 1 to 3 have none. Anything malformed or cut short by the PEC block is ignored, so the stitches still import.
+const PES_METADATA_KEYS = ['name', 'category', 'author', 'keywords', 'comments'];
+function pesMetadata(bytes, pecOffset) {
+  if (!(Number(new TextDecoder().decode(bytes.subarray(4, 8))) >= 40)) return null;
+  const out = {};
+  let p = 16;
+  for (const key of PES_METADATA_KEYS) {
+    if (p >= pecOffset) break;
+    const n = bytes[p++];
+    if (p + n > pecOffset) break;
+    const text = new TextDecoder().decode(bytes.subarray(p, p + n)).trim();
+    p += n;
+    if (text) out[key] = text.slice(0, 240);
+  }
+  return Object.keys(out).length ? out : null;
 }
 function readPec(bytes) {
   if (bytes.length < 0x218) fail('PEC header is truncated');

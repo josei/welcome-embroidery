@@ -74,7 +74,8 @@ export function makeStitchLayer(decoded,format,{id=crypto.randomUUID(),name='Imp
   if(decoded.stitches.length>250000)throw Error('This design exceeds the 250,000 stitch import limit.');
   const first=decoded.threads.find(t=>/^#[0-9a-f]{6}$/i.test(t.color||'')),defaultThread=first?.color||'#527461';
   const placement={x:-w/2,y:-h/2,w,h};
-  return {id,name,kind:'stitch_layer',...placement,rotation:0,thread:defaultThread,stitch:'run',threads:structuredClone(decoded.threads),stitches:structuredClone(decoded.stitches),threadOverrides:{},source:{format,fileName:String(fileName).slice(0,240),size,sha256,bounds:[...decoded.bounds],coordinateMapping:'source_mm_centered_on_editor_origin',defaultPlacement:placement,defaultThread,warnings:[...(decoded.warnings||[])],originalBytesBase64}};
+  const fileMeta=decoded.metadata&&typeof decoded.metadata==='object'?{...decoded.metadata}:null,layerName=fileMeta?.name||name;
+  return {id,name:layerName,kind:'stitch_layer',...placement,rotation:0,thread:defaultThread,stitch:'run',threads:structuredClone(decoded.threads),stitches:structuredClone(decoded.stitches),threadOverrides:{},source:{format,fileName:String(fileName).slice(0,240),size,sha256,bounds:[...decoded.bounds],coordinateMapping:'source_mm_centered_on_editor_origin',defaultPlacement:placement,defaultThread,warnings:[...(decoded.warnings||[])],...(fileMeta?{metadata:fileMeta}:{}),originalBytesBase64}};
 }
 export function importStitchLayer(bytes,format,metadata={}){
   const input=bytes instanceof Uint8Array?bytes:new Uint8Array(bytes);
@@ -541,6 +542,7 @@ export function validateDocument(doc){
       if(o.source.originalBytesBase64!==null&&o.source.originalBytesBase64!==undefined&&(!/^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$/.test(o.source.originalBytesBase64)||o.source.originalBytesBase64.length>1398104))fail(`stitch layer ${o.id} has invalid preserved source bytes.`);
       if(o.source.originalBytesBase64&&Math.floor(o.source.originalBytesBase64.length*3/4)-(o.source.originalBytesBase64.endsWith('==')?2:o.source.originalBytesBase64.endsWith('=')?1:0)!==o.source.size)fail(`stitch layer ${o.id} source byte count does not match its preserved bytes.`);
       sourceByteCount+=o.source.size;if(sourceByteCount>2097152)fail('combined preserved machine source bytes exceed 2 MiB.');
+      if(o.source.metadata!==undefined&&(!o.source.metadata||typeof o.source.metadata!=='object'||Object.entries(o.source.metadata).some(([k,v])=>!['name','category','author','keywords','comments'].includes(k)||typeof v!=='string'||v.length>240)))fail(`stitch layer ${o.id} has invalid file metadata.`);
       if(!Array.isArray(o.source.warnings)||o.source.warnings.length>100||o.source.warnings.some(v=>typeof v!=='string'||v.length>500))fail(`stitch layer ${o.id} has invalid reader warnings.`);
       if(o.threads.some((t,i)=>!t||Array.isArray(t)||typeof t!=='object'||t.index!==i||!(t.color===null||color.test(t.color))||Object.entries(t).length>24||Object.entries(t).some(([k,v])=>k.length>64||!(v===null||typeof v==='string'&&v.length<=240||typeof v==='boolean'||typeof v==='number'&&Number.isFinite(v)))))fail(`stitch layer ${o.id} has invalid ordered thread metadata.`);
       stitchCommandCount+=o.stitches.length;if(stitchCommandCount>250000)fail('total imported stitch command count exceeds 250,000.');let sewable=false,ended=false,endCount=0,minX=Infinity,minY=Infinity,maxX=-Infinity,maxY=-Infinity;
@@ -1029,22 +1031,27 @@ export {geometry,objectBounds};
 
 // Plain-language sewing advice for a design, so an agent (or a person) hears about likely problems before sewing. Thresholds follow common embroidery practice.
 export function designWarnings(doc){
-  const out=[],hoopW=doc.hoop,hoopH=doc.hoopH??doc.hoop,seen=new Map(),w=(o,message)=>out.push({id:o.id,name:o.name||o.kind,message});
+  const out=[],hoopW=doc.hoop,hoopH=doc.hoopH??doc.hoop,seen=new Map(),w=(o,message,category)=>out.push({id:o.id,name:o.name||o.kind,message,category});
   for(const o of doc.objects){
     if(o.visible===false||o.mask||o.kind==='stitch_layer')continue;let b;try{b=objectBounds(o);}catch{continue;}const bw=b[2]-b[0],bh=b[3]-b[1],label=o.name||o.id;
-    if(b[0]<-hoopW/2||b[1]<-hoopH/2||b[2]>hoopW/2||b[3]>hoopH/2)w(o,`${label} reaches outside the ${hoopW}×${hoopH} mm hoop.`);
-    const key=[o.kind,o.stitch,o.thread,Math.round(b[0]),Math.round(b[1]),Math.round(b[2]),Math.round(b[3])].join('|');if(seen.has(key))w(o,`${label} is a duplicate of ${seen.get(key)}: it would be sewn twice. Delete one.`);else seen.set(key,label);
+    if(b[0]<-hoopW/2||b[1]<-hoopH/2||b[2]>hoopW/2||b[3]>hoopH/2)w(o,`${label} reaches outside the ${hoopW}×${hoopH} mm hoop.`,'hoop');
+    const key=[o.kind,o.stitch,o.thread,Math.round(b[0]),Math.round(b[1]),Math.round(b[2]),Math.round(b[3])].join('|');if(seen.has(key))w(o,`${label} is a duplicate of ${seen.get(key)}: it would be sewn twice. Delete one.`,'duplicate');else seen.set(key,label);
     const filled=o.stitch==='fill'&&o.kind!=='text'&&(o.kind!=='path'||o.closed);
     if(filled&&!o.photo){const lines=geometry(o,0).filter(l=>l.length>=4);if(lines.length){const area=shapeArea(lines),per=lines.reduce((n,r)=>n+r.reduce((m,p,i)=>i?m+distP(p,r[i-1]):m,0),0),mean=per?2*area/per:0;
-      if(Math.min(bw,bh)<2||area<6)w(o,`${label} is ${bw.toFixed(1)}×${bh.toFixed(1)} mm, too small for a clean fill. Make it at least about 2 mm across, or use a satin column or running stitch.`);
-      else if(Math.min(bw,bh)<4.5||area<25)w(o,`${label} is a small fill (${bw.toFixed(1)}×${bh.toFixed(1)} mm): it will sew, but the rows are very short and can look dense or rough. A satin stitch or a slightly larger shape usually sews cleaner.`);
-      else if(mean<1.4)w(o,`${label} is mostly narrower than 1.4 mm, so a fill will skip or look thin. Use a satin column along its centre line.`);}}
-    if(o.kind==='path'&&!filled){const len=pathOutline(o).reduce((n,p,i,a)=>i?n+distP(p,a[i-1]):0,0);if(len<2)w(o,`${label} is only ${len.toFixed(1)} mm long; stitches this short are skipped or bunch up.`);
-      if(o.stitch==='satin'){const wd=Math.max(Number(o.satinWidth)||3,Number(o.satinWidthEnd)||0);if((Number(o.satinWidth)||3)<1)w(o,`${label} is a satin column under 1 mm wide, which is hard to sew cleanly. Use a running stitch, or widen it to at least 1.5 mm.`);if(wd>7)w(o,`${label} is a satin column wider than 7 mm; long satin stitches snag. Use a fill, or split it into narrower columns.`);}}
-    if(o.kind==='text'&&Number(o.h)<5&&isRegistryFont(o.font)&&getFont(o.font)?.kind!=='line')w(o,`${label} is only ${Number(o.h).toFixed(1)} mm tall; lettering under about 5 mm rarely sews cleanly in a satin or fill font.`);
+      if(Math.min(bw,bh)<2||area<6)w(o,`${label} is ${bw.toFixed(1)}×${bh.toFixed(1)} mm, too small for a clean fill. Make it at least about 2 mm across, or use a satin column or running stitch.`,'fill');
+      else if(Math.min(bw,bh)<4.5||area<25)w(o,`${label} is a small fill (${bw.toFixed(1)}×${bh.toFixed(1)} mm): it will sew, but the rows are very short and can look dense or rough. A satin stitch or a slightly larger shape usually sews cleaner.`,'fill');
+      else if(mean<1.4)w(o,`${label} is mostly narrower than 1.4 mm, so a fill will skip or look thin. Use a satin column along its centre line.`,'fill');}}
+    if(o.kind==='path'&&!filled){const len=pathOutline(o).reduce((n,p,i,a)=>i?n+distP(p,a[i-1]):0,0);if(len<2)w(o,`${label} is only ${len.toFixed(1)} mm long; stitches this short are skipped or bunch up.`,'short');
+      if(o.stitch==='satin'){const wd=Math.max(Number(o.satinWidth)||3,Number(o.satinWidthEnd)||0);if((Number(o.satinWidth)||3)<1)w(o,`${label} is a satin column under 1 mm wide, which is hard to sew cleanly. Use a running stitch, or widen it to at least 1.5 mm.`,'satin');if(wd>7)w(o,`${label} is a satin column wider than 7 mm; long satin stitches snag. Use a fill, or split it into narrower columns.`,'satin');}}
+    if(o.kind==='text'&&Number(o.h)<5&&isRegistryFont(o.font)&&getFont(o.font)?.kind!=='line')w(o,`${label} is only ${Number(o.h).toFixed(1)} mm tall; lettering under about 5 mm rarely sews cleanly in a satin or fill font.`,'lettering');
   }
   return out;
 }
+
+// The sewing tip categories, in the order the Tips settings list shows them. Each warning from designWarnings carries one of these ids.
+export const TIP_CATEGORIES=[{id:'hoop',label:'Outside the hoop'},{id:'duplicate',label:'Duplicate objects'},{id:'fill',label:'Small or thin fills'},{id:'short',label:'Very short paths'},{id:'satin',label:'Satin columns too narrow or too wide'},{id:'lettering',label:'Small lettering'}];
+// Drops the tips whose category is hidden. A hidden id that is not a category matches nothing, so it is ignored.
+export function visibleTips(warnings,hidden=[]){const off=new Set(hidden);return warnings.filter(w=>!off.has(w.category));}
 
 // Thread plan: the colours in sewing order. A block starts at the first stitch after a colour change or stop, so the same colour sewn twice gives two blocks, as the editor shows it.
 export function threadPlan(plan){const blocks=[];let cur=null;for(const s of plan.stitches){if(s.cmd==='color'||s.cmd==='stop'){cur=null;continue;}if(s.cmd!=='stitch')continue;if(!cur||cur.thread!==s.thread){cur={thread:s.thread,stitches:0};blocks.push(cur);}cur.stitches++;}return blocks;}
