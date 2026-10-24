@@ -623,3 +623,12 @@ Based on direct feedback that editing felt far from a vector program:
 - The raised fill's extra underlay has a Raised spacing (mm) field (1–4 mm, empty for the 2 mm default), shown when Raised fill is on. It is stored as `raisedSpacing` and settable over MCP. It replaces the fixed 2 mm row spacing of the raised layer from `74f8c8e`.
 - Covered by an engine test (a 4 mm raised spacing sews fewer than 70% of the raised stitches of the 2 mm default, measured above a plain fill; 5 mm is rejected) and the e2e raised fill test, which ticks Raised fill, then sets the spacing to 4 mm and checks that the count falls. Screenshot: `design/progress/features/fill-raised.png` (4 mm).
 - Limits: one spacing for the raised layer; it still stacks on the chosen underlay.
+
+## 2026-10-24 bling fill
+
+- Fill pattern Bling fill (fillMethod `bling`) covers a closed shape with the bling stones (Stone shape and Fixing rings settings) on the sequin fill's staggered grid, every row offset by half a spacing, in a fixed orientation. Spacing is `motifSpacing` (default 8 mm), stone size `motifSize` (default 4 mm). Settable over MCP.
+- The stone drawing moved out of the bling stroke into one shared function, `blingStones`, used by both the stroke and the fill; the bling stroke's output is unchanged (the existing bling tests pass unchanged).
+- Correction to the queued item: it expected a square-stone fill to sew more stitches than a sequin fill at the same spacing. Measured on a 40 by 30 mm fill at 3 mm: sequin 344, square bling 288, round bling 630 (round stones have two fixing rings), hexagon 366 at 3 mm, heart 992 at the 4 mm default. The test asserts that round bling sews more than sequins and that the stones stay near the shape.
+- Also fixed: the editor showed the motif defaults (spacing 4, size 1.6) for bling and sequin fills, while the engine sews 8 and 4 (sequin fill 8 and 3). The editor now shows what is sewn. The e2e bling fill test checks the displayed defaults.
+- Covered by an engine test (the bling fill stays near the shape; round bling sews more than sequins; an unknown stone shape is refused), the e2e test (the Bling fill option appears, its defaults show, and changing the stone shape changes the count), and `npm run test:mcp`. Screenshot: `design/progress/features/bling-fill.png` (hexagon stones).
+- Limits: stones in a fixed orientation (no turning on a fill); no per-stone spacing; the stones do not stop at the edge, so an outline can reach about a stone's radius past the shape.

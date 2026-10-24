@@ -1200,6 +1200,18 @@ test('accordion spacing fields show for rows fills and a start value gives the e
  expect(errors).toEqual([]);
 });
 
+test('bling fill is a fill pattern that lays stones inside a closed shape, and the stone shape changes it',async({page})=>{
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());await page.locator('#new').click();
+ await page.locator('#path').click();const m=await ctm(page);for(const [x,y] of [[-20,-15],[20,-15],[20,15],[-20,15],[-20,-15]]){const s=toScreen(m,x,y);await page.mouse.click(s.x,s.y);}await page.keyboard.press('Enter');
+ const count=async()=>Number(((await page.locator('#count').textContent()).match(/^([\d,]+) stitches/)||[,'0'])[1].replace(/,/g,''));
+ await page.locator('#type').selectOption('fill');await expect(page.locator('#fillMethod option[value="bling"]')).toHaveCount(1);
+ await expect.poll(count).toBeGreaterThan(0);const rows=await count();
+ await page.locator('#fillMethod').selectOption('bling');await expect(page.locator('#fillMethod')).toHaveValue('bling');
+ await expect(page.locator('#blingShapeRow')).toBeVisible();await expect(page.locator('#motifSpacing')).toHaveValue('8');await expect(page.locator('#motifSize')).toHaveValue('4');await expect.poll(count).not.toBe(rows);const round=await count();
+ await page.locator('#blingShape').selectOption('hexagon');await expect.poll(count).not.toBe(round);
+ expect(errors).toEqual([]);
+});
+
 test('satin pull fields show for satin paths only, and a typed value is kept',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());await page.locator('#new').click();
  await page.locator('#path').click();const m=await ctm(page);for(const [x,y] of [[-20,0],[20,0]]){const s=toScreen(m,x,y);await page.mouse.click(s.x,s.y);}await page.keyboard.press('Enter');

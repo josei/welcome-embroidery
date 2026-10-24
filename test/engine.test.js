@@ -1060,6 +1060,17 @@ const plain=sewn({raised:false}),two=sewn({}),four=sewn({raisedSpacing:4});
  assert.throws(()=>validateDocument(doc),/raised spacing/);
 });
 
+test('bling fill lays stones on a staggered grid inside a closed shape; round stones with two fixing rings sew more than sequins, and the stones stay near the shape',()=>{
+ const sewn=(fm,extra={})=>{const doc=initialDocument();doc.objects=[];applyOperations(doc,[{op:'add_shape',id:'r',kind:'rect',x:-20,y:-15,width:40,height:30,stitch:'fill'},{op:'set_object',id:'r',fillMethod:fm,underlayType:'none',motifSize:3,...extra}]);validateDocument(doc);const plan=compile(doc);assert.deepEqual(plan.errors,[]);return plan;};
+ const sequin=sewn('sequin'),square=sewn('bling',{blingShape:'square'}),round=sewn('bling');
+ // Each round stone is a centre stitch with two fixing rings, against a sequin's centre and one ring, so the round bling fill sews more.
+ assert.ok(round.count>sequin.count,'round bling stones sew more than sequins at the same size ('+round.count+' vs '+sequin.count+')');
+ // Stones are centred on the grid inside the 40 x 30 mm shape; their outlines reach at most a stone's radius past it.
+ for(const plan of [square,round])assert.ok(plan.bounds[0]>=-22&&plan.bounds[2]<=22&&plan.bounds[1]>=-16&&plan.bounds[3]<=16,'stones stay within a stone of the shape ('+plan.bounds.join(' ')+')');
+ const doc=initialDocument();doc.objects=[];applyOperations(doc,[{op:'add_shape',id:'r',kind:'rect',x:-20,y:-15,width:40,height:30,stitch:'fill'},{op:'set_object',id:'r',fillMethod:'bling',blingShape:'triangle'}]);
+ assert.throws(()=>validateDocument(doc),/bling shape/);
+});
+
 test('batch plan counts copies per hoop and hoops needed',async()=>{
  const {batchPlan}=await import('../src/engine.js');
  const doc=initialDocument();doc.objects=[];
