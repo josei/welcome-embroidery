@@ -140,7 +140,7 @@ Everything in the feature list is built, partly built, or deliberately out of sc
 - Several live document slots per agent link: would broaden agent permissions; out of scope.
 - A real Safari device check: needs a device.
 - macOS and Windows desktop builds: built by CI (`desktop.yml`) on a tag or a manual run. The manual run on `036109f` passed on Linux, macOS and Windows (run 40035382088), after the Windows npm fix.
-- Bling stone library (more shapes and settings beyond Round, Square, Oval, Hexagon, Star and Heart; turn and fixing rings are now settings), and a true 3D surface warp: not started; the basic forms are built.
+- Bling stone library: Round, Square, Oval, Hexagon, Star, Heart, Teardrop and Baguette are built, with turn and fixing rings as settings. More shapes and a true 3D surface warp are not started.
 
 ## Desktop app roadmap (Tauri, proposed 2026-10-20)
 

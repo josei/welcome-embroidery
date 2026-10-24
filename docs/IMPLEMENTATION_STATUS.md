@@ -700,3 +700,17 @@ Based on direct feedback that editing felt far from a vector program:
 - Over MCP, the `transform` operation takes an optional `pivot: {x, y}`. With it, `rotation` turns the object about the pivot by the difference from its current rotation, so its centre moves; without it, `rotation` sets the angle as before.
 - Covered by an engine test (`test/engine.test.js`: two objects turned 90° about a point land on the rotated centres; a rotation about an object's own centre keeps it; the transform pivot key moves the centre and turns by the change), and an e2e test (`test/editor.spec.js`: the pivot is set by a canvas click, the field turns the rectangle, its centre matches the predicted position, and Use centre clears the marker). Screenshot: `design/progress/features/rotate-pivot.png`.
 - Limits: the pivot is not stored in the project and is lost on reload; it is not cleared when the selection changes; the marker is hidden while a path's nodes are being edited; the rotate handle and Alt+arrow keys still turn about each selection's own centre, not the pivot.
+
+## 2026-10-24 Teardrop and baguette bling stones
+
+- Two stone shapes join the bling list. A **teardrop** is a circle whose tangents meet at a point ahead of it, so it follows the path like the heart (its tip points along the path). A **baguette** is a long rectangle with chamfered ends; it turns with the path like the square, and its turn setting is shown in the panel.
+- Both are accepted by the validator and by the MCP `set_object` shape enum. Covered by an engine test (compile and validate; the baguette keeps its turn setting) and an e2e test (both appear in the shape list; only the baguette shows the turn setting). Screenshots: `design/progress/features/bling-teardrop.png`, `bling-baguette.png`.
+- Limits: outlines with fixing rings only, no per-stone size control beyond Size (mm).
+
+## 2026-10-24 Sewing tips to show, and PES header names
+
+- **Sewing tips** now carry a category: outside the hoop, duplicate objects, small or thin fills, very short paths, satin columns too narrow or too wide, and small lettering. The side panel's **Sewing tips to show** list has one checkbox per category. Unticked categories are hidden from the tip panel and the tip count (the issues button). The choice is stored in local storage under `welcome.hiddenTips`, per browser; an unknown id in that list is ignored.
+- **PES header metadata:** PES files from version 4 on hold a name, category, author, keywords and comments after a 16-byte prefix, each a length byte and the text. `readers.js` reads them (versions 1 to 3 have none; malformed fields are ignored and the stitches still import). The name becomes the stitch layer's name when the file has one; the source keeps the fields (validated: five known keys, at most 240 characters each); the info panel shows the name and `by <author>`.
+- Checked against pyembroidery 1.5.1: a sample with name, author and comments written in imports with the same fields and the same 96 stitches.
+- Covered by engine tests (the category filter; the PES metadata round trip and refusal), an e2e test for the tip checkboxes and saved choice, and an e2e test for a PES upload. Screenshots: `sewing-tips-settings.png`, `pes-metadata.png`. The metadata sample is built in the tests by `test/pes-with-metadata.js`, because the pinned PES samples have empty fields.
+- Limits: the tips list is per browser, not per document; keywords and category are read but not shown; the MCP has no tip filter.
