@@ -8,7 +8,7 @@ Rules for the supervisor: verify tests actually pass and diffs match commit mess
 
 ## Current preview
 
-- Public URL: https://advanced-study-accurate-restructuring.trycloudflare.com (unchanged; quick tunnel, a cloudflared process forwarding to `http://127.0.0.1:8790`). Verified HTTP 200 for `/` and `/health` on 2026-10-24 by the supervisor review. The 8790 server serves the tree at `1241c33` (the last code change); later commits are docs and roadmap only.
+- Public URL: https://advanced-study-accurate-restructuring.trycloudflare.com (unchanged; quick tunnel, a cloudflared process forwarding to `http://127.0.0.1:8790`). Verified HTTP 200 for `/` and `/health` on 2026-10-24 by the supervisor review. The 8790 server serves the tree at `c38b2b9` (the last code change); later commits are docs and roadmap only.
 - GitHub Pages: https://josei.github.io/welcome-embroidery/ (pages.yml run on `8341663` succeeded; the Pages site serves the last pushed build).
 - Latest screenshot set: `design/progress/features/`. Latest feature shots: `organize-fonts.png` (2026-10-24 builder run).
 
@@ -47,6 +47,8 @@ Refilled by the 2026-10-24 supervisor review (six items). Items 1 and 5 to 6 com
 - **2026-10-24 — Windows npm spawn (fixed).** Covered by the desktop entry above. The fix is in `scripts/prepare-desktop.mjs` only, because `desktop/electron/` is gitignored.
 
 ## Done this cycle — pending supervisor review
+
+- 2026-10-24 — **Custom font cap and MCP request limit raised** (commit `c38b2b9`, local, not pushed; requested by the user). A document holds up to 16 custom fonts (was 8); the MCP request body limit is 8 MB (was 2 MB). Measured: one 200-glyph font is about 96.5 KB of JSON. Tests: `npm run test:engine` 151/151; `CI=1 npm run test:e2e` 122/122; `npm run test:mcp` pass, and the 3 MB check fails with the old 2 MB limit. No UI change, so no new screenshot. Limits: relay limits unchanged.
 
 - 2026-10-24 — **Organize custom fonts** (commit `1241c33`, local, not pushed). An Organize fonts button in the document stitch settings opens a dialog listing each custom font with the lettering that uses it. Remove unused fonts drops the custom fonts no lettering uses, as one undoable step, and is disabled when every font is in use. Over MCP as `remove_unused_fonts`. Tests: `npm run test:engine` 150/150; `CI=1 npm run test:e2e` 122/122; `npm run test:mcp` pass. Screenshot: `design/progress/features/organize-fonts.png`. Limits: bundled fonts not listed; no rename or merge; English dialog text.
 
@@ -121,3 +123,4 @@ _(none: the 2026-10-24 supervisor review pushed everything below and moved it in
 - 2026-10-24 09:06 CEST builder run (Claude Haiku 5.5): took the top queue item, DXF import (`6ec6041`). Found the server allowlist needed the new module (the relay test caught it), fixed it. The queue had three items; added DXF export as the mirror of the import, so four remain. The 8790 server serves `6ec6041`.
 - 2026-10-24 10:03 CEST builder run (Claude Haiku 5.5): took the top queue item, the per-end satin inset (`712aa84`). The queue had three items; added a rotate-around-pivot item from the Embrilliance release notes, so four remain. The 8790 server serves `712aa84` (restarted after the server.js change).
 - 2026-10-24 11:03 CEST builder run (Claude Haiku 5.5): took the top queue item, organize custom fonts (`1241c33`). The queue had three items; added a choose-sewing-tips item from the Hatch 4 feature list, so four remain. The 8790 server serves `1241c33` (restarted after the server.js change).
+- 2026-10-24 11:16 CEST (requested by the user): raised the custom font cap to 16 and the MCP request limit to 8 MB (`c38b2b9`). The 8790 server serves `c38b2b9`.
