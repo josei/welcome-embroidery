@@ -978,6 +978,21 @@ test('print template is a 1:1 millimetre sheet the size of the hoop, with the de
  assert.match(svg,/>10 mm</,'the scale bar is labelled');
 });
 
+test('fabric presets set the document stitch settings, explicit settings still win, and unknown fabrics are rejected',()=>{
+ const settingsFor=(ops)=>{const doc=initialDocument();doc.objects=[];applyOperations(doc,[{op:'add_shape',id:'r',kind:'rect',x:-20,y:-15,width:40,height:30,stitch:'fill'},{op:'set_settings',...ops}]);validateDocument(doc);return {doc,plan:compile(doc)};};
+ const knit=settingsFor({fabric:'knit'}),towel=settingsFor({fabric:'towel'});
+ assert.equal(knit.doc.settings.compensation,0.5,'knit pulls in 0.5 mm of compensation');
+ assert.equal(knit.doc.settings.fabric,'knit');
+ assert.equal(towel.doc.settings.stitchLength,2.5,'towel uses a 2.5 mm stitch length');
+ assert.equal(towel.doc.settings.stagger,8,'towel uses the widest needle stagger the select offers (8 phases)');
+ assert.deepEqual(towel.plan.errors,[]);
+ assert.notEqual(towel.plan.count,settingsFor({fabric:'woven'}).plan.count,'the towel preset sews a different stitch plan from woven');
+ const over=settingsFor({fabric:'towel',compensation:0});
+ assert.equal(over.doc.settings.compensation,0,'an explicit compensation after a fabric preset wins');
+ const doc=initialDocument();doc.objects=[];
+ assert.throws(()=>applyOperations(doc,[{op:'set_settings',fabric:'silk'}]),/Unknown fabric/);
+});
+
 test('batch plan counts copies per hoop and hoops needed',async()=>{
  const {batchPlan}=await import('../src/engine.js');
  const doc=initialDocument();doc.objects=[];
