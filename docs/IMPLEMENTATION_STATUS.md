@@ -692,3 +692,11 @@ Based on direct feedback that editing felt far from a vector program:
 - Stitch layers have no outline, so they are not written and are counted as skipped. The download message reports the number of paths written and the layers skipped.
 - Covered by unit tests in `test/dxf.test.js`: a closed rectangle exported and read back by the importer gives the same four points, and a stitch layer is counted as skipped. An e2e test downloads a `.dxf` file and checks for an LWPOLYLINE, the EOF marker and the "DXF exported" message. Screenshot: `design/progress/features/dxf-export.png`.
 - Limits: outlines only, so no stitches, layers, colours or arcs (the geometry is polyline); no MCP export tool; the option label is clipped by the dialog's select width.
+
+## 2026-10-24 Rotate around a pivot
+
+- **Set pivot** (Transform section) arms pivot mode: the next click on the canvas sets the rotation pivot, rounded to 0.1 mm, and the point is drawn as a ring with ticks on the canvas. The panel reads "Pivot at x, y mm" and **Use centre** clears it.
+- With a pivot set, changing the **Rotation** field turns each selected object by the change in the field, about the pivot (the `rotate` operation with the pivot as its centre). Without a pivot the field keeps its old meaning: it sets the object's own angle about its own centre.
+- Over MCP, the `transform` operation takes an optional `pivot: {x, y}`. With it, `rotation` turns the object about the pivot by the difference from its current rotation, so its centre moves; without it, `rotation` sets the angle as before.
+- Covered by an engine test (`test/engine.test.js`: two objects turned 90° about a point land on the rotated centres; a rotation about an object's own centre keeps it; the transform pivot key moves the centre and turns by the change), and an e2e test (`test/editor.spec.js`: the pivot is set by a canvas click, the field turns the rectangle, its centre matches the predicted position, and Use centre clears the marker). Screenshot: `design/progress/features/rotate-pivot.png`.
+- Limits: the pivot is not stored in the project and is lost on reload; it is not cleared when the selection changes; the marker is hidden while a path's nodes are being edited; the rotate handle and Alt+arrow keys still turn about each selection's own centre, not the pivot.
