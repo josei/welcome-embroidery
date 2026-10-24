@@ -679,3 +679,9 @@ Based on direct feedback that editing felt far from a vector program:
 - Validation refuses vertical lettering with more than one line, on a path (text on path), or with the two older single-line fonts (Welcome Mono, Néon). A vertical column that runs past the hoop gets the usual "exceeds the hoop" sewing tip.
 - Covered by an engine test (a vertical "ABC" is far taller and one letter wide, the column is centred on x, and the three refusals) and an e2e test (the checkbox changes the stitch count of the demo lettering). Screenshot: `design/progress/features/vertical-lettering.png` (LATO, four letters stacked; the hoop tip shows because it is taller than 110 mm).
 - Limits: the column is not scaled to fit the hoop; the object's frame and handles still show the one-line box; no vertical alignment options beyond the centre.
+
+## 2026-10-24 SVG strokes as satin columns
+
+- An SVG path, line or polyline with no fill and a stroke, and a `stroke-width` attribute of at least 0.3 mm after the viewBox scale (the scale that fits the file to the 110 mm hoop), imports as a satin column of that width in the stroke's colour. A narrower stroke, or a path with no `stroke-width`, still imports as a running stitch, as before. Widths are clamped to the satin range (0.5 to 12 mm).
+- Covered by an e2e test (`test/fixtures/strokes.svg`: a 4 mm stroke becomes one satin row, a 0.2 mm stroke and an unset stroke stay running stitches). Screenshot: `design/progress/features/svg-stroke-satin.png`.
+- Limit: the engine test the queue asked for is not possible, because the SVG importer runs in the browser (it uses DOMParser), so the check is the e2e test. Filled shapes and text are unchanged; no MCP import of SVG strokes.

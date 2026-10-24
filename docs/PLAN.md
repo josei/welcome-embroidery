@@ -84,6 +84,7 @@ Reference: Wilcom EmbroideryStudio, the commercial digitizing suite. Its feature
 | Digitizing | Running, satin, tatami and fill stitches with underlay and pull compensation; satin pull set separately on the left and right rails | Built |
 | Digitizing | Raised fill: an extra tatami underlay at 2 mm rows under a fill, so it stands up | Built (basic; same 90° as the fill underlay) |
 | Digitizing | Accordion spacing: a tatami fill whose row spacing changes linearly from a start to an end value (Wilcom's Accordion Spacing behaviour; Wilcom's placement algorithm is not published) | Built (basic; linear gradient only, rows pattern) |
+| Digitizing | SVG import: a stroke-only path with a stroke width of 0.3 mm or more becomes a satin column of that width (Ink/Stitch 3.3's simple strokes as satin) | Built (basic; import only) |
 | Digitizing | Satin end inset: the first and last needle of a satin column move inward, so the end stitches are shorter; a start and an end value (Ink/Stitch's short stitch inset) | Built (basic) |
 | Digitizing | Fabric presets (woven, knit, towel or fleece) that set pull compensation, stitch length, stagger and underlay for the document | Built (basic; three presets) |
 | Digitizing | Laydown underlay for towelling and fleece: a light fill at 4 mm rows under a fill (fills only; satin has no closed area to cover) | Built (basic) |

@@ -1254,6 +1254,15 @@ test('vertical lettering checkbox stacks the letters of a lettering object and c
  expect(errors).toEqual([]);
 });
 
+test('an SVG stroke at least 0.3 mm wide imports as a satin column, and a thinner or unset stroke stays a running stitch',async({page})=>{
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());await page.locator('#new').click();
+ await page.locator('#file').setInputFiles('test/fixtures/strokes.svg');
+ await expect(page.locator('.object-row')).toHaveCount(3);
+ await expect(page.locator('.object-row').filter({hasText:'satin'})).toHaveCount(1);
+ await expect(page.locator('.object-row').filter({hasText:'run'})).toHaveCount(2);
+ expect(errors).toEqual([]);
+});
+
 test('satin pull fields show for satin paths only, and a typed value is kept',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());await page.locator('#new').click();
  await page.locator('#path').click();const m=await ctm(page);for(const [x,y] of [[-20,0],[20,0]]){const s=toScreen(m,x,y);await page.mouse.click(s.x,s.y);}await page.keyboard.press('Enter');
