@@ -536,3 +536,10 @@ Based on direct feedback that editing felt far from a vector program:
 - Scope decision: the queued item said a dot sews one stitch at each point. One stitch is not visible on the fabric, so a dot is a small round bead instead. Recorded in the roadmap.
 - Covered by an engine test (a dot path is 2 mm tall and sews more stitches than the dash path; a dash path has no height; an unknown bead shape is rejected) and an e2e test (the Bead shape select shows for beads only, defaults to dash, and dot sews more stitches). Screenshot: `design/progress/features/bead-dot.png`.
 - Limits: a dot is a plain ring; there is no bead-size control separate from the bead size, and no dispensing control.
+
+## 2026-10-24 twin beads
+
+- Beads have a Twin beads checkbox (`beadTwin: true`, shown for beads only, settable over MCP). Each point gets two beads side by side across the path, one either side of the centre line, centres a bead length apart. Works for both shapes: two dashes or two dots.
+- Scope note: the engine's dash runs along the path, not across it as an older comment said; the twin dashes are therefore side by side across the path. The default output (twin off, dash) is unchanged.
+- Covered by an engine test (a single dot is 2 mm across the path, twin dots 4 mm, about twice the stitches; twin dashes 2 mm across; `beadTwin` must be true or false) and an e2e test (the checkbox shows for beads only, is off by default, and turning it on adds stitches). Screenshot: `design/progress/features/bead-twin.png`.
+- Limits: the two beads are the same shape and size; no per-bead offset control.

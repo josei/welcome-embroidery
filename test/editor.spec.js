@@ -1094,6 +1094,17 @@ test('bling stone shape switches between round and square stones',async({page})=
  await page.locator('#blingShape').selectOption('heart');await expect(page.locator('#blingShape')).toHaveValue('heart');await expect(page.locator('#stoneTurnRow')).toBeHidden();expect(errors).toEqual([]);
 });
 
+test('twin beads add a second bead either side of the centre line',async({page})=>{
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());await page.locator('#new').click();
+ await page.locator('#path').click();const m=await ctm(page);for(const [x,y] of [[-20,0],[20,0]]){const s=toScreen(m,x,y);await page.mouse.click(s.x,s.y);}await page.keyboard.press('Enter');
+ const count=async()=>Number(((await page.locator('#count').textContent()).match(/^([\d,]+) stitches/)||[,'0'])[1].replace(/,/g,''));
+ await page.locator('#type').selectOption('bead');await expect(page.locator('#beadTwinRow')).toBeVisible();await expect(page.locator('#beadTwin')).not.toBeChecked();
+ await expect.poll(count).toBeGreaterThan(0);const single=await count();
+ await page.locator('#beadTwin').check();await expect.poll(count).toBeGreaterThan(single*1.5);
+ await page.locator('#type').selectOption('sequin');await expect(page.locator('#beadTwinRow')).toBeHidden();
+ expect(errors).toEqual([]);
+});
+
 test('bead shape: dash by default, dot sews a small round bead at each point',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());await page.locator('#new').click();
  await page.locator('#path').click();const m=await ctm(page);for(const [x,y] of [[-20,0],[20,0]]){const s=toScreen(m,x,y);await page.mouse.click(s.x,s.y);}await page.keyboard.press('Enter');

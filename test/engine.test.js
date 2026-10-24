@@ -925,6 +925,20 @@ test('dot beads are small round beads the size of the bead length; dash beads st
  assert.throws(()=>validateDocument(doc),/bead shape/);
 });
 
+test('twin beads sit one either side of the centre line, side by side across the path, and only accept true or false',()=>{
+ const sewn=(extra)=>{const doc=initialDocument();doc.objects=[];applyOperations(doc,[{op:'add_path',id:'b',x:0,y:0,points:[[-20,0],[20,0]]},{op:'set_object',id:'b',stitch:'bead',motifSize:2,...extra}]);validateDocument(doc);const plan=compile(doc);assert.deepEqual(plan.errors,[]);return plan;};
+ const height=(b)=>b[3]-b[1];
+ const single=sewn({beadShape:'dot'}),twin=sewn({beadShape:'dot',beadTwin:true});
+ // Two 2 mm dots, centres a bead length apart across the path, span 4 mm; a single dot is 2 mm.
+ assert.ok(Math.abs(height(single.bounds)-2)<0.2,'a single dot is 2 mm across ('+height(single.bounds)+')');
+ assert.ok(Math.abs(height(twin.bounds)-4)<0.2,'twin dots span 4 mm across the path ('+height(twin.bounds)+')');
+ assert.ok(twin.count>1.9*single.count&&twin.count<2.3*single.count,'twins sew about twice the stitches ('+twin.count+' vs '+single.count+')');
+ const dash=sewn({beadTwin:true});
+ assert.ok(Math.abs(height(dash.bounds)-2)<0.2,'twin dashes lie side by side across the path, 2 mm across');
+ const doc=initialDocument();doc.objects=[];applyOperations(doc,[{op:'add_path',id:'b',x:0,y:0,points:[[-20,0],[20,0]]},{op:'set_object',id:'b',stitch:'bead',beadTwin:'yes'}]);
+ assert.throws(()=>validateDocument(doc),/beadTwin/);
+});
+
 test('batch plan counts copies per hoop and hoops needed',async()=>{
  const {batchPlan}=await import('../src/engine.js');
  const doc=initialDocument();doc.objects=[];
