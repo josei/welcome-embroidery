@@ -65,9 +65,11 @@ test('WELCOME_DATA_DIR relocates artifacts and relay sessions (used by the deskt
  }finally{proc.kill('SIGTERM');}
 });
 
-test('every browser module and the font files the editor needs are served, gzip-compressed when asked',async()=>{
- const {readdirSync}=await import('node:fs');const files=[...readdirSync('src').filter(f=>f.endsWith('.js')).map(f=>'src/'+f),...readdirSync('src/vendor').map(f=>'src/vendor/'+f),'fonts/inkstitch/index.json','fonts/ttf/index.json','fonts/ttf/lato.json','fonts/inkstitch/emilio_20.json'];
- for(const f of files){const r=await fetch(`${base}/${f}`);assert.equal(r.status,200,`${f} must be in the server allowlist`);}
+test('the editor bundle and font files are served from the build, gzip-compressed when asked; source modules are not',async()=>{
+ const {readdirSync}=await import('node:fs');const bundles=readdirSync('dist/assets').filter(f=>f.endsWith('.js')).map(f=>'assets/'+f);
+ const files=[...bundles,'fonts/inkstitch/index.json','fonts/ttf/index.json','fonts/ttf/lato.json','fonts/inkstitch/emilio_20.json'];
+ for(const f of files){const r=await fetch(`${base}/${f}`);assert.equal(r.status,200,`${f} must be served from the build`);}
+ for(const f of ['src/app.js','src/agent.js'])assert.equal((await fetch(`${base}/${f}`)).status,404,`${f} is bundled, not served`);
  const gz=await fetch(`${base}/fonts/ttf/lato.json`,{headers:{'accept-encoding':'gzip'}});assert.equal(gz.headers.get('content-encoding'),'gzip');assert.ok((await gz.json()).glyphs['A']);
  assert.equal((await fetch(`${base}/fonts/ttf/../../server.js`)).status,404);assert.equal((await fetch(`${base}/fonts/ttf/nope.txt`)).status,404);
 });

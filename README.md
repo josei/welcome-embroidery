@@ -24,10 +24,10 @@ An open-source, userless embroidery editor that runs as a static web app, a self
 
 ```sh
 npm ci
-npm start            # http://127.0.0.1:8787/
+npm start            # builds the editor with Vite, then serves http://127.0.0.1:8787/
 ```
 
-The editor compiles stitches in a module worker; the Node server supplies the static assets, fonts, MCP and downloadable artifacts. The MCP endpoint needs a session link from the editor's Agent button (`/mcp/<token>`).
+The editor is bundled by Vite into `dist/`; the stitch worker compiles in a module worker. The Node server serves `dist/`, the fonts, MCP and downloadable artifacts. The MCP endpoint needs a session link from the editor's Agent button (`/mcp/<token>`).
 
 Self-host with Docker:
 

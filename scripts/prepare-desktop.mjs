@@ -4,7 +4,7 @@ const stage='src-tauri/resources/welcome';
 await fs.rm(stage,{recursive:true,force:true});
 await fs.mkdir(stage,{recursive:true});
 for(const file of ['index.html','styles.css','server.js','server-relay.js','server-fonts.js','server-render.js','package.json','package-lock.json','LICENSE','THIRD_PARTY_NOTICES.md','LICENSE-THIRD-PARTY-pystitch.txt','LICENSE-THIRD-PARTY-polygon-clipping.txt'])await fs.copyFile(file,`${stage}/${file}`);
-for(const dir of ['src','fonts'])await fs.cp(dir,`${stage}/${dir}`,{recursive:true});
+for(const dir of ['src','fonts','dist'])await fs.cp(dir,`${stage}/${dir}`,{recursive:true});
 // On Windows npm is npm.cmd, which only runs through a shell; the arguments are fixed, so the shell is safe here.
 execFileSync(process.platform==='win32'?'npm.cmd':'npm',['ci','--omit=dev','--ignore-scripts','--no-audit','--no-fund'],{cwd:stage,stdio:'inherit',shell:process.platform==='win32'});
 const runtime=`${stage}/runtime`;
