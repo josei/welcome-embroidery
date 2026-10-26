@@ -1,0 +1,10 @@
+import fs from 'node:fs/promises';
+import {execFileSync} from 'node:child_process';
+execFileSync(process.execPath,['scripts/build-static.mjs'],{stdio:'inherit'});
+await fs.rm('_site',{recursive:true,force:true});
+await fs.cp('site','_site',{recursive:true});
+await fs.cp('dist','_site/app',{recursive:true});
+await fs.mkdir('_site/assets',{recursive:true});
+await fs.copyFile('design/progress/public-preview.png','_site/assets/editor.png');
+await fs.writeFile('_site/.nojekyll','');
+console.log('Built the GitHub Pages site in _site/: landing page at /, editor at /app/.');

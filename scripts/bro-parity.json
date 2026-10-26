@@ -1,0 +1,112 @@
+{
+ "schema": "welcome/bro-parity/1",
+ "oracle": "pyembroidery 1.5.1 reader for .bro (positions as pyembroidery reports them)",
+ "coordinates": "integer 0.1 mm exactly as pyembroidery reports positions",
+ "fixtures": [
+  {
+   "path": "samples-6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random1-wilcom-a.BRO",
+   "sha256": "481f16e5bea007a8b509b85e50dc15a2ef07bb4cfc4e5da56f2be18aedb50554",
+   "threads": 0,
+   "commandCounts": {
+    "color": 8,
+    "end": 1,
+    "jump": 26,
+    "stitch": 11
+   },
+   "commandsSha256": "0823ffc68f53dcb80eb469e956b9e06e55bb10ce69faf546c1ef0068edd5924a"
+  },
+  {
+   "path": "samples-6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random1-wilcom-b.BRO",
+   "sha256": "97a856d4c9fc942c2fda281f3d256df2537439fcd901eea7939877d2ce44e5f8",
+   "threads": 0,
+   "commandCounts": {
+    "end": 1,
+    "jump": 2,
+    "stitch": 3
+   },
+   "commandsSha256": "4c8a235ea51940c15e3d70c0cca14f85a5b781c80405d0407b000c4921d1b26d"
+  },
+  {
+   "path": "samples-6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random2-wilcom-a.BRO",
+   "sha256": "b7cb411e8521066b90e93269e984e56a7ed7d1c724bcb343b77bc5a5a735d711",
+   "threads": 0,
+   "commandCounts": {
+    "color": 8,
+    "end": 1,
+    "jump": 25,
+    "stitch": 12
+   },
+   "commandsSha256": "a0db5352d510913c0342e652e81930087b7f295a28957c95bb3f47f602675163"
+  },
+  {
+   "path": "samples-6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random2-wilcom-b.BRO",
+   "sha256": "f0954a0ba3bafbf6e3945c62095fc47e55d3c281fd9bdad683679dc9e265d364",
+   "threads": 0,
+   "commandCounts": {
+    "end": 1,
+    "jump": 2,
+    "stitch": 3
+   },
+   "commandsSha256": "d50a790d8f431875251a1c1e588d38cbe0a35ecafaa2e94256b13a431dcef2bf"
+  },
+  {
+   "path": "samples-6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random3-wilcom-a.BRO",
+   "sha256": "ae338a30111401208e1183376622b37e706dd0250d31261e99149848a290ae02",
+   "threads": 0,
+   "commandCounts": {
+    "color": 8,
+    "end": 1,
+    "jump": 25,
+    "stitch": 12
+   },
+   "commandsSha256": "f6ba9d58e1e9ed5f8d0e6bd06bc61e182fa80ddf2ff7293c37f0902abf116b6e"
+  },
+  {
+   "path": "samples-6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random3-wilcom-b.BRO",
+   "sha256": "91a7c80ffdb9719d00e7091c43d97c7a3d156c56e6ead15b4353664bff6611ef",
+   "threads": 0,
+   "commandCounts": {
+    "end": 1,
+    "jump": 2,
+    "stitch": 3
+   },
+   "commandsSha256": "b1111900ffc316cdd86d20f8b2b791795121802579feb7d2d9a40b9eba8f69f7"
+  },
+  {
+   "path": "samples-6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/scene-wilcom.BRO",
+   "sha256": "ae956f2018289d3e6bae49925c5bb7a691a7622d0fe5ab4f91d812567635ad40",
+   "threads": 0,
+   "commandCounts": {
+    "color": 2,
+    "end": 1,
+    "jump": 3,
+    "stitch": 128
+   },
+   "commandsSha256": "6773c7cc41a37da627ed0ced7d48ecd0e0cd2216b3d0be5ac35d5ef34eab1eec"
+  },
+  {
+   "path": "samples-6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/spiralbox-wilcom-a.BRO",
+   "sha256": "6a573739bbcaf7ce098766dea799a79c9fc9fca9a0d19a25824cd7fd8f4bf963",
+   "threads": 0,
+   "commandCounts": {
+    "color": 8,
+    "end": 1,
+    "jump": 8,
+    "stitch": 46
+   },
+   "commandsSha256": "2f092e2ff2a3b9f709d1e467c3229b9915cc7bdd8372493295c6d2fc9b2b131f"
+  },
+  {
+   "path": "samples-6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/spiralbox-wilcom-b.BRO",
+   "sha256": "7e15e1f21ecb2daf968948a4bea01e850ec6f8e132f08de24049c9a0b64b7ceb",
+   "threads": 0,
+   "commandCounts": {
+    "color": 6,
+    "end": 1,
+    "jump": 6,
+    "stitch": 37
+   },
+   "commandsSha256": "3991821f3f46d5bd237bf4cf74052720e9d060300e7cd3943b14727ca172c2cc"
+  }
+ ]
+}

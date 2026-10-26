@@ -1,0 +1,194 @@
+{
+ "schema": "welcome/pcs-parity/1",
+ "oracle": "pyembroidery 1.5.1 reader for .pcs (positions as pyembroidery reports them)",
+ "coordinates": "integer 0.1 mm exactly as pyembroidery reports positions",
+ "fixtures": [
+  {
+   "path": "samples-6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random1-me.pcs",
+   "sha256": "176313c0e647dbeb65ed30e3999eae8493f248cad41d9b416fa458f0f6797c59",
+   "threads": 16,
+   "commandCounts": {
+    "color": 10,
+    "end": 1,
+    "jump": 105,
+    "stitch": 31
+   },
+   "commandsSha256": "af1ec36f98a175b738f1bb4dacecf7b7df65cdfb3c69bef38db113c163f02fe9"
+  },
+  {
+   "path": "samples-6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random1-premier.pcs",
+   "sha256": "d411ce28d69c5405119f920a730b26c19ab54d4d5ab6720f78967082bade4937",
+   "threads": 15,
+   "commandCounts": {
+    "color": 10,
+    "end": 1,
+    "stitch": 38
+   },
+   "commandsSha256": "28a55347d09c92248f354191624f137e7580bd160e537f0cd57e0fc186a02801"
+  },
+  {
+   "path": "samples-6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random1-wilcom.PCS",
+   "sha256": "9fc449b825320b9db0e3afdab09cd679a53ebd453c963d18cee4fc316a963f70",
+   "threads": 16,
+   "commandCounts": {
+    "color": 10,
+    "end": 1,
+    "jump": 1,
+    "stitch": 41
+   },
+   "commandsSha256": "a9705973f774e3de28f281d12feba6458f9484441d9660ba8e1c31208c344b9e"
+  },
+  {
+   "path": "samples-6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random2-me.pcs",
+   "sha256": "5e1ab6b55233329e6e187de623cf312f40c51b1d8c776d467f5ec78d19d79a0d",
+   "threads": 16,
+   "commandCounts": {
+    "color": 10,
+    "end": 1,
+    "jump": 110,
+    "stitch": 31
+   },
+   "commandsSha256": "5d52a3b6025d69ce8f3035e0b81ca3d97ec8993d51700f66d1500fe5fd084e31"
+  },
+  {
+   "path": "samples-6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random2-premier.pcs",
+   "sha256": "bd83ad4228c941d19b007bfbe7802f71e2317fe4916c52d3f105899c30060214",
+   "threads": 15,
+   "commandCounts": {
+    "color": 10,
+    "end": 1,
+    "stitch": 37
+   },
+   "commandsSha256": "b35a1ba8cef97696abbf659d7f8246233ef2bbcd60ed9ce6b712e1556433fe35"
+  },
+  {
+   "path": "samples-6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random2-wilcom.PCS",
+   "sha256": "8d2ca59b5b02a409767bfe31ccff1ca751fb0cc9a28b585d94927c5335342a68",
+   "threads": 16,
+   "commandCounts": {
+    "color": 10,
+    "end": 1,
+    "jump": 1,
+    "stitch": 41
+   },
+   "commandsSha256": "fba2f6b38610843e7516482bba2616f4400bf156807d3a023de317cd54227dd8"
+  },
+  {
+   "path": "samples-6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random3-me.pcs",
+   "sha256": "23b0d281c3870fd309e6d58e68d80d1c8d2d95ba54c9164557db0e84c6ed3643",
+   "threads": 16,
+   "commandCounts": {
+    "color": 10,
+    "end": 1,
+    "jump": 114,
+    "stitch": 31
+   },
+   "commandsSha256": "9410d3bdb97fbc019d3221c3e4a8fb659920dcae88f2d706caea3304984f1173"
+  },
+  {
+   "path": "samples-6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random3-premier.pcs",
+   "sha256": "bd1f385c503fb863cf4e8154d05979ff0a706b78798cfec064562179e40033ea",
+   "threads": 15,
+   "commandCounts": {
+    "color": 10,
+    "end": 1,
+    "stitch": 39
+   },
+   "commandsSha256": "88fec36ceb14e1a3c5dab60b988548305164b0507d5a76d664854f7d44aeb0c9"
+  },
+  {
+   "path": "samples-6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random3-wilcom.PCS",
+   "sha256": "dfdd5cf028224c3323bdeaf77d4e95b0e0ecdd79f659f5ab8ebf92241862d5f7",
+   "threads": 16,
+   "commandCounts": {
+    "color": 10,
+    "end": 1,
+    "jump": 1,
+    "stitch": 41
+   },
+   "commandsSha256": "d29e23c164f03a860afb42a1be7d214843eda1cdee0197704b9c19001f1bdda4"
+  },
+  {
+   "path": "samples-6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/scene-me.pcs",
+   "sha256": "556830469e9a823734c0d582e69a32c6546fb072ed880385bed6a1fe3481cbea",
+   "threads": 16,
+   "commandCounts": {
+    "color": 3,
+    "end": 1,
+    "jump": 20,
+    "stitch": 126
+   },
+   "commandsSha256": "00d31134023b809dda326723cd5a9d4277239099f11fdee2cf468959f467bb13"
+  },
+  {
+   "path": "samples-6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/scene-premier.pcs",
+   "sha256": "6648e496e5d78eedb0e56a90482c524254ab2d1f52c4ec653d7b98a2419692dd",
+   "threads": 15,
+   "commandCounts": {
+    "color": 3,
+    "end": 1,
+    "stitch": 128
+   },
+   "commandsSha256": "4ae6c520fa3d7a30d39a95e733418a40388c61ad50cd9965d4c518f5fdd22e9d"
+  },
+  {
+   "path": "samples-6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/scene-wilcom.PCS",
+   "sha256": "78f4a08f7673671de68e65066adfe9bd3a8e8d6130523488985ab7b004089d3f",
+   "threads": 16,
+   "commandCounts": {
+    "color": 3,
+    "end": 1,
+    "jump": 2,
+    "stitch": 130
+   },
+   "commandsSha256": "0f2fd6563645116f9bd7deb5616dff72c641d4b17632dde361c05c6ac04f40ac"
+  },
+  {
+   "path": "samples-6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/spiralbox-me.pcs",
+   "sha256": "b10656e036b56b37dff606b08215ee55a3be0db38306ff6f929cdd62245772c0",
+   "threads": 16,
+   "commandCounts": {
+    "color": 16,
+    "end": 1,
+    "jump": 15,
+    "stitch": 84
+   },
+   "commandsSha256": "a78e27ccd53ae08e99c63908d8a4c3cd1bf40d546c02c0afd5c2e4d99abc038e"
+  },
+  {
+   "path": "samples-6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/spiralbox-premier.pcs",
+   "sha256": "e82e44b15854c2c91b8059b0190748817a18bdb73953e3cb2f9f59bfa6482143",
+   "threads": 15,
+   "commandCounts": {
+    "color": 16,
+    "end": 1,
+    "stitch": 97
+   },
+   "commandsSha256": "b23ff22b06ff41e6df395b44a1eff88c7fcd40c3c6070f6bc2f68b745153536f"
+  },
+  {
+   "path": "samples-6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/spiralbox-wilcom-a.PCS",
+   "sha256": "495486bfbb72ada377ccb061db12db583aaa6505ded3890aa14c65efb4db7f34",
+   "threads": 16,
+   "commandCounts": {
+    "color": 15,
+    "end": 1,
+    "jump": 2,
+    "stitch": 89
+   },
+   "commandsSha256": "01160c74427bdf5b51c407179035172c1f2eb4d2bc2d2396a3b1125a3cdeb702"
+  },
+  {
+   "path": "samples-6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/spiralbox-wilcom-b.PCS",
+   "sha256": "7791b66721fe2e0037c10ad77a63f09a113fa1648739fb0207febffd1defb684",
+   "threads": 16,
+   "commandCounts": {
+    "color": 1,
+    "end": 1,
+    "jump": 2,
+    "stitch": 6
+   },
+   "commandsSha256": "61876de77ee8e832cedb21627a14009998f4cade38461527af3cc72180463abd"
+  }
+ ]
+}

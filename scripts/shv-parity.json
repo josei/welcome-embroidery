@@ -1,0 +1,127 @@
+{
+ "schema": "welcome/shv-parity/1",
+ "oracle": "pyembroidery 1.5.1 reader for .shv (positions as pyembroidery reports them)",
+ "coordinates": "integer 0.1 mm exactly as pyembroidery reports positions",
+ "fixtures": [
+  {
+   "path": "samples-6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random1-me.shv",
+   "sha256": "8cde803f0da455199b5527a723d5f2b986de04bdf2fbdcd10649055a4a1be13f",
+   "threads": 10,
+   "commandCounts": {
+    "color": 10,
+    "end": 1,
+    "jump": 88,
+    "stitch": 31
+   },
+   "commandsSha256": "8d7a3146e36e2db320534ed1d7ab5b879f0c343409606dcdd564ed847554670c"
+  },
+  {
+   "path": "samples-6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random1-wilcom.SHV",
+   "sha256": "a53c586e762bed1624fbc9e85f24eb3f9587c9dcb9ad65ca92ef57c5f3640291",
+   "threads": 10,
+   "commandCounts": {
+    "color": 10,
+    "end": 1,
+    "jump": 30,
+    "stitch": 31
+   },
+   "commandsSha256": "5544e5a093f83f40043cdee4b025633209230c31d4bfff56c4f2e13dd9e6d95f"
+  },
+  {
+   "path": "samples-6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random2-me.shv",
+   "sha256": "cbede4ff363df781cf628352214dd01a0a2354b9aa44b70ae748d6f3bb38daf3",
+   "threads": 10,
+   "commandCounts": {
+    "color": 10,
+    "end": 1,
+    "jump": 92,
+    "stitch": 31
+   },
+   "commandsSha256": "89a467aa241c75fa2f19669e0a8e97633955b79e365d0766f67f7b6abdf14098"
+  },
+  {
+   "path": "samples-6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random2-wilcom.SHV",
+   "sha256": "c17f269286d692dfd19b25378070d2cddfe522ed2967cd54249a02508e43fef7",
+   "threads": 10,
+   "commandCounts": {
+    "color": 10,
+    "end": 1,
+    "jump": 29,
+    "stitch": 31
+   },
+   "commandsSha256": "0abbd49c10946b2167133365c57ca44e10ac93732182cfa3e2722e424e5871f1"
+  },
+  {
+   "path": "samples-6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random3-me.shv",
+   "sha256": "60504d87b275386a9148550b5c32a3228a038bf74e49288583706bc0eabb73a4",
+   "threads": 10,
+   "commandCounts": {
+    "color": 10,
+    "end": 1,
+    "jump": 93,
+    "stitch": 31
+   },
+   "commandsSha256": "ece9b432b0cce949c448dcd224f56292a424cfafc67cc34f47b30bdb561897f6"
+  },
+  {
+   "path": "samples-6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random3-wilcom.SHV",
+   "sha256": "4f23c342dd78ae68d1b8f497343eda82de1ef250a4bf97dac8783036e87d2919",
+   "threads": 10,
+   "commandCounts": {
+    "color": 10,
+    "end": 1,
+    "jump": 29,
+    "stitch": 31
+   },
+   "commandsSha256": "e5c0239c0996b17bdae50b6b55e2a19d268faba64c326b2e3612276142543330"
+  },
+  {
+   "path": "samples-6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/scene-me.shv",
+   "sha256": "1f65faccd65cfc6da1737557277f0dc38a20aff9ede458d5a4e1175bcfa26536",
+   "threads": 3,
+   "commandCounts": {
+    "color": 3,
+    "end": 1,
+    "jump": 16,
+    "stitch": 126
+   },
+   "commandsSha256": "5ed580fe0f64290608c1a9411749df7abba2506da0d0df5d9764c2cae2545a24"
+  },
+  {
+   "path": "samples-6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/scene-wilcom.SHV",
+   "sha256": "87a3882cf361ba307b527584375942c344fde7c2f36188ddd3a537364e7bf5b6",
+   "threads": 3,
+   "commandCounts": {
+    "color": 3,
+    "end": 1,
+    "jump": 5,
+    "stitch": 126
+   },
+   "commandsSha256": "4fe0afee9675e84dad0f8daf4f915f571f7d316e0aebadb2e9c521a095e8f561"
+  },
+  {
+   "path": "samples-6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/spiralbox-me.shv",
+   "sha256": "7f1d1953d2b487fec03b9a8b9af9242e73dc7dc8ecf9514c2926bfbca62cd686",
+   "threads": 16,
+   "commandCounts": {
+    "color": 15,
+    "end": 1,
+    "jump": 15,
+    "stitch": 84
+   },
+   "commandsSha256": "0de4caa71c02874c70241eba690f08d418a77a65d343fabcdf1c38720f19b8b5"
+  },
+  {
+   "path": "samples-6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/spiralbox-wilcom.SHV",
+   "sha256": "1125b673d590d093aade37baed379f1c0d04a3ae284f4167f98837ac0d7fb0f5",
+   "threads": 16,
+   "commandCounts": {
+    "color": 16,
+    "end": 1,
+    "jump": 15,
+    "stitch": 80
+   },
+   "commandsSha256": "868e0949d31e492fa98ae96f471a9fd8bce1ec9c8134d0d3c7d387acc22caa01"
+  }
+ ]
+}

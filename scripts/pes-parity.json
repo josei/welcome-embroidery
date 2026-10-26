@@ -1,0 +1,998 @@
+{
+ "schema": "welcome/pes-parity/1",
+ "oracle": "pyembroidery 1.5.1 PesReader (PEC block at the offset in bytes 8-11; interpolate_duplicate_color_as_stop)",
+ "coordinates": "integer 0.1 mm exactly as pyembroidery reports positions",
+ "fixtures": [
+  {
+   "path": "samples-6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random1-brother-v1.pes",
+   "version": "#PES0001",
+   "sha256": "ecf7b6c1aff1035a15f8e1da23c9b7250253b1d24d211acd569e3b2a93fff4f4",
+   "threads": 10,
+   "commandCounts": {
+    "color": 9,
+    "end": 1,
+    "jump": 10,
+    "stitch": 20
+   },
+   "commandsSha256": "f8f439c48f7e82f129e063f32aec51f1217d5209c6c616725ae6337fbeba2396"
+  },
+  {
+   "path": "samples-6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random1-brother-v2.pes",
+   "version": "#PES0020",
+   "sha256": "6600bdf7900f9dbafbc624df6ad5e5626782296a35854229f56222fbd498b38b",
+   "threads": 10,
+   "commandCounts": {
+    "color": 9,
+    "end": 1,
+    "jump": 10,
+    "stitch": 20
+   },
+   "commandsSha256": "f8f439c48f7e82f129e063f32aec51f1217d5209c6c616725ae6337fbeba2396"
+  },
+  {
+   "path": "samples-6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random1-brother-v3.pes",
+   "version": "#PES0030",
+   "sha256": "bd2bc73f4d087bab50c8cf1bf236f166309df2cdc8f46861d608acb8de4902df",
+   "threads": 10,
+   "commandCounts": {
+    "color": 9,
+    "end": 1,
+    "jump": 10,
+    "stitch": 20
+   },
+   "commandsSha256": "f8f439c48f7e82f129e063f32aec51f1217d5209c6c616725ae6337fbeba2396"
+  },
+  {
+   "path": "samples-6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random1-brother-v4.pes",
+   "version": "#PES0040",
+   "sha256": "46965f42519095afdc9f647074b1d62c07c1a93e605f5eed8e31bf2f502aae91",
+   "threads": 10,
+   "commandCounts": {
+    "color": 9,
+    "end": 1,
+    "jump": 10,
+    "stitch": 20
+   },
+   "commandsSha256": "f8f439c48f7e82f129e063f32aec51f1217d5209c6c616725ae6337fbeba2396"
+  },
+  {
+   "path": "samples-6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random1-brother-v5.pes",
+   "version": "#PES0050",
+   "sha256": "c47c60982068b6d0c80c866270c3af2e2e5aef7e504e44de844002575b7f25a5",
+   "threads": 10,
+   "commandCounts": {
+    "color": 9,
+    "end": 1,
+    "jump": 10,
+    "stitch": 20
+   },
+   "commandsSha256": "f8f439c48f7e82f129e063f32aec51f1217d5209c6c616725ae6337fbeba2396"
+  },
+  {
+   "path": "samples-6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random1-brother-v6.pes",
+   "version": "#PES0060",
+   "sha256": "2bf708b8d742e0b1f3d730fb2fc9c2a40c84d4568aba51c84256bb5ddbf5e8e5",
+   "threads": 10,
+   "commandCounts": {
+    "color": 9,
+    "end": 1,
+    "jump": 10,
+    "stitch": 20
+   },
+   "commandsSha256": "f8f439c48f7e82f129e063f32aec51f1217d5209c6c616725ae6337fbeba2396"
+  },
+  {
+   "path": "samples-6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random1-ew.pes",
+   "version": "#PES0001",
+   "sha256": "e485791b78966a6725f9cd01f53fc41db455dc2c8a7b3e07a2535d2a9c408849",
+   "threads": 10,
+   "commandCounts": {
+    "color": 9,
+    "end": 1,
+    "jump": 21,
+    "stitch": 30,
+    "trim": 9
+   },
+   "commandsSha256": "4812878a38556dd0115a0af09b6c174eb3ec4f438f1bc61d2199735c0175a560"
+  },
+  {
+   "path": "samples-6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random1-me.pes",
+   "version": "#PES0060",
+   "sha256": "c32aa71d996724157df1f1769a5e8b56b15d51114d23a0c28cadef5b5efa6d2a",
+   "threads": 10,
+   "commandCounts": {
+    "color": 9,
+    "end": 1,
+    "jump": 207,
+    "stitch": 9,
+    "trim": 196
+   },
+   "commandsSha256": "97563e5be276f4420a1eed9863e4920abe8c98b67d3822b9262d7579fdb77baf"
+  },
+  {
+   "path": "samples-6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random1-premier-v10.pes",
+   "version": "#PES0100",
+   "sha256": "0f9bdab4b088a4e72bfe8d5a6c2bfa935cae01274e5e174c53e74eb27bf277d8",
+   "threads": 1,
+   "commandCounts": {
+    "end": 1,
+    "jump": 12,
+    "stitch": 32,
+    "trim": 10
+   },
+   "commandsSha256": "dce28573e200061670363062d0f49a528da883f67db0a7371d757f99dfec93ca"
+  },
+  {
+   "path": "samples-6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random1-premier-v2.pes",
+   "version": "#PES0020",
+   "sha256": "888120e0f31dc33cf2ebec6bd345e31fc4a34188026cb685f4b28ca81403a4e8",
+   "threads": 1,
+   "commandCounts": {
+    "end": 1,
+    "jump": 12,
+    "stitch": 32,
+    "trim": 10
+   },
+   "commandsSha256": "1213cb082a9bffd36913664e13f8ebaebb1274574477a0071b3e65fee6a8c15b"
+  },
+  {
+   "path": "samples-6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random1-premier-v4.pes",
+   "version": "#PES0040",
+   "sha256": "f5a3ca048a33268d8e0038120446043572294e51c6fbd047292180d8190fd3df",
+   "threads": 1,
+   "commandCounts": {
+    "end": 1,
+    "jump": 12,
+    "stitch": 32,
+    "trim": 10
+   },
+   "commandsSha256": "1213cb082a9bffd36913664e13f8ebaebb1274574477a0071b3e65fee6a8c15b"
+  },
+  {
+   "path": "samples-6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random1-premier-v6.pes",
+   "version": "#PES0060",
+   "sha256": "3d97664ea96eec15844c43c9f6a8a11ec676b4bc2c9a7bac10529f09a87d98ba",
+   "threads": 9,
+   "commandCounts": {
+    "color": 8,
+    "end": 1,
+    "jump": 12,
+    "stitch": 37,
+    "stop": 1,
+    "trim": 1
+   },
+   "commandsSha256": "01cd5aad3d374d30bbc27c768441974c609dbe60cb2f3229c60057312b57d2fc"
+  },
+  {
+   "path": "samples-6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random1-premier-v9.pes",
+   "version": "#PES0090",
+   "sha256": "b4dabda9b0afe37c4f6d0953345a43ac586816dcada40d189c0338246a562f73",
+   "threads": 9,
+   "commandCounts": {
+    "color": 8,
+    "end": 1,
+    "jump": 12,
+    "stitch": 37,
+    "stop": 1,
+    "trim": 1
+   },
+   "commandsSha256": "01cd5aad3d374d30bbc27c768441974c609dbe60cb2f3229c60057312b57d2fc"
+  },
+  {
+   "path": "samples-6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random1-wilcom-v1.PES",
+   "version": "#PES0001",
+   "sha256": "9cc50465d4720a4d6b961454d8f0f58bc3f632cd2dd17d006482ede9a9ca8b51",
+   "threads": 10,
+   "commandCounts": {
+    "color": 9,
+    "end": 1,
+    "jump": 1,
+    "stitch": 30
+   },
+   "commandsSha256": "20f32d1c7752d92da54205f992e0e82f63f349ac5dd834f12b1302ad972819f8"
+  },
+  {
+   "path": "samples-6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random1-wilcom-v4.PES",
+   "version": "#PES0040",
+   "sha256": "8e1579f19efb6fa188a849634b56d54ba3ee746ebc7b150977871e89490ab5d9",
+   "threads": 10,
+   "commandCounts": {
+    "color": 9,
+    "end": 1,
+    "jump": 31,
+    "stitch": 40,
+    "trim": 30
+   },
+   "commandsSha256": "1ab0d0036ad55aef763b67fda05254923d1b0aaab7b502f76d0491737bff6ae0"
+  },
+  {
+   "path": "samples-6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random1-wilcom-v5.PES",
+   "version": "#PES0050",
+   "sha256": "262a8285da1793862424538d3e1d0e9c8615ee40f37d5fa5582d472a12244ffc",
+   "threads": 10,
+   "commandCounts": {
+    "color": 9,
+    "end": 1,
+    "jump": 31,
+    "stitch": 40,
+    "trim": 30
+   },
+   "commandsSha256": "1ab0d0036ad55aef763b67fda05254923d1b0aaab7b502f76d0491737bff6ae0"
+  },
+  {
+   "path": "samples-6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random1-wilcom-v6.PES",
+   "version": "#PES0060",
+   "sha256": "1ac00b2f50dd6da4f02b442e7ca86e729fba5732131de5ffae072ee80fc3021a",
+   "threads": 10,
+   "commandCounts": {
+    "color": 9,
+    "end": 1,
+    "jump": 31,
+    "stitch": 40,
+    "trim": 30
+   },
+   "commandsSha256": "1ab0d0036ad55aef763b67fda05254923d1b0aaab7b502f76d0491737bff6ae0"
+  },
+  {
+   "path": "samples-6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random1.pes",
+   "version": "#PES0001",
+   "sha256": "20f57b157d9370e577d191796ed1d42ce5cf9a297af9a120e1da57f9ea05ec35",
+   "threads": 10,
+   "commandCounts": {
+    "color": 9,
+    "end": 1,
+    "jump": 11,
+    "stitch": 40,
+    "trim": 10
+   },
+   "commandsSha256": "703e310954168c0bfae92486c12eda74094596a0b396d49b9a3a03be1bf6f2b3"
+  },
+  {
+   "path": "samples-6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random2-brother-v1.pes",
+   "version": "#PES0001",
+   "sha256": "b2b620108ba09ad68e8756309b237c901f23f5305bbeea58e5d9bc40e3e3ba3d",
+   "threads": 10,
+   "commandCounts": {
+    "color": 9,
+    "end": 1,
+    "jump": 10,
+    "stitch": 20
+   },
+   "commandsSha256": "65940ff61419505c54839eb9f5dd82489d1770ade335681a5e22241eff5cc712"
+  },
+  {
+   "path": "samples-6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random2-brother-v2.pes",
+   "version": "#PES0020",
+   "sha256": "aafb875281572e3231df43574580750a809414f143db7410e4f6febfe15e40d1",
+   "threads": 10,
+   "commandCounts": {
+    "color": 9,
+    "end": 1,
+    "jump": 10,
+    "stitch": 20
+   },
+   "commandsSha256": "65940ff61419505c54839eb9f5dd82489d1770ade335681a5e22241eff5cc712"
+  },
+  {
+   "path": "samples-6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random2-brother-v3.pes",
+   "version": "#PES0030",
+   "sha256": "cd47b25025e861911a51b41f1b2c976922cd295cf9caacbcdaffe278389dfdcb",
+   "threads": 10,
+   "commandCounts": {
+    "color": 9,
+    "end": 1,
+    "jump": 10,
+    "stitch": 20
+   },
+   "commandsSha256": "65940ff61419505c54839eb9f5dd82489d1770ade335681a5e22241eff5cc712"
+  },
+  {
+   "path": "samples-6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random2-brother-v4.pes",
+   "version": "#PES0040",
+   "sha256": "f223f79b527082203435bd5bf80b72ff17651116be12ac6ea8380c780a0bf431",
+   "threads": 10,
+   "commandCounts": {
+    "color": 9,
+    "end": 1,
+    "jump": 10,
+    "stitch": 20
+   },
+   "commandsSha256": "65940ff61419505c54839eb9f5dd82489d1770ade335681a5e22241eff5cc712"
+  },
+  {
+   "path": "samples-6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random2-brother-v5.pes",
+   "version": "#PES0050",
+   "sha256": "148735527e3e1080d67f716fe37db7f7afc19650c2cdb43df4a6fbae14436e06",
+   "threads": 10,
+   "commandCounts": {
+    "color": 9,
+    "end": 1,
+    "jump": 10,
+    "stitch": 20
+   },
+   "commandsSha256": "65940ff61419505c54839eb9f5dd82489d1770ade335681a5e22241eff5cc712"
+  },
+  {
+   "path": "samples-6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random2-brother-v6.pes",
+   "version": "#PES0060",
+   "sha256": "7d6540584a0424ff186db7194c7188712462bed58fd61c92ceaf57693d5758ab",
+   "threads": 10,
+   "commandCounts": {
+    "color": 9,
+    "end": 1,
+    "jump": 10,
+    "stitch": 20
+   },
+   "commandsSha256": "65940ff61419505c54839eb9f5dd82489d1770ade335681a5e22241eff5cc712"
+  },
+  {
+   "path": "samples-6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random2-ew.pes",
+   "version": "#PES0001",
+   "sha256": "a3152537959836d710a830990ea63e28b0e73f26bde9b8aa751e34e9faddc615",
+   "threads": 10,
+   "commandCounts": {
+    "color": 9,
+    "end": 1,
+    "jump": 21,
+    "stitch": 30,
+    "trim": 9
+   },
+   "commandsSha256": "dfa9ca69f46309b35ea5a7a0d14faefccecc8d34897d64f32f65703ccb27103c"
+  },
+  {
+   "path": "samples-6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random2-me.pes",
+   "version": "#PES0060",
+   "sha256": "055879bea6011a56ddaa98cc29ff5c21a1103d0cebdd2b67b545ce0d01cf4f28",
+   "threads": 10,
+   "commandCounts": {
+    "color": 9,
+    "end": 1,
+    "jump": 213,
+    "stitch": 10,
+    "trim": 202
+   },
+   "commandsSha256": "37f7e46edc6e3d3001e360b4855ad723b3ae774ef70f1acdb6fcefeac517450d"
+  },
+  {
+   "path": "samples-6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random2-premier-v2.pes",
+   "version": "#PES0020",
+   "sha256": "99e3e6a0f20ad35f05813a17def950e2508b5c9e094f717324e0ee3327235c64",
+   "threads": 10,
+   "commandCounts": {
+    "color": 9,
+    "end": 1,
+    "jump": 12,
+    "stitch": 36,
+    "trim": 1
+   },
+   "commandsSha256": "2cba3dc5f2c0d527ae24290ffd554e2793c305c8dce62efd1853079817fac862"
+  },
+  {
+   "path": "samples-6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random2-wilcom-v1.PES",
+   "version": "#PES0001",
+   "sha256": "13d115f98602691f635dc814d8e0ddc7af02244353904cfdc53efd35d0195b5f",
+   "threads": 10,
+   "commandCounts": {
+    "color": 9,
+    "end": 1,
+    "jump": 1,
+    "stitch": 30
+   },
+   "commandsSha256": "dbc0879a99365b439fe76fe492a7d8dda3aeeef87263bd4fb5811e53e2465306"
+  },
+  {
+   "path": "samples-6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random2-wilcom-v4.PES",
+   "version": "#PES0040",
+   "sha256": "44760906f16743caded2f02bd417489e8b573f6623dd34ef0a6e3fb292cc5423",
+   "threads": 10,
+   "commandCounts": {
+    "color": 9,
+    "end": 1,
+    "jump": 30,
+    "stitch": 40,
+    "trim": 29
+   },
+   "commandsSha256": "691b2b73646a6f1cb9b71cc0529d7a554b9188568b10981e6a7b1a88217b5a4f"
+  },
+  {
+   "path": "samples-6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random2-wilcom-v5.PES",
+   "version": "#PES0050",
+   "sha256": "84386a2d787849a89cea78b64c35a63aeddf6b9738825d64f0c4856912c52f58",
+   "threads": 10,
+   "commandCounts": {
+    "color": 9,
+    "end": 1,
+    "jump": 30,
+    "stitch": 40,
+    "trim": 29
+   },
+   "commandsSha256": "691b2b73646a6f1cb9b71cc0529d7a554b9188568b10981e6a7b1a88217b5a4f"
+  },
+  {
+   "path": "samples-6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random2-wilcom-v6.PES",
+   "version": "#PES0060",
+   "sha256": "591eb482a0c90e2afa9eb9d05c7a01396294bdcef6e6b3a6cce5f6e9f883995d",
+   "threads": 10,
+   "commandCounts": {
+    "color": 9,
+    "end": 1,
+    "jump": 30,
+    "stitch": 40,
+    "trim": 29
+   },
+   "commandsSha256": "691b2b73646a6f1cb9b71cc0529d7a554b9188568b10981e6a7b1a88217b5a4f"
+  },
+  {
+   "path": "samples-6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random2.pes",
+   "version": "#PES0001",
+   "sha256": "4b33890b9602cc6b91695b9eebb1af35c79ce3feb3c782b45dd338694aaf8c94",
+   "threads": 10,
+   "commandCounts": {
+    "color": 9,
+    "end": 1,
+    "jump": 11,
+    "stitch": 40,
+    "trim": 10
+   },
+   "commandsSha256": "681f15577fdac7d9922e8bd10279d4fe22677a5429c48a925c2e5500cdf0a2eb"
+  },
+  {
+   "path": "samples-6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random3-brother-v1.pes",
+   "version": "#PES0001",
+   "sha256": "66e75bba4a4553ce36f403919f3228fff12209ccf349b53c1e286bd388f5951f",
+   "threads": 10,
+   "commandCounts": {
+    "color": 9,
+    "end": 1,
+    "jump": 10,
+    "stitch": 20
+   },
+   "commandsSha256": "5a49d33493874367271e7b00af56c52d80d0321a1907df1943f31ec91a74cc0e"
+  },
+  {
+   "path": "samples-6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random3-brother-v2.pes",
+   "version": "#PES0020",
+   "sha256": "17accaeb02a92d87a56d2e5a7a5f5869fba98e566eac5cd8062029861d1c9e7c",
+   "threads": 10,
+   "commandCounts": {
+    "color": 9,
+    "end": 1,
+    "jump": 10,
+    "stitch": 20
+   },
+   "commandsSha256": "5a49d33493874367271e7b00af56c52d80d0321a1907df1943f31ec91a74cc0e"
+  },
+  {
+   "path": "samples-6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random3-brother-v3.pes",
+   "version": "#PES0030",
+   "sha256": "8780c13bb38fbf5111d2e398cf729d2226e65404cd90b582e69e58e0dba410b2",
+   "threads": 10,
+   "commandCounts": {
+    "color": 9,
+    "end": 1,
+    "jump": 10,
+    "stitch": 20
+   },
+   "commandsSha256": "5a49d33493874367271e7b00af56c52d80d0321a1907df1943f31ec91a74cc0e"
+  },
+  {
+   "path": "samples-6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random3-brother-v4.pes",
+   "version": "#PES0040",
+   "sha256": "811319ff4dd4faea7dcde1f996fdadc3e6f211333b17858f7f730af40b0ebed4",
+   "threads": 10,
+   "commandCounts": {
+    "color": 9,
+    "end": 1,
+    "jump": 10,
+    "stitch": 20
+   },
+   "commandsSha256": "5a49d33493874367271e7b00af56c52d80d0321a1907df1943f31ec91a74cc0e"
+  },
+  {
+   "path": "samples-6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random3-brother-v5.pes",
+   "version": "#PES0050",
+   "sha256": "44dfed3c24d1c3ac009e3ef4bf00a1a898e2fc08344d7e1c9700f6f4c55c15f9",
+   "threads": 10,
+   "commandCounts": {
+    "color": 9,
+    "end": 1,
+    "jump": 10,
+    "stitch": 20
+   },
+   "commandsSha256": "5a49d33493874367271e7b00af56c52d80d0321a1907df1943f31ec91a74cc0e"
+  },
+  {
+   "path": "samples-6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random3-brother-v6.pes",
+   "version": "#PES0060",
+   "sha256": "40da0e3f17175f3777a98cd0a38ca4b96311b158273958aefd8c17713588032e",
+   "threads": 10,
+   "commandCounts": {
+    "color": 9,
+    "end": 1,
+    "jump": 10,
+    "stitch": 20
+   },
+   "commandsSha256": "5a49d33493874367271e7b00af56c52d80d0321a1907df1943f31ec91a74cc0e"
+  },
+  {
+   "path": "samples-6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random3-ew.pes",
+   "version": "#PES0001",
+   "sha256": "af9af8352e84db0c199128ce0801e775f59716c2f9c521d86dc6c651d9d73f9a",
+   "threads": 10,
+   "commandCounts": {
+    "color": 9,
+    "end": 1,
+    "jump": 21,
+    "stitch": 30,
+    "trim": 9
+   },
+   "commandsSha256": "61df9f322b56f77d88db28f7115dd6a5c122fb205ebd08662b0f783d78fb7abc"
+  },
+  {
+   "path": "samples-6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random3-me.pes",
+   "version": "#PES0060",
+   "sha256": "08ac30f9f5ce172bf851e2c4a5fc78bb4cae5bf2e87fcf719248fe19285a7286",
+   "threads": 10,
+   "commandCounts": {
+    "color": 9,
+    "end": 1,
+    "jump": 226,
+    "stitch": 10,
+    "trim": 215
+   },
+   "commandsSha256": "44a9aa1bd78bdd8dff841e0dc8bb74c771804680150e9b15057c0bc97d30d260"
+  },
+  {
+   "path": "samples-6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random3-premier.pes",
+   "version": "#PES0020",
+   "sha256": "3e615610153f54b12745b4743bc9ae5b6e9a256409a7e877dccabaa72dc127ef",
+   "threads": 10,
+   "commandCounts": {
+    "color": 9,
+    "end": 1,
+    "jump": 12,
+    "stitch": 38,
+    "trim": 1
+   },
+   "commandsSha256": "62f567e2831ef2f6887c970a50c3d6b469fad188fee10c919a650840d2e6f0e4"
+  },
+  {
+   "path": "samples-6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random3-wilcom-v1.PES",
+   "version": "#PES0001",
+   "sha256": "991f09bc119f444e30ef2cbe7d6f0c25f394bab8026423ebfbe3095ac9d96a05",
+   "threads": 10,
+   "commandCounts": {
+    "color": 9,
+    "end": 1,
+    "jump": 1,
+    "stitch": 30
+   },
+   "commandsSha256": "e25ddacac4674da123df27c5759cf4416fd60328697651d62a21acc9ff133662"
+  },
+  {
+   "path": "samples-6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random3-wilcom-v4.PES",
+   "version": "#PES0040",
+   "sha256": "12d872172dde3acabe4fb5afd674561432fba550932f84244fd1a78ecd89d0d7",
+   "threads": 10,
+   "commandCounts": {
+    "color": 9,
+    "end": 1,
+    "jump": 30,
+    "stitch": 40,
+    "trim": 29
+   },
+   "commandsSha256": "1b9bca693e0fc4e54b9ccf372b2a6cad25262d5e6e909e717c963a80f456f3f3"
+  },
+  {
+   "path": "samples-6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random3-wilcom-v5.PES",
+   "version": "#PES0050",
+   "sha256": "6652948f93a8ff77e56a7b46d309e215f9a77030555bd6117604d3d98805bad1",
+   "threads": 10,
+   "commandCounts": {
+    "color": 9,
+    "end": 1,
+    "jump": 30,
+    "stitch": 40,
+    "trim": 29
+   },
+   "commandsSha256": "1b9bca693e0fc4e54b9ccf372b2a6cad25262d5e6e909e717c963a80f456f3f3"
+  },
+  {
+   "path": "samples-6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random3-wilcom-v6.PES",
+   "version": "#PES0060",
+   "sha256": "3ce25a878d1aca201712dec423289466a1a864afa50163863d46a73e2d207833",
+   "threads": 10,
+   "commandCounts": {
+    "color": 9,
+    "end": 1,
+    "jump": 30,
+    "stitch": 40,
+    "trim": 29
+   },
+   "commandsSha256": "1b9bca693e0fc4e54b9ccf372b2a6cad25262d5e6e909e717c963a80f456f3f3"
+  },
+  {
+   "path": "samples-6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random3.pes",
+   "version": "#PES0001",
+   "sha256": "641675149ae63ab0988fe5915c5077cdd4a3a21d7c472f0099822bc9dee33298",
+   "threads": 10,
+   "commandCounts": {
+    "color": 9,
+    "end": 1,
+    "jump": 11,
+    "stitch": 40,
+    "trim": 10
+   },
+   "commandsSha256": "7b924c22d97d4a19080357710f133aacc81218ac31a3fed2aa9fadcee2ff0ac4"
+  },
+  {
+   "path": "samples-6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/scene-brother-v1.pes",
+   "version": "#PES0001",
+   "sha256": "192851217e53ca10e49fa5640fe89ce0357a5fede5fbca2716107685c7211042",
+   "threads": 3,
+   "commandCounts": {
+    "color": 2,
+    "end": 1,
+    "jump": 5,
+    "stitch": 120,
+    "trim": 2
+   },
+   "commandsSha256": "8917264a9815049d335a1500af02f588ff01782deae187ea3cefe4a31947d72c"
+  },
+  {
+   "path": "samples-6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/scene-brother-v2.pes",
+   "version": "#PES0020",
+   "sha256": "e29794e8212700e43aa5fe37306b7acb95f1c8ec532edc126162d714e1f2aa55",
+   "threads": 3,
+   "commandCounts": {
+    "color": 2,
+    "end": 1,
+    "jump": 5,
+    "stitch": 120,
+    "trim": 2
+   },
+   "commandsSha256": "8917264a9815049d335a1500af02f588ff01782deae187ea3cefe4a31947d72c"
+  },
+  {
+   "path": "samples-6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/scene-brother-v3.pes",
+   "version": "#PES0030",
+   "sha256": "a6fcd43822bdbfd9f639e233192f380acc67679a8cbbe617a26423efa426fbd0",
+   "threads": 3,
+   "commandCounts": {
+    "color": 2,
+    "end": 1,
+    "jump": 5,
+    "stitch": 120,
+    "trim": 2
+   },
+   "commandsSha256": "8917264a9815049d335a1500af02f588ff01782deae187ea3cefe4a31947d72c"
+  },
+  {
+   "path": "samples-6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/scene-brother-v4.pes",
+   "version": "#PES0040",
+   "sha256": "11317582949ed9d480b583dd2b8c9286bf0d6d2735aa845c4e73209104a8d78d",
+   "threads": 3,
+   "commandCounts": {
+    "color": 2,
+    "end": 1,
+    "jump": 5,
+    "stitch": 120,
+    "trim": 2
+   },
+   "commandsSha256": "8917264a9815049d335a1500af02f588ff01782deae187ea3cefe4a31947d72c"
+  },
+  {
+   "path": "samples-6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/scene-brother-v5.pes",
+   "version": "#PES0050",
+   "sha256": "87da473416bb310ca7fd24549ac8042737a87fde81102ec422f21aa05f5c00d7",
+   "threads": 3,
+   "commandCounts": {
+    "color": 2,
+    "end": 1,
+    "jump": 5,
+    "stitch": 120,
+    "trim": 2
+   },
+   "commandsSha256": "8917264a9815049d335a1500af02f588ff01782deae187ea3cefe4a31947d72c"
+  },
+  {
+   "path": "samples-6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/scene-brother-v6.pes",
+   "version": "#PES0060",
+   "sha256": "666fab112f84bfc901c7ae77b7f953254a555e03e6d2b00010b787ed5d7c46e7",
+   "threads": 3,
+   "commandCounts": {
+    "color": 2,
+    "end": 1,
+    "jump": 5,
+    "stitch": 120,
+    "trim": 2
+   },
+   "commandsSha256": "8917264a9815049d335a1500af02f588ff01782deae187ea3cefe4a31947d72c"
+  },
+  {
+   "path": "samples-6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/scene-ew.pes",
+   "version": "#PES0001",
+   "sha256": "b95c4de1b9a46b5a8816a5747bf0d6928f766696c948dc97f0734a9f2e99e331",
+   "threads": 3,
+   "commandCounts": {
+    "color": 2,
+    "end": 1,
+    "jump": 7,
+    "stitch": 125,
+    "trim": 2
+   },
+   "commandsSha256": "593929f77b91fe6c88200998b81c3a0aed6f2697e25a00d9ee287519f41377d5"
+  },
+  {
+   "path": "samples-6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/scene-me.pes",
+   "version": "#PES0060",
+   "sha256": "35a9dfc657e01bc8d4f5c4b190d8ecf006c8289fda36ec785b1a09b5751b7461",
+   "threads": 3,
+   "commandCounts": {
+    "color": 2,
+    "end": 1,
+    "jump": 48,
+    "stitch": 124,
+    "trim": 44
+   },
+   "commandsSha256": "01d56045953457e946e79f3786c733be20b956bc562bc7bca913d60e7f22036d"
+  },
+  {
+   "path": "samples-6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/scene-wilcom-v1.PES",
+   "version": "#PES0001",
+   "sha256": "c7cfa420af4786fe9e33b5008093a91601492c671a27d4dc2af494a99328c050",
+   "threads": 3,
+   "commandCounts": {
+    "color": 2,
+    "end": 1,
+    "jump": 1,
+    "stitch": 125
+   },
+   "commandsSha256": "767119c4ee9230d54b9c29f77502c01b53389395383be8409031ac3e3627b995"
+  },
+  {
+   "path": "samples-6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/scene-wilcom-v4.PES",
+   "version": "#PES0040",
+   "sha256": "42ad22715b59a226e74133fe3e110ea98510c1548db78288ba0ca3126f64711f",
+   "threads": 3,
+   "commandCounts": {
+    "color": 2,
+    "end": 1,
+    "jump": 6,
+    "stitch": 130,
+    "trim": 5
+   },
+   "commandsSha256": "b92d161e2acf0a377ab6a63039e6a653e6e38179ab7b415fb9b0e47308d6f5dc"
+  },
+  {
+   "path": "samples-6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/scene-wilcom-v5.PES",
+   "version": "#PES0050",
+   "sha256": "0ce4dc5935c59d7bb2e72fa37f52ed94d2d02a92d646486f1b577008863a3cb5",
+   "threads": 3,
+   "commandCounts": {
+    "color": 2,
+    "end": 1,
+    "jump": 6,
+    "stitch": 130,
+    "trim": 5
+   },
+   "commandsSha256": "b92d161e2acf0a377ab6a63039e6a653e6e38179ab7b415fb9b0e47308d6f5dc"
+  },
+  {
+   "path": "samples-6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/scene-wilcom-v6.PES",
+   "version": "#PES0060",
+   "sha256": "8822eba8fe6268cc114d5ceed667496d63283486e2421750910b449ad51e29c8",
+   "threads": 3,
+   "commandCounts": {
+    "color": 2,
+    "end": 1,
+    "jump": 6,
+    "stitch": 130,
+    "trim": 5
+   },
+   "commandsSha256": "b92d161e2acf0a377ab6a63039e6a653e6e38179ab7b415fb9b0e47308d6f5dc"
+  },
+  {
+   "path": "samples-6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/scene.pes",
+   "version": "#PES0001",
+   "sha256": "4e21817df1d76afe5dae3f984344826c9076b24685b9db94392698d5b4eefdd4",
+   "threads": 3,
+   "commandCounts": {
+    "color": 2,
+    "end": 1,
+    "jump": 6,
+    "stitch": 130,
+    "trim": 5
+   },
+   "commandsSha256": "b92d161e2acf0a377ab6a63039e6a653e6e38179ab7b415fb9b0e47308d6f5dc"
+  },
+  {
+   "path": "samples-6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/spiralbox-brother-v1.pes",
+   "version": "#PES0001",
+   "sha256": "3324aa3d30eac238857acdf4301e0e3c24922a9a962b0e502c5fb334f72b0598",
+   "threads": 16,
+   "commandCounts": {
+    "color": 15,
+    "end": 1,
+    "jump": 16,
+    "stitch": 64
+   },
+   "commandsSha256": "2aac91b1070a36cdca411b214d7c332355fba2a8f6d2f0e5b48062b7a39e7b05"
+  },
+  {
+   "path": "samples-6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/spiralbox-brother-v2.pes",
+   "version": "#PES0020",
+   "sha256": "0a244deb29c039be8918643ec705f6fa5801ae5d9a01f0e8f2f24cd10e893c1b",
+   "threads": 16,
+   "commandCounts": {
+    "color": 15,
+    "end": 1,
+    "jump": 16,
+    "stitch": 64
+   },
+   "commandsSha256": "2aac91b1070a36cdca411b214d7c332355fba2a8f6d2f0e5b48062b7a39e7b05"
+  },
+  {
+   "path": "samples-6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/spiralbox-brother-v3.pes",
+   "version": "#PES0030",
+   "sha256": "168954c4a28be940173dec28296a50d97893a38f60f4dd0fabe94b2d1ec11ddf",
+   "threads": 16,
+   "commandCounts": {
+    "color": 15,
+    "end": 1,
+    "jump": 16,
+    "stitch": 64
+   },
+   "commandsSha256": "2aac91b1070a36cdca411b214d7c332355fba2a8f6d2f0e5b48062b7a39e7b05"
+  },
+  {
+   "path": "samples-6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/spiralbox-brother-v4.pes",
+   "version": "#PES0040",
+   "sha256": "848b9733479642b8823aab4aca4f0db3086e5e38abf0eed6d2ba485668c2b14e",
+   "threads": 16,
+   "commandCounts": {
+    "color": 15,
+    "end": 1,
+    "jump": 16,
+    "stitch": 64
+   },
+   "commandsSha256": "2aac91b1070a36cdca411b214d7c332355fba2a8f6d2f0e5b48062b7a39e7b05"
+  },
+  {
+   "path": "samples-6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/spiralbox-brother-v5.pes",
+   "version": "#PES0050",
+   "sha256": "82481a9672e158760c835a367c5d83385a47cad0e6a990dd329a337d3ce1ee1a",
+   "threads": 16,
+   "commandCounts": {
+    "color": 15,
+    "end": 1,
+    "jump": 16,
+    "stitch": 64
+   },
+   "commandsSha256": "2aac91b1070a36cdca411b214d7c332355fba2a8f6d2f0e5b48062b7a39e7b05"
+  },
+  {
+   "path": "samples-6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/spiralbox-brother-v6.pes",
+   "version": "#PES0060",
+   "sha256": "bd34da72db46df0f1eeacabb01ffcd85ecd0db889a869fa554cbc6fd13a6322e",
+   "threads": 16,
+   "commandCounts": {
+    "color": 15,
+    "end": 1,
+    "jump": 16,
+    "stitch": 64
+   },
+   "commandsSha256": "2aac91b1070a36cdca411b214d7c332355fba2a8f6d2f0e5b48062b7a39e7b05"
+  },
+  {
+   "path": "samples-6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/spiralbox-ew.pes",
+   "version": "#PES0001",
+   "sha256": "4dc1e212911e014087234d082c8faedc795a6c3701d61839cae3f2ab33c381f9",
+   "threads": 16,
+   "commandCounts": {
+    "color": 15,
+    "end": 1,
+    "jump": 33,
+    "stitch": 79,
+    "trim": 15
+   },
+   "commandsSha256": "2f9873d419fd73ddcd3dd50d3107cba326c8e2ce24a3a2980da957f37bf67a78"
+  },
+  {
+   "path": "samples-6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/spiralbox-me.pes",
+   "version": "#PES0060",
+   "sha256": "8b0f8eb91352ac0577c46f8d1f1af867c416ca16d9ddc7d1dfa7f2042b1dbdd7",
+   "threads": 16,
+   "commandCounts": {
+    "color": 15,
+    "end": 1,
+    "jump": 17,
+    "stitch": 83
+   },
+   "commandsSha256": "5f3a0c429195e4dcd900b722aee1504e6f5d1150c29917174d41c40aac06e629"
+  },
+  {
+   "path": "samples-6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/spiralbox-premier.pes",
+   "version": "#PES0020",
+   "sha256": "c082bce588af5fb6492f69ff0154980149d505b60856b8b8a555e237e5740821",
+   "threads": 16,
+   "commandCounts": {
+    "color": 15,
+    "end": 1,
+    "jump": 18,
+    "stitch": 95,
+    "trim": 1
+   },
+   "commandsSha256": "14499d17521e98545a5b8db0398e032e8546a6927a3f9da8ea7e8a38ec79b9ca"
+  },
+  {
+   "path": "samples-6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/spiralbox-wilcom-v1.PES",
+   "version": "#PES0001",
+   "sha256": "dbccdfcde27dcfb6f3982412d6d11baa171031a74d057fe4a99c94384d822efc",
+   "threads": 16,
+   "commandCounts": {
+    "color": 15,
+    "end": 1,
+    "jump": 1,
+    "stitch": 79
+   },
+   "commandsSha256": "fd881a5eb24017087e2d05bba86d7cb69bcbddf17d5423f35526a1fe9fa24bd8"
+  },
+  {
+   "path": "samples-6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/spiralbox-wilcom-v4.PES",
+   "version": "#PES0040",
+   "sha256": "c63070588c659dd5938d8b196225db5502bbdbe0aa54bf1b212e5ecea53fdd71",
+   "threads": 16,
+   "commandCounts": {
+    "color": 15,
+    "end": 1,
+    "jump": 16,
+    "stitch": 95,
+    "trim": 15
+   },
+   "commandsSha256": "c9d1f3fb9452279ab24ddc90b58450ae3f7ad1f9cad37c3db1d1715be2696391"
+  },
+  {
+   "path": "samples-6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/spiralbox-wilcom-v5.PES",
+   "version": "#PES0050",
+   "sha256": "3a0e6421bd6de521faf198ff8616fd7163a3de68b44d58e06e85843bd1eddf07",
+   "threads": 16,
+   "commandCounts": {
+    "color": 15,
+    "end": 1,
+    "jump": 16,
+    "stitch": 95,
+    "trim": 15
+   },
+   "commandsSha256": "c9d1f3fb9452279ab24ddc90b58450ae3f7ad1f9cad37c3db1d1715be2696391"
+  },
+  {
+   "path": "samples-6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/spiralbox-wilcom-v6.PES",
+   "version": "#PES0060",
+   "sha256": "73dc35137c5a9b7d18110373a9472468c05714f2bb9b12cb3ffdcf1904925c2f",
+   "threads": 16,
+   "commandCounts": {
+    "color": 15,
+    "end": 1,
+    "jump": 16,
+    "stitch": 95,
+    "trim": 15
+   },
+   "commandsSha256": "c9d1f3fb9452279ab24ddc90b58450ae3f7ad1f9cad37c3db1d1715be2696391"
+  },
+  {
+   "path": "samples-6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/spiralbox.pes",
+   "version": "#PES0001",
+   "sha256": "4e6ca07e33132787c2211eb676443e8c9fc6629993e37be7b886bde21df3066c",
+   "threads": 16,
+   "commandCounts": {
+    "color": 15,
+    "end": 1,
+    "jump": 16,
+    "stitch": 95,
+    "trim": 15
+   },
+   "commandsSha256": "c9d1f3fb9452279ab24ddc90b58450ae3f7ad1f9cad37c3db1d1715be2696391"
+  }
+ ]
+}

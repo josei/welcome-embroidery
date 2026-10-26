@@ -1,0 +1,72 @@
+{
+ "schema": "welcome/emd-parity/1",
+ "oracle": "pyembroidery 1.5.1 reader for .emd (positions as pyembroidery reports them)",
+ "coordinates": "integer 0.1 mm exactly as pyembroidery reports positions",
+ "fixtures": [
+  {
+   "path": "samples-6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random1-wilcom.EMD",
+   "sha256": "7d9fd029e7d2c138d040c94682ec68fcab1776d501fe119e1462e890868b1a70",
+   "threads": 0,
+   "commandCounts": {
+    "color": 9,
+    "end": 1,
+    "jump": 114,
+    "stitch": 41,
+    "trim": 1
+   },
+   "commandsSha256": "8dbd0d844664064c7fd21814556e6924b44b59dff3e0327665d133615f9f7a59"
+  },
+  {
+   "path": "samples-6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random2-wilcom.EMD",
+   "sha256": "94ccea4cc86de9b9a1d557aa16a05aa83ed21aafa37815a98c475b265f2c8925",
+   "threads": 0,
+   "commandCounts": {
+    "color": 9,
+    "end": 1,
+    "jump": 114,
+    "stitch": 41,
+    "trim": 1
+   },
+   "commandsSha256": "a99bb29453739864b7a9df4902270f8dd7486b56051942760368008b0b55020f"
+  },
+  {
+   "path": "samples-6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random3-wilcom.EMD",
+   "sha256": "dbeb04abf80be14339512c038714c1ea04cc26bdc2c1313d998e3c00c7d5524b",
+   "threads": 0,
+   "commandCounts": {
+    "color": 9,
+    "end": 1,
+    "jump": 118,
+    "stitch": 41,
+    "trim": 1
+   },
+   "commandsSha256": "23d04ce4605fd27dc3c2db93ca6c977022c2963f2e224106030d57872e015db1"
+  },
+  {
+   "path": "samples-6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/scene-wilcom.EMD",
+   "sha256": "1b72df7c3524cb0a6f780f8c142614df67ad2e43be7277c47d1787dd6b9dfd16",
+   "threads": 0,
+   "commandCounts": {
+    "color": 2,
+    "end": 1,
+    "jump": 25,
+    "stitch": 131,
+    "trim": 1
+   },
+   "commandsSha256": "5c144816fc7cc585e2f6a823b370131870df73f3e38d533a28e8219b6bf28df2"
+  },
+  {
+   "path": "samples-6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/spiralbox-wilcom.EMD",
+   "sha256": "10d46f24046caf19d092f84965fca129d87047a89e0b38b4e379f46434eb2b40",
+   "threads": 0,
+   "commandCounts": {
+    "color": 15,
+    "end": 1,
+    "jump": 21,
+    "stitch": 96,
+    "trim": 1
+   },
+   "commandsSha256": "2a99a2d04152a5cca7df19bfd0467479c9bf791db90c02f709615b06a031792d"
+  }
+ ]
+}

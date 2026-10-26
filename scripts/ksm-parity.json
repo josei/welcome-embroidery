@@ -1,0 +1,132 @@
+{
+ "schema": "welcome/ksm-parity/1",
+ "oracle": "pyembroidery 1.5.1 reader for .ksm (positions as pyembroidery reports them)",
+ "coordinates": "integer 0.1 mm exactly as pyembroidery reports positions",
+ "fixtures": [
+  {
+   "path": "samples-6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random1-me.ksm",
+   "sha256": "5c58c04c97f34ea1f3c5f3f87c4d3c286c7d82e96b5d0efaced75efcf19b43e3",
+   "threads": 0,
+   "commandCounts": {
+    "color": 2,
+    "end": 1,
+    "jump": 2,
+    "stitch": 6
+   },
+   "commandsSha256": "9ff8a9852a3c5f3f6b60d25a52006085c0b69a7b804e0e346bcb571ccbce6bd8"
+  },
+  {
+   "path": "samples-6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random1-wilcom.KSM",
+   "sha256": "a06b73e1be664ab281477481dd4c4a840b30c6ee4b06aa5b6bd1a20c5f7437ef",
+   "threads": 0,
+   "commandCounts": {
+    "color": 6,
+    "end": 1,
+    "jump": 36,
+    "stitch": 54,
+    "trim": 1
+   },
+   "commandsSha256": "3bad831b0d37ff9ab30a73a9e96e63270c31ce04c5fe8e7b2b28ced76c111203"
+  },
+  {
+   "path": "samples-6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random2-me.ksm",
+   "sha256": "0ac6fbbd0610b15708b07caefab96ff2b0eb685a7e23f64d0920cf7018d08ef5",
+   "threads": 0,
+   "commandCounts": {
+    "color": 2,
+    "end": 1,
+    "jump": 4,
+    "stitch": 7
+   },
+   "commandsSha256": "d9cbcfcc08d0552234396e2d8109b9ecf273bd4361e3619774313280cb2ffc39"
+  },
+  {
+   "path": "samples-6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random2-wilcom.KSM",
+   "sha256": "c658033139ec95eedbc137c4fdd22bb364ae0ee901d6f7ee876467354483c7c6",
+   "threads": 0,
+   "commandCounts": {
+    "color": 6,
+    "end": 1,
+    "jump": 39,
+    "stitch": 56,
+    "trim": 1
+   },
+   "commandsSha256": "fa0b13440715b80dfd19abe9f3aae4ef24a8a3f01e863ed2ebc89dd8221499e5"
+  },
+  {
+   "path": "samples-6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random3-me.ksm",
+   "sha256": "f66f68a83516fbded42034738118f9caccd7f697096bc4e8eed750a7c307ae5f",
+   "threads": 0,
+   "commandCounts": {
+    "color": 2,
+    "end": 1,
+    "jump": 3,
+    "stitch": 3
+   },
+   "commandsSha256": "df1120f6b625fcb3aba68e6df586390865a475fdb61b5c2d15d220d21539e57c"
+  },
+  {
+   "path": "samples-6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random3-wilcom.KSM",
+   "sha256": "209fe930ec22b353bd66ec1a031e08c65ced7f29af125e99a7ad407a34cb65e1",
+   "threads": 0,
+   "commandCounts": {
+    "color": 6,
+    "end": 1,
+    "jump": 39,
+    "stitch": 54,
+    "trim": 1
+   },
+   "commandsSha256": "3757f7b4da353725639f46f70547b1a6c538530e7a381b79da4c1f02fafdd165"
+  },
+  {
+   "path": "samples-6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/scene-me.ksm",
+   "sha256": "4a0a5fda61694c725f80ccc5d1a86939827f8bf93bf97a2c3e1d4c1ef2f8ca33",
+   "threads": 0,
+   "commandCounts": {
+    "color": 2,
+    "end": 1,
+    "jump": 6,
+    "stitch": 47
+   },
+   "commandsSha256": "f8a20b891d47d16f052e0bacc3bc844b1af942405c45d28ca404fa0adea38af8"
+  },
+  {
+   "path": "samples-6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/scene-wilcom.KSM",
+   "sha256": "5ef613853860598d6388f4be677a3feb193dc86800b02dd023fe1c26a4bbd8ee",
+   "threads": 0,
+   "commandCounts": {
+    "color": 3,
+    "end": 1,
+    "jump": 19,
+    "stitch": 116,
+    "trim": 2
+   },
+   "commandsSha256": "7f678de4177d76d2dc189ae27eb1dfd9ad987036b6155e8db01e372668962eb0"
+  },
+  {
+   "path": "samples-6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/spiralbox-me.ksm",
+   "sha256": "8abda0440fc76a1d5516fbaa0da8d422879fc1cab52fb726b92b2cb9b8507354",
+   "threads": 0,
+   "commandCounts": {
+    "color": 2,
+    "end": 1,
+    "jump": 2,
+    "stitch": 3
+   },
+   "commandsSha256": "17529bc1754a6793fb084f31319676457c2921bd4d81193afdb690ca1a5c0775"
+  },
+  {
+   "path": "samples-6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/spiralbox-wilcom.KSM",
+   "sha256": "5a9840061e5c95c6633b51607051fe781449e935361b8ad4b41f93e9baca1cab",
+   "threads": 0,
+   "commandCounts": {
+    "color": 6,
+    "end": 1,
+    "jump": 12,
+    "stitch": 22,
+    "trim": 1
+   },
+   "commandsSha256": "f547a0fdf0771fae23dc7dbbe88c750fb798dc1210a8b3e9ea52831c9883e08d"
+  }
+ ]
+}

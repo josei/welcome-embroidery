@@ -1,0 +1,133 @@
+{
+ "schema": "welcome/tbf-parity/1",
+ "oracle": "pyembroidery 1.5.1 reader for .tbf (positions as pyembroidery reports them)",
+ "coordinates": "integer 0.1 mm exactly as pyembroidery reports positions",
+ "fixtures": [
+  {
+   "path": "samples-6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/RANDOM1-WILCOM.TBF",
+   "sha256": "4d4f4188edcd68ac4177ccd06e2f0a7d9fd08604cfa6e10df1c1abbdadf16b08",
+   "threads": 10,
+   "commandCounts": {
+    "color": 10,
+    "end": 1,
+    "jump": 107,
+    "stitch": 30,
+    "trim": 10
+   },
+   "commandsSha256": "e09f6ed2ba6e3ed7674557176b2d9df709e09eab214803f4653a0dc2bc8e4416"
+  },
+  {
+   "path": "samples-6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/RANDOM2-WILCOM.TBF",
+   "sha256": "9ee256c0821bf9656f1cb60d65ff036b7c31761b27ad122669c9fac23de9ff2c",
+   "threads": 10,
+   "commandCounts": {
+    "color": 10,
+    "end": 1,
+    "jump": 111,
+    "stitch": 30,
+    "trim": 10
+   },
+   "commandsSha256": "49eb5cc24f46b8d1418bed75380e86faa9fc2ec89a7920d89faaec98e78e5e91"
+  },
+  {
+   "path": "samples-6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/RANDOM3-WILCOM.TBF",
+   "sha256": "e26b5dbd61e0df5df5968e08c13784f7e43889816d8aeb06258b46b985582c3f",
+   "threads": 10,
+   "commandCounts": {
+    "color": 10,
+    "end": 1,
+    "jump": 115,
+    "stitch": 30,
+    "trim": 10
+   },
+   "commandsSha256": "bec51f46abf75c96c49946e938bedc720d2cd1941fae0f509ee6bbd16ff45523"
+  },
+  {
+   "path": "samples-6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/SCENE-WILCOM.TBF",
+   "sha256": "b9ef1fa8aadffa8efdf69b9db646e4dc5c012a86148d7a40e66056063957d7ee",
+   "threads": 3,
+   "commandCounts": {
+    "color": 3,
+    "end": 1,
+    "jump": 18,
+    "stitch": 125,
+    "trim": 4
+   },
+   "commandsSha256": "3bebe4e42a63af9d524829bd28c9f7afeea596e2471501765e5c339b8356fa1d"
+  },
+  {
+   "path": "samples-6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/SPIRALBOX-WILCOM.TBF",
+   "sha256": "a0b8d2f9c8e1da5ea940380d321fbe5988e9d0b1ee5ed8feea68611a99a01459",
+   "threads": 16,
+   "commandCounts": {
+    "color": 16,
+    "end": 1,
+    "jump": 15,
+    "stitch": 79,
+    "trim": 16
+   },
+   "commandsSha256": "2152ea243d86045ef77fe7a2099c1178a80a8eb03af1d471a94976be45439ac1"
+  },
+  {
+   "path": "samples-6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random1-me.TBF",
+   "sha256": "9320bcca814cc9aeee84832b0f69481c880bab97e1cae8808b1c0b40a5f0f074",
+   "threads": 99,
+   "commandCounts": {
+    "color": 9,
+    "end": 1,
+    "jump": 182,
+    "stitch": 30
+   },
+   "commandsSha256": "7ff16d8825b505788f44ae64c1fb14634f7b1d3e77af57db349c6b65a7ba510d"
+  },
+  {
+   "path": "samples-6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random2-me.TBF",
+   "sha256": "548e0c2703f953c4cac9c43993467f1ceb4fb5a24761d3ee9d8a368ce64a6b42",
+   "threads": 99,
+   "commandCounts": {
+    "color": 9,
+    "end": 1,
+    "jump": 185,
+    "stitch": 30
+   },
+   "commandsSha256": "1f6cfbd0e9aaf71fb53006e38a0e55a7884eee10926ae9183be5957068c41df6"
+  },
+  {
+   "path": "samples-6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random3-me.TBF",
+   "sha256": "15d0053e61fad314c34f56d7fb118f95b7df9bd3162360de57a6c7c8104e2fa6",
+   "threads": 99,
+   "commandCounts": {
+    "color": 9,
+    "end": 1,
+    "jump": 197,
+    "stitch": 30
+   },
+   "commandsSha256": "7592f29339d3fabd2a304c1b9fa7f5eadb0b38bde3bc691d79ed12c5b98ed957"
+  },
+  {
+   "path": "samples-6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/scene-me.TBF",
+   "sha256": "3545237c3221c96d60e00e7b779fc9cbf63d714d4329d5ff4db0fc8b829acd80",
+   "threads": 99,
+   "commandCounts": {
+    "color": 2,
+    "end": 1,
+    "jump": 29,
+    "stitch": 125,
+    "trim": 2
+   },
+   "commandsSha256": "a58bc951d0a1e6fec01efc354158b2aba22064526998ac73e70338fb76ca378d"
+  },
+  {
+   "path": "samples-6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/spiralbox-me.TBF",
+   "sha256": "ebbf2bc157ad8977908a09838265ce14d48ff67b7bf2d701617574be1c9af170",
+   "threads": 99,
+   "commandCounts": {
+    "color": 15,
+    "end": 1,
+    "jump": 63,
+    "stitch": 83
+   },
+   "commandsSha256": "28c217bf4e95a1b87189dc21c3c49c0883bedb70775187cc3875d4fde99fede0"
+  }
+ ]
+}

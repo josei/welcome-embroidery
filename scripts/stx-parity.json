@@ -1,0 +1,68 @@
+{
+ "schema": "welcome/stx-parity/1",
+ "oracle": "pyembroidery 1.5.1 reader for .stx (positions as pyembroidery reports them)",
+ "coordinates": "integer 0.1 mm exactly as pyembroidery reports positions",
+ "fixtures": [
+  {
+   "path": "samples-6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random1-wilcom.STX",
+   "sha256": "ef6b749a567fba47cd0e3e4481923e5297a0eab8fb6aa65c0640be8fab92af32",
+   "threads": 0,
+   "commandCounts": {
+    "color": 9,
+    "end": 1,
+    "jump": 107,
+    "stitch": 40
+   },
+   "commandsSha256": "cd88f84d988d158656b1b3e199a8480e53ad5206be08c961dd92e5aea56fbe18"
+  },
+  {
+   "path": "samples-6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random2-wilcom.STX",
+   "sha256": "91f1d1158772fc37cfee4edd2ad6aec1f4ea6d6637a851e82d8d200353fb12a5",
+   "threads": 0,
+   "commandCounts": {
+    "color": 9,
+    "end": 1,
+    "jump": 111,
+    "stitch": 40
+   },
+   "commandsSha256": "dd0b6f49866844cac98e1cc52289a966438d0ef441d378a63dafb8552a4454fc"
+  },
+  {
+   "path": "samples-6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random3-wilcom.STX",
+   "sha256": "4b75377af68d36aa32ccfb1234dbdc4e37de8b1e394c4d4e0125cf1244ca2fee",
+   "threads": 0,
+   "commandCounts": {
+    "color": 9,
+    "end": 1,
+    "jump": 115,
+    "stitch": 40
+   },
+   "commandsSha256": "ee92ea6933d55a616001c3f0d6a0fa777b6706e6d88204f9cd0101f3ed71ff98"
+  },
+  {
+   "path": "samples-6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/scene-wilcom.STX",
+   "sha256": "efb4131c29f92235128d19cfca72e67fc1d3568a1bf94e4784c84a1d86733711",
+   "threads": 0,
+   "commandCounts": {
+    "color": 2,
+    "end": 1,
+    "jump": 15,
+    "stitch": 130,
+    "trim": 2
+   },
+   "commandsSha256": "e29e202f1368cdd8526993e456d56a7b94070bcea4e9097bd3d2fa36e85f584d"
+  },
+  {
+   "path": "samples-6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/spiralbox-wilcom.STX",
+   "sha256": "c2fe35d5b4ffaa35541950fa31fb6cc02588acd1fa942cd0dfdab98c09a10a71",
+   "threads": 0,
+   "commandCounts": {
+    "color": 15,
+    "end": 1,
+    "jump": 15,
+    "stitch": 95
+   },
+   "commandsSha256": "e5c3ffbb6dbbd031f6273a4a36461a61a7797c270ff0c89deb87127a83b3edea"
+  }
+ ]
+}

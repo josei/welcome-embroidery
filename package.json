@@ -1,0 +1,31 @@
+{
+  "name": "welcome-embroidery",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "license": "MIT",
+  "scripts": {
+    "start": "node server.js",
+    "test:engine": "node --test test/*.test.js",
+    "test:mcp": "node scripts/test-mcp.mjs",
+    "test:e2e": "playwright test",
+    "test:e2e:webkit": "PW_BROWSER=webkit playwright test",
+    "build": "node scripts/build-static.mjs",
+    "test:dist": "npm run build && node scripts/test-dist.mjs",
+    "build:pages": "node scripts/build-pages.mjs",
+    "test:pages": "npm run build:pages && node scripts/test-pages.mjs",
+    "desktop:build": "tauri build",
+    "tauri": "tauri",
+    "desktop:prepare": "node scripts/prepare-desktop.mjs",
+    "bench:compile": "node scripts/bench-compile.mjs",
+    "bench:browser": "node scripts/bench-browser.mjs"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "1.29.0",
+    "zod": "3.25.76"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.63.0",
+    "@tauri-apps/cli": "^2.12.3"
+  }
+}

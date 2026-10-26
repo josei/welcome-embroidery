@@ -1,0 +1,327 @@
+{
+ "schema": "welcome/pec-parity/1",
+ "oracle": "pyembroidery 1.5.1 PecReader (including interpolate_duplicate_color_as_stop)",
+ "coordinates": "integer 0.1 mm exactly as pyembroidery reports positions",
+ "fixtures": [
+  {
+   "path": "samples-6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random1-ew.pec",
+   "sha256": "92edd94e2d186bc1e8014d8f26a449c0077c980fbf40f643801686f11020f1ff",
+   "threads": 10,
+   "commandCounts": {
+    "color": 9,
+    "end": 1,
+    "jump": 21,
+    "stitch": 30,
+    "trim": 9
+   },
+   "commandsSha256": "4812878a38556dd0115a0af09b6c174eb3ec4f438f1bc61d2199735c0175a560"
+  },
+  {
+   "path": "samples-6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random1-me.pec",
+   "sha256": "8cc387aa8458c0de448a60d94848a5344ece75f879989471cf060419f1297456",
+   "threads": 10,
+   "commandCounts": {
+    "color": 9,
+    "end": 1,
+    "jump": 206,
+    "stitch": 10,
+    "trim": 196
+   },
+   "commandsSha256": "a91dd269744103940d3c2775318efe3425fe7db1ac7c4b1a50530c7b24024b6b"
+  },
+  {
+   "path": "samples-6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random1-premier.pec",
+   "sha256": "28696cb05fe4f4117584010d0d33dc0dd3675b28f88ff7aa62323d98623dcaa5",
+   "threads": 9,
+   "commandCounts": {
+    "color": 8,
+    "end": 1,
+    "jump": 11,
+    "stitch": 39,
+    "stop": 1,
+    "trim": 1
+   },
+   "commandsSha256": "7236c97e6cbc31d1f4b9904deae783ce4b4682dedcfbe341a2457bfbb8ccf534"
+  },
+  {
+   "path": "samples-6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random1-wilcom.PEC",
+   "sha256": "1f640c16d84de6bd1d3fa8593b2415b2d1b95eb4552f2a5887ec2ab945fb3d15",
+   "threads": 10,
+   "commandCounts": {
+    "color": 9,
+    "end": 1,
+    "jump": 1,
+    "stitch": 30
+   },
+   "commandsSha256": "20f32d1c7752d92da54205f992e0e82f63f349ac5dd834f12b1302ad972819f8"
+  },
+  {
+   "path": "samples-6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random1.pec",
+   "sha256": "a2b4ea8a6f21463f8dcea74331c01868bc12f1c2376a91c0d0c7074fcb895ab5",
+   "threads": 10,
+   "commandCounts": {
+    "color": 9,
+    "end": 1,
+    "jump": 11,
+    "stitch": 40,
+    "trim": 10
+   },
+   "commandsSha256": "703e310954168c0bfae92486c12eda74094596a0b396d49b9a3a03be1bf6f2b3"
+  },
+  {
+   "path": "samples-6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random2-ew.pec",
+   "sha256": "a477c40a760e5fe100eeac856df3b166e4e2c35e58900ee7980849182ab7534e",
+   "threads": 10,
+   "commandCounts": {
+    "color": 9,
+    "end": 1,
+    "jump": 21,
+    "stitch": 30,
+    "trim": 9
+   },
+   "commandsSha256": "dfa9ca69f46309b35ea5a7a0d14faefccecc8d34897d64f32f65703ccb27103c"
+  },
+  {
+   "path": "samples-6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random2-me.pec",
+   "sha256": "d2690293e2ba3de5ee4682ccdb76e8c8a52775117c7aeb2d36f0fb21ce4e4cf6",
+   "threads": 10,
+   "commandCounts": {
+    "color": 9,
+    "end": 1,
+    "jump": 212,
+    "stitch": 11,
+    "trim": 202
+   },
+   "commandsSha256": "dbed301a6e4fcfd883392a507b2c9d269c091e5de05cdd2e854d37c351b7181a"
+  },
+  {
+   "path": "samples-6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random2-premier.pec",
+   "sha256": "6a730e061215262185c4cac6b1488eba51e45a38d89fa2cb37bb48b5ebf48421",
+   "threads": 10,
+   "commandCounts": {
+    "color": 9,
+    "end": 1,
+    "jump": 11,
+    "stitch": 38,
+    "trim": 1
+   },
+   "commandsSha256": "717f76f0a298ad4a07349d3ac93eebd97bc64c9595e6e5cff47612393e843840"
+  },
+  {
+   "path": "samples-6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random2-wilcom.PEC",
+   "sha256": "acc518eb5aeebe5139731f3b72b6cd193dd4fc5df9ea387a59570d434b1a276c",
+   "threads": 10,
+   "commandCounts": {
+    "color": 9,
+    "end": 1,
+    "jump": 1,
+    "stitch": 30
+   },
+   "commandsSha256": "dbc0879a99365b439fe76fe492a7d8dda3aeeef87263bd4fb5811e53e2465306"
+  },
+  {
+   "path": "samples-6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random2.pec",
+   "sha256": "32abcac1c65b7d8aaae7892b0cb8074c8c9b196e80985b46dac4771be6a0e0be",
+   "threads": 10,
+   "commandCounts": {
+    "color": 9,
+    "end": 1,
+    "jump": 11,
+    "stitch": 40,
+    "trim": 10
+   },
+   "commandsSha256": "681f15577fdac7d9922e8bd10279d4fe22677a5429c48a925c2e5500cdf0a2eb"
+  },
+  {
+   "path": "samples-6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random3-ew.pec",
+   "sha256": "83d1800f40beb41dcd180676a6d9169c4a1de41bd6dfa27657a56af5617ba6d3",
+   "threads": 10,
+   "commandCounts": {
+    "color": 9,
+    "end": 1,
+    "jump": 21,
+    "stitch": 30,
+    "trim": 9
+   },
+   "commandsSha256": "61df9f322b56f77d88db28f7115dd6a5c122fb205ebd08662b0f783d78fb7abc"
+  },
+  {
+   "path": "samples-6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random3-me.pec",
+   "sha256": "bdffa43784dc6ca2701751b63f16e209786c469e1c28854784804b470a0cdc77",
+   "threads": 10,
+   "commandCounts": {
+    "color": 9,
+    "end": 1,
+    "jump": 225,
+    "stitch": 11,
+    "trim": 215
+   },
+   "commandsSha256": "5df518e4c7e658f81d0ed0d5c6aa6421d1bf92bfed0aad20e530b26fd847fff9"
+  },
+  {
+   "path": "samples-6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random3-premier.pec",
+   "sha256": "536e80733e2f39d9535c96ac3eb01aa5332ebea49f4b5e3a265299f5c1058cee",
+   "threads": 10,
+   "commandCounts": {
+    "color": 9,
+    "end": 1,
+    "jump": 11,
+    "stitch": 40,
+    "trim": 1
+   },
+   "commandsSha256": "fc2ac13535510ad68506cb6dc56f4300108eebfc19e40b977050f58ee42be938"
+  },
+  {
+   "path": "samples-6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random3-wilcom.PEC",
+   "sha256": "2bbe518066eda4e0ae1bd9e291e54f351044f72927e82635dfef6ff9a9fdd5ef",
+   "threads": 10,
+   "commandCounts": {
+    "color": 9,
+    "end": 1,
+    "jump": 1,
+    "stitch": 30
+   },
+   "commandsSha256": "e25ddacac4674da123df27c5759cf4416fd60328697651d62a21acc9ff133662"
+  },
+  {
+   "path": "samples-6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/random3.pec",
+   "sha256": "96787fa7a38eb3c4fc8f3a27a3df9caddb02fd6bab61118de35c06990ef07025",
+   "threads": 10,
+   "commandCounts": {
+    "color": 9,
+    "end": 1,
+    "jump": 11,
+    "stitch": 40,
+    "trim": 10
+   },
+   "commandsSha256": "7b924c22d97d4a19080357710f133aacc81218ac31a3fed2aa9fadcee2ff0ac4"
+  },
+  {
+   "path": "samples-6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/scene-ew.pec",
+   "sha256": "30e5c0e0f6b384495d5dd33aad6317a97b7246e41f64e1762aabe1dccbe01eb7",
+   "threads": 3,
+   "commandCounts": {
+    "color": 2,
+    "end": 1,
+    "jump": 7,
+    "stitch": 125,
+    "trim": 2
+   },
+   "commandsSha256": "593929f77b91fe6c88200998b81c3a0aed6f2697e25a00d9ee287519f41377d5"
+  },
+  {
+   "path": "samples-6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/scene-me.pec",
+   "sha256": "698cd21ce79d5ec63b2eaafd0f9b49399fbe3feb90db65b2c644c72e8756818e",
+   "threads": 3,
+   "commandCounts": {
+    "color": 2,
+    "end": 1,
+    "jump": 47,
+    "stitch": 125,
+    "trim": 44
+   },
+   "commandsSha256": "8134d64156a4e01b1e846bd9e49be84175d11251a68e32ba9a6856c555d7616f"
+  },
+  {
+   "path": "samples-6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/scene-premier.pec",
+   "sha256": "4fe2635c9aed66d1a69863e008245fd92978613e3b8b077f889a6627deff859d",
+   "threads": 3,
+   "commandCounts": {
+    "color": 2,
+    "end": 1,
+    "jump": 4,
+    "stitch": 129,
+    "trim": 1
+   },
+   "commandsSha256": "95b4a141171cf1dac5430ab26ac6e57362abd7848d4ddada38a0454e8429ddd2"
+  },
+  {
+   "path": "samples-6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/scene-wilcom.PEC",
+   "sha256": "b4ec73b3866b0523648c418b1424df09e49ffedb7b4ff1764b1dc7d0c10c22a0",
+   "threads": 3,
+   "commandCounts": {
+    "color": 2,
+    "end": 1,
+    "jump": 1,
+    "stitch": 125
+   },
+   "commandsSha256": "767119c4ee9230d54b9c29f77502c01b53389395383be8409031ac3e3627b995"
+  },
+  {
+   "path": "samples-6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/scene.pec",
+   "sha256": "0ee8c5c1330378e471234d4f3e34830c309d82d2c6657b0d94478a7767ba2039",
+   "threads": 3,
+   "commandCounts": {
+    "color": 2,
+    "end": 1,
+    "jump": 6,
+    "stitch": 130,
+    "trim": 5
+   },
+   "commandsSha256": "b92d161e2acf0a377ab6a63039e6a653e6e38179ab7b415fb9b0e47308d6f5dc"
+  },
+  {
+   "path": "samples-6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/spiralbox-ew.pec",
+   "sha256": "52568a81a7d4b12c0eb6a1c903a9a009bd6a328fa1692a74e68a88e34e94737e",
+   "threads": 16,
+   "commandCounts": {
+    "color": 15,
+    "end": 1,
+    "jump": 33,
+    "stitch": 79,
+    "trim": 15
+   },
+   "commandsSha256": "2f9873d419fd73ddcd3dd50d3107cba326c8e2ce24a3a2980da957f37bf67a78"
+  },
+  {
+   "path": "samples-6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/spiralbox-me.pec",
+   "sha256": "b5c26dc75f3a5cce3e73c0b6f3f110e17b9e8cf6d27ede8eb7395e74a982a228",
+   "threads": 16,
+   "commandCounts": {
+    "color": 15,
+    "end": 1,
+    "jump": 16,
+    "stitch": 84
+   },
+   "commandsSha256": "921a61e29c0d87f0da99311acca27db757d30e32f86b161bea4ee243b3f6fb8f"
+  },
+  {
+   "path": "samples-6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/spiralbox-premier.pec",
+   "sha256": "3399ba806a60d6eb9f4e0a0a2b6316f62490a10ffe129c29dd5242a72010ed65",
+   "threads": 16,
+   "commandCounts": {
+    "color": 15,
+    "end": 1,
+    "jump": 18,
+    "stitch": 98,
+    "trim": 1
+   },
+   "commandsSha256": "38e1592bac541a2920c72456f101a389c7ae41b5bf48c8cb570e810613909192"
+  },
+  {
+   "path": "samples-6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/spiralbox-wilcom.PEC",
+   "sha256": "50a9a1e0d0e84112f1d202c60f7330a0eff60b5dbcabb1295fc9941602243dbe",
+   "threads": 16,
+   "commandCounts": {
+    "color": 15,
+    "end": 1,
+    "jump": 1,
+    "stitch": 79
+   },
+   "commandsSha256": "fd881a5eb24017087e2d05bba86d7cb69bcbddf17d5423f35526a1fe9fa24bd8"
+  },
+  {
+   "path": "samples-6e65f1ae8599b1e04d3e082aae1b86abed52ec9e/spiralbox.pec",
+   "sha256": "769d05a4bfd71124a692b67f15a873f2d15ed10dca533e4995858c79941ea5dc",
+   "threads": 16,
+   "commandCounts": {
+    "color": 15,
+    "end": 1,
+    "jump": 16,
+    "stitch": 95,
+    "trim": 15
+   },
+   "commandsSha256": "c9d1f3fb9452279ab24ddc90b58450ae3f7ad1f9cad37c3db1d1715be2696391"
+  }
+ ]
+}

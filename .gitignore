@@ -1,0 +1,13 @@
+node_modules/
+dist/
+var/
+test-results/
+playwright-report/
+.claude/
+*.log
+.DS_Store
+_site/
+src-tauri/target/
+src-tauri/gen/
+src-tauri/resources/
+
