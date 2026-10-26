@@ -8,6 +8,7 @@ try{
  if(!ready)throw Error('Self-host server did not become ready.');
  const html=await(await fetch(origin+'/')).text();
  assert.match(html,/<style>/,'the page embeds its stylesheet');
+ assert.doesNotMatch(html,/welcome-static/,'the self-host page keeps the Agent controls, so it is not marked static');
  const entry=html.match(/<script type="module"[^>]* src="\.\/(assets\/[^"]+\.js)"/);
  assert.ok(entry,'the page loads its bundled editor module');
  const worker=(await fs.readdir('dist/assets')).find(file=>/^worker-.*\.js$/.test(file));
