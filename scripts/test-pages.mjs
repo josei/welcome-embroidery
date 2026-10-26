@@ -8,10 +8,12 @@ assert.match(landing,/href="app\/"/,'landing page links to the editor relatively
 assert.doesNotMatch(landing,/(href|src)="\//,'landing page has no root-absolute links');
 const editor=await read('app/index.html');
 assert.match(editor,/<meta name="welcome-static" content="true">/,'static build marks itself');
-assert.match(editor,/src="src\/app\.js"/,'editor module is relative');
+assert.match(editor,/<script type="module"[^>]* src="\.\/assets\/[^"]+\.js"/,'editor module is bundled and relative');
 assert.doesNotMatch(editor,/(href|src)="\/[^"]/,'editor has no root-absolute asset links');
-for(const file of ['src/app.js','src/worker.js','src/fontui.js','src/agent.js']){
- const code=await read(`app/${file}`);
+const bundles=(await fs.readdir(path.join(site,'app/assets'))).filter(file=>file.endsWith('.js'));
+assert.ok(bundles.length>0,'editor bundles exist');
+for(const file of bundles){
+ const code=await read(`app/assets/${file}`);
  assert.doesNotMatch(code,/['"`]\/(src|fonts)\//,`${file} has no root-absolute module or font path`);
  assert.doesNotMatch(code,/fetch\('\/'\+/,`${file} fetches fonts relative to its module`);
 }

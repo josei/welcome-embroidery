@@ -99,7 +99,7 @@ test('oversized imported bounds stay visible and block machine export with an ex
 });
 
 test('worker load failure reports a recoverable editor error instead of leaving requests pending',async({page})=>{
- const errors=[];page.on('pageerror',e=>errors.push(e.message));let downloaded=false;page.on('download',()=>{downloaded=true;});await page.route('**/src/worker.js',route=>route.fulfill({status:404,contentType:'text/javascript',body:'not found'}));await page.goto('/');await page.locator('#count').click();await expect(page.locator('#toast')).toContainText('Stitch worker failed to load or run');
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));let downloaded=false;page.on('download',()=>{downloaded=true;});await page.route('**/assets/worker-*.js',route=>route.fulfill({status:404,contentType:'text/javascript',body:'not found'}));await page.goto('/');await page.locator('#count').click();await expect(page.locator('#toast')).toContainText('Stitch worker failed to load or run');
  await page.locator('button[data-view="stitches"]').click();await page.locator('#play').click({timeout:3000});await expect(page.locator('#toast')).toContainText('Reload the editor and try again');await page.locator('#machineFile').setInputFiles({name:'failed.jef',mimeType:'application/octet-stream',buffer:Buffer.from(pinnedMachineFixture('jef').bytes)});await expect(page.locator('#toast')).toContainText('Reload the editor and try again');await expect(page.locator('#objects .object-row')).toHaveCount(5);
  await page.locator('#export').click();await page.locator('#format').selectOption('jef');await page.locator('#download').click();await expect(page.locator('#toast')).toContainText('Reload the editor and try again');await expect(page.locator('#objects .object-row')).toHaveCount(5);expect(downloaded).toBe(false);expect(errors).toEqual([]);
 });
@@ -2107,15 +2107,16 @@ test('edge closing can be turned on for a clipped run in the panel',async({page}
 });
 
 test('the stitch worker compiles the benchmark fixture to the same stitch count as the engine',async({page})=>{
- const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');
- const result=await page.evaluate(async()=>{
-  const {initialDocument,applyOperations}=await import('/src/engine.js');
-  const doc=initialDocument();doc.objects=[];doc.hoop=400;const cols=10,step=16,ops=[];
-  for(let i=0;i<100;i++){const c=i%cols,r=Math.floor(i/cols);ops.push({op:'add_shape',id:`s${i}`,kind:'rect',x:-(cols*step)/2+c*step,y:-(cols*step)/2+r*step,width:12,height:12,thread:'#527461',stitch:'fill'});}
-  applyOperations(doc,ops);
-  const worker=new Worker('/src/worker.js',{type:'module'});
+ const {initialDocument,applyOperations}=await import('../src/engine.js');
+ const doc=initialDocument();doc.objects=[];doc.hoop=400;const cols=10,step=16,ops=[];
+ for(let i=0;i<100;i++){const c=i%cols,r=Math.floor(i/cols);ops.push({op:'add_shape',id:`s${i}`,kind:'rect',x:-(cols*step)/2+c*step,y:-(cols*step)/2+r*step,width:12,height:12,thread:'#527461',stitch:'fill'});}
+ applyOperations(doc,ops);
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));const workerRequest=page.waitForRequest(/\/assets\/worker-[^/]*\.js$/);await page.goto('/');
+ const workerUrl=(await workerRequest).url();
+ const result=await page.evaluate(async({doc,workerUrl})=>{
+  const worker=new Worker(workerUrl,{type:'module'});
   const reply=await new Promise((resolve,reject)=>{worker.onmessage=e=>e.data.ok?resolve(e.data):reject(Error(e.data.error));worker.onerror=reject;worker.postMessage({id:1,generation:1,type:'compile',document:doc});});
   worker.terminate();return {stitches:reply.plan.count};
- });
+ },{doc,workerUrl});
  expect(result.stitches).toBe(26463);expect(errors).toEqual([]);
 });
