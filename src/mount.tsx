@@ -3,11 +3,12 @@ import {flushSync} from 'react-dom';
 import {createRoot} from 'react-dom/client';
 import shellHtml from './shell.html?raw';
 import {Header} from './components/Header';
+import {SewingOrder} from './components/SewingOrder';
 import {ThreadPlan} from './components/ThreadPlan';
 
 // Panels rendered by React into a <div data-react-panel="Name"> placeholder in shell.html.
 // Add a panel here when its markup moves out of the HTML.
-const panels: Record<string, () => ReactElement> = {ThreadPlan};
+const panels: Record<string, () => ReactElement> = {SewingOrder, ThreadPlan};
 
 // React mounts the editor once: the header, then the markup in shell.html. Each panel then renders
 // into its placeholder, all before app.js wires the controls it finds in the DOM (queue item 1c).
