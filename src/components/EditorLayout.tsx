@@ -1,3 +1,4 @@
+import {DesignSummary, SelectionHeading} from './InspectorText';
 import {AlignButtons} from './AlignButtons';
 import {ArrayPanel} from './ArrayPanel';
 import {DocumentSettings} from './DocumentSettings';
@@ -293,9 +294,7 @@ export function EditorLayout() {
         </footer>
       </main>
       <aside className={"panel"}>
-        <h3 id={"selected"}>
-          {"Select an object"}
-        </h3>
+        <SelectionHeading />
         <div id={"sewTips"} className={"sew-tips"} role={"status"} hidden={true}>
         </div>
         <details id={"tipsSettings"} className={"tips-settings"}>
@@ -330,9 +329,7 @@ export function EditorLayout() {
         <ReferencePicture />
         <ThreadPlan />
         <DocumentSettings />
-        <p id={"stats"}>
-          {"No generated stitches."}
-        </p>
+        <DesignSummary />
       </aside>
     </div>
   </>

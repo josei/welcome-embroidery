@@ -4,6 +4,7 @@ import {setReferenceFields,referenceActions} from './referenceFieldsState.js';
 import {setHoopFields,hoopActions} from './hoopState.js';
 import {setShortcutsOpen,shortcutsState} from './shortcutsState.js';
 import {restoreActions,setRestore} from './restoreState.js';
+import {setInspectorText} from './inspectorTextState.js';
 import {pathDraftNow,setPathDraft,replaceAt} from './pathDraftState.js';
 import {interactionNow,setInteraction} from './interactionState.js';
 import {clipboardNow,setClipboard} from './clipboardState.js';
@@ -166,7 +167,7 @@ function render(){updateBatchInfo();
   }if(o.id===selState().selected)element.classList.add('selected');else if(selState().multi.has(o.id))element.classList.add('multi');if(o.border&&o.stitch==='fill'){element.setAttribute('stroke',o.borderThread||o.thread);
   element.style.strokeWidth='.9';
   }g.append(element);}
-drawControls();const o=selectedObject();$('#selected').textContent=o?.name||'Select an object';$('#sourceInfo').hidden=o?.kind!=='stitch_layer';
+drawControls();const o=selectedObject();setInspectorText({heading:o?.name||'Select an object'});$('#sourceInfo').hidden=o?.kind!=='stitch_layer';
 $('#sourceInfo').innerHTML=o?.kind==='stitch_layer'?`<strong>${esc(o.source.format.toUpperCase())} stitch layer</strong>${o.source.metadata?`<br>${esc([o.source.metadata.name,o.source.metadata.author?t('by {author}',{author:o.source.metadata.author}):''].filter(Boolean).join(' · '))}`:''}<br>${o.stitches.length.toLocaleString()} commands · ${o.threads.length} source threads<br>${esc(o.source.fileName)} · ${(o.source.size/1024).toFixed(1)} KiB<br>Source bounds ${o.source.bounds.map(v=>v.toFixed(1)).join(' × ')} mm<br>${o.source.warnings.length?`<em>${o.source.warnings.map(esc).join('<br>')}</em>`:''}`:'';
 if(o){$('#type').value=['run','satin','motif','sequin','bead','bling'].includes(o.stitch)?o.stitch:'fill';setStitchRow('satinRow',o.stitch!=='satin');$('#satinWidth').value=o.satinWidth??3;$('#type').querySelector('option[value=satin]').disabled=o.kind!=='path';$('#type').disabled=o.kind==='stitch_layer';const thread=$('#thread');if(![...thread.options].some(v=>v.value.toLowerCase()===o.thread.toLowerCase())){const opt=document.createElement('option');opt.value=o.thread;opt.textContent=o.kind==='stitch_layer'?'Imported · replace all':'Custom';thread.append(opt);}thread.value=o.thread;$('#spacing').value=o.spacing??documentNow().doc.settings.spacing;$('#angle').value=o.angle??documentNow().doc.settings.angle;setStitchRow('fillReset',['spacing','angle','stitchLength','stagger','underlayType','underlayInset','underlaySpacing'].every(k=>o[k]===undefined));$('#underlay').checked=documentNow().doc.settings.underlay;{const isPath=o.kind==='path',canFill=o.kind==='text'?getFont(o.font)?.kind==='outline':(o.kind!=='path'||o.closed);
 setStitchRow('pathProps',!isPath);$('#pathClosed').checked=Boolean(o.closed);$('#pathSmooth').checked=Boolean(o.smooth);$('#pathClosed').disabled=!isPath;
@@ -179,10 +180,10 @@ setStitchRow('alongRow',!o.along);$('#alongOffset').value=o.along?.offset??0;syn
 $('#spacing').value=documentNow().doc.settings.spacing;$('#angle').value=documentNow().doc.settings.angle;setStitchRow('fillReset',true);
 setStitchRow('alongRow',true);
 setStitchRow('satinRow',true);$('#type').disabled=false;setStitchRow('pathProps',true);$('#border').disabled=true;$('#borderThread').disabled=true;}
- $('#saved').textContent=documentNow().dirty?'Unsaved':'Saved';
+ 
  setStatus({count:compileError?`⚠ Can't compile: ${compileError}`:plan?`${t('{n} stitches',{n:plan.count.toLocaleString()})} · ${plan.errors.length?plan.errors[0]:t('compiled')}`:documentNow().doc.objects.length?'Compiling…':'Nothing to sew yet'});
  setStatus({countError:Boolean(compileError)||Boolean(plan?.errors.length)});
- {const errs=plan?.issues||[],tips=sewingTips();setStatus({issuesHidden:errs.length+tips.length===0,issuesText:`⚠ ${[errs.length?t(errs.length===1?'1 issue':'{n} issues',{n:errs.length}):'',tips.length?t(tips.length===1?'1 sewing tip':'{n} sewing tips',{n:tips.length}):''].filter(Boolean).join(' · ')}`,issuesTitle:[...errs,...tips].map(i=>t(i.message)).join('\n')});renderSewTips(tips);}$('#stats').textContent=plan?t('{n} stitches · {m} m estimated thread · {c} thread colors',{n:plan.count.toLocaleString(),m:(plan.threadLength/1000).toFixed(1),c:plan.colors.length})+' · '+t('about {t} to sew',{t:sewTime(plan)})+(plan.errors.length?' · '+plan.errors.join(' '):''):'No generated stitches.';
+ {const errs=plan?.issues||[],tips=sewingTips();setStatus({issuesHidden:errs.length+tips.length===0,issuesText:`⚠ ${[errs.length?t(errs.length===1?'1 issue':'{n} issues',{n:errs.length}):'',tips.length?t(tips.length===1?'1 sewing tip':'{n} sewing tips',{n:tips.length}):''].filter(Boolean).join(' · ')}`,issuesTitle:[...errs,...tips].map(i=>t(i.message)).join('\n')});renderSewTips(tips);}setInspectorText({summary:plan?t('{n} stitches · {m} m estimated thread · {c} thread colors',{n:plan.count.toLocaleString(),m:(plan.threadLength/1000).toFixed(1),c:plan.colors.length})+' · '+t('about {t} to sew',{t:sewTime(plan)})+(plan.errors.length?' · '+plan.errors.join(' '):''):'No generated stitches.'});
  syncSections();
  renderSimulation();
  canvasView?.refresh();
@@ -297,7 +298,7 @@ setStitchRow('stitchLenRow',!(n===0||fillable||(n===1&&o?.stitch==='run'&&o.kind
 {const mm=src.fillMethod||'rows';setStitchRow('staggerRow',!(n===0||(fillable&&['rows','guided'].includes(mm))));}setStitchRow('underlayRow',!underlayable);
 setStitchRow('underlayDetails',!showDetails);}
  lab('#border').hidden=!fillable;lab('#borderThread').hidden=!fillable;if(n===0||only('stitch_layer'))setStitchRow('pathProps',true);
- $('#selected').textContent=n>1?`${n} objects selected`:(o?.name||'Select an object');
+ setInspectorText({heading:n>1?`${n} objects selected`:(o?.name||'Select an object')});
  for(const [id,kinds] of [['#offsetBtn',['rect','ellipse','path']],['#strokeBtn',['path']],['#simpBtn',['path']],['#reverseBtn',['path']],['#splitBtn',['path']],['#joinBtn',['path']]])$(id).disabled=!picked.some(v=>kinds.includes(v.kind));
 }
 // Nodes and Bézier handles of the path being edited (edit mode). Sizes are in screen pixels, so they stay constant while zooming.
