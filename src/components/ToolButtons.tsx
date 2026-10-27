@@ -27,3 +27,12 @@ export function PenTool() {
   <button className={toolClass(current, 'pen')} onClick={() => toolActions.press('pen')} aria-label="Pen with curves (P, drag for handles)" title="Pen with curves (P, drag for handles)" data-tooltip="Pen with curves (P, drag for handles)" id="pen"><svg className="icon"><use href="#i-pen"/></svg></button>
  );
 }
+
+// The draw path button. Its label follows the tool: while a path is being drawn it says how to finish it.
+export function PathTool() {
+ const current = useSyncExternalStore(toolMode.subscribe, toolMode.get);
+ const label = current === 'path' ? 'Finish path (Enter · click first point to close · Esc cancels)' : 'Draw path (N)';
+ return (
+  <button className={toolClass(current, 'path')} onClick={() => toolActions.press('path')} aria-label={label} title={label} data-tooltip={label} id="path"><svg className="icon"><use href="#i-path"/></svg></button>
+ );
+}
