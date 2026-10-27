@@ -1,9 +1,22 @@
 import {stitchRowsState} from '../stitchRowsState.js';
 import {useSyncExternalStore} from 'react';
+import {IconSelect} from './IconSelect';
+import {stitchChoiceActions, stitchChoicesState} from '../stitchChoicesState.js';
 // Part of the stitch panel, rendered by React. Ids match the markup it replaced, because app.js wires them by id.
+const CAP_ENDS = [
+ {value: 'butt', label: 'Flat ends', icon: 'i-cap-butt'},
+ {value: 'round', label: 'Round ends', icon: 'i-cap-round'},
+ {value: 'square', label: 'Square ends', icon: 'i-cap-square'},
+];
+const JOIN_CORNERS = [
+ {value: 'round', label: 'Rounded corners', icon: 'i-join-round'},
+ {value: 'miter', label: 'Sharp (mitered) corners', icon: 'i-join-miter'},
+ {value: 'bevel', label: 'Bevelled corners', icon: 'i-join-bevel'},
+];
 export function StitchCapRows() {
  const rows = useSyncExternalStore(stitchRowsState.subscribe, stitchRowsState.get);
+ const choices = useSyncExternalStore(stitchChoicesState.subscribe, stitchChoicesState.get);
  return (
-  <><label id="capRow" hidden={rows.capRow}>Line ends<select id="cap" data-icons="butt:i-cap-butt,round:i-cap-round,square:i-cap-square"><option value="butt">Flat ends</option><option value="round">Round ends</option><option value="square">Square ends</option></select></label><label id="joinRow" hidden={rows.joinRow}>Corners<select id="join" data-icons="round:i-join-round,miter:i-join-miter,bevel:i-join-bevel"><option value="round">Rounded corners</option><option value="miter">Sharp (mitered) corners</option><option value="bevel">Bevelled corners</option></select></label><label id="nodeWidthRow" hidden={rows.nodeWidthRow}>Width at selected node (mm)<input id="nodeWidth" type="number" min="0.5" max="12" step="0.5" title="Select a node of the satin path in node-edit mode, then set the column width there; the width eases between nodes" /></label><div id="widthClearRow" className="btn-row" hidden={rows.widthClearRow}><button type="button" id="widthClear" title="Remove the per-node widths and go back to one width">Clear node widths</button></div><label id="appliqueRow" hidden={rows.appliqueRow}>Appliqué <input id="applique" type="checkbox" className="icon-check" data-icon="applique" title="Appliqué: sews a placement line, stops for the fabric, tacks it down, stops to trim, then covers the edge with satin (the area is not filled)" /></label><label id="appliqueWidthRow" hidden={rows.appliqueWidthRow}>Cover width (mm)<input id="appliqueWidth" type="number" min="1" max="8" step="0.5" defaultValue="2.5" /></label><label id="compRow" hidden={rows.compRow}>Pull compensation (mm)<input id="compensation" type="number" min="0" max="2" step="0.05" placeholder="document" title="Overrides the document pull compensation for this object; leave empty to use the document value" /></label></>
+  <><label id="capRow" hidden={rows.capRow}>Line ends<IconSelect id="cap" groupLabel="Line ends" value={choices.cap} options={CAP_ENDS} onChoose={v => stitchChoiceActions.choose('cap', v)} /></label><label id="joinRow" hidden={rows.joinRow}>Corners<IconSelect id="join" groupLabel="Corners" value={choices.join} options={JOIN_CORNERS} onChoose={v => stitchChoiceActions.choose('join', v)} /></label><label id="nodeWidthRow" hidden={rows.nodeWidthRow}>Width at selected node (mm)<input id="nodeWidth" type="number" min="0.5" max="12" step="0.5" title="Select a node of the satin path in node-edit mode, then set the column width there; the width eases between nodes" /></label><div id="widthClearRow" className="btn-row" hidden={rows.widthClearRow}><button type="button" id="widthClear" title="Remove the per-node widths and go back to one width">Clear node widths</button></div><label id="appliqueRow" hidden={rows.appliqueRow}>Appliqué <input id="applique" type="checkbox" className="icon-check" data-icon="applique" title="Appliqué: sews a placement line, stops for the fabric, tacks it down, stops to trim, then covers the edge with satin (the area is not filled)" /></label><label id="appliqueWidthRow" hidden={rows.appliqueWidthRow}>Cover width (mm)<input id="appliqueWidth" type="number" min="1" max="8" step="0.5" defaultValue="2.5" /></label><label id="compRow" hidden={rows.compRow}>Pull compensation (mm)<input id="compensation" type="number" min="0" max="2" step="0.05" placeholder="document" title="Overrides the document pull compensation for this object; leave empty to use the document value" /></label></>
  );
 }

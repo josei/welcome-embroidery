@@ -8,6 +8,7 @@ import {setInspectorText} from './inspectorTextState.js';
 import {setActions} from './actionState.js';
 import {setSelectionLabels} from './selectionLabelsState.js';
 import {letteringFieldsState,setLetteringFields,letteringActions} from './letteringFieldsState.js';
+import {setStitchChoices,stitchChoiceActions,stitchChoicesState} from './stitchChoicesState.js';
 import {pathDraftNow,setPathDraft,replaceAt} from './pathDraftState.js';
 import {interactionNow,setInteraction} from './interactionState.js';
 import {clipboardNow,setClipboard} from './clipboardState.js';
@@ -88,7 +89,7 @@ function renderSimulation(){
   if(viewMode.get()==='preview'&&!active&&!preview3d.available){const layer=(cls,d,width,stroke,dx=0,dy=0)=>{const path=document.createElementNS(svgNS,'path');path.setAttribute('d',d);path.setAttribute('class',cls);path.setAttribute('stroke-width',width);if(stroke)path.style.stroke=stroke;if(dx||dy)path.setAttribute('transform',`translate(${dx} ${dy})`);return path;};for(const [,d] of paths)root.append(layer('thread-shadow',d,.5,null,.14,.2));for(const [thread,d] of paths){root.append(layer('thread-body',d,.4,thread));root.append(layer('thread-sheen',d,.1,null,-.07,-.09));}}
   else for(const [thread,d] of paths){const path=document.createElementNS(svgNS,'path');path.setAttribute('d',d);path.setAttribute('class','stitch-path');path.style.stroke=thread;root.append(path);}if(travel){const path=document.createElementNS(svgNS,'path');path.setAttribute('d',travel);path.setAttribute('class','stitch-path jump');root.append(path);}if(active&&needle){const marker=document.createElementNS(svgNS,'circle');marker.setAttribute('id','needleMarker');marker.setAttribute('cx',needle.x);marker.setAttribute('cy',needle.y);marker.setAttribute('r','1.2');root.append(marker);}}
  {const use3d=viewMode.get()==='preview'&&Boolean(plan)&&preview3d.available;if(use3d&&preview3dPlan!==plan){preview3d.setPlan(plan,hoopSize(documentNow().doc));preview3dPlan=plan;}if(use3d)preview3d.setLimit(active?playIndex:null);if(preview3d.available){preview3d.show(use3d);$('#previewHint').hidden=!use3d;$('#art').style.visibility=use3d?'hidden':'';$('#controls').style.display=use3d?'none':$('#controls').style.display;}}
- if(segReady){syncSeg();if(threadsReady)syncThreads();}if(typeof renderPlan==='function'&&threadsReady)renderPlan();
+ if(segReady){if(threadsReady)syncThreads();}if(typeof renderPlan==='function'&&threadsReady)renderPlan();
  window.__autosaveHook?.();
  renderReference();
  $('#shapes').style.opacity=viewMode.get()==='stitches'?.18:viewMode.get()==='preview'&&plan?0:viewMode.get()==='preview'?.55:1;
@@ -172,9 +173,9 @@ function render(){updateBatchInfo();
   }g.append(element);}
 drawControls();const o=selectedObject();setInspectorText({heading:o?.name||'Select an object'});$('#sourceInfo').hidden=o?.kind!=='stitch_layer';
 $('#sourceInfo').innerHTML=o?.kind==='stitch_layer'?`<strong>${esc(o.source.format.toUpperCase())} stitch layer</strong>${o.source.metadata?`<br>${esc([o.source.metadata.name,o.source.metadata.author?t('by {author}',{author:o.source.metadata.author}):''].filter(Boolean).join(' · '))}`:''}<br>${o.stitches.length.toLocaleString()} commands · ${o.threads.length} source threads<br>${esc(o.source.fileName)} · ${(o.source.size/1024).toFixed(1)} KiB<br>Source bounds ${o.source.bounds.map(v=>v.toFixed(1)).join(' × ')} mm<br>${o.source.warnings.length?`<em>${o.source.warnings.map(esc).join('<br>')}</em>`:''}`:'';
-if(o){$('#type').value=['run','satin','motif','sequin','bead','bling'].includes(o.stitch)?o.stitch:'fill';setStitchRow('satinRow',o.stitch!=='satin');$('#satinWidth').value=o.satinWidth??3;$('#type').querySelector('option[value=satin]').disabled=o.kind!=='path';$('#type').disabled=o.kind==='stitch_layer';const thread=$('#thread');if(![...thread.options].some(v=>v.value.toLowerCase()===o.thread.toLowerCase())){const opt=document.createElement('option');opt.value=o.thread;opt.textContent=o.kind==='stitch_layer'?'Imported · replace all':'Custom';thread.append(opt);}thread.value=o.thread;$('#spacing').value=o.spacing??documentNow().doc.settings.spacing;$('#angle').value=o.angle??documentNow().doc.settings.angle;setStitchRow('fillReset',['spacing','angle','stitchLength','stagger','underlayType','underlayInset','underlaySpacing'].every(k=>o[k]===undefined));$('#underlay').checked=documentNow().doc.settings.underlay;{const isPath=o.kind==='path',canFill=o.kind==='text'?getFont(o.font)?.kind==='outline':(o.kind!=='path'||o.closed);
+if(o){setStitchChoices({type:['run','satin','motif','sequin','bead','bling'].includes(o.stitch)?o.stitch:'fill'});setStitchRow('satinRow',o.stitch!=='satin');$('#satinWidth').value=o.satinWidth??3;setStitchChoices({satinOff:o.kind!=='path'});setStitchChoices({typeDisabled:o.kind==='stitch_layer'});const thread=$('#thread');if(![...thread.options].some(v=>v.value.toLowerCase()===o.thread.toLowerCase())){const opt=document.createElement('option');opt.value=o.thread;opt.textContent=o.kind==='stitch_layer'?'Imported · replace all':'Custom';thread.append(opt);}thread.value=o.thread;$('#spacing').value=o.spacing??documentNow().doc.settings.spacing;$('#angle').value=o.angle??documentNow().doc.settings.angle;setStitchRow('fillReset',['spacing','angle','stitchLength','stagger','underlayType','underlayInset','underlaySpacing'].every(k=>o[k]===undefined));$('#underlay').checked=documentNow().doc.settings.underlay;{const isPath=o.kind==='path',canFill=o.kind==='text'?getFont(o.font)?.kind==='outline':(o.kind!=='path'||o.closed);
 setStitchRow('pathProps',!isPath);$('#pathClosed').checked=Boolean(o.closed);$('#pathSmooth').checked=Boolean(o.smooth);$('#pathClosed').disabled=!isPath;
-$('#pathSmooth').disabled=!isPath;$('#type').querySelector('option[value=fill]').disabled=!canFill;$('#border').checked=Boolean(o.border);
+$('#pathSmooth').disabled=!isPath;setStitchChoices({fillOff:!canFill});$('#border').checked=Boolean(o.border);
 $('#border').disabled=!(canFill&&o.stitch==='fill');const bt=$('#borderThread');bt.disabled=$('#border').disabled||(!o.border&&!o.applique);
 const bv=o.borderThread||o.thread;
 if(![...bt.options].some(v=>v.value.toLowerCase()===bv.toLowerCase())){const opt=document.createElement('option');opt.value=bv;opt.textContent='Custom';bt.append(opt);}bt.value=bv;
@@ -182,7 +183,7 @@ if(![...bt.options].some(v=>v.value.toLowerCase()===bv.toLowerCase())){const opt
 setStitchRow('alongRow',!o.along);setLetteringFields({alongOffset:String(o.along?.offset??0)});syncTextInspector(o);}else{syncTextInspector(null);
 $('#spacing').value=documentNow().doc.settings.spacing;$('#angle').value=documentNow().doc.settings.angle;setStitchRow('fillReset',true);
 setStitchRow('alongRow',true);
-setStitchRow('satinRow',true);$('#type').disabled=false;setStitchRow('pathProps',true);$('#border').disabled=true;$('#borderThread').disabled=true;}
+setStitchRow('satinRow',true);setStitchChoices({typeDisabled:false});setStitchRow('pathProps',true);$('#border').disabled=true;$('#borderThread').disabled=true;}
  
  setStatus({count:compileError?`⚠ Can't compile: ${compileError}`:plan?`${t('{n} stitches',{n:plan.count.toLocaleString()})} · ${plan.errors.length?plan.errors[0]:t('compiled')}`:documentNow().doc.objects.length?'Compiling…':'Nothing to sew yet'});
  setStatus({countError:Boolean(compileError)||Boolean(plan?.errors.length)});
@@ -252,7 +253,7 @@ if(bordered&&document.activeElement!==$('#borderWidth'))$('#borderWidth').value=
   if(n===1&&o?.kind==='text'){const paths=documentNow().doc.objects.filter(v=>v.kind==='path'),want=['',...paths.map(v=>v.id)].join('|')+(o.along&&!o.along.pathId?'|custom':'');if(fp.dataset.set!==want){fp.replaceChildren(new Option(t('Not on a path'),''),...paths.map(v=>new Option(v.name||v.id,v.id)));if(o.along&&!o.along.pathId)fp.append(new Option(t('Custom path'),'__custom'));fp.dataset.set=want;}fp.value=o.along?(o.along.pathId||'__custom'):'';}}
   {const method=o?.fillMethod||'rows',single=n===1&&o&&o.kind!=='text'&&o.kind!=='stitch_layer',runPick=single&&o.stitch==='run';
   setStitchRow('crossRow',!(single&&fillable&&method==='cross'));if(o&&document.activeElement!==$('#crossSize'))$('#crossSize').value=o.crossSize??2.5;
-setStitchRow('runStyleRow',!runPick);if(o)$('#runStyle').value=o.runStyle||'single';setStitchRow('stemWidthRow',!(runPick&&o?.runStyle==='stem'));
+setStitchRow('runStyleRow',!runPick);if(o)setStitchChoices({runStyle:o.runStyle||'single'});setStitchRow('stemWidthRow',!(runPick&&o?.runStyle==='stem'));
 if(o&&document.activeElement!==$('#stemWidth'))$('#stemWidth').value=o.stemWidth??'';
 setStitchRow('varianceRow',!(single&&fillable&&['rows','guided'].includes(method)));
 if(o&&document.activeElement!==$('#lengthVariance'))$('#lengthVariance').value=Math.round((o.lengthVariance??0)*100);
@@ -278,7 +279,7 @@ $('#underpath').checked=o?.underpath!==false;
   if(ph){if(document.activeElement!==$('#photoSpacing'))$('#photoSpacing').value=o.photo.spacing??.7;if(document.activeElement!==$('#photoContrast'))$('#photoContrast').value=o.photo.contrast??1.4;$('#photoInvert').checked=Boolean(o.photo.invert);$('#photoThread2').value=o.photo.thread2||'';$('#photoThread3').value=o.photo.thread3||'';setStitchRow('photoThread3Row',!o.photo.thread2);$('#photoThread4').value=o.photo.thread4||'';setStitchRow('photoThread4Row',!o.photo.thread3);}}
   {const satinPath=n===1&&o?.kind==='path'&&o.stitch==='satin',bw=Number(o?.borderWidth)>0&&picked.every(v=>v.border);
   setStitchRow('capRow',!satinPath&&!(n===1&&o?.kind==='path'&&o.stitch==='run'&&false));setStitchRow('joinRow',!(satinPath||(n>=1&&bw&&fillable)));
-  if(o){$('#cap').value=o.cap||'butt';$('#join').value=o.join||'round';}
+  if(o){setStitchChoices({cap:o.cap||'butt',join:o.join||'round'});}
 const nw=satinPath&&selState().selNode!==null&&selState().selNode<o.points.length;setStitchRow('nodeWidthRow',!nw);
 if(nw&&document.activeElement!==$('#nodeWidth'))$('#nodeWidth').value=widthAt(o,nodeFraction(o,selState().selNode)).toFixed(1);
   setStitchRow('widthClearRow',!(satinPath&&o.widthStops));
@@ -289,7 +290,7 @@ if(nw&&document.activeElement!==$('#nodeWidth'))$('#nodeWidth').value=widthAt(o,
   setActions({clip:!(ordered.length>=2&&top&&(top.kind==='rect'||top.kind==='ellipse'||(top.kind==='path'&&top.closed)))});
   setActions({unclip:!ordered.some(v=>v.clipId||v.mask)});
   }
-  {const m=['contour','spiral','meander','guided','cross','ripple','motif','sequin','bling'].includes(src.fillMethod)?src.fillMethod:'rows';$('#fillMethod').value=m;setStitchRow('methodRow',!fillable||n===0);
+  {const m=['contour','spiral','meander','guided','cross','ripple','motif','sequin','bling'].includes(src.fillMethod)?src.fillMethod:'rows';setStitchChoices({fillMethod:m});setStitchRow('methodRow',!fillable||n===0);
 setStitchRow('accordionStartRow',!(n===1&&fillable&&m==='rows'));
 setStitchRow('accordionEndRow',!(n===1&&fillable&&m==='rows'));
 setStitchRow('accordionEaseRow',!(n===1&&fillable&&m==='rows'));if(o)$('#accordionEase').value=o.accordionEase??'linear';
@@ -321,7 +322,7 @@ function drawControls(){
  if(selState().selNode!==null&&selState().selNodes.size<=1&&selectedPath.handles?.[selState().selNode]){const h=selectedPath.handles[selState().selNode],p=selectedPath.points[selState().selNode];for(const which of ['in','out']){const q=which==='in'?h.i:h.o,line=document.createElementNS(svgNS,'line');line.setAttribute('class','handle-line');line.setAttribute('x1',p[0]);line.setAttribute('y1',p[1]);line.setAttribute('x2',q[0]);line.setAttribute('y2',q[1]);controls.append(line);const dot=document.createElementNS(svgNS,'circle');dot.setAttribute('class','path-handle');dot.setAttribute('cx',q[0]);dot.setAttribute('cy',q[1]);dot.setAttribute('r',px(4));dot.addEventListener('pointerdown',e=>{if(e.button!==0)return;e.preventDefault();e.stopPropagation();setInteraction({nodeDrag: {id:selectedPath.id,index:selState().selNode,handle:which,mirror:!e.altKey,pointerId:e.pointerId,element:dot,line}});});controls.append(dot);}}
 }
 
-async function add(kind){const id=crypto.randomUUID();if(kind==='text'){try{await ensureFontLoaded(newTextFont);}catch(error){toast(error.message);return;}const f=getFont(newTextFont);edit([{op:'add_text',id,text:'BLOOM',x:-18,y:18,height:fitHeight(newTextFont,'BLOOM'),thread:$('#thread').value,font:newTextFont,...(f?.kind==='outline'?{stitch:'fill'}:{})}],()=>{setSelection({selected: id});setSelection({multi: new Set([id])});});return;}edit([{op:'add_shape',id,kind,name:kind==='ellipse'?'Ellipse':'Rectangle',x:-12,y:-8,width:24,height:16,thread:$('#thread').value,stitch:$('#type').value==='satin'?'fill':$('#type').value}],()=>{setSelection({selected: id});});}
+async function add(kind){const id=crypto.randomUUID();if(kind==='text'){try{await ensureFontLoaded(newTextFont);}catch(error){toast(error.message);return;}const f=getFont(newTextFont);edit([{op:'add_text',id,text:'BLOOM',x:-18,y:18,height:fitHeight(newTextFont,'BLOOM'),thread:$('#thread').value,font:newTextFont,...(f?.kind==='outline'?{stitch:'fill'}:{})}],()=>{setSelection({selected: id});setSelection({multi: new Set([id])});});return;}edit([{op:'add_shape',id,kind,name:kind==='ellipse'?'Ellipse':'Rectangle',x:-12,y:-8,width:24,height:16,thread:$('#thread').value,stitch:(stitchChoicesState.get().type==='satin'?'fill':stitchChoicesState.get().type)}],()=>{setSelection({selected: id});});}
 function coord(e){const p=$('#art').createSVGPoint();p.x=e.clientX;p.y=e.clientY;const q=p.matrixTransform($('#art').getScreenCTM().inverse());return [q.x,q.y];}
 const withGroup=id=>{const g=documentNow().doc.objects.find(o=>o.id===id)?.groupId;return g?new Set(documentNow().doc.objects.filter(o=>o.groupId===g).map(o=>o.id)):new Set([id]);};
 let lastDown=null;
@@ -468,13 +469,13 @@ $('#grid').onchange=e=>{gridSize=Number(e.target.value);render();};
 alignActions.press=name=>{const ids=[...selState().multi];if(name==='horizontal'||name==='vertical'){if(ids.length>=3)edit([{op:'distribute',ids,axis:name}]);return;}if(!ids.length)return;edit([{op:'align',ids,edge:name,...(ids.length===1?{to:'hoop'}:{})}]);};
 $('#duplicate').onclick=()=>{const ids=[...selState().multi];if(!ids.length)return;const copies=ids.map(id=>[id,crypto.randomUUID()]),regroup=ids.length>1&&new Set(ids.map(id=>documentNow().doc.objects.find(o=>o.id===id)?.groupId)).size===1&&documentNow().doc.objects.find(o=>o.id===ids[0])?.groupId;edit([...copies.map(([id,newId])=>({op:'duplicate',id,newId,dx:3,dy:3})),...(regroup?[{op:'group',ids:copies.map(c=>c[1])}]:[])],()=>{setSelection({multi: new Set(copies.map(c=>c[1]))});setSelection({selected: copies.at(-1)[1]});});};
 function removeSelected(){const ids=[...selState().multi];if(!ids.length)return;edit(ids.map(id=>({op:'delete',id})),()=>{setSelection({selected: null});setSelection({multi: new Set()});setSelection({selNode: null});});}$('#remove').onclick=removeSelected;
-$('#type').onchange=e=>{if(selState().selected)edit([{op:'set_object',id:selState().selected,stitch:e.target.value}]);};
+
 $('#satinWidth').onchange=e=>{if(selState().selected)edit([{op:'set_object',id:selState().selected,satinWidth:Number(e.target.value)}]);};
 $('#thread').onchange=e=>{if(selState().selected)edit([{op:'set_object',id:selState().selected,thread:e.target.value}]);};
 $('#spacing').onchange=e=>edit(selState().selected?[{op:'set_object',id:selState().selected,spacing:Number(e.target.value)}]:[{op:'set_settings',spacing:Number(e.target.value)}]);
 $('#angle').onchange=e=>edit(selState().selected?[{op:'set_object',id:selState().selected,angle:Number(e.target.value)}]:[{op:'set_settings',angle:Number(e.target.value)}]);
 $('#fillResetBtn').onclick=()=>{if(selState().selected)edit(orderedIds().map(id=>({op:'set_object',id,spacing:null,angle:null,stitchLength:null,stagger:null,underlayType:null,underlayInset:null,underlaySpacing:null})));};
-for(const [id,key,parse] of [['fillMethod','fillMethod',v=>v==='rows'?null:v],['stitchLength','stitchLength',Number],['stagger','stagger',v=>Number(v)],['underlayType','underlayType',v=>v],['underlayInset','underlayInset',Number],['underlaySpacing','underlaySpacing',Number]])$('#'+id).onchange=e=>{const v=parse(e.target.value);if(selState().multi.size)edit(orderedIds().map(oid=>({op:'set_object',id:oid,[key]:v})));else edit([{op:'set_settings',[key]:v}]);};
+for(const [id,key,parse] of [['stitchLength','stitchLength',Number],['stagger','stagger',v=>Number(v)],['underlayType','underlayType',v=>v],['underlayInset','underlayInset',Number],['underlaySpacing','underlaySpacing',Number]])$('#'+id).onchange=e=>{const v=parse(e.target.value);if(selState().multi.size)edit(orderedIds().map(oid=>({op:'set_object',id:oid,[key]:v})));else edit([{op:'set_settings',[key]:v}]);};
 settingsActions.set=patch=>edit([{op:'set_settings',...patch}]);
 const runBoolean=mode=>{const ids=documentNow().doc.objects.map(o=>o.id).filter(id=>selState().multi.has(id));if(ids.length>=2)edit([{op:'boolean',mode,ids}],()=>{setSelection({selected: ids[0]});setSelection({multi: new Set([ids[0]])});});};
 selectionToolbarActions.press=name=>{if(name==='flipH'){const ids=orderedIds();if(ids.length)edit([{op:'flip',ids,axis:'horizontal'}]);}else if(name==='flipV'){const ids=orderedIds();if(ids.length)edit([{op:'flip',ids,axis:'vertical'}]);}else runBoolean(name);};
@@ -560,6 +561,7 @@ async function loadFontFile(file){
   if(ok){newTextFont=key;fontIndex=[...fontIndex.filter(f=>f.fid!==key),{fid:key,id,name:font.name,kind:'outline',keywords:['truetype','outline','custom'],license:font.license,size:font.size,minScale:font.minScale,maxScale:font.maxScale}];populateFontSelect();toast(`Loaded ${font.name}. It is stored in this project.`);syncTextInspector(selectedObject());}
  }catch(error){toast(error.message);}
 }
+stitchChoiceActions.choose=(id,value)=>{if(id==='fillMethod'){const v=value==='rows'?null:value;if(selState().multi.size)edit(orderedIds().map(oid=>({op:'set_object',id:oid,fillMethod:v})));else edit([{op:'set_settings',fillMethod:v}]);return;}if(id==='cap'||id==='join'){const ids=[...selState().multi];if(ids.length)edit(ids.map(i=>({op:'set_object',id:i,[id]:value==='butt'&&id==='cap'||value==='round'&&id==='join'?null:value})));return;}if(id==='runStyle'){if(selState().selected)edit([{op:'set_object',id:selState().selected,runStyle:value==='single'?null:value}]);return;}if(id==='type'){if(selState().selected)edit([{op:'set_object',id:selState().selected,stitch:value}]);}};
 function populateFontSelect(){setLetteringFields({fontOptions:fontIndex.map(f=>({value:f.fid,label:f.name}))});}
 const fontPicker=createFontPicker({button:$('#fontButton'),buttonPreview:$('#fontButtonPreview'),buttonName:$('#fontButtonName'),panel:$('#fontPanel'),search:$('#fontSearch'),chips:$('#fontChips'),list:$('#fontList'),loadFile:$('#fontLoadFile'),fileInput:$('#fontFile'),getIndex:()=>[...fontIndex,...Object.entries(documentNow().doc.customFonts||{}).filter(([id])=>!fontIndex.some(f=>f.fid===`custom/${id}`)).map(([id,f])=>({fid:`custom/${id}`,id,name:f.name,kind:'outline',keywords:['truetype','custom'],license:f.license,size:f.size,minScale:f.minScale,maxScale:f.maxScale}))],getCurrent:()=>textObj()?.font||newTextFont,getSample:()=>(textObj()?.text||'Hello 123').split('\n')[0].slice(0,14),getColor:()=>textObj()?.thread||'#1d2925',ensureLoaded:ensureFontLoaded,onPick:setFont,onLoadFile:loadFontFile});
 fetchFontIndex().then(index=>{fontIndex=index;populateFontSelect();syncTextInspector(selectedObject());fontPicker.refresh();});
@@ -738,17 +740,6 @@ $('#guideClear').onclick=()=>{if(selState().selected)edit([{op:'set_object',id:s
 $('#art').addEventListener('pointerdown',e=>{if(!interactionNow().guideDraft||e.button!==0)return;const o=selectedObject();if(!o){setInteraction({guideDraft: null});return;}e.preventDefault();e.stopImmediatePropagation();const p=coord(e),b=objectBounds(o),w=b[2]-b[0]||1,h=b[3]-b[1]||1;if(interactionNow().guideDraft.length<50)setInteraction({guideDraft:[...interactionNow().guideDraft,[+((p[0]-b[0])/w).toFixed(4),+((p[1]-b[1])/h).toFixed(4)]]});drawControls();},true);
 window.addEventListener('keydown',e=>{if(e.key==='Escape'&&interactionNow().guideDraft){setInteraction({guideDraft: null});$('#art').classList.remove('art-pin');render();}});
 
-// Icon controls: selects marked data-icons get a row of icon buttons (the select stays as the value holder); sections fold and remember it.
-const segSelects=$$('select[data-icons]');
-for(const sel of segSelects){const map=Object.fromEntries(sel.dataset.icons.split(',').map(p=>p.split(':')));sel.classList.add('sr-only');sel.tabIndex=-1;
- const group=document.createElement('div');
- group.className='icon-seg';
- group.setAttribute('role','radiogroup');
- group.setAttribute('aria-label',sel.closest('label')?.firstChild?.textContent?.trim()||sel.id);
- for(const op of sel.options){const b=document.createElement('button');b.type='button';b.dataset.value=op.value;b.title=op.textContent;b.setAttribute('aria-label',op.textContent);b.setAttribute('role','radio');b.innerHTML=`<svg class="icon" aria-hidden="true"><use href="#${map[op.value]||'i-fill'}"/></svg>`;b.onclick=e=>{e.preventDefault();if(sel.value!==op.value){sel.value=op.value;sel.dispatchEvent(new Event('change',{bubbles:true}));}syncSeg();};group.append(b);}
- sel.after(group);sel.addEventListener('change',syncSeg);}
-function syncSeg(){for(const sel of segSelects){const g=sel.nextElementSibling;if(!g?.classList.contains('icon-seg'))continue;for(const b of g.children){const on=b.dataset.value===sel.value;b.setAttribute('aria-pressed',String(on));b.setAttribute('aria-checked',String(on));}}}
-syncSeg();
 segReady=true;
 for(const d of $$('details.sec-fold')){try{d.open=localStorage.getItem('welcome.fold.'+d.id)==='1';}catch{}d.addEventListener('toggle',()=>{try{localStorage.setItem('welcome.fold.'+d.id,d.open?'1':'0');}catch{}});}
 
@@ -780,7 +771,7 @@ $('#followPath').onchange=e=>{const o=selectedObject();if(!o||o.kind!=='text')re
 $('#roundBtn').onclick=()=>{const o=selectedObject(),r=Number($('#roundMm').value);if(!o||!(r>0))return;if(o.kind==='rect')edit([{op:'set_object',id:o.id,radius:r}]);else if(o.kind==='path')edit([{op:'round_corners',id:o.id,radius:r,...(selState().selNodes.size?{indexes:[...selState().selNodes]}:{})}],()=>{setSelection({selNodes: new Set()});setSelection({selNode: null});});else toast('Rounding works on rectangles and paths. Convert the shape to a path first.');};
 
 // Line ends and corners, per-node widths, colour blend, clipping masks
-for(const id of ['cap','join'])$('#'+id).addEventListener('change',e=>{const ids=[...selState().multi];if(ids.length)edit(ids.map(i=>({op:'set_object',id:i,[id]:e.target.value==='butt'&&id==='cap'||e.target.value==='round'&&id==='join'?null:e.target.value})));});
+
 $('#nodeWidth').onchange=e=>{const o=selectedObject();if(o&&selState().selNode!==null)edit([{op:'set_width_at_node',id:o.id,index:selState().selNode,width:Number(e.target.value)}]);};
 $('#widthClear').onclick=()=>{if(selState().selected)edit([{op:'set_object',id:selState().selected,widthStops:null}]);};
 $('#blendThread').onchange=e=>{if(selState().selected)edit([{op:'set_object',id:selState().selected,blendThread:e.target.value||null,blendPalette:null,...(e.target.value?{}:{blendStart:null,blendEnd:null})}]);};
@@ -794,7 +785,7 @@ window.addEventListener('pointerup',()=>showSnap(null));
 // Embroidery options: cross stitch size, run style, length variation, appliqué, per-object compensation
 $('#crossSize').onchange=e=>{if(selState().selected)edit([{op:'set_object',id:selState().selected,crossSize:Number(e.target.value)}]);};
 $('#stemWidth').onchange=e=>{if(selState().selected)edit([{op:'set_object',id:selState().selected,stemWidth:e.target.value===''?null:Number(e.target.value)}]);};
-$('#runStyle').addEventListener('change',e=>{if(selState().selected)edit([{op:'set_object',id:selState().selected,runStyle:e.target.value==='single'?null:e.target.value}]);});
+
 $('#lengthVariance').onchange=e=>{if(selState().selected)edit([{op:'set_object',id:selState().selected,lengthVariance:Math.max(0,Math.min(50,Number(e.target.value)||0))/100||null}]);};
 $('#applique').onchange=e=>{if(selState().selected)edit([{op:'set_object',id:selState().selected,applique:e.target.checked?true:null}]);};
 $('#appliqueWidth').onchange=e=>{if(selState().selected)edit([{op:'set_object',id:selState().selected,appliqueWidth:Number(e.target.value)}]);};
