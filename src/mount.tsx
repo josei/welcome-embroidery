@@ -21,10 +21,11 @@ import {StitchBlendRows} from './components/StitchBlendRows';
 import {StitchFillRows} from './components/StitchFillRows';
 import {StitchBlingRows} from './components/StitchBlingRows';
 import {StitchTypeRows} from './components/StitchTypeRows';
+import {MeasureReadout} from './components/MeasureReadout';
 
 // Panels rendered by React into a <div data-react-panel="Name"> placeholder in shell.html.
 // Add a panel here when its markup moves out of the HTML.
-const panels: Record<string, () => ReactElement> = {PathTool, PenTool, SelectTool, ToolButtons, StitchPathRows: StitchPathRows, StitchSatinEndRows: StitchSatinEndRows, StitchCapRows: StitchCapRows, StitchRunRows: StitchRunRows, StitchAccordionRows: StitchAccordionRows, StitchBlendRows: StitchBlendRows, StitchFillRows: StitchFillRows, StitchBlingRows: StitchBlingRows, StitchTypeRows: StitchTypeRows, ArrayPanel, DocumentSettings, LetteringPanel, PathPanel, ReferencePicture, SewingOrder, ThreadPlan, TransformPanel};
+const panels: Record<string, () => ReactElement> = {MeasureReadout, PathTool, PenTool, SelectTool, ToolButtons, StitchPathRows: StitchPathRows, StitchSatinEndRows: StitchSatinEndRows, StitchCapRows: StitchCapRows, StitchRunRows: StitchRunRows, StitchAccordionRows: StitchAccordionRows, StitchBlendRows: StitchBlendRows, StitchFillRows: StitchFillRows, StitchBlingRows: StitchBlingRows, StitchTypeRows: StitchTypeRows, ArrayPanel, DocumentSettings, LetteringPanel, PathPanel, ReferencePicture, SewingOrder, ThreadPlan, TransformPanel};
 
 // React mounts the editor once: the header, then the markup in shell.html. Each panel then renders
 // into its placeholder, all before app.js wires the controls it finds in the DOM (queue item 1c).
