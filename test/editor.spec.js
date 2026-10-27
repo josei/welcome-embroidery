@@ -2127,3 +2127,12 @@ test('the measure tool shows its hint, and only the chosen tool button is active
  await expect(page.locator('#measure')).toHaveClass(/active-tool/);
  await expect(page.locator('#select')).not.toHaveClass(/active-tool/);
 });
+
+test('snap to other objects is on by default, toggles from the toolbar and is remembered',async({page})=>{
+ await page.goto('/');
+ await expect(page.locator('#snapObj')).toHaveClass(/active-tool/);
+ await page.locator('#snapObj').click();
+ await expect(page.locator('#snapObj')).not.toHaveClass(/active-tool/);
+ await expect(page.locator('#toast')).toContainText('Snapping to other objects off.');
+ expect(await page.evaluate(()=>localStorage.getItem('welcome.snapObj'))).toBe('0');
+});

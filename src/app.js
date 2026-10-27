@@ -1,3 +1,4 @@
+import {snapObjState,snapObjActions} from './snapObjState.js';
 import {measureState} from './measureState.js';
 import {pinState,pinActions} from './pinState.js';
 import {pivotState,pivotActions} from './pivotState.js';
@@ -61,7 +62,7 @@ $('#batchExport').onclick=async()=>{const names=batchNameList(),copies=names.len
 function render(){updateBatchInfo();
  kickFontLoads();
  if(selected&&!doc.objects.some(o=>o.id===selected))selected=null;multi=new Set([...multi].filter(id=>doc.objects.some(o=>o.id===id)));if(selected&&!multi.has(selected))multi=new Set([selected]);else if(!selected&&multi.size)selected=[...multi][0];if(selNode!==null&&!(selectedObject()?.points?.[selNode]))selNode=null;{const pts=selectedObject()?.points;selNodes=new Set([...selNodes].filter(i=>pts?.[i]));}
- $('#ties').checked=Boolean(doc.settings.ties);$('#trims').checked=Boolean(doc.settings.trims);if(document.activeElement!==$('#trimMm'))$('#trimMm').value=doc.settings.trimMm??'';$('#snap').classList.toggle('active-tool',snapOn);$('#snapObj').classList.toggle('active-tool',snapObj);$('.canvas').classList.toggle('snapping',snapOn);const nMulti=multi.size;$$('[data-align]').forEach(b=>b.disabled=!(nMulti>=2||nMulti===1));$$('[data-distribute]').forEach(b=>b.disabled=nMulti<3);{const picked=[...multi].map(id=>doc.objects.find(o=>o.id===id)).filter(Boolean);$('#textOnPath').disabled=!(picked.length===2&&picked.some(o=>o.kind==='text')&&picked.some(o=>o.kind==='path'));$('#textOffPath').disabled=!picked.some(o=>o.along);}
+ $('#ties').checked=Boolean(doc.settings.ties);$('#trims').checked=Boolean(doc.settings.trims);if(document.activeElement!==$('#trimMm'))$('#trimMm').value=doc.settings.trimMm??'';$('#snap').classList.toggle('active-tool',snapOn);$('.canvas').classList.toggle('snapping',snapOn);const nMulti=multi.size;$$('[data-align]').forEach(b=>b.disabled=!(nMulti>=2||nMulti===1));$$('[data-distribute]').forEach(b=>b.disabled=nMulti<3);{const picked=[...multi].map(id=>doc.objects.find(o=>o.id===id)).filter(Boolean);$('#textOnPath').disabled=!(picked.length===2&&picked.some(o=>o.kind==='text')&&picked.some(o=>o.kind==='path'));$('#textOffPath').disabled=!picked.some(o=>o.along);}
  $('#subtract').disabled=$('#union').disabled=$('#intersect').disabled=nMulti<2;$('#group').disabled=nMulti<2;$('#ungroup').disabled=![...multi].some(id=>doc.objects.find(o=>o.id===id)?.groupId);$('#nodeAdd').disabled=selectedObject()?.kind!=='path';$('#editNodes').disabled=multi.size!==1||selectedObject()?.kind==='stitch_layer';$('#editNodes').classList.toggle('active-tool',editMode);$('#flipH').disabled=$('#flipV').disabled=!multi.size;$('#nodeDel').disabled=selNode===null;$('#nodeSmooth').disabled=selNode===null;$('#nodeCorner').disabled=selNode===null||!selectedObject()?.handles?.[selNode];
  document.querySelector('.canvas').classList.toggle('preview-mode',viewMode.get()==='preview');document.querySelector('.layout main').classList.toggle('design-view',viewMode.get()==='design');
  $('#undo').disabled=!history.length;$('#redo').disabled=!future.length;$('#duplicate').disabled=!selected;$('#remove').disabled=!selected;
@@ -143,7 +144,7 @@ async function add(kind){const id=crypto.randomUUID();if(kind==='text'){try{awai
 function coord(e){const p=$('#art').createSVGPoint();p.x=e.clientX;p.y=e.clientY;const q=p.matrixTransform($('#art').getScreenCTM().inverse());return [q.x,q.y];}
 const withGroup=id=>{const g=doc.objects.find(o=>o.id===id)?.groupId;return g?new Set(doc.objects.filter(o=>o.groupId===g).map(o=>o.id)):new Set([id]);};let lastDown=null;const snapv=v=>snapOn?+(Math.round(v/gridSize)*gridSize).toFixed(3):v;
 // With snapping on, a point first snaps to a nearby node of another object (within 1.5 mm), otherwise to the grid.
-let snapObj=(()=>{try{return localStorage.getItem('welcome.snapObj')!=='0';}catch{return true;}})(),snapCache=null;
+let snapCache=null;
 // Object snapping: nodes, segment midpoints, shape centres and the nearest point on other outlines, within a few screen pixels; a marker shows what was hit.
 function snapTargets(){const key=doc.revision+':'+(nodeDrag?.id||'');if(snapCache?.key===key)return snapCache;const nodes=[],segs=[];
   for(const o of doc.objects){if(o.kind==='text'||o.kind==='stitch_layer'||o.visible===false||(nodeDrag&&o.id===nodeDrag.id))continue;
@@ -156,7 +157,7 @@ function snapTargets(){const key=doc.revision+':'+(nodeDrag?.id||'');if(snapCach
 function showSnap(hit){const root=$('#overlay');root.querySelectorAll('.snap-hit').forEach(n=>n.remove());if(!hit)return;const c=document.createElementNS(svgNS,'g');c.setAttribute('class','snap-hit');const r=px(5);const shape=hit.kind==='mid'?document.createElementNS(svgNS,'path'):hit.kind==='edge'?document.createElementNS(svgNS,'circle'):document.createElementNS(svgNS,'rect');
   if(hit.kind==='mid')shape.setAttribute('d',`M${hit.p[0]},${hit.p[1]-r}L${hit.p[0]+r},${hit.p[1]+r}L${hit.p[0]-r},${hit.p[1]+r}Z`);else if(hit.kind==='edge'){shape.setAttribute('cx',hit.p[0]);shape.setAttribute('cy',hit.p[1]);shape.setAttribute('r',r*.7);}else{shape.setAttribute('x',hit.p[0]-r);shape.setAttribute('y',hit.p[1]-r);shape.setAttribute('width',2*r);shape.setAttribute('height',2*r);if(hit.kind==='center')shape.setAttribute('transform',`rotate(45 ${hit.p[0]} ${hit.p[1]})`);}
   c.append(shape);root.append(c);}
-function snapPt(p){if(snapObj){const tol=px(9),{nodes,segs}=snapTargets();let best=null,bd=tol;for(const n of nodes){const d=Math.hypot(n.p[0]-p[0],n.p[1]-p[1])-(n.kind==='node'?px(2):0);if(d<bd){bd=d;best=n;}}
+function snapPt(p){if(snapObjState.get()){const tol=px(9),{nodes,segs}=snapTargets();let best=null,bd=tol;for(const n of nodes){const d=Math.hypot(n.p[0]-p[0],n.p[1]-p[1])-(n.kind==='node'?px(2):0);if(d<bd){bd=d;best=n;}}
     if(!best)for(const [a,b] of segs){const dx=b[0]-a[0],dy=b[1]-a[1],l2=dx*dx+dy*dy;if(!l2)continue;const t=Math.max(0,Math.min(1,((p[0]-a[0])*dx+(p[1]-a[1])*dy)/l2)),q=[a[0]+dx*t,a[1]+dy*t],d=Math.hypot(q[0]-p[0],q[1]-p[1]);if(d<Math.min(bd,px(5))){bd=d;best={p:q,kind:'edge'};}}
     if(best){showSnap(best);return [best.p[0],best.p[1]];}}
   showSnap(null);if(!snapOn)return p;return p.map(snapv);}
@@ -241,7 +242,7 @@ $('#group').onclick=()=>{const ids=[...multi];if(ids.length>=2)edit([{op:'group'
 const setHoop=(w,h)=>{if(edit([{op:'set_hoop',width:w,height:h}])){try{localStorage.setItem('welcome.hoop',JSON.stringify(hoopSize(doc)));}catch{}canvasView?.fitHoop();}};$('#hoopPreset').onchange=e=>{const p=HOOP_PRESETS.find(v=>v.key===e.target.value);if(p)setHoop(p.w,p.h);else $('#hoopPreset').value=HOOP_PRESETS.some(v=>v.w===hoopSize(doc).w&&v.h===hoopSize(doc).h)?e.target.value:'custom';};
 $('#hoopRotate').onclick=()=>{if(edit([{op:'rotate_hoop'}])){try{localStorage.setItem('welcome.hoop',JSON.stringify(hoopSize(doc)));}catch{}canvasView?.fitHoop();}};
 $('#hoopW').onchange=e=>{const h=hoopSize(doc);setHoop(Number(e.target.value),h.h);};$('#hoopH').onchange=e=>{const h=hoopSize(doc);setHoop(h.w,Number(e.target.value));};
-$('#snapObj').onclick=()=>{snapObj=!snapObj;try{localStorage.setItem('welcome.snapObj',snapObj?'1':'0');}catch{}showSnap(null);$('#snapObj').classList.toggle('active-tool',snapObj);toast(snapObj?'Snapping to other objects on.':'Snapping to other objects off.');};
+snapObjActions.toggle=()=>{const on=!snapObjState.get();snapObjState.set(on);try{localStorage.setItem('welcome.snapObj',on?'1':'0');}catch{}showSnap(null);toast(on?'Snapping to other objects on.':'Snapping to other objects off.');};
 $('#snap').onclick=()=>{snapOn=!snapOn;render();toast(snapOn?`Snap to ${gridSize} mm grid on.`:'Snap off.');};$('#grid').onchange=e=>{gridSize=Number(e.target.value);render();};
 $$('[data-align]').forEach(b=>b.onclick=()=>{const ids=[...multi];if(!ids.length)return;edit([{op:'align',ids,edge:b.dataset.align,...(ids.length===1?{to:'hoop'}:{})}]);});
 $$('[data-distribute]').forEach(b=>b.onclick=()=>{const ids=[...multi];if(ids.length>=3)edit([{op:'distribute',ids,axis:b.dataset.distribute}]);});
@@ -506,7 +507,7 @@ for(const [id,key] of [['#blendStart','blendStart'],['#blendEnd','blendEnd']])$(
 $('#clipBtn').onclick=()=>{const ordered=[...multi].map(id=>doc.objects.find(v=>v.id===id)).filter(Boolean).sort((a,b)=>doc.objects.indexOf(a)-doc.objects.indexOf(b)),top=ordered.at(-1);if(ordered.length<2||!top)return;edit([{op:'clip',ids:ordered.slice(0,-1).map(v=>v.id),maskId:top.id}],()=>{multi=new Set(ordered.slice(0,-1).map(v=>v.id));selected=ordered[0].id;});};
 $('#unclipBtn').onclick=()=>{const ids=new Set();for(const id of multi){const o=doc.objects.find(v=>v.id===id);if(!o)continue;if(o.clipId)ids.add(o.id);if(o.mask)for(const v of doc.objects)if(v.clipId===o.id)ids.add(v.id);}if(ids.size)edit([{op:'release_clip',ids:[...ids]}]);};
 window.addEventListener('pointerup',()=>showSnap(null));
-$('#snapObj').classList.toggle('active-tool',snapObj);
+
 
 // Embroidery options: cross stitch size, run style, length variation, appliqué, per-object compensation
 $('#crossSize').onchange=e=>{if(selected)edit([{op:'set_object',id:selected,crossSize:Number(e.target.value)}]);};
