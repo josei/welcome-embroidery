@@ -2,6 +2,7 @@ import {documentNow,setDocument,settingsActions,documentActions} from './documen
 import {setTransformFields,transformActions} from './transformState.js';
 import {setReferenceFields,referenceActions} from './referenceFieldsState.js';
 import {setHoopFields,hoopActions} from './hoopState.js';
+import {setShortcutsOpen,shortcutsState} from './shortcutsState.js';
 import {pathDraftNow,setPathDraft,replaceAt} from './pathDraftState.js';
 import {interactionNow,setInteraction} from './interactionState.js';
 import {clipboardNow,setClipboard} from './clipboardState.js';
@@ -1040,13 +1041,9 @@ $('#worksheetDownload').onclick=async e=>{e.preventDefault();if(!plan||plan.revi
 // Copies the text worksheet of the current revision to the clipboard, compiling first when needed. Only the text form is copied; the SVG form stays a download.
 $('#worksheetCopy').onclick=async e=>{e.preventDefault();if(!plan||plan.revision!==documentNow().doc.revision)await compileNow(true);if(!plan||plan.revision!==documentNow().doc.revision){toast(compileError||t('Compile the design first.'));return;}try{await navigator.clipboard.writeText(sewingWorksheet(documentNow().doc,plan,'text'));toast(t('Worksheet copied to the clipboard.'));}catch{toast(t('The browser did not allow copying. Use Download instead.'));}};
 // Keyboard shortcuts
-const SHORTCUTS=[['Tools',[['V','Select'],['R','Rectangle'],['O','Ellipse'],['T','Lettering'],['N','Draw path'],['P','Pen with curves'],['L','Line'],['G','Polygon'],['S','Star'],['Enter','Edit nodes / finish a path'],['Esc','Cancel, go back to select']]],
- ['Edit',[['Ctrl+Z / Ctrl+Y','Undo / redo'],['Ctrl+C / X / V','Copy, cut, paste'],['Ctrl+D','Duplicate'],['Ctrl+Alt+C / V','Copy / paste style'],['Del','Delete'],['Ctrl+A','Select all'],['Ctrl+G / Ctrl+Shift+G','Group / ungroup'],['Ctrl+Shift+C','Convert to path'],['Arrow keys','Nudge (Shift = 5 mm, Alt = 0.1 mm)'],['Ctrl+Arrows','Resize'],['Ctrl+Alt+← / →','Rotate']]],
- ['Sewing order',[['[ and ]','Sew earlier / later'],['Home / End','Sew first / last']]],
- ['View',[['Shift+0','Fit the hoop'],['Shift+1','Fit everything'],['Shift+2','Zoom to selection'],['+ / −','Zoom in / out'],['?','This list']]]];
-{const box=$('#keysList');for(const [title,rows] of SHORTCUTS){const h=document.createElement('h4');h.textContent=t(title);box.append(h);for(const [k,d] of rows){const kb=document.createElement('kbd');kb.textContent=k;const ds=document.createElement('span');ds.textContent=t(d);box.append(kb,ds);}}}
-$('#helpBtn').onclick=()=>$('#keysDialog').showModal();
-document.addEventListener('keydown',e=>{if(e.key==='?'&&!e.ctrlKey&&!e.metaKey&&!canvasView.inField(e)&&!$('#keysDialog').open){e.preventDefault();$('#keysDialog').showModal();}});
+
+$('#helpBtn').onclick=()=>setShortcutsOpen(true);
+document.addEventListener('keydown',e=>{if(e.key==='?'&&!e.ctrlKey&&!e.metaKey&&!canvasView.inField(e)&&!shortcutsState.get()){e.preventDefault();setShortcutsOpen(true);}});
 
 // Copy / paste style: thread, stitch type and every stitching option, from one object to the selection.
 const STYLE_KEYS=['thread','spacing','angle','stitchLength','stagger','underlayType','underlayInset','underlaySpacing','fillMethod','crossSize','border','borderThread','borderWidth','join','cap','blendThread','blendPalette','blendStart','blendEnd','blendAngle','compensation','runStyle','lengthVariance','underpath'];
