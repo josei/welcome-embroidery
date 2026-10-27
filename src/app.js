@@ -1,3 +1,4 @@
+import {pivotState,pivotActions} from './pivotState.js';
 import {toolMode,toolActions} from './toolMode.js';
 import {viewMode,viewActions} from './viewMode.js';
 import {dxfDocument,exportDxf} from './dxf.js';
@@ -55,7 +56,7 @@ function batchNameList(){return $('#batchNames').value.split('\n').map(v=>v.trim
 function updateBatchInfo(){const names=batchNameList(),copies=names.length||Math.max(1,Math.round(Number($('#arrCount').value))||1),p=batchPlan(doc,{copies});$('#batchInfo').textContent=!p?'':p.perHoop?t('{perHoop} copies fit one {hoop} mm hoop ({cols} × {rows}). {copies} copies need {hoops} hoop(s).',{perHoop:p.perHoop,hoop:`${p.hoop[0]}×${p.hoop[1]}`,cols:p.cols,rows:p.rows,copies,hoops:p.hoopsNeeded}):t('The design does not fit in one hoop.');}
 $('#batchNames').oninput=()=>updateBatchInfo();
 $('#batchExport').onclick=async()=>{const names=batchNameList(),copies=names.length||Math.max(1,Math.round(Number($('#arrCount').value))||1);let docs;try{docs=batchDocuments(doc,{copies,names:names.length?names:null});}catch(error){toast(error.message);return;}if(!docs.length){toast(t('The design does not fit in one hoop.'));return;}await ensureDocFonts().catch(()=>{});const format=$('#batchFormat').value,base=safeProjectFilename(doc.name).replace(/\.welcome$/i,''),color=selectedObject()?.thread||'#527461';for(const [i,d] of docs.entries()){const result=await request({type:'export',document:forWorker(d),format,color});download(result.bytes,`${base}-hoop${i+1}.${format==='pes6'?'pes':format}`,'application/octet-stream');}toast(t('{n} {fmt} files exported, one per hoop.',{n:docs.length,fmt:format.toUpperCase()}));};
-function render(){updateBatchInfo();pivotUi();
+function render(){updateBatchInfo();
  kickFontLoads();
  if(selected&&!doc.objects.some(o=>o.id===selected))selected=null;multi=new Set([...multi].filter(id=>doc.objects.some(o=>o.id===id)));if(selected&&!multi.has(selected))multi=new Set([selected]);else if(!selected&&multi.size)selected=[...multi][0];if(selNode!==null&&!(selectedObject()?.points?.[selNode]))selNode=null;{const pts=selectedObject()?.points;selNodes=new Set([...selNodes].filter(i=>pts?.[i]));}
  $('#ties').checked=Boolean(doc.settings.ties);$('#trims').checked=Boolean(doc.settings.trims);if(document.activeElement!==$('#trimMm'))$('#trimMm').value=doc.settings.trimMm??'';$('#snap').classList.toggle('active-tool',snapOn);$('#snapObj').classList.toggle('active-tool',snapObj);$('.canvas').classList.toggle('snapping',snapOn);const nMulti=multi.size;$$('[data-align]').forEach(b=>b.disabled=!(nMulti>=2||nMulti===1));$$('[data-distribute]').forEach(b=>b.disabled=nMulti<3);{const picked=[...multi].map(id=>doc.objects.find(o=>o.id===id)).filter(Boolean);$('#textOnPath').disabled=!(picked.length===2&&picked.some(o=>o.kind==='text')&&picked.some(o=>o.kind==='path'));$('#textOffPath').disabled=!picked.some(o=>o.along);}
@@ -204,7 +205,7 @@ $('#objects').addEventListener('dragend',()=>{dragLayer=null;$$('#objects .drop-
 
 $('#rect').onclick=()=>add('rect');$('#ellipse').onclick=()=>add('ellipse');$('#letter').onclick=()=>add('text');
 let pathMode=false,pathPoints=[],pathHandles=[],continueId=null,continueStitch=null,penDown=null,shapeDrag=null;
-let pivot=null,pivotPicking=false;
+
 // The measure tool's two points in mm (b is null until the second click).
 let measure=null;
 // The knife tool's first point in mm (null until the first click).
@@ -273,11 +274,10 @@ $('#removeUnusedFonts').onclick=()=>{const before=Object.keys(doc.customFonts||{
 $('#comp').onchange=e=>edit([{op:'set_settings',compensation:Number(e.target.value)}]);
 for(const [id,key] of [['posX','x'],['posY','y'],['sizeW','width'],['sizeH','height']])$('#'+id).onchange=e=>{if(!selected)return;const op={op:'transform',id:selected,[key]:Number(e.target.value)};edit([op]);};
 // With a pivot set, the rotation field turns the whole selection by the change about the pivot; without one, each object's own rotation is set.
-$('#rotation').onchange=e=>{if(!selected)return;const v=Number(e.target.value);if(!Number.isFinite(v))return;if(pivot){const turn=((v-(Number(selectedObject()?.rotation)||0))+540)%360-180;if(turn)edit([{op:'rotate',ids:[...multi],angle:turn,cx:pivot[0],cy:pivot[1]}]);return;}edit([{op:'transform',id:selected,rotation:v}]);};
-$('#pivotPick').onclick=()=>{pivotPicking=!pivotPicking;pivotUi();};
-$('#pivotReset').onclick=()=>{pivot=null;pivotPicking=false;render();canvasView.refresh();};
+$('#rotation').onchange=e=>{if(!selected)return;const v=Number(e.target.value);if(!Number.isFinite(v))return;if(pivotState.get().pivot){const turn=((v-(Number(selectedObject()?.rotation)||0))+540)%360-180;if(turn)edit([{op:'rotate',ids:[...multi],angle:turn,cx:pivotState.get().pivot[0],cy:pivotState.get().pivot[1]}]);return;}edit([{op:'transform',id:selected,rotation:v}]);};
+pivotActions.togglePick=()=>{const cur=pivotState.get();pivotState.set({...cur,picking:!cur.picking});};
+pivotActions.reset=()=>{pivotState.set({pivot:null,picking:false});render();canvasView.refresh();};
 function updateMeasure(){const box=$('#measureReadout');box.hidden=toolMode.get()!=='measure';if(toolMode.get()!=='measure')return;if(!measure){box.textContent=t('Measure: click the first point');return;}if(!measure.b){box.textContent=t('Measure: click the second point');return;}const m=measureBetween(measure.a,measure.b);box.textContent=t('Distance {d} mm · dx {dx} mm · dy {dy} mm',{d:m.distance.toFixed(1),dx:m.dx.toFixed(1),dy:m.dy.toFixed(1)});}
-function pivotUi(){$('#pivotPick').setAttribute('aria-pressed',String(pivotPicking));$('#pivotReset').hidden=!pivot;$('#pivotInfo').textContent=pivotPicking?t('Click the canvas to set the pivot.'):pivot?t('Pivot at {x}, {y} mm',{x:pivot[0],y:pivot[1]}):'';}
 // New text and font switches start at the font's own design size, shrunk (within the font's size range) so the line fits 85% of the hoop width.
 function fitHeight(fid,text,opts={}){const f=isRegistryFont(fid)?getFont(fid):null;if(!f)return fid==='neon-blinking/1'?20:8;const lo=f.size*f.minScale,hi=f.size*f.maxScale,limit=hoopSize(doc).w*.85,w=measureText(text,fid,f.size,opts);let h=f.size;if(w>limit)h=f.size*limit/w;return Math.max(lo,Math.min(hi,+h.toFixed(2)));}
 const textObj=()=>{const o=selectedObject();return o?.kind==='text'?o:null;};
@@ -415,7 +415,7 @@ function menuItems(o,p){
   {label:sel.every(v=>v.locked)?'Unlock':'Lock',run:()=>edit(sel.map(v=>({op:'set_object',id:v.id,locked:!sel.every(w=>w.locked)})))},{label:'Hide',run:()=>edit(sel.map(v=>({op:'set_object',id:v.id,visible:false})))},'-',
   {label:'Zoom to selection',key:'Shift+2',run:()=>canvasView.fitSelection()},{label:'Select all',key:'Ctrl+A',run:selectAll}];
 }
-canvasView=createCanvas({svg:$('#art'),container:$('.canvas'),overlay:$('#overlay'),doc:()=>doc,ids:orderedIds,tool:()=>toolMode.get(),pivot:()=>pivot,knife:()=>knifePts,knifeClick:p=>{const o=selectedObject();if(!o||!(o.kind==='rect'||o.kind==='ellipse'||(o.kind==='path'&&o.closed))){toast(t('Select a closed shape to cut.'));setTool('select');return true;}knifePts.push(p);canvasView.refresh();return true;},measure:()=>measure,measureClick:p=>{const q=snapPt(p);if(!measure||measure.b)measure={a:q,b:null};else measure.b=q;updateMeasure();canvasView.refresh();return true;},pickPivot:p=>{if(!pivotPicking)return false;pivotPicking=false;pivot=[Math.round(p[0]*10)/10,Math.round(p[1]*10)/10];render();canvasView.refresh();return true;},snapPt:p=>snapPt(p),snapOn:()=>snapOn,gridSize:()=>gridSize,coord,isEditing:()=>editMode,
+canvasView=createCanvas({svg:$('#art'),container:$('.canvas'),overlay:$('#overlay'),doc:()=>doc,ids:orderedIds,tool:()=>toolMode.get(),pivot:()=>pivotState.get().pivot,knife:()=>knifePts,knifeClick:p=>{const o=selectedObject();if(!o||!(o.kind==='rect'||o.kind==='ellipse'||(o.kind==='path'&&o.closed))){toast(t('Select a closed shape to cut.'));setTool('select');return true;}knifePts.push(p);canvasView.refresh();return true;},measure:()=>measure,measureClick:p=>{const q=snapPt(p);if(!measure||measure.b)measure={a:q,b:null};else measure.b=q;updateMeasure();canvasView.refresh();return true;},pickPivot:p=>{if(!pivotState.get().picking)return false;pivotState.set({pivot:[Math.round(p[0]*10)/10,Math.round(p[1]*10)/10],picking:false});render();canvasView.refresh();return true;},snapPt:p=>snapPt(p),snapOn:()=>snapOn,gridSize:()=>gridSize,coord,isEditing:()=>editMode,
  select:selectIds,commit:(ops,after)=>edit(ops,after),selectNodesIn:(r,add)=>{const o=selectedObject();if(o?.kind!=='path')return;const inside=o.points.map((p,i)=>[p,i]).filter(([p])=>p[0]>=r[0]&&p[0]<=r[2]&&p[1]>=r[1]&&p[1]<=r[3]).map(([,i])=>i);selNodes=new Set(add?[...selNodes,...inside]:inside);selNode=inside.at(-1)??null;render();},withGroup:id=>withGroup(id),dblclick:(o,p)=>{objectDblclickAt=performance.now();if(o.kind==='path'&&editMode&&selected===o.id)insertNodeAt(o,p);else enterEdit(o);},menuItems,
  onViewport:()=>{drawControls();const z=$('#zoomPct');if(z)z.textContent=`${canvasView?canvasView.percent():100}%`;},
  zoomUi:(zoomAt,fitHoop,fitAll,zoom100)=>{$('#zoomIn').onclick=()=>zoomAt(1.25);$('#zoomOut').onclick=()=>zoomAt(1/1.25);$('#zoomFit').onclick=fitHoop;$('#zoomAll').onclick=fitAll;$('#zoomPct').onclick=zoom100;}});
