@@ -22,6 +22,7 @@ import {StitchFillRows} from './components/StitchFillRows';
 import {StitchBlingRows} from './components/StitchBlingRows';
 import {StitchTypeRows} from './components/StitchTypeRows';
 import {MeasureReadout} from './components/MeasureReadout';
+import {StatusRun} from './components/StatusRun';
 import {SnapObjectButton} from './components/SnapObjectButton';
 import {PathNodeButtons} from './components/PathNodeButtons';
 import {AlignButtons} from './components/AlignButtons';
@@ -29,7 +30,7 @@ import {BooleanButtons, FlipButtons} from './components/SelectionToolbarButtons'
 
 // Panels rendered by React into a <div data-react-panel="Name"> placeholder in shell.html.
 // Add a panel here when its markup moves out of the HTML.
-const panels: Record<string, () => ReactElement> = {AlignButtons, BooleanButtons, FlipButtons, PathNodeButtons, MeasureReadout, SnapObjectButton, PathTool, PenTool, SelectTool, ToolButtons, StitchPathRows: StitchPathRows, StitchSatinEndRows: StitchSatinEndRows, StitchCapRows: StitchCapRows, StitchRunRows: StitchRunRows, StitchAccordionRows: StitchAccordionRows, StitchBlendRows: StitchBlendRows, StitchFillRows: StitchFillRows, StitchBlingRows: StitchBlingRows, StitchTypeRows: StitchTypeRows, ArrayPanel, DocumentSettings, LetteringPanel, PathPanel, ReferencePicture, SewingOrder, ThreadPlan, TransformPanel};
+const panels: Record<string, () => ReactElement> = {StatusRun, AlignButtons, BooleanButtons, FlipButtons, PathNodeButtons, MeasureReadout, SnapObjectButton, PathTool, PenTool, SelectTool, ToolButtons, StitchPathRows: StitchPathRows, StitchSatinEndRows: StitchSatinEndRows, StitchCapRows: StitchCapRows, StitchRunRows: StitchRunRows, StitchAccordionRows: StitchAccordionRows, StitchBlendRows: StitchBlendRows, StitchFillRows: StitchFillRows, StitchBlingRows: StitchBlingRows, StitchTypeRows: StitchTypeRows, ArrayPanel, DocumentSettings, LetteringPanel, PathPanel, ReferencePicture, SewingOrder, ThreadPlan, TransformPanel};
 
 // React mounts the editor once: the header, then the markup in shell.html. Each panel then renders
 // into its placeholder, all before app.js wires the controls it finds in the DOM (queue item 1c).
@@ -43,7 +44,11 @@ function Shell({html}: {html: string}) {
 }
 
 flushSync(() => createRoot(document.getElementById('root')!).render(<Shell html={shellHtml} />));
-for (const node of document.querySelectorAll<HTMLElement>('[data-react-panel]')) {
+// A panel can render placeholders of its own (the status run holds the measure readout), so look again after each mount.
+const mounted = new WeakSet<Element>();
+for (let node = document.querySelector<HTMLElement>('[data-react-panel]'); node; ) {
+ mounted.add(node);
  const Panel = panels[node.dataset.reactPanel!];
- flushSync(() => createRoot(node).render(<Panel />));
+ flushSync(() => createRoot(node!).render(<Panel />));
+ node = [...document.querySelectorAll<HTMLElement>('[data-react-panel]')].find(n => !mounted.has(n)) ?? null;
 }
