@@ -5,6 +5,9 @@ import {createStore} from './store.js';
 /** Which point the next canvas click places: the start, the end or the ripple centre. The pin buttons read it; app.js changes it. */
 export const pinState = createStore(/** @type {PinTool} */ (null));
 
+/** Whether Clear has a start or end point to remove. app.js sets it from the selection. */
+export const pinClearState = createStore(false);
+
 /**
  * The pin buttons call press() with the point they arm. app.js sets it at start-up, because arming
  * also changes the canvas cursor and shows the hint.
@@ -12,4 +15,12 @@ export const pinState = createStore(/** @type {PinTool} */ (null));
  */
 export const pinActions = {
   press() {},
+};
+
+/**
+ * The Clear button calls clear(). app.js sets it at start-up, because it edits the selected object.
+ * @type {{clear: () => void}}
+ */
+export const pinClearActions = {
+  clear() {},
 };

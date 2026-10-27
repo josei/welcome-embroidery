@@ -9,7 +9,7 @@ import {nodeButtonsState,nodeActions} from './nodeButtonsState.js';
 import {knifeState} from './knifeState.js';
 import {snapObjState,snapObjActions} from './snapObjState.js';
 import {measureState} from './measureState.js';
-import {pinState,pinActions} from './pinState.js';
+import {pinState,pinActions,pinClearState,pinClearActions} from './pinState.js';
 import {pivotState,pivotActions} from './pivotState.js';
 import {toolMode,toolActions} from './toolMode.js';
 import {viewMode,viewActions} from './viewMode.js';
@@ -208,7 +208,7 @@ function syncSections(){
   set('#underlayInset',src.underlayInset??.4);set('#underlaySpacing',src.underlaySpacing??(satinish&&!fillable?2:2.2));
   const showDetails=underlayable&&!['none','auto',undefined].includes(sel.value);
   {const one=n===1&&o&&o.kind!=='text'&&o.kind!=='stitch_layer'&&(fillable||o.stitch==='satin');
-setStitchRow('pinRow',!one);if(!one)pinState.set(null);$('#pinClear').disabled=!(o&&(o.startAt||o.endAt));}
+setStitchRow('pinRow',!one);if(!one)pinState.set(null);pinClearState.set(Boolean(o&&(o.startAt||o.endAt)));}
   {const rectOnly=n===1&&o?.kind==='rect';setStitchRow('radiusRow',!rectOnly);if(rectOnly&&document.activeElement!==$('#radius'))$('#radius').value=o.radius??0;if(rectOnly){const rr=cornerRadii(o);[['TL',0],['TR',1],['BR',2],['BL',3]].forEach(([k,i])=>{const el=$('#radius'+k);if(document.activeElement!==el)el.value=rr[i];});}
   const taper=n===1&&o?.kind==='path'&&(o.stitch==='satin'||(o.stitch==='motif'&&o.motifPair));
 setStitchRow('satinEndRow',!taper);if(taper&&document.activeElement!==$('#satinWidthEnd'))$('#satinWidthEnd').value=o.satinWidthEnd??'';
@@ -740,7 +740,7 @@ const openId=new URL(location.href).searchParams.get('open');if(openId)openArtif
 
 // Start / end points: arm a button, then click the canvas. The point is stored as a fraction of the object's bounding box so it follows the object.
 pinActions.press=key=>{pinState.set(pinState.get()===key?null:key);$('#art').classList.toggle('art-pin',!!pinState.get());if(pinState.get())toast(key==='startAt'?'Click the canvas to place the start point.':key==='endAt'?'Click the canvas to place the end point.':'Click the canvas to place the ripple centre.');};
-$('#pinClear').onclick=()=>{if(selState().selected)edit([{op:'set_object',id:selState().selected,startAt:null,endAt:null,rippleCenter:null}]);};
+pinClearActions.clear=()=>{if(selState().selected)edit([{op:'set_object',id:selState().selected,startAt:null,endAt:null,rippleCenter:null}]);};
 $('#art').addEventListener('pointerdown',e=>{if(!pinState.get()||e.button!==0)return;const o=selectedObject();if(!o){pinState.set(null);return;}e.preventDefault();e.stopImmediatePropagation();const p=coord(e),b=objectBounds(o),w=b[2]-b[0]||1,h=b[3]-b[1]||1,key=pinState.get();pinState.set(null);$('#art').classList.remove('art-pin');edit([{op:'set_object',id:o.id,[key]:[Math.max(0,Math.min(1,+((p[0]-b[0])/w).toFixed(4))),Math.max(0,Math.min(1,+((p[1]-b[1])/h).toFixed(4)))]}]);},true);
 scheduleCompile(100);
 
