@@ -27,6 +27,11 @@ export function documentNow(): DocumentState {
   return documentState.get();
 }
 
+/** The document settings controls call set() with the fields they change. app.js runs the edit. */
+export const settingsActions: {set: (patch: Record<string, unknown>) => void} = {
+  set() {},
+};
+
 /** Changes some of the document state fields. */
 export function setDocument(patch: Partial<DocumentState>) {
   documentState.set({...documentState.get(), ...patch});
