@@ -720,7 +720,7 @@ test('vector basics in the sidebar: corner radius, round corners, border width, 
  expect(errors).toEqual([]);
 });
 
-test('roadmap tools: object snapping, clipping masks, caps/joins/node widths and colour blend',async({page})=>{
+test('editing tools: object snapping, clipping masks, caps/joins/node widths and colour blend',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));
  await page.goto('/');page.on('dialog',d=>d.accept());await page.locator('#new').click();
  const n=async()=>Number(((await page.locator('#count').textContent()).match(/^([\d,]+) stitches/)||[,'0'])[1].replace(/,/g,''));
@@ -2119,4 +2119,11 @@ test('the stitch worker compiles the benchmark fixture to the same stitch count 
   worker.terminate();return {stitches:reply.plan.count};
  },{doc,workerUrl});
  expect(result.stitches).toBe(26463);expect(errors).toEqual([]);
+});
+
+test('the measure tool shows its hint, and only the chosen tool button is active',async({page})=>{
+ await page.goto('/');await page.locator('#measure').click();
+ await expect(page.locator('#toast')).toContainText('Esc leaves the tool.');
+ await expect(page.locator('#measure')).toHaveClass(/active-tool/);
+ await expect(page.locator('#select')).not.toHaveClass(/active-tool/);
 });
