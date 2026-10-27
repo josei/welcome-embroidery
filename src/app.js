@@ -1,4 +1,5 @@
 import {documentNow,setDocument,settingsActions,documentActions} from './documentState.js';
+import {setTransformFields,transformActions} from './transformState.js';
 import {pathDraftNow,setPathDraft,replaceAt} from './pathDraftState.js';
 import {interactionNow,setInteraction} from './interactionState.js';
 import {clipboardNow,setClipboard} from './clipboardState.js';
@@ -171,7 +172,7 @@ $('#pathSmooth').disabled=!isPath;$('#type').querySelector('option[value=fill]')
 $('#border').disabled=!(canFill&&o.stitch==='fill');const bt=$('#borderThread');bt.disabled=$('#border').disabled||(!o.border&&!o.applique);
 const bv=o.borderThread||o.thread;
 if(![...bt.options].some(v=>v.value.toLowerCase()===bv.toLowerCase())){const opt=document.createElement('option');opt.value=bv;opt.textContent='Custom';bt.append(opt);}bt.value=bv;
-}$('#comp').value=documentNow().doc.settings.compensation;$('#fabric').value=documentNow().doc.settings.fabric??'woven';$('#posX').value=Number(o.x).toFixed(1);$('#posY').value=Number(o.y).toFixed(1);$('#sizeW').value=Number(o.w||0).toFixed(1);$('#sizeH').value=Number(o.h||0).toFixed(1);$('#rotation').value=Number(o.rotation||0);
+}$('#comp').value=documentNow().doc.settings.compensation;$('#fabric').value=documentNow().doc.settings.fabric??'woven';setTransformFields({posX:Number(o.x).toFixed(1),posY:Number(o.y).toFixed(1),sizeW:Number(o.w||0).toFixed(1),sizeH:Number(o.h||0).toFixed(1),rotation:String(Number(o.rotation||0))});
 setStitchRow('alongRow',!o.along);$('#alongOffset').value=o.along?.offset??0;syncTextInspector(o);}else{syncTextInspector(null);
 $('#spacing').value=documentNow().doc.settings.spacing;$('#angle').value=documentNow().doc.settings.angle;setStitchRow('fillReset',true);
 setStitchRow('alongRow',true);
@@ -504,9 +505,8 @@ function renderFontsList(){const list=$('#fontsList'),usage=customFontUsage(docu
 $('#organizeFonts').onclick=()=>{renderFontsList();$('#fontsDialog').showModal();};
 $('#removeUnusedFonts').onclick=()=>{const before=Object.keys(documentNow().doc.customFonts||{}).length;edit([{op:'remove_unused_fonts'}]);const removed=before-Object.keys(documentNow().doc.customFonts||{}).length;renderFontsList();toast(removed?`Removed ${removed} unused font${removed===1?'':'s'}.`:'No unused fonts to remove.');};
 $('#comp').onchange=e=>edit([{op:'set_settings',compensation:Number(e.target.value)}]);
-for(const [id,key] of [['posX','x'],['posY','y'],['sizeW','width'],['sizeH','height']])$('#'+id).onchange=e=>{if(!selState().selected)return;const op={op:'transform',id:selState().selected,[key]:Number(e.target.value)};edit([op]);};
 // With a pivot set, the rotation field turns the whole selection by the change about the pivot; without one, each object's own rotation is set.
-$('#rotation').onchange=e=>{if(!selState().selected)return;const v=Number(e.target.value);if(!Number.isFinite(v))return;if(pivotState.get().pivot){const turn=((v-(Number(selectedObject()?.rotation)||0))+540)%360-180;if(turn)edit([{op:'rotate',ids:[...selState().multi],angle:turn,cx:pivotState.get().pivot[0],cy:pivotState.get().pivot[1]}]);return;}edit([{op:'transform',id:selState().selected,rotation:v}]);};
+transformActions.commit=(field,text)=>{if(!selState().selected)return;if(field==='rotation'){const v=Number(text);if(!Number.isFinite(v))return;if(pivotState.get().pivot){const turn=((v-(Number(selectedObject()?.rotation)||0))+540)%360-180;if(turn)edit([{op:'rotate',ids:[...selState().multi],angle:turn,cx:pivotState.get().pivot[0],cy:pivotState.get().pivot[1]}]);return;}edit([{op:'transform',id:selState().selected,rotation:v}]);return;}const key={posX:'x',posY:'y',sizeW:'width',sizeH:'height'}[field];edit([{op:'transform',id:selState().selected,[key]:Number(text)}]);};
 pivotActions.togglePick=()=>{const cur=pivotState.get();pivotState.set({...cur,picking:!cur.picking});};
 pivotActions.reset=()=>{pivotState.set({pivot:null,picking:false});render();canvasView.refresh();};
 // New text and font switches start at the font's own design size, shrunk (within the font's size range) so the line fits 85% of the hoop width.
