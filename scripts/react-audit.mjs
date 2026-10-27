@@ -27,6 +27,7 @@ const checks = [
  {id: '3', name: 'direct DOM writes in app.js', now: count(app, /\$\([^)]*\)\.(textContent|innerHTML|hidden|disabled|value|title|onclick|onchange|oninput|onpointerdown)\s*=|classList\.(toggle|add|remove)|setAttribute\(/g), target: 0, baseline: 602},
  {id: '4', name: 'addEventListener calls in app.js', now: count(app, /addEventListener\(/g), target: 0, baseline: 44},
  {id: '4', name: 'onclick assignments in app.js', now: count(app, /\.onclick\s*=/g), target: 0, baseline: 92},
+ {id: '5', name: 'selection reads and writes through the store (reported, not ratcheted)', now: count(app, /selState\(\)|setSelection\(/g), target: 0, baseline: Infinity},
  {id: '5', name: 'state references in app.js (selected, doc, multi, selNode)', now: ['selected', 'doc', 'multi', 'selNode'].reduce((n, name) => n + count(app, new RegExp(`(?<![A-Za-z0-9_$.])${name}(?![A-Za-z0-9_$])`, 'g')), 0), target: 0, baseline: 461},
  {id: '6', name: 'JavaScript files not type-checked', now: count(tsconfig, /"checkJs": false/g) ? sources.filter(f => f.endsWith('.js')).length : 0, target: 0, baseline: 25},
  {id: '7', name: 'source files over 500 lines', now: sources.filter(f => read(f).split('\n').length > 500).length, target: 0, baseline: 3},
