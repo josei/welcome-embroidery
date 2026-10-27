@@ -13,6 +13,7 @@
     "test:e2e:webkit": "PW_BROWSER=webkit playwright test",
     "build": "node scripts/build-static.mjs",
     "typecheck": "tsc --noEmit",
+    "audit:react": "node scripts/react-audit.mjs",
     "test:dist": "npm run build && node scripts/test-dist.mjs",
     "build:pages": "node scripts/build-pages.mjs",
     "test:pages": "npm run build:pages && node scripts/test-pages.mjs",
