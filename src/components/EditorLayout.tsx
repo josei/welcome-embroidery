@@ -1,3 +1,4 @@
+import {SelectionHint} from './SelectionHint';
 import {ActionButton} from './ActionButton';
 import {DesignSummary, SelectionHeading} from './InspectorText';
 import {AlignButtons} from './AlignButtons';
@@ -305,9 +306,7 @@ export function EditorLayout() {
           <div id={"tipsList"} className={"tips-list"}>
           </div>
         </details>
-        <p id={"selHint"} className={"sel-hint"}>
-          {"Nothing selected. Click an object, drag a box around several, or pick a tool on the left."}
-        </p>
+        <SelectionHint />
         <section id={"sourceInfo"} hidden={true}>
         </section>
         <TransformPanel />

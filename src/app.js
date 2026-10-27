@@ -6,6 +6,7 @@ import {setShortcutsOpen,shortcutsState} from './shortcutsState.js';
 import {restoreActions,setRestore} from './restoreState.js';
 import {setInspectorText} from './inspectorTextState.js';
 import {setActions} from './actionState.js';
+import {setSelectionLabels} from './selectionLabelsState.js';
 import {pathDraftNow,setPathDraft,replaceAt} from './pathDraftState.js';
 import {interactionNow,setInteraction} from './interactionState.js';
 import {clipboardNow,setClipboard} from './clipboardState.js';
@@ -199,8 +200,8 @@ function syncSections(){
  show('#secPath',picked.some(v=>['rect','ellipse','path'].includes(v.kind)));
  show('#secArray',n>=1);
  show('#secOrder',n>=1);
- $('#selHint').hidden=n>=1;
- $('#stitchTitle').textContent=n?'Stitching':'Fill defaults for new objects';
+ setSelectionLabels({hintHidden:n>=1});
+ setSelectionLabels({stitchTitle:n?'Stitching':'Fill defaults for new objects'});
  lab('#type').hidden=n===0||onlyAny(['text','stitch_layer']);lab('#thread').hidden=n===0;if(n===0)setStitchRow('satinRow',true);
  {const lettered=picked.some(v=>v.kind==='text'&&isRegistryFont(v.font));lab('#spacing').hidden=!(n===0||fillable||lettered||picked.some(v=>v.stitch==='satin'));const sl=$('#spacing').closest('label'),tn=[...sl.childNodes].find(c=>c.nodeType===3);if(tn)tn.nodeValue=lettered&&!fillable?'Stitch spacing (mm) · lower = denser':'Row spacing (mm)';}lab('#angle').hidden=!(n===0||fillable);
  {const src=o||{},st=documentNow().doc.settings,satinish=picked.some(v=>v.stitch==='satin'||(v.kind==='text'&&getFont(v.font)?.kind==='stitch')),underlayable=n===0||fillable||satinish;
