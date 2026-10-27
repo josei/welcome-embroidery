@@ -3,6 +3,7 @@ import {setTransformFields,transformActions} from './transformState.js';
 import {setReferenceFields,referenceActions} from './referenceFieldsState.js';
 import {setHoopFields,hoopActions} from './hoopState.js';
 import {setShortcutsOpen,shortcutsState} from './shortcutsState.js';
+import {restoreActions,setRestore} from './restoreState.js';
 import {pathDraftNow,setPathDraft,replaceAt} from './pathDraftState.js';
 import {interactionNow,setInteraction} from './interactionState.js';
 import {clipboardNow,setClipboard} from './clipboardState.js';
@@ -1014,10 +1015,7 @@ threadsReady=true;syncThreads();
  window.__autosaveHook=schedule;window.addEventListener('pagehide',write);
  const raw=(()=>{try{return localStorage.getItem('welcome.autosave');}catch{return null;}})();
  if(raw&&!new URL(location.href).searchParams.get('open')){try{const saved=JSON.parse(raw);validateDocument(clone(saved.doc));
-   if(!saved.clean&&saved.doc.revision>0&&saved.doc.objects.length>0){const ago=Math.max(1,Math.round((Date.now()-saved.savedAt)/60000));$('#restoreInfo').textContent=t('"{name}", {n} objects, edited {m} min ago.',{name:saved.doc.name,n:saved.doc.objects.length,m:ago});
-     $('#restoreYes').onclick=()=>{try{acceptProject(saved.doc);setDocument({dirty: true});render();}catch(err){toast(err.message);}$('#restoreDialog').close();};
-     $('#restoreNo').onclick=()=>{try{localStorage.removeItem('welcome.autosave');}catch{}$('#restoreDialog').close();};
-     queueMicrotask(()=>$('#restoreDialog').showModal());}}catch{try{localStorage.removeItem('welcome.autosave');}catch{}}}
+   if(!saved.clean&&saved.doc.revision>0&&saved.doc.objects.length>0){const ago=Math.max(1,Math.round((Date.now()-saved.savedAt)/60000));setRestore({info:t('"{name}", {n} objects, edited {m} min ago.',{name:saved.doc.name,n:saved.doc.objects.length,m:ago})});restoreActions.yes=()=>{try{acceptProject(saved.doc);setDocument({dirty: true});render();}catch(err){toast(err.message);}setRestore({open:false});};restoreActions.no=()=>{try{localStorage.removeItem('welcome.autosave');}catch{}setRestore({open:false});};queueMicrotask(()=>setRestore({open:true}));}}catch{try{localStorage.removeItem('welcome.autosave');}catch{}}}
 }
 
 // Thread plan: the colours in sewing order with their stitch counts.
