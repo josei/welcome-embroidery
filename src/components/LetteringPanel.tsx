@@ -1,10 +1,14 @@
 import {stitchRowsState} from '../stitchRowsState.js';
 import {useSyncExternalStore} from 'react';
+import {letteringActions, letteringFieldsState} from '../letteringFieldsState.js';
+import {useDraftInput} from './useDraftInput';
 // The lettering panel, rendered by React. Ids match the markup it replaced, because app.js wires them by id.
 export function LetteringPanel() {
  const rows = useSyncExternalStore(stitchRowsState.subscribe, stitchRowsState.get);
+ const lettering = useSyncExternalStore(letteringFieldsState.subscribe, letteringFieldsState.get);
+ const along = useDraftInput(lettering.alongOffset, text => letteringActions.commit('alongOffset', text), 'store');
  return (
-  <section id="secText" data-sec="" hidden><h4>Lettering</h4><label id="followRow">Follow path<select id="followPath" title="Make the lettering follow a path; it stays attached when the path is edited"></select></label><label id="alongRow" hidden={rows.alongRow}>Offset along path (mm)<input id="alongOffset" type="number" step="0.5" defaultValue="0" /></label>
+  <section id="secText" data-sec="" hidden><h4>Lettering</h4><label id="followRow">Follow path<select id="followPath" title="Make the lettering follow a path; it stays attached when the path is edited"></select></label><label id="alongRow" hidden={rows.alongRow}>Offset along path (mm)<input id="alongOffset" type="number" step="0.5" {...along} /></label>
 <div className="font-field"><span className="font-label">Font</span><button id="fontButton" type="button" className="font-button" aria-haspopup="dialog" aria-expanded="false" aria-controls="fontPanel"><svg id="fontButtonPreview" className="font-preview" aria-hidden="true"></svg><span id="fontButtonName">Welcome Mono</span><svg className="icon chevron" aria-hidden="true"><use href="#i-chevron"/></svg></button>
 <select id="font" className="sr-only" tabIndex={-1} aria-label="Embroidery font"><option value="welcome-mono/1">Welcome Mono</option><option value="neon-blinking/1">Néon blinking (centerline)</option></select></div>
 <label className="block">Text<textarea id="letteringText" rows={2} maxLength={120} aria-label="Lettering text" defaultValue="BLOOM" /></label>

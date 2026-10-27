@@ -7,6 +7,7 @@ import {restoreActions,setRestore} from './restoreState.js';
 import {setInspectorText} from './inspectorTextState.js';
 import {setActions} from './actionState.js';
 import {setSelectionLabels} from './selectionLabelsState.js';
+import {setLetteringFields,letteringActions} from './letteringFieldsState.js';
 import {pathDraftNow,setPathDraft,replaceAt} from './pathDraftState.js';
 import {interactionNow,setInteraction} from './interactionState.js';
 import {clipboardNow,setClipboard} from './clipboardState.js';
@@ -178,7 +179,7 @@ $('#border').disabled=!(canFill&&o.stitch==='fill');const bt=$('#borderThread');
 const bv=o.borderThread||o.thread;
 if(![...bt.options].some(v=>v.value.toLowerCase()===bv.toLowerCase())){const opt=document.createElement('option');opt.value=bv;opt.textContent='Custom';bt.append(opt);}bt.value=bv;
 }$('#comp').value=documentNow().doc.settings.compensation;$('#fabric').value=documentNow().doc.settings.fabric??'woven';setTransformFields({posX:Number(o.x).toFixed(1),posY:Number(o.y).toFixed(1),sizeW:Number(o.w||0).toFixed(1),sizeH:Number(o.h||0).toFixed(1),rotation:String(Number(o.rotation||0))});
-setStitchRow('alongRow',!o.along);$('#alongOffset').value=o.along?.offset??0;syncTextInspector(o);}else{syncTextInspector(null);
+setStitchRow('alongRow',!o.along);setLetteringFields({alongOffset:String(o.along?.offset??0)});syncTextInspector(o);}else{syncTextInspector(null);
 $('#spacing').value=documentNow().doc.settings.spacing;$('#angle').value=documentNow().doc.settings.angle;setStitchRow('fillReset',true);
 setStitchRow('alongRow',true);
 setStitchRow('satinRow',true);$('#type').disabled=false;setStitchRow('pathProps',true);$('#border').disabled=true;$('#borderThread').disabled=true;}
@@ -502,7 +503,7 @@ $('#removeSmallHoles').onclick=()=>{const ids=[...selState().multi].filter(id=>i
 $('#removeSmallIslands').onclick=()=>{const ids=[...selState().multi].filter(id=>isClosedShape(documentNow().doc.objects.find(o=>o.id===id))),maxArea=Number($('#smallIslandArea').value);if(!(maxArea>=.1&&maxArea<=20)){toast(t('The island limit must be 0.1 to 20 mm².'));return;}const count=ids.filter(id=>isSmallIsland(documentNow().doc.objects.find(o=>o.id===id),maxArea)).length;if(!count){toast(t('No islands under {a} mm² in the selection.',{a:maxArea}));return;}edit([{op:'remove_small_islands',ids,maxArea}],()=>toast(t('Removed small islands: {n}.',{n:count})));};
 $('#textOnPath').onclick=()=>{const picked=[...selState().multi].map(id=>documentNow().doc.objects.find(o=>o.id===id)).filter(Boolean),t=picked.find(o=>o.kind==='text'),p=picked.find(o=>o.kind==='path');if(t&&p)edit([{op:'text_on_path',textId:t.id,pathId:p.id}],()=>{setSelection({selected: t.id});setSelection({multi: new Set([t.id])});});};
 $('#textOffPath').onclick=()=>{const ids=[...selState().multi].filter(id=>documentNow().doc.objects.find(o=>o.id===id)?.along);if(ids.length)edit(ids.map(textId=>({op:'text_off_path',textId})));};
-$('#alongOffset').onchange=e=>{const o=selectedObject();if(o?.along)edit([{op:'set_along_offset',textId:o.id,offset:Number(e.target.value)}]);};
+letteringActions.commit=(field,text)=>{const o=selectedObject();if(field==='alongOffset'&&o?.along)edit([{op:'set_along_offset',textId:o.id,offset:Number(text)}]);};
 $('#underlay').onchange=e=>edit([{op:'set_settings',underlay:e.target.checked}]);
 $('#fabric').onchange=e=>edit([{op:'set_settings',fabric:e.target.value}]);
 function renderFontsList(){const list=$('#fontsList'),usage=customFontUsage(documentNow().doc),bundled=bundledFontUsage(documentNow().doc);list.replaceChildren();for(const f of usage){const li=document.createElement('li');li.textContent=`${f.name}: used by ${f.uses.length} lettering object${f.uses.length===1?'':'s'}${f.uses.length?' ('+f.uses.join(', ')+')':''}`;list.append(li);}for(const f of bundled){const li=document.createElement('li');li.textContent=`${getFont(f.id)?.name||f.id} (bundled, not removed): used by ${f.uses.length} lettering object${f.uses.length===1?'':'s'} (${f.uses.join(', ')})`;list.append(li);}$('#fontsEmpty').hidden=usage.length+bundled.length>0;$('#removeUnusedFonts').disabled=!usage.some(f=>!f.uses.length);}
