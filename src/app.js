@@ -5,6 +5,7 @@ import {setHoopFields,hoopActions} from './hoopState.js';
 import {setShortcutsOpen,shortcutsState} from './shortcutsState.js';
 import {restoreActions,setRestore} from './restoreState.js';
 import {setInspectorText} from './inspectorTextState.js';
+import {setActions} from './actionState.js';
 import {pathDraftNow,setPathDraft,replaceAt} from './pathDraftState.js';
 import {interactionNow,setInteraction} from './interactionState.js';
 import {clipboardNow,setClipboard} from './clipboardState.js';
@@ -109,19 +110,19 @@ function render(){updateBatchInfo();
  $('.canvas').classList.toggle('snapping',snapOn);
  const nMulti=selState().multi.size;
  alignState.set({align:!(nMulti>=2||nMulti===1),distribute:nMulti<3});
- {const picked=[...selState().multi].map(id=>documentNow().doc.objects.find(o=>o.id===id)).filter(Boolean);$('#textOnPath').disabled=!(picked.length===2&&picked.some(o=>o.kind==='text')&&picked.some(o=>o.kind==='path'));$('#textOffPath').disabled=!picked.some(o=>o.along);}
+ {const picked=[...selState().multi].map(id=>documentNow().doc.objects.find(o=>o.id===id)).filter(Boolean);setActions({textOnPath:!(picked.length===2&&picked.some(o=>o.kind==='text')&&picked.some(o=>o.kind==='path'))});setActions({textOffPath:!picked.some(o=>o.along)});}
  selectionToolbarState.set({...selectionToolbarState.get(),subtract:nMulti<2,union:nMulti<2,intersect:nMulti<2});
- $('#group').disabled=nMulti<2;
- $('#ungroup').disabled=![...selState().multi].some(id=>documentNow().doc.objects.find(o=>o.id===id)?.groupId);
- $('#editNodes').disabled=selState().multi.size!==1||selectedObject()?.kind==='stitch_layer';
+ setActions({group:nMulti<2});
+ setActions({ungroup:![...selState().multi].some(id=>documentNow().doc.objects.find(o=>o.id===id)?.groupId)});
+ setActions({editNodes:selState().multi.size!==1||selectedObject()?.kind==='stitch_layer'});
  $('#editNodes').classList.toggle('active-tool',editMode);
  selectionToolbarState.set({...selectionToolbarState.get(),flip:!selState().multi.size});
  nodeButtonsState.set({add:selectedObject()?.kind!=='path',del:selState().selNode===null,smooth:selState().selNode===null,corner:selState().selNode===null||!selectedObject()?.handles?.[selState().selNode]});
  document.querySelector('.canvas').classList.toggle('preview-mode',viewMode.get()==='preview');
  document.querySelector('.layout main').classList.toggle('design-view',viewMode.get()==='design');
- $('#undo').disabled=!documentNow().history.length;
- $('#redo').disabled=!documentNow().future.length;
- $('#duplicate').disabled=!selState().selected;
+ setActions({undo:!documentNow().history.length});
+ setActions({redo:!documentNow().future.length});
+ setActions({duplicate:!selState().selected});
  $('#remove').disabled=!selState().selected;
  const hoop=hoopSize(documentNow().doc);
  const setRect=(id,w,h,rx)=>{const r=$(id);r.setAttribute('x',-w/2);r.setAttribute('y',-h/2);r.setAttribute('width',w);r.setAttribute('height',h);r.setAttribute('rx',rx);};
@@ -283,8 +284,8 @@ if(nw&&document.activeElement!==$('#nodeWidth'))$('#nodeWidth').value=widthAt(o,
   setStitchRow('blendRow',!blendable);
   if(blendable){$('#blendThread').value=o.blendThread||'';setStitchRow('blendRange',!(o.blendThread||o.blendPalette));for(let k=0;k<4;k++){const s=$('#blendPalette'+k),v=o.blendPalette?.[k]||'';if(v&&![...s.options].some(x=>x.value.toLowerCase()===v.toLowerCase()))s.append(new Option(threadName(v),v));s.value=v;}if(document.activeElement!==$('#blendAngle'))$('#blendAngle').value=o.blendAngle??'';if(document.activeElement!==$('#blendStart'))$('#blendStart').value=Math.round((o.blendStart??0)*100);if(document.activeElement!==$('#blendEnd'))$('#blendEnd').value=Math.round((o.blendEnd??1)*100);}
   const ordered=[...selState().multi].map(id=>documentNow().doc.objects.find(v=>v.id===id)).filter(Boolean).sort((a,b)=>documentNow().doc.objects.indexOf(a)-documentNow().doc.objects.indexOf(b)),top=ordered.at(-1);
-  $('#clipBtn').disabled=!(ordered.length>=2&&top&&(top.kind==='rect'||top.kind==='ellipse'||(top.kind==='path'&&top.closed)));
-  $('#unclipBtn').disabled=!ordered.some(v=>v.clipId||v.mask);
+  setActions({clip:!(ordered.length>=2&&top&&(top.kind==='rect'||top.kind==='ellipse'||(top.kind==='path'&&top.closed)))});
+  setActions({unclip:!ordered.some(v=>v.clipId||v.mask)});
   }
   {const m=['contour','spiral','meander','guided','cross','ripple','motif','sequin','bling'].includes(src.fillMethod)?src.fillMethod:'rows';$('#fillMethod').value=m;setStitchRow('methodRow',!fillable||n===0);
 setStitchRow('accordionStartRow',!(n===1&&fillable&&m==='rows'));
