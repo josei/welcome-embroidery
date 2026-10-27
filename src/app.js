@@ -1,5 +1,6 @@
 import {documentNow,setDocument,settingsActions,documentActions} from './documentState.js';
 import {setTransformFields,transformActions} from './transformState.js';
+import {setReferenceFields,referenceActions} from './referenceFieldsState.js';
 import {pathDraftNow,setPathDraft,replaceAt} from './pathDraftState.js';
 import {interactionNow,setInteraction} from './interactionState.js';
 import {clipboardNow,setClipboard} from './clipboardState.js';
@@ -892,10 +893,7 @@ setStitchRow('refRemove',!r);$('#refLoad').textContent=t(r?'Replace picture…':
   if(r.visible!==false&&viewMode.get()!=='preview'){const im=document.createElementNS(svgNS,'image');im.setAttribute('href',r.data);im.setAttribute('x',r.x);im.setAttribute('y',r.y);im.setAttribute('width',r.w);im.setAttribute('height',r.h);im.setAttribute('preserveAspectRatio','none');im.setAttribute('opacity',r.opacity??.5);layer.append(im);}
   const set=(id,v)=>{if(document.activeElement!==$(id))$(id).value=v;};
   set('#refOpacity',Math.round((r.opacity??.5)*100));
-  set('#refX',+r.x.toFixed(2));
-  set('#refY',+r.y.toFixed(2));
-  set('#refW',+r.w.toFixed(2));
-  set('#refH',+r.h.toFixed(2));
+  setReferenceFields({refX:String(+r.x.toFixed(2)),refY:String(+r.y.toFixed(2)),refW:String(+r.w.toFixed(2)),refH:String(+r.h.toFixed(2))});
   $('#refVisible').checked=r.visible!==false;
   $('#refLocked').checked=Boolean(r.locked);
   $('#refMove').disabled=Boolean(r.locked);
@@ -917,9 +915,7 @@ $('#refOpacity').oninput=e=>{const im=$('#refLayer image');if(im)im.setAttribute
 $('#refOpacity').onchange=e=>edit([{op:'set_reference',opacity:Math.max(.05,Math.min(1,Number(e.target.value)/100))}]);
 $('#refVisible').onchange=e=>edit([{op:'set_reference',visible:e.target.checked}]);
 $('#refLocked').onchange=e=>edit([{op:'set_reference',locked:e.target.checked}]);
-for(const [id,key] of [['#refX','x'],['#refY','y']])$(id).onchange=e=>{if(Number.isFinite(Number(e.target.value)))edit([{op:'set_reference',[key]:Number(e.target.value)}]);};
-$('#refW').onchange=e=>{const r=documentNow().doc.reference,w=Number(e.target.value);if(r&&w>=1)edit([{op:'set_reference',w,h:+(r.h*w/r.w).toFixed(2)}]);};
-$('#refH').onchange=e=>{const r=documentNow().doc.reference,h=Number(e.target.value);if(r&&h>=1)edit([{op:'set_reference',h,w:+(r.w*h/r.h).toFixed(2)}]);};
+referenceActions.commit=(field,text)=>{const r=documentNow().doc.reference;if(field==='refX'||field==='refY'){const key=field==='refX'?'x':'y';if(!Number.isFinite(Number(text)))return false;edit([{op:'set_reference',[key]:Number(text)}]);return;}if(field==='refW'){const w=Number(text);if(!(r&&w>=1))return false;edit([{op:'set_reference',w,h:+(r.h*w/r.w).toFixed(2)}]);return;}const h=Number(text);if(!(r&&h>=1))return false;edit([{op:'set_reference',h,w:+(r.w*h/r.h).toFixed(2)}]);};
 $('#refFit').onclick=()=>{const r=documentNow().doc.reference;if(!r)return;const hs=hoopSize(documentNow().doc),f=Math.min((hs.w-4)/r.w,(hs.h-4)/r.h),w=+(r.w*f).toFixed(2),h=+(r.h*f).toFixed(2);edit([{op:'set_reference',x:+(-w/2).toFixed(2),y:+(-h/2).toFixed(2),w,h}]);};
 $('#refMove').onclick=()=>{if(!documentNow().doc.reference||documentNow().doc.reference.locked)return;setInteraction({refMoving: !interactionNow().refMoving});$('#art').classList.toggle('ref-moving',interactionNow().refMoving);$('#refMove').classList.toggle('armed',interactionNow().refMoving);if(interactionNow().refMoving)toast(t('Drag on the canvas to move the picture. Press the button again to go back to drawing.'));};
 $('#art').addEventListener('pointerdown',e=>{if(!interactionNow().refMoving||e.button!==0||!documentNow().doc.reference)return;e.preventDefault();e.stopImmediatePropagation();const r=documentNow().doc.reference,start=coord(e);setInteraction({refDrag: {start,x:r.x,y:r.y,pointerId:e.pointerId}});$('#art').setPointerCapture?.(e.pointerId);},true);
