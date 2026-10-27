@@ -7,7 +7,7 @@ import {restoreActions,setRestore} from './restoreState.js';
 import {setInspectorText} from './inspectorTextState.js';
 import {setActions} from './actionState.js';
 import {setSelectionLabels} from './selectionLabelsState.js';
-import {setLetteringFields,letteringActions} from './letteringFieldsState.js';
+import {letteringFieldsState,setLetteringFields,letteringActions} from './letteringFieldsState.js';
 import {pathDraftNow,setPathDraft,replaceAt} from './pathDraftState.js';
 import {interactionNow,setInteraction} from './interactionState.js';
 import {clipboardNow,setClipboard} from './clipboardState.js';
@@ -503,7 +503,9 @@ $('#removeSmallHoles').onclick=()=>{const ids=[...selState().multi].filter(id=>i
 $('#removeSmallIslands').onclick=()=>{const ids=[...selState().multi].filter(id=>isClosedShape(documentNow().doc.objects.find(o=>o.id===id))),maxArea=Number($('#smallIslandArea').value);if(!(maxArea>=.1&&maxArea<=20)){toast(t('The island limit must be 0.1 to 20 mm².'));return;}const count=ids.filter(id=>isSmallIsland(documentNow().doc.objects.find(o=>o.id===id),maxArea)).length;if(!count){toast(t('No islands under {a} mm² in the selection.',{a:maxArea}));return;}edit([{op:'remove_small_islands',ids,maxArea}],()=>toast(t('Removed small islands: {n}.',{n:count})));};
 $('#textOnPath').onclick=()=>{const picked=[...selState().multi].map(id=>documentNow().doc.objects.find(o=>o.id===id)).filter(Boolean),t=picked.find(o=>o.kind==='text'),p=picked.find(o=>o.kind==='path');if(t&&p)edit([{op:'text_on_path',textId:t.id,pathId:p.id}],()=>{setSelection({selected: t.id});setSelection({multi: new Set([t.id])});});};
 $('#textOffPath').onclick=()=>{const ids=[...selState().multi].filter(id=>documentNow().doc.objects.find(o=>o.id===id)?.along);if(ids.length)edit(ids.map(textId=>({op:'text_off_path',textId})));};
-letteringActions.commit=(field,text)=>{const o=selectedObject();if(field==='alongOffset'&&o?.along)edit([{op:'set_along_offset',textId:o.id,offset:Number(text)}]);};
+letteringActions.commit=(field,text)=>{if(field==='alongOffset'){const o=selectedObject();if(o?.along)edit([{op:'set_along_offset',textId:o.id,offset:Number(text)}]);return;}const o=textObj();if(!o)return;if(field==='text'){let t=text;if(!isRegistryFont(o.font))t=t.replace(/\n/g,' ').toUpperCase().slice(0,24);if(!t.trim()){toast('Lettering needs some text.');syncTextInspector(o);return false;}edit([{op:'set_object',id:o.id,text:t}]);return;}if(field==='height'){const height=Number(text);edit([{op:'transform',id:o.id,height,width:measureText(o.text,o.font||'welcome-mono/1',height,o)}]);return;}const key={tracking:'tracking',wordSpacing:'wordSpacing',lineHeight:'lineHeight',boldMm:'bold',italicDeg:'italic'}[field];edit([{op:'set_object',id:o.id,[key]:Number(text)}]);};
+letteringActions.choose=(field,value)=>{if(field==='font'){setFont(value);return;}const o=textObj();if(!o)return;if(field==='vertical'){if(value&&!isRegistryFont(o.font)){toast(t('Vertical lettering needs a bundled or loaded font. Choose one in Font.'));return false;}if(edit([{op:'set_object',id:o.id,vertical:value}])&&value)fitVerticalToHoop(o.id);return;}if(field==='nameDrop'){edit([{op:'set_object',id:o.id,nameDrop:value}]);return;}if(field==='stitch')edit([{op:'set_object',id:o.id,stitch:value}]);};
+letteringActions.press=(name,value)=>{const o=textObj();if(!o)return;if(name==='bold')edit([{op:'set_object',id:o.id,bold:o.bold>0?0:Math.max(.4,Math.round(o.h*.03*10)/10)}]);else if(name==='italic')edit([{op:'set_object',id:o.id,italic:o.italic>0?0:12}]);else edit([{op:'set_object',id:o.id,align:value}]);};
 $('#underlay').onchange=e=>edit([{op:'set_settings',underlay:e.target.checked}]);
 $('#fabric').onchange=e=>edit([{op:'set_settings',fabric:e.target.value}]);
 function renderFontsList(){const list=$('#fontsList'),usage=customFontUsage(documentNow().doc),bundled=bundledFontUsage(documentNow().doc);list.replaceChildren();for(const f of usage){const li=document.createElement('li');li.textContent=`${f.name}: used by ${f.uses.length} lettering object${f.uses.length===1?'':'s'}${f.uses.length?' ('+f.uses.join(', ')+')':''}`;list.append(li);}for(const f of bundled){const li=document.createElement('li');li.textContent=`${getFont(f.id)?.name||f.id} (bundled, not removed): used by ${f.uses.length} lettering object${f.uses.length===1?'':'s'} (${f.uses.join(', ')})`;list.append(li);}$('#fontsEmpty').hidden=usage.length+bundled.length>0;$('#removeUnusedFonts').disabled=!usage.some(f=>!f.uses.length);}
@@ -518,32 +520,13 @@ pivotActions.reset=()=>{pivotState.set({pivot:null,picking:false});render();canv
 function fitHeight(fid,text,opts={}){const f=isRegistryFont(fid)?getFont(fid):null;if(!f)return fid==='neon-blinking/1'?20:8;const lo=f.size*f.minScale,hi=f.size*f.maxScale,limit=hoopSize(documentNow().doc).w*.85,w=measureText(text,fid,f.size,opts);let h=f.size;if(w>limit)h=f.size*limit/w;return Math.max(lo,Math.min(hi,+h.toFixed(2)));}
 const textObj=()=>{const o=selectedObject();return o?.kind==='text'?o:null;};
 function syncTextInspector(o){
- const isText=o?.kind==='text',fid=isText?(o.font||'welcome-mono/1'):newTextFont,f=isRegistryFont(fid)?getFont(fid):null,legacyNeon=fid==='neon-blinking/1';
- for(const id of ['letteringText','letteringHeight','tracking','wordSpacing','lineHeight','boldMm','italicDeg','textBold','textItalic','alignLeft','alignCenter','alignRight','textStitch'])$('#'+id).disabled=!isText;
- if(document.activeElement!==$('#letteringText'))$('#letteringText').value=isText?o.text:'';
- if(document.activeElement!==$('#letteringHeight'))$('#letteringHeight').value=isText?+Number(o.h).toFixed(2):(f?.size??(legacyNeon?20:8));
- const lo=f?+(f.size*f.minScale).toFixed(2):legacyNeon?20:isRegistryFont(fid)?2:4,hi=f?+(f.size*f.maxScale).toFixed(2):legacyNeon?60:isRegistryFont(fid)?200:16;
- $('#letteringHeight').min=lo;
- $('#letteringHeight').max=hi;
- $('#letteringHeight').title=`${lo}–${hi} mm for this font`;
- if(![...$('#font').options].some(op=>op.value===fid)){const op=document.createElement('option');op.value=fid;op.textContent=fid;$('#font').append(op);}$('#font').value=fid;
- $('#font').disabled=false;
- const set=(id,v)=>{if(document.activeElement!==$('#'+id))$('#'+id).value=v;};
- set('tracking',o?.tracking??0);
- set('wordSpacing',o?.wordSpacing??0);
- set('lineHeight',o?.lineHeight??1);
- set('boldMm',o?.bold??0);
- set('italicDeg',o?.italic??0);
- const registry=isRegistryFont(fid);
- for(const id of ['tracking','wordSpacing','lineHeight','textVertical','boldMm','italicDeg','textBold','textItalic','alignLeft','alignCenter','alignRight'])$('#'+id).disabled=!isText||!registry;
- $('#textBold').setAttribute('aria-pressed',String(Boolean(o?.bold>0)));
- $('#textItalic').setAttribute('aria-pressed',String(Boolean(o?.italic>0)));
- for(const b of $$('[data-align-text]'))b.setAttribute('aria-pressed',String((o?.align||'left')===b.dataset.alignText));
-setStitchRow('textStitchRow',!(isText&&f?.kind==='outline'));$('#textVertical').checked=Boolean(o?.vertical);$('#textNameDrop').checked=Boolean(o?.nameDrop);
-$('#textStitch').value=o?.stitch==='run'?'run':'fill';
- const info=$('#fontInfo'),entry=fontIndex.find(x=>x.fid===fid),custom=fid.startsWith('custom/')?documentNow().doc.customFonts?.[fid.slice(7)]:null;
- info.hidden=!(entry||custom);
- info.textContent=custom?`${custom.name} — loaded from a file; stored inside this project. ${custom.license||'Check the licence of the font file before sharing the design.'}`:entry?`${entry.name} — ${entry.license||''}${entry.original&&entry.original!==entry.name?` · ${t('based on')} ${entry.original}`:''}${!registry?' · '+t('single-line font: spacing, bold and italic apply to bundled outline/stitch fonts; pick a satin or fill font to set the stitch density'):''}`:'';
+ const isText=o?.kind==='text',fid=isText?(o.font||'welcome-mono/1'):newTextFont,f=isRegistryFont(fid)?getFont(fid):null,legacyNeon=fid==='neon-blinking/1',registry=isRegistryFont(fid);
+ const lo=f?+(f.size*f.minScale).toFixed(2):legacyNeon?20:registry?2:4,hi=f?+(f.size*f.maxScale).toFixed(2):legacyNeon?60:registry?200:16;
+ const entry=fontIndex.find(x=>x.fid===fid),custom=fid.startsWith('custom/')?documentNow().doc.customFonts?.[fid.slice(7)]:null;
+ let fontOptions=letteringFieldsState.get().fontOptions;
+ if(!fontOptions.some(op=>op.value===fid))fontOptions=[...fontOptions,{value:fid,label:fid}];
+ setLetteringFields({textOff:!isText,styleOff:!isText||!registry,text:isText?o.text:'',height:String(isText?+Number(o.h).toFixed(2):(f?.size??(legacyNeon?20:8))),heightMin:String(lo),heightMax:String(hi),heightTitle:`${lo}–${hi} mm for this font`,fontOptions,fontValue:fid,tracking:String(o?.tracking??0),wordSpacing:String(o?.wordSpacing??0),lineHeight:String(o?.lineHeight??1),boldMm:String(o?.bold??0),italicDeg:String(o?.italic??0),bold:Boolean(o?.bold>0),italic:Boolean(o?.italic>0),align:o?.align||'left',vertical:Boolean(o?.vertical),nameDrop:Boolean(o?.nameDrop),stitch:o?.stitch==='run'?'run':'fill',fontInfoHidden:!(entry||custom),fontInfoText:custom?`${custom.name} — loaded from a file; stored inside this project. ${custom.license||'Check the licence of the font file before sharing the design.'}`:entry?`${entry.name} — ${entry.license||''}${entry.original&&entry.original!==entry.name?` · ${t('based on')} ${entry.original}`:''}${!registry?' · '+t('single-line font: spacing, bold and italic apply to bundled outline/stitch fonts; pick a satin or fill font to set the stitch density'):''}`:''});
+ setStitchRow('textStitchRow',!(isText&&f?.kind==='outline'));
  fontPicker?.refreshButton();
 }
 async function setFont(fid){
@@ -554,18 +537,18 @@ async function setFont(fid){
   }
  else syncTextInspector(null);
 }
-$('#letteringText').onchange=e=>{const o=textObj();if(!o)return;let text=e.target.value;if(!isRegistryFont(o.font))text=text.replace(/\n/g,' ').toUpperCase().slice(0,24);if(!text.trim()){toast('Lettering needs some text.');syncTextInspector(o);return;}edit([{op:'set_object',id:o.id,text}]);};
-$('#font').onchange=e=>setFont(e.target.value);
-$('#letteringHeight').onchange=e=>{const o=textObj();if(!o)return;const height=Number(e.target.value);edit([{op:'transform',id:o.id,height,width:measureText(o.text,o.font||'welcome-mono/1',height,o)}]);};
-for(const [id,key] of [['tracking','tracking'],['wordSpacing','wordSpacing'],['lineHeight','lineHeight'],['boldMm','bold'],['italicDeg','italic']])$('#'+id).onchange=e=>{const o=textObj();if(o)edit([{op:'set_object',id:o.id,[key]:Number(e.target.value)}]);};
-$('#textBold').onclick=()=>{const o=textObj();if(o)edit([{op:'set_object',id:o.id,bold:o.bold>0?0:Math.max(.4,Math.round(o.h*.03*10)/10)}]);};
-$('#textItalic').onclick=()=>{const o=textObj();if(o)edit([{op:'set_object',id:o.id,italic:o.italic>0?0:12}]);};
-for(const b of $$('[data-align-text]'))b.onclick=()=>{const o=textObj();if(o)edit([{op:'set_object',id:o.id,align:b.dataset.alignText}]);};
-$('#textStitch').onchange=e=>{const o=textObj();if(o)edit([{op:'set_object',id:o.id,stitch:e.target.value}]);};
+
+
+
+
+
+
+
+
 // Vertical lettering fits the hoop: a column taller than 90% of the hoop height is scaled down by its height ratio, with the width kept in proportion (the same transform the lettering height field uses).
 function fitVerticalToHoop(id){const o=documentNow().doc.objects.find(v=>v.id===id);if(!o?.vertical)return;const b=objectBounds(o),colH=b[3]-b[1],limit=hoopSize(documentNow().doc).h*.9;if(!(colH>limit)||!(o.h>0))return;const height=+(o.h*limit/colH).toFixed(2);if(edit([{op:'transform',id,height,width:measureText(o.text,o.font||'welcome-mono/1',height,o)}])){const o2=documentNow().doc.objects.find(v=>v.id===id),b2=objectBounds(o2),cx=(b2[0]+b2[2])/2,cy=(b2[1]+b2[3])/2;edit([{op:'transform',id,x:o2.x-cx,y:o2.y-cy}]);toast(t('Vertical lettering fitted to the hoop at {h} mm.',{h:height}));}}
-$('#textVertical').onchange=e=>{const o=textObj();if(!o)return;if(e.target.checked&&!isRegistryFont(o.font)){e.target.checked=false;toast(t('Vertical lettering needs a bundled or loaded font. Choose one in Font.'));return;}if(edit([{op:'set_object',id:o.id,vertical:e.target.checked}])&&e.target.checked)fitVerticalToHoop(o.id);};
-$('#textNameDrop').onchange=e=>{const o=textObj();if(o)edit([{op:'set_object',id:o.id,nameDrop:e.target.checked}]);};
+
+
 async function loadFontFile(file){
  try{if(file.size>12_000_000)throw Error('Font files over 12 MB are not supported.');const bytes=new Uint8Array(await file.arrayBuffer()),base=file.name.replace(/\.[^.]+$/,'').replace(/[^A-Za-z0-9_.-]+/g,'_').slice(0,32)||'font';let id=base,n=1;while(documentNow().doc.customFonts?.[id]||getFont(`custom/${id}`))id=`${base}_${++n}`;
   const font=ttfToFont(bytes,{id,name:file.name.replace(/\.[^.]+$/,''),license:'Loaded from a local file — check its licence',keywords:['truetype','outline','custom']});
@@ -577,7 +560,7 @@ async function loadFontFile(file){
   if(ok){newTextFont=key;fontIndex=[...fontIndex.filter(f=>f.fid!==key),{fid:key,id,name:font.name,kind:'outline',keywords:['truetype','outline','custom'],license:font.license,size:font.size,minScale:font.minScale,maxScale:font.maxScale}];populateFontSelect();toast(`Loaded ${font.name}. It is stored in this project.`);syncTextInspector(selectedObject());}
  }catch(error){toast(error.message);}
 }
-function populateFontSelect(){const sel=$('#font'),keep=sel.value;sel.replaceChildren(...fontIndex.map(f=>{const op=document.createElement('option');op.value=f.fid;op.textContent=f.name;return op;}));sel.value=keep;}
+function populateFontSelect(){setLetteringFields({fontOptions:fontIndex.map(f=>({value:f.fid,label:f.name}))});}
 const fontPicker=createFontPicker({button:$('#fontButton'),buttonPreview:$('#fontButtonPreview'),buttonName:$('#fontButtonName'),panel:$('#fontPanel'),search:$('#fontSearch'),chips:$('#fontChips'),list:$('#fontList'),loadFile:$('#fontLoadFile'),fileInput:$('#fontFile'),getIndex:()=>[...fontIndex,...Object.entries(documentNow().doc.customFonts||{}).filter(([id])=>!fontIndex.some(f=>f.fid===`custom/${id}`)).map(([id,f])=>({fid:`custom/${id}`,id,name:f.name,kind:'outline',keywords:['truetype','custom'],license:f.license,size:f.size,minScale:f.minScale,maxScale:f.maxScale}))],getCurrent:()=>textObj()?.font||newTextFont,getSample:()=>(textObj()?.text||'Hello 123').split('\n')[0].slice(0,14),getColor:()=>textObj()?.thread||'#1d2925',ensureLoaded:ensureFontLoaded,onPick:setFont,onLoadFile:loadFontFile});
 fetchFontIndex().then(index=>{fontIndex=index;populateFontSelect();syncTextInspector(selectedObject());fontPicker.refresh();});
 $('#undo').onclick=()=>{const d=documentNow();if(!d.history.length)return;const prev=d.history.at(-1);setDocument({doc:{...prev,revision:prev.revision+1},history:d.history.slice(0,-1),future:[...d.future,clone(d.doc)],dirty:true});clearComputed();render();};

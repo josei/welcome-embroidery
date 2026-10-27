@@ -1424,12 +1424,11 @@ test('name drop checkbox marks a lettering object for the names, and the mark su
  expect(errors).toEqual([]);
 });
 
-test('vertical lettering on the default monospace font is refused with a message, and the box stays unticked',async({page})=>{
+test('vertical lettering on the default monospace font: the box is disabled and stays unticked',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());await page.locator('#new').click();
  await page.locator('#letter').click();await page.locator('#letteringText').fill('ANA');await page.locator('#letteringText').press('Tab');
  await page.locator('.object-row').filter({hasText:'Lettering'}).first().click();
- await page.locator('#textVertical').evaluate(el=>{el.checked=true;el.dispatchEvent(new Event('change',{bubbles:true}));});
- await expect(page.locator('#toast')).toContainText('needs a bundled or loaded font');
+ await expect(page.locator('#textVertical')).toBeDisabled();
  await expect(page.locator('#textVertical')).not.toBeChecked();
  expect(errors).toEqual([]);
 });
