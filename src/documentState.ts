@@ -32,6 +32,11 @@ export const settingsActions: {set: (patch: Record<string, unknown>) => void} = 
   set() {},
 };
 
+/** The name field calls rename() with the text the user committed. app.js runs the edit; false puts the stored name back. */
+export const documentActions: {rename: (text: string) => boolean | void} = {
+  rename() {},
+};
+
 /** Changes some of the document state fields. */
 export function setDocument(patch: Partial<DocumentState>) {
   documentState.set({...documentState.get(), ...patch});

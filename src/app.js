@@ -1,4 +1,4 @@
-import {documentNow,setDocument,settingsActions} from './documentState.js';
+import {documentNow,setDocument,settingsActions,documentActions} from './documentState.js';
 import {pathDraftNow,setPathDraft,replaceAt} from './pathDraftState.js';
 import {interactionNow,setInteraction} from './interactionState.js';
 import {clipboardNow,setClipboard} from './clipboardState.js';
@@ -81,7 +81,7 @@ function renderSimulation(){
  {const use3d=viewMode.get()==='preview'&&Boolean(plan)&&preview3d.available;if(use3d&&preview3dPlan!==plan){preview3d.setPlan(plan,hoopSize(documentNow().doc));preview3dPlan=plan;}if(use3d)preview3d.setLimit(active?playIndex:null);if(preview3d.available){preview3d.show(use3d);$('#previewHint').hidden=!use3d;$('#art').style.visibility=use3d?'hidden':'';$('#controls').style.display=use3d?'none':$('#controls').style.display;}}
  if(segReady){syncSeg();if(threadsReady)syncThreads();}if(typeof renderPlan==='function'&&threadsReady)renderPlan();
  window.__autosaveHook?.();
- {const nm=$('#name');if(nm&&document.activeElement!==nm&&nm.value!==documentNow().doc.name)nm.value=documentNow().doc.name;}renderReference();
+ renderReference();
  $('#shapes').style.opacity=viewMode.get()==='stitches'?.18:viewMode.get()==='preview'&&plan?0:viewMode.get()==='preview'?.55:1;
  $('#controls').style.display=viewMode.get()==='design'?'':'none';
  syncPlaybackControls();
@@ -98,7 +98,7 @@ function render(){updateBatchInfo();
  else if(!selState().selected&&selState().multi.size)setSelection({selected: [...selState().multi][0]});
  if(selState().selNode!==null&&!(selectedObject()?.points?.[selState().selNode]))setSelection({selNode: null});
  {const pts=selectedObject()?.points;setSelection({selNodes: new Set([...selState().selNodes].filter(i=>pts?.[i]))});}
- if(document.activeElement!==$('#trimMm'))$('#trimMm').value=documentNow().doc.settings.trimMm??'';
+ 
  $('#snap').classList.toggle('active-tool',snapOn);
  $('.canvas').classList.toggle('snapping',snapOn);
  const nMulti=selState().multi.size;
@@ -470,7 +470,6 @@ $('#angle').onchange=e=>edit(selState().selected?[{op:'set_object',id:selState()
 $('#fillResetBtn').onclick=()=>{if(selState().selected)edit(orderedIds().map(id=>({op:'set_object',id,spacing:null,angle:null,stitchLength:null,stagger:null,underlayType:null,underlayInset:null,underlaySpacing:null})));};
 for(const [id,key,parse] of [['fillMethod','fillMethod',v=>v==='rows'?null:v],['stitchLength','stitchLength',Number],['stagger','stagger',v=>Number(v)],['underlayType','underlayType',v=>v],['underlayInset','underlayInset',Number],['underlaySpacing','underlaySpacing',Number]])$('#'+id).onchange=e=>{const v=parse(e.target.value);if(selState().multi.size)edit(orderedIds().map(oid=>({op:'set_object',id:oid,[key]:v})));else edit([{op:'set_settings',[key]:v}]);};
 settingsActions.set=patch=>edit([{op:'set_settings',...patch}]);
-$('#trimMm').onchange=e=>{if(e.target.value==='')return edit([{op:'set_settings',trimMm:5}]);edit([{op:'set_settings',trimMm:Number(e.target.value)}]);};
 const runBoolean=mode=>{const ids=documentNow().doc.objects.map(o=>o.id).filter(id=>selState().multi.has(id));if(ids.length>=2)edit([{op:'boolean',mode,ids}],()=>{setSelection({selected: ids[0]});setSelection({multi: new Set([ids[0]])});});};
 selectionToolbarActions.press=name=>{if(name==='flipH'){const ids=orderedIds();if(ids.length)edit([{op:'flip',ids,axis:'horizontal'}]);}else if(name==='flipV'){const ids=orderedIds();if(ids.length)edit([{op:'flip',ids,axis:'vertical'}]);}else runBoolean(name);};
 const pickedObjects=()=>documentNow().doc.objects.filter(o=>selState().multi.has(o.id));
@@ -618,12 +617,12 @@ function importSvg(source){
 }
 function safeProjectFilename(name){return `${String(name||'Untitled').replace(/\.welcome$/i,'').replace(/[^a-z0-9 _-]/gi,'_').trim()||'Untitled'}.welcome`;}
 function projectSave(){setTimeout(()=>{try{const a=JSON.parse(localStorage.getItem('welcome.autosave')||'null');if(a){a.clean=true;localStorage.setItem('welcome.autosave',JSON.stringify(a));}}catch{}},0);download(JSON.stringify(documentNow().doc,null,2),safeProjectFilename(documentNow().doc.name),'application/json');setDocument({dirty: false});render();}
-function acceptProject(next){validateDocument(next);const opened=clone(next);clearComputed();setDocument({doc: opened});setDocument({history: []});setDocument({future: []});setSelection({selected: documentNow().doc.objects[0]?.id||null});setSelection({multi: new Set(selState().selected?[selState().selected]:[])});editMode=false;setSelection({selNode: null});$('#name').value=documentNow().doc.name;setDocument({dirty: false});render();canvasView?.fitAll();toast('Project opened locally.');}
+function acceptProject(next){validateDocument(next);const opened=clone(next);clearComputed();setDocument({doc: opened});setDocument({history: []});setDocument({future: []});setSelection({selected: documentNow().doc.objects[0]?.id||null});setSelection({multi: new Set(selState().selected?[selState().selected]:[])});editMode=false;setSelection({selNode: null});setDocument({dirty: false});render();canvasView?.fitAll();toast('Project opened locally.');}
 async function openArtifact(id){if(!/^[0-9a-f-]{36}$/.test(id))throw Error('Invalid MCP project link.');let response=await fetch(`/artifacts/${id}.welcome`,{credentials:'same-origin',redirect:'error'});if(response.status===404)response=await fetch(`/artifacts/${id}.welcome`,{credentials:'same-origin',redirect:'error'});if(!response.ok)throw Error(`MCP project could not be opened (${response.status}).`);const next=await response.json();acceptProject(next);window.history.replaceState(null,'',location.pathname);}
-$('#name').value=documentNow().doc.name;
-$('#name').onchange=e=>{const name=e.target.value.trim();if(!name){e.target.value=documentNow().doc.name;toast('Project name cannot be empty.');return;}edit([{op:'rename_document',name}]);};
+
+documentActions.rename=text=>{const name=text.trim();if(!name){toast('Project name cannot be empty.');return false;}edit([{op:'rename_document',name}]);return true;};
 $('#save').onclick=projectSave;
-$('#new').onclick=()=>{editMode=false;if(documentNow().dirty&&!confirm(t('Discard unsaved changes?')))return;clearComputed();setDocument({doc: withSavedHoop({...initialDocument(),name:'Untitled design',objects:[]})});setDocument({history: []});setDocument({future: []});setSelection({selected: null});setSelection({multi: new Set()});$('#name').value=documentNow().doc.name;setDocument({dirty: true});render();canvasView?.fitHoop();};
+$('#new').onclick=()=>{editMode=false;if(documentNow().dirty&&!confirm(t('Discard unsaved changes?')))return;clearComputed();setDocument({doc: withSavedHoop({...initialDocument(),name:'Untitled design',objects:[]})});setDocument({history: []});setDocument({future: []});setSelection({selected: null});setSelection({multi: new Set()});setDocument({dirty: true});render();canvasView?.fitHoop();};
 $('#open').onclick=()=>$('#file').click();
 $('#file').onchange=async e=>{const f=e.target.files[0];if(!f)return;try{if(f.size>33_554_432)throw Error('Welcome project files are limited to 32 MiB.');if(f.name.toLowerCase().endsWith('.svg')){acceptProject(importSvg(await f.text()));if(svgImportNotes.length)toast(svgImportNotes.join(' '));}else if((f.name.toLowerCase().endsWith('.welcome')||f.name.toLowerCase().endsWith('.welcome'))||f.name.toLowerCase().endsWith('.json'))acceptProject(JSON.parse(await f.text()));else if(f.name.toLowerCase().endsWith('.dxf')){const r=dxfDocument(await f.text());acceptProject(r.doc);const skipped=Object.entries(r.skipped).map(([k,n])=>`${n} ${k}`).join(', ');toast(`DXF imported: ${r.doc.objects.length} path${r.doc.objects.length===1?'':'s'}${skipped?`; skipped ${skipped}`:''}${r.bulged?`; ${r.bulged} arc${r.bulged===1?'':'s'} sewn as straight segments`:''}.`);}else throw Error('Open a .welcome project, SVG or ASCII DXF here. Use Import JEF / VP3 for machine files.');}catch(err){toast(err.message);}e.target.value='';};
 $('#importMachine').onclick=()=>$('#machineFile').click();
