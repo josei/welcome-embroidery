@@ -954,6 +954,20 @@ test('tooltips are drawn on top of the panels, inside the window, above the cont
  await page.mouse.move(700,500);await expect(page.locator('#tooltip')).not.toHaveClass(/show/);
 });
 
+test('3D preview pull view: the estimate is on the fabric, and it changes with the fabric',async({page})=>{
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());
+ const webgl=await page.evaluate(()=>Boolean(document.createElement('canvas').getContext('webgl2')));test.skip(!webgl,'WebGL2 is not available in this browser');
+ await page.locator('#new').click();await page.locator('#path').click();const m=await ctm(page);for(const [x,y] of [[-20,-15],[20,-15],[20,15],[-20,15],[-20,-15]]){const s=toScreen(m,x,y);await page.mouse.click(s.x,s.y);}await page.keyboard.press('Enter');
+ await page.locator('#type').selectOption('fill');await page.locator('#secDoc').evaluate(d=>{d.open=true;});
+ const peak=async()=>Number(((await page.locator('#pullNote').textContent()).match(/(\d+)%/)||[,'0'])[1]);
+ await page.locator('button[data-view="preview"]').click();const canvas=page.locator('#preview3d');await expect(canvas).toBeVisible();
+ await expect(page.locator('#showPull')).toBeVisible();await expect(page.locator('#pullNote')).toBeHidden();await expect(canvas).toHaveAttribute('data-pull','off');
+ await page.locator('#showPull').check();await expect(canvas).toHaveAttribute('data-pull','on');await expect(page.locator('#pullNote')).toContainText('Woven');const woven=await peak();
+ await page.locator('button[data-view="design"]').click();await page.locator('#fabric').selectOption('knit');
+ await page.locator('button[data-view="preview"]').click();await expect(page.locator('#pullNote')).toContainText('Stretchy knit');
+ expect(await peak()).toBeGreaterThan(woven);
+ expect(errors).toEqual([]);
+});
 test('3D preview drag direction: dragging right turns the fabric right, dragging down looks more from above',async({page})=>{
  await page.goto('/');await expect(page.locator('#count')).toContainText('compiled');await page.locator('[data-view=preview]').click();const canvas=page.locator('#preview3d');await expect(canvas).toBeVisible();await expect(canvas).toHaveAttribute('data-instances',/\d+/);
  const box=await canvas.boundingBox(),cx=box.x+box.width/2,cy=box.y+box.height/2,num=async n=>Number(await canvas.getAttribute(n));

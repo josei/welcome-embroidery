@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import neonGlyphs from '../fonts/neon_blinking/glyphs.json' with {type:'json'};
 import {pinnedMachineFixture} from './fixture-archive.js';
-import {FABRIC_PROFILES,bundledFontUsage,blockSeconds,blockTimeLabel,initialDocument,compile,encode,applyOperations,geometry,objectBounds,validateDocument,jefWarnings,exportSvg,exportPrintTemplate,exportAppliqueTemplates,isClosedShape,HOOP_PRESETS,batchDocuments,customFontUsage,hoopSize,importStitchLayer,measureText,threadPlan,sewingSeconds,sewingWorksheet,designWarnings,TIP_CATEGORIES,visibleTips,measureBetween,nearestStockThread,parseThreadStock,svgPathFill,parseSvgPath,cornerRadii} from '../src/engine.js';
+import {FABRIC_PROFILES,distortionGrid,bundledFontUsage,blockSeconds,blockTimeLabel,initialDocument,compile,encode,applyOperations,geometry,objectBounds,validateDocument,jefWarnings,exportSvg,exportPrintTemplate,exportAppliqueTemplates,isClosedShape,HOOP_PRESETS,batchDocuments,customFontUsage,hoopSize,importStitchLayer,measureText,threadPlan,sewingSeconds,sewingWorksheet,designWarnings,TIP_CATEGORIES,visibleTips,measureBetween,nearestStockThread,parseThreadStock,svgPathFill,parseSvgPath,cornerRadii} from '../src/engine.js';
 
 test('browser and MCP semantic operations share editable document behavior',()=>{
  const doc=initialDocument();doc.objects=[];
@@ -1167,6 +1167,15 @@ for(const [key,profile] of Object.entries(FABRIC_PROFILES)){
   assert.ok(tips[0].message.includes(profile.stabilizer),'the tip names the stabilizer');
  });
 }
+const pullFor=(spacing,fabric)=>{const doc=initialDocument();doc.objects=[];applyOperations(doc,[{op:'add_shape',id:'r',kind:'rect',x:-20,y:-15,width:40,height:30,stitch:'fill'},{op:'set_settings',spacing,fabric}]);validateDocument(doc);return distortionGrid(compile(doc),fabric,{w:110,h:110});};
+test('the pull estimate: a denser design pulls more on the same fabric, a stretchier fabric pulls more for the same design, and every cell stays on the scale',()=>{
+ const dense=pullFor(.3,'woven'),sparse=pullFor(.6,'woven'),knit=pullFor(.3,'knit');
+ assert.ok(dense.peak>sparse.peak,'the denser design shows more pull on the same fabric');
+ assert.ok(knit.peak>dense.peak,'the knit shows more pull than woven for the same design');
+ assert.equal(dense.label,'Woven (default)');assert.equal(knit.label,'Stretchy knit');
+ for(const grid of [dense,sparse,knit])for(const v of grid.values)assert.ok(v>=0&&v<=1,'each cell is on the 0 to 1 scale');
+ assert.equal(dense.values.length,dense.cols*dense.rows);
+});
 
 test('redwork outline runs around a closed shape out and back, and refuses open paths',()=>{
  const doc=initialDocument();doc.objects=[];applyOperations(doc,[{op:'add_shape',id:'r',kind:'rect',x:-20,y:-15,width:40,height:30,stitch:'fill'},{op:'redwork_outline',id:'r',newId:'rw'}]);validateDocument(doc);

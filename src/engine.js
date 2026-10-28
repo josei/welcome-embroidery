@@ -21,12 +21,14 @@ const GLYPHS = {
 export const FABRIC_PROFILES = {
  woven: {
   label: 'Woven (default)',
+  stretch: 1, // the reference: a woven takes the stitches with no give
   stabilizer: 'tear-away backing for a plain woven fabric.',
   // Document defaults, so choosing woven returns every value to where a new document starts.
   values: {spacing: .4, stitchLength: 3, stagger: 4, underlay: true, underlayType: 'auto', compensation: .2},
  },
  knit: {
   label: 'Stretchy knit',
+  stretch: 1.6, // starting point: a knit gives under the stitches, so it pulls and puckers the most
   stabilizer: 'cut-away mesh. A knit stretches, so the backing has to stay under the stitches; tear-away lets the stitches pucker.',
   values: {
    spacing: .45, // a little more open, so the stretch does not crowd the rows together
@@ -39,6 +41,7 @@ export const FABRIC_PROFILES = {
  },
  towel: {
   label: 'Terry towel or fleece',
+  stretch: 1.3, // starting point: a loop pile gives some way under the stitches
   stabilizer: 'tear-away backing with a water-soluble topping on the loops, so the stitches do not sink into the pile.',
   values: {
    spacing: .5, // open rows, so the stitches do not flatten the loops
@@ -51,6 +54,7 @@ export const FABRIC_PROFILES = {
  },
  denim: {
   label: 'Denim',
+  stretch: .8, // starting point: a dense woven gives less than a plain one
   stabilizer: 'cut-away or heavy tear-away backing for a dense, stable woven.',
   values: {
    spacing: .35, // a denser fill, which the stable fabric can hold without puckering
@@ -1310,3 +1314,16 @@ export function parseThreadStock(text){const entries=String(text??'').split(/[\s
 export function nearestStockThread(hex,stock){if(!Array.isArray(stock)||!stock.length)return null;const rgb=h=>[0,2,4].map(i=>parseInt(h.slice(1+i,3+i),16));const a=rgb(hex);let best=null;stock.forEach((s,i)=>{const b=rgb(s),d=(b[0]-a[0])**2+(b[1]-a[1])**2+(b[2]-a[2])**2;if(!best||d<best.distance)best={hex:s,index:i+1,distance:d};});return best;}
 // Measure tool: the straight-line distance between two points in mm, with its x and y parts (b minus a, so the signs say which way the second point lies).
 export function measureBetween(a,b){const dx=b[0]-a[0],dy=b[1]-a[1];return {distance:Math.hypot(dx,dy),dx,dy};}
+// Pull estimate for the 3D preview: the stitches that land in each cell of the hoop, scaled by how far the chosen fabric
+// stretches. It shows where the fabric is likely to pull and pucker. It is a guide for where to look, not a simulation of
+// the machine. A cell whose stretch-adjusted density equals DISTORTION_SCALE shows 63% of the colour, and denser cells show more.
+export const DISTORTION_SCALE=1.5;
+export function distortionGrid(plan,fabric,hoop,cell=2){
+  const profile=FABRIC_PROFILES[fabric]??FABRIC_PROFILES.woven,stretch=profile.stretch;
+  const x0=-hoop.w/2,y0=-hoop.h/2,cols=Math.max(1,Math.ceil(hoop.w/cell)),rows=Math.max(1,Math.ceil(hoop.h/cell));
+  const counts=new Float32Array(cols*rows);
+  for(const s of plan.stitches){if(s.cmd!=='stitch')continue;const c=Math.floor((s.x-x0)/cell),r=Math.floor((s.y-y0)/cell);if(c>=0&&c<cols&&r>=0&&r<rows)counts[r*cols+c]++;}
+  const values=new Float32Array(cols*rows);let peak=0;
+  for(let i=0;i<counts.length;i++){const pull=counts[i]/(cell*cell)*stretch;values[i]=1-Math.exp(-pull/DISTORTION_SCALE);peak=Math.max(peak,values[i]);}
+  return {cols,rows,cell,x0,y0,values,peak,stretch,label:profile.label};
+}

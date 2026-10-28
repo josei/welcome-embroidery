@@ -1,4 +1,5 @@
 import {layoutState} from '../layoutState.js';
+import {PreviewPanel} from './PreviewPanel';
 import {useSyncExternalStore} from 'react';
 import {SelectionHint} from './SelectionHint';
 import {ActionButton} from './ActionButton';
@@ -134,9 +135,7 @@ export function EditorLayout() {
               {"All"}
             </button>
           </div>
-          <div id={"previewHint"} hidden={true}>
-            {"Drag to orbit · scroll to zoom · double-click to reset"}
-          </div>
+          <PreviewPanel />
           <div className={"floating"} role={"toolbar"} aria-label={"Canvas tools"}>
             <button className={"icon-button"} aria-label={"Snap to grid"} title={"Snap to grid"} data-tooltip={"Snap to grid"} id={"snap"}>
               <svg className={"icon"}>

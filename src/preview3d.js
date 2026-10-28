@@ -19,7 +19,7 @@ void main(){
 const FRAG=`#version 300 es
 precision highp float;
 in vec2 v_across;in vec3 v_color;in vec2 v_dir;in float v_len;in float v_pos;in vec3 v_world;
-uniform float u_shadowPass;uniform vec3 u_eye;uniform vec3 u_light;
+uniform float u_shadowPass;uniform vec3 u_eye;uniform vec3 u_light;uniform float u_alpha;
 out vec4 o;
 void main(){
   float s=v_across.x;float edge=1.-smoothstep(.9,1.,abs(s));
@@ -33,18 +33,18 @@ void main(){
   float ao=mix(.62,1.,smoothstep(0.,.5,min(v_pos,v_len-v_pos)))*mix(.7,1.,h);
   float fiber=.93+.07*sin(v_pos*38.+s*5.);
   vec3 c=v_color*(.24+.78*diff)*ao*fiber+vec3(1.,.97,.9)*spec*mix(.5,1.,diff);
-  o=vec4(c,edge);
+  o=vec4(c,edge*u_alpha);
 }`;
 const FABRIC_VERT=`#version 300 es
 precision highp float;layout(location=0) in vec2 a_corner;uniform mat4 u_vp;uniform vec4 u_rect;out vec2 v_mm;
 void main(){vec2 p=u_rect.xy+a_corner*u_rect.zw;v_mm=p;gl_Position=u_vp*vec4(p,0.,1.);}`;
 const FABRIC_FRAG=`#version 300 es
-precision highp float;in vec2 v_mm;uniform vec4 u_rect;out vec4 o;
+precision highp float;in vec2 v_mm;uniform vec4 u_rect;uniform sampler2D u_pull;uniform vec4 u_pullRect;uniform float u_pullOn;out vec4 o;
 void main(){
   vec2 q=v_mm/.62;float warp=.5+.5*sin(q.x*6.2831),weft=.5+.5*sin(q.y*6.2831);float over=step(.5,fract((floor(q.x)+floor(q.y))*.5));
   float weave=mix(warp*.55+.45,weft*.55+.45,over);float grain=fract(sin(dot(floor(q*3.),vec2(12.9898,78.233)))*43758.5453);
   vec3 base=vec3(.945,.925,.875)*(.86+.14*weave)*(.97+.03*grain);
-  vec2 e=min(v_mm-u_rect.xy,u_rect.xy+u_rect.zw-v_mm);float rim=smoothstep(0.,3.,min(e.x,e.y));o=vec4(base*mix(.88,1.,rim),1.);
+  vec2 e=min(v_mm-u_rect.xy,u_rect.xy+u_rect.zw-v_mm);float rim=smoothstep(0.,3.,min(e.x,e.y));vec2 uv=(v_mm-u_pullRect.xy)/u_pullRect.zw;if(u_pullOn>.5&&all(greaterThanEqual(uv,vec2(0.)))&&all(lessThanEqual(uv,vec2(1.)))){vec4 d=texture(u_pull,uv);base=mix(base,d.rgb,d.a);}o=vec4(base*mix(.88,1.,rim),1.);
 }`;
 const hex=c=>{const m=/^#?([0-9a-f]{6})$/i.exec(c||'');const v=m?parseInt(m[1],16):0x527461;return [(v>>16&255)/255,(v>>8&255)/255,(v&255)/255];};
 const mul=(a,b)=>{const o=new Float32Array(16);for(let c=0;c<4;c++)for(let r=0;r<4;r++){let s=0;for(let k=0;k<4;k++)s+=a[k*4+r]*b[c*4+k];o[c*4+r]=s;}return o;};
@@ -61,9 +61,11 @@ export function createThreadPreview(canvas){
   gl.bindBuffer(gl.ARRAY_BUFFER,instBuf);for(const [loc,off] of [[1,0],[2,16]]){gl.enableVertexAttribArray(loc);gl.vertexAttribPointer(loc,4,gl.FLOAT,false,32,off);gl.vertexAttribDivisor(loc,1);}
   const fabVao=gl.createVertexArray();gl.bindVertexArray(fabVao);gl.bindBuffer(gl.ARRAY_BUFFER,fabBuf);gl.enableVertexAttribArray(0);gl.vertexAttribPointer(0,2,gl.FLOAT,false,0,0);
   const U=(p,n)=>gl.getUniformLocation(p,n),u={vp:U(threadProg,'u_vp'),width:U(threadProg,'u_width'),lift:U(threadProg,'u_lift'),shadow:U(threadProg,'u_shadow'),shadowPass:U(threadProg,'u_shadowPass'),light:U(threadProg,'u_light'),eye:U(threadProg,'u_eye'),fvp:U(fabricProg,'u_vp'),frect:U(fabricProg,'u_rect')};
+  const fpull=U(fabricProg,'u_pull'),fpullRect=U(fabricProg,'u_pullRect'),fpullOn=U(fabricProg,'u_pullOn'),talpha=U(threadProg,'u_alpha');
   let count=0,shown=-1,segEnd=[],hoop={w:110,h:110},extent=120,yaw=0,tilt=.95,zoom=1,visible=false,raf=0;
   const reset=()=>{yaw=0;tilt=.95;zoom=1;};
   let camDist=200;
+  let pullOn=false,pullRect=[0,0,1,1],pullTex=gl.createTexture();
   function matrix(aspect){
     // perspective camera orbiting the hoop centre: yaw around Z, tilt around X, the hoop fitted to the view at the current zoom
     const FOV=34*Math.PI/180,f=1/Math.tan(FOV/2),r=Math.max(hoop.w,hoop.h)*.58/zoom,cy=Math.cos(yaw),sy=Math.sin(yaw),ct=Math.cos(tilt),st=Math.sin(tilt);
@@ -75,11 +77,11 @@ export function createThreadPreview(canvas){
   function draw(){
     raf=0;if(!visible)return;const dpr=Math.min(2,devicePixelRatio||1),w=Math.max(2,Math.round(canvas.clientWidth*dpr)),h=Math.max(2,Math.round(canvas.clientHeight*dpr));if(canvas.width!==w||canvas.height!==h){canvas.width=w;canvas.height=h;}
     gl.viewport(0,0,w,h);gl.clearColor(.906,.914,.894,1);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);const vp=matrix(w/h);
-    gl.disable(gl.DEPTH_TEST);gl.disable(gl.BLEND);gl.useProgram(fabricProg);gl.bindVertexArray(fabVao);gl.uniformMatrix4fv(u.fvp,false,vp);gl.uniform4f(u.frect,-hoop.w/2-3,-hoop.h/2-3,hoop.w+6,hoop.h+6);gl.drawArrays(gl.TRIANGLE_STRIP,0,4);
-    const drawn=shown<0?count:Math.min(shown,count);if(!drawn)return;gl.useProgram(threadProg);gl.bindVertexArray(vao);gl.uniformMatrix4fv(u.vp,false,vp);gl.uniform1f(u.width,.5);gl.uniform1f(u.lift,.9);gl.uniform3f(u.eye,Math.sin(yaw)*Math.sin(tilt)*camDist,Math.cos(yaw)*Math.sin(tilt)*camDist,Math.cos(tilt)*camDist);{const lx=-.35,ly=-.45,c=Math.cos(yaw),sn=Math.sin(yaw);gl.uniform3f(u.light,c*lx+sn*ly,-sn*lx+c*ly,.82);}
+    gl.disable(gl.DEPTH_TEST);gl.disable(gl.BLEND);gl.useProgram(fabricProg);gl.bindVertexArray(fabVao);gl.uniformMatrix4fv(u.fvp,false,vp);gl.uniform4f(u.frect,-hoop.w/2-3,-hoop.h/2-3,hoop.w+6,hoop.h+6);gl.activeTexture(gl.TEXTURE0);gl.bindTexture(gl.TEXTURE_2D,pullTex);gl.uniform1i(fpull,0);gl.uniform4f(fpullRect,pullRect[0],pullRect[1],pullRect[2],pullRect[3]);gl.uniform1f(fpullOn,pullOn?1:0);gl.drawArrays(gl.TRIANGLE_STRIP,0,4);
+    const drawn=shown<0?count:Math.min(shown,count);if(!drawn)return;gl.useProgram(threadProg);gl.bindVertexArray(vao);gl.uniformMatrix4fv(u.vp,false,vp);gl.uniform1f(u.width,.5);gl.uniform1f(u.lift,.9);gl.uniform1f(talpha,pullOn?.5:1);gl.uniform3f(u.eye,Math.sin(yaw)*Math.sin(tilt)*camDist,Math.cos(yaw)*Math.sin(tilt)*camDist,Math.cos(tilt)*camDist);{const lx=-.35,ly=-.45,c=Math.cos(yaw),sn=Math.sin(yaw);gl.uniform3f(u.light,c*lx+sn*ly,-sn*lx+c*ly,.82);}
     gl.enable(gl.BLEND);gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA);gl.depthMask(false);gl.uniform1f(u.shadowPass,1);gl.uniform2f(u.shadow,.14,.2);gl.drawArraysInstanced(gl.TRIANGLE_STRIP,0,4,drawn);
     gl.enable(gl.DEPTH_TEST);gl.depthFunc(gl.LEQUAL);gl.depthMask(true);gl.uniform1f(u.shadowPass,0);gl.uniform2f(u.shadow,0,0);gl.drawArraysInstanced(gl.TRIANGLE_STRIP,0,4,drawn);
-    canvas.dataset.instances=String(count);canvas.dataset.yaw=yaw.toFixed(3);canvas.dataset.tilt=tilt.toFixed(3);canvas.dataset.zoom=zoom.toFixed(3);
+    canvas.dataset.pull=pullOn?'on':'off';canvas.dataset.instances=String(count);canvas.dataset.yaw=yaw.toFixed(3);canvas.dataset.tilt=tilt.toFixed(3);canvas.dataset.zoom=zoom.toFixed(3);
   }
   const schedule=()=>{if(!raf&&visible)raf=requestAnimationFrame(draw);};
   let drag=null;
@@ -98,6 +100,14 @@ export function createThreadPreview(canvas){
     },
     setLimit(idx){const v=idx==null?-1:(idx<=0?0:(segEnd[Math.min(idx,segEnd.length-1)]??count));if(v!==shown){shown=v;schedule();}},
     show(on){visible=on;canvas.hidden=!on;if(on)schedule();},
+    setPull(grid){
+      pullOn=Boolean(grid);
+      if(grid){const data=new Uint8Array(grid.cols*grid.rows*4);for(let i=0;i<grid.values.length;i++){const f=grid.values[i],k=i*4;data[k]=Math.round(255*(1-f)+196*f);data[k+1]=Math.round(236*(1-f)+36*f);data[k+2]=Math.round(160*(1-f)+28*f);data[k+3]=Math.round(255*.9*f);}
+        gl.bindTexture(gl.TEXTURE_2D,pullTex);gl.pixelStorei(gl.UNPACK_ALIGNMENT,1);gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,grid.cols,grid.rows,0,gl.RGBA,gl.UNSIGNED_BYTE,data);
+        gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.LINEAR);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.LINEAR);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,gl.CLAMP_TO_EDGE);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,gl.CLAMP_TO_EDGE);
+        pullRect=[grid.x0,grid.y0,grid.cols*grid.cell,grid.rows*grid.cell];}
+      schedule();
+    },
     reset(){reset();schedule();},
   };
 }
