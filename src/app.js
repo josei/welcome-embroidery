@@ -16,6 +16,7 @@ import {setSatinEndRows,satinEndRowsActions} from './satinEndRowsState.js';
 import {setRunRows,runRowsActions} from './runRowsState.js';
 import {setAccordionRows,accordionRowsActions} from './accordionRowsState.js';
 import {setTypeRows,typeRowsActions} from './typeRowsState.js';
+import {setRaisedRows,raisedRowsActions} from './raisedRowsState.js';
 import {setPathRows,pathRowsActions} from './pathRowsState.js';
 import {setLoopRows,loopRowsActions} from './loopRowsState.js';
 import {setThreadStock,threadStockActions} from './threadStockState.js';
@@ -236,13 +237,13 @@ setStitchRow('pinRow',!one);if(!one)pinState.set(null);pinClearState.set(Boolean
   {const rectOnly=n===1&&o?.kind==='rect';setStitchRow('radiusRow',!rectOnly);if(rectOnly)setRadius({radius:String(o.radius??0)});if(rectOnly){const rr=cornerRadii(o);setRadius({radiusTL:String(rr[0]),radiusTR:String(rr[1]),radiusBR:String(rr[2]),radiusBL:String(rr[3])});}
   const taper=n===1&&o?.kind==='path'&&(o.stitch==='satin'||(o.stitch==='motif'&&o.motifPair));
 setStitchRow('satinEndRow',!taper);if(taper)setSatinEndRows({satinWidthEnd:String(o.satinWidthEnd??'')});
-$('#satinRaised').checked=Boolean(o?.raised);$('#satinButtonhole').checked=Boolean(o?.buttonhole);setBlingRows({motifPair:Boolean(o?.motifPair)});
+setRaisedRows({satinRaised:Boolean(o?.raised),satinButtonhole:Boolean(o?.buttonhole)});setBlingRows({motifPair:Boolean(o?.motifPair)});
 setStitchRow('motifPairRow',o?.stitch!=='motif');
 {const motifish=['motif','sequin','bead','bling'].includes(o?.stitch)||['motif','sequin','bling'].includes(o?.fillMethod),sequin=o?.stitch==='sequin',bead=o?.stitch==='bead',blingLike=o?.stitch==='bling'||o?.fillMethod==='bling';setStitchRow('motifSpacingRow',!motifish);
 setStitchRow('motifSizeRow',!motifish);setTypeRows({motifSpacing:String(o?.motifSpacing??(sequin||o?.fillMethod==='sequin'||blingLike?8:bead?6:4))});
 setTypeRows({motifSize:String(o?.motifSize??(sequin||o?.fillMethod==='sequin'?3:bead?2:blingLike?4:1.6))});
 setStitchRow('motifShapeRow',o?.stitch!=='motif');
-setStitchRow('edgeCloseRow',!(o?.clipId&&['run','satin'].includes(o?.stitch)));$('#edgeClose').checked=Boolean(o?.edgeClose);
+setStitchRow('edgeCloseRow',!(o?.clipId&&['run','satin'].includes(o?.stitch)));setRaisedRows({edgeClose:Boolean(o?.edgeClose)});
 setLoopRows({motifShape:o?.motifShape??'circle'});setStitchRow('blingShapeRow',!(o?.stitch==='bling'||o?.fillMethod==='bling'));
 setStitchRow('sequinTwinRow',o?.stitch!=='sequin');setBlingRows({sequinTwin:o?.sequinTwin===true});
 setStitchRow('stoneTurnRow',!(o?.stitch==='bling'&&['square','hexagon','star','baguette','marquise','pear','cushion','oval','heart','teardrop'].includes(o?.blingShape??'round')));
@@ -255,13 +256,13 @@ setLoopRows({motifAlong:Boolean(motifAlong)});
 setLoopRows({motifWarp:o?.motifWarp??'none'});
 }setStitchRow('satinButtonholeRow',o?.stitch!=='satin'||o?.kind!=='path'||o?.closed);
 setStitchRow('satinRaisedRow',o?.stitch!=='satin');
-setStitchRow('fillRaisedRow',!(n===1&&o?.stitch==='fill'&&o?.kind!=='text'));$('#fillRaised').checked=Boolean(o?.raised);
+setStitchRow('fillRaisedRow',!(n===1&&o?.stitch==='fill'&&o?.kind!=='text'));setRaisedRows({fillRaised:Boolean(o?.raised)});
 setStitchRow('raisedSpacingRow',!(n===1&&o?.stitch==='fill'&&o?.kind!=='text'&&o?.raised));
-if(o&&document.activeElement!==$('#raisedSpacing'))$('#raisedSpacing').value=o.raisedSpacing??'';
+if(o)setRaisedRows({raisedSpacing:String(o.raisedSpacing??'')});
 setStitchRow('raisedAngleRow',stitchRowsState.get().raisedSpacingRow);
 setStitchRow('laydownSpacingRow',!(n===1&&o?.stitch==='fill'&&String(o?.underlayType??'').includes('laydown')));
 if(o)setRunRows({laydownSpacing:String(o.laydownSpacing??'')});
-if(o&&document.activeElement!==$('#raisedAngle'))$('#raisedAngle').value=o.raisedAngle??'';
+if(o)setRaisedRows({raisedAngle:String(o.raisedAngle??'')});
 const bordered=picked.length>0&&picked.every(v=>v.border)&&fillable;setStitchRow('borderWidthRow',!bordered);
 if(bordered&&document.activeElement!==$('#borderWidth'))$('#borderWidth').value=o?.borderWidth??0;
   const fp=$('#followPath');
@@ -574,6 +575,8 @@ runRowsActions.choose=(field,checked)=>{if(selState().selected)edit([{op:'set_ob
 radiusActions.commit=(field,text)=>{if(field==='radius'){if(selState().selected)edit([{op:'set_object',id:selState().selected,radius:Number(text)>0?Number(text):null}]);return;}const o=selectedObject();if(!o||o.kind!=='rect')return;const rr=cornerRadii(o),i=['radiusTL','radiusTR','radiusBR','radiusBL'].indexOf(field);rr[i]=Math.max(0,Math.min(500,Number(text)||0));edit([{op:'set_object',id:o.id,radii:rr}]);};
 loopRowsActions.choose=(field,value)=>{if(selState().selected)edit([{op:'set_object',id:selState().selected,[field]:value}]);};
 pathRowsActions.choose=(field,checked)=>{const o=selectedObject();if(!o)return;if(field==='closed'){edit([{op:'set_path',id:o.id,closed:checked},...(checked?[{op:'set_object',id:o.id,stitch:'fill'}]:[])]);return;}edit([{op:'set_path',id:o.id,smooth:checked}]);};
+raisedRowsActions.choose=(field,checked)=>{if(selState().selected)edit([{op:'set_object',id:selState().selected,...(field==='fillRaised'||field==='satinRaised'?{raised:checked}:field==='satinButtonhole'?{buttonhole:checked}:{edgeClose:checked})}]);};
+raisedRowsActions.commit=(field,text)=>{if(selState().selected)edit([{op:'set_object',id:selState().selected,[field]:text===''?null:Number(text)}]);};
 typeRowsActions.commit=(field,text)=>{if(selState().selected)edit([{op:'set_object',id:selState().selected,[field]:Number(text)}]);};
 satinEndRowsActions.commit=(field,text)=>{if(selState().selected)edit([{op:'set_object',id:selState().selected,[field]:text===''?null:Number(text)}]);};
 capRowsActions.commit=(field,text)=>{if(field==='appliqueWidth'){if(selState().selected)edit([{op:'set_object',id:selState().selected,appliqueWidth:Number(text)}]);return;}if(field==='compensation'){if(selState().selected)edit([{op:'set_object',id:selState().selected,compensation:text===''?null:Number(text)}]);return;}const o=selectedObject();if(o&&selState().selNode!==null)edit([{op:'set_width_at_node',id:o.id,index:selState().selNode,width:Number(text)}]);};
@@ -767,13 +770,13 @@ for(const d of $$('details.sec-fold')){try{d.open=localStorage.getItem('welcome.
 
 
 
-$('#edgeClose').onchange=e=>{if(selState().selected)edit([{op:'set_object',id:selState().selected,edgeClose:e.target.checked}]);};
 
-$('#satinButtonhole').onchange=e=>{if(selState().selected)edit([{op:'set_object',id:selState().selected,buttonhole:e.target.checked}]);};
-$('#raisedSpacing').onchange=e=>{if(selState().selected)edit([{op:'set_object',id:selState().selected,raisedSpacing:e.target.value===''?null:Number(e.target.value)}]);};
-$('#raisedAngle').onchange=e=>{if(selState().selected)edit([{op:'set_object',id:selState().selected,raisedAngle:e.target.value===''?null:Number(e.target.value)}]);};
-$('#fillRaised').onchange=e=>{if(selState().selected)edit([{op:'set_object',id:selState().selected,raised:e.target.checked}]);};
-$('#satinRaised').onchange=e=>{if(selState().selected)edit([{op:'set_object',id:selState().selected,raised:e.target.checked}]);};
+
+
+
+
+
+
 $('#borderWidth').onchange=e=>{const ids=[...selState().multi];if(ids.length)edit(ids.map(id=>({op:'set_object',id,borderWidth:Number(e.target.value)>0?Number(e.target.value):null})));};
 $('#followPath').onchange=e=>{const o=selectedObject();if(!o||o.kind!=='text')return;const v=e.target.value;if(v==='__custom')return;if(!v){if(o.along)edit([{op:'text_off_path',textId:o.id}]);}else edit([{op:'text_on_path',textId:o.id,pathId:v}]);};
 $('#roundBtn').onclick=()=>{const o=selectedObject(),r=Number($('#roundMm').value);if(!o||!(r>0))return;if(o.kind==='rect')edit([{op:'set_object',id:o.id,radius:r}]);else if(o.kind==='path')edit([{op:'round_corners',id:o.id,radius:r,...(selState().selNodes.size?{indexes:[...selState().selNodes]}:{})}],()=>{setSelection({selNodes: new Set()});setSelection({selNode: null});});else toast('Rounding works on rectangles and paths. Convert the shape to a path first.');};
