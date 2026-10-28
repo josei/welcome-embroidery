@@ -14,6 +14,7 @@ import {setCapRows,capRowsActions} from './capRowsState.js';
 import {setBlingRows,blingRowsActions} from './blingRowsState.js';
 import {setSatinEndRows,satinEndRowsActions} from './satinEndRowsState.js';
 import {setRunRows,runRowsActions} from './runRowsState.js';
+import {setAccordionRows,accordionRowsActions} from './accordionRowsState.js';
 import {pathDraftNow,setPathDraft,replaceAt} from './pathDraftState.js';
 import {interactionNow,setInteraction} from './interactionState.js';
 import {clipboardNow,setClipboard} from './clipboardState.js';
@@ -257,7 +258,7 @@ if(bordered&&document.activeElement!==$('#borderWidth'))$('#borderWidth').value=
   const fp=$('#followPath');
   if(n===1&&o?.kind==='text'){const paths=documentNow().doc.objects.filter(v=>v.kind==='path'),want=['',...paths.map(v=>v.id)].join('|')+(o.along&&!o.along.pathId?'|custom':'');if(fp.dataset.set!==want){fp.replaceChildren(new Option(t('Not on a path'),''),...paths.map(v=>new Option(v.name||v.id,v.id)));if(o.along&&!o.along.pathId)fp.append(new Option(t('Custom path'),'__custom'));fp.dataset.set=want;}fp.value=o.along?(o.along.pathId||'__custom'):'';}}
   {const method=o?.fillMethod||'rows',single=n===1&&o&&o.kind!=='text'&&o.kind!=='stitch_layer',runPick=single&&o.stitch==='run';
-  setStitchRow('crossRow',!(single&&fillable&&method==='cross'));if(o&&document.activeElement!==$('#crossSize'))$('#crossSize').value=o.crossSize??2.5;
+  setStitchRow('crossRow',!(single&&fillable&&method==='cross'));if(o)setAccordionRows({crossSize:String(o.crossSize??2.5)});
 setStitchRow('runStyleRow',!runPick);if(o)setStitchChoices({runStyle:o.runStyle||'single'});setStitchRow('stemWidthRow',!(runPick&&o?.runStyle==='stem'));
 if(o)setRunRows({stemWidth:String(o.stemWidth??'')});
 setStitchRow('varianceRow',!(single&&fillable&&['rows','guided'].includes(method)));
@@ -295,9 +296,9 @@ if(nw)setCapRows({nodeWidth:widthAt(o,nodeFraction(o,selState().selNode)).toFixe
   {const m=['contour','spiral','meander','guided','cross','ripple','motif','sequin','bling'].includes(src.fillMethod)?src.fillMethod:'rows';setStitchChoices({fillMethod:m});setStitchRow('methodRow',!fillable||n===0);
 setStitchRow('accordionStartRow',!(n===1&&fillable&&m==='rows'));
 setStitchRow('accordionEndRow',!(n===1&&fillable&&m==='rows'));
-setStitchRow('accordionEaseRow',!(n===1&&fillable&&m==='rows'));if(o)$('#accordionEase').value=o.accordionEase??'linear';
-if(o&&document.activeElement!==$('#accordionStart'))$('#accordionStart').value=o.accordionStart??'';
-if(o&&document.activeElement!==$('#accordionEnd'))$('#accordionEnd').value=o.accordionEnd??'';const g=n===1&&fillable&&m==='guided';setStitchRow('guideRow',!g);
+setStitchRow('accordionEaseRow',!(n===1&&fillable&&m==='rows'));if(o)setAccordionRows({accordionEase:String(o.accordionEase??'linear')});
+if(o)setAccordionRows({accordionStart:String(o.accordionStart??'')});
+if(o)setAccordionRows({accordionEnd:String(o.accordionEnd??'')});const g=n===1&&fillable&&m==='guided';setStitchRow('guideRow',!g);
 if(!g)setInteraction({guideDraft: null});$('#guideDraw').textContent=t(interactionNow().guideDraft?'Finish guide':'Draw guide');$('#guideDraw').classList.toggle('armed',!!interactionNow().guideDraft);
 $('#guideClear').disabled=!o?.guide;$('#angle').closest('label').hidden=!(n===0||(fillable&&(m==='rows')));}
 setStitchRow('stitchLenRow',!(n===0||fillable||(n===1&&o?.stitch==='run'&&o.kind!=='text'&&o.kind!=='stitch_layer')));
@@ -789,14 +790,12 @@ window.addEventListener('pointerup',()=>showSnap(null));
 
 
 // Embroidery options: cross stitch size, run style, length variation, appliqué, per-object compensation
-$('#crossSize').onchange=e=>{if(selState().selected)edit([{op:'set_object',id:selState().selected,crossSize:Number(e.target.value)}]);};
 
 
 
+accordionRowsActions.commit=(field,text)=>{if(field==='crossSize'){if(selState().selected)edit([{op:'set_object',id:selState().selected,crossSize:Number(text)}]);return;}setAccordion(field,text===''?null:Number(text));};
+accordionRowsActions.choose=(field,value)=>{if(selState().selected)edit([{op:'set_object',id:selState().selected,accordionEase:value}]);};
 const setAccordion=(which,v)=>{if(!selState().selected)return;const o=documentNow().doc.objects.find(x=>x.id===selState().selected),other=which==='accordionStart'?'accordionEnd':'accordionStart';if(v===null)return edit([{op:'set_object',id:selState().selected,accordionStart:null,accordionEnd:null}]);edit([{op:'set_object',id:selState().selected,[which]:v,[other]:o?.[other]??v}]);};
-$('#accordionStart').onchange=e=>setAccordion('accordionStart',e.target.value===''?null:Number(e.target.value));
-$('#accordionEnd').onchange=e=>setAccordion('accordionEnd',e.target.value===''?null:Number(e.target.value));
-$('#accordionEase').onchange=e=>{if(selState().selected)edit([{op:'set_object',id:selState().selected,accordionEase:e.target.value}]);};
 
 
 // Photo stitch: a picture becomes a rectangle with grey samples; the zigzag rows are planned at compile time.
