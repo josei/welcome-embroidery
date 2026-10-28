@@ -224,7 +224,7 @@ function syncSections(){
 setStitchRow('pinRow',!one);if(!one)pinState.set(null);pinClearState.set(Boolean(o&&(o.startAt||o.endAt)));}
   {const rectOnly=n===1&&o?.kind==='rect';setStitchRow('radiusRow',!rectOnly);if(rectOnly&&document.activeElement!==$('#radius'))$('#radius').value=o.radius??0;if(rectOnly){const rr=cornerRadii(o);[['TL',0],['TR',1],['BR',2],['BL',3]].forEach(([k,i])=>{const el=$('#radius'+k);if(document.activeElement!==el)el.value=rr[i];});}
   const taper=n===1&&o?.kind==='path'&&(o.stitch==='satin'||(o.stitch==='motif'&&o.motifPair));
-setStitchRow('satinEndRow',!taper);if(taper&&document.activeElement!==$('#satinWidthEnd'))$('#satinWidthEnd').value=o.satinWidthEnd??'';
+setStitchRow('satinEndRow',!taper);if(taper)setSatinEndRows({satinWidthEnd:String(o.satinWidthEnd??'')});
 $('#satinRaised').checked=Boolean(o?.raised);$('#satinButtonhole').checked=Boolean(o?.buttonhole);setBlingRows({motifPair:Boolean(o?.motifPair)});
 setStitchRow('motifPairRow',o?.stitch!=='motif');
 {const motifish=['motif','sequin','bead','bling'].includes(o?.stitch)||['motif','sequin','bling'].includes(o?.fillMethod),sequin=o?.stitch==='sequin',bead=o?.stitch==='bead',blingLike=o?.stitch==='bling'||o?.fillMethod==='bling';setStitchRow('motifSpacingRow',!motifish);
@@ -770,7 +770,6 @@ $('#laydownSpacing').onchange=e=>{if(selState().selected)edit([{op:'set_object',
 $('#raisedAngle').onchange=e=>{if(selState().selected)edit([{op:'set_object',id:selState().selected,raisedAngle:e.target.value===''?null:Number(e.target.value)}]);};
 $('#fillRaised').onchange=e=>{if(selState().selected)edit([{op:'set_object',id:selState().selected,raised:e.target.checked}]);};
 $('#satinRaised').onchange=e=>{if(selState().selected)edit([{op:'set_object',id:selState().selected,raised:e.target.checked}]);};
-$('#satinWidthEnd').onchange=e=>{if(selState().selected)edit([{op:'set_object',id:selState().selected,satinWidthEnd:e.target.value===''?null:Number(e.target.value)}]);};
 $('#borderWidth').onchange=e=>{const ids=[...selState().multi];if(ids.length)edit(ids.map(id=>({op:'set_object',id,borderWidth:Number(e.target.value)>0?Number(e.target.value):null})));};
 $('#followPath').onchange=e=>{const o=selectedObject();if(!o||o.kind!=='text')return;const v=e.target.value;if(v==='__custom')return;if(!v){if(o.along)edit([{op:'text_off_path',textId:o.id}]);}else edit([{op:'text_on_path',textId:o.id,pathId:v}]);};
 $('#roundBtn').onclick=()=>{const o=selectedObject(),r=Number($('#roundMm').value);if(!o||!(r>0))return;if(o.kind==='rect')edit([{op:'set_object',id:o.id,radius:r}]);else if(o.kind==='path')edit([{op:'round_corners',id:o.id,radius:r,...(selState().selNodes.size?{indexes:[...selState().selNodes]}:{})}],()=>{setSelection({selNodes: new Set()});setSelection({selNode: null});});else toast('Rounding works on rectangles and paths. Convert the shape to a path first.');};

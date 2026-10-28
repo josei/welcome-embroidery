@@ -1,14 +1,15 @@
 import {createStore} from './store.js';
 
 /**
- * The satin end and pull values of the selected object: the end inset at each end and the pull on each rail, as text
- * (empty when unset). app.js sets them; the rows commit them through satinEndRowsActions.
+ * The satin end values of the selected object: the end inset at each end, the pull on each rail and the end width, as
+ * text (empty when unset). app.js sets them; the rows commit them through satinEndRowsActions.
  */
 export interface SatinEndRows {
   endInsetStart: string;
   endInsetEnd: string;
   pullRight: string;
   pullLeft: string;
+  satinWidthEnd: string;
 }
 
 export const satinEndRowsState = createStore<SatinEndRows>({
@@ -16,6 +17,7 @@ export const satinEndRowsState = createStore<SatinEndRows>({
   endInsetEnd: '',
   pullRight: '',
   pullLeft: '',
+  satinWidthEnd: '',
 });
 
 /** Changes some of the satin end values. */
