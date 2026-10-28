@@ -12,6 +12,7 @@ import {setStitchChoices,stitchChoiceActions,stitchChoicesState} from './stitchC
 import {setLayout} from './layoutState.js';
 import {setCapRows,capRowsActions} from './capRowsState.js';
 import {setBlingRows,blingRowsActions} from './blingRowsState.js';
+import {setSatinEndRows,satinEndRowsActions} from './satinEndRowsState.js';
 import {pathDraftNow,setPathDraft,replaceAt} from './pathDraftState.js';
 import {interactionNow,setInteraction} from './interactionState.js';
 import {clipboardNow,setClipboard} from './clipboardState.js';
@@ -268,10 +269,7 @@ setStitchRow('pullRightRow',!(single&&o.kind==='path'&&o.stitch==='satin'));
 setStitchRow('pullLeftRow',stitchRowsState.get().pullRightRow);
 setStitchRow('endInsetStartRow',!(single&&o?.kind==='path'&&o?.stitch==='satin'));
 setStitchRow('endInsetEndRow',!(single&&o?.kind==='path'&&o?.stitch==='satin'));
-if(o&&document.activeElement!==$('#endInsetStart'))$('#endInsetStart').value=o.endInsetStart??o.endInset??'';
-if(o&&document.activeElement!==$('#endInsetEnd'))$('#endInsetEnd').value=o.endInsetEnd??o.endInset??'';
-if(o&&document.activeElement!==$('#pullRight'))$('#pullRight').value=o.pullRight??'';
-if(o&&document.activeElement!==$('#pullLeft'))$('#pullLeft').value=o.pullLeft??'';
+if(o)setSatinEndRows({endInsetStart:String(o.endInsetStart??o.endInset??''),endInsetEnd:String(o.endInsetEnd??o.endInset??''),pullRight:String(o.pullRight??''),pullLeft:String(o.pullLeft??'')});
 if(o)setCapRows({compensation:String(o.compensation??'')});}
   {const single2=n===1&&o&&o.kind!=='text'&&o.kind!=='stitch_layer';setStitchRow('pinCenter',!(single2&&fillable&&o.fillMethod==='ripple'));
 setStitchRow('underpathRow',!(single2&&fillable&&!o.photo&&!o.applique&&['rows',undefined].includes(o.fillMethod)));
@@ -566,6 +564,7 @@ async function loadFontFile(file){
 }
 stitchChoiceActions.choose=(id,value)=>{if(id==='fillMethod'){const v=value==='rows'?null:value;if(selState().multi.size)edit(orderedIds().map(oid=>({op:'set_object',id:oid,fillMethod:v})));else edit([{op:'set_settings',fillMethod:v}]);return;}if(id==='cap'||id==='join'){const ids=[...selState().multi];if(ids.length)edit(ids.map(i=>({op:'set_object',id:i,[id]:value==='butt'&&id==='cap'||value==='round'&&id==='join'?null:value})));return;}if(id==='runStyle'){if(selState().selected)edit([{op:'set_object',id:selState().selected,runStyle:value==='single'?null:value}]);return;}if(id==='type'){if(selState().selected)edit([{op:'set_object',id:selState().selected,stitch:value}]);}};
 capRowsActions.choose=(field,checked)=>{if(selState().selected)edit([{op:'set_object',id:selState().selected,applique:checked?true:null}]);};
+satinEndRowsActions.commit=(field,text)=>{if(selState().selected)edit([{op:'set_object',id:selState().selected,[field]:text===''?null:Number(text)}]);};
 capRowsActions.commit=(field,text)=>{if(field==='appliqueWidth'){if(selState().selected)edit([{op:'set_object',id:selState().selected,appliqueWidth:Number(text)}]);return;}if(field==='compensation'){if(selState().selected)edit([{op:'set_object',id:selState().selected,compensation:text===''?null:Number(text)}]);return;}const o=selectedObject();if(o&&selState().selNode!==null)edit([{op:'set_width_at_node',id:o.id,index:selState().selNode,width:Number(text)}]);};
 blingRowsActions.choose=(field,value)=>{if(!selState().selected)return;if(field==='motifPair'){edit([{op:'set_object',id:selState().selected,motifPair:value,...(value?{satinWidth:selectedObject()?.satinWidth??4}:{})}]);return;}const v=field==='blingRings'?Number(value):value;edit([{op:'set_object',id:selState().selected,[field]:v}]);};
 function populateFontSelect(){setLetteringFields({fontOptions:fontIndex.map(f=>({value:f.fid,label:f.name}))});}
@@ -795,14 +794,10 @@ $('#stemWidth').onchange=e=>{if(selState().selected)edit([{op:'set_object',id:se
 $('#lengthVariance').onchange=e=>{if(selState().selected)edit([{op:'set_object',id:selState().selected,lengthVariance:Math.max(0,Math.min(50,Number(e.target.value)||0))/100||null}]);};
 
 
-$('#endInsetStart').onchange=e=>{if(selState().selected)edit([{op:'set_object',id:selState().selected,endInsetStart:e.target.value===''?null:Number(e.target.value)}]);};
-$('#endInsetEnd').onchange=e=>{if(selState().selected)edit([{op:'set_object',id:selState().selected,endInsetEnd:e.target.value===''?null:Number(e.target.value)}]);};
 const setAccordion=(which,v)=>{if(!selState().selected)return;const o=documentNow().doc.objects.find(x=>x.id===selState().selected),other=which==='accordionStart'?'accordionEnd':'accordionStart';if(v===null)return edit([{op:'set_object',id:selState().selected,accordionStart:null,accordionEnd:null}]);edit([{op:'set_object',id:selState().selected,[which]:v,[other]:o?.[other]??v}]);};
 $('#accordionStart').onchange=e=>setAccordion('accordionStart',e.target.value===''?null:Number(e.target.value));
 $('#accordionEnd').onchange=e=>setAccordion('accordionEnd',e.target.value===''?null:Number(e.target.value));
 $('#accordionEase').onchange=e=>{if(selState().selected)edit([{op:'set_object',id:selState().selected,accordionEase:e.target.value}]);};
-$('#pullRight').onchange=e=>{if(selState().selected)edit([{op:'set_object',id:selState().selected,pullRight:e.target.value===''?null:Number(e.target.value)}]);};
-$('#pullLeft').onchange=e=>{if(selState().selected)edit([{op:'set_object',id:selState().selected,pullLeft:e.target.value===''?null:Number(e.target.value)}]);};
 
 
 // Photo stitch: a picture becomes a rectangle with grey samples; the zigzag rows are planned at compile time.
