@@ -9,6 +9,7 @@ import {setActions} from './actionState.js';
 import {setSelectionLabels} from './selectionLabelsState.js';
 import {letteringFieldsState,setLetteringFields,letteringActions} from './letteringFieldsState.js';
 import {setStitchChoices,stitchChoiceActions,stitchChoicesState} from './stitchChoicesState.js';
+import {setLayout} from './layoutState.js';
 import {pathDraftNow,setPathDraft,replaceAt} from './pathDraftState.js';
 import {interactionNow,setInteraction} from './interactionState.js';
 import {clipboardNow,setClipboard} from './clipboardState.js';
@@ -194,18 +195,18 @@ setStitchRow('satinRow',true);setStitchChoices({typeDisabled:false});setStitchRo
 }
 // Only the controls that apply to the current selection are shown (lettering for lettering, path tools for shapes and paths, ...).
 function syncSections(){
- const picked=documentNow().doc.objects.filter(o=>selState().multi.has(o.id)),n=picked.length,o=selectedObject(),kind=o?.kind,lab=id=>$(id).closest('label'),show=(id,on)=>{$(id).hidden=!on;};
+ const picked=documentNow().doc.objects.filter(o=>selState().multi.has(o.id)),n=picked.length,o=selectedObject(),kind=o?.kind;
  const only=k=>n>=1&&picked.every(v=>v.kind===k),onlyAny=ks=>n>=1&&picked.every(v=>ks.includes(v.kind)),fillable=picked.some(v=>v.stitch==='fill'&&(v.kind==='rect'||v.kind==='ellipse'||(v.kind==='path'&&v.closed)||(v.kind==='text'&&getFont(v.font)?.kind==='outline')));
- show('#secTransform',n>=1);
- show('#secStitch',true);
- show('#secText',n===1&&kind==='text');
- show('#secPath',picked.some(v=>['rect','ellipse','path'].includes(v.kind)));
- show('#secArray',n>=1);
- show('#secOrder',n>=1);
+ setLayout({secTransform:!(n>=1)});
+ setLayout({secStitch:false});
+ setLayout({secText:!(n===1&&kind==='text')});
+ setLayout({secPath:!picked.some(v=>['rect','ellipse','path'].includes(v.kind))});
+ setLayout({secArray:!(n>=1)});
+ setLayout({secOrder:!(n>=1)});
  setSelectionLabels({hintHidden:n>=1});
  setSelectionLabels({stitchTitle:n?'Stitching':'Fill defaults for new objects'});
- lab('#type').hidden=n===0||onlyAny(['text','stitch_layer']);lab('#thread').hidden=n===0;if(n===0)setStitchRow('satinRow',true);
- {const lettered=picked.some(v=>v.kind==='text'&&isRegistryFont(v.font));lab('#spacing').hidden=!(n===0||fillable||lettered||picked.some(v=>v.stitch==='satin'));const sl=$('#spacing').closest('label'),tn=[...sl.childNodes].find(c=>c.nodeType===3);if(tn)tn.nodeValue=lettered&&!fillable?'Stitch spacing (mm) · lower = denser':'Row spacing (mm)';}lab('#angle').hidden=!(n===0||fillable);
+ setLayout({typeHidden:n===0||onlyAny(['text','stitch_layer'])});setLayout({threadHidden:n===0});if(n===0)setStitchRow('satinRow',true);
+ {const lettered=picked.some(v=>v.kind==='text'&&isRegistryFont(v.font));setLayout({spacingHidden:!(n===0||fillable||lettered||picked.some(v=>v.stitch==='satin')),spacingLabel:lettered&&!fillable?'Stitch spacing (mm) · lower = denser':'Row spacing (mm)'});}setLayout({angleHidden:!(n===0||fillable)});
  {const src=o||{},st=documentNow().doc.settings,satinish=picked.some(v=>v.stitch==='satin'||(v.kind==='text'&&getFont(v.font)?.kind==='stitch')),underlayable=n===0||fillable||satinish;
   const set=(id,v)=>{if(document.activeElement!==$(id))$(id).value=v;};
   set('#stitchLength',src.stitchLength??st.stitchLength??3);
@@ -301,7 +302,7 @@ $('#guideClear').disabled=!o?.guide;$('#angle').closest('label').hidden=!(n===0|
 setStitchRow('stitchLenRow',!(n===0||fillable||(n===1&&o?.stitch==='run'&&o.kind!=='text'&&o.kind!=='stitch_layer')));
 {const mm=src.fillMethod||'rows';setStitchRow('staggerRow',!(n===0||(fillable&&['rows','guided'].includes(mm))));}setStitchRow('underlayRow',!underlayable);
 setStitchRow('underlayDetails',!showDetails);}
- lab('#border').hidden=!fillable;lab('#borderThread').hidden=!fillable;if(n===0||only('stitch_layer'))setStitchRow('pathProps',true);
+ setLayout({borderHidden:!fillable,borderThreadHidden:!fillable});if(n===0||only('stitch_layer'))setStitchRow('pathProps',true);
  setInspectorText({heading:n>1?`${n} objects selected`:(o?.name||'Select an object')});
  for(const [id,kinds] of [['#offsetBtn',['rect','ellipse','path']],['#strokeBtn',['path']],['#simpBtn',['path']],['#reverseBtn',['path']],['#splitBtn',['path']],['#joinBtn',['path']]])$(id).disabled=!picked.some(v=>kinds.includes(v.kind));
 }

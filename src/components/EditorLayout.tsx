@@ -1,3 +1,5 @@
+import {layoutState} from '../layoutState.js';
+import {useSyncExternalStore} from 'react';
 import {SelectionHint} from './SelectionHint';
 import {ActionButton} from './ActionButton';
 import {DesignSummary, SelectionHeading} from './InspectorText';
@@ -27,6 +29,7 @@ import {PathTool, PenTool, SelectTool, ToolButtons} from './ToolButtons';
 import {TransformPanel} from './TransformPanel';
 // The editor layout: the object list, the canvas and the inspector. Rendered by React; ids match the markup it replaced, because app.js wires them by id.
 export function EditorLayout() {
+ const layout = useSyncExternalStore(layoutState.subscribe, layoutState.get);
  return (
   <>
     <div className={"layout"}>
@@ -310,7 +313,7 @@ export function EditorLayout() {
         <section id={"sourceInfo"} hidden={true}>
         </section>
         <TransformPanel />
-        <section id={"secStitch"} data-sec={""} hidden={true}>
+        <section id={"secStitch"} data-sec={""} hidden={layout.secStitch}>
           <StitchTypeRows />
           <StitchBlingRows />
           <StitchFillRows />
