@@ -3,7 +3,7 @@
 // strings with numbers use {name} placeholders.
 const ES={
 'Welcome Embroidery':'Welcome Embroidery','Untitled.welcome':'Sin título.welcome','Unsaved':'Sin guardar','Saved':'Guardado',
-'New design':'Nuevo diseño','Open project or SVG':'Abrir proyecto o SVG','Import JEF, VP3, DST, SEW, PEC, PES, EXP, HUS, XXX, DSB, DSZ, TAP, TBF, PCS, SHV, STX, BRO, EMD, KSM or 10O':'Importar JEF, VP3, DST, SEW, PEC, PES, EXP, HUS, XXX, DSB, DSZ, TAP, TBF, PCS, SHV, STX, BRO, EMD, KSM o 10O','Choose a .jef, .vp3, .dst, .sew, .pec, .pes, .exp, .hus, .xxx, .dsb, .dsz, .tap, .tbf, .pcs, .shv, .stx, .bro, .emd, .ksm or .10o file.':'Elige un archivo .jef, .vp3, .dst, .sew, .pec, .pes, .exp, .hus, .xxx, .dsb, .dsz, .tap, .tbf, .pcs, .shv, .stx, .bro, .emd, .ksm o .10o.','Save project':'Guardar proyecto','Connect an AI agent':'Conectar un agente de IA',
+'New design':'Nuevo diseño','Open project or SVG':'Abrir proyecto o SVG','Import JEF, VP3, DST, SEW, PEC, PES, EXP, HUS, XXX, DSB, DSZ, TAP, TBF, PCS, SHV, STX, BRO, EMD, KSM or 10O':'Importar JEF, VP3, DST, SEW, PEC, PES, EXP, HUS, XXX, DSB, DSZ, TAP, TBF, PCS, SHV, STX, BRO, EMD, KSM o 10O','Choose a .jef, .vp3, .dst, .sew, .pec, .pes, .exp, .hus, .xxx, .dsb, .dsz, .tap, .tbf, .pcs, .shv, .stx, .bro, .emd, .ksm or .10o file.':'Elige un archivo .jef, .vp3, .dst, .sew, .pec, .pes, .exp, .hus, .xxx, .dsb, .dsz, .tap, .tbf, .pcs, .shv, .stx, .bro, .emd, .ksm o .10o.','Save project':'Guardar proyecto','Settings':'Ajustes','AI agent':'Agente de IA','Connect an AI agent':'Conectar un agente de IA',
 'View':'Vista','Design':'Diseño','Stitches':'Puntadas','Preview':'Vista previa','Undo':'Deshacer','Redo':'Rehacer','Duplicate selected object':'Duplicar el objeto seleccionado','Duplicate':'Duplicar','Delete selected object':'Eliminar el objeto seleccionado','Delete':'Eliminar','Export':'Exportar',
 'Objects':'Objetos','Tools':'Herramientas','Select (V)':'Seleccionar (V)','Add rectangle':'Añadir rectángulo','Add ellipse':'Añadir elipse','Draw path':'Dibujar trazado','Draw path (N)':'Dibujar trazado (N)','Add lettering':'Añadir texto bordado',
 'Line (L, drag)':'Línea (L, arrastrar)','Polygon (G, drag from center)':'Polígono (G, arrastrar desde el centro)','Star (S, drag from center)':'Estrella (S, arrastrar desde el centro)','Pen with curves (P, drag for handles)':'Pluma con curvas (P, arrastrar para tiradores)',
@@ -119,14 +119,5 @@ if(lang==='es'&&typeof document!=='undefined'){
  };
  if(document.body)start();else addEventListener('DOMContentLoaded',start);
 }
-if(typeof document!=='undefined')addEventListener('DOMContentLoaded',()=>{
- for(const b of document.querySelectorAll('[data-lang]')){
-  b.setAttribute('aria-pressed',String(b.dataset.lang===lang));
-  b.onclick=()=>{
-   if(b.dataset.lang===lang){const menu=b.parentElement,open=menu.classList.toggle('open');b.setAttribute('aria-expanded',String(open));return;}
-   try{localStorage.setItem('welcome.lang',b.dataset.lang);}catch{}location.reload();
-  };
-  b.setAttribute('aria-expanded','false');
- }
- addEventListener('click',e=>{const menu=document.querySelector('.lang-flags.open');if(menu&&!menu.contains(e.target)){menu.classList.remove('open');menu.querySelector('[aria-pressed=true]').setAttribute('aria-expanded','false');}});
-});
+/** Saves the language the user picks and reloads, so the whole page is drawn in it. */
+export function setLanguage(code){if(code===lang||(code!=='en'&&code!=='es'))return;try{localStorage.setItem('welcome.lang',code);}catch{}location.reload();}

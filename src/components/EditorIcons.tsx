@@ -25,6 +25,10 @@ export function EditorIcons() {
           <rect x={"4"} y={"7"} width={"16"} height={"12"} rx={"3"} />
           <path d={"M12 3v4M9 13v1M15 13v1"} />
         </symbol>
+        <symbol id={"i-gear"} viewBox={"0 0 24 24"}>
+          <circle cx={"12"} cy={"12"} r={"3"} />
+          <path d={"M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1L7 17M17 7l2.1-2.1"} />
+        </symbol>
         {" "}
         <symbol id={"i-rect"} viewBox={"0 0 24 24"}>
           <rect x={"4"} y={"5"} width={"16"} height={"14"} rx={"1"} />

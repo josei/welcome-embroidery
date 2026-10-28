@@ -143,7 +143,7 @@ label[hidden],button[hidden],.sel-hint[hidden]{display:none!important}
 
 .underlay-details{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin:-4px 0 6px;font-size:11px}.underlay-details label{margin:4px 0}.underlay-details input{width:60px!important}.underlay-details[hidden],#stitchLenRow[hidden],#staggerRow[hidden],#underlayRow[hidden]{display:none!important}
 
-.lang-flags{display:flex;gap:4px;position:relative}.lang-flags:not(.open) .flag-button:not([aria-pressed=true]){display:none}.lang-flags.open .flag-button:not([aria-pressed=true]){position:absolute;top:calc(100% + 4px);right:0;background:#fff;border:1px solid #dedfd9;border-radius:6px;box-shadow:0 6px 18px rgba(0,0,0,.12);z-index:60}.top .flag-button{display:inline-flex;align-items:center;padding:3px;line-height:0;border-radius:5px;opacity:.55}.top .flag-button[aria-pressed=true]::after{content:"";margin-left:5px;border:4px solid transparent;border-top:5px solid currentColor;border-bottom:0;transition:transform .15s}.lang-flags.open .flag-button[aria-pressed=true]::after{transform:rotate(180deg)}.top .flag-button svg{width:26px;height:17px;border-radius:2px;display:block}.top .flag-button[aria-pressed=true]{opacity:1;border-color:var(--teal);box-shadow:0 0 0 1px var(--teal)}.top .flag-button:hover{opacity:1}
+.top .top .top .top .top .settings-choices{display:flex;gap:8px}.settings-choices button[aria-pressed=true]{border-color:var(--teal);box-shadow:0 0 0 1px var(--teal)}
 .unused-lang-select{border:1px solid #dedfd9;border-radius:6px;font:inherit;font-size:11px;padding:6px 4px;background:#fff;color:#53635b}
 
 .pin{stroke:#fff;stroke-width:.6;vector-effect:non-scaling-stroke;pointer-events:none}.pin.start{fill:#1c8069}.pin.end{fill:#c2453a}#pinRow button.armed{background:#e3f1ec;border-color:var(--teal)}.art-pin{cursor:crosshair}
@@ -209,7 +209,6 @@ body{height:auto;min-height:0;overflow-x:hidden;overflow-y:auto}
 .top #name{order:1;flex:1 1 0;min-width:60px;width:auto}
 .top #saved,.top .sep,#helpBtn{display:none}
 .top #export{order:2;margin-left:0}
-.lang-flags{order:3}
 .segmented{order:4;flex:1 1 100%;display:grid;grid-template-columns:repeat(3,1fr)}
 .segmented button[data-view]{padding:7px 4px}
 .top>.icon-button,.edit-tools{order:5}

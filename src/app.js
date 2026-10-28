@@ -20,6 +20,7 @@ import {setPathRows,pathRowsActions} from './pathRowsState.js';
 import {setLoopRows,loopRowsActions} from './loopRowsState.js';
 import {setThreadStock,threadStockActions} from './threadStockState.js';
 import {setRadius,radiusActions} from './radiusState.js';
+import {setSettingsOpen} from './settingsState.js';
 import {pathDraftNow,setPathDraft,replaceAt} from './pathDraftState.js';
 import {interactionNow,setInteraction} from './interactionState.js';
 import {clipboardNow,setClipboard} from './clipboardState.js';
@@ -661,7 +662,7 @@ function addLayerRemote(layer,expected){
 }
 const agentTexts={idle:'Not connected.',waiting:'Connected. Waiting for an agent to use the link.',active:'Agent active.',error:'Connection problem.',unavailable:'Agent relay unavailable.'};
 const agent=createAgentBridge({getReference:o=>referenceForAgent(o),getDocument:()=>{const c=clone(documentNow().doc);if(c.reference)c.reference={...c.reference,data:'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==',pictureOmitted:true};return c;},applyRemote,addLayerRemote,onChange:state=>{$('#agentStatus').textContent=`${t(agentTexts[state.status]||'')}${state.status==='active'?` ${t(state.agentCalls===1?'1 request so far.':`${state.agentCalls} requests so far.`)}`:''} ${state.message||''}`.trim();$('#agentUrl').value=state.mcpUrl||'';$('#agentCopy').disabled=$('#agentRevoke').disabled=!state.mcpUrl;const button=$('#copyEndpoint');button.classList.toggle('agent-on',state.status==='waiting'||state.status==='active');button.classList.toggle('agent-active',state.status==='active');}});
-$('#copyEndpoint').onclick=async()=>{$('#agentDialog').showModal();if(!agent.hasSession())await agent.start();};
+$('#copyEndpoint').onclick=async()=>{setSettingsOpen(false);$('#agentDialog').showModal();if(!agent.hasSession())await agent.start();};
 if(document.querySelector('meta[name="welcome-static"]'))setStitchRow('copyEndpoint',true);
 $('#agentCopy').onclick=async()=>{const url=$('#agentUrl').value;try{await navigator.clipboard.writeText(url);toast('Copied the private MCP link.');}catch{$('#agentUrl').select();toast('Select and copy the link.');}};
 $('#agentRevoke').onclick=async()=>{if(confirm(t('Revoke this link? Agents using it lose access immediately.')))await agent.revoke();};

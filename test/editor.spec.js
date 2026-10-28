@@ -184,7 +184,7 @@ test('agent relay: the Agent dialog creates a private link and an MCP client edi
  try{
   for(let i=0;i<100;i++){try{if((await fetch(origin+'/health')).ok)break;}catch{}await new Promise(r=>setTimeout(r,100));}
   const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto(origin+'/');page.on('dialog',d=>d.accept());await page.locator('#new').click();
-  await page.locator('#copyEndpoint').click();await expect(page.locator('#agentDialog')).toBeVisible();await expect(page.locator('#agentUrl')).toHaveValue(/\/mcp\/[A-Za-z0-9_-]{32,}$/);await expect(page.locator('#agentStatus')).toContainText('Waiting for an agent');
+  await page.locator('#settingsBtn').click();await page.locator('#copyEndpoint').click();await expect(page.locator('#agentDialog')).toBeVisible();await expect(page.locator('#agentUrl')).toHaveValue(/\/mcp\/[A-Za-z0-9_-]{32,}$/);await expect(page.locator('#agentStatus')).toContainText('Waiting for an agent');
   const link=await page.locator('#agentUrl').inputValue();await page.locator('#agentDialog button:not([type=button])').click();await expect(page.locator('#copyEndpoint')).toHaveClass(/agent-on/);
   const client=new Client({name:'e2e-agent',version:'1'});await client.connect(new StreamableHTTPClientTransport(new URL(link)));
   const call=(name,args)=>client.callTool({name,arguments:args});const inspect=await call('document_inspect',{documentId:'live'});expect(inspect.structuredContent.objects).toHaveLength(0);
@@ -194,7 +194,7 @@ test('agent relay: the Agent dialog creates a private link and an MCP client edi
   const plan=await call('embroidery_compile',{documentId:'live',expectedRevision:(await call('document_inspect',{documentId:'live'})).structuredContent.revision});expect(plan.isError).toBe(true);
   await expect(page.locator('#copyEndpoint')).toHaveClass(/agent-active/);
   {const bytes=Buffer.from(pinnedMachineFixture('jef').bytes),rev=(await call('document_inspect',{documentId:'live'})).structuredContent.revision,imported=await call('document_import_embroidery',{documentId:'live',expectedRevision:rev,fileName:'agent.jef',format:'jef',dataBase64:bytes.toString('base64')});expect(imported.isError).toBeFalsy();await expect(page.locator('.object-row').last()).toContainText('machine stitches');await expect(page.locator('#sourceInfo')).toContainText('201 commands');}
-  await page.locator('#copyEndpoint').click();await page.locator('#agentRevoke').click();await expect(page.locator('#agentUrl')).not.toHaveValue(link);await expect(page.locator('#agentUrl')).toHaveValue(/\/mcp\/[A-Za-z0-9_-]{32,}$/);
+  await page.locator('#settingsBtn').click();await page.locator('#copyEndpoint').click();await page.locator('#agentRevoke').click();await expect(page.locator('#agentUrl')).not.toHaveValue(link);await expect(page.locator('#agentUrl')).toHaveValue(/\/mcp\/[A-Za-z0-9_-]{32,}$/);
   const dead=await fetch(link,{method:'POST',headers:{'content-type':'application/json',accept:'application/json, text/event-stream'},body:JSON.stringify({jsonrpc:'2.0',id:1,method:'tools/list'})});expect(dead.status).toBe(401);
   expect(errors).toEqual([]);await client.close().catch(()=>{});
  }finally{child.kill('SIGTERM');}
@@ -553,6 +553,18 @@ test('measure tool: M, then two clicks on the canvas, reads the distance and its
  await page.keyboard.press('Escape');await expect(page.locator('#measureReadout')).toBeHidden();await expect(page.locator('#overlay .measure-line')).toHaveCount(0);
 });
 
+test.describe('settings dialog',()=>{
+ test('the header has one settings button, and it opens the language and agent choices',async({page})=>{
+  const errors=[];page.on('pageerror',e=>errors.push(e.message));
+  await page.goto('/');
+  await expect(page.locator('#settingsBtn')).toBeVisible();await expect(page.locator('.lang-flags')).toHaveCount(0);
+  await expect(page.locator('#settingsDialog')).toBeHidden();
+  await page.locator('#settingsBtn').click();await expect(page.locator('#settingsDialog')).toBeVisible();
+  await expect(page.locator('#langEn')).toHaveAttribute('aria-pressed','true');await expect(page.locator('#langEs')).toHaveText('Español');
+  await page.keyboard.press('Escape');await expect(page.locator('#settingsDialog')).toBeHidden();
+  expect(errors).toEqual([]);
+ });
+});
 test.describe('language detection',()=>{
  test.use({locale:'es-ES'});
  test('Spanish browser gets Spanish UI, including dynamic text, and can switch to English',async({page})=>{
@@ -564,8 +576,8 @@ test.describe('language detection',()=>{
   await page.locator('#rect').click();
   await expect(page.locator('#secStitch h4')).toHaveText('Puntadas');
   await expect(page.locator('#stats')).toContainText('puntadas');
-  await expect(page.locator('#langEs')).toHaveAttribute('aria-pressed','true');await expect(page.locator('#langEn')).toBeHidden();
-  await page.locator('#langEs').click();await expect(page.locator('#langEn')).toBeVisible();await page.locator('#langEn').click();
+  await page.locator('#settingsBtn').click();await expect(page.locator('#settingsDialog')).toBeVisible();await expect(page.locator('#langEs')).toHaveAttribute('aria-pressed','true');await expect(page.locator('#langEn')).toHaveAttribute('aria-pressed','false');
+  await page.locator('#langEn').click();
   await expect(page.locator('#export')).toHaveText('Export');
   expect(errors).toEqual([]);
  });
@@ -882,7 +894,7 @@ test('agents can see the reference picture: annotated view with grid, hoop and s
  try{
   for(let i=0;i<100;i++){try{if((await fetch(origin+'/health')).ok)break;}catch{}await new Promise(r=>setTimeout(r,100));}
   const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto(origin+'/');page.on('dialog',d=>d.accept());await page.locator('#new').click();
-  await page.locator('#copyEndpoint').click();await expect(page.locator('#agentUrl')).toHaveValue(/\/mcp\/[A-Za-z0-9_-]{32,}$/);const link=await page.locator('#agentUrl').inputValue();await page.locator('#agentDialog button:not([type=button])').click();
+  await page.locator('#settingsBtn').click();await page.locator('#copyEndpoint').click();await expect(page.locator('#agentUrl')).toHaveValue(/\/mcp\/[A-Za-z0-9_-]{32,}$/);const link=await page.locator('#agentUrl').inputValue();await page.locator('#agentDialog button:not([type=button])').click();
   const client=new Client({name:'ref-agent',version:'1'});await client.connect(new StreamableHTTPClientTransport(new URL(link)));const call=(name,args)=>client.callTool({name,arguments:args});
   const none=await call('reference_image',{documentId:'live'});expect(none.content[0].text).toContain('no reference picture');
   await page.locator('#secRef summary').click();await page.locator('#refFile').setInputFiles({name:'sketch.png',mimeType:'image/png',buffer:pngBytes(120,80,(x,y)=>(x+y)%20<3?[30,30,30]:[240,230,210])});await expect(page.locator('#refLayer image')).toHaveCount(1);
@@ -913,7 +925,7 @@ test('agent experience on the live document: summaries, render, clear, snapshot 
  try{
   for(let i=0;i<100;i++){try{if((await fetch(origin+'/health')).ok)break;}catch{}await new Promise(r=>setTimeout(r,100));}
   const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto(origin+'/');page.on('dialog',d=>d.accept());await page.locator('#new').click();
-  await page.locator('#copyEndpoint').click();await expect(page.locator('#agentUrl')).toHaveValue(/\/mcp\/[A-Za-z0-9_-]{32,}$/);const link=await page.locator('#agentUrl').inputValue();await page.locator('#agentDialog button:not([type=button])').click();
+  await page.locator('#settingsBtn').click();await page.locator('#copyEndpoint').click();await expect(page.locator('#agentUrl')).toHaveValue(/\/mcp\/[A-Za-z0-9_-]{32,}$/);const link=await page.locator('#agentUrl').inputValue();await page.locator('#agentDialog button:not([type=button])').click();
   const client=new Client({name:'ux-agent',version:'1'});await client.connect(new StreamableHTTPClientTransport(new URL(link)));const call=(name,args)=>client.callTool({name,arguments:args});
   const list=await call('document_list',{});expect(list.structuredContent.live.documentId).toBe('live');
   let rev=(await call('document_inspect',{documentId:'live'})).structuredContent.revision;
