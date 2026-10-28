@@ -1,8 +1,11 @@
 import {KeysDialog} from './KeysDialog';
 import {RestoreDialog} from './RestoreDialog';
+import {useSyncExternalStore} from 'react';
+import {agentLinkState} from '../agentLinkState.js';
 import {SettingsDialog} from './SettingsDialog';
 // The dialogs and overlays that sit above the layout. Rendered by React; ids match the markup it replaced, because app.js wires them by id.
 export function EditorOverlays() {
+ const agent = useSyncExternalStore(agentLinkState.subscribe, agentLinkState.get);
  return (
   <>
     <dialog id={"agentDialog"}>
@@ -11,16 +14,17 @@ export function EditorOverlays() {
           {"Connect an AI agent"}
         </h2>
         <p id={"agentStatus"} role={"status"} aria-live={"polite"}>
+          {agent.statusText}
         </p>
         <label className={"agent-field"}>
           {"MCP endpoint (private link)"}
-          <input id={"agentUrl"} readOnly={true} spellCheck={"false"} />
+          <input id={"agentUrl"} readOnly={true} spellCheck={"false"} value={agent.url} />
         </label>
         <div className={"agent-actions"}>
-          <button type={"button"} id={"agentCopy"}>
+          <button type={"button"} id={"agentCopy"} disabled={!agent.ready}>
             {"Copy URL"}
           </button>
-          <button type={"button"} id={"agentRevoke"}>
+          <button type={"button"} id={"agentRevoke"} disabled={!agent.ready}>
             {"Revoke & make new link"}
           </button>
         </div>

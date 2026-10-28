@@ -19,6 +19,7 @@ import {setTypeRows,typeRowsActions} from './typeRowsState.js';
 import {setRaisedRows,raisedRowsActions} from './raisedRowsState.js';
 import {setFillValues,fillValuesActions} from './fillValuesState.js';
 import {setGuideButtons} from './guideButtonState.js';
+import {setAgentLink} from './agentLinkState.js';
 import {setPathRows,pathRowsActions} from './pathRowsState.js';
 import {setLoopRows,loopRowsActions} from './loopRowsState.js';
 import {setThreadStock,threadStockActions} from './threadStockState.js';
@@ -665,7 +666,7 @@ function addLayerRemote(layer,expected){
  return {revision:documentNow().doc.revision};
 }
 const agentTexts={idle:'Not connected.',waiting:'Connected. Waiting for an agent to use the link.',active:'Agent active.',error:'Connection problem.',unavailable:'Agent relay unavailable.'};
-const agent=createAgentBridge({getReference:o=>referenceForAgent(o),getDocument:()=>{const c=clone(documentNow().doc);if(c.reference)c.reference={...c.reference,data:'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==',pictureOmitted:true};return c;},applyRemote,addLayerRemote,onChange:state=>{$('#agentStatus').textContent=`${t(agentTexts[state.status]||'')}${state.status==='active'?` ${t(state.agentCalls===1?'1 request so far.':`${state.agentCalls} requests so far.`)}`:''} ${state.message||''}`.trim();$('#agentUrl').value=state.mcpUrl||'';$('#agentCopy').disabled=$('#agentRevoke').disabled=!state.mcpUrl;const button=$('#copyEndpoint');button.classList.toggle('agent-on',state.status==='waiting'||state.status==='active');button.classList.toggle('agent-active',state.status==='active');}});
+const agent=createAgentBridge({getReference:o=>referenceForAgent(o),getDocument:()=>{const c=clone(documentNow().doc);if(c.reference)c.reference={...c.reference,data:'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==',pictureOmitted:true};return c;},applyRemote,addLayerRemote,onChange:state=>{setAgentLink({statusText:`${t(agentTexts[state.status]||'')}${state.status==='active'?` ${t(state.agentCalls===1?'1 request so far.':`${state.agentCalls} requests so far.`)}`:''} ${state.message||''}`.trim(),url:state.mcpUrl||'',ready:Boolean(state.mcpUrl),waiting:state.status==='waiting'||state.status==='active',active:state.status==='active'});}});
 $('#copyEndpoint').onclick=async()=>{setSettingsOpen(false);$('#agentDialog').showModal();if(!agent.hasSession())await agent.start();};
 if(document.querySelector('meta[name="welcome-static"]'))setStitchRow('copyEndpoint',true);
 $('#agentCopy').onclick=async()=>{const url=$('#agentUrl').value;try{await navigator.clipboard.writeText(url);toast('Copied the private MCP link.');}catch{$('#agentUrl').select();toast('Select and copy the link.');}};
