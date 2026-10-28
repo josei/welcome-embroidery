@@ -18,6 +18,7 @@ import {setAccordionRows,accordionRowsActions} from './accordionRowsState.js';
 import {setTypeRows,typeRowsActions} from './typeRowsState.js';
 import {setRaisedRows,raisedRowsActions} from './raisedRowsState.js';
 import {setFillValues,fillValuesActions} from './fillValuesState.js';
+import {setGuideButtons} from './guideButtonState.js';
 import {setPathRows,pathRowsActions} from './pathRowsState.js';
 import {setLoopRows,loopRowsActions} from './loopRowsState.js';
 import {setThreadStock,threadStockActions} from './threadStockState.js';
@@ -311,7 +312,7 @@ setStitchRow('accordionEaseRow',!(n===1&&fillable&&m==='rows'));if(o)setAccordio
 if(o)setAccordionRows({accordionStart:String(o.accordionStart??'')});
 if(o)setAccordionRows({accordionEnd:String(o.accordionEnd??'')});const g=n===1&&fillable&&m==='guided';setStitchRow('guideRow',!g);
 if(!g)setInteraction({guideDraft: null});$('#guideDraw').textContent=t(interactionNow().guideDraft?'Finish guide':'Draw guide');$('#guideDraw').classList.toggle('armed',!!interactionNow().guideDraft);
-$('#guideClear').disabled=!o?.guide;$('#angle').closest('label').hidden=!(n===0||(fillable&&(m==='rows')));}
+setGuideButtons({clearDisabled:!o?.guide});$('#angle').closest('label').hidden=!(n===0||(fillable&&(m==='rows')));}
 setStitchRow('stitchLenRow',!(n===0||fillable||(n===1&&o?.stitch==='run'&&o.kind!=='text'&&o.kind!=='stitch_layer')));
 {const mm=src.fillMethod||'rows';setStitchRow('staggerRow',!(n===0||(fillable&&['rows','guided'].includes(mm))));}setStitchRow('underlayRow',!underlayable);
 setStitchRow('underlayDetails',!showDetails);}
@@ -873,7 +874,7 @@ setStitchRow('refRemove',!r);$('#refLoad').textContent=t(r?'Replace picture…':
   set('#refOpacity',Math.round((r.opacity??.5)*100));
   setReferenceFields({refX:String(+r.x.toFixed(2)),refY:String(+r.y.toFixed(2)),refW:String(+r.w.toFixed(2)),refH:String(+r.h.toFixed(2))});
   setReferenceFields({refVisible:r.visible!==false,refLocked:Boolean(r.locked)});
-  $('#refMove').disabled=Boolean(r.locked);
+  
   if(r.locked){setInteraction({refMoving: false});$('#art').classList.remove('ref-moving');}$('#refMove').classList.toggle('armed',interactionNow().refMoving);
   }
 async function loadReference(file){try{const bmp=await createImageBitmap(file),hs=hoopSize(documentNow().doc),scale=Math.min(1,1400/Math.max(bmp.width,bmp.height)),w=Math.max(1,Math.round(bmp.width*scale)),h=Math.max(1,Math.round(bmp.height*scale)),c=document.createElement('canvas');c.width=w;c.height=h;const ctx=c.getContext('2d');ctx.fillStyle='#fff';ctx.fillRect(0,0,w,h);ctx.drawImage(bmp,0,0,w,h);
