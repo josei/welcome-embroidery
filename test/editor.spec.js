@@ -752,6 +752,21 @@ test('editing tools: object snapping, clipping masks, caps/joins/node widths and
  expect(errors).toEqual([]);
 });
 
+test('satin path: the width at a selected node is set from the sidebar, and undo puts it back',async({page})=>{
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());await page.locator('#new').click();
+ const n=async()=>Number(((await page.locator('#count').textContent()).match(/^([\d,]+) stitches/)||[,'0'])[1].replace(/,/g,''));
+ const m=await page.evaluate(()=>{const m=document.querySelector('#art').getScreenCTM();return {a:m.a,d:m.d,e:m.e,f:m.f};}),at=(x,y)=>({x:m.a*x+m.e,y:m.d*y+m.f});
+ await page.locator('#line').click();const a=at(-25,0),b=at(25,0);
+ await page.mouse.move(a.x,a.y);await page.mouse.down();await page.mouse.move(b.x,b.y,{steps:4});await page.mouse.up();
+ await page.locator('#type').selectOption('satin');await expect(page.locator('#satinRow')).toBeVisible();
+ await page.keyboard.press('Enter');await expect(page.locator('.path-node')).toHaveCount(2);
+ await page.locator('.path-node').nth(1).click({force:true});await expect(page.locator('#nodeWidthRow')).toBeVisible();
+ await expect(page.locator('#count')).toContainText('stitches');const before=await n();
+ await page.locator('#nodeWidth').fill('6');await page.locator('#nodeWidth').press('Tab');
+ await expect.poll(n).not.toBe(before);
+ await page.locator('#undo').click();await expect.poll(n).toBe(before);
+ expect(errors).toEqual([]);
+});
 test('embroidery options in the sidebar: cross stitch, appliqué, bean run, length variation, per-object compensation',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));
  await page.goto('/');page.on('dialog',d=>d.accept());await page.locator('#new').click();
