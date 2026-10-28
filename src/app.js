@@ -17,6 +17,7 @@ import {setRunRows,runRowsActions} from './runRowsState.js';
 import {setAccordionRows,accordionRowsActions} from './accordionRowsState.js';
 import {setTypeRows,typeRowsActions} from './typeRowsState.js';
 import {setPathRows,pathRowsActions} from './pathRowsState.js';
+import {setLoopRows,loopRowsActions} from './loopRowsState.js';
 import {pathDraftNow,setPathDraft,replaceAt} from './pathDraftState.js';
 import {interactionNow,setInteraction} from './interactionState.js';
 import {clipboardNow,setClipboard} from './clipboardState.js';
@@ -235,7 +236,7 @@ setStitchRow('motifSizeRow',!motifish);setTypeRows({motifSpacing:String(o?.motif
 setTypeRows({motifSize:String(o?.motifSize??(sequin||o?.fillMethod==='sequin'?3:bead?2:blingLike?4:1.6))});
 setStitchRow('motifShapeRow',o?.stitch!=='motif');
 setStitchRow('edgeCloseRow',!(o?.clipId&&['run','satin'].includes(o?.stitch)));$('#edgeClose').checked=Boolean(o?.edgeClose);
-$('#motifShape').value=o?.motifShape??'circle';setStitchRow('blingShapeRow',!(o?.stitch==='bling'||o?.fillMethod==='bling'));
+setLoopRows({motifShape:o?.motifShape??'circle'});setStitchRow('blingShapeRow',!(o?.stitch==='bling'||o?.fillMethod==='bling'));
 setStitchRow('sequinTwinRow',o?.stitch!=='sequin');setBlingRows({sequinTwin:o?.sequinTwin===true});
 setStitchRow('stoneTurnRow',!(o?.stitch==='bling'&&['square','hexagon','star','baguette','marquise','pear','cushion','oval','heart','teardrop'].includes(o?.blingShape??'round')));
 setBlingRows({stoneTurn:o?.stoneTurn!==false});setStitchRow('blingRingsRow',!(o?.stitch==='bling'||o?.fillMethod==='bling'));
@@ -243,8 +244,8 @@ setStitchRow('beadShapeRow',o?.stitch!=='bead');setBlingRows({beadShape:o?.beadS
 setBlingRows({beadTwin:o?.beadTwin===true});setBlingRows({blingRings:String(o?.blingRings??2)});setBlingRows({blingShape:o?.blingShape??'round'});
 const motifAlong=n===1&&o?.kind==='path'&&o?.stitch==='motif';
 setStitchRow('motifWarpRow',!(motifAlong||n===1&&o?.kind!=='text'&&o?.kind!=='stitch_layer'&&o?.fillMethod==='motif'));
-for(const opt of $('#motifWarp').options)opt.disabled=opt.value==='along'?!motifAlong:opt.value!=='none'&&motifAlong;
-$('#motifWarp').value=o?.motifWarp??'none';
+setLoopRows({motifAlong:Boolean(motifAlong)});
+setLoopRows({motifWarp:o?.motifWarp??'none'});
 }setStitchRow('satinButtonholeRow',o?.stitch!=='satin'||o?.kind!=='path'||o?.closed);
 setStitchRow('satinRaisedRow',o?.stitch!=='satin');
 setStitchRow('fillRaisedRow',!(n===1&&o?.stitch==='fill'&&o?.kind!=='text'));$('#fillRaised').checked=Boolean(o?.raised);
@@ -566,6 +567,7 @@ stitchChoiceActions.choose=(id,value)=>{if(id==='fillMethod'){const v=value==='r
 capRowsActions.choose=(field,checked)=>{if(selState().selected)edit([{op:'set_object',id:selState().selected,applique:checked?true:null}]);};
 runRowsActions.commit=(field,text)=>{if(selState().selected)edit([{op:'set_object',id:selState().selected,[field]:field==='lengthVariance'?(Math.max(0,Math.min(50,Number(text)||0))/100||null):(text===''?null:Number(text))}]);};
 runRowsActions.choose=(field,checked)=>{if(selState().selected)edit([{op:'set_object',id:selState().selected,underpath:checked?null:false}]);};
+loopRowsActions.choose=(field,value)=>{if(selState().selected)edit([{op:'set_object',id:selState().selected,[field]:value}]);};
 pathRowsActions.choose=(field,checked)=>{const o=selectedObject();if(!o)return;if(field==='closed'){edit([{op:'set_path',id:o.id,closed:checked},...(checked?[{op:'set_object',id:o.id,stitch:'fill'}]:[])]);return;}edit([{op:'set_path',id:o.id,smooth:checked}]);};
 typeRowsActions.commit=(field,text)=>{if(selState().selected)edit([{op:'set_object',id:selState().selected,[field]:Number(text)}]);};
 satinEndRowsActions.commit=(field,text)=>{if(selState().selected)edit([{op:'set_object',id:selState().selected,[field]:text===''?null:Number(text)}]);};
@@ -756,14 +758,12 @@ for(const d of $$('details.sec-fold')){try{d.open=localStorage.getItem('welcome.
 $('#radius').onchange=e=>{if(selState().selected)edit([{op:'set_object',id:selState().selected,radius:Number(e.target.value)>0?Number(e.target.value):null}]);};
 // Each corner radius: the rectangle's four radii, with the one corner changed (top-left, top-right, bottom-right, bottom-left).
 for(const [k,i] of [['TL',0],['TR',1],['BR',2],['BL',3]])$('#radius'+k).onchange=e=>{const o=selectedObject();if(!o||o.kind!=='rect')return;const rr=cornerRadii(o);rr[i]=Math.max(0,Math.min(500,Number(e.target.value)||0));edit([{op:'set_object',id:o.id,radii:rr}]);};
-$('#motifShape').onchange=e=>{if(selState().selected)edit([{op:'set_object',id:selState().selected,motifShape:e.target.value}]);};
 
 
 
 
 
 
-$('#motifWarp').onchange=e=>{if(selState().selected)edit([{op:'set_object',id:selState().selected,motifWarp:e.target.value}]);};
 $('#edgeClose').onchange=e=>{if(selState().selected)edit([{op:'set_object',id:selState().selected,edgeClose:e.target.checked}]);};
 
 $('#satinButtonhole').onchange=e=>{if(selState().selected)edit([{op:'set_object',id:selState().selected,buttonhole:e.target.checked}]);};
