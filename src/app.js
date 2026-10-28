@@ -13,6 +13,7 @@ import {setLayout} from './layoutState.js';
 import {setCapRows,capRowsActions} from './capRowsState.js';
 import {setBlingRows,blingRowsActions} from './blingRowsState.js';
 import {setSatinEndRows,satinEndRowsActions} from './satinEndRowsState.js';
+import {setRunRows,runRowsActions} from './runRowsState.js';
 import {pathDraftNow,setPathDraft,replaceAt} from './pathDraftState.js';
 import {interactionNow,setInteraction} from './interactionState.js';
 import {clipboardNow,setClipboard} from './clipboardState.js';
@@ -249,7 +250,7 @@ setStitchRow('raisedSpacingRow',!(n===1&&o?.stitch==='fill'&&o?.kind!=='text'&&o
 if(o&&document.activeElement!==$('#raisedSpacing'))$('#raisedSpacing').value=o.raisedSpacing??'';
 setStitchRow('raisedAngleRow',stitchRowsState.get().raisedSpacingRow);
 setStitchRow('laydownSpacingRow',!(n===1&&o?.stitch==='fill'&&String(o?.underlayType??'').includes('laydown')));
-if(o&&document.activeElement!==$('#laydownSpacing'))$('#laydownSpacing').value=o.laydownSpacing??'';
+if(o)setRunRows({laydownSpacing:String(o.laydownSpacing??'')});
 if(o&&document.activeElement!==$('#raisedAngle'))$('#raisedAngle').value=o.raisedAngle??'';
 const bordered=picked.length>0&&picked.every(v=>v.border)&&fillable;setStitchRow('borderWidthRow',!bordered);
 if(bordered&&document.activeElement!==$('#borderWidth'))$('#borderWidth').value=o?.borderWidth??0;
@@ -258,9 +259,9 @@ if(bordered&&document.activeElement!==$('#borderWidth'))$('#borderWidth').value=
   {const method=o?.fillMethod||'rows',single=n===1&&o&&o.kind!=='text'&&o.kind!=='stitch_layer',runPick=single&&o.stitch==='run';
   setStitchRow('crossRow',!(single&&fillable&&method==='cross'));if(o&&document.activeElement!==$('#crossSize'))$('#crossSize').value=o.crossSize??2.5;
 setStitchRow('runStyleRow',!runPick);if(o)setStitchChoices({runStyle:o.runStyle||'single'});setStitchRow('stemWidthRow',!(runPick&&o?.runStyle==='stem'));
-if(o&&document.activeElement!==$('#stemWidth'))$('#stemWidth').value=o.stemWidth??'';
+if(o)setRunRows({stemWidth:String(o.stemWidth??'')});
 setStitchRow('varianceRow',!(single&&fillable&&['rows','guided'].includes(method)));
-if(o&&document.activeElement!==$('#lengthVariance'))$('#lengthVariance').value=Math.round((o.lengthVariance??0)*100);
+if(o)setRunRows({lengthVariance:String(Math.round((o.lengthVariance??0)*100))});
   setStitchRow('appliqueRow',!(single&&fillable));setCapRows({applique:Boolean(o?.applique)});
 setStitchRow('appliqueWidthRow',!(single&&fillable&&o.applique));
 if(o)setCapRows({appliqueWidth:String(o.appliqueWidth??2.5)});
@@ -273,7 +274,7 @@ if(o)setSatinEndRows({endInsetStart:String(o.endInsetStart??o.endInset??''),endI
 if(o)setCapRows({compensation:String(o.compensation??'')});}
   {const single2=n===1&&o&&o.kind!=='text'&&o.kind!=='stitch_layer';setStitchRow('pinCenter',!(single2&&fillable&&o.fillMethod==='ripple'));
 setStitchRow('underpathRow',!(single2&&fillable&&!o.photo&&!o.applique&&['rows',undefined].includes(o.fillMethod)));
-$('#underpath').checked=o?.underpath!==false;
+setRunRows({underpath:o?.underpath!==false});
   setStitchRow('maskRow',!(n===1&&o?.clipId));
   const ph=n===1&&o?.photo;
   setStitchRow('photoBox',!ph);
@@ -564,6 +565,8 @@ async function loadFontFile(file){
 }
 stitchChoiceActions.choose=(id,value)=>{if(id==='fillMethod'){const v=value==='rows'?null:value;if(selState().multi.size)edit(orderedIds().map(oid=>({op:'set_object',id:oid,fillMethod:v})));else edit([{op:'set_settings',fillMethod:v}]);return;}if(id==='cap'||id==='join'){const ids=[...selState().multi];if(ids.length)edit(ids.map(i=>({op:'set_object',id:i,[id]:value==='butt'&&id==='cap'||value==='round'&&id==='join'?null:value})));return;}if(id==='runStyle'){if(selState().selected)edit([{op:'set_object',id:selState().selected,runStyle:value==='single'?null:value}]);return;}if(id==='type'){if(selState().selected)edit([{op:'set_object',id:selState().selected,stitch:value}]);}};
 capRowsActions.choose=(field,checked)=>{if(selState().selected)edit([{op:'set_object',id:selState().selected,applique:checked?true:null}]);};
+runRowsActions.commit=(field,text)=>{if(selState().selected)edit([{op:'set_object',id:selState().selected,[field]:field==='lengthVariance'?(Math.max(0,Math.min(50,Number(text)||0))/100||null):(text===''?null:Number(text))}]);};
+runRowsActions.choose=(field,checked)=>{if(selState().selected)edit([{op:'set_object',id:selState().selected,underpath:checked?null:false}]);};
 satinEndRowsActions.commit=(field,text)=>{if(selState().selected)edit([{op:'set_object',id:selState().selected,[field]:text===''?null:Number(text)}]);};
 capRowsActions.commit=(field,text)=>{if(field==='appliqueWidth'){if(selState().selected)edit([{op:'set_object',id:selState().selected,appliqueWidth:Number(text)}]);return;}if(field==='compensation'){if(selState().selected)edit([{op:'set_object',id:selState().selected,compensation:text===''?null:Number(text)}]);return;}const o=selectedObject();if(o&&selState().selNode!==null)edit([{op:'set_width_at_node',id:o.id,index:selState().selNode,width:Number(text)}]);};
 blingRowsActions.choose=(field,value)=>{if(!selState().selected)return;if(field==='motifPair'){edit([{op:'set_object',id:selState().selected,motifPair:value,...(value?{satinWidth:selectedObject()?.satinWidth??4}:{})}]);return;}const v=field==='blingRings'?Number(value):value;edit([{op:'set_object',id:selState().selected,[field]:v}]);};
@@ -766,7 +769,6 @@ $('#edgeClose').onchange=e=>{if(selState().selected)edit([{op:'set_object',id:se
 
 $('#satinButtonhole').onchange=e=>{if(selState().selected)edit([{op:'set_object',id:selState().selected,buttonhole:e.target.checked}]);};
 $('#raisedSpacing').onchange=e=>{if(selState().selected)edit([{op:'set_object',id:selState().selected,raisedSpacing:e.target.value===''?null:Number(e.target.value)}]);};
-$('#laydownSpacing').onchange=e=>{if(selState().selected)edit([{op:'set_object',id:selState().selected,laydownSpacing:e.target.value===''?null:Number(e.target.value)}]);};
 $('#raisedAngle').onchange=e=>{if(selState().selected)edit([{op:'set_object',id:selState().selected,raisedAngle:e.target.value===''?null:Number(e.target.value)}]);};
 $('#fillRaised').onchange=e=>{if(selState().selected)edit([{op:'set_object',id:selState().selected,raised:e.target.checked}]);};
 $('#satinRaised').onchange=e=>{if(selState().selected)edit([{op:'set_object',id:selState().selected,raised:e.target.checked}]);};
@@ -788,9 +790,7 @@ window.addEventListener('pointerup',()=>showSnap(null));
 
 // Embroidery options: cross stitch size, run style, length variation, appliqué, per-object compensation
 $('#crossSize').onchange=e=>{if(selState().selected)edit([{op:'set_object',id:selState().selected,crossSize:Number(e.target.value)}]);};
-$('#stemWidth').onchange=e=>{if(selState().selected)edit([{op:'set_object',id:selState().selected,stemWidth:e.target.value===''?null:Number(e.target.value)}]);};
 
-$('#lengthVariance').onchange=e=>{if(selState().selected)edit([{op:'set_object',id:selState().selected,lengthVariance:Math.max(0,Math.min(50,Number(e.target.value)||0))/100||null}]);};
 
 
 const setAccordion=(which,v)=>{if(!selState().selected)return;const o=documentNow().doc.objects.find(x=>x.id===selState().selected),other=which==='accordionStart'?'accordionEnd':'accordionStart';if(v===null)return edit([{op:'set_object',id:selState().selected,accordionStart:null,accordionEnd:null}]);edit([{op:'set_object',id:selState().selected,[which]:v,[other]:o?.[other]??v}]);};
@@ -825,7 +825,6 @@ $('#photoSpacing').onchange=e=>setPhoto({spacing:Math.max(.3,Math.min(2,Number(e
 $('#photoContrast').onchange=e=>setPhoto({contrast:Math.max(.4,Math.min(3,Number(e.target.value)||1.4))});
 $('#photoInvert').onchange=e=>setPhoto({invert:e.target.checked});
 $('#blendAngle').onchange=e=>{if(selState().selected)edit([{op:'set_object',id:selState().selected,blendAngle:e.target.value===''?null:Number(e.target.value)}]);};
-$('#underpath').onchange=e=>{if(selState().selected)edit([{op:'set_object',id:selState().selected,underpath:e.target.checked?null:false}]);};
 $('#selectMask').onclick=()=>{const o=selectedObject();if(o?.clipId&&documentNow().doc.objects.some(v=>v.id===o.clipId))selectIds([o.clipId],o.clipId);};
 const photoThreadKeys=['thread2','thread3','thread4'];
 for(const key of photoThreadKeys)$('#photo'+key[0].toUpperCase()+key.slice(1)).onchange=e=>{const o=selectedObject();if(!o?.photo)return;const ph={...o.photo};
