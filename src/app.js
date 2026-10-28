@@ -18,6 +18,7 @@ import {setAccordionRows,accordionRowsActions} from './accordionRowsState.js';
 import {setTypeRows,typeRowsActions} from './typeRowsState.js';
 import {setPathRows,pathRowsActions} from './pathRowsState.js';
 import {setLoopRows,loopRowsActions} from './loopRowsState.js';
+import {setThreadStock,threadStockActions} from './threadStockState.js';
 import {pathDraftNow,setPathDraft,replaceAt} from './pathDraftState.js';
 import {interactionNow,setInteraction} from './interactionState.js';
 import {clipboardNow,setClipboard} from './clipboardState.js';
@@ -994,11 +995,11 @@ threadsReady=true;syncThreads();
 // The user's own thread stock, kept per browser as the text of the My threads box.
 const STOCK_KEY='welcome.threadStock';
 function threadStock(){try{return parseThreadStock(localStorage.getItem(STOCK_KEY)||'');}catch{return parseThreadStock('');}}
-$('#threadStock').value=(()=>{try{return localStorage.getItem(STOCK_KEY)||'';}catch{return '';}})();
-$('#threadStock').oninput=e=>{try{localStorage.setItem(STOCK_KEY,e.target.value);}catch{}renderPlan();};
+setThreadStock({text:(()=>{try{return localStorage.getItem(STOCK_KEY)||'';}catch{return '';}})()});
+threadStockActions.commit=text=>{setThreadStock({text});try{localStorage.setItem(STOCK_KEY,text);}catch{}renderPlan();};
 function renderPlan(){const list=$('#planList');if(!list)return;list.replaceChildren();
 setStitchRow('planEmpty',Boolean(plan));const stock=threadStock();
-$('#threadStockInfo').textContent=stock.invalid||stock.colours.length?t('{n} threads, {m} lines ignored',{n:stock.colours.length,m:stock.invalid}):'';
+setThreadStock({info:stock.invalid||stock.colours.length?t('{n} threads, {m} lines ignored',{n:stock.colours.length,m:stock.invalid}):''});
 if(!plan)return;const blocks=threadPlan(plan);
   blocks.slice(0,60).forEach((b,i)=>{const row=document.createElement('div');row.className='plan-row';const pick=document.createElement('select');pick.className='plan-replace';pick.title=t('Replace this thread everywhere');pick.setAttribute('aria-label',t('Replace this thread everywhere'));pick.append(new Option(t('Replace with…'),''));for(const [n,hex] of THREAD_PALETTE)pick.append(new Option(t(n),hex));pick.onchange=()=>{const from=b.thread,to=pick.value;if(!to)return;const count=documentNow().doc.objects.filter(o=>o.kind!=='stitch_layer'&&o.thread&&o.thread.toLowerCase()===from.toLowerCase()).length;edit([{op:'replace_thread',from,to}]);toast(t('Replaced {thread} in {n} objects.',{thread:from,n:count}));};const sw=document.createElement('span');sw.className='sw';sw.style.background=b.thread;const nm=document.createElement('span');nm.textContent=`${i+1}. ${threadName(b.thread)}`;const n=document.createElement('span');n.className='n';n.textContent=`${t('{n} stitches',{n:b.stitches.toLocaleString()})} · ${(b.mm/1000).toFixed(2)} m · ${blockTimeLabel(blockSeconds(b))}`;row.append(sw,nm,n);row.append(pick);const near=nearestStockThread(b.thread,stock.colours);if(near){const ms=document.createElement('span');ms.className='stock-match';const dot=document.createElement('span');dot.className='sw';dot.style.background=near.hex;ms.append(dot,` ${t('Closest of your threads')}: ${near.hex}`);row.append(ms);}list.append(row);});
   }
