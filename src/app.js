@@ -265,7 +265,7 @@ setStitchRow('laydownSpacingRow',!(n===1&&o?.stitch==='fill'&&String(o?.underlay
 if(o)setRunRows({laydownSpacing:String(o.laydownSpacing??'')});
 if(o)setRaisedRows({raisedAngle:String(o.raisedAngle??'')});
 const bordered=picked.length>0&&picked.every(v=>v.border)&&fillable;setStitchRow('borderWidthRow',!bordered);
-if(bordered&&document.activeElement!==$('#borderWidth'))$('#borderWidth').value=o?.borderWidth??0;
+if(bordered)setRunRows({borderWidth:String(o?.borderWidth??0)});
   const fp=$('#followPath');
   if(n===1&&o?.kind==='text'){const paths=documentNow().doc.objects.filter(v=>v.kind==='path'),want=['',...paths.map(v=>v.id)].join('|')+(o.along&&!o.along.pathId?'|custom':'');if(fp.dataset.set!==want){fp.replaceChildren(new Option(t('Not on a path'),''),...paths.map(v=>new Option(v.name||v.id,v.id)));if(o.along&&!o.along.pathId)fp.append(new Option(t('Custom path'),'__custom'));fp.dataset.set=want;}fp.value=o.along?(o.along.pathId||'__custom'):'';}}
   {const method=o?.fillMethod||'rows',single=n===1&&o&&o.kind!=='text'&&o.kind!=='stitch_layer',runPick=single&&o.stitch==='run';
@@ -568,7 +568,7 @@ async function loadFontFile(file){
 }
 stitchChoiceActions.choose=(id,value)=>{if(id==='fillMethod'){const v=value==='rows'?null:value;if(selState().multi.size)edit(orderedIds().map(oid=>({op:'set_object',id:oid,fillMethod:v})));else edit([{op:'set_settings',fillMethod:v}]);return;}if(id==='cap'||id==='join'){const ids=[...selState().multi];if(ids.length)edit(ids.map(i=>({op:'set_object',id:i,[id]:value==='butt'&&id==='cap'||value==='round'&&id==='join'?null:value})));return;}if(id==='runStyle'){if(selState().selected)edit([{op:'set_object',id:selState().selected,runStyle:value==='single'?null:value}]);return;}if(id==='type'){if(selState().selected)edit([{op:'set_object',id:selState().selected,stitch:value}]);}};
 capRowsActions.choose=(field,checked)=>{if(selState().selected)edit([{op:'set_object',id:selState().selected,applique:checked?true:null}]);};
-runRowsActions.commit=(field,text)=>{if(selState().selected)edit([{op:'set_object',id:selState().selected,[field]:field==='lengthVariance'?(Math.max(0,Math.min(50,Number(text)||0))/100||null):(text===''?null:Number(text))}]);};
+runRowsActions.commit=(field,text)=>{if(field==='borderWidth'){const ids=[...selState().multi];if(ids.length)edit(ids.map(id=>({op:'set_object',id,borderWidth:Number(text)>0?Number(text):null})));return;}if(selState().selected)edit([{op:'set_object',id:selState().selected,[field]:field==='lengthVariance'?(Math.max(0,Math.min(50,Number(text)||0))/100||null):(text===''?null:Number(text))}]);};
 runRowsActions.choose=(field,value)=>{if(field==='border'){const o=selectedObject();if(o)edit([{op:'set_object',id:o.id,border:value}]);return;}if(field==='stagger'){const v=Number(value);if(selState().multi.size)edit(orderedIds().map(oid=>({op:'set_object',id:oid,stagger:v})));else edit([{op:'set_settings',stagger:v}]);return;}if(selState().selected)edit([{op:'set_object',id:selState().selected,underpath:value?null:false}]);};
 radiusActions.commit=(field,text)=>{if(field==='radius'){if(selState().selected)edit([{op:'set_object',id:selState().selected,radius:Number(text)>0?Number(text):null}]);return;}const o=selectedObject();if(!o||o.kind!=='rect')return;const rr=cornerRadii(o),i=['radiusTL','radiusTR','radiusBR','radiusBL'].indexOf(field);rr[i]=Math.max(0,Math.min(500,Number(text)||0));edit([{op:'set_object',id:o.id,radii:rr}]);};
 loopRowsActions.choose=(field,value)=>{if(selState().selected)edit([{op:'set_object',id:selState().selected,[field]:value}]);};
@@ -776,7 +776,6 @@ for(const d of $$('details.sec-fold')){try{d.open=localStorage.getItem('welcome.
 
 
 
-$('#borderWidth').onchange=e=>{const ids=[...selState().multi];if(ids.length)edit(ids.map(id=>({op:'set_object',id,borderWidth:Number(e.target.value)>0?Number(e.target.value):null})));};
 $('#followPath').onchange=e=>{const o=selectedObject();if(!o||o.kind!=='text')return;const v=e.target.value;if(v==='__custom')return;if(!v){if(o.along)edit([{op:'text_off_path',textId:o.id}]);}else edit([{op:'text_on_path',textId:o.id,pathId:v}]);};
 $('#roundBtn').onclick=()=>{const o=selectedObject(),r=Number($('#roundMm').value);if(!o||!(r>0))return;if(o.kind==='rect')edit([{op:'set_object',id:o.id,radius:r}]);else if(o.kind==='path')edit([{op:'round_corners',id:o.id,radius:r,...(selState().selNodes.size?{indexes:[...selState().selNodes]}:{})}],()=>{setSelection({selNodes: new Set()});setSelection({selNode: null});});else toast('Rounding works on rectangles and paths. Convert the shape to a path first.');};
 

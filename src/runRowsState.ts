@@ -12,6 +12,7 @@ export interface RunRows {
   stagger: string;
   border: boolean;
   borderDisabled: boolean;
+  borderWidth: string;
 }
 
 export const runRowsState = createStore<RunRows>({
@@ -22,6 +23,7 @@ export const runRowsState = createStore<RunRows>({
   stagger: '4',
   border: false,
   borderDisabled: false,
+  borderWidth: '0',
 });
 
 /** Changes some of the run values. */
@@ -31,7 +33,7 @@ export function setRunRows(patch: Partial<RunRows>) {
 
 /** The rows call commit(field, text) for a committed number, and choose(field, value) for a checkbox or the stagger choice. app.js runs them. */
 export const runRowsActions: {
-  commit: (field: 'laydownSpacing' | 'stemWidth' | 'lengthVariance', text: string) => void;
+  commit: (field: 'laydownSpacing' | 'stemWidth' | 'lengthVariance' | 'borderWidth', text: string) => void;
   choose: (field: 'underpath' | 'border' | 'stagger', value: boolean | string) => void;
 } = {
   commit() {},
