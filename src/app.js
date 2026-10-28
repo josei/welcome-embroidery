@@ -19,6 +19,7 @@ import {setTypeRows,typeRowsActions} from './typeRowsState.js';
 import {setPathRows,pathRowsActions} from './pathRowsState.js';
 import {setLoopRows,loopRowsActions} from './loopRowsState.js';
 import {setThreadStock,threadStockActions} from './threadStockState.js';
+import {setRadius,radiusActions} from './radiusState.js';
 import {pathDraftNow,setPathDraft,replaceAt} from './pathDraftState.js';
 import {interactionNow,setInteraction} from './interactionState.js';
 import {clipboardNow,setClipboard} from './clipboardState.js';
@@ -227,7 +228,7 @@ function syncSections(){
   const showDetails=underlayable&&!['none','auto',undefined].includes(sel.value);
   {const one=n===1&&o&&o.kind!=='text'&&o.kind!=='stitch_layer'&&(fillable||o.stitch==='satin');
 setStitchRow('pinRow',!one);if(!one)pinState.set(null);pinClearState.set(Boolean(o&&(o.startAt||o.endAt)));}
-  {const rectOnly=n===1&&o?.kind==='rect';setStitchRow('radiusRow',!rectOnly);if(rectOnly&&document.activeElement!==$('#radius'))$('#radius').value=o.radius??0;if(rectOnly){const rr=cornerRadii(o);[['TL',0],['TR',1],['BR',2],['BL',3]].forEach(([k,i])=>{const el=$('#radius'+k);if(document.activeElement!==el)el.value=rr[i];});}
+  {const rectOnly=n===1&&o?.kind==='rect';setStitchRow('radiusRow',!rectOnly);if(rectOnly)setRadius({radius:String(o.radius??0)});if(rectOnly){const rr=cornerRadii(o);setRadius({radiusTL:String(rr[0]),radiusTR:String(rr[1]),radiusBR:String(rr[2]),radiusBL:String(rr[3])});}
   const taper=n===1&&o?.kind==='path'&&(o.stitch==='satin'||(o.stitch==='motif'&&o.motifPair));
 setStitchRow('satinEndRow',!taper);if(taper)setSatinEndRows({satinWidthEnd:String(o.satinWidthEnd??'')});
 $('#satinRaised').checked=Boolean(o?.raised);$('#satinButtonhole').checked=Boolean(o?.buttonhole);setBlingRows({motifPair:Boolean(o?.motifPair)});
@@ -568,6 +569,7 @@ stitchChoiceActions.choose=(id,value)=>{if(id==='fillMethod'){const v=value==='r
 capRowsActions.choose=(field,checked)=>{if(selState().selected)edit([{op:'set_object',id:selState().selected,applique:checked?true:null}]);};
 runRowsActions.commit=(field,text)=>{if(selState().selected)edit([{op:'set_object',id:selState().selected,[field]:field==='lengthVariance'?(Math.max(0,Math.min(50,Number(text)||0))/100||null):(text===''?null:Number(text))}]);};
 runRowsActions.choose=(field,checked)=>{if(selState().selected)edit([{op:'set_object',id:selState().selected,underpath:checked?null:false}]);};
+radiusActions.commit=(field,text)=>{if(field==='radius'){if(selState().selected)edit([{op:'set_object',id:selState().selected,radius:Number(text)>0?Number(text):null}]);return;}const o=selectedObject();if(!o||o.kind!=='rect')return;const rr=cornerRadii(o),i=['radiusTL','radiusTR','radiusBR','radiusBL'].indexOf(field);rr[i]=Math.max(0,Math.min(500,Number(text)||0));edit([{op:'set_object',id:o.id,radii:rr}]);};
 loopRowsActions.choose=(field,value)=>{if(selState().selected)edit([{op:'set_object',id:selState().selected,[field]:value}]);};
 pathRowsActions.choose=(field,checked)=>{const o=selectedObject();if(!o)return;if(field==='closed'){edit([{op:'set_path',id:o.id,closed:checked},...(checked?[{op:'set_object',id:o.id,stitch:'fill'}]:[])]);return;}edit([{op:'set_path',id:o.id,smooth:checked}]);};
 typeRowsActions.commit=(field,text)=>{if(selState().selected)edit([{op:'set_object',id:selState().selected,[field]:Number(text)}]);};
@@ -756,9 +758,7 @@ segReady=true;
 for(const d of $$('details.sec-fold')){try{d.open=localStorage.getItem('welcome.fold.'+d.id)==='1';}catch{}d.addEventListener('toggle',()=>{try{localStorage.setItem('welcome.fold.'+d.id,d.open?'1':'0');}catch{}});}
 
 // vector-editing extras: corner radius, taper, border width, follow path, round corners
-$('#radius').onchange=e=>{if(selState().selected)edit([{op:'set_object',id:selState().selected,radius:Number(e.target.value)>0?Number(e.target.value):null}]);};
 // Each corner radius: the rectangle's four radii, with the one corner changed (top-left, top-right, bottom-right, bottom-left).
-for(const [k,i] of [['TL',0],['TR',1],['BR',2],['BL',3]])$('#radius'+k).onchange=e=>{const o=selectedObject();if(!o||o.kind!=='rect')return;const rr=cornerRadii(o);rr[i]=Math.max(0,Math.min(500,Number(e.target.value)||0));edit([{op:'set_object',id:o.id,radii:rr}]);};
 
 
 
