@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import neonGlyphs from '../fonts/neon_blinking/glyphs.json' with {type:'json'};
 import {pinnedMachineFixture} from './fixture-archive.js';
-import {bundledFontUsage,blockSeconds,blockTimeLabel,initialDocument,compile,encode,applyOperations,geometry,objectBounds,validateDocument,jefWarnings,exportSvg,exportPrintTemplate,exportAppliqueTemplates,isClosedShape,HOOP_PRESETS,batchDocuments,customFontUsage,hoopSize,importStitchLayer,measureText,threadPlan,sewingSeconds,sewingWorksheet,designWarnings,TIP_CATEGORIES,visibleTips,measureBetween,nearestStockThread,parseThreadStock,svgPathFill,parseSvgPath,cornerRadii} from '../src/engine.js';
+import {FABRIC_PROFILES,bundledFontUsage,blockSeconds,blockTimeLabel,initialDocument,compile,encode,applyOperations,geometry,objectBounds,validateDocument,jefWarnings,exportSvg,exportPrintTemplate,exportAppliqueTemplates,isClosedShape,HOOP_PRESETS,batchDocuments,customFontUsage,hoopSize,importStitchLayer,measureText,threadPlan,sewingSeconds,sewingWorksheet,designWarnings,TIP_CATEGORIES,visibleTips,measureBetween,nearestStockThread,parseThreadStock,svgPathFill,parseSvgPath,cornerRadii} from '../src/engine.js';
 
 test('browser and MCP semantic operations share editable document behavior',()=>{
  const doc=initialDocument();doc.objects=[];
@@ -1156,6 +1156,17 @@ test('fabric presets set the document stitch settings, explicit settings still w
  const doc=initialDocument();doc.objects=[];
  assert.throws(()=>applyOperations(doc,[{op:'set_settings',fabric:'silk'}]),/Unknown fabric/);
 });
+const fabricDocument=fabric=>{const doc=initialDocument();doc.objects=[];applyOperations(doc,[{op:'add_shape',id:'r',kind:'rect',x:-20,y:-15,width:40,height:30,stitch:'fill'},{op:'set_settings',fabric}]);validateDocument(doc);return doc;};
+for(const [key,profile] of Object.entries(FABRIC_PROFILES)){
+ test(`fabric profile ${key} sets its document settings and names its stabilizer as a sewing tip`,()=>{
+  const doc=fabricDocument(key);
+  for(const [name,value] of Object.entries(profile.values))assert.equal(doc.settings[name],value,`${key} sets ${name}`);
+  const tips=designWarnings(doc).filter(w=>w.category==='fabric');
+  if(key==='woven'){assert.equal(tips.length,0,'woven names no stabilizer');return;}
+  assert.equal(tips.length,1,`${key} names one stabilizer tip`);
+  assert.ok(tips[0].message.includes(profile.stabilizer),'the tip names the stabilizer');
+ });
+}
 
 test('redwork outline runs around a closed shape out and back, and refuses open paths',()=>{
  const doc=initialDocument();doc.objects=[];applyOperations(doc,[{op:'add_shape',id:'r',kind:'rect',x:-20,y:-15,width:40,height:30,stitch:'fill'},{op:'redwork_outline',id:'r',newId:'rw'}]);validateDocument(doc);

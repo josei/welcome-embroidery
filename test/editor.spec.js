@@ -1315,8 +1315,10 @@ test('fabric select sets the document stitch settings and changes the stitch pla
  await page.locator('#type').selectOption('fill');await expect.poll(count).toBeGreaterThan(0);const woven=await count();
  await page.locator('#secDoc').evaluate(d=>{d.open=true;});
  await expect(page.locator('#fabric')).toHaveValue('woven');
- await page.locator('#fabric').selectOption('towel');await expect(page.locator('#comp')).toHaveValue('0.4');
+ await page.locator('#fabric').selectOption('towel');await expect(page.locator('#comp')).toHaveValue('0.4');await expect(page.locator('#spacing')).toHaveValue('0.5');
  await expect.poll(count).not.toBe(woven);
+ await page.locator('#undo').click();await expect(page.locator('#fabric')).toHaveValue('woven');await expect(page.locator('#comp')).toHaveValue('0.2');
+ await page.locator('#fabric').selectOption('denim');await expect(page.locator('#comp')).toHaveValue('0.25');await expect(page.locator('#fabric option')).toHaveCount(4);
  expect(errors).toEqual([]);
 });
 
