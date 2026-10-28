@@ -1176,6 +1176,13 @@ test('the pull estimate: a denser design pulls more on the same fabric, a stretc
  for(const grid of [dense,sparse,knit])for(const v of grid.values)assert.ok(v>=0&&v<=1,'each cell is on the 0 to 1 scale');
  assert.equal(dense.values.length,dense.cols*dense.rows);
 });
+const pullDirFor=angle=>{const doc=initialDocument();doc.objects=[];applyOperations(doc,[{op:'add_shape',id:'r',kind:'rect',x:-20,y:-15,width:40,height:30,stitch:'fill'},{op:'set_settings',spacing:.4,angle,fabric:'woven',underlay:false}]);validateDocument(doc);return distortionGrid(compile(doc),'woven',{w:110,h:110});};
+test('the pull direction is across the stitch lines: horizontal rows pull up and down, vertical rows pull left and right',()=>{
+ const mean=grid=>{let x=0,y=0,n=0;for(let i=0;i<grid.values.length;i++)if(grid.values[i]>0){x+=Math.abs(grid.dirs[i*2]);y+=Math.abs(grid.dirs[i*2+1]);n++;}return {x:x/n,y:y/n};};
+ const horizontal=mean(pullDirFor(0)),vertical=mean(pullDirFor(90));
+ assert.ok(horizontal.y>.9&&horizontal.x<.2,'horizontal stitch rows pull up and down');
+ assert.ok(vertical.x>.8&&vertical.y<.3,'vertical stitch rows pull left and right');
+});
 
 test('redwork outline runs around a closed shape out and back, and refuses open paths',()=>{
  const doc=initialDocument();doc.objects=[];applyOperations(doc,[{op:'add_shape',id:'r',kind:'rect',x:-20,y:-15,width:40,height:30,stitch:'fill'},{op:'redwork_outline',id:'r',newId:'rw'}]);validateDocument(doc);

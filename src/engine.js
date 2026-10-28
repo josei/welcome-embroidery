@@ -1317,13 +1317,25 @@ export function measureBetween(a,b){const dx=b[0]-a[0],dy=b[1]-a[1];return {dist
 // Pull estimate for the 3D preview: the stitches that land in each cell of the hoop, scaled by how far the chosen fabric
 // stretches. It shows where the fabric is likely to pull and pucker. It is a guide for where to look, not a simulation of
 // the machine. A cell whose stretch-adjusted density equals DISTORTION_SCALE shows 63% of the colour, and denser cells show more.
+// The pull direction is across the stitch lines in each cell (the stitch lines' normal), from the average line direction there.
 export const DISTORTION_SCALE=1.5;
 export function distortionGrid(plan,fabric,hoop,cell=2){
   const profile=FABRIC_PROFILES[fabric]??FABRIC_PROFILES.woven,stretch=profile.stretch;
   const x0=-hoop.w/2,y0=-hoop.h/2,cols=Math.max(1,Math.ceil(hoop.w/cell)),rows=Math.max(1,Math.ceil(hoop.h/cell));
-  const counts=new Float32Array(cols*rows);
-  for(const s of plan.stitches){if(s.cmd!=='stitch')continue;const c=Math.floor((s.x-x0)/cell),r=Math.floor((s.y-y0)/cell);if(c>=0&&c<cols&&r>=0&&r<rows)counts[r*cols+c]++;}
-  const values=new Float32Array(cols*rows);let peak=0;
-  for(let i=0;i<counts.length;i++){const pull=counts[i]/(cell*cell)*stretch;values[i]=1-Math.exp(-pull/DISTORTION_SCALE);peak=Math.max(peak,values[i]);}
-  return {cols,rows,cell,x0,y0,values,peak,stretch,label:profile.label};
+  const counts=new Float32Array(cols*rows),axialC=new Float32Array(cols*rows),axialS=new Float32Array(cols*rows);
+  const cellOf=(x,y)=>{const c=Math.floor((x-x0)/cell),r=Math.floor((y-y0)/cell);return c>=0&&c<cols&&r>=0&&r<rows?r*cols+c:-1;};
+  let prev=null;
+  for(const s of plan.stitches){
+    if(s.cmd!=='stitch'){prev=null;continue;}
+    const i=cellOf(s.x,s.y);if(i>=0)counts[i]++;
+    if(prev){const dx=s.x-prev.x,dy=s.y-prev.y,len2=dx*dx+dy*dy,j=cellOf((s.x+prev.x)/2,(s.y+prev.y)/2);
+      if(j>=0&&len2>0){axialC[j]+=(dx*dx-dy*dy)/len2;axialS[j]+=2*dx*dy/len2;}}
+    prev=s;
+  }
+  const values=new Float32Array(cols*rows),dirs=new Float32Array(cols*rows*2);let peak=0;
+  for(let i=0;i<counts.length;i++){
+    const pull=counts[i]/(cell*cell)*stretch;values[i]=1-Math.exp(-pull/DISTORTION_SCALE);peak=Math.max(peak,values[i]);
+    if(axialC[i]||axialS[i]){const theta=0.5*Math.atan2(axialS[i],axialC[i]);dirs[i*2]=-Math.sin(theta);dirs[i*2+1]=Math.cos(theta);}
+  }
+  return {cols,rows,cell,x0,y0,values,dirs,peak,stretch,label:profile.label};
 }
