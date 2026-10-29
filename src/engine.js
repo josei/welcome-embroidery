@@ -1283,6 +1283,28 @@ export function blockSeconds(b){return b.stitches/600*60+(b.trims||0)*8+(b.chang
 export function blockTimeLabel(sec){const s=Math.round(sec);return `${Math.floor(s/60)}:${String(s%60).padStart(2,'0')}`;}
 // Sewing time in seconds: 600 stitches a minute, 20 s per colour change or stop, 8 s per trim.
 export function sewingSeconds(plan){return plan.count/600*60+plan.stitches.filter(s=>s.cmd==='color'||s.cmd==='stop').length*20+plan.stitches.filter(s=>s.cmd==='trim').length*8;}
+// The thread blocks of a plan as ranges of its command list: the same blocks threadPlan makes, with start and end as indexes into
+// plan.stitches. The simulation bar draws them as its track, and its seek position is an index into the same list.
+export function threadSpans(plan){
+ const spans=[];let cur=null;
+ plan.stitches.forEach((s,i)=>{
+  if(s.cmd==='color'||s.cmd==='stop'){cur=null;return;}
+  if(s.cmd!=='stitch')return;
+  if(!cur||cur.thread.toLowerCase()!==String(s.thread).toLowerCase()){
+   if(spans.length)spans[spans.length-1].end=i;
+   cur={thread:s.thread,start:spans.length?i:0,end:plan.stitches.length,stitches:0};
+   spans.push(cur);
+  }
+  cur.stitches++;
+ });
+ return spans;
+}
+// Sewing seconds up to an index into plan.stitches, at the same rates as sewingSeconds: the time elapsed at a seek position.
+export function sewingSecondsUpTo(plan,index){
+ let stitches=0,events=0,trims=0;
+ for(let i=0,end=Math.min(index,plan.stitches.length);i<end;i++){const c=plan.stitches[i].cmd;if(c==='stitch')stitches++;else if(c==='color'||c==='stop')events++;else if(c==='trim')trims++;}
+ return stitches/600*60+events*20+trims*8;
+}
 const sewingLabel=sec=>{const m=Math.max(1,Math.round(sec/60));return m>=60?`${Math.floor(m/60)} h ${m%60} min`:`${m} min`;};
 // Printable sewing worksheet for a compiled plan: the thread blocks in sewing order with stitch counts, and the time estimate. Format 'text' or 'svg'. Threads are shown as hex values because the engine has no colour names.
 export function sewingWorksheet(doc,plan,format='text'){

@@ -53,11 +53,12 @@ import {createAgentBridge} from './agent.js';
 import {createThreadPreview} from './preview3d.js';
 import {previewState,setPreviewState,previewActions} from './previewState.js';
 import {layersActions} from './layersState.js';
+import {playbackActions,setPlayback} from './playbackState.js';
 import {createCanvas} from './canvas.js';
 import {getFont,registerFont,loadFont,isRegistryFont,documentFontIds,registerDocumentFonts} from './fonts.js';
 import {createFontPicker,fetchFontIndex,LEGACY} from './fontui.js';
 import {ttfToFont} from './ttf.js';
-import {distortionGrid,blockSeconds,blockTimeLabel,bundledFontUsage,countSmallHoles,isSmallIsland,isClosedShape,exportAppliqueTemplates,cornerRadii,svgPathFill,parseThreadStock,nearestStockThread,HOOP_PRESETS,customFontUsage,exportPrintTemplate,batchDocuments,batchPlan,designWarnings,TIP_CATEGORIES,visibleTips,measureBetween,widthAt,nodeFraction,initialDocument,geometry,applyOperations,validateDocument,measureText,parseSvgPath,makeStitchLayer,objectBounds,hoopSize,jefWarnings,exportSvg,textPrimitives,threadPlan,sewingSeconds,sewingWorksheet} from './engine.js';
+import {distortionGrid,blockSeconds,blockTimeLabel,bundledFontUsage,countSmallHoles,isSmallIsland,isClosedShape,exportAppliqueTemplates,cornerRadii,svgPathFill,parseThreadStock,nearestStockThread,HOOP_PRESETS,customFontUsage,exportPrintTemplate,batchDocuments,batchPlan,designWarnings,TIP_CATEGORIES,visibleTips,measureBetween,widthAt,nodeFraction,initialDocument,geometry,applyOperations,validateDocument,measureText,parseSvgPath,makeStitchLayer,objectBounds,hoopSize,jefWarnings,exportSvg,textPrimitives,threadPlan,threadSpans,sewingSeconds,sewingSecondsUpTo,sewingWorksheet} from './engine.js';
 const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)],svgNS='http://www.w3.org/2000/svg';
 const withSavedHoop=d=>{try{const h=JSON.parse(localStorage.getItem('welcome.hoop')||'null');if(h&&Number.isFinite(h.w)&&Number.isFinite(h.h)&&h.w>=10&&h.w<=400&&h.h>=10&&h.h<=400){d.hoop=h.w;if(h.h===h.w)delete d.hoopH;else d.hoopH=h.h;}}catch{}return d;};
 setDocument({doc:withSavedHoop(initialDocument()),history:[],future:[],dirty:true});
@@ -76,22 +77,17 @@ function edit(operations,after=()=>{}){return transact(()=>{applyOperations(docu
 function toast(s){const t=$('#toast');t.textContent=s;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2600);}
 function selectedObject(){return documentNow().doc.objects.find(o=>o.id===selState().selected);}
 function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+// The simulation bar (PlaybackBar.tsx) reads the playback store; this sets it from the plan and the playback position. Status text stays in statusState.
+let spanCache={plan:null,spans:[],trims:0,metres:0,changes:0};
+function planSpans(){if(spanCache.plan!==plan){const spans=plan?threadSpans(plan):[];spanCache={plan,spans,trims:plan?plan.stitches.filter(s=>s.cmd==='trim').length:0,metres:plan?threadPlan(plan).reduce((n,b)=>n+b.mm,0)/1000:0,changes:Math.max(0,spans.length-1)};}return spanCache;}
 function syncPlaybackControls(){
- const button=$('#play'),playing=Boolean(playbackTimer);
- button.innerHTML=`<svg class="icon"><use href="#i-${playing?'pause':'play'}"/></svg>`;
- button.classList.toggle('playing',playing);
- button.setAttribute('aria-label',playing?'Pause stitch simulation':plan?'Play stitch simulation':'Compile and play stitch simulation');
- button.title=playing?'Pause stitch simulation':plan?'Play stitch simulation':'Compile and play stitch simulation';
- button.dataset.tooltip=playing?'Pause simulation':plan?'Play simulation':'Compile and play';
- const seek=$('#seek'),length=plan?.stitches.length||0,limit=playIndex===null?length:Math.min(playIndex,length);
- seek.max=String(Math.max(1,length));
- seek.value=String(playIndex===null?length:limit);
- if(!plan){setStatus({playback:'Ready to simulate',needle:''});seek.setAttribute('aria-valuetext','Ready to simulate');return;}
- if(playIndex===null){setStatus({playback:`Ready · ${plan.count.toLocaleString()} stitches`,needle:''});seek.setAttribute('aria-valuetext',`Ready to simulate ${plan.count} stitches`);return;}
+ const cache=planSpans(),length=plan?.stitches.length||0,ready=playIndex===null,limit=ready?length:Math.min(playIndex,length);
  let sewn=0,current=null;for(let i=0;i<limit;i++){const item=plan.stitches[i];if(item.cmd==='stitch'){sewn++;current=item;}}
+ setPlayback({hasPlan:Boolean(plan),ready,playing:Boolean(playbackTimer),index:limit,seekMax:Math.max(1,length),count:plan?.count||0,sewn,sewnSeconds:plan?sewingSecondsUpTo(plan,limit):0,totalSeconds:plan?sewingSeconds(plan):0,spans:cache.spans,colourChanges:cache.changes,trims:cache.trims,metres:cache.metres});
+ if(!plan){setStatus({playback:'Ready to simulate',needle:''});return;}
+ if(ready){setStatus({playback:`Ready · ${plan.count.toLocaleString()} stitches`,needle:''});return;}
  const percent=length?Math.floor(limit/length*100):0;
  setStatus({playback:`${sewn.toLocaleString()} / ${plan.count.toLocaleString()} stitches · ${percent}%`,needle:current?`Needle ${current.x.toFixed(1)}, ${current.y.toFixed(1)} mm`:'Needle at start'});
- seek.setAttribute('aria-valuetext',`${sewn} of ${plan.count} stitches`);
 }
 // ---- fonts: bundled fonts load on demand; the document's own (loaded-from-file) fonts are registered from doc.customFonts
 let fontIndex=[...LEGACY],newTextFont='welcome-mono/1';const fontLoading=new Set(),fontFailed=new Set();
@@ -606,9 +602,9 @@ $('#download').onclick=async e=>{e.preventDefault();await ensureDocFonts().catch
 async function compileNow(manual=false){compiling=true;try{await ensureDocFonts();const revision=documentNow().doc.revision,result=await request({type:'compile',document:forWorker(documentNow().doc)});if(result.plan.revision!==revision||revision!==documentNow().doc.revision)return;plan=result.plan;lastPlan=plan;compileError='';playIndex=null;compiling=false;render();}catch(err){if(err.name!=='AbortError'){compileError=err.message;compiling=false;render();if(manual===true||manual instanceof Event)toast(err.message);}}finally{if(!plan&&compileError)compiling=false;}}statusActions.compile=()=>compileNow(true);
 let issueAt=0;
 statusActions.issues=()=>{const list=[...(plan?.issues||[]),...sewingTips()];if(!list.length)return;const issue=list[issueAt++%list.length];selectIds([...withGroup(issue.id)],issue.id);canvasView.fitSelection();};
-$('#seek').oninput=()=>{if(!plan)return;if(playbackTimer){clearInterval(playbackTimer);playbackTimer=null;}if(viewMode.get()==='design')viewMode.set('stitches');playIndex=Number($('#seek').value);render();};
-$('#play').onclick=async()=>{if(playbackTimer){clearInterval(playbackTimer);playbackTimer=null;render();return;}if(!plan)await compileNow(true);if(!plan)return;if(viewMode.get()==='design')viewMode.set('stitches');if(playIndex===null||playIndex>=plan.stitches.length)playIndex=0;playbackTimer=setInterval(()=>{playIndex=Math.min(plan.stitches.length,playIndex+Math.max(1,Math.ceil(plan.stitches.length/180)));if(playIndex>=plan.stitches.length){clearInterval(playbackTimer);playbackTimer=null;}render();},50);render();};
-$('#resetPlayback').onclick=()=>{if(playbackTimer)clearInterval(playbackTimer);playbackTimer=null;if(viewMode.get()==='design')viewMode.set('stitches');playIndex=0;render();};
+playbackActions.seek=index=>{if(!plan)return;if(playbackTimer){clearInterval(playbackTimer);playbackTimer=null;}if(viewMode.get()==='design')viewMode.set('stitches');playIndex=index;render();};
+playbackActions.togglePlay=async()=>{if(playbackTimer){clearInterval(playbackTimer);playbackTimer=null;render();return;}if(!plan)await compileNow(true);if(!plan)return;if(viewMode.get()==='design')viewMode.set('stitches');if(playIndex===null||playIndex>=plan.stitches.length)playIndex=0;playbackTimer=setInterval(()=>{playIndex=Math.min(plan.stitches.length,playIndex+Math.max(1,Math.ceil(plan.stitches.length/180)));if(playIndex>=plan.stitches.length){clearInterval(playbackTimer);playbackTimer=null;}render();},50);render();};
+playbackActions.restart=()=>{if(playbackTimer)clearInterval(playbackTimer);playbackTimer=null;if(viewMode.get()==='design')viewMode.set('stitches');playIndex=0;render();};
 $('#art').onpointermove=e=>{const p=coord(e);setStatus({cursor:`x ${p[0].toFixed(1)} mm · y ${p[1].toFixed(1)} mm`});};let objectDblclickAt=-Infinity;
 $('#art').addEventListener('dblclick',e=>{if(e.target===$('#art')&&!pathDraftNow().pathMode&&performance.now()-objectDblclickAt>500)add('rect');});
 function applyRemote(operations,expected){

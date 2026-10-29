@@ -2227,3 +2227,22 @@ test('sewing order: the heading counts objects and threads, and each row shows i
  await expect(page.locator('.layers-head')).toContainText('2 objects · 2 threads');
  expect(errors).toEqual([]);
 });
+
+test('simulation bar: the time, stitch count, thread track and summary follow the playback position',async({page})=>{
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));
+ await page.goto('/');page.on('dialog',d=>d.accept());await expect(page.locator('#count')).toContainText('compiled');
+ await page.locator('#new').click();await page.locator('#rect').click();await page.locator('#ellipse').click();
+ await page.locator('.object-row').first().click();await page.locator('#thread').selectOption('#d9897e');
+ await page.locator('button[data-view="stitches"]').click();
+ await expect(page.locator('#playbackSummary')).toContainText('1 colour change');
+ await expect(page.locator('#playbackSummary')).toContainText('m thread');
+ await expect(page.locator('.playback-spans span')).toHaveCount(2);
+ const total=await page.locator('#playbackTime').textContent();
+ expect(total).toMatch(/^\d+:\d\d \/ \d+:\d\d$/);
+ await page.locator('#seek').evaluate(el=>{el.value='0';el.dispatchEvent(new Event('input',{bubbles:true}));});
+ await expect(page.locator('#playbackTime')).toHaveText(/^0:00 \/ /);
+ await expect(page.locator('#playbackStitches')).toContainText('Stitch 0 of');
+ await page.locator('#seek').evaluate(el=>{el.value=el.max;el.dispatchEvent(new Event('input',{bubbles:true}));});
+ await expect(page.locator('#playbackTime')).toHaveText(total);
+ expect(errors).toEqual([]);
+});

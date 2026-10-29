@@ -29,6 +29,7 @@ import {ThreadPlan} from './ThreadPlan';
 import {PathTool, PenTool, SelectTool, ToolButtons} from './ToolButtons';
 import {TransformPanel} from './TransformPanel';
 import {ObjectList, ObjectListHead} from './ObjectList';
+import {PlaybackBar} from './PlaybackBar';
 // The editor layout: the object list, the canvas and the inspector. Rendered by React; ids match the markup it replaced, because app.js wires them by id.
 export function EditorLayout() {
  const layout = useSyncExternalStore(layoutState.subscribe, layoutState.get);
@@ -261,38 +262,8 @@ export function EditorLayout() {
           </svg>
         </div>
         <footer>
-          <button
-            className={"icon-button playback-control"}
-            id={"resetPlayback"}
-            aria-label={"Restart stitch simulation"}
-            title={"Restart stitch simulation"}
-            data-tooltip={"Restart simulation"}
-          >
-            <svg className={"icon"}>
-              <use href={"#i-reset"} />
-            </svg>
-          </button>
+          <PlaybackBar />
           <StatusRun />
-          <button
-            className={"icon-button playback-control"}
-            id={"play"}
-            aria-label={"Play stitch simulation"}
-            title={"Play stitch simulation"}
-            data-tooltip={"Play simulation"}
-          >
-            <svg className={"icon"}>
-              <use href={"#i-play"} />
-            </svg>
-          </button>
-          <input
-            id={"seek"}
-            type={"range"}
-            min={"0"}
-            max={"1"}
-            defaultValue={"0"}
-            aria-label={"Stitch simulation progress"}
-            title={"Stitch simulation progress"}
-          />
         </footer>
       </main>
       <aside className={"panel"}>

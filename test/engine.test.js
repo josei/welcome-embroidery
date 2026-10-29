@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import neonGlyphs from '../fonts/neon_blinking/glyphs.json' with {type:'json'};
 import {pinnedMachineFixture} from './fixture-archive.js';
-import {FABRIC_PROFILES,distortionGrid,bundledFontUsage,blockSeconds,blockTimeLabel,initialDocument,compile,encode,applyOperations,geometry,objectBounds,validateDocument,jefWarnings,exportSvg,exportPrintTemplate,exportAppliqueTemplates,isClosedShape,HOOP_PRESETS,batchDocuments,customFontUsage,hoopSize,importStitchLayer,measureText,threadPlan,sewingSeconds,sewingWorksheet,designWarnings,TIP_CATEGORIES,visibleTips,measureBetween,nearestStockThread,parseThreadStock,svgPathFill,parseSvgPath,cornerRadii} from '../src/engine.js';
+import {FABRIC_PROFILES,distortionGrid,bundledFontUsage,blockSeconds,blockTimeLabel,initialDocument,compile,encode,applyOperations,geometry,objectBounds,validateDocument,jefWarnings,exportSvg,exportPrintTemplate,exportAppliqueTemplates,isClosedShape,HOOP_PRESETS,batchDocuments,customFontUsage,hoopSize,importStitchLayer,measureText,threadPlan,threadSpans,sewingSeconds,sewingSecondsUpTo,sewingWorksheet,designWarnings,TIP_CATEGORIES,visibleTips,measureBetween,nearestStockThread,parseThreadStock,svgPathFill,parseSvgPath,cornerRadii} from '../src/engine.js';
 
 test('browser and MCP semantic operations share editable document behavior',()=>{
  const doc=initialDocument();doc.objects=[];
@@ -1717,6 +1717,18 @@ test('PES v6 export: each thread carries its colour hex as the description, in t
  const bytes=encode(compile(d),'pes6','#527461',110,d),text=String.fromCharCode(...bytes);
  assert.ok(text.includes('\x07#c0392b'),'the first thread description is #c0392b, with its length byte');
  assert.ok(text.indexOf('#c0392b')<text.indexOf('#2471a3'),'descriptions follow the thread order');
+});
+
+test('simulation bar: thread spans are the thread blocks as command ranges, and the time up to a point ends at the total',()=>{
+ const d=blank();applyOperations(d,[{op:'add_shape',id:'a',kind:'rect',x:-30,y:-20,width:24,height:14,thread:'#527461',stitch:'fill'},{op:'add_shape',id:'c',kind:'ellipse',x:30,y:-20,width:18,height:12,thread:'#2471a3',stitch:'fill'}]);
+ const plan=compile(d),spans=threadSpans(plan),blocks=threadPlan(plan);
+ assert.equal(spans.length,blocks.length,'one span per thread block');
+ assert.deepEqual(spans.map(s=>s.stitches),blocks.map(b=>b.stitches),'the same stitch counts as the thread plan');
+ assert.equal(spans[0].start,0,'the first span starts at the top of the list');
+ assert.equal(spans.at(-1).end,plan.stitches.length,'the last span ends at the end of the list');
+ for(let i=1;i<spans.length;i++)assert.equal(spans[i].start,spans[i-1].end,'the spans are contiguous');
+ assert.equal(sewingSecondsUpTo(plan,0),0,'nothing sewn at the start');
+ assert.ok(Math.abs(sewingSecondsUpTo(plan,plan.stitches.length)-sewingSeconds(plan))<1e-9,'the end matches the total');
 });
 
 test('replace thread: every object in that colour takes the new one, without case, and the thread plan merges the blocks',()=>{
