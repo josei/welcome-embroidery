@@ -2259,3 +2259,21 @@ test('header export: the format beside Export and the dialog share one choice, a
  await page.locator('#agentPill').click();await expect(page.locator('#agentDialog')).toBeVisible();
  expect(errors).toEqual([]);
 });
+
+test('blend colour rows: each colour label and its thread button stay in their own cell, with no overlap',async({page})=>{
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));
+ await page.goto('/');page.on('dialog',d=>d.accept());await expect(page.locator('#count')).toContainText('compiled');
+ await page.locator('#new').click();await page.locator('#rect').click();await page.locator('.object-row').first().click();
+ await expect(page.locator('#blendPaletteRow')).toBeVisible();
+ const boxes=await page.locator('#blendPaletteRow > label').evaluateAll(ls=>ls.map(l=>{const r=l.getBoundingClientRect(),b=l.querySelector('.thread-btn').getBoundingClientRect();return {l:r.left,r:r.right,t:r.top,b:r.bottom,bl:b.left,br:b.right,bt:b.top,bb:b.bottom};}));
+ expect(boxes.length).toBe(4);
+ for(const c of boxes) {
+  expect(c.bl).toBeGreaterThanOrEqual(c.l-0.5);expect(c.br).toBeLessThanOrEqual(c.r+0.5);
+ }
+ for(let i=0;i<boxes.length;i++)for(let j=i+1;j<boxes.length;j++){
+  const a=boxes[i],b=boxes[j];
+  const overlap=a.l<b.r&&b.l<a.r&&a.t<b.b&&b.t<a.b;
+  expect(overlap,`colour cells ${i+1} and ${j+1} overlap`).toBe(false);
+ }
+ expect(errors).toEqual([]);
+});
