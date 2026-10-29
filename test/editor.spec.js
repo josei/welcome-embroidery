@@ -2201,3 +2201,17 @@ test('snap to other objects is on by default, toggles from the toolbar and is re
  await expect(page.locator('#toast')).toContainText('Snapping to other objects off.');
  expect(await page.evaluate(()=>localStorage.getItem('welcome.snapObj'))).toBe('0');
 });
+
+test('stitch type shows labelled cards, and the row spacing slider sets the same value as its field, one undo step',async({page})=>{
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));
+ await page.goto('/');page.on('dialog',d=>d.accept());await expect(page.locator('#count')).toContainText('compiled');
+ await page.locator('#new').click();await page.locator('#path').click();const m=await ctm(page);for(const [x,y] of [[-20,-15],[20,-15],[20,15],[-20,15],[-20,-15]]){const s=toScreen(m,x,y);await page.mouse.click(s.x,s.y);}await page.keyboard.press('Enter');
+ await page.locator('#type').selectOption('fill');
+ const cards=page.locator('.icon-seg.labelled button');await expect(cards).toHaveCount(7);await expect(cards.first()).toContainText('Fill');
+ await expect(page.locator('.icon-seg.labelled button[aria-pressed=true]')).toHaveText('Fill');
+ const slider=page.locator('#spacingSlider');await expect(slider).toBeVisible();await expect(slider).toHaveValue('0.4');await expect(page.locator('#spacing')).toHaveValue('0.4');
+ await slider.focus();await page.keyboard.press('ArrowRight');
+ await expect(page.locator('#spacing')).toHaveValue('0.45');await expect(slider).toHaveValue('0.45');
+ await page.locator('#undo').click();await expect(page.locator('#spacing')).toHaveValue('0.4');await expect(slider).toHaveValue('0.4');
+ expect(errors).toEqual([]);
+});

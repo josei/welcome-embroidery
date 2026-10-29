@@ -234,3 +234,8 @@ body{height:auto;min-height:0;overflow-x:hidden;overflow-y:auto}
 dialog,#agentDialog,#keysDialog{width:calc(100vw - 24px);max-width:calc(100vw - 24px)}
 input:not([type=checkbox]):not([type=range]),select,textarea,.panel textarea{font-size:16px}
 }
+
+.icon-seg.labelled{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+.icon-seg.labelled button{width:auto;height:auto;padding:9px 4px 7px;display:flex;flex-direction:column;align-items:center;gap:5px;border:1px solid #dcdad3;border-radius:10px;background:#fff;font-size:11px;font-weight:500;color:#3c423e}
+.icon-seg.labelled button[aria-pressed=true]{padding:8px 3px 6px;border:2px solid var(--teal);background:var(--teal-soft);color:var(--teal-deep);font-weight:600}
+.slider-field{margin:-4px 0 10px}.slider-field label{margin:0 0 6px}.slider-field input[type=range]{width:100%;margin:0;accent-color:var(--teal)}
