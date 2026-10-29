@@ -1,5 +1,5 @@
 // The align and distribute buttons on the canvas toolbar. Which are hidden comes from alignState, set by app.js from the selection:
-// align needs two or more objects, distribute three or more. Hidden rather than disabled, so the toolbar shows only what applies.
+// align needs one or more objects (one aligns to the hoop), distribute three or more. Hidden rather than disabled, so the toolbar shows only what applies.
 import {useSyncExternalStore} from 'react';
 import {alignActions, alignState} from '../alignState.js';
 

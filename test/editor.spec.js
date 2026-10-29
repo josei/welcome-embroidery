@@ -2291,7 +2291,7 @@ test('canvas views: 2D, Stitches and 3D sit on the canvas, and the 3D pull panel
  expect(errors).toEqual([]);
 });
 
-test('contextual toolbar: only the actions that apply to the selection show; align needs two objects, distribute three',async({page})=>{
+test('contextual toolbar: only the actions that apply to the selection show; align needs one object, distribute three',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));
  await page.goto('/');page.on('dialog',d=>d.accept());await expect(page.locator('#count')).toContainText('compiled');
  await page.locator('#new').click();
@@ -2299,7 +2299,7 @@ test('contextual toolbar: only the actions that apply to the selection show; ali
  await expect(page.locator('#snap')).toBeVisible();
  await expect(align).toBeHidden();await expect(flip).toBeHidden();await expect(union).toBeHidden();await expect(group).toBeHidden();
  await page.locator('#rect').click();await page.locator('#rect').click();await page.locator('#rect').click();await expect(rows).toHaveCount(3);
- await rows.nth(0).click();await expect(align).toBeHidden();await expect(flip).toBeVisible();await expect(union).toBeHidden();await expect(group).toBeHidden();
+ await rows.nth(0).click();await expect(align).toBeVisible();await expect(distribute).toBeHidden();await expect(flip).toBeVisible();await expect(union).toBeHidden();await expect(group).toBeHidden();
  await rows.nth(1).click({modifiers:['Shift']});await expect(align).toBeVisible();await expect(distribute).toBeHidden();await expect(union).toBeVisible();await expect(group).toBeVisible();
  await rows.nth(2).click({modifiers:['Shift']});await expect(distribute).toBeVisible();
  expect(errors).toEqual([]);

@@ -138,7 +138,7 @@ function render(){updateBatchInfo();
  $('#snap').classList.toggle('active-tool',snapOn);
  $('.canvas').classList.toggle('snapping',snapOn);
  const nMulti=selState().multi.size;
- alignState.set({align:nMulti<2,distribute:nMulti<3});
+ alignState.set({align:nMulti<1,distribute:nMulti<3});
  {const picked=[...selState().multi].map(id=>documentNow().doc.objects.find(o=>o.id===id)).filter(Boolean);setActions({textOnPath:!(picked.length===2&&picked.some(o=>o.kind==='text')&&picked.some(o=>o.kind==='path'))});setActions({textOffPath:!picked.some(o=>o.along)});}
  selectionToolbarState.set({...selectionToolbarState.get(),subtract:nMulti<2,union:nMulti<2,intersect:nMulti<2});
  setActions({group:nMulti<2});
