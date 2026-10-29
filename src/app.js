@@ -20,6 +20,7 @@ import {setRaisedRows,raisedRowsActions} from './raisedRowsState.js';
 import {setFillValues,fillValuesActions} from './fillValuesState.js';
 import {setGuideButtons} from './guideButtonState.js';
 import {setAgentLink} from './agentLinkState.js';
+import {referenceMoveActions} from './referenceFieldsState.js';
 import {setPathRows,pathRowsActions} from './pathRowsState.js';
 import {setLoopRows,loopRowsActions} from './loopRowsState.js';
 import {setThreadStock,threadStockActions} from './threadStockState.js';
@@ -875,7 +876,7 @@ setStitchRow('refRemove',!r);$('#refLoad').textContent=t(r?'Replace picture…':
   setReferenceFields({refX:String(+r.x.toFixed(2)),refY:String(+r.y.toFixed(2)),refW:String(+r.w.toFixed(2)),refH:String(+r.h.toFixed(2))});
   setReferenceFields({refVisible:r.visible!==false,refLocked:Boolean(r.locked)});
   
-  if(r.locked){setInteraction({refMoving: false});$('#art').classList.remove('ref-moving');}$('#refMove').classList.toggle('armed',interactionNow().refMoving);
+  if(r.locked){setInteraction({refMoving: false});$('#art').classList.remove('ref-moving');}
   }
 async function loadReference(file){try{const bmp=await createImageBitmap(file),hs=hoopSize(documentNow().doc),scale=Math.min(1,1400/Math.max(bmp.width,bmp.height)),w=Math.max(1,Math.round(bmp.width*scale)),h=Math.max(1,Math.round(bmp.height*scale)),c=document.createElement('canvas');c.width=w;c.height=h;const ctx=c.getContext('2d');ctx.fillStyle='#fff';ctx.fillRect(0,0,w,h);ctx.drawImage(bmp,0,0,w,h);
   let q=.85,data=c.toDataURL('image/jpeg',q);while(data.length>1_200_000&&q>.4){q-=.1;data=c.toDataURL('image/jpeg',q);}
@@ -894,7 +895,7 @@ $('#refOpacity').onchange=e=>edit([{op:'set_reference',opacity:Math.max(.05,Math
 referenceActions.choose=(field,checked)=>edit([{op:'set_reference',...(field==='refVisible'?{visible:checked}:{locked:checked})}]);
 referenceActions.commit=(field,text)=>{const r=documentNow().doc.reference;if(field==='refX'||field==='refY'){const key=field==='refX'?'x':'y';if(!Number.isFinite(Number(text)))return false;edit([{op:'set_reference',[key]:Number(text)}]);return;}if(field==='refW'){const w=Number(text);if(!(r&&w>=1))return false;edit([{op:'set_reference',w,h:+(r.h*w/r.w).toFixed(2)}]);return;}const h=Number(text);if(!(r&&h>=1))return false;edit([{op:'set_reference',h,w:+(r.w*h/r.h).toFixed(2)}]);};
 $('#refFit').onclick=()=>{const r=documentNow().doc.reference;if(!r)return;const hs=hoopSize(documentNow().doc),f=Math.min((hs.w-4)/r.w,(hs.h-4)/r.h),w=+(r.w*f).toFixed(2),h=+(r.h*f).toFixed(2);edit([{op:'set_reference',x:+(-w/2).toFixed(2),y:+(-h/2).toFixed(2),w,h}]);};
-$('#refMove').onclick=()=>{if(!documentNow().doc.reference||documentNow().doc.reference.locked)return;setInteraction({refMoving: !interactionNow().refMoving});$('#art').classList.toggle('ref-moving',interactionNow().refMoving);$('#refMove').classList.toggle('armed',interactionNow().refMoving);if(interactionNow().refMoving)toast(t('Drag on the canvas to move the picture. Press the button again to go back to drawing.'));};
+referenceMoveActions.toggle=()=>{if(!documentNow().doc.reference||documentNow().doc.reference.locked)return;setInteraction({refMoving: !interactionNow().refMoving});$('#art').classList.toggle('ref-moving',interactionNow().refMoving);if(interactionNow().refMoving)toast(t('Drag on the canvas to move the picture. Press the button again to go back to drawing.'));};
 $('#art').addEventListener('pointerdown',e=>{if(!interactionNow().refMoving||e.button!==0||!documentNow().doc.reference)return;e.preventDefault();e.stopImmediatePropagation();const r=documentNow().doc.reference,start=coord(e);setInteraction({refDrag: {start,x:r.x,y:r.y,pointerId:e.pointerId}});$('#art').setPointerCapture?.(e.pointerId);},true);
 window.addEventListener('pointermove',e=>{if(!interactionNow().refDrag||e.pointerId!==interactionNow().refDrag.pointerId)return;const q=coord(e),im=$('#refLayer image');setInteraction({refDrag: {...interactionNow().refDrag, nx: interactionNow().refDrag.x+q[0]-interactionNow().refDrag.start[0]}});setInteraction({refDrag: {...interactionNow().refDrag, ny: interactionNow().refDrag.y+q[1]-interactionNow().refDrag.start[1]}});if(im){im.setAttribute('x',interactionNow().refDrag.nx);im.setAttribute('y',interactionNow().refDrag.ny);}});
 window.addEventListener('pointerup',e=>{if(!interactionNow().refDrag||e.pointerId!==interactionNow().refDrag.pointerId)return;const d=interactionNow().refDrag;setInteraction({refDrag: null});if(d.nx!==undefined&&(Math.abs(d.nx-d.x)>.01||Math.abs(d.ny-d.y)>.01))edit([{op:'set_reference',x:+d.nx.toFixed(2),y:+d.ny.toFixed(2)}]);});

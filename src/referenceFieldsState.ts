@@ -32,3 +32,8 @@ export const referenceActions: {
   commit() {},
   choose() {},
 };
+
+/** The Move on canvas button calls toggle() when it is pressed. app.js runs it: it switches the picture-moving mode. */
+export const referenceMoveActions: {toggle: () => void} = {
+  toggle() {},
+};
