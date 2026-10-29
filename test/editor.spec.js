@@ -2332,3 +2332,14 @@ test('tool rail: the tools sit on the canvas beside the rulers, keep working, an
  await page.locator('.canvas-views button[data-view="design"]').click();await expect(rail).toBeVisible();
  expect(errors).toEqual([]);
 });
+
+test('sewing-order list: each row shows its stitch count, the counts add up to the design, and each row has a thread spool',async({page})=>{
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));
+ await page.goto('/');page.on('dialog',d=>d.accept());await expect(page.locator('#count')).toContainText('compiled');
+ await page.locator('#new').click();await page.locator('#rect').click();await page.locator('#ellipse').click();
+ const rowCounts=async()=>(await page.locator('.object-row .row-tag').allTextContents()).map(t=>Number((t.match(/([\d,]+) stitch/)||[,'NaN'])[1].replace(/,/g,'')));
+ const total=async()=>Number((await page.locator('#count').textContent()).match(/([\d,]+) stitches/)[1].replace(/,/g,''));
+ await expect.poll(async()=>{const rows=await rowCounts();return rows.length===2&&rows.every(Number.isFinite)&&rows.reduce((a,b)=>a+b,0)===await total();}).toBe(true);
+ await expect(page.locator('.object-row .swatch')).toHaveCount(2);
+ expect(errors).toEqual([]);
+});

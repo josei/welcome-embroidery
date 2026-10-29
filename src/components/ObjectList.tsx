@@ -3,6 +3,7 @@ import type {DragEvent, MouseEvent} from 'react';
 import {documentState} from '../documentState.js';
 import {selectionState} from '../selectionState.js';
 import {layersActions} from '../layersState.js';
+import {sewingCountsState} from '../sewingCountsState.js';
 import {t} from '../i18n.js';
 // The object list in sewing order, rendered by React. Groups collapse, each row has its eye and lock buttons, a click selects,
 // Shift adds to the selection, a double click renames, and rows drag to reorder. Ids and classes match the markup it replaced,
@@ -50,6 +51,12 @@ function entriesOf(objects: Obj[], collapsed: Set<string>): Entry[] {
  return out;
 }
 
+// A group's stitches are the sum of its members' counts, if any member has one.
+function groupCount(members: Obj[], counts: Record<string, number>): number | undefined {
+ const known = members.map(m => counts[m.id]).filter((n): n is number => n !== undefined);
+ return known.length ? known.reduce((sum, n) => sum + n, 0) : undefined;
+}
+
 function useObjects(): Obj[] {
  const {doc} = useSyncExternalStore(documentState.subscribe, documentState.get);
  return doc.objects ?? [];
@@ -94,12 +101,16 @@ function RenameField({name, onDone}: {name: string; onDone: (text: string | null
  );
 }
 
-function ObjectRow({o, depth, selected, dropping, renaming, onRenameDone}: {
+// The stitch count as the row shows it: nothing until the design compiles.
+const stitchesText = (count: number) => (count === 1 ? t('1 stitch') : t('{n} stitches', {n: count.toLocaleString()}));
+
+function ObjectRow({o, depth, selected, dropping, renaming, count, onRenameDone}: {
  o: Obj;
  depth: number;
  selected: boolean;
  dropping: Drop | null;
  renaming: boolean;
+ count: number | undefined;
  onRenameDone: (text: string | null) => void;
 }) {
  const name = o.name || o.kind;
@@ -113,7 +124,9 @@ function ObjectRow({o, depth, selected, dropping, renaming, onRenameDone}: {
    {stitchIcon && <svg className="icon row-icon" aria-hidden="true"><use href={`#${stitchIcon}`} /></svg>}
    <span className="row-text">
     {renaming ? <RenameField name={o.name || ''} onDone={onRenameDone} /> : <span className="row-name">{name}</span>}
-    <span className="row-tag">{o.kind === 'stitch_layer' ? 'machine stitches' : o.stitch}</span>
+    <span className="row-tag">
+     {[o.kind === 'stitch_layer' ? 'machine stitches' : o.stitch, count === undefined ? '' : stitchesText(count)].filter(Boolean).join(' · ')}
+    </span>
    </span>
    <button type="button" className="row-btn row-eye" aria-label={`${hidden ? 'Show' : 'Hide'} ${name}`} title={hidden ? 'Show' : 'Hide'}>
     {icon(hidden ? 'i-eye-off' : 'i-eye')}
@@ -130,7 +143,13 @@ function ObjectRow({o, depth, selected, dropping, renaming, onRenameDone}: {
  );
 }
 
-function GroupRow({groupId, members, open, selectedIds}: {groupId: string; members: Obj[]; open: boolean; selectedIds: Set<string>}) {
+function GroupRow({groupId, members, open, selectedIds, count}: {
+ groupId: string;
+ members: Obj[];
+ open: boolean;
+ selectedIds: Set<string>;
+ count: number | undefined;
+}) {
  const all = members.every(m => selectedIds.has(m.id));
  const hiddenAll = members.every(m => m.visible === false);
  const lockedAll = members.every(m => m.locked);
@@ -140,7 +159,10 @@ function GroupRow({groupId, members, open, selectedIds}: {groupId: string; membe
     {icon(open ? 'i-chevron' : 'i-chevron-right')}
    </button>
    {icon('i-group')}
-   <span className="row-name">{`Group · ${members.length} objects`}</span>
+   <span className="row-text">
+    <span className="row-name">{`Group · ${members.length} objects`}</span>
+    {count !== undefined && <span className="row-tag">{stitchesText(count)}</span>}
+   </span>
    <button type="button" className="row-btn row-eye" aria-label={`${hiddenAll ? 'Show' : 'Hide'} group`}>{icon(hiddenAll ? 'i-eye-off' : 'i-eye')}</button>
    <button type="button" className={`row-btn row-lock${lockedAll ? ' on' : ''}`} aria-label={`${lockedAll ? 'Unlock' : 'Lock'} group`}>
     {icon(lockedAll ? 'i-lock' : 'i-unlock')}
@@ -152,6 +174,7 @@ function GroupRow({groupId, members, open, selectedIds}: {groupId: string; membe
 export function ObjectList() {
  const objects = useObjects();
  const sel = useSyncExternalStore(selectionState.subscribe, selectionState.get);
+ const counts = useSyncExternalStore(sewingCountsState.subscribe, sewingCountsState.get);
  const [collapsed, setCollapsed] = useState<Set<string>>(() => new Set());
  const [renaming, setRenaming] = useState<string | null>(null);
  const [drop, setDrop] = useState<Drop | null>(null);
@@ -256,7 +279,14 @@ export function ObjectList() {
  return (
   <div id="objects" onClick={onClick} onDragStart={onDragStart} onDragOver={onDragOver} onDragLeave={onDragLeave} onDrop={onDrop} onDragEnd={onDragEnd}>
    {entriesOf(objects, collapsed).map(entry => entry.kind === 'group' ? (
-    <GroupRow key={`group:${entry.groupId}`} groupId={entry.groupId} members={entry.members} open={entry.open} selectedIds={sel.multi} />
+    <GroupRow
+     key={`group:${entry.groupId}`}
+     groupId={entry.groupId}
+     members={entry.members}
+     open={entry.open}
+     selectedIds={sel.multi}
+     count={groupCount(entry.members, counts)}
+    />
    ) : (
     <ObjectRow
      key={entry.o.id}
@@ -265,6 +295,7 @@ export function ObjectList() {
      selected={sel.multi.has(entry.o.id)}
      dropping={drop && drop.id === entry.o.id ? drop : null}
      renaming={renaming === entry.o.id}
+     count={counts[entry.o.id]}
      onRenameDone={text => {
       setRenaming(null);
       layersActions.rename(entry.o.id, text);
