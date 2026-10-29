@@ -106,7 +106,7 @@ test('worker load failure reports a recoverable editor error instead of leaving 
 
 test('single top bar and vector editing: polygon, nodes, snap, align, distribute, border and thread preview',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');await page.locator('#new').click().catch(()=>{});page.on('dialog',d=>d.accept());await page.locator('#new').click();
- await expect(page.locator('nav')).toHaveCount(0);await expect(page.locator('header.top button[data-view="preview"]')).toBeVisible();await expect(page.locator('header.top #undo')).toBeVisible();
+ await expect(page.locator('nav')).toHaveCount(0);await expect(page.locator('.canvas-views button[data-view="preview"]')).toBeVisible();await expect(page.locator('header.top #undo')).toBeVisible();
  const m=await page.evaluate(()=>{const m=document.querySelector('#art').getScreenCTM();return {a:m.a,d:m.d,e:m.e,f:m.f};}),at=(mx,my)=>({x:m.a*mx+m.e,y:m.d*my+m.f});
  await page.locator('#snap').click();await expect(page.locator('#snap')).toHaveClass(/active-tool/);
  await page.locator('#path').click();for(const [x,y] of [[-20,-20],[20.4,-20.3],[0,20]]){const p=at(x,y);await page.mouse.click(p.x,p.y);}const first=at(-20,-20);await page.mouse.click(first.x,first.y);
@@ -2275,5 +2275,18 @@ test('blend colour rows: each colour label and its thread button stay in their o
   const overlap=a.l<b.r&&b.l<a.r&&a.t<b.b&&b.t<a.b;
   expect(overlap,`colour cells ${i+1} and ${j+1} overlap`).toBe(false);
  }
+ expect(errors).toEqual([]);
+});
+
+test('canvas views: 2D, Stitches and 3D sit on the canvas, and the 3D pull panel sits below them',async({page})=>{
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));
+ await page.goto('/');page.on('dialog',d=>d.accept());await expect(page.locator('#count')).toContainText('compiled');
+ const webgl=await page.evaluate(()=>Boolean(document.createElement('canvas').getContext('webgl2')));test.skip(!webgl,'WebGL2 is not available in this browser');
+ await expect(page.locator('.canvas-views button')).toHaveText(['2D','Stitches','3D']);
+ await expect(page.locator('.canvas-views button[data-view="design"]')).toHaveAttribute('aria-pressed','true');
+ await page.locator('.canvas-views button[data-view="preview"]').click();await expect(page.locator('#preview3d')).toBeVisible();
+ await expect(page.locator('#previewPull')).toBeVisible();
+ const views=await page.locator('.canvas-views').boundingBox(),pull=await page.locator('#previewPull').boundingBox();
+ expect(pull.y).toBeGreaterThanOrEqual(views.y+views.height);
  expect(errors).toEqual([]);
 });

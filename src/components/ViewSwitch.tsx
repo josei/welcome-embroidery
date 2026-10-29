@@ -2,12 +2,12 @@ import {useSyncExternalStore} from 'react';
 import {viewActions, viewMode} from '../viewMode.js';
 
 const VIEWS = [
- {id: 'design', label: 'Design'},
+ {id: 'design', label: '2D'},
  {id: 'stitches', label: 'Stitches'},
- {id: 'preview', label: 'Preview'},
+ {id: 'preview', label: '3D'},
 ] as const;
 
-// The Design, Stitches and Preview switch in the header. The current view lives in viewMode.
+// The 2D, Stitches and 3D switch on the canvas (the ids stay design, stitches and preview). The current view lives in viewMode.
 // Choosing a view runs app.js's view change, which also stops playback and redraws the canvas.
 export function ViewSwitch() {
  const current = useSyncExternalStore(viewMode.subscribe, viewMode.get);

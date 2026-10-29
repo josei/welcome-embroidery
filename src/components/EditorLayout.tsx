@@ -30,6 +30,7 @@ import {PathTool, PenTool, SelectTool, ToolButtons} from './ToolButtons';
 import {TransformPanel} from './TransformPanel';
 import {ObjectList, ObjectListHead} from './ObjectList';
 import {PlaybackBar} from './PlaybackBar';
+import {ViewSwitch} from './ViewSwitch';
 // The editor layout: the object list, the canvas and the inspector. Rendered by React; ids match the markup it replaced, because app.js wires them by id.
 export function EditorLayout() {
  const layout = useSyncExternalStore(layoutState.subscribe, layoutState.get);
@@ -91,6 +92,9 @@ export function EditorLayout() {
       </aside>
       <main>
         <div className={"canvas"}>
+          <div className={"canvas-views"}>
+            <ViewSwitch />
+          </div>
           <canvas id={"rulerTop"} aria-hidden={"true"}>
           </canvas>
           <canvas id={"rulerLeft"} aria-hidden={"true"}>
