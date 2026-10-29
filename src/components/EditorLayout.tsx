@@ -39,50 +39,6 @@ export function EditorLayout() {
     <div className={"layout"}>
       <aside className={"panel"}>
         <ObjectListHead />
-        <div className={"tool-row"} aria-label={"Tools"}>
-          <SelectTool />
-          <button className={"icon-button"} id={"rect"} aria-label={"Add rectangle"} title={"Add rectangle"} data-tooltip={"Add rectangle"}>
-            <svg className={"icon"}>
-              <use href={"#i-rect"} />
-            </svg>
-          </button>
-          <button className={"icon-button"} id={"ellipse"} aria-label={"Add ellipse"} title={"Add ellipse"} data-tooltip={"Add ellipse"}>
-            <svg className={"icon"}>
-              <use href={"#i-ellipse"} />
-            </svg>
-          </button>
-          <PathTool />
-          <button className={"icon-button"} id={"letter"} aria-label={"Add lettering"} title={"Add lettering"} data-tooltip={"Add lettering"}>
-            <svg className={"icon"}>
-              <use href={"#i-text"} />
-            </svg>
-          </button>
-          <ToolButtons />
-          <button
-            className={"icon-button"}
-            id={"traceBtn"}
-            aria-label={"Trace a picture into filled shapes"}
-            title={"Trace a picture into filled shapes"}
-            data-tooltip={"Trace a picture into filled shapes"}
-          >
-            <svg className={"icon"}>
-              <use href={"#i-trace"} />
-            </svg>
-          </button>
-          <button
-            className={"icon-button"}
-            id={"photo"}
-            aria-label={"Photo stitch from a picture"}
-            title={"Photo stitch from a picture"}
-            data-tooltip={"Photo stitch from a picture"}
-          >
-            <svg className={"icon"}>
-              <use href={"#i-photo"} />
-            </svg>
-          </button>
-          <input id={"photoFile"} type={"file"} accept={"image/*"} hidden={true} />
-          <PenTool />
-        </div>
         <label className={"sides-row"} hidden={true}>
           {"Sides / star points "}
           <input id={"sides"} type={"number"} min={"3"} max={"12"} defaultValue={"5"} />
@@ -92,6 +48,50 @@ export function EditorLayout() {
       </aside>
       <main>
         <div className={"canvas"}>
+          <div className={"tool-row tool-rail"} aria-label={"Tools"}>
+            <SelectTool />
+            <button className={"icon-button"} id={"rect"} aria-label={"Add rectangle"} title={"Add rectangle"} data-tooltip={"Add rectangle"}>
+              <svg className={"icon"}>
+                <use href={"#i-rect"} />
+              </svg>
+            </button>
+            <button className={"icon-button"} id={"ellipse"} aria-label={"Add ellipse"} title={"Add ellipse"} data-tooltip={"Add ellipse"}>
+              <svg className={"icon"}>
+                <use href={"#i-ellipse"} />
+              </svg>
+            </button>
+            <PathTool />
+            <button className={"icon-button"} id={"letter"} aria-label={"Add lettering"} title={"Add lettering"} data-tooltip={"Add lettering"}>
+              <svg className={"icon"}>
+                <use href={"#i-text"} />
+              </svg>
+            </button>
+            <ToolButtons />
+            <button
+              className={"icon-button"}
+              id={"traceBtn"}
+              aria-label={"Trace a picture into filled shapes"}
+              title={"Trace a picture into filled shapes"}
+              data-tooltip={"Trace a picture into filled shapes"}
+            >
+              <svg className={"icon"}>
+                <use href={"#i-trace"} />
+              </svg>
+            </button>
+            <button
+              className={"icon-button"}
+              id={"photo"}
+              aria-label={"Photo stitch from a picture"}
+              title={"Photo stitch from a picture"}
+              data-tooltip={"Photo stitch from a picture"}
+            >
+              <svg className={"icon"}>
+                <use href={"#i-photo"} />
+              </svg>
+            </button>
+            <input id={"photoFile"} type={"file"} accept={"image/*"} hidden={true} />
+            <PenTool />
+          </div>
           <div className={"canvas-views"}>
             <ViewSwitch />
           </div>

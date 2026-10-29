@@ -1113,7 +1113,7 @@ test('sewing tips are translated in the Spanish interface',async({page})=>{
 });
 
 test('hand tool drags the view and the select tool does not',async({page})=>{
- await page.goto('/');const art=await page.locator('#art').boundingBox();const x=art.x+60,y=art.y+60;
+ await page.goto('/');const art=await page.locator('#art').boundingBox();const x=art.x+art.width/2,y=art.y+art.height/2;
  const m0=await ctm(page);await page.mouse.move(x,y);await page.mouse.down();await page.mouse.move(x+50,y+20,{steps:3});await page.mouse.up();
  expect(await ctm(page)).toEqual(m0);
  await page.locator('#handTool').click();await expect(page.locator('#handTool')).toHaveAttribute('aria-pressed','true');
@@ -2316,5 +2316,19 @@ test('the interface uses the bundled Inter font, and the page loads no font from
  expect(loaded).toBe(true);
  expect(fontStatuses).toContain(200);
  expect(requests.filter(u=>!u.startsWith(origin)&&!u.startsWith('data:')&&!u.startsWith('blob:'))).toEqual([]);
+ expect(errors).toEqual([]);
+});
+
+test('tool rail: the tools sit on the canvas beside the rulers, keep working, and hide in 3D',async({page})=>{
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));
+ await page.goto('/');page.on('dialog',d=>d.accept());await expect(page.locator('#count')).toContainText('compiled');
+ const rail=page.locator('.canvas .tool-rail');await expect(rail).toBeVisible();
+ for(const id of ['select','rect','ellipse','path','pen','letter','line','measure','polygon','star','traceBtn','photo']) await expect(rail.locator('#'+id)).toBeVisible();
+ await expect(page.locator('.layout > aside.panel .tool-row')).toHaveCount(0);
+ const box=await rail.boundingBox(),ruler=await page.locator('#rulerLeft').boundingBox(),top=await page.locator('#rulerTop').boundingBox();
+ expect(box.x).toBeGreaterThanOrEqual(ruler.x+ruler.width);expect(box.y).toBeGreaterThanOrEqual(top.y+top.height);
+ await page.locator('#new').click();await page.locator('#rect').click();await expect(page.locator('.object-row')).toHaveCount(1);
+ await page.locator('.canvas-views button[data-view="preview"]').click();await expect(rail).toBeHidden();
+ await page.locator('.canvas-views button[data-view="design"]').click();await expect(rail).toBeVisible();
  expect(errors).toEqual([]);
 });
