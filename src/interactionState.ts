@@ -2,7 +2,7 @@ import {createStore} from './store.js';
 
 /**
  * Transient editing state: the guide being drawn, a reference-picture move in progress, the text being edited on the canvas,
- * the object-list row being dragged, and the path node or reference picture being dragged. app.js changes it with setInteraction.
+ * and the path node or reference picture being dragged. app.js changes it with setInteraction.
  */
 /** A path node or handle being dragged: where the pointer went down, and the position as it moves. */
 export interface PathNodeDrag {
@@ -36,7 +36,6 @@ export interface Interaction {
   guideDraft: Array<[number, number]> | null;
   refMoving: boolean;
   canvasText: {id: string; original: string; ta: HTMLTextAreaElement} | null;
-  dragLayer: string | null;
   nodeDrag: PathNodeDrag | null;
   refDrag: RefDrag | null;
 }
@@ -45,7 +44,6 @@ export const interactionState = createStore<Interaction>({
   guideDraft: null,
   refMoving: false,
   canvasText: null,
-  dragLayer: null,
   nodeDrag: null,
   refDrag: null,
 });

@@ -52,6 +52,7 @@ import {traceImage,traceOps,traceLines,traceLineOps} from './trace.js';
 import {createAgentBridge} from './agent.js';
 import {createThreadPreview} from './preview3d.js';
 import {previewState,setPreviewState,previewActions} from './previewState.js';
+import {layersActions} from './layersState.js';
 import {createCanvas} from './canvas.js';
 import {getFont,registerFont,loadFont,isRegistryFont,documentFontIds,registerDocumentFonts} from './fonts.js';
 import {createFontPicker,fetchFontIndex,LEGACY} from './fontui.js';
@@ -60,7 +61,7 @@ import {distortionGrid,blockSeconds,blockTimeLabel,bundledFontUsage,countSmallHo
 const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)],svgNS='http://www.w3.org/2000/svg';
 const withSavedHoop=d=>{try{const h=JSON.parse(localStorage.getItem('welcome.hoop')||'null');if(h&&Number.isFinite(h.w)&&Number.isFinite(h.h)&&h.w>=10&&h.w<=400&&h.h>=10&&h.h<=400){d.hoop=h.w;if(h.h===h.w)delete d.hoopH;else d.hoopH=h.h;}}catch{}return d;};
 setDocument({doc:withSavedHoop(initialDocument()),history:[],future:[],dirty:true});
-let plan=null,worker=new Worker(new URL('./worker.js',import.meta.url),{type:'module'}),workerFailure=null,seq=0,generation=0,pending=new Map(),editMode=false,canvasView=null,collapsed=new Set(),snapOn=false,gridSize=1,playIndex=null,playbackTimer=null;
+let plan=null,worker=new Worker(new URL('./worker.js',import.meta.url),{type:'module'}),workerFailure=null,seq=0,generation=0,pending=new Map(),editMode=false,canvasView=null,snapOn=false,gridSize=1,playIndex=null,playbackTimer=null;
 worker.onmessage=e=>{if(e.data.generation!==generation)return;const p=pending.get(e.data.id);if(!p)return;pending.delete(e.data.id);e.data.ok?p.resolve(e.data):p.reject(Error(e.data.error));};
 function failPending(error){workerFailure??=error;for(const item of pending.values())item.reject(workerFailure);pending.clear();}
 worker.addEventListener('error',e=>{e.preventDefault();failPending(Error(`Stitch worker failed to load or run${e.message?`: ${e.message}`:''}. Reload the editor and try again.`));});
@@ -160,7 +161,7 @@ function render(){updateBatchInfo();
  setRect('#hoopRing',hoop.w,hoop.h,4);
  setRect('#hoopLinen',hoop.w-2.4,hoop.h-2.4,3);
  setHoopFields({hoopW:String(hoop.w),hoopH:String(hoop.h),preset:HOOP_PRESETS.some(p=>p.w===hoop.w&&p.h===hoop.h)?`${hoop.w}x${hoop.h}`:'custom'});
- renderLayers();
+ 
  const g=$('#shapes');
  g.replaceChildren();
  const defs=document.createElementNS(svgNS,'defs'),clipDone=new Set();
@@ -394,56 +395,12 @@ function finishDrag(e){if(!interactionNow().nodeDrag||e.pointerId!==interactionN
  }
 window.addEventListener('pointerup',finishDrag);window.addEventListener('pointercancel',finishDrag);
 
-// ---- layers / element tree: sewing order top to bottom, groups as collapsible parents, eye and lock toggles, drag to reorder, double-click to rename
-function renderLayers(){
- const root=$('#objects');root.replaceChildren();const seen=new Set(),icon=(name)=>`<svg class="icon" aria-hidden="true"><use href="#i-${name}"/></svg>`;
- const rowFor=(o,depth)=>{const row=document.createElement('div');row.className=`object-row${selState().multi.has(o.id)?' selected':''}${o.visible===false?' is-hidden':''}${o.locked?' is-locked':''}`;row.dataset.id=o.id;row.draggable=true;row.tabIndex=0;row.setAttribute('role','button');row.style.paddingLeft=`${8+depth*16}px`;
-  row.innerHTML=`<i class="swatch" style="background:${esc(o.thread)}"></i><span class="row-name">${esc(o.name||o.kind)}</span><span class="row-tag">${o.kind==='stitch_layer'?'machine stitches':esc(o.stitch)}</span><button type="button" class="row-btn row-eye" aria-label="${o.visible===false?'Show':'Hide'} ${esc(o.name||o.kind)}" title="${o.visible===false?'Show':'Hide'}">${icon(o.visible===false?'eye-off':'eye')}</button><button type="button" class="row-btn row-lock${o.locked?' on':''}" aria-label="${o.locked?'Unlock':'Lock'} ${esc(o.name||o.kind)}" title="${o.locked?'Unlock':'Lock'}">${icon(o.locked?'lock':'unlock')}</button>`;
-  root.append(row);
-  };
- for(const o of documentNow().doc.objects){if(seen.has(o.id))continue;
-  if(o.groupId){const members=documentNow().doc.objects.filter(v=>v.groupId===o.groupId);members.forEach(m=>seen.add(m.id));const open=!collapsed.has(o.groupId),all=members.every(m=>selState().multi.has(m.id)),hiddenAll=members.every(m=>m.visible===false),lockedAll=members.every(m=>m.locked);
-   const head=document.createElement('div');
-   head.className=`group-row${all?' selected':''}`;
-   head.dataset.group=o.groupId;
-   head.tabIndex=0;
-   head.setAttribute('role','button');
-   head.innerHTML=`<button type="button" class="row-btn group-caret" aria-label="${open?'Collapse':'Expand'} group" aria-expanded="${open}">${icon(open?'chevron':'chevron-right')}</button>${icon('group')}<span class="row-name">Group · ${members.length} objects</span><button type="button" class="row-btn row-eye" aria-label="${hiddenAll?'Show':'Hide'} group">${icon(hiddenAll?'eye-off':'eye')}</button><button type="button" class="row-btn row-lock${lockedAll?' on':''}" aria-label="${lockedAll?'Unlock':'Lock'} group">${icon(lockedAll?'lock':'unlock')}</button>`;
-   root.append(head);
-   if(open)for(const m of members)rowFor(m,1);}
-  else{seen.add(o.id);rowFor(o,0);}}
-}
-function layerIds(target){const g=target.closest('.group-row')?.dataset.group;return g?documentNow().doc.objects.filter(o=>o.groupId===g).map(o=>o.id):null;}
-$('#objects').addEventListener('click',e=>{
- const head=e.target.closest('.group-row'),row=e.target.closest('.object-row');
- if(e.target.closest('.group-caret')&&head){const g=head.dataset.group;collapsed.has(g)?collapsed.delete(g):collapsed.add(g);render();return;}
- if(e.target.closest('.row-eye')){const ids=head?layerIds(head):[row.dataset.id],hide=!documentNow().doc.objects.filter(o=>ids.includes(o.id)).every(o=>o.visible===false);edit(ids.map(id=>({op:'set_object',id,visible:!hide})));return;}
- if(e.target.closest('.row-lock')){const ids=head?layerIds(head):[row.dataset.id],lock=!documentNow().doc.objects.filter(o=>ids.includes(o.id)).every(o=>o.locked);edit(ids.map(id=>({op:'set_object',id,locked:lock})));return;}
- if(head){const ids=layerIds(head);if(e.shiftKey)selectIds([...new Set([...selState().multi,...ids])],ids.at(-1));else selectIds(ids,ids.at(-1));return;}
- if(!row)return;
- const id=row.dataset.id;
- if(!e.shiftKey&&e.target.closest('.row-name')){const now=performance.now();if(lastRowClick&&lastRowClick.id===id&&now-lastRowClick.t<450){lastRowClick=null;startRename(row);return;}lastRowClick={id,t:now};}if(e.shiftKey){const next=new Set(selState().multi);if(next.has(id)&&next.size>1)next.delete(id);else next.add(id);selectIds([...next],id);}else selectIds([...withGroup(id)],id);
-});
-let lastRowClick=null;
-function startRename(row){const o=documentNow().doc.objects.find(v=>v.id===row.dataset.id),name=row.querySelector('.row-name');if(!o||!name)return;
- const input=document.createElement('input');
- input.className='row-rename';
- input.value=o.name||'';
- input.maxLength=120;
- name.replaceWith(input);
- input.focus();
- input.select();
- let finished=false;
- const done=ok=>{if(finished)return;finished=true;const v=input.value.trim();if(ok&&v&&v!==o.name)edit([{op:'set_object',id:o.id,name:v}]);else render();};
- input.onkeydown=ev=>{ev.stopPropagation();if(ev.key==='Enter')done(true);else if(ev.key==='Escape')done(false);};
- input.onblur=()=>done(true);
- input.onclick=ev=>ev.stopPropagation();
- }
-$('#objects').addEventListener('dragstart',e=>{const row=e.target.closest('.object-row');if(!row)return;setInteraction({dragLayer: row.dataset.id});e.dataTransfer.effectAllowed='move';e.dataTransfer.setData('text/plain',interactionNow().dragLayer);});
-$('#objects').addEventListener('dragover',e=>{const row=e.target.closest('.object-row');if(!interactionNow().dragLayer||!row||row.dataset.id===interactionNow().dragLayer)return;e.preventDefault();const r=row.getBoundingClientRect(),after=e.clientY>r.top+r.height/2;$$('#objects .drop-before,#objects .drop-after').forEach(n=>n.classList.remove('drop-before','drop-after'));row.classList.add(after?'drop-after':'drop-before');});
-$('#objects').addEventListener('dragleave',e=>{if(!e.relatedTarget||!$('#objects').contains(e.relatedTarget))$$('#objects .drop-before,#objects .drop-after').forEach(n=>n.classList.remove('drop-before','drop-after'));});
-$('#objects').addEventListener('drop',e=>{const row=e.target.closest('.object-row');$$('#objects .drop-before,#objects .drop-after').forEach(n=>n.classList.remove('drop-before','drop-after'));if(!interactionNow().dragLayer||!row||row.dataset.id===interactionNow().dragLayer){setInteraction({dragLayer: null});return;}e.preventDefault();const from=documentNow().doc.objects.findIndex(o=>o.id===interactionNow().dragLayer),t=documentNow().doc.objects.findIndex(o=>o.id===row.dataset.id),after=e.clientY>row.getBoundingClientRect().top+row.offsetHeight/2;let to=t+(after?1:0);if(from<to)to--;const id=interactionNow().dragLayer;setInteraction({dragLayer: null});if(to!==from)edit([{op:'reorder',id,index:to}]);});
-$('#objects').addEventListener('dragend',()=>{setInteraction({dragLayer: null});$$('#objects .drop-before,#objects .drop-after').forEach(n=>n.classList.remove('drop-before','drop-after'));});
+// The object list (ObjectList.tsx) calls these: they change the selection or the document, as the list did before it moved to React.
+layersActions.select=(ids,primary)=>selectIds(ids,primary);
+layersActions.setVisible=(ids,visible)=>edit(ids.map(id=>({op:'set_object',id,visible})));
+layersActions.setLocked=(ids,locked)=>edit(ids.map(id=>({op:'set_object',id,locked})));
+layersActions.reorder=(id,index)=>edit([{op:'reorder',id,index}]);
+layersActions.rename=(id,text)=>{const o=documentNow().doc.objects.find(v=>v.id===id),name=text?.trim();if(o&&name&&name!==o.name)edit([{op:'set_object',id,name}]);};
 
 $('#rect').onclick=()=>add('rect');$('#ellipse').onclick=()=>add('ellipse');$('#letter').onclick=()=>add('text');
 

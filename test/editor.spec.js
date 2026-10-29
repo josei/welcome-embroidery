@@ -2215,3 +2215,15 @@ test('stitch type shows labelled cards, and the row spacing slider sets the same
  await page.locator('#undo').click();await expect(page.locator('#spacing')).toHaveValue('0.4');await expect(slider).toHaveValue('0.4');
  expect(errors).toEqual([]);
 });
+
+test('sewing order: the heading counts objects and threads, and each row shows its stitch icon',async({page})=>{
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));
+ await page.goto('/');page.on('dialog',d=>d.accept());await expect(page.locator('#count')).toContainText('compiled');
+ await page.locator('#new').click();await page.locator('#rect').click();await page.locator('#ellipse').click();
+ await expect(page.locator('.layers-head')).toContainText('2 objects · 1 thread');
+ const rows=page.locator('.object-row');await expect(rows).toHaveCount(2);
+ for(const row of await rows.all()) await expect(row.locator('.row-icon use')).toHaveAttribute('href','#i-fill');
+ await rows.first().click();await page.locator('#thread').selectOption('#d9897e');
+ await expect(page.locator('.layers-head')).toContainText('2 objects · 2 threads');
+ expect(errors).toEqual([]);
+});

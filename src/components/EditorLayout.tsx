@@ -28,6 +28,7 @@ import {StitchTypeRows} from './StitchTypeRows';
 import {ThreadPlan} from './ThreadPlan';
 import {PathTool, PenTool, SelectTool, ToolButtons} from './ToolButtons';
 import {TransformPanel} from './TransformPanel';
+import {ObjectList, ObjectListHead} from './ObjectList';
 // The editor layout: the object list, the canvas and the inspector. Rendered by React; ids match the markup it replaced, because app.js wires them by id.
 export function EditorLayout() {
  const layout = useSyncExternalStore(layoutState.subscribe, layoutState.get);
@@ -35,9 +36,7 @@ export function EditorLayout() {
   <>
     <div className={"layout"}>
       <aside className={"panel"}>
-        <h3>
-          {"Objects"}
-        </h3>
+        <ObjectListHead />
         <div className={"tool-row"} aria-label={"Tools"}>
           <SelectTool />
           <button className={"icon-button"} id={"rect"} aria-label={"Add rectangle"} title={"Add rectangle"} data-tooltip={"Add rectangle"}>
@@ -86,8 +85,7 @@ export function EditorLayout() {
           {"Sides / star points "}
           <input id={"sides"} type={"number"} min={"3"} max={"12"} defaultValue={"5"} />
         </label>
-        <div id={"objects"}>
-        </div>
+        <ObjectList />
         <HoopFields />
       </aside>
       <main>
