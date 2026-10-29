@@ -2304,3 +2304,17 @@ test('contextual toolbar: only the actions that apply to the selection show; ali
  await rows.nth(2).click({modifiers:['Shift']});await expect(distribute).toBeVisible();
  expect(errors).toEqual([]);
 });
+
+test('the interface uses the bundled Inter font, and the page loads no font from another site',async({page})=>{
+ const errors=[],requests=[],fontStatuses=[];
+ page.on('pageerror',e=>errors.push(e.message));
+ page.on('request',r=>requests.push(r.url()));
+ page.on('response',r=>{if(/\.woff2(\?|$)/.test(r.url()))fontStatuses.push(r.status());});
+ await page.goto('/');await expect(page.locator('#count')).toContainText('compiled');
+ const origin=new URL(page.url()).origin;
+ const loaded=await page.evaluate(async()=>{await document.fonts.load('600 13px Inter');return [...document.fonts].some(f=>f.family.replace(/"/g,'')==='Inter'&&f.status==='loaded');});
+ expect(loaded).toBe(true);
+ expect(fontStatuses).toContain(200);
+ expect(requests.filter(u=>!u.startsWith(origin)&&!u.startsWith('data:')&&!u.startsWith('blob:'))).toEqual([]);
+ expect(errors).toEqual([]);
+});

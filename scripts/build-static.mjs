@@ -6,7 +6,9 @@ let html=await fs.readFile('dist/index.html','utf8');
 const link=html.match(/<link rel="stylesheet"[^>]*href="\.\/(assets\/[^"]+\.css)"[^>]*>/);
 if(!link)throw Error('Expected bundled stylesheet link was not found.');
 const css=await fs.readFile(`dist/${link[1]}`,'utf8');
-html=html.replace(link[0],`<meta name="welcome-static" content="true"><style>\n${css}\n</style>`);
+// The stylesheet sat in dist/assets/, so its relative url(./…) (the bundled fonts) must point into assets/ once it is inlined here.
+const cssEmbedded=css.replace(/url\(\.\/(?!assets\/)/g,'url(./assets/');
+html=html.replace(link[0],`<meta name="welcome-static" content="true"><style>\n${cssEmbedded}\n</style>`);
 await fs.writeFile('dist/index.html',html);
 await fs.rm(`dist/${link[1]}`);
 await fs.cp('fonts','dist/fonts',{recursive:true});

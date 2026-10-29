@@ -16,7 +16,7 @@ import {renderStitches,renderDesign} from './server-render.js';
 
 // Settings come from WELCOME_* environment variables.
 const env=name=>process.env[`WELCOME_${name}`];
-const root=path.dirname(fileURLToPath(import.meta.url)),distRoot=path.join(root,'dist'),dataDir=env('DATA_DIR')||path.join(root,'var'),anonymousDocs=new Map(),relay=createRelay({storePath:env('SESSION_FILE')===''?null:(env('SESSION_FILE')||path.join(dataDir,'sessions.json'))}),anonymousAllowed=env('ANONYMOUS_MCP')==='1',artifacts=path.join(dataDir,'artifacts'),mime={'.html':'text/html; charset=utf-8','.css':'text/css; charset=utf-8','.js':'text/javascript; charset=utf-8','.json':'application/json; charset=utf-8','.svg':'image/svg+xml','.png':'image/png'};
+const root=path.dirname(fileURLToPath(import.meta.url)),distRoot=path.join(root,'dist'),dataDir=env('DATA_DIR')||path.join(root,'var'),anonymousDocs=new Map(),relay=createRelay({storePath:env('SESSION_FILE')===''?null:(env('SESSION_FILE')||path.join(dataDir,'sessions.json'))}),anonymousAllowed=env('ANONYMOUS_MCP')==='1',artifacts=path.join(dataDir,'artifacts'),mime={'.html':'text/html; charset=utf-8','.css':'text/css; charset=utf-8','.js':'text/javascript; charset=utf-8','.json':'application/json; charset=utf-8','.svg':'image/svg+xml','.png':'image/png','.woff2':'font/woff2'};
 await fs.mkdir(artifacts,{recursive:true});
 const fontCount=loadBundledFonts(root);
 const fontIndex=(await Promise.all(['inkstitch','ttf'].map(async g=>JSON.parse(await fs.readFile(path.join(root,'fonts',g,'index.json'),'utf8').catch(()=>'[]')).map(f=>({...f,fid:`${g}/${f.id}`}))))).flat();
