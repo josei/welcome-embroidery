@@ -21,6 +21,8 @@ import {setFillValues,fillValuesActions} from './fillValuesState.js';
 import {setGuideButtons} from './guideButtonState.js';
 import {setAgentLink} from './agentLinkState.js';
 import {setPhotoRows,photoRowsActions} from './photoRowsState.js';
+import {THREAD_PALETTE,threadName} from './threadPalette.js';
+import {openThreadPopover,closeThreadPopover,threadPopoverState} from './threadPopoverState.js';
 import {setFontsDialogOpen} from './fontsDialogState.js';
 import {referenceMoveActions} from './referenceFieldsState.js';
 import {setPathRows,pathRowsActions} from './pathRowsState.js';
@@ -294,7 +296,7 @@ setRunRows({underpath:o?.underpath!==false});
   setStitchRow('maskRow',!(n===1&&o?.clipId));
   const ph=n===1&&o?.photo;
   setStitchRow('photoBox',!ph);
-  if(ph){setPhotoRows({spacing:String(o.photo.spacing??.7),contrast:String(o.photo.contrast??1.4),invert:Boolean(o.photo.invert)});$('#photoThread2').value=o.photo.thread2||'';$('#photoThread3').value=o.photo.thread3||'';setStitchRow('photoThread3Row',!o.photo.thread2);$('#photoThread4').value=o.photo.thread4||'';setStitchRow('photoThread4Row',!o.photo.thread3);}}
+  if(ph){setPhotoRows({spacing:String(o.photo.spacing??.7),contrast:String(o.photo.contrast??1.4),invert:Boolean(o.photo.invert)});setPhotoRows({thread2:o.photo.thread2||'',thread3:o.photo.thread3||'',thread4:o.photo.thread4||''});setStitchRow('photoThread3Row',!o.photo.thread2);setStitchRow('photoThread4Row',!o.photo.thread3);}}
   {const satinPath=n===1&&o?.kind==='path'&&o.stitch==='satin',bw=Number(o?.borderWidth)>0&&picked.every(v=>v.border);
   setStitchRow('capRow',!satinPath&&!(n===1&&o?.kind==='path'&&o.stitch==='run'&&false));setStitchRow('joinRow',!(satinPath||(n>=1&&bw&&fillable)));
   if(o){setStitchChoices({cap:o.cap||'butt',join:o.join||'round'});}
@@ -830,8 +832,8 @@ photoRowsActions.choose=(field,checked)=>setPhoto({invert:checked});
 $('#blendAngle').onchange=e=>{if(selState().selected)edit([{op:'set_object',id:selState().selected,blendAngle:e.target.value===''?null:Number(e.target.value)}]);};
 $('#selectMask').onclick=()=>{const o=selectedObject();if(o?.clipId&&documentNow().doc.objects.some(v=>v.id===o.clipId))selectIds([o.clipId],o.clipId);};
 const photoThreadKeys=['thread2','thread3','thread4'];
-for(const key of photoThreadKeys)$('#photo'+key[0].toUpperCase()+key.slice(1)).onchange=e=>{const o=selectedObject();if(!o?.photo)return;const ph={...o.photo};
-  if(e.target.value)ph[key]=e.target.value;else for(const k of photoThreadKeys.slice(photoThreadKeys.indexOf(key)))delete ph[k];
+photoRowsActions.pickThread=(key,hex)=>{const o=selectedObject();if(!o?.photo)return;const ph={...o.photo};
+  if(hex)ph[key]=hex;else for(const k of photoThreadKeys.slice(photoThreadKeys.indexOf(key)))delete ph[k];
   edit([{op:'set_object',id:o.id,photo:ph}]);};
 
 // Image tracing: picture -> colour regions -> filled paths (with holes), grouped.
@@ -947,43 +949,11 @@ async function referenceForAgent({view='annotated',includeShapes=true}={}){
 function sewTime(p){const m=Math.max(1,Math.round(sewingSeconds(p)/60));return m>=60?`${Math.floor(m/60)} h ${m%60} min`:`${m} min`;}
 
 // Thread colours: a swatch button per colour select opens a palette (plus recent and custom colours); the select stays as the value holder.
-const THREAD_PALETTE=[['White','#ffffff'],['Ivory','#f3ead7'],['Cream','#efe0b9'],['Light grey','#c9cccf'],['Silver','#a4a8ae'],['Grey','#7a7f87'],['Charcoal','#3f4349'],['Black','#111111'],
- ['Pale pink','#f6cbd4'],['Pink','#ec8fa7'],['Hot pink','#d9467f'],['Coral','#d9897e'],['Red','#c8281e'],['Cherry','#9c1b25'],['Burgundy','#6a1a2a'],['Rust','#a8452b'],
- ['Peach','#f4b183'],['Orange','#ec7a1c'],['Honey','#d3ad61'],['Gold','#c9962b'],['Yellow','#f2d21b'],['Lemon','#f7ec7a'],['Mustard','#b88a14'],['Tan','#c8a679'],
- ['Mint','#bfe3c9'],['Sage','#89a377'],['Lime','#9ccb3b'],['Green','#3f9b4f'],['Forest','#527461'],['Emerald','#1f7a52'],['Olive','#7a7a2d'],['Dark green','#1f4a33'],
- ['Baby blue','#bcd8ec'],['Sky','#6fb1e0'],['Turquoise','#28a7b0'],['Teal','#1f7f86'],['Blue','#2f6fc4'],['Royal','#2347a8'],['Navy','#17275c'],['Denim','#4a6a94'],
- ['Lavender','#c6b3e0'],['Lilac','#a37fcf'],['Purple','#6d3aa8'],['Plum','#5a2a58'],['Brown','#7a4a2a'],['Chocolate','#4a2c1b'],['Beige','#d9c3a0'],['Skin','#e8b894']];
-const threadName=hex=>{const h=String(hex||'').toLowerCase(),e=THREAD_PALETTE.find(([,x])=>x===h);if(e)return t(e[0]);const rgb=v=>[1,3,5].map(i=>parseInt(v.slice(i,i+2),16));if(!/^#[0-9a-f]{6}$/.test(h))return h;const a=rgb(h);let best=null,bd=1e9;for(const [n,x] of THREAD_PALETTE){const b=rgb(x),d=Math.hypot(a[0]-b[0],a[1]-b[1],a[2]-b[2]);if(d<bd){bd=d;best=n;}}return bd<28?t(best):h;};
-const threadSelects=['#thread','#borderThread','#blendThread','#blendPalette0','#blendPalette1','#blendPalette2','#blendPalette3','#photoThread2','#photoThread3','#photoThread4'].map(id=>$(id)).filter(Boolean);
-const pop=$('#threadPop');let popFor=null;
-const recents=()=>{try{return JSON.parse(localStorage.getItem('welcome.threads.recent')||'[]').filter(h=>/^#[0-9a-f]{6}$/i.test(h)).slice(0,8);}catch{return [];}};
-const remember=hex=>{try{localStorage.setItem('welcome.threads.recent',JSON.stringify([hex,...recents().filter(h=>h.toLowerCase()!==hex.toLowerCase())].slice(0,8)));}catch{}};
-function pickThread(sel,hex){if(hex&&![...sel.options].some(o=>o.value.toLowerCase()===hex.toLowerCase()))sel.append(new Option(threadName(hex),hex));sel.value=hex;if(hex)remember(hex);closeThreadPop();sel.dispatchEvent(new Event('change',{bubbles:true}));syncThreads();}
-function closeThreadPop(){pop.hidden=true;popFor=null;}
-function openThreadPop(sel,btn){popFor=sel;pop.replaceChildren();const cur=(sel.value||'').toLowerCase(),title=document.createElement('h5');
-  if([...sel.options].some(o=>o.value===''))pop.append(Object.assign(document.createElement('button'),{type:'button',className:'none-btn',textContent:t('None'),onclick:()=>pickThread(sel,'')}));
-  const grid=document.createElement('div');
-  grid.className='grid';
-  for(const [n,hex] of THREAD_PALETTE){const b=document.createElement('button');b.type='button';b.style.background=hex;b.title=t(n);b.setAttribute('aria-label',t(n));b.setAttribute('aria-pressed',String(hex===cur));b.onclick=()=>pickThread(sel,hex);grid.append(b);}pop.append(grid);
-  const rec=recents();
-  if(rec.length){const h=document.createElement('h5');h.textContent=t('Recent');const g=document.createElement('div');g.className='grid';for(const hex of rec){const b=document.createElement('button');b.type='button';b.style.background=hex;b.title=hex;b.setAttribute('aria-label',hex);b.onclick=()=>pickThread(sel,hex);g.append(b);}pop.append(h,g);}
-  const cu=document.createElement('div');
-  cu.className='custom';
-  const col=Object.assign(document.createElement('input'),{type:'color',value:/^#[0-9a-f]{6}$/.test(cur)?cur:'#527461',ariaLabel:t('Custom colour')}),txt=Object.assign(document.createElement('input'),{type:'text',value:/^#[0-9a-f]{6}$/.test(cur)?cur:'',placeholder:'#rrggbb',maxLength:7,ariaLabel:t('Hex colour')}),use=Object.assign(document.createElement('button'),{type:'button',textContent:t('Use')});
-  col.oninput=()=>{txt.value=col.value;};
-  use.onclick=()=>{const v=txt.value.trim().toLowerCase();if(/^#[0-9a-f]{6}$/.test(v))pickThread(sel,v);else txt.focus();};
-  txt.onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();use.click();}};
-  cu.append(col,txt,use);
-  pop.append(cu);
-  pop.hidden=false;
-  const r=btn.getBoundingClientRect(),h=pop.offsetHeight,vw=document.documentElement.clientWidth,vh=document.documentElement.clientHeight;
-  pop.style.left=Math.max(6,Math.min(vw-pop.offsetWidth-6,r.right-pop.offsetWidth))+'px';
-  pop.style.top=Math.max(6,r.bottom+6+h>vh?r.top-h-6:r.bottom+6)+'px';
-  }
-for(const sel of threadSelects){sel.classList.add('sr-only');sel.tabIndex=-1;const b=document.createElement('button');b.type='button';b.className='thread-btn';b.setAttribute('aria-haspopup','dialog');b.innerHTML='<span class="sw"></span><span class="nm"></span>';b.onclick=e=>{e.preventDefault();if(popFor===sel&&!pop.hidden)closeThreadPop();else openThreadPop(sel,b);};sel.after(b);}
+const threadSelects=['#thread','#borderThread','#blendThread','#blendPalette0','#blendPalette1','#blendPalette2','#blendPalette3'].map(id=>$(id)).filter(Boolean);
+// The thread selects app.js still builds open the picker that ThreadPopover draws; a colour picked there is applied to the select.
+function pickDomThread(sel,hex){if(hex&&![...sel.options].some(o=>o.value.toLowerCase()===hex.toLowerCase()))sel.append(new Option(threadName(hex),hex));sel.value=hex;sel.dispatchEvent(new Event('change',{bubbles:true}));syncThreads();}
+for(const sel of threadSelects){sel.classList.add('sr-only');sel.tabIndex=-1;const b=document.createElement('button');b.type='button';b.className='thread-btn';b.setAttribute('aria-haspopup','dialog');b.innerHTML='<span class="sw"></span><span class="nm"></span>';b.onclick=e=>{e.preventDefault();if(threadPopoverState.get().owner?.id===sel.id)closeThreadPopover();else openThreadPopover({id:sel.id,value:sel.value,onPick:hex=>pickDomThread(sel,hex)},b.getBoundingClientRect());};sel.after(b);}
 function syncThreads(){for(const sel of threadSelects){const b=sel.nextElementSibling;if(!b?.classList.contains('thread-btn'))continue;const v=sel.value,sw=b.querySelector('.sw');sw.className=v?'sw':'sw none';sw.style.background=v||'';b.querySelector('.nm').textContent=v?threadName(v):t('None');b.disabled=sel.disabled;b.setAttribute('aria-label',(sel.closest('label')?.firstChild?.textContent||'').trim()+': '+(v?threadName(v):t('None')));}}
-document.addEventListener('pointerdown',e=>{if(!pop.hidden&&!pop.contains(e.target)&&!e.target.closest?.('.thread-btn'))closeThreadPop();},true);
-window.addEventListener('keydown',e=>{if(e.key==='Escape'&&!pop.hidden){e.stopImmediatePropagation();closeThreadPop();}},true);
 threadsReady=true;syncThreads();
 
 // Autosave: the design is kept in this browser (localStorage) after every edit, and offered back after a reload or crash. Saving a project file marks it clean.

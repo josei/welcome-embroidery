@@ -7,6 +7,7 @@ import {bundledFontUsage, customFontUsage} from '../engine.js';
 import {getFont} from '../fonts.js';
 import {fontsDialogState, setFontsDialogOpen} from '../fontsDialogState.js';
 import {SettingsDialog} from './SettingsDialog';
+import {ThreadPopover} from './ThreadPopover';
 // The dialogs and overlays that sit above the layout. Rendered by React; ids match the markup it replaced, because app.js wires them by id.
 export function EditorOverlays() {
  const agent = useSyncExternalStore(agentLinkState.subscribe, agentLinkState.get);
@@ -157,8 +158,7 @@ export function EditorOverlays() {
     <KeysDialog />
     <SettingsDialog />
     <RestoreDialog />
-    <div id={"threadPop"} role={"dialog"} aria-label={"Choose a thread colour"} hidden={true}>
-    </div>
+    <ThreadPopover />
     <dialog id={"exportDialog"}>
       <form method={"dialog"}>
         <h2>
