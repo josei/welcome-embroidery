@@ -1,4 +1,5 @@
-// The align and distribute buttons above the canvas. Which are disabled comes from alignState, set by app.js from the selection.
+// The align and distribute buttons on the canvas toolbar. Which are hidden comes from alignState, set by app.js from the selection:
+// align needs two or more objects, distribute three or more. Hidden rather than disabled, so the toolbar shows only what applies.
 import {useSyncExternalStore} from 'react';
 import {alignActions, alignState} from '../alignState.js';
 
@@ -12,7 +13,7 @@ export function AlignButtons() {
     aria-label="Align left"
     title="Align left"
     data-tooltip="Align left"
-    disabled={state.align}
+    hidden={state.align}
     onClick={() => alignActions.press('left')}
    ><svg className="icon"><use href="#i-al-left"/></svg></button>
    <button
@@ -21,7 +22,7 @@ export function AlignButtons() {
     aria-label="Align horizontal centers"
     title="Align horizontal centers"
     data-tooltip="Align horizontal centers"
-    disabled={state.align}
+    hidden={state.align}
     onClick={() => alignActions.press('hcenter')}
    ><svg className="icon"><use href="#i-al-hcenter"/></svg></button>
    <button
@@ -30,7 +31,7 @@ export function AlignButtons() {
     aria-label="Align right"
     title="Align right"
     data-tooltip="Align right"
-    disabled={state.align}
+    hidden={state.align}
     onClick={() => alignActions.press('right')}
    ><svg className="icon"><use href="#i-al-right"/></svg></button>
    <button
@@ -39,7 +40,7 @@ export function AlignButtons() {
     aria-label="Align top"
     title="Align top"
     data-tooltip="Align top"
-    disabled={state.align}
+    hidden={state.align}
     onClick={() => alignActions.press('top')}
    ><svg className="icon"><use href="#i-al-top"/></svg></button>
    <button
@@ -48,7 +49,7 @@ export function AlignButtons() {
     aria-label="Align vertical centers"
     title="Align vertical centers"
     data-tooltip="Align vertical centers"
-    disabled={state.align}
+    hidden={state.align}
     onClick={() => alignActions.press('vcenter')}
    ><svg className="icon"><use href="#i-al-vcenter"/></svg></button>
    <button
@@ -57,7 +58,7 @@ export function AlignButtons() {
     aria-label="Align bottom"
     title="Align bottom"
     data-tooltip="Align bottom"
-    disabled={state.align}
+    hidden={state.align}
     onClick={() => alignActions.press('bottom')}
    ><svg className="icon"><use href="#i-al-bottom"/></svg></button>
    <button
@@ -66,7 +67,7 @@ export function AlignButtons() {
     aria-label="Distribute horizontally"
     title="Distribute horizontally"
     data-tooltip="Distribute horizontally"
-    disabled={state.distribute}
+    hidden={state.distribute}
     onClick={() => alignActions.press('horizontal')}
    ><svg className="icon"><use href="#i-dist-h"/></svg></button>
    <button
@@ -75,7 +76,7 @@ export function AlignButtons() {
     aria-label="Distribute vertically"
     title="Distribute vertically"
     data-tooltip="Distribute vertically"
-    disabled={state.distribute}
+    hidden={state.distribute}
     onClick={() => alignActions.press('vertical')}
    ><svg className="icon"><use href="#i-dist-v"/></svg></button>
   </>

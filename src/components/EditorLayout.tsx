@@ -168,12 +168,12 @@ export function EditorLayout() {
             </select>
             <AlignButtons />
             <FlipButtons />
-            <ActionButton flag="group" className={"icon-button"} aria-label={"Group (Ctrl+G)"} title={"Group (Ctrl+G)"} data-tooltip={"Group (Ctrl+G)"} id={"group"}>
+            <ActionButton flag="group" hideWhenDisabled className={"icon-button"} aria-label={"Group (Ctrl+G)"} title={"Group (Ctrl+G)"} data-tooltip={"Group (Ctrl+G)"} id={"group"}>
               <svg className={"icon"}>
                 <use href={"#i-group"} />
               </svg>
             </ActionButton>
-            <ActionButton flag="ungroup"
+            <ActionButton flag="ungroup" hideWhenDisabled
               className={"icon-button"}
               aria-label={"Ungroup (Ctrl+Shift+G)"}
               title={"Ungroup (Ctrl+Shift+G)"}
@@ -185,7 +185,7 @@ export function EditorLayout() {
               </svg>
             </ActionButton>
             <BooleanButtons />
-            <ActionButton flag="clip"
+            <ActionButton flag="clip" hideWhenDisabled
               className={"icon-button tb-start"}
               aria-label={"Clip: use the top selected shape as a mask for the other selected objects"}
               title={"Clip: use the top selected shape as a mask for the other selected objects"}
@@ -196,7 +196,7 @@ export function EditorLayout() {
                 <use href={"#i-clip"} />
               </svg>
             </ActionButton>
-            <ActionButton flag="unclip"
+            <ActionButton flag="unclip" hideWhenDisabled
               className={"icon-button"}
               aria-label={"Release the clipping mask"}
               title={"Release the clipping mask"}
@@ -207,7 +207,7 @@ export function EditorLayout() {
                 <use href={"#i-unclip"} />
               </svg>
             </ActionButton>
-            <ActionButton flag="textOnPath"
+            <ActionButton flag="textOnPath" hideWhenDisabled
               className={"icon-button tb-start"}
               aria-label={"Put the selected lettering on the selected path"}
               title={"Put the selected lettering on the selected path"}
@@ -218,7 +218,7 @@ export function EditorLayout() {
                 <use href={"#i-text-path"} />
               </svg>
             </ActionButton>
-            <ActionButton flag="textOffPath"
+            <ActionButton flag="textOffPath" hideWhenDisabled
               className={"icon-button"}
               aria-label={"Detach lettering from its path"}
               title={"Detach lettering from its path"}
@@ -229,7 +229,7 @@ export function EditorLayout() {
                 <use href={"#i-text-detach"} />
               </svg>
             </ActionButton>
-            <ActionButton flag="editNodes"
+            <ActionButton flag="editNodes" hideWhenDisabled
               className={"icon-button tb-start"}
               aria-label={"Edit nodes (Enter) — converts rectangles and ellipses to paths"}
               title={"Edit nodes (Enter) — converts rectangles and ellipses to paths"}

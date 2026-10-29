@@ -1,7 +1,7 @@
 import {useSyncExternalStore} from 'react';
 import {nodeActions, nodeButtonsState} from '../nodeButtonsState.js';
 
-// The four path-node buttons in the tool row. Which of them are disabled comes from nodeButtonsState.
+// The four path-node buttons on the canvas toolbar. Which are hidden comes from nodeButtonsState: each shows only when it applies.
 export function PathNodeButtons() {
  const disabled = useSyncExternalStore(nodeButtonsState.subscribe, nodeButtonsState.get);
  return (
@@ -12,7 +12,7 @@ export function PathNodeButtons() {
     title="Add node at midpoint of selected segment (or double-click a path)"
     data-tooltip="Add node at midpoint of selected segment (or double-click a path)"
     id="nodeAdd"
-    disabled={disabled.add}
+    hidden={disabled.add}
     onClick={() => nodeActions.add()}
    ><svg className="icon"><use href="#i-node-add"/></svg></button>
    <button
@@ -21,7 +21,7 @@ export function PathNodeButtons() {
     title="Delete selected node (Delete key)"
     data-tooltip="Delete selected node (Delete key)"
     id="nodeDel"
-    disabled={disabled.del}
+    hidden={disabled.del}
     onClick={() => nodeActions.del()}
    ><svg className="icon"><use href="#i-node-del"/></svg></button>
    <button
@@ -30,7 +30,7 @@ export function PathNodeButtons() {
     title="Smooth node (Bézier handles)"
     data-tooltip="Smooth node (Bézier handles)"
     id="nodeSmooth"
-    disabled={disabled.smooth}
+    hidden={disabled.smooth}
     onClick={() => nodeActions.smooth()}
    ><svg className="icon"><use href="#i-node-smooth"/></svg></button>
    <button
@@ -39,7 +39,7 @@ export function PathNodeButtons() {
     title="Corner node (remove handles)"
     data-tooltip="Corner node (remove handles)"
     id="nodeCorner"
-    disabled={disabled.corner}
+    hidden={disabled.corner}
     onClick={() => nodeActions.corner()}
    ><svg className="icon"><use href="#i-node-corner"/></svg></button>
   </>

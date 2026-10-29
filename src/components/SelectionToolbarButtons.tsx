@@ -1,7 +1,7 @@
 import {useSyncExternalStore} from 'react';
 import {selectionToolbarActions, selectionToolbarState} from '../selectionToolbarState.js';
 
-// The subtract, union and intersect buttons. Which are disabled comes from selectionToolbarState.
+// The subtract, union and intersect buttons. Which are hidden comes from selectionToolbarState: they need two or more objects.
 export function BooleanButtons() {
  const state = useSyncExternalStore(selectionToolbarState.subscribe, selectionToolbarState.get);
  return (
@@ -12,7 +12,7 @@ export function BooleanButtons() {
     title="Subtract the others from the lowest shape"
     data-tooltip="Subtract the others from the lowest shape"
     id="subtract"
-    disabled={state.subtract}
+    hidden={state.subtract}
     onClick={() => selectionToolbarActions.press('subtract')}
    ><svg className="icon"><use href="#i-subtract"/></svg></button>
    <button
@@ -21,7 +21,7 @@ export function BooleanButtons() {
     title="Union of selected shapes"
     data-tooltip="Union of selected shapes"
     id="union"
-    disabled={state.union}
+    hidden={state.union}
     onClick={() => selectionToolbarActions.press('union')}
    ><svg className="icon"><use href="#i-union"/></svg></button>
    <button
@@ -30,14 +30,14 @@ export function BooleanButtons() {
     title="Intersection of selected shapes"
     data-tooltip="Intersection of selected shapes"
     id="intersect"
-    disabled={state.intersect}
+    hidden={state.intersect}
     onClick={() => selectionToolbarActions.press('intersect')}
    ><svg className="icon"><use href="#i-intersect"/></svg></button>
   </>
  );
 }
 
-// The flip buttons. Both are disabled together, from selectionToolbarState.
+// The flip buttons. Both are hidden together, from selectionToolbarState, when nothing is selected.
 export function FlipButtons() {
  const state = useSyncExternalStore(selectionToolbarState.subscribe, selectionToolbarState.get);
  return (
@@ -48,7 +48,7 @@ export function FlipButtons() {
     title="Flip horizontally"
     data-tooltip="Flip horizontally"
     id="flipH"
-    disabled={state.flip}
+    hidden={state.flip}
     onClick={() => selectionToolbarActions.press('flipH')}
    ><svg className="icon"><use href="#i-flip-h"/></svg></button>
    <button
@@ -57,7 +57,7 @@ export function FlipButtons() {
     title="Flip vertically"
     data-tooltip="Flip vertically"
     id="flipV"
-    disabled={state.flip}
+    hidden={state.flip}
     onClick={() => selectionToolbarActions.press('flipV')}
    ><svg className="icon"><use href="#i-flip-v"/></svg></button>
   </>

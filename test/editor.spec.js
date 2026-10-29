@@ -215,7 +215,7 @@ test('subtract makes a hole (even-odd render, fewer stitches) and ties add lock 
  const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());await page.locator('#new').click();
  await page.locator('#rect').click();await page.locator('#posX').fill('-20');await page.locator('#posX').press('Tab');await page.locator('#posY').fill('-20');await page.locator('#posY').press('Tab');await page.locator('#sizeW').fill('40');await page.locator('#sizeW').press('Tab');await page.locator('#sizeH').fill('40');await page.locator('#sizeH').press('Tab');
  await page.locator('#ellipse').click();await page.locator('#posX').fill('-8');await page.locator('#posX').press('Tab');await page.locator('#posY').fill('-8');await page.locator('#posY').press('Tab');await page.locator('#sizeW').fill('16');await page.locator('#sizeW').press('Tab');await page.locator('#sizeH').fill('16');await page.locator('#sizeH').press('Tab');
- await expect(page.locator('#subtract')).toBeDisabled();await page.locator('.object-row').first().click();await page.locator('.object-row').last().click({modifiers:['Shift']});await expect(page.locator('#subtract')).toBeEnabled();
+ await expect(page.locator('#subtract')).toBeHidden();await page.locator('.object-row').first().click();await page.locator('.object-row').last().click({modifiers:['Shift']});await expect(page.locator('#subtract')).toBeEnabled();
  await page.locator('button[data-view="stitches"]').click();await expect.poll(n).toBeGreaterThan(0);const before=await n();
  await page.locator('#subtract').click();await expect(page.locator('.object-row')).toHaveCount(1);await expect(page.locator('#shapes path.shape')).toHaveAttribute('fill-rule','evenodd');
  await page.locator('button[data-view="stitches"]').click();await page.locator('#count').click();await expect.poll(async()=>{const v=await n();return v>0&&v<before;}).toBe(true);const holed=await n();
@@ -240,7 +240,7 @@ test('union merges overlapping shapes; lettering can be put on a path and detach
  await page.locator('#new').click();
  await page.locator('#line').click();const m=await page.evaluate(()=>{const m=document.querySelector('#art').getScreenCTM();return {a:m.a,d:m.d,e:m.e,f:m.f};}),at=(x,y)=>({x:m.a*x+m.e,y:m.d*y+m.f}),a=at(-30,10),b=at(30,-10);
  await page.mouse.move(a.x,a.y);await page.mouse.down();await page.mouse.move(b.x,b.y,{steps:4});await page.mouse.up();
- await page.locator('#letter').click();await expect(page.locator('#textOnPath')).toBeDisabled();
+ await page.locator('#letter').click();await expect(page.locator('#textOnPath')).toBeHidden();
  await page.locator('.object-row').first().click();await page.locator('.object-row').last().click({modifiers:['Shift']});await expect(page.locator('#textOnPath')).toBeEnabled();
  const before=await page.locator('#shapes g.shape polyline').first().getAttribute('points');await page.locator('#textOnPath').click();await expect(page.locator('#alongRow')).toBeVisible();
  const after=await page.locator('#shapes g.shape polyline').first().getAttribute('points');expect(after).not.toBe(before);
@@ -2288,5 +2288,19 @@ test('canvas views: 2D, Stitches and 3D sit on the canvas, and the 3D pull panel
  await expect(page.locator('#previewPull')).toBeVisible();
  const views=await page.locator('.canvas-views').boundingBox(),pull=await page.locator('#previewPull').boundingBox();
  expect(pull.y).toBeGreaterThanOrEqual(views.y+views.height);
+ expect(errors).toEqual([]);
+});
+
+test('contextual toolbar: only the actions that apply to the selection show; align needs two objects, distribute three',async({page})=>{
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));
+ await page.goto('/');page.on('dialog',d=>d.accept());await expect(page.locator('#count')).toContainText('compiled');
+ await page.locator('#new').click();
+ const align=page.locator('[data-align="left"]'),distribute=page.locator('[data-distribute="horizontal"]'),flip=page.locator('#flipH'),union=page.locator('#union'),group=page.locator('#group'),rows=page.locator('.object-row');
+ await expect(page.locator('#snap')).toBeVisible();
+ await expect(align).toBeHidden();await expect(flip).toBeHidden();await expect(union).toBeHidden();await expect(group).toBeHidden();
+ await page.locator('#rect').click();await page.locator('#rect').click();await page.locator('#rect').click();await expect(rows).toHaveCount(3);
+ await rows.nth(0).click();await expect(align).toBeHidden();await expect(flip).toBeVisible();await expect(union).toBeHidden();await expect(group).toBeHidden();
+ await rows.nth(1).click({modifiers:['Shift']});await expect(align).toBeVisible();await expect(distribute).toBeHidden();await expect(union).toBeVisible();await expect(group).toBeVisible();
+ await rows.nth(2).click({modifiers:['Shift']});await expect(distribute).toBeVisible();
  expect(errors).toEqual([]);
 });

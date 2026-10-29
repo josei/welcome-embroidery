@@ -250,3 +250,5 @@ input:not([type=checkbox]):not([type=range]),select,textarea,.panel textarea{fon
 #blendPaletteRow{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}#blendPaletteRow label{flex-direction:column;align-items:stretch;gap:4px;min-width:0}#blendPaletteRow .thread-btn{width:100%;min-width:0}
 
 .canvas-views{position:absolute;top:10px;right:12px;z-index:6}.canvas-views .segmented{background:#fff;box-shadow:0 2px 8px rgba(0,0,0,.08);padding:3px}#previewPull{top:58px}
+
+.floating button[hidden]{display:none}
