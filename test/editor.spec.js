@@ -975,6 +975,29 @@ test('3D preview drag direction: dragging right turns the fabric right, dragging
  await page.mouse.move(cx,cy);await page.mouse.down();await page.mouse.move(cx,cy+60,{steps:5});await page.mouse.up();await expect.poll(()=>num('data-tilt')).toBeLessThan(tilt0-.2);
 });
 
+test('3D preview views: close-up and turntable change the camera, the loupe magnifies under the pointer, and the fabric sets the background',async({page})=>{
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());
+ const webgl=await page.evaluate(()=>Boolean(document.createElement('canvas').getContext('webgl2')));test.skip(!webgl,'WebGL2 is not available in this browser');
+ await expect(page.locator('#count')).toContainText('compiled');await page.locator('[data-view=preview]').click();const canvas=page.locator('#preview3d');await expect(canvas).toBeVisible();await expect(canvas).toHaveAttribute('data-instances',/\d+/);
+ const view=page.locator('#previewView'),pressed=async name=>view.getByRole('button',{name}).getAttribute('aria-pressed');
+ await expect(view).toBeVisible();await expect(view.getByRole('button',{name:'Front ¾'})).toHaveAttribute('aria-pressed','true');await expect(canvas).toHaveAttribute('data-view','front');
+ await view.getByRole('button',{name:'Close-up'}).click();await expect(canvas).toHaveAttribute('data-view','close');expect(await pressed('Close-up')).toBe('true');expect(await pressed('Front ¾')).toBe('false');
+ await view.getByRole('button',{name:'Turntable'}).click();await expect(canvas).toHaveAttribute('data-view','turntable');
+ const yaw0=Number(await canvas.getAttribute('data-yaw'));await expect.poll(async()=>Number(await canvas.getAttribute('data-yaw'))).toBeGreaterThan(yaw0+.05);
+ await view.getByRole('button',{name:'Front ¾'}).click();await expect(canvas).toHaveAttribute('data-view','front');const still=await canvas.getAttribute('data-yaw');await page.waitForTimeout(200);expect(await canvas.getAttribute('data-yaw')).toBe(still);
+ const avgBR=()=>canvas.evaluate(c=>{const t=document.createElement('canvas');t.width=c.width;t.height=c.height;const x=t.getContext('2d');x.drawImage(c,0,0);const d=x.getImageData(0,0,t.width,t.height).data;let diff=0,n=0;for(let i=0;i<d.length;i+=4*16){diff+=d[i+2]-d[i];n++;}return diff/n;});
+ const woven=await avgBR();
+ await page.locator('button[data-view="design"]').click();await page.locator('#secDoc').evaluate(d=>{d.open=true;});await page.locator('#fabric').selectOption('denim');await page.locator('button[data-view="preview"]').click();await expect(canvas).toHaveAttribute('data-fabric','denim');
+ expect(await avgBR()).toBeGreaterThan(woven+20);
+ await view.getByRole('button',{name:'Loupe 8×'}).click();expect(await pressed('Loupe 8×')).toBe('true');
+ const box=await canvas.boundingBox();await page.mouse.move(box.x+box.width/2,box.y+box.height/2,{steps:3});
+ const loupe=page.locator('#preview3dLoupe');await expect(loupe).toBeVisible();
+ const colours=await loupe.evaluate(c=>{const d=c.getContext('2d').getImageData(0,0,c.width,c.height).data;const seen=new Set();for(let i=0;i<d.length;i+=4*97)seen.add(d[i]+','+d[i+1]+','+d[i+2]);return seen.size;});
+ expect(colours).toBeGreaterThan(1);
+ await view.getByRole('button',{name:'Loupe 8×'}).click();await expect(loupe).toBeHidden();expect(await pressed('Loupe 8×')).toBe('false');
+ expect(errors).toEqual([]);
+});
+
 test('thread colours: swatch palette, custom colour, recent colours, None for blends',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));
  await page.goto('/');page.on('dialog',d=>d.accept());await page.locator('#new').click();await page.locator('#rect').click();
