@@ -20,6 +20,7 @@ import {setRaisedRows,raisedRowsActions} from './raisedRowsState.js';
 import {setFillValues,fillValuesActions} from './fillValuesState.js';
 import {setGuideButtons} from './guideButtonState.js';
 import {setAgentLink} from './agentLinkState.js';
+import {setPhotoRows,photoRowsActions} from './photoRowsState.js';
 import {referenceMoveActions} from './referenceFieldsState.js';
 import {setPathRows,pathRowsActions} from './pathRowsState.js';
 import {setLoopRows,loopRowsActions} from './loopRowsState.js';
@@ -292,7 +293,7 @@ setRunRows({underpath:o?.underpath!==false});
   setStitchRow('maskRow',!(n===1&&o?.clipId));
   const ph=n===1&&o?.photo;
   setStitchRow('photoBox',!ph);
-  if(ph){if(document.activeElement!==$('#photoSpacing'))$('#photoSpacing').value=o.photo.spacing??.7;if(document.activeElement!==$('#photoContrast'))$('#photoContrast').value=o.photo.contrast??1.4;$('#photoInvert').checked=Boolean(o.photo.invert);$('#photoThread2').value=o.photo.thread2||'';$('#photoThread3').value=o.photo.thread3||'';setStitchRow('photoThread3Row',!o.photo.thread2);$('#photoThread4').value=o.photo.thread4||'';setStitchRow('photoThread4Row',!o.photo.thread3);}}
+  if(ph){setPhotoRows({spacing:String(o.photo.spacing??.7),contrast:String(o.photo.contrast??1.4),invert:Boolean(o.photo.invert)});$('#photoThread2').value=o.photo.thread2||'';$('#photoThread3').value=o.photo.thread3||'';setStitchRow('photoThread3Row',!o.photo.thread2);$('#photoThread4').value=o.photo.thread4||'';setStitchRow('photoThread4Row',!o.photo.thread3);}}
   {const satinPath=n===1&&o?.kind==='path'&&o.stitch==='satin',bw=Number(o?.borderWidth)>0&&picked.every(v=>v.border);
   setStitchRow('capRow',!satinPath&&!(n===1&&o?.kind==='path'&&o.stitch==='run'&&false));setStitchRow('joinRow',!(satinPath||(n>=1&&bw&&fillable)));
   if(o){setStitchChoices({cap:o.cap||'butt',join:o.join||'round'});}
@@ -824,9 +825,8 @@ $('#photoFile').onchange=async e=>{const file=e.target.files[0];e.target.value='
   toast('Photo stitch added. Adjust spacing and contrast in the sidebar.');
  }catch(err){toast(err.message||'That picture could not be read.');}};
 const setPhoto=patch=>{const o=selectedObject();if(o?.photo)edit([{op:'set_object',id:o.id,photo:{...o.photo,...patch}}]);};
-$('#photoSpacing').onchange=e=>setPhoto({spacing:Math.max(.3,Math.min(2,Number(e.target.value)||.7))});
-$('#photoContrast').onchange=e=>setPhoto({contrast:Math.max(.4,Math.min(3,Number(e.target.value)||1.4))});
-$('#photoInvert').onchange=e=>setPhoto({invert:e.target.checked});
+photoRowsActions.commit=(field,text)=>setPhoto({[field]:field==='spacing'?Math.max(.3,Math.min(2,Number(text)||.7)):Math.max(.4,Math.min(3,Number(text)||1.4))});
+photoRowsActions.choose=(field,checked)=>setPhoto({invert:checked});
 $('#blendAngle').onchange=e=>{if(selState().selected)edit([{op:'set_object',id:selState().selected,blendAngle:e.target.value===''?null:Number(e.target.value)}]);};
 $('#selectMask').onclick=()=>{const o=selectedObject();if(o?.clipId&&documentNow().doc.objects.some(v=>v.id===o.clipId))selectIds([o.clipId],o.clipId);};
 const photoThreadKeys=['thread2','thread3','thread4'];
