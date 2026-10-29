@@ -5,6 +5,7 @@ export interface ActionFlags {
   undo: boolean;
   redo: boolean;
   duplicate: boolean;
+  remove: boolean;
   group: boolean;
   ungroup: boolean;
   clip: boolean;
@@ -18,6 +19,7 @@ export const actionState = createStore<ActionFlags>({
   undo: false,
   redo: false,
   duplicate: false,
+  remove: true,
   group: false,
   ungroup: false,
   clip: false,
