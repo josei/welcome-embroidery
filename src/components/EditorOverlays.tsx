@@ -2,10 +2,13 @@ import {KeysDialog} from './KeysDialog';
 import {RestoreDialog} from './RestoreDialog';
 import {useSyncExternalStore} from 'react';
 import {agentLinkState} from '../agentLinkState.js';
+import {documentState} from '../documentState.js';
+import {customFontUsage} from '../engine.js';
 import {SettingsDialog} from './SettingsDialog';
 // The dialogs and overlays that sit above the layout. Rendered by React; ids match the markup it replaced, because app.js wires them by id.
 export function EditorOverlays() {
  const agent = useSyncExternalStore(agentLinkState.subscribe, agentLinkState.get);
+ const {doc} = useSyncExternalStore(documentState.subscribe, documentState.get);
  return (
   <>
     <dialog id={"agentDialog"}>
@@ -74,7 +77,7 @@ export function EditorOverlays() {
         <p className={"dlg-note"}>
           {"Fonts used by lettering are kept. Removing a font that lettering uses is not offered."}
         </p>
-        <button type={"button"} id={"removeUnusedFonts"}>
+        <button type={"button"} id={"removeUnusedFonts"} disabled={!customFontUsage(doc).some(f => !f.uses.length)}>
           {"Remove unused fonts"}
         </button>
         <button>
