@@ -1782,3 +1782,12 @@ test('sewing worksheet lists thread blocks in sewing order with stitch counts an
  assert.throws(()=>sewingWorksheet(d,p,'pdf'),/Unsupported worksheet format/);
  const empty={revision:0,count:0,stitches:[]};assert.equal(threadPlan(empty).length,0);assert.match(sewingWorksheet(blank(),empty,'text'),/Threads: 0   Stitches: 0\nEstimate: about 1 min/);
 });
+
+test('per-object stitch counts: each visible object reports its own stitches, and the counts add up to the plan',()=>{
+ const d=blank();applyOperations(d,[{op:'add_shape',id:'a',kind:'rect',x:-30,y:-20,width:24,height:14,thread:'#527461',stitch:'fill'},{op:'add_shape',id:'b',kind:'ellipse',x:30,y:-20,width:18,height:12,thread:'#2471a3',stitch:'run'},{op:'add_shape',id:'c',kind:'rect',x:0,y:25,width:10,height:6,thread:'#527461',stitch:'fill'}]);
+ applyOperations(d,[{op:'set_object',id:'c',visible:false}]);validateDocument(d);
+ const plan=compile(d),counts=plan.objectCounts;
+ assert.ok(counts.a>0,'the fill has stitches');assert.ok(counts.b>0,'the run has stitches');
+ assert.equal(counts.c??0,0,'a hidden object is not sewn, so it has no count');
+ assert.equal(Object.values(counts).reduce((n,v)=>n+v,0),plan.count,'the per-object counts add up to the plan');
+});

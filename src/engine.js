@@ -871,7 +871,10 @@ export function compile(doc) {
   // Lock stitches: four 0.4 mm back-and-forth needles. Tie-in runs along the first segment; tie-off runs back along the last one.
   const tieIn=(start,dir,thread)=>{if(!ties)return;const q=[start[0]+dir[0]*.4,start[1]+dir[1]*.4];push(...q,'stitch',thread);push(...start,'stitch',thread);push(...q,'stitch',thread);push(...start,'stitch',thread);};
   const tieOff=thread=>{if(!ties||!lastNeedle)return;const n=lastNeedle,q=[n[0]-lastDir[0]*.4,n[1]-lastDir[1]*.4];push(...q,'stitch',thread);push(...n,'stitch',thread);push(...q,'stitch',thread);push(...n,'stitch',thread);};
+  // Where each object's stitches start in the list, so the stitch counts per object can be read back after the last one.
+  const objectStarts=[];
   for(const {o,lines,satin,rails,maskRings,clippedFill} of records){
+    objectStarts.push({id:o.id,start:stitches.length});
     const comp=o.compensation??doc.settings.compensation;
     if(o.kind==='stitch_layer'){
       hasImportedLayer=true;
@@ -953,7 +956,14 @@ export function compile(doc) {
   if(hasImportedLayer&&position)push(position[0],position[1],'end',currentThread||'#527461',true);
   let minNeedleX=Infinity,minNeedleY=Infinity,maxNeedleX=-Infinity,maxNeedleY=-Infinity,count=0;for(const p of stitches)if(p.cmd==='stitch'){minNeedleX=Math.min(minNeedleX,p.x);minNeedleY=Math.min(minNeedleY,p.y);maxNeedleX=Math.max(maxNeedleX,p.x);maxNeedleY=Math.max(maxNeedleY,p.y);count++;}const bounds=[minNeedleX,minNeedleY,maxNeedleX,maxNeedleY];
   const length=stitches.reduce((sum,p,i)=>i?sum+Math.hypot(p.x-stitches[i-1].x,p.y-stitches[i-1].y):0,0);
-  return {revision:doc.revision,stitches,bounds,count,threadLength:Math.round(length*1.12),colors:[...new Set(stitches.filter(s=>s.cmd==='stitch'||s.cmd==='color').map(s=>s.thread).filter(Boolean))],errors:[...new Set(errors)],issues};
+  // Stitches per object: an object's stitches run from its start to the next object's start (the last one runs to the end).
+  const objectCounts={};
+  objectStarts.forEach(({id,start},r)=>{
+    const end=r+1<objectStarts.length?objectStarts[r+1].start:stitches.length;
+    let n=0;for(let i=start;i<end;i++)if(stitches[i].cmd==='stitch')n++;
+    objectCounts[id]=(objectCounts[id]||0)+n;
+  });
+  return {revision:doc.revision,stitches,bounds,count,objectCounts,threadLength:Math.round(length*1.12),colors:[...new Set(stitches.filter(s=>s.cmd==='stitch'||s.cmd==='color').map(s=>s.thread).filter(Boolean))],errors:[...new Set(errors)],issues};
 }
 const ascii=(s,n)=>Array.from({length:n},(_,i)=>s.charCodeAt(i)||0);
 export function encodeJef(plan,color='#527461',hoop=110) {
