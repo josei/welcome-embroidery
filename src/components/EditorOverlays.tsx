@@ -3,12 +3,17 @@ import {RestoreDialog} from './RestoreDialog';
 import {useSyncExternalStore} from 'react';
 import {agentLinkState} from '../agentLinkState.js';
 import {documentState} from '../documentState.js';
-import {customFontUsage} from '../engine.js';
+import {bundledFontUsage, customFontUsage} from '../engine.js';
+import {getFont} from '../fonts.js';
+import {fontsDialogState, setFontsDialogOpen} from '../fontsDialogState.js';
 import {SettingsDialog} from './SettingsDialog';
 // The dialogs and overlays that sit above the layout. Rendered by React; ids match the markup it replaced, because app.js wires them by id.
 export function EditorOverlays() {
  const agent = useSyncExternalStore(agentLinkState.subscribe, agentLinkState.get);
  const {doc} = useSyncExternalStore(documentState.subscribe, documentState.get);
+ const fontsOpen = useSyncExternalStore(fontsDialogState.subscribe, fontsDialogState.get);
+ const documentReady = Array.isArray(doc.objects) && fontsOpen; // the store starts empty; the lists are worked out when the dialog opens
+ const customFonts = documentReady ? customFontUsage(doc) : [], bundledFonts = documentReady ? bundledFontUsage(doc) : [];
  return (
   <>
     <dialog id={"agentDialog"}>
@@ -64,14 +69,16 @@ export function EditorOverlays() {
       </div>
     </div>
     {" "}
-    <dialog id={"fontsDialog"} aria-labelledby={"fontsTitle"}>
+    <dialog id={"fontsDialog"} aria-labelledby={"fontsTitle"} onClose={() => setFontsDialogOpen(false)}>
       <form method={"dialog"}>
         <h2 id={"fontsTitle"}>
           {"Organize fonts"}
         </h2>
         <ul id={"fontsList"}>
+          {customFonts.map(f => <li key={"c" + f.id}>{`${f.name}: used by ${f.uses.length} lettering object${f.uses.length === 1 ? '' : 's'}${f.uses.length ? ' (' + f.uses.join(', ') + ')' : ''}`}</li>)}
+          {bundledFonts.map(f => <li key={"b" + f.id}>{`${getFont(f.id)?.name || f.id} (bundled, not removed): used by ${f.uses.length} lettering object${f.uses.length === 1 ? '' : 's'} (${f.uses.join(', ')})`}</li>)}
         </ul>
-        <p id={"fontsEmpty"} className={"sel-hint"}>
+        <p id={"fontsEmpty"} className={"sel-hint"} hidden={customFonts.length + bundledFonts.length > 0}>
           {"This document has no custom fonts. Load a .ttf from the font picker to add one."}
         </p>
         <p className={"dlg-note"}>
