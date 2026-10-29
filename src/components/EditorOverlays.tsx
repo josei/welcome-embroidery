@@ -2,6 +2,7 @@ import {KeysDialog} from './KeysDialog';
 import {RestoreDialog} from './RestoreDialog';
 import {useSyncExternalStore} from 'react';
 import {agentLinkState} from '../agentLinkState.js';
+import {EXPORT_FORMATS, exportFormatState, setExportFormat} from '../exportFormatState.js';
 import {documentState} from '../documentState.js';
 import {bundledFontUsage, customFontUsage} from '../engine.js';
 import {getFont} from '../fonts.js';
@@ -11,6 +12,7 @@ import {ThreadPopover} from './ThreadPopover';
 // The dialogs and overlays that sit above the layout. Rendered by React; ids match the markup it replaced, because app.js wires them by id.
 export function EditorOverlays() {
  const agent = useSyncExternalStore(agentLinkState.subscribe, agentLinkState.get);
+ const exportFormat = useSyncExternalStore(exportFormatState.subscribe, exportFormatState.get);
  const {doc} = useSyncExternalStore(documentState.subscribe, documentState.get);
  const fontsOpen = useSyncExternalStore(fontsDialogState.subscribe, fontsDialogState.get);
  const documentReady = Array.isArray(doc.objects) && fontsOpen; // the store starts empty; the lists are worked out when the dialog opens
@@ -164,58 +166,8 @@ export function EditorOverlays() {
         <h2>
           {"Export embroidery"}
         </h2>
-        <select id={"format"}>
-          <option value={"jef"}>
-            {"JEF · Janome"}
-          </option>
-          <option value={"vp3"}>
-            {"VP3 · Pfaff"}
-          </option>
-          <option value={"dst"}>
-            {"DST · Tajima (widely supported)"}
-          </option>
-          <option value={"exp"}>
-            {"EXP · Melco"}
-          </option>
-          <option value={"pec"}>
-            {"PEC · Brother"}
-          </option>
-          <option value={"pes"}>
-            {"PES · Brother (v1)"}
-          </option>
-          <option value={"pes6"}>
-            {"PES · Brother (v6)"}
-          </option>
-          <option value={"sew"}>
-            {"SEW · Janome (native)"}
-          </option>
-          <option value={"u01"}>
-            {"U01 · Barudan"}
-          </option>
-          <option value={"xxx"}>
-            {"XXX · Singer"}
-          </option>
-          <option value={"tbf"}>
-            {"TBF · Tajima"}
-          </option>
-          <option value={"col"}>
-            {"COL · thread colour list"}
-          </option>
-          <option value={"edr"}>
-            {"EDR · thread colour list (binary)"}
-          </option>
-          <option value={"svg"}>
-            {"SVG · vector design (Inkscape)"}
-          </option>
-          <option value={"print"}>
-            {"Print template · 1:1 SVG (placement sheet)"}
-          </option>
-          <option value={"applique-print"}>
-            {"Appliqué templates · 1:1 SVG"}
-          </option>
-          <option value={"dxf"}>
-            {"DXF · paths (CAD)"}
-          </option>
+        <select id={"format"} value={exportFormat.format} onChange={e => setExportFormat(e.target.value)}>
+          {EXPORT_FORMATS.map(f => <option key={f.value} value={f.value}>{f.label}</option>)}
         </select>
         <label id={"worksheetRow"} className={"check-row"} hidden={true}>
           <input type={"checkbox"} id={"withWorksheet"} />

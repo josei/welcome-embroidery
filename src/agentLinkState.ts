@@ -21,6 +21,11 @@ export const agentLinkState = createStore<AgentLink>({
   active: false,
 });
 
+/** The header's agent button calls open(). app.js runs it: it opens the Connect an AI agent dialog. */
+export const agentLinkActions: {open: () => void} = {
+  open() {},
+};
+
 /** Changes the agent link state. */
 export function setAgentLink(patch: Partial<AgentLink>) {
   agentLinkState.set({...agentLinkState.get(), ...patch});

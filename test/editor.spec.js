@@ -2246,3 +2246,16 @@ test('simulation bar: the time, stitch count, thread track and summary follow th
  await expect(page.locator('#playbackTime')).toHaveText(total);
  expect(errors).toEqual([]);
 });
+
+test('header export: the format beside Export and the dialog share one choice, and the agent button opens the agent dialog',async({page})=>{
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));
+ await page.goto('/');page.on('dialog',d=>d.accept());await expect(page.locator('#count')).toContainText('compiled');
+ await page.locator('#headerFormat').selectOption('pes');
+ await page.locator('#export').click();await expect(page.locator('#exportDialog')).toBeVisible();
+ await expect(page.locator('#format')).toHaveValue('pes');
+ await page.locator('#format').selectOption('dst');await expect(page.locator('#headerFormat')).toHaveValue('dst');
+ await page.keyboard.press('Escape');await expect(page.locator('#exportDialog')).toBeHidden();
+ await expect(page.locator('#agentPill')).toContainText('Connect an AI agent');
+ await page.locator('#agentPill').click();await expect(page.locator('#agentDialog')).toBeVisible();
+ expect(errors).toEqual([]);
+});
