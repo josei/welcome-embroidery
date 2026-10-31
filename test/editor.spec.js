@@ -2343,3 +2343,17 @@ test('sewing-order list: each row shows its stitch count, the counts add up to t
  await expect(page.locator('.object-row .swatch')).toHaveCount(2);
  expect(errors).toEqual([]);
 });
+
+test('stitch cards show a picture of each stitch, and the density swatch follows the row spacing slider',async({page})=>{
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));
+ await page.goto('/');page.on('dialog',d=>d.accept());await expect(page.locator('#count')).toContainText('compiled');
+ await page.locator('#new').click();await page.locator('#rect').click();
+ await expect(page.locator('.icon-seg.labelled .stitch-thumb')).toHaveCount(7);
+ await expect(page.locator('.icon-seg.labelled button').first().locator('.stitch-thumb')).toHaveCount(1);
+ const swatch=page.locator('.density-swatch');await expect(swatch).toBeVisible();await expect(swatch).toHaveAttribute('data-spacing','0.4');
+ await page.locator('#spacingSlider').focus();await page.keyboard.press('ArrowRight');
+ await expect(swatch).toHaveAttribute('data-spacing','0.45');
+ await expect(swatch).toHaveAttribute('style',/--pitch: 4\.95px/);
+ await expect(page.locator('#spacing')).toHaveValue('0.45');
+ expect(errors).toEqual([]);
+});

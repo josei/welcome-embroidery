@@ -29,6 +29,7 @@ export function StitchFillRows() {
      step={0.05}
      value={fillValues.spacing}
      onCommit={text => fillValuesActions.commit('spacing', text)}
+     swatch
     />
    </div><label hidden={layout.angleHidden}>Angle (°)<input id="angle" {...angle} type="number" min="0" max="180" /></label></>
  );
