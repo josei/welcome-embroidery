@@ -83,7 +83,7 @@ function selectedObject(){return documentNow().doc.objects.find(o=>o.id===selSta
 function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 // The simulation bar (PlaybackBar.tsx) reads the playback store; this sets it from the plan and the playback position. Status text stays in statusState.
 let spanCache={plan:null,spans:[],trims:0,metres:0,changes:0};
-function planSpans(){if(spanCache.plan!==plan){const spans=plan?threadSpans(plan):[];spanCache={plan,spans,trims:plan?plan.stitches.filter(s=>s.cmd==='trim').length:0,metres:plan?threadPlan(plan).reduce((n,b)=>n+b.mm,0)/1000:0,changes:Math.max(0,spans.length-1)};}return spanCache;}
+function planSpans(){if(spanCache.plan!==plan){const spans=plan?threadSpans(plan).map(s=>({...s,seconds:sewingSecondsUpTo(plan,s.start)})):[];spanCache={plan,spans,trims:plan?plan.stitches.filter(s=>s.cmd==='trim').length:0,metres:plan?threadPlan(plan).reduce((n,b)=>n+b.mm,0)/1000:0,changes:Math.max(0,spans.length-1)};}return spanCache;}
 function syncPlaybackControls(){
  const cache=planSpans(),length=plan?.stitches.length||0,ready=playIndex===null,limit=ready?length:Math.min(playIndex,length);
  let sewn=0,current=null;for(let i=0;i<limit;i++){const item=plan.stitches[i];if(item.cmd==='stitch'){sewn++;current=item;}}

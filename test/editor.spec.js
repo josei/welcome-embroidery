@@ -2420,3 +2420,23 @@ test('sewing tips: Fix tip makes one undo step and clears the tip, and Ignore hi
  await expect(card).toBeVisible();await expect(card).toContainText('1.2');
  expect(errors).toEqual([]);
 });
+
+test('timeline: a marker sits at each colour change, in the new thread colour, and clicking one seeks to that change',async({page})=>{
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));
+ await page.goto('/');page.on('dialog',d=>d.accept());await expect(page.locator('#count')).toContainText('compiled');
+ await page.locator('#new').click();await page.locator('#rect').click();await page.locator('#ellipse').click();await page.locator('#rect').click();
+ await page.locator('.object-row').nth(1).click();await page.locator('#thread').selectOption('#d9897e');
+ await page.locator('.object-row').nth(2).click();await page.locator('#thread').selectOption('#d3ad61');
+ await expect(page.locator('#count')).toContainText('compiled');
+ await page.locator('button[data-view="stitches"]').click();
+ const blocks=page.locator('.playback-spans span'),markers=page.locator('.timeline-marker');
+ await expect(blocks).toHaveCount(3);
+ await expect(markers).toHaveCount(2);
+ await expect(page.locator('#playbackSummary')).toContainText('2 colour changes');
+ await expect(markers.nth(1)).toHaveAttribute('title',/Colour change to .* at \d+:\d\d/);
+ const second=await markers.nth(1).getAttribute('data-index');
+ await markers.nth(1).click();
+ await expect(page.locator('#seek')).toHaveValue(String(second));
+ await expect(page.locator('#playbackStitches')).toContainText('Stitch');
+ expect(errors).toEqual([]);
+});

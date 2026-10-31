@@ -5,6 +5,8 @@ export interface PlaybackSpan {
   thread: string;
   start: number;
   end: number;
+  // The sewing time at the span's start, in seconds: where its colour-change marker sits in time.
+  seconds: number;
 }
 
 /**
