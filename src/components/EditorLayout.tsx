@@ -146,24 +146,30 @@ export function EditorLayout() {
               </svg>
             </button>
             <SnapObjectButton />
-            <select id={"grid"} className={"tb-wide"} aria-label={"Grid size"} defaultValue={"1"}>
+            <select
+              id={"grid"}
+              className={"tb-wide"}
+              aria-label={"Grid size"}
+              title={"Grid spacing: the distance Snap to grid snaps to"}
+              defaultValue={"1"}
+            >
               <option value={"0.1"}>
-                {"0.1 mm"}
+                {"Grid 0.1 mm"}
               </option>
               <option value={"0.25"}>
-                {"0.25 mm"}
+                {"Grid 0.25 mm"}
               </option>
               <option value={"0.5"}>
-                {"0.5 mm"}
+                {"Grid 0.5 mm"}
               </option>
               <option value={"1"}>
-                {"1 mm"}
+                {"Grid 1 mm"}
               </option>
               <option value={"2"}>
-                {"2 mm"}
+                {"Grid 2 mm"}
               </option>
               <option value={"5"}>
-                {"5 mm"}
+                {"Grid 5 mm"}
               </option>
             </select>
             <AlignButtons />

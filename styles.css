@@ -12,7 +12,7 @@ body{background:#f6f7f5;min-height:580px}
 .top input{width:180px;font-weight:600}
 .top button{border-color:transparent;color:#66726c}.top button:hover{background:#eef1ec;border-color:transparent}
 .top #export{background:var(--teal);border-color:var(--teal);border-radius:7px;padding:8px 14px;font-weight:600}
-.layout{height:calc(100vh - 48px);grid-template-columns:256px minmax(0,1fr) 288px}
+.layout{height:calc(100vh - 48px);grid-template-columns:256px minmax(0,1fr) 240px}
 .panel{padding:16px;background:#fff}.layout>.panel:first-child{border-color:#e3e6e1}.layout>.panel:last-child{border-color:#e3e6e1}
 .panel h3{font-size:12px;color:#34413b}.panel h4{font-size:10px;color:#66726c;letter-spacing:.07em;margin-top:18px}
 .panel>button{border-color:transparent;background:#f6f7f5;border-radius:7px;padding:7px 9px;color:#53635b}.panel>button:hover{background:var(--teal-soft);color:var(--teal)}
@@ -29,7 +29,7 @@ nav button[data-view]{padding:7px 13px;color:#66726c}nav button[data-view].activ
 #seek{accent-color:var(--teal)}#play,#resetPlayback{border-color:#e3e6e1;color:#66726c}
 .panel input:not([type=checkbox]),.panel select{border-color:#e3e6e1;background:#f6f7f5;border-radius:6px}
 #toast{background:#1d2925;border-radius:9px;box-shadow:0 5px 20px #1d292522}
-@media(max-width:1100px){.layout{grid-template-columns:208px minmax(0,1fr) 248px}}
+@media(max-width:1100px){.layout{grid-template-columns:208px minmax(0,1fr) 220px}}
 .path-node{fill:#fff;stroke:var(--teal);stroke-width:.42;vector-effect:non-scaling-stroke;cursor:crosshair;pointer-events:all}.path-node:hover{fill:#d7eee7;stroke-width:.6}
 #sourceInfo{padding:10px;background:#f1f5f1;border-radius:8px;font-size:11px;line-height:1.55;color:#56645d}#sourceInfo[hidden]{display:none}#sourceInfo strong{color:#245d4d}#sourceInfo em{color:#826a42;font-style:normal}
 
@@ -269,3 +269,4 @@ input:not([type=checkbox]):not([type=range]),select,textarea,.panel textarea{fon
 .density-row{display:flex;align-items:center;gap:10px}.density-row input[type=range]{flex:1;min-width:0}.density-swatch{width:44px;height:44px;flex:none;border:1px solid #dcdad3;border-radius:6px;background-color:#f6f5f1;background-image:repeating-linear-gradient(0deg,var(--teal) 0 1px,transparent 1px var(--pitch))}
 
 .sel-angle{fill:#fff;stroke:#dba944;stroke-width:1.6;vector-effect:non-scaling-stroke;pointer-events:all;cursor:grab}.sel-angle-line{stroke:#dba944;stroke-dasharray:3 2;vector-effect:non-scaling-stroke;pointer-events:none}
+.panel .corner-radii input{width:100%}
