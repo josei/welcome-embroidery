@@ -58,6 +58,7 @@ import {playbackActions,setPlayback} from './playbackState.js';
 import {setSewingCounts} from './sewingCountsState.js';
 import {underlayActions,underlayState} from './underlayState.js';
 import {sewTipActions,setSewTips} from './sewTipsState.js';
+import {gridActions,setGridValue} from './gridState.js';
 import {createCanvas} from './canvas.js';
 import {getFont,registerFont,loadFont,isRegistryFont,documentFontIds,registerDocumentFonts} from './fonts.js';
 import {createFontPicker,fetchFontIndex,LEGACY} from './fontui.js';
@@ -439,7 +440,8 @@ hoopActions.rotate=()=>{if(edit([{op:'rotate_hoop'}])){try{localStorage.setItem(
 hoopActions.commit=(field,text)=>{const h=hoopSize(documentNow().doc);if(field==='hoopW')setHoop(Number(text),h.h);else setHoop(h.w,Number(text));};
 snapObjActions.toggle=()=>{const on=!snapObjState.get();snapObjState.set(on);try{localStorage.setItem('welcome.snapObj',on?'1':'0');}catch{}showSnap(null);toast(on?'Snapping to other objects on.':'Snapping to other objects off.');};
 $('#snap').onclick=()=>{snapOn=!snapOn;render();toast(snapOn?`Snap to ${gridSize} mm grid on.`:'Snap off.');};
-$('#grid').onchange=e=>{gridSize=Number(e.target.value);render();};
+// The grid select and the grid chip (GridControl.tsx) call this: it sets the snap grid and shows the new spacing.
+gridActions.choose=v=>{gridSize=Number(v);setGridValue(v);render();};
 alignActions.press=name=>{const ids=[...selState().multi];if(name==='horizontal'||name==='vertical'){if(ids.length>=3)edit([{op:'distribute',ids,axis:name}]);return;}if(!ids.length)return;edit([{op:'align',ids,edge:name,...(ids.length===1?{to:'hoop'}:{})}]);};
 $('#duplicate').onclick=()=>{const ids=[...selState().multi];if(!ids.length)return;const copies=ids.map(id=>[id,crypto.randomUUID()]),regroup=ids.length>1&&new Set(ids.map(id=>documentNow().doc.objects.find(o=>o.id===id)?.groupId)).size===1&&documentNow().doc.objects.find(o=>o.id===ids[0])?.groupId;edit([...copies.map(([id,newId])=>({op:'duplicate',id,newId,dx:3,dy:3})),...(regroup?[{op:'group',ids:copies.map(c=>c[1])}]:[])],()=>{setSelection({multi: new Set(copies.map(c=>c[1]))});setSelection({selected: copies.at(-1)[1]});});};
 function removeSelected(){const ids=[...selState().multi];if(!ids.length)return;edit(ids.map(id=>({op:'delete',id})),()=>{setSelection({selected: null});setSelection({multi: new Set()});setSelection({selNode: null});});}$('#remove').onclick=removeSelected;

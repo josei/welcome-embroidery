@@ -2440,3 +2440,27 @@ test('timeline: a marker sits at each colour change, in the new thread colour, a
  await expect(page.locator('#playbackStitches')).toContainText('Stitch');
  expect(errors).toEqual([]);
 });
+
+test('grid chip: it is no wider than the toolbar buttons, shows the spacing, and cycles through it',async({page})=>{
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));
+ await page.goto('/');page.on('dialog',d=>d.accept());await expect(page.locator('#count')).toContainText('compiled');
+ const chip=page.locator('#gridCycle'),snap=page.locator('#snap');
+ await expect(chip).toBeVisible();await expect(chip).toContainText('1');
+ const cw=(await chip.boundingBox()).width,sw=(await snap.boundingBox()).width;
+ expect(cw).toBeLessThanOrEqual(sw+0.5);
+ await chip.click();await expect(page.locator('#grid')).toHaveValue('2');
+ await expect(chip).toContainText('2');
+ await chip.click();await expect(page.locator('#grid')).toHaveValue('5');
+ await chip.click();await expect(page.locator('#grid')).toHaveValue('0.1');
+ await page.locator('#grid').selectOption('0.25');await expect(chip).toContainText('0.25');
+ expect(errors).toEqual([]);
+});
+
+test('sidebars: the right inspector is as wide as the left sidebar',async({page})=>{
+ await page.goto('/');await expect(page.locator('#count')).toContainText('compiled');
+ for (const width of [1600,1280]) {
+  await page.setViewportSize({width,height:1000});
+  const left=await page.locator('.layout > aside.panel').first().boundingBox(),right=await page.locator('.layout > aside.panel').last().boundingBox();
+  expect(Math.abs(left.width-right.width)).toBeLessThan(1);
+ }
+});
