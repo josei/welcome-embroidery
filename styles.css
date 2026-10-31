@@ -267,3 +267,5 @@ input:not([type=checkbox]):not([type=range]),select,textarea,.panel textarea{fon
 
 .icon-seg.labelled .stitch-thumb{width:40px;height:24px;display:block;color:#4f5551}.icon-seg.labelled button[aria-pressed=true] .stitch-thumb{color:var(--teal)}
 .density-row{display:flex;align-items:center;gap:10px}.density-row input[type=range]{flex:1;min-width:0}.density-swatch{width:44px;height:44px;flex:none;border:1px solid #dcdad3;border-radius:6px;background-color:#f6f5f1;background-image:repeating-linear-gradient(0deg,var(--teal) 0 1px,transparent 1px var(--pitch))}
+
+.sel-angle{fill:#fff;stroke:#dba944;stroke-width:1.6;vector-effect:non-scaling-stroke;pointer-events:all;cursor:grab}.sel-angle-line{stroke:#dba944;stroke-dasharray:3 2;vector-effect:non-scaling-stroke;pointer-events:none}

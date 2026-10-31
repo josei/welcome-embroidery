@@ -2357,3 +2357,21 @@ test('stitch cards show a picture of each stitch, and the density swatch follows
  await expect(page.locator('#spacing')).toHaveValue('0.45');
  expect(errors).toEqual([]);
 });
+
+test('fill angle handle: dragging it turns the rows as one undo step, the Angle field follows, and the arrow keys nudge it',async({page})=>{
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));
+ await page.goto('/');page.on('dialog',d=>d.accept());await expect(page.locator('#count')).toContainText('compiled');
+ await page.locator('#new').click();await page.locator('#rect').click();
+ const handle=page.locator('[data-handle="angle"]');await expect(handle).toBeVisible();
+ await expect(page.locator('#angle')).toHaveValue('32');
+ const shape=await page.locator('#shapes [data-id]').first().boundingBox(),hb=await handle.boundingBox();
+ const cx=shape.x+shape.width/2,cy=shape.y+shape.height/2,hx=hb.x+hb.width/2,hy=hb.y+hb.height/2,R=Math.hypot(hx-cx,hy-cy);
+ await page.mouse.move(hx,hy);await page.mouse.down();await page.mouse.move(cx,cy+R,{steps:6});await page.mouse.up();
+ await expect(page.locator('#angle')).toHaveValue('90');
+ await page.locator('#undo').click();await expect(page.locator('#angle')).toHaveValue('32');
+ await page.locator('[data-handle="angle"]').focus();await page.keyboard.press('ArrowRight');
+ await expect(page.locator('#angle')).toHaveValue('33');
+ await page.keyboard.press('Shift+ArrowRight');
+ await expect(page.locator('#angle')).toHaveValue('48');
+ expect(errors).toEqual([]);
+});

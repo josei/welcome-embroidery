@@ -95,6 +95,26 @@ export function createCanvas(api){
   const HANDLES=[['nw',0,0],['n',.5,0],['ne',1,0],['e',1,.5],['se',1,1],['s',.5,1],['sw',0,1],['w',0,.5]];
   const HANDLE_LABEL={nw:'Resize from north-west corner',n:'Resize from north edge',ne:'Resize from north-east corner',e:'Resize from east edge',se:'Resize from south-east corner',s:'Resize from south edge',sw:'Resize from south-west corner',w:'Resize from west edge',rot:'Rotate selection'};
   let keyFocus=null;
+  // The fill angle handle: on a single fill, a point beyond the object's corners on the line its rows run along (the angle is in world degrees).
+  // It sits outside the half-diagonal, so it never lands on a corner handle.
+  function angleSpot(f){
+    const ids=api.ids();if(ids.length!==1||api.isEditing())return null;
+    const o=api.doc().objects.find(v=>v.id===ids[0]);
+    if(!o||o.visible===false||o.locked||o.stitch!=='fill'||o.kind==='text'||o.kind==='stitch_layer'||o.applique)return null;
+    if(o.kind==='path'&&!o.closed)return null;
+    return {id:o.id,c:f.c,deg:Number(o.angle??api.doc().settings.angle??0),dist:Math.hypot(f.W,f.H)/2};
+  }
+  // Draws the angle handle and its line at an angle (degrees) from the object's centre.
+  function drawAngle(spot,deg,label=null){
+    const k=1/vp.s,rad=deg*Math.PI/180,r=spot.dist+18*k,hp=[spot.c[0]+r*Math.cos(rad),spot.c[1]+r*Math.sin(rad)];
+    overlay.append(el('line',{class:'sel-stem sel-angle-line',x1:spot.c[0],y1:spot.c[1],x2:hp[0],y2:hp[1]}));
+    overlay.append(el('circle',{
+      class:'sel-angle','data-handle':'angle',tabindex:0,role:'button',
+      'aria-label':`Fill angle ${deg.toFixed(0)}°. Drag or use the arrow keys to turn the rows.`,
+      cx:hp[0],cy:hp[1],r:4*k,
+    }));
+    if(label){const t=el('text',{class:'sel-note',x:hp[0],y:hp[1]-9*k,'text-anchor':'middle','font-size':11*k});t.textContent=label;overlay.append(t);}
+  }
   function refresh(f0=null,note=null){
     drawGuides();overlay.replaceChildren();drawMeasure();drawKnife();if(api.tool()!=='select'||state?.type==='marquee'||state?.type==='nodemarquee')return;
     const f=f0||frame();if(!f||api.isEditing())return;const k=1/vp.s,hs=4*k,pv=api.pivot?.();
@@ -103,6 +123,7 @@ export function createCanvas(api){
     overlay.append(el('polygon',{class:'sel-box',points:corners.map(p=>p.join(',')).join(' '),fill:'none'}));
     for(const [name,fx,fy] of HANDLES){if(name.length===1&&((name==='n'||name==='s')?f.W*vp.s<30:f.H*vp.s<30))continue;const [x,y]=toWorld(f,(fx-.5)*f.W,(fy-.5)*f.H);overlay.append(el('rect',{class:'sel-handle','data-handle':name,tabindex:0,role:'button','aria-label':HANDLE_LABEL[name],x:x-hs,y:y-hs,width:hs*2,height:hs*2,transform:f.rot?`rotate(${f.rot*180/Math.PI} ${x} ${y})`:''}));}
     const top=toWorld(f,0,-f.H/2),rot=toWorld(f,0,-f.H/2-22*k);overlay.append(el('line',{class:'sel-stem',x1:top[0],y1:top[1],x2:rot[0],y2:rot[1]}));overlay.append(el('circle',{class:'sel-handle sel-rotate','data-handle':'rot',tabindex:0,role:'button','aria-label':HANDLE_LABEL.rot,cx:rot[0],cy:rot[1],r:5*k}));
+    {const spot=angleSpot(f);if(spot)drawAngle(spot,spot.deg);}
     if(note){const base=toWorld(f,0,f.H/2),t=el('text',{class:'sel-note',x:base[0],y:base[1]+16*k,'text-anchor':'middle','font-size':11*k});t.textContent=note;overlay.append(t);}
     drawSmart();
     if(keyFocus){overlay.querySelector(`[data-handle="${keyFocus}"]`)?.focus({preventScroll:true});keyFocus=null;}
@@ -159,6 +180,11 @@ export function createCanvas(api){
   function startMarquee(e,p){state={type:api.isEditing()?'nodemarquee':'marquee',start:p,add:e.shiftKey,pid:e.pointerId,rect:null};svg.setPointerCapture?.(e.pointerId);overlay.replaceChildren();}
   function startHandle(e,name){
     const ids=api.ids(),f=frame();if(!f)return;const els=stash(shapeEls(ids)),q=coord(e);
+    if(name==='angle'){
+     const spot=angleSpot(f);if(!spot)return;
+     state={type:'angle',id:spot.id,c:spot.c,dist:spot.dist,deg:spot.deg,next:spot.deg,pid:e.pointerId};
+     svg.setPointerCapture?.(e.pointerId);return;
+    }
     state=name==='rot'?{type:'rotate',ids,f,els,a0:Math.atan2(q[1]-f.c[1],q[0]-f.c[0]),angle:0,pid:e.pointerId}:{type:'resize',name,ids,f,els,pid:e.pointerId,sx:1,sy:1,anchor:null,alt:false};
     svg.setPointerCapture?.(e.pointerId);
   }
@@ -170,6 +196,11 @@ export function createCanvas(api){
   function nudgeHandle(name,e){
     const f=frame();if(!f)return;const ids=api.ids(),step=e.shiftKey?10:1;
     const right=e.key==='ArrowRight',left=e.key==='ArrowLeft',down=e.key==='ArrowDown';
+    if(name==='angle'){
+     const spot=angleSpot(f);if(!spot)return;
+     const d=(right||down?1:-1)*(e.shiftKey?15:1),next=((spot.deg+d)%180+180)%180;
+     keyFocus=name;api.commit([{op:'set_object',id:spot.id,angle:next}]);return;
+    }
     if(name==='rot'){keyFocus=name;api.commit([{op:'rotate',ids,angle:(right||down?1:-1)*(e.shiftKey?15:1),cx:f.c[0],cy:f.c[1]}]);return;}
     const dx=right?step:left?-step:0,dy=down?step:e.key==='ArrowUp'?-step:0;
     const co=Math.cos(f.rot),si=Math.sin(f.rot),lx=dx*co+dy*si,ly=-dx*si+dy*co;
@@ -196,6 +227,12 @@ export function createCanvas(api){
       if(!e.ctrlKey&&!e.metaKey){const moved=[state.box[0]+dx,state.box[1]+dy,state.box[2]+dx,state.box[3]+dy],[sx,sy]=snapMove(moved,state.ids,api.doc().objects.filter(o=>state.ids.includes(o.id)&&o.kind==='path'&&Array.isArray(o.points)).flatMap(o=>o.points.map(q=>[q[0]+dx,q[1]+dy])));dx+=sx;dy+=sy;}
       state.delta=[dx,dy];setT(state.els,`translate(${dx} ${dy})`);overlay.setAttribute('transform',`translate(${dx} ${dy})`);previewMask(state.els,`translate(${dx} ${dy})`);drawSmart();return;}
     if(state.type==='marquee'||state.type==='nodemarquee'){const [x0,y0]=state.start,r=[Math.min(x0,q[0]),Math.min(y0,q[1]),Math.max(x0,q[0]),Math.max(y0,q[1])];state.rect=r;overlay.replaceChildren(el('rect',{class:'marquee',x:r[0],y:r[1],width:r[2]-r[0],height:r[3]-r[1]}));return;}
+    if(state.type==='angle'){
+     let a=Math.atan2(q[1]-state.c[1],q[0]-state.c[0])*180/Math.PI;
+     if(e.shiftKey)a=Math.round(a/15)*15;
+     a=((a%180)+180)%180;state.next=Math.round(a*10)/10;
+     overlay.replaceChildren();drawAngle({c:state.c,dist:state.dist},state.next,`${state.next.toFixed(1)}°`);return;
+    }
     if(state.type==='rotate'){const f=state.f;let a=Math.atan2(q[1]-f.c[1],q[0]-f.c[0])-state.a0;a=deg(a);if(e.shiftKey)a=Math.round(a/15)*15;a=((a+540)%360)-180;state.angle=a;const tr=`rotate(${a} ${f.c[0]} ${f.c[1]})`;setT(state.els,tr);previewMask(state.els,tr);overlay.setAttribute('transform',`rotate(${a} ${f.c[0]} ${f.c[1]})`);return;}
     if(state.type==='resize'){const f=state.f,n=state.name;smartLines=[];let p=api.snapOn()?api.snapPt(q):q;if(!f.oriented&&!e.ctrlKey&&!e.metaKey)p=snapPoint(p,state.ids);
       const l=toLocal(f,p),fx=n.includes('e')?1:n.includes('w')?0:.5,fy=n.includes('s')?1:n.includes('n')?0:.5,hx=(fx-.5)*f.W,hy=(fy-.5)*f.H;
@@ -217,6 +254,7 @@ export function createCanvas(api){
       const picked=new Set(s.add?api.ids():[]);for(const o of api.doc().objects){if(o.visible===false||o.locked)continue;const b=objectBounds(o);if(b[2]>=r[0]&&b[0]<=r[2]&&b[3]>=r[1]&&b[1]<=r[3])for(const id of api.withGroup(o.id))picked.add(id);}
       api.select([...picked],[...picked].at(-1)??null);return;}
     if(s.type==='nodemarquee'){const r=s.rect;if(!r||(r[2]-r[0])*vp.s<4&&(r[3]-r[1])*vp.s<4){if(!s.add)api.select([],null);else refresh();return;}api.selectNodesIn(r,s.add);return;}
+    if(s.type==='angle'){if(Math.abs(s.next-s.deg)<.05){refresh();return;}api.commit([{op:'set_object',id:s.id,angle:s.next}]);return;}
     if(s.type==='rotate'){restore(s.els);if(Math.abs(s.angle)>.05)api.commit([{op:'rotate',ids:s.ids,angle:s.angle,cx:s.f.c[0],cy:s.f.c[1]}]);else refresh();return;}
     if(s.type==='resize'){restore(s.els);if(!s.anchor||(Math.abs(s.sx-1)<1e-4&&Math.abs(s.sy-1)<1e-4)){refresh();return;}commitResize(s);}
   });
