@@ -2375,3 +2375,17 @@ test('fill angle handle: dragging it turns the rows as one undo step, the Angle 
  await expect(page.locator('#angle')).toHaveValue('48');
  expect(errors).toEqual([]);
 });
+
+test('pull compensation is a slider that shows the document value until the object gets its own, and the fabric choice sits at the bottom of the inspector',async({page})=>{
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));
+ await page.goto('/');page.on('dialog',d=>d.accept());await expect(page.locator('#count')).toContainText('compiled');
+ await page.locator('#new').click();await page.locator('#rect').click();
+ const slider=page.locator('#compensationSlider'),field=page.locator('#compensation'),reset=page.locator('#compUseDoc');
+ await expect(slider).toBeVisible();await expect(slider).toHaveValue('0.2');await expect(reset).toBeHidden();
+ await slider.focus();await page.keyboard.press('ArrowRight');
+ await expect(field).toHaveValue('0.25');await expect(slider).toHaveValue('0.25');await expect(reset).toBeVisible();
+ await reset.click();
+ await expect(field).toHaveValue('');await expect(slider).toHaveValue('0.2');await expect(reset).toBeHidden();
+ await expect(page.locator('#fabric')).toBeVisible();await expect(page.locator('.fabric-section')).toContainText('Sets density');
+ expect(errors).toEqual([]);
+});

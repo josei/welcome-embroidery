@@ -13,6 +13,9 @@ const ES={
 'Stitch {n} of {m}':'Puntada {n} de {m}','{n} of {m} stitches':'{n} de {m} puntadas','1 colour change':'1 cambio de color','{n} colour changes':'{n} cambios de color','1 trim':'1 corte','{n} trims':'{n} cortes','{m} m thread':'{m} m de hilo',
 'Agent connected':'Agente conectado','Waiting for agent':'Esperando al agente','Export format':'Formato de exportación',
 '1 stitch':'1 puntada','{n} stitches':'{n} puntadas',
+'Use document value':'Usar el valor del documento',
+'Sets density, underlay, pull compensation and the stabilizer tip for the design. Objects with their own values keep them.':
+'Ajusta la densidad, la base, la compensación de tirón y la estabilización de la tela del diseño. Los objetos con valores propios los mantienen.',
 'Drag to orbit · scroll to zoom · double-click to reset':'Arrastra para orbitar · rueda para zoom · doble clic para restablecer',
 'Zoom':'Zoom','Colour 1':'Color 1','Colour 2':'Color 2','Colour 3':'Color 3','Colour 4':'Color 4','Choose at least two colours for a palette.':'Elige al menos dos colores para la paleta.','Hand tool: drag to pan':'Herramienta mano: arrastra para mover la vista','Zoom out (−)':'Alejar (−)','Zoom in (+)':'Acercar (+)','Reset to 100% (Shift+0)':'Restablecer al 100% (Shift+0)','Fit the hoop in view':'Ajustar el bastidor a la vista','Fit everything (Shift+1)':'Ajustar todo (Shift+1)','All':'Todo',
 'Canvas tools':'Herramientas del lienzo','Snap to grid':'Ajustar a la cuadrícula','Grid size':'Tamaño de cuadrícula',

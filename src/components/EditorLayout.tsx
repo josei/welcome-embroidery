@@ -6,7 +6,7 @@ import {ActionButton} from './ActionButton';
 import {DesignSummary, SelectionHeading} from './InspectorText';
 import {AlignButtons} from './AlignButtons';
 import {ArrayPanel} from './ArrayPanel';
-import {DocumentSettings} from './DocumentSettings';
+import {DocumentSettings, FabricSection} from './DocumentSettings';
 import {HoopFields} from './HoopFields';
 import {LetteringPanel} from './LetteringPanel';
 import {PathNodeButtons} from './PathNodeButtons';
@@ -311,6 +311,7 @@ export function EditorLayout() {
         <ThreadPlan />
         <DocumentSettings />
         <DesignSummary />
+        <FabricSection />
       </aside>
     </div>
   </>
