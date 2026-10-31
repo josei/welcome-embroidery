@@ -56,6 +56,7 @@ import {layersActions} from './layersState.js';
 import {exportFormatState} from './exportFormatState.js';
 import {playbackActions,setPlayback} from './playbackState.js';
 import {setSewingCounts} from './sewingCountsState.js';
+import {underlayActions,underlayState} from './underlayState.js';
 import {createCanvas} from './canvas.js';
 import {getFont,registerFont,loadFont,isRegistryFont,documentFontIds,registerDocumentFonts} from './fonts.js';
 import {createFontPicker,fetchFontIndex,LEGACY} from './fontui.js';
@@ -234,11 +235,11 @@ function syncSections(){
   set('#stitchLength',src.stitchLength??st.stitchLength??3);
   setRunRows({stagger:String(src.stagger??st.stagger??4)});
   const fillTypes=[['auto','Auto (by size)'],['none','None'],['contour','Edge walk'],['fill','Tatami (90°)'],['laydown','Laydown (wide rows)'],['contour+fill','Edge walk + tatami']],satinTypes=[['auto','Auto (by width)'],['none','None'],['center','Centre run'],['contour','Edge walk'],['zigzag','Zigzag'],['center+zigzag','Centre + zigzag'],['contour+zigzag','Edge walk + zigzag']];
-  const types=satinish&&!fillable?satinTypes:fillTypes,sel=$('#underlayType'),want=types.map(t=>t[0]).join();
-  if(sel.dataset.set!==want){sel.replaceChildren(...types.map(([v,l])=>{const op=document.createElement('option');op.value=v;op.textContent=l;return op;}));sel.dataset.set=want;}
-  const cur=src.underlayType??(st.underlay===false?'none':(st.underlayType??'auto'));sel.value=types.some(t=>t[0]===cur)?cur:'auto';
+  const types=satinish&&!fillable?satinTypes:fillTypes;
+  const cur=src.underlayType??(st.underlay===false?'none':(st.underlayType??'auto')),shownUnderlay=types.some(t=>t[0]===cur)?cur:'auto';
+  underlayState.set({types:types.map(([value,label])=>({value,label})),value:shownUnderlay});
   set('#underlayInset',src.underlayInset??.4);set('#underlaySpacing',src.underlaySpacing??(satinish&&!fillable?2:2.2));
-  const showDetails=underlayable&&!['none','auto',undefined].includes(sel.value);
+  const showDetails=underlayable&&!['none','auto',undefined].includes(shownUnderlay);
   {const one=n===1&&o&&o.kind!=='text'&&o.kind!=='stitch_layer'&&(fillable||o.stitch==='satin');
 setStitchRow('pinRow',!one);if(!one)pinState.set(null);pinClearState.set(Boolean(o&&(o.startAt||o.endAt)));}
   {const rectOnly=n===1&&o?.kind==='rect';setStitchRow('radiusRow',!rectOnly);if(rectOnly)setRadius({radius:String(o.radius??0)});if(rectOnly){const rr=cornerRadii(o);setRadius({radiusTL:String(rr[0]),radiusTR:String(rr[1]),radiusBR:String(rr[2]),radiusBL:String(rr[3])});}
@@ -444,7 +445,9 @@ function removeSelected(){const ids=[...selState().multi];if(!ids.length)return;
 
 $('#thread').onchange=e=>{if(selState().selected)edit([{op:'set_object',id:selState().selected,thread:e.target.value}]);};
 $('#fillResetBtn').onclick=()=>{if(selState().selected)edit(orderedIds().map(id=>({op:'set_object',id,spacing:null,angle:null,stitchLength:null,stagger:null,underlayType:null,underlayInset:null,underlaySpacing:null})));};
-for(const [id,key,parse] of [['stitchLength','stitchLength',Number],['underlayType','underlayType',v=>v],['underlayInset','underlayInset',Number],['underlaySpacing','underlaySpacing',Number]])$('#'+id).onchange=e=>{const v=parse(e.target.value);if(selState().multi.size)edit(orderedIds().map(oid=>({op:'set_object',id:oid,[key]:v})));else edit([{op:'set_settings',[key]:v}]);};
+for(const [id,key,parse] of [['stitchLength','stitchLength',Number],['underlayInset','underlayInset',Number],['underlaySpacing','underlaySpacing',Number]])$('#'+id).onchange=e=>{const v=parse(e.target.value);if(selState().multi.size)edit(orderedIds().map(oid=>({op:'set_object',id:oid,[key]:v})));else edit([{op:'set_settings',[key]:v}]);};
+// The underlay pills (and their hidden select) call this: it writes the chosen underlay to the selected objects, or the document when none is selected.
+underlayActions.choose=v=>{if(selState().multi.size)edit(orderedIds().map(oid=>({op:'set_object',id:oid,underlayType:v})));else edit([{op:'set_settings',underlayType:v}]);};
 settingsActions.set=patch=>edit([{op:'set_settings',...patch}]);
 const runBoolean=mode=>{const ids=documentNow().doc.objects.map(o=>o.id).filter(id=>selState().multi.has(id));if(ids.length>=2)edit([{op:'boolean',mode,ids}],()=>{setSelection({selected: ids[0]});setSelection({multi: new Set([ids[0]])});});};
 selectionToolbarActions.press=name=>{if(name==='flipH'){const ids=orderedIds();if(ids.length)edit([{op:'flip',ids,axis:'horizontal'}]);}else if(name==='flipV'){const ids=orderedIds();if(ids.length)edit([{op:'flip',ids,axis:'vertical'}]);}else runBoolean(name);};

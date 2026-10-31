@@ -2389,3 +2389,17 @@ test('pull compensation is a slider that shows the document value until the obje
  await expect(page.locator('#fabric')).toBeVisible();await expect(page.locator('.fabric-section')).toContainText('Sets density');
  expect(errors).toEqual([]);
 });
+
+test('underlay pills: clicking one sets the underlay as one undo step, and the hidden select keeps the same value',async({page})=>{
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));
+ await page.goto('/');page.on('dialog',d=>d.accept());await expect(page.locator('#count')).toContainText('compiled');
+ await page.locator('#new').click();await page.locator('#rect').click();
+ const pill=v=>page.locator(`.pill-group [data-value="${v}"]`);
+ await expect(pill('auto')).toHaveAttribute('aria-checked','true');await expect(page.locator('#underlayType')).toHaveValue('auto');
+ await expect(pill('none')).toBeVisible();
+ await pill('none').click();
+ await expect(pill('none')).toHaveAttribute('aria-checked','true');await expect(page.locator('#underlayType')).toHaveValue('none');
+ await page.locator('#undo').click();
+ await expect(pill('auto')).toHaveAttribute('aria-checked','true');await expect(page.locator('#underlayType')).toHaveValue('auto');
+ expect(errors).toEqual([]);
+});

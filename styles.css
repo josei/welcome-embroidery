@@ -142,7 +142,7 @@ label[hidden],button[hidden],.sel-hint[hidden]{display:none!important}
 .guide{stroke:#2f80ed;stroke-width:1;vector-effect:non-scaling-stroke;pointer-events:none}.guide-hit{stroke:transparent;stroke-width:9;vector-effect:non-scaling-stroke;pointer-events:stroke;cursor:move}.smart{stroke:#e0457b;stroke-width:1;stroke-dasharray:4 3;vector-effect:non-scaling-stroke;pointer-events:none}.canvas.deleting-guide{cursor:not-allowed}
 #canvasText{position:absolute;z-index:9;resize:none;font:600 18px Inter,system-ui,sans-serif;line-height:1.25;padding:6px 8px;background:#ffffffeb;color:var(--teal-deep);border:1.5px solid var(--teal);border-radius:8px;box-shadow:0 8px 28px #1d29252b;outline:none}
 
-.underlay-details{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin:-4px 0 6px;font-size:11px}.underlay-details label{margin:4px 0}.underlay-details input{width:60px!important}.underlay-details[hidden],#stitchLenRow[hidden],#staggerRow[hidden],#underlayRow[hidden]{display:none!important}
+.underlay-details{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin:-4px 0 6px;font-size:11px}.underlay-details label{margin:4px 0}.underlay-details input{width:100%!important;min-width:0}.underlay-details[hidden],#stitchLenRow[hidden],#staggerRow[hidden],#underlayRow[hidden]{display:none!important}
 
 .top .top .top .top .top .settings-choices{display:flex;gap:8px}.settings-choices button[aria-pressed=true]{border-color:var(--teal);box-shadow:0 0 0 1px var(--teal)}
 .unused-lang-select{border:1px solid #dedfd9;border-radius:6px;font:inherit;font-size:11px;padding:6px 4px;background:#fff;color:#53635b}
@@ -273,3 +273,4 @@ input:not([type=checkbox]):not([type=range]),select,textarea,.panel textarea{fon
 .fabric-section{margin-top:14px}.fabric-hint{font-size:11px;color:#66726c;margin:6px 0 0;line-height:1.4}
 #compUseDoc{margin:2px 0 0;font-size:11px;padding:0;border:0;background:none;color:var(--teal);cursor:pointer;text-decoration:underline}#compUseDoc[hidden]{display:none}
 .fabric-section select{width:100%}
+.pill-group{display:flex;flex-wrap:wrap;gap:6px;margin-top:2px}.pill{height:30px;padding:0 12px;border:1px solid #dcdad3;border-radius:999px;background:#fff;color:#3c423e;font:inherit;font-size:11px;font-weight:500;cursor:pointer}.pill:hover{background:#f6f5f1}.pill.on{border-color:var(--teal);background:var(--teal-soft);color:var(--teal-deep);font-weight:600}
