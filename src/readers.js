@@ -1,11 +1,24 @@
+// @ts-check
 // Bounded browser-side JEF, VP3, DST, SEW, PEC and EXP stitch readers.
 // Codec behavior follows the MIT-licensed Ink/Stitch pystitch readers pinned in the
 // upstream project; this is an independently written JavaScript port.
+/**
+ * @typedef {{x: number, y: number, cmd: string, thread: number}} Stitch
+ * @typedef {{
+ *   index: number, color: string | null, brand: string, catalogNumber: string | null, name: string | null,
+ *   threadType?: number, weight?: number, transition?: number
+ * }} Thread
+ * @typedef {{stitches: Stitch[], threads: Thread[], bounds: number[], warnings: string[], metadata?: Record<string, string>}} Decoded
+ * @typedef {{x: number, y: number, cmd: number}} Step
+ * @typedef {{dflt: number, table: number[] | null, width: number, lengths: number[]}} Huff
+ */
 const MAX_FILE_BYTES = 64 * 1024 * 1024;
 const MAX_STITCHES = 2_000_000;
 const MAX_THREADS = 256;
 
+/** @param {string} message @returns {never} */
 const fail = message => { throw new Error(`Invalid embroidery file: ${message}`); };
+/** @param {Uint8Array | ArrayBuffer} input @returns {Uint8Array} */
 const asBytes = input => {
   if (input instanceof Uint8Array) return input;
   if (input instanceof ArrayBuffer) return new Uint8Array(input);
@@ -13,8 +26,11 @@ const asBytes = input => {
 };
 
 class Reader {
+  /** @param {Uint8Array} bytes */
   constructor(bytes) { this.b = bytes; this.p = 0; }
+  /** @param {number} n */
   need(n) { if (!Number.isSafeInteger(n) || n < 0 || this.p + n > this.b.length) fail('truncated data'); }
+  /** @param {number} n */
   skip(n) { this.need(n); this.p += n; }
   u8() { this.need(1); return this.b[this.p++]; }
   s8() { const n = this.u8(); return n > 127 ? n - 256 : n; }
@@ -28,9 +44,11 @@ class Reader {
 }
 
 const jefColors = [null,0x000000,0xffffff,0xffff17,0xff6600,0x2f5933,0x237336,0x65c2c8,0xab5a96,0xf669a0,0xff0000,0xb1704e,0x0b2f84,0xe4c35d,0x481a05,0xac9cc7,0xfcf294,0xf999b7,0xfab381,0xc9a480,0x970533,0xa0b8cc,0x7fc21c,0xe5e5e5,0x889b9b,0x98d6bd,0xb2e1e3,0x368ba0,0x4f83ab,0x386a91,0x071650,0xf999a2,0xf9676b,0xe3311f,0xe2a188,0xb59474,0xe4cf99,0xffcb00,0xe1add4,0xc3007e,0x80004b,0x540571,0xb10525,0xcae0c0,0x899856,0x5c941a,0x003114,0x5dae94,0x4cbf8f,0x007772,0x595b61,0xfffff2,0xb15818,0xcb8a07,0x986c80,0x98692d,0x4d3419,0x4c330b,0x33200a,0x523a97,0x0d217e,0x1e77ac,0xb2dd53,0xf33689,0xde649e,0x984161,0x4c5612,0x4c881f,0xe4de79,0xcb8a1a,0xcba21c,0xff9805,0xfcb257,0xffe505,0xf0331f,0x1a842d,0x386cae,0xe3c4b4,0xe3ac81];
+/** @param {number} n @returns {string} */
 const hex = n => `#${(n >>> 0).toString(16).padStart(6,'0')}`;
 // Janome SEW thread set (pyembroidery's 79-entry EmbThreadSew list, 0-based): the file stores indices into it.
 export const SEW_CHART=[[0,0,0],[0,0,0],[255,255,255],[255,255,23],[250,160,96],[92,118,73],[64,192,48],[101,194,200],[172,128,190],[245,188,203],[255,0,0],[192,128,0],[0,0,240],[228,195,93],[165,42,42],[213,176,212],[252,242,148],[240,208,192],[255,192,0],[201,164,128],[155,61,75],[160,184,204],[127,194,28],[185,185,185],[160,160,160],[152,214,189],[184,240,240],[54,139,160],[79,131,171],[56,106,145],[0,32,107],[229,197,202],[249,103,107],[227,49,31],[226,161,136],[181,148,116],[228,207,153],[225,203,0],[225,173,212],[195,0,126],[128,0,75],[160,96,176],[192,64,32],[202,224,192],[137,152,86],[0,170,0],[33,138,33],[93,174,148],[76,191,143],[0,119,114],[112,112,112],[242,255,255],[177,88,24],[203,138,7],[247,146,123],[152,105,45],[162,113,72],[123,85,74],[79,57,70],[82,58,151],[0,0,160],[0,150,222],[178,221,83],[250,143,187],[222,100,158],[181,80,102],[94,87,71],[76,136,31],[228,220,121],[203,138,26],[198,170,66],[236,176,44],[248,128,64],[255,229,5],[250,122,122],[107,224,0],[56,108,174],[208,186,176],[227,190,129]];
+/** @param {Stitch[]} stitches @param {Thread[]} threads @param {string[]} [warnings] @returns {Decoded} */
 function result(stitches, threads, warnings=[]) {
   if (!stitches.length) fail('no stitch commands');
   const sew = stitches.some(s => s.cmd === 'stitch');
@@ -39,26 +57,30 @@ function result(stitches, threads, warnings=[]) {
   for(const s of stitches){minX=Math.min(minX,s.x);minY=Math.min(minY,s.y);maxX=Math.max(maxX,s.x);maxY=Math.max(maxY,s.y);}
   return {stitches, threads, bounds:[minX,minY,maxX,maxY],warnings};
 }
+/** @param {Stitch[]} out @param {number} x @param {number} y @param {string} cmd @param {number} thread */
 function push(out, x, y, cmd, thread) {
   if (out.length >= MAX_STITCHES) fail('stitch count exceeds limit');
   if (!Number.isFinite(x) || !Number.isFinite(y) || Math.abs(x)>100000 || Math.abs(y)>100000) fail('coordinate exceeds limit');
+  /** @type {(n: number) => number} */
   const mm=n=>Object.is(n,-0)?0:n;
   out.push({x:mm(x/10),y:mm(y/10),cmd,thread});
 }
 
+/** @param {Uint8Array} bytes @returns {Decoded} */
 function readJef(bytes) {
   const r = new Reader(bytes);
   if (bytes.length < 128) fail('JEF header is truncated');
   const offset=r.u32le(); r.skip(20); const colorCount=r.u32le(); r.skip(88);
   if (colorCount < 1 || colorCount > MAX_THREADS) fail('invalid JEF thread count');
   if (offset < 116 + colorCount*8 || offset >= bytes.length) fail('invalid JEF stitch offset');
-  const threads=[];
+  /** @type {Thread[]} */ const threads=[];
   for(let i=0;i<colorCount;i++){
     const ix=Math.abs(r.u32le());
     const color=ix===0?null:jefColors[ix%jefColors.length];
     threads.push({index:i,color:color===null?null:hex(color),brand:'Jef',catalogNumber:ix===0?'000':null,name:ix===0?'Stop':null});
   }
-  r.p=offset; const stitches=[]; let x=0,y=0,thread=0,colorIndex=1,ended=false;
+  r.p=offset;
+  /** @type {Stitch[]} */ const stitches=[]; let x=0,y=0,thread=0,colorIndex=1,ended=false;
   while(r.p < bytes.length){
     const a=r.u8();
     if(a!==0x80){const b=r.u8(); x+=a>127?a-256:a; y-=(b>127?b-256:b); push(stitches,x,y,'stitch',thread); continue;}
@@ -94,6 +116,7 @@ function readJef(bytes) {
   return result(stitches,threads);
 }
 
+/** @param {Uint8Array} bytes @returns {Decoded} */
 function readVp3(bytes) {
   const r=new Reader(bytes);
   if(bytes.length<100) fail('VP3 header is truncated');
@@ -102,7 +125,8 @@ function readVp3(bytes) {
   const centerX=r.s32be()/100, centerY=-r.s32be()/100;
   r.skip(27); r.str16(); r.skip(24); r.str16();
   const count=r.u16be(); if(count<1||count>MAX_THREADS) fail('invalid VP3 thread count');
-  const threads=[], stitches=[]; let x=0,y=0;
+  /** @type {Thread[]} */ const threads=[];
+  /** @type {Stitch[]} */ const stitches=[]; let x=0,y=0;
   for(let block=0;block<count;block++){
     r.skip(3); const blockLength=r.u32be(),end=r.p+blockLength;
     if(end>bytes.length || end<=r.p) fail('invalid VP3 block length');
@@ -141,11 +165,15 @@ function readVp3(bytes) {
 // Tajima DST: a 512 byte text header, then 3 byte records of x/y steps in 0.1 mm (y points up) with jump, colour-change and end flags. DST has no colours, so each
 // colour block gets a distinct placeholder thread; a run of three or more small jumps is a trim, which is how DST writes one.
 const dstPalette=['#1f2937','#c0392b','#2471a3','#229954','#d4ac0d','#8e44ad','#e67e22','#17a589','#7f8c8d','#a93226','#5d6d7e','#117864'];
+/** @param {Uint8Array} bytes @returns {Decoded} */
 function readDst(bytes) {
   if (bytes.length < 515) fail('DST file is too short');
   const head = new TextDecoder('latin1').decode(bytes.subarray(0, 512));
   if (!/^LA:/.test(head)) fail('DST header is missing');
-  let x=0,y=0,block=0,jumps=[];const stitches=[];
+  let x=0,y=0,block=0;
+  /** @type {{dx: number, dy: number}[]} */
+  let jumps=[];
+  /** @type {Stitch[]} */ const stitches=[];
   const flush=()=>{ // jumps recorded so far: the first three small ones are a trim
     let i=0;
     if (jumps.length>=3 && jumps.slice(0,3).every(j=>Math.hypot(j.dx,j.dy)<=6)) { push(stitches,x-jumps.slice(3).reduce((a,j)=>a+j.dx,0),y-jumps.slice(3).reduce((a,j)=>a+j.dy,0),'trim',block); i=3; }
@@ -168,6 +196,7 @@ function readDst(bytes) {
   }
   flush();
   push(stitches,x,y,'end',block);
+  /** @type {Thread[]} */
   const threads=[];for(let i=0;i<=block&&i<MAX_THREADS;i++)threads.push({index:i,color:dstPalette[i%dstPalette.length],brand:'DST',catalogNumber:null,name:`Colour ${i+1}`});
   if(block>=MAX_THREADS)fail('too many colour changes');
   return result(stitches,threads,['DST files carry no thread colours: placeholder colours were assigned.']);
@@ -176,17 +205,18 @@ function readDst(bytes) {
 // SEW (Janome native), as read by pyembroidery's SewReader: a 2-byte colour count and 2-byte thread-chart indices, then the stitch stream from byte 0x1D78.
 // A record is two bytes: a plain pair is a stitch, and 80 xx starts a control record whose own two bytes are its coordinates (or zeros for a colour change).
 // 80 01 is a colour change, 80 02 and 80 04 a jump, 80 10 a stitch; any other control ends the stream. Coordinates are relative, in 0.1 mm, with y negated.
+/** @param {Uint8Array} bytes @returns {Decoded} */
 function readSew(bytes) {
   if (bytes.length < 0x1D78) fail('SEW header is truncated');
   const colours = bytes[0] | bytes[1] << 8;
   if (colours < 1 || colours > MAX_THREADS) fail('invalid SEW colour count');
-  const threads = [];
+  /** @type {Thread[]} */ const threads = [];
   for (let i = 0; i < colours; i++) {
     const [r, g, b] = SEW_CHART[(bytes[2 + 2*i] | bytes[3 + 2*i] << 8) % SEW_CHART.length];
     threads.push({index:i, color:hex(r << 16 | g << 8 | b), brand:'SEW', catalogNumber:null, name:null});
   }
-  const s8 = n => n > 127 ? n - 256 : n;
-  const stitches = [];
+  /** @type {(n: number) => number} */ const s8 = n => n > 127 ? n - 256 : n;
+  /** @type {Stitch[]} */ const stitches = [];
   let x = 0, y = 0, block = 0, p = 0x1D78;
   while (p + 2 <= bytes.length) {
     const a = bytes[p], b = bytes[p+1];
@@ -210,6 +240,7 @@ export const PEC_CHART=[[14,31,124],[10,85,163],[0,135,119],[75,107,175],[237,23
 // then the stitch stream at 0x218. Values are 0.1 mm relative moves: a byte below 0x80 is a 7-bit step, 0x80 starts a 12-bit step whose flags are 0x20 trim and 0x10 jump.
 // FE B0 xx is a colour change; FF 00 ends the stream. Palette bytes index the chart modulo 65, where 0 is no thread (pyembroidery's reader behaves the same way).
 // PES (Brother): every version starts '#PES' + a four-digit version, and bytes 8-11 hold the offset of its PEC block, which is read as a PEC file.
+/** @param {Uint8Array} bytes @returns {Decoded} */
 function readPes(bytes) {
   if (bytes.length < 12) fail('PES header is truncated');
   if (new TextDecoder().decode(bytes.subarray(0, 4)) !== '#PES') fail('invalid PES signature');
@@ -226,8 +257,10 @@ function readPes(bytes) {
 }
 // PES headers from version 4 on (pyembroidery's PesReader) hold five length-prefixed strings after the 16-byte prefix: name, category, author, keywords and comments. Each is one length byte then the text; an empty field is a zero length. Versions 1 to 3 have none. Anything malformed or cut short by the PEC block is ignored, so the stitches still import.
 const PES_METADATA_KEYS = ['name', 'category', 'author', 'keywords', 'comments'];
+/** @param {Uint8Array} bytes @param {number} pecOffset @returns {Record<string, string> | null} */
 function pesMetadata(bytes, pecOffset) {
   if (!(Number(new TextDecoder().decode(bytes.subarray(4, 8))) >= 40)) return null;
+  /** @type {Record<string, string>} */
   const out = {};
   let p = 16;
   for (const key of PES_METADATA_KEYS) {
@@ -240,26 +273,27 @@ function pesMetadata(bytes, pecOffset) {
   }
   return Object.keys(out).length ? out : null;
 }
+/** @param {Uint8Array} bytes @returns {Decoded} */
 function readPec(bytes) {
   if (bytes.length < 0x218) fail('PEC header is truncated');
   if (new TextDecoder().decode(bytes.subarray(0, 3)) !== '#PE' || new TextDecoder().decode(bytes.subarray(8, 11)) !== 'LA:') fail('invalid PEC signature');
   const count = bytes[0x38] + 1;
-  const threads = [];
+  /** @type {Thread[]} */ const threads = [];
   for (let i = 0; i < count; i++) {
     const index = bytes[0x39 + i] % (PEC_CHART.length + 1);
     const rgb = index ? PEC_CHART[index - 1] : null;
     threads.push({index: i, color: rgb ? hex(rgb[0] << 16 | rgb[1] << 8 | rgb[2]) : null, brand: 'PEC', catalogNumber: index ? String(index) : null, name: null});
   }
-  const s7 = b => b > 63 ? b - 128 : b;
-  const s12 = c => { c &= 0xFFF; return c > 0x7FF ? c - 0x1000 : c; };
-  const stitches = [];
+  /** @type {(b: number) => number} */ const s7 = b => b > 63 ? b - 128 : b;
+  /** @type {(c: number) => number} */ const s12 = c => { c &= 0xFFF; return c > 0x7FF ? c - 0x1000 : c; };
+  /** @type {Stitch[]} */ const stitches = [];
   let x = 0, y = 0, p = 0x218;
   while (p + 1 < bytes.length) {
     let a = bytes[p], b = bytes[p + 1];
     p += 2;
     if (a === 0xFF && b === 0x00) break;
     if (a === 0xFE && b === 0xB0) { p += 1; push(stitches, x, y, 'color', 0); continue; }
-    let jump = false, trim = false, dx, dy;
+    let jump = false, trim = false, dx = 0, dy = 0;
     if (a & 0x80) {
       trim = Boolean(a & 0x20); jump = Boolean(a & 0x10);
       if (p >= bytes.length) break;
@@ -298,9 +332,10 @@ function readPec(bytes) {
 // EXP (Melco), as read by pyembroidery's ExpReader: no header, a stream of byte pairs of 0.1 mm steps (y is negated, as in SEW). 80 xx starts a control record
 // whose own pair holds the step: 80 80 is a trim (its step is ignored), 80 04 a jump, 80 02 a stitch, 80 01 a colour change followed by a jump when the step is not zero.
 // Any other control ends the stream, and so does EOF. EXP has no palette, so each colour block gets a placeholder colour as DST does.
+/** @param {Uint8Array} bytes @param {string} [label] @returns {Decoded} */
 function readExp(bytes, label = 'EXP') {
-  const s8 = n => n > 127 ? n - 256 : n;
-  const stitches = [];
+  /** @type {(n: number) => number} */ const s8 = n => n > 127 ? n - 256 : n;
+  /** @type {Stitch[]} */ const stitches = [];
   let x = 0, y = 0, block = 0, p = 0;
   while (p + 1 < bytes.length) {
     const a = bytes[p], b = bytes[p + 1];
@@ -321,31 +356,36 @@ function readExp(bytes, label = 'EXP') {
     break;
   }
   push(stitches, x, y, 'end', block);
-  const threads = [];
+  /** @type {Thread[]} */ const threads = [];
   for (let i = 0; i <= block; i++) threads.push({index: i, color: dstPalette[i % dstPalette.length], brand: label, catalogNumber: null, name: `Colour ${i + 1}`});
   return result(stitches, threads, [`${label} files carry no thread colours: placeholder colours were assigned.`]);
 }
 
 // Husqvarna HUS, read as pyembroidery 1.5.1 does (HusReader and EmbCompress): a header, a chart of 29 thread colours, then the command, x and y streams, each compressed with a Huffman and back-reference scheme. Coordinates are 0.1 mm and y is stored negated.
 const HUS_THREADS=[["#000000","Black","026"],["#0000e7","Blue","005"],["#00c600","Green","002"],["#ff0000","Red","014"],["#840084","Purple","008"],["#ffff00","Yellow","020"],["#848484","Grey","024"],["#8484e7","Light Blue","006"],["#00ff84","Light Green","003"],["#ff7b31","Orange","017"],["#ff8ca5","Pink","011"],["#845200","Brown","028"],["#ffffff","White","022"],["#000084","Dark Blue","004"],["#008400","Dark Green","001"],["#7b0000","Dark Red","013"],["#ff6384","Light Red","015"],["#522952","Dark Purple","007"],["#ff00ff","Light Purple","009"],["#ffde00","Dark Yellow","019"],["#ffff9c","Light Yellow","021"],["#525252","Dark Grey","025"],["#d6d6d6","Light Grey","023"],["#ff5208","Dark Orange","016"],["#ff9c5a","Light Orange","018"],["#ff52b5","Dark Pink","010"],["#ffc6de","Light Pink","012"],["#523100","Dark Brown","027"],["#b5a584","Light Brown","029"]];
-const husFail = message => fail(`HUS ${message}`);
+/** @type {(message: string) => never} */ const husFail = message => fail(`HUS ${message}`);
+/** @param {Uint8Array} data @param {number} size @returns {number[]} */
 function husExpand(data, size) {
-  let bitPos = 0, blockElements = -1, charHuff = null, distHuff = null;
-  const bits = (start, length) => {
+  let bitPos = 0, blockElements = -1;
+  /** @type {Huff | null} */
+  let charHuff = null;
+  /** @type {Huff | null} */
+  let distHuff = null;
+  /** @type {(start: number, length: number) => number} */ const bits = (start, length) => {
     const end = start + length - 1, first = Math.floor(start / 8), last = Math.floor(end / 8);
     let value = 0;
     for (let i = first; i <= last; i++) value = (value << 8) | (i < data.length ? data[i] : 0);
     const unused = (8 - ((end + 1) % 8)) % 8;
     return (value >>> unused) & ((1 << length) - 1);
   };
-  const peek = n => bits(bitPos, n);
-  const pop = n => { const v = peek(n); bitPos += n; return v; };
+  /** @type {(n: number) => number} */ const peek = n => bits(bitPos, n);
+  /** @type {(n: number) => number} */ const pop = n => { const v = peek(n); bitPos += n; return v; };
   // A Huffman code is either a single default value (table null) or a lookup table built from code lengths.
-  const huffman = (lengths, dflt) => {
-    if (!lengths) return {dflt, table: null, width: 0, lengths: null};
+  /** @type {(lengths: number[] | null, dflt: number) => Huff} */ const huffman = (lengths, dflt) => {
+    if (!lengths) return {dflt, table: null, width: 0, lengths: []};
     const width = Math.max(...lengths);
     if (!Number.isFinite(width) || width < 1 || width > 16) husFail('has an invalid Huffman code');
-    const table = [];
+    /** @type {number[]} */ const table = [];
     let size = 1 << width;
     for (let len = 1; len <= width; len++) {
       size /= 2;
@@ -353,7 +393,7 @@ function husExpand(data, size) {
     }
     return {dflt, table, width, lengths};
   };
-  const lookup = (h, bits16) => {
+  /** @type {(h: Huff, bits16: number) => [number, number]} */ const lookup = (h, bits16) => {
     if (!h.table) return [h.dflt, 0];
     const v = h.table[bits16 >> (16 - h.width)];
     if (v === undefined) husFail('has an incomplete Huffman code');
@@ -368,7 +408,7 @@ function husExpand(data, size) {
   const characterLengthHuffman = () => {
     const count = pop(5);
     if (count === 0) return huffman(null, pop(5));
-    const lengths = new Array(count).fill(0);
+    /** @type {number[]} */ const lengths = new Array(count).fill(0);
     let index = 0;
     while (index < count) {
       if (index === 3) index += pop(2);
@@ -377,10 +417,10 @@ function husExpand(data, size) {
     }
     return huffman(lengths, 8);
   };
-  const characterHuffman = lengthHuff => {
+  /** @type {(lengthHuff: Huff) => Huff} */ const characterHuffman = lengthHuff => {
     const count = pop(9);
     if (count === 0) return huffman(null, pop(9));
-    const lengths = new Array(count).fill(0);
+    /** @type {number[]} */ const lengths = new Array(count).fill(0);
     let index = 0;
     while (index < count) {
       const [c, used] = lookup(lengthHuff, peek(16));
@@ -398,7 +438,7 @@ function husExpand(data, size) {
   const distanceHuffman = () => {
     const count = pop(5);
     if (count === 0) return huffman(null, pop(5));
-    const lengths = [];
+    /** @type {number[]} */ const lengths = [];
     for (let i = 0; i < count; i++) lengths.push(variableLength());
     return huffman(lengths, 0);
   };
@@ -410,17 +450,17 @@ function husExpand(data, size) {
   const token = () => {
     if (blockElements <= 0) loadBlock();
     blockElements--;
-    const [v, used] = lookup(charHuff, peek(16));
+    const [v, used] = lookup(/** @type {Huff} */ (charHuff), peek(16));
     bitPos += used;
     return v;
   };
   const position = () => {
-    const [v, used] = lookup(distHuff, peek(16));
+    const [v, used] = lookup(/** @type {Huff} */ (distHuff), peek(16));
     bitPos += used;
     if (v === 0) return 0;
     return (1 << (v - 1)) + pop(v - 1);
   };
-  const out = [];
+  /** @type {number[]} */ const out = [];
   const bitsTotal = data.length * 8;
   while (bitsTotal > bitPos && (size === null || out.length <= size)) {
     const c = token();
@@ -435,16 +475,17 @@ function husExpand(data, size) {
   }
   return out;
 }
+/** @param {Uint8Array} bytes @returns {Decoded} */
 function readHus(bytes) {
   if (bytes.length < 42) husFail('header is truncated');
-  const u32 = o => (bytes[o] | bytes[o + 1] << 8 | bytes[o + 2] << 16 | bytes[o + 3] << 24) >>> 0;
-  const u16 = o => bytes[o] | bytes[o + 1] << 8;
+  /** @type {(o: number) => number} */ const u32 = o => (bytes[o] | bytes[o + 1] << 8 | bytes[o + 2] << 16 | bytes[o + 3] << 24) >>> 0;
+  /** @type {(o: number) => number} */ const u16 = o => bytes[o] | bytes[o + 1] << 8;
   const stitchCount = u32(4), colours = u32(8);
   const cmdOffset = u32(20), xOffset = u32(24), yOffset = u32(28);
   if (colours < 1 || colours > MAX_THREADS) husFail('has an invalid colour count');
   if (42 + 2 * colours > bytes.length) husFail('colour chart is truncated');
   if (!(cmdOffset <= xOffset && xOffset <= yOffset && yOffset <= bytes.length)) husFail('stream offsets are out of order');
-  const threads = [];
+  /** @type {Thread[]} */ const threads = [];
   for (let i = 0; i < colours; i++) {
     const index = u16(42 + 2 * i);
     if (index >= HUS_THREADS.length) husFail('uses an unknown thread');
@@ -454,8 +495,8 @@ function readHus(bytes) {
   const cmd = husExpand(bytes.subarray(cmdOffset, xOffset), stitchCount);
   const xs = husExpand(bytes.subarray(xOffset, yOffset), stitchCount);
   const ys = husExpand(bytes.subarray(yOffset), stitchCount);
-  const s8 = n => n > 127 ? n - 256 : n;
-  const stitches = [];
+  /** @type {(n: number) => number} */ const s8 = n => n > 127 ? n - 256 : n;
+  /** @type {Stitch[]} */ const stitches = [];
   let x = 0, y = 0, block = 0;
   const count = Math.min(cmd.length, xs.length, ys.length);
   for (let i = 0; i < count; i++) {
@@ -471,14 +512,15 @@ function readHus(bytes) {
 }
 
 // Singer XXX, read as pyembroidery 1.5.1 does (XxxReader): a 0x100-byte header whose colour count is at 0x27, uncompressed commands from 0x100 (a 7F escape introduces moves, trims and colour changes; 7D and 7E are big jumps), an end code, then the colours as big-endian 32-bit values.
+/** @param {Uint8Array} bytes @returns {Decoded} */
 function readXxx(bytes) {
   if (bytes.length < 0x100) fail('XXX header is truncated');
   const colourCount = bytes[0x27] | bytes[0x28] << 8;
   let p = 0x100;
   const next = () => { if (p >= bytes.length) fail('XXX commands end before the end code'); return bytes[p++]; };
-  const s8 = n => n > 127 ? n - 256 : n;
+  /** @type {(n: number) => number} */ const s8 = n => n > 127 ? n - 256 : n;
   const s16 = () => { const v = next() | next() << 8; return v > 0x7FFF ? v - 0x10000 : v; };
-  const stitches = [];
+  /** @type {Stitch[]} */ const stitches = [];
   let x = 0, y = 0, block = 0;
   for (;;) {
     const b1 = next();
@@ -501,23 +543,24 @@ function readXxx(bytes) {
   }
   push(stitches, x, y, 'end', block);
   p += 2;
-  const threads = [];
+  /** @type {Thread[]} */ const threads = [];
   for (let i = 0; i < colourCount && p + 4 <= bytes.length; i++) {
     const v = (bytes[p] << 24 | bytes[p + 1] << 16 | bytes[p + 2] << 8 | bytes[p + 3]) >>> 0;
     p += 4;
     threads.push({index: i, color: '#' + (v & 0xFFFFFF).toString(16).padStart(6, '0'), brand: 'XXX', catalogNumber: null, name: null});
   }
   // A colour block with no entry in the colour table gets a placeholder colour, and the file is reported as having one.
-  const warnings = [];
+  /** @type {string[]} */ const warnings = [];
   if (threads.length < block + 1) warnings.push(threads.length ? 'XXX file has fewer colours than colour changes: placeholder colours were assigned.' : 'XXX file has no colour table: placeholder colours were assigned.');
   for (let i = threads.length; i <= block; i++) threads.push({index: i, color: '#527461', brand: 'XXX', catalogNumber: null, name: `Colour ${i + 1}`});
   return result(stitches, threads, warnings);
 }
 
 // Barudan-style DSB, read as pyembroidery 1.5.1 does (DsbReader): a 512-byte DST-style header, then 3-byte records. The control byte gives the command, and its 0x40 and 0x20 bits flip y and x. Coordinates are read as unsigned bytes, as pyembroidery does. There is no colour table: each needle change starts a colour block.
+/** @param {Uint8Array} bytes @returns {Decoded} */
 function readDsb(bytes) {
   if (bytes.length < 512) fail('DSB header is truncated');
-  const stitches = [];
+  /** @type {Stitch[]} */ const stitches = [];
   let x = 0, y = 0, block = 0;
   let p = 512;
   for (; p + 3 <= bytes.length; p += 3) {
@@ -537,15 +580,17 @@ function readDsb(bytes) {
   return blockResult(stitches, block, 'DSB');
 }
 // Colour blocks in a file with no colour table: one placeholder colour per block, reported as a warning when there is more than one block.
+/** @param {Stitch[]} stitches @param {number} block @param {string} brand @returns {Decoded} */
 function blockResult(stitches, block, brand) {
-  const threads = [];
+  /** @type {Thread[]} */ const threads = [];
   for (let i = 0; i <= block; i++) threads.push({index: i, color: '#527461', brand, catalogNumber: null, name: `Colour ${i + 1}`});
   return result(stitches, threads, block ? [`${brand} files carry no thread colours: placeholder colours were assigned.`] : []);
 }
 // Barudan-style DSZ (pyembroidery's DszReader): the same header and 3-byte records as DSB, with the bytes in another order (y, x, control), other control codes (0x82 stop, 0x9B trim, 0x83 to 0x9A needle change) and no end code: the file simply stops.
+/** @param {Uint8Array} bytes @returns {Decoded} */
 function readDsz(bytes) {
   if (bytes.length < 512) fail('DSZ header is truncated');
-  const stitches = [];
+  /** @type {Stitch[]} */ const stitches = [];
   let x = 0, y = 0, block = 0;
   for (let p = 512; p + 3 <= bytes.length; p += 3) {
     const ctrl = bytes[p + 2];
@@ -564,12 +609,15 @@ function readDsz(bytes) {
 }
 
 // Tajima-style TAP, read as pyembroidery 1.5.1 does (TapReader): DST records with no header, then pyembroidery's trim pass. A jump run of three or more jumps after stitching gets a trim at its start, and zero-length jump runs are removed. Sequin codes are refused: the editor has no sequin commands to map them to.
+/** @param {Uint8Array} bytes @returns {Decoded} */
 function readTap(bytes) {
   const CMD = {STITCH: 0, JUMP: 1, TRIM: 2, END: 4, COLOR: 5, SEQUIN_MODE: 6, SEQUIN_EJECT: 7};
-  const bit = (b, n) => (b >> n) & 1;
+  /** @type {(b: number, n: number) => number} */ const bit = (b, n) => (b >> n) & 1;
+  /** @type {(b0: number, b1: number, b2: number) => number} */
   const dxOf = (b0, b1, b2) => 81 * bit(b2, 2) - 81 * bit(b2, 3) + 27 * bit(b1, 2) - 27 * bit(b1, 3) + 9 * bit(b0, 2) - 9 * bit(b0, 3) + 3 * bit(b1, 0) - 3 * bit(b1, 1) + bit(b0, 0) - bit(b0, 1);
+  /** @type {(b0: number, b1: number, b2: number) => number} */
   const dyOf = (b0, b1, b2) => -(81 * bit(b2, 5) - 81 * bit(b2, 4) + 27 * bit(b1, 5) - 27 * bit(b1, 4) + 9 * bit(b0, 5) - 9 * bit(b0, 4) + 3 * bit(b1, 7) - 3 * bit(b1, 6) + bit(b0, 7) - bit(b0, 6));
-  const st = [];
+  /** @type {Step[]} */ const st = [];
   let x = 0, y = 0;
   for (let p = 0; p + 3 <= bytes.length; p += 3) {
     const b0 = bytes[p], b1 = bytes[p + 1], b2 = bytes[p + 2];
@@ -582,7 +630,7 @@ function readTap(bytes) {
   }
   st.push({x, y, cmd: CMD.END});
   interpolateTrims(st, 3, true);
-  const stitches = [];
+  /** @type {Stitch[]} */ const stitches = [];
   let block = 0;
   for (const s of st) {
     if (s.cmd === CMD.COLOR) { block++; if (block >= MAX_THREADS) fail('too many colour changes'); push(stitches, s.x, s.y, 'color', block); }
@@ -594,6 +642,7 @@ function readTap(bytes) {
   return blockResult(stitches, block, 'TAP');
 }
 // pyembroidery's EmbPattern.interpolate_trims on a list of absolute {x, y, cmd} stitches, edited in place: a run of jumps after stitching gets a trim at its start once it reaches jumpsRequired jumps, and a zero-displacement run is deleted when clipping.
+/** @param {Step[]} st @param {number} jumpsRequired @param {boolean} clipping */
 function interpolateTrims(st, jumpsRequired, clipping) {
   const JUMP = 1, STITCH = 0, TRIM = 2, COLOR = 5;
   let i = -1, ie = st.length - 1, x = 0, y = 0, jumpCount = 0, jumpStart = 0, jumpDx = 0, jumpDy = 0, jumping = false, trimmed = true;
@@ -623,11 +672,12 @@ function interpolateTrims(st, jumpsRequired, clipping) {
 }
 
 // Tajima TBF, read as pyembroidery 1.5.1 does (TbfReader): a name at 0x83, a 256-byte needle order at 0x10A, a colour table from 0x20E (each entry a 0x45 byte, a 24-bit colour and a space), then 3-byte stitch records from 0x600. A 0x81 record changes needle, which starts a colour block (needle 0 is a stop). The colour blocks take the table's colours in order, with placeholders past the table; pyembroidery does not map needles to table entries either.
+/** @param {Uint8Array} bytes @returns {Decoded} */
 function readTbf(bytes) {
   if (bytes.length < 0x600) fail('TBF header is truncated');
   const name = new TextDecoder().decode(bytes.subarray(0x83, 0x93)).trim();
   const order = bytes.subarray(0x10A, 0x10A + 0x100);
-  const colours = [];
+  /** @type {string[]} */ const colours = [];
   let p = 0x20E;
   while (p < bytes.length) {
     const tag = bytes[p++];
@@ -635,8 +685,8 @@ function readTbf(bytes) {
     colours.push('#' + ((bytes[p] << 16 | bytes[p + 1] << 8 | bytes[p + 2]) & 0xFFFFFF).toString(16).padStart(6, '0'));
     p += 4;
   }
-  const s8 = n => n > 127 ? n - 256 : n;
-  const stitches = [];
+  /** @type {(n: number) => number} */ const s8 = n => n > 127 ? n - 256 : n;
+  /** @type {Stitch[]} */ const stitches = [];
   let x = 0, y = 0, block = 0, needle = 0;
   for (let q = 0x600; q + 3 <= bytes.length; q += 3) {
     const b0 = bytes[q], b1 = bytes[q + 1], c = bytes[q + 2];
@@ -656,8 +706,8 @@ function readTbf(bytes) {
     else break;
   }
   push(stitches, x, y, 'end', block);
-  const threads = [];
-  const warnings = [];
+  /** @type {Thread[]} */ const threads = [];
+  /** @type {string[]} */ const warnings = [];
   if (colours.length < block + 1) warnings.push(colours.length ? 'TBF file has fewer colours than colour changes: placeholder colours were assigned.' : 'TBF file has no colour table: placeholder colours were assigned.');
   for (let i = 0; i <= Math.max(colours.length - 1, block); i++) {
     threads.push(i < colours.length
@@ -670,20 +720,22 @@ function readTbf(bytes) {
 }
 
 // PCS, read as pyembroidery 1.5.1 does (PcsReader): a header of version and hoop bytes and a 16-bit colour count, then one 4-byte entry per colour (a 24-bit big-endian colour and a skipped byte), a 16-bit stitch count, and 9-byte records: a byte, x as signed 24-bit little-endian, a byte, y as signed 24-bit little-endian (negated), then a control byte. Coordinates are absolute and scaled by 5/3. Control 0x00 stitches, bit 0x01 changes colour, bit 0x04 jumps; anything else ends the stitches.
+/** @param {Uint8Array} bytes @returns {Decoded} */
 function readPcs(bytes) {
   if (bytes.length < 6) fail('PCS header is truncated');
   const colours = bytes[2] | bytes[3] << 8;
   let p = 4;
-  const colourList = [];
+  /** @type {string[]} */ const colourList = [];
   for (let i = 0; i < colours; i++) {
     if (p + 4 > bytes.length) fail('PCS colour table is truncated');
     colourList.push('#' + ((bytes[p] << 16 | bytes[p + 1] << 8 | bytes[p + 2]) & 0xFFFFFF).toString(16).padStart(6, '0'));
     p += 4;
   }
   p += 2;
+  /** @type {(o: number) => number} */
   const s24 = o => { const v = bytes[o] | bytes[o + 1] << 8 | bytes[o + 2] << 16; return v > 0x7FFFFF ? v - 0x1000000 : v; };
   const ratio = 5 / 3;
-  const stitches = [];
+  /** @type {Stitch[]} */ const stitches = [];
   let x = 0, y = 0, block = 0;
   for (; p + 9 <= bytes.length; p += 9) {
     const ctrl = bytes[p + 8];
@@ -694,22 +746,23 @@ function readPcs(bytes) {
     else break;
   }
   push(stitches, x, y, 'end', block);
-  const warnings = [];
+  /** @type {string[]} */ const warnings = [];
   if (colourList.length < block + 1) warnings.push(colourList.length ? 'PCS file has fewer colours than colour changes: placeholder colours were assigned.' : 'PCS file has no colour table: placeholder colours were assigned.');
-  const threads = [];
+  /** @type {Thread[]} */ const threads = [];
   for (let i = 0; i <= Math.max(colourList.length - 1, block); i++) threads.push({index: i, color: i < colourList.length ? colourList[i] : '#527461', brand: 'PCS', catalogNumber: null, name: `Colour ${i + 1}`});
   return result(stitches, threads, warnings);
 }
 
 // SHV, read as pyembroidery 1.5.1 does (ShvReader): a header with the design name, size and colour count, then a 32-bit stitch count and a thread code for each colour, then 2-byte stitch records. Colour changes come from the per-colour stitch counts, as in pyembroidery. The thread codes index the 43-colour SHV chart. Control 0x80 with a second byte of 1 is a jump with a 16-bit move, 2 ends a jump run, 3 is ignored; anything else is a stitch step.
 const SHV_THREADS=[[0,0,0],[0,0,255],[51,204,102],[255,0,0],[255,0,255],[255,255,0],[127,127,127],[51,154,255],[0,255,0],[255,127,0],[255,160,180],[153,75,0],[255,255,255],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[255,127,127],[255,127,255],[255,255,153],[192,192,192],[0,0,0],[0,0,0],[255,165,65],[255,204,204],[175,90,10],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,127],[0,127,0],[127,0,0],[127,0,127],[200,200,0],[60,60,60],[0,0,0],[0,0,0],[232,63,0],[255,102,122]];
+/** @param {Uint8Array} bytes @returns {Decoded} */
 function readShv(bytes) {
   let p = 0x56;
-  const colourList = [];
+  /** @type {number[][]} */ const colourList = [];
   const u8 = () => (p < bytes.length ? bytes[p++] : null);
   const u32be = () => { if (p + 4 > bytes.length) fail('SHV colour table is truncated'); const v = (bytes[p] << 24 | bytes[p + 1] << 16 | bytes[p + 2] << 8 | bytes[p + 3]) >>> 0; p += 4; return v; };
   const s16be = () => { if (p + 2 > bytes.length) fail('SHV move is truncated'); const v = bytes[p] << 8 | bytes[p + 1]; p += 2; return v > 0x7FFF ? v - 0x10000 : v; };
-  const s8 = n => n > 127 ? n - 256 : n;
+  /** @type {(n: number) => number} */ const s8 = n => n > 127 ? n - 256 : n;
   const length = u8();
   if (length === null) fail('SHV header is truncated');
   const name = new TextDecoder().decode(bytes.subarray(p, p + length)).trim();
@@ -720,7 +773,7 @@ function readShv(bytes) {
   const colourCount = u8();
   if (colourCount === null) fail('SHV header is truncated');
   p += 18;
-  const perColour = [];
+  /** @type {number[]} */ const perColour = [];
   for (let i = 0; i < colourCount; i++) {
     perColour.push(u32be());
     if (p >= bytes.length) fail('SHV colour table is truncated');
@@ -729,13 +782,13 @@ function readShv(bytes) {
     p += 9;
   }
   p -= 2;
-  const stitches = [];
+  /** @type {Stitch[]} */ const stitches = [];
   let x = 0, y = 0, block = 0, sinceStop = 0, current = 0, inJump = false;
   let maxStitches = perColour.length ? perColour[0] : 0;
   for (;;) {
     const jumping = inJump;
     const b0 = u8(), b1 = u8();
-    if (b1 === null) break;
+    if (b0 === null || b1 === null) break;
     if (sinceStop >= maxStitches) {
       block++; if (block >= MAX_THREADS) fail('too many colour changes');
       push(stitches, x, y, 'color', block);
@@ -760,8 +813,8 @@ function readShv(bytes) {
     push(stitches, x, y, jumping ? 'jump' : 'stitch', block);
   }
   push(stitches, x, y, 'end', block);
-  const threads = [];
-  const warnings = [];
+  /** @type {Thread[]} */ const threads = [];
+  /** @type {string[]} */ const warnings = [];
   if (colourList.length < block + 1) warnings.push(colourList.length ? 'SHV file has fewer colours than colour changes: placeholder colours were assigned.' : 'SHV file has no colour table: placeholder colours were assigned.');
   for (let i = 0; i <= Math.max(colourList.length - 1, block); i++) {
     const rgb = i < colourList.length ? colourList[i] : null;
@@ -773,6 +826,7 @@ function readShv(bytes) {
 }
 
 // STX, read as pyembroidery 1.5.1 does (StxReader): a 'STX' file whose stitch stream starts at the offset in the 32-bit field at 0x14; the stream is read with the EXP decoder. The file carries no colour table, so colour blocks get placeholder colours.
+/** @param {Uint8Array} bytes @returns {Decoded} */
 function readStx(bytes) {
   if (bytes.length < 0x18) fail('STX header is truncated');
   if (new TextDecoder().decode(bytes.subarray(0, 3)) !== 'STX') fail('invalid STX signature');
@@ -782,11 +836,12 @@ function readStx(bytes) {
 }
 
 // BRO, read as pyembroidery 1.5.1 does (BroReader): records from 0x100 in pairs of bytes. A first byte other than 0x80 is a relative stitch (y is stored negated). A 0x80 escape reads a control byte: 0x00 is a no-op, 0x02 and 0xE0 end the stitches, 0x03 and 0x7E are a 16-bit move, and 0xE1 to 0xEF change needle and then move. There is no colour table, so each needle change starts a colour block.
+/** @param {Uint8Array} bytes @returns {Decoded} */
 function readBro(bytes) {
   if (bytes.length < 0x100) fail('BRO header is truncated');
-  const s8 = n => n > 127 ? n - 256 : n;
-  const s16 = o => { const v = bytes[o] | bytes[o + 1] << 8; return v > 0x7FFF ? v - 0x10000 : v; };
-  const stitches = [];
+  /** @type {(n: number) => number} */ const s8 = n => n > 127 ? n - 256 : n;
+  /** @type {(o: number) => number} */ const s16 = o => { const v = bytes[o] | bytes[o + 1] << 8; return v > 0x7FFF ? v - 0x10000 : v; };
+  /** @type {Stitch[]} */ const stitches = [];
   let x = 0, y = 0, block = 0;
   let p = 0x100;
   const move = () => { if (p + 4 > bytes.length) fail('BRO move is truncated'); x += s16(p); y -= s16(p + 2); p += 4; push(stitches, x, y, 'jump', block); };
@@ -812,10 +867,11 @@ function readBro(bytes) {
 }
 
 // EMD, read as pyembroidery 1.5.1 does (EmdReader): 2-byte records from 0x30. A first byte other than 0x80 is a relative stitch (y is stored negated). A 0x80 escape reads a control byte: 0x80 is a 2-byte move, 0x2A a colour change, 0x7D a no-op, 0xAD and 0x90 a trim (0x90 is the last command before the start), 0xFD ends the stitches, and anything else stops. There is no colour table, so each colour change starts a colour block.
+/** @param {Uint8Array} bytes @returns {Decoded} */
 function readEmd(bytes) {
   if (bytes.length < 0x30) fail('EMD header is truncated');
-  const s8 = n => n > 127 ? n - 256 : n;
-  const stitches = [];
+  /** @type {(n: number) => number} */ const s8 = n => n > 127 ? n - 256 : n;
+  /** @type {Stitch[]} */ const stitches = [];
   let x = 0, y = 0, block = 0;
   let p = 0x30;
   while (p + 2 <= bytes.length) {
@@ -839,9 +895,10 @@ function readEmd(bytes) {
 }
 
 // KSM, read as pyembroidery 1.5.1 does (KsmReader): 3-byte records from 0x200 (y is stored negated, the 0x40 and 0x20 bits of the control byte flip x and y, and the low five bits are the control code). Steps are stitches until a trim, and moves after it, until the restart codes. Control 0x07, 0x13 and 0x1D trim (only once something is stitched) and start a trim; 0x17 to 0x19 and 0x1B end it; 0x0B to 0x12 are needle changes; 0x05 is a stop; 0x08 ends the stitches. There is no colour table, so needle changes start placeholder colour blocks.
+/** @param {Uint8Array} bytes @returns {Decoded} */
 function readKsm(bytes) {
   if (bytes.length < 0x200) fail('KSM header is truncated');
-  const stitches = [];
+  /** @type {Stitch[]} */ const stitches = [];
   let x = 0, y = 0, block = 0;
   let trimmed = false, stitchedYet = false;
   for (let p = 0x200; p + 3 <= bytes.length; p += 3) {
@@ -877,8 +934,9 @@ function readKsm(bytes) {
 }
 
 // 10O, read as pyembroidery 1.5.1 does (A10oReader): 3-byte records from the start of the file. The first byte is the control, the second is y (negated) and the third is x; the 0x20 and 0x40 bits flip x and y. Control codes in the low five bits: 0 is a stitch and 0x10 a move. 0x8A is the start marker, 0x85 a colour change, 0x82 a stop, 0x81 a trim and 0x87 ends the stitches. There is no colour table, so colour changes start placeholder colour blocks.
+/** @param {Uint8Array} bytes @returns {Decoded} */
 function readTenO(bytes) {
-  const stitches = [];
+  /** @type {Stitch[]} */ const stitches = [];
   let x = 0, y = 0, block = 0;
   for (let p = 0; p + 3 <= bytes.length; p += 3) {
     const ctrl = bytes[p];
@@ -897,6 +955,7 @@ function readTenO(bytes) {
   return blockResult(stitches, block, '10O');
 }
 
+/** @param {Uint8Array | ArrayBuffer} input @param {string} format @returns {Decoded} */
 export function decodeEmbroidery(input, format) {
   const bytes=asBytes(input);
   if(bytes.byteLength>MAX_FILE_BYTES) fail('file exceeds 64 MiB limit');
