@@ -1791,3 +1791,14 @@ test('per-object stitch counts: each visible object reports its own stitches, an
  assert.equal(counts.c??0,0,'a hidden object is not sewn, so it has no count');
  assert.equal(Object.values(counts).reduce((n,v)=>n+v,0),plan.count,'the per-object counts add up to the plan');
 });
+
+test('sewing tips with a fix: a tiny fill becomes a running stitch, an object outside the hoop moves in, a duplicate is deleted, and applying the fix clears the tip',()=>{
+  const d=blank();applyOperations(d,[{op:'add_shape',id:'tiny',kind:'rect',x:0,y:0,width:1,height:1,thread:'#527461',stitch:'fill'},{op:'add_shape',id:'far',kind:'rect',x:60,y:-5,width:10,height:10,thread:'#2471a3',stitch:'run'},{op:'add_shape',id:'dup1',kind:'rect',x:-30,y:20,width:10,height:8,thread:'#527461',stitch:'fill'},{op:'add_shape',id:'dup2',kind:'rect',x:-30,y:20,width:10,height:8,thread:'#527461',stitch:'fill'}]);
+  const warnings=designWarnings(d);const pick=c=>warnings.find(w=>w.category===c);
+  assert.deepEqual(pick('fill').fix,[{op:'set_object',id:'tiny',stitch:'run'}]);
+  assert.deepEqual(pick('hoop').fix,[{op:'translate',ids:['far'],dx:-15,dy:0}],'the object spans 60 to 70 mm, and the hoop edge is at 55 mm');
+  assert.deepEqual(pick('duplicate').fix,[{op:'delete',id:'dup2'}],'the later duplicate is the one deleted');
+  applyOperations(d,pick('fill').fix.concat(pick('hoop').fix,[{op:'delete',id:'dup2'}]));validateDocument(d);
+  const after=designWarnings(d).map(w=>w.category);
+  assert.ok(!after.includes('fill')&&!after.includes('hoop')&&!after.includes('duplicate'),'the three fixes clear their tips');
+});

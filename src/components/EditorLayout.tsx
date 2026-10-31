@@ -30,6 +30,7 @@ import {PathTool, PenTool, SelectTool, ToolButtons} from './ToolButtons';
 import {TransformPanel} from './TransformPanel';
 import {ObjectList, ObjectListHead} from './ObjectList';
 import {PlaybackBar} from './PlaybackBar';
+import {TipCard} from './TipCard';
 import {ViewSwitch} from './ViewSwitch';
 // The editor layout: the object list, the canvas and the inspector. Rendered by React; ids match the markup it replaced, because app.js wires them by id.
 export function EditorLayout() {
@@ -278,8 +279,7 @@ export function EditorLayout() {
       </main>
       <aside className={"panel"}>
         <SelectionHeading />
-        <div id={"sewTips"} className={"sew-tips"} role={"status"} hidden={true}>
-        </div>
+        <TipCard />
         <details id={"tipsSettings"} className={"tips-settings"}>
           <summary>
             {"Sewing tips to show"}

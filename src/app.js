@@ -57,6 +57,7 @@ import {exportFormatState} from './exportFormatState.js';
 import {playbackActions,setPlayback} from './playbackState.js';
 import {setSewingCounts} from './sewingCountsState.js';
 import {underlayActions,underlayState} from './underlayState.js';
+import {sewTipActions,setSewTips} from './sewTipsState.js';
 import {createCanvas} from './canvas.js';
 import {getFont,registerFont,loadFont,isRegistryFont,documentFontIds,registerDocumentFonts} from './fonts.js';
 import {createFontPicker,fetchFontIndex,LEGACY} from './fontui.js';
@@ -972,7 +973,26 @@ var tipsCache={rev:-1,key:'',list:[]};
 // Sewing tips the user has switched off in the Tips settings list, kept per browser.
 const TIPS_KEY='welcome.hiddenTips';
 function hiddenTips(){try{const v=JSON.parse(localStorage.getItem(TIPS_KEY)||'[]');return Array.isArray(v)?v.filter(x=>typeof x==='string'):[];}catch{return [];}}
-function sewingTips(){const key=documentNow().doc.revision+'|'+documentNow().doc.objects.length;if(!tipsCache||tipsCache.key!==key){let list=[];try{list=designWarnings(documentNow().doc);}catch{}tipsCache={key,list};}return visibleTips(tipsCache.list,hiddenTips());}
+// A tip is ignored for its object while its message is the same: the message carries the dimensions, so a changed object shows it again.
+// Function declarations and var: render can run before this part of the module is reached, so these must already exist.
+function ignoredTipsKey(){return 'welcome.ignoredTips';}
+function tipKey(w){return `${w.id}|${w.category}|${w.message}`;}
+function ignoredTips(){
+ try{
+  const v=JSON.parse(localStorage.getItem(ignoredTipsKey())||'[]');
+  return new Set(Array.isArray(v)?v.filter(x=>typeof x==='string'):[]);
+ }catch{return new Set();}
+}
+// Keyed on the document object: undo can give a document the same revision as an earlier state, so the revision is not a safe key.
+function sewingTips(){const doc=documentNow().doc;if(!tipsCache||tipsCache.doc!==doc){let list=[];try{list=designWarnings(doc);}catch{}tipsCache={doc,list};}const ignored=ignoredTips();return visibleTips(tipsCache.list,hiddenTips()).filter(w=>!ignored.has(tipKey(w)));}
 function buildTipsList(){const box=$('#tipsList');if(!box)return;const hidden=new Set(hiddenTips());box.replaceChildren();for(const c of TIP_CATEGORIES){const label=document.createElement('label'),cb=document.createElement('input');cb.type='checkbox';cb.checked=!hidden.has(c.id);cb.onchange=()=>{const off=new Set(hiddenTips());if(cb.checked)off.delete(c.id);else off.add(c.id);try{localStorage.setItem(TIPS_KEY,JSON.stringify([...off]));}catch{}render();};label.append(cb,' ',t(c.label));box.append(label);}}
 buildTipsList();
-function renderSewTips(tips){const box=$('#sewTips');if(!box)return;const mine=tips.filter(w=>selState().multi.has(w.id));box.replaceChildren();box.hidden=mine.length===0;if(!mine.length)return;const h=document.createElement('b');h.textContent=t('Sewing tips');box.append(h);for(const w of mine.slice(0,4)){const p=document.createElement('p');p.textContent=t(w.message);box.append(p);}}
+// The card shows the selected objects' tips (at most four). Its buttons come back here by key.
+var shownTips=new Map();
+function renderSewTips(tips){const mine=tips.filter(w=>selState().multi.has(w.id)).slice(0,4);shownTips=new Map(mine.map(w=>[tipKey(w),w]));setSewTips(mine.map(w=>({key:tipKey(w),message:w.message,canFix:Boolean(w.fix)})));}
+sewTipActions.fix=key=>{const w=shownTips.get(key);if(w?.fix)edit(w.fix);};
+sewTipActions.ignore=key=>{
+ const set=ignoredTips();set.add(key);
+ try{localStorage.setItem(ignoredTipsKey(),JSON.stringify([...set].slice(-200)));}catch{}
+ render();
+};

@@ -2403,3 +2403,20 @@ test('underlay pills: clicking one sets the underlay as one undo step, and the h
  await expect(pill('auto')).toHaveAttribute('aria-checked','true');await expect(page.locator('#underlayType')).toHaveValue('auto');
  expect(errors).toEqual([]);
 });
+
+test('sewing tips: Fix tip makes one undo step and clears the tip, and Ignore hides it until the object changes',async({page})=>{
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));
+ await page.goto('/');page.on('dialog',d=>d.accept());await expect(page.locator('#count')).toContainText('compiled');
+ await page.locator('#new').click();await page.locator('#rect').click();
+ await page.locator('#sizeW').fill('1');await page.locator('#sizeW').press('Tab');await page.locator('#sizeH').fill('1');await page.locator('#sizeH').press('Tab');
+ const card=page.locator('#sewTips');
+ await expect(card).toBeVisible();await expect(card).toContainText('too small for a clean fill');
+ await page.locator('.tip-fix').click();
+ await expect(page.locator('#type')).toHaveValue('run');await expect(card).toBeHidden();
+ await page.locator('#undo').click();
+ await expect(page.locator('#type')).toHaveValue('fill');await expect(card).toBeVisible();
+ await page.locator('.tip-ignore').click();await expect(card).toBeHidden();
+ await page.locator('#sizeW').fill('1.2');await page.locator('#sizeW').press('Tab');
+ await expect(card).toBeVisible();await expect(card).toContainText('1.2');
+ expect(errors).toEqual([]);
+});
