@@ -10,7 +10,7 @@ import {shapeArea} from './designChecks.js';
 /** @typedef {import('./transforms.js').Obj} Obj */
 /** @typedef {import('./transforms.js').Doc} Doc */
 
-// A rectangle, an ellipse or a closed path: the shapes that boolean, clip and cleanup operations take.
+// A closed shape: a rectangle, an ellipse or a closed path. Clip masks and appliqué from a group use only these.
 /**
  * @param {{kind?: string, closed?: boolean}|null|undefined} o
  * @returns {boolean}

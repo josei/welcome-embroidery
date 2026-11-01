@@ -15,6 +15,7 @@ import {flipObjects,mapPathPoints,normAngle,objById,objectBounds,refreshPathBoun
 import {HOOP_PRESETS,hoopSize,hoopLabel} from './hoops.js';
 import {designWarnings,shapeArea,ringArea,TIP_CATEGORIES,visibleTips} from './designChecks.js';
 import {refreshAlong,ringRoute,alongPoints,pathSig} from './pathFollow.js';
+import {clipLines,refreshClips} from './clipMasks.js';
 import {sameThread,parseThreadStock,nearestStockThread} from './threads.js';
 export {parseThreadStock,nearestStockThread};
 export {designWarnings,shapeArea,TIP_CATEGORIES,visibleTips};
@@ -134,11 +135,6 @@ export function applyOperations(doc,operations) {
   refreshAlong(doc);refreshClips(doc);
   return doc;
 }
-function clipLines(lines,maskLines){const poly=ls=>ls.filter(l=>l.length>=3).map(closeRing),a=poly(lines),b=poly(maskLines);if(!a.length||!b.length)return [];
-  try{return polygonClipping.intersection(a,b).flatMap(pg=>pg.map(r=>r.map(([x,y])=>[x,y])));}catch{return [];}}
-// Clipping masks: a clipped object is sewn only inside its mask (a closed shape that is itself not sewn). Dangling links are cleaned up after every edit.
-// A closed shape: a rectangle, an ellipse or a closed path. Clip masks and appliqué from a group use only these.
-function refreshClips(doc){const ids=new Set(doc.objects.map(o=>o.id));for(const o of doc.objects)if(o.clipId&&(!ids.has(o.clipId)||o.clipId===o.id||!isClosedShape(doc.objects.find(v=>v.id===o.clipId))))delete o.clipId;const used=new Set(doc.objects.map(o=>o.clipId).filter(Boolean));for(const o of doc.objects){if(o.mask&&!used.has(o.id))delete o.mask;else if(!o.mask&&used.has(o.id))o.mask=true;}}
 // Appliqué from a group: the selected closed shapes become fills, and the bottom-most one (first in the object order) stays the fabric the others are laid on. Each other shape becomes an appliqué: its placement line, tack-down and satin cover, as a single object's appliqué already sews. Shapes are kept in their object order.
 function appliqueGroup(doc,ids){if(!Array.isArray(ids)||ids.length<2)throw Error('Appliqué from a group needs two or more closed shapes.');if(new Set(ids).size!==ids.length)throw Error('Each shape can be chosen once.');
   // Open paths, text and other objects in the selection are left as they are; only the closed shapes take part, and at least two must remain.
