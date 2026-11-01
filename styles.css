@@ -281,3 +281,6 @@ input:not([type=checkbox]):not([type=range]),select,textarea,.panel textarea{fon
 /* Export group and settings gear sit together at the header's right edge; both are 36 px tall, so the export split is 36 px too. */
 .top .export-split{margin-left:auto;height:36px;flex:none}
 .top .export-split #export,.top .export-split #headerFormat{height:100%;min-height:0}
+
+/* Export format: only the chevron shows; the chosen format is still the select's value and is listed when opened. */
+.export-split select{color:transparent;appearance:none;-webkit-appearance:none;width:30px;max-width:none;padding:0;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' fill='none' stroke='%23fff' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") no-repeat center}

@@ -2254,8 +2254,9 @@ test('header export: the format beside Export and the dialog share one choice, a
  await page.locator('#export').click();await expect(page.locator('#exportDialog')).toBeVisible();
  await expect(page.locator('#format')).toHaveValue('pes');
  await page.locator('#format').selectOption('dst');await expect(page.locator('#headerFormat')).toHaveValue('dst');
+ await expect(page.locator('#headerFormat')).toHaveCSS('color','rgba(0, 0, 0, 0)');
  await page.keyboard.press('Escape');await expect(page.locator('#exportDialog')).toBeHidden();
- await expect(page.locator('#agentPill')).toContainText('Connect an AI agent');
+ await expect(page.locator('#agentPill')).toContainText('Agent');await expect(page.locator('#agentPill')).toHaveAttribute('title','Connect an AI agent');
  await page.locator('#agentPill').click();await expect(page.locator('#agentDialog')).toBeVisible();
  expect(errors).toEqual([]);
 });

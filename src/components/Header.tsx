@@ -21,9 +21,11 @@ function SavedLabel() {
 // The agent button: it shows whether an AI agent is connected, and opens the Connect an AI agent dialog.
 function AgentPill() {
  const agent = useSyncExternalStore(agentLinkState.subscribe, agentLinkState.get);
- const label = agent.active ? t('Agent connected') : agent.waiting ? t('Waiting for agent') : t('Connect an AI agent');
+ // The visible label is one word; the full status stays in the tooltip.
+ const label = agent.active ? t('Connected') : agent.waiting ? t('Waiting') : t('Agent');
+ const hint = agent.active ? t('Agent connected') : agent.waiting ? t('Waiting for agent') : t('Connect an AI agent');
  return (
-  <button type="button" id="agentPill" className={agent.active ? 'agent-pill on' : 'agent-pill'} onClick={() => agentLinkActions.open()}>
+  <button type="button" id="agentPill" className={agent.active ? 'agent-pill on' : 'agent-pill'} title={hint} onClick={() => agentLinkActions.open()}>
    <span className="agent-dot" aria-hidden="true" />{label}
   </button>
  );
