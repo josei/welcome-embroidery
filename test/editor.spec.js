@@ -2464,3 +2464,5 @@ test('sidebars: the right inspector is as wide as the left sidebar',async({page}
   expect(Math.abs(left.width-right.width)).toBeLessThan(1);
  }
 });
+
+test('header: export and settings gear sit together at the right edge, the same height',async({page})=>{await page.goto('/');const gear=await page.locator('#settingsBtn').boundingBox(),split=await page.locator('.export-split').boundingBox(),header=await page.locator('header.top').boundingBox();expect(Math.abs(gear.height-split.height)).toBeLessThan(1);expect(split.x+split.width).toBeLessThan(gear.x);expect(Math.abs(gear.x+gear.width-(header.x+header.width-14))).toBeLessThan(2);});
