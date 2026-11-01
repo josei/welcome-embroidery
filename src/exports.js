@@ -92,3 +92,10 @@ const margin=10,gap=12,ink='#000';
     `<path d="M${margin} 5H${margin+10}" fill="none" stroke="#000" stroke-width="0.3"/><text x="${margin+12}" y="6.5" font-size="2.5" font-family="sans-serif">10 mm</text>`+
     parts.join('')+'</svg>\n';
 }
+
+/**
+ * @param {{bounds?: number[]}} plan
+ * @param {string} [format]
+ * @returns {string[]}
+ */
+export function jefWarnings(plan,format='jef'){if(format!=='jef'||!plan.bounds)return [];const w=plan.bounds[2]-plan.bounds[0],h=plan.bounds[3]-plan.bounds[1];return w>=200||h>=200?[`Warning: ${w.toFixed(0)} × ${h.toFixed(0)} mm is beyond the largest JEF hoop code (200 × 200 mm); the file gets hoop code 0 and no hoop-edge distances, and machines may reject it.`]:[];}

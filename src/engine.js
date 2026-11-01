@@ -25,8 +25,10 @@ import {closeRing,insideRings,clipRuns,satinFromRails,underlayTypes,orientRuns,p
 import {makeStitchLayer,importStitchLayer,decodeBase64} from './stitchImport.js';
 export {makeStitchLayer,importStitchLayer};
 export {satinFromRails};
-import {exportSvg,exportPrintTemplate,exportAppliqueTemplates} from './exports.js';
-export {exportSvg,exportPrintTemplate,exportAppliqueTemplates};
+import {exportSvg,exportPrintTemplate,exportAppliqueTemplates,jefWarnings} from './exports.js';
+export {exportSvg,exportPrintTemplate,exportAppliqueTemplates,jefWarnings};
+import {measureBetween} from './measure.js';
+export {measureBetween};
 import {validateDocument} from './validate.js';
 export {validateDocument};
 import {sewingWorksheet} from './worksheet.js';
@@ -52,7 +54,6 @@ const round = n => Math.round(n * 10) / 10;
 
 // Organize fonts: each custom font in the document, with the lettering objects that use it.
 // Bundled fonts (Ink/Stitch and open TrueType, registry ids) that lettering in the document uses, with the lettering that uses each. Read-only: bundled fonts ship with the app and are not removed here.
-export function jefWarnings(plan,format='jef'){if(format!=='jef'||!plan.bounds)return [];const w=plan.bounds[2]-plan.bounds[0],h=plan.bounds[3]-plan.bounds[1];return w>=200||h>=200?[`Warning: ${w.toFixed(0)} × ${h.toFixed(0)} mm is beyond the largest JEF hoop code (200 × 200 mm); the file gets hoop code 0 and no hoop-edge distances, and machines may reject it.`]:[];}
 export function applyOperations(doc,operations) {
   if(!doc||doc.schema!=='welcome/1'||!Array.isArray(doc.objects)||!Array.isArray(operations))throw Error('Invalid Welcome document operation.');
   for(const op of operations){
@@ -351,5 +352,3 @@ export {geometry,objectBounds};
 // Thread plan: the colours in sewing order. A block starts at the first stitch after a colour change or stop, so the same colour sewn twice gives two blocks, as the editor shows it.
 // Two thread strings name the same colour when they differ only in case (#D9897E and #d9897e).
 
-// Measure tool: the straight-line distance between two points in mm, with its x and y parts (b minus a, so the signs say which way the second point lies).
-export function measureBetween(a,b){const dx=b[0]-a[0],dy=b[1]-a[1];return {distance:Math.hypot(dx,dy),dx,dy};}
