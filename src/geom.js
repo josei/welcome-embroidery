@@ -3,7 +3,7 @@
 import polygonClippingModule from './vendor/polygon-clipping.js';
 /** @typedef {[number, number]} Pt */
 // The vendored module ships no type declarations; this names its union, which is all the helpers here use.
-const polygonClipping = /** @type {{union: (...polygons: Pt[][][]) => Pt[][][][], difference: (subject: Pt[][][], ...clips: Pt[][][][]) => Pt[][][]}} */ (/** @type {any} */ (polygonClippingModule));
+const polygonClipping = /** @type {{union: (...geoms: Array<Pt[][] | Pt[][][]>) => Pt[][][], difference: (subject: Pt[][][], ...clips: Array<Pt[][] | Pt[][][]>) => Pt[][][]}} */ (/** @type {any} */ (polygonClippingModule));
 export {polygonClipping};
 
 /** @param {Pt[]} points @param {number} tol @returns {Pt[]} */
@@ -19,7 +19,7 @@ export const openRing=r=>{
 
 // Buffer = union of one quad per segment plus one regular polygon (circle) per vertex. Trying a few circle phases keeps the
 // sweep-line clipper away from exactly coincident edges, which can otherwise make it fail on tangent arcs.
-/** @param {Pt[][]} rings @param {number} r @param {number} [maxEdges] @param {number} [sides] @returns {Pt[][][][]} */
+/** @param {Pt[][]} rings @param {number} r @param {number} [maxEdges] @param {number} [sides] @returns {Pt[][][]} */
 export function bufferSegments(rings,r,maxEdges=500,sides=24){
   /** @type {[Pt, Pt][]} */const edges=[];const verts=/** @type {Pt[]} */([]);for(const ring of rings)for(let i=0;i<ring.length;i++){const a=ring[i];if(!verts.some(v=>Math.abs(v[0]-a[0])<1e-9&&Math.abs(v[1]-a[1])<1e-9))verts.push(a);if(i){const b=ring[i-1];if(Math.hypot(a[0]-b[0],a[1]-b[1])>1e-9)edges.push([b,a]);}}
   if(!edges.length)return [];if(edges.length>maxEdges)throw Error(`The outline has too many segments for this operation (limit ${maxEdges}). Simplify it first.`);

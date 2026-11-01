@@ -7,6 +7,8 @@ import {nearestJefColor} from './jefPalette.js';
 import {decodeEmbroidery,SEW_CHART,PEC_CHART} from './readers.js';
 import {FABRIC_PROFILES,FABRIC_PRESETS,DISTORTION_SCALE,distortionGrid} from './fabrics.js';
 import {GLYPHS,parseSvgPath,textLines} from './lettering.js';
+import {geometry,textPrimitives,cornerRadii} from './outlines.js';
+export {textPrimitives,cornerRadii};
 import {distP,pathOutline,railsFromLine,railsFromCenterline,widthAt} from './pathGeometry.js';
 export {FABRIC_PROFILES,FABRIC_PRESETS,DISTORTION_SCALE,distortionGrid};
 export {parseSvgPath};
@@ -276,19 +278,6 @@ function replaceWithPolygons(doc,base,objs,result){
     for(const key of ['rotation','smooth','handles','holes','satinWidth','text','font','along'])delete o[key];Object.assign(o,{kind:'path',points:outer,closed:true,stitch:base.stitch==='run'?'run':'fill',w:0,h:0,x:0,y:0});if(holes.length)o.holes=holes;refreshPathBounds(o);made.push(o);});
   doc.objects=doc.objects.filter(o=>!objs.includes(o)||o===base);const baseAt=doc.objects.indexOf(base);doc.objects.splice(baseAt+1,0,...made.slice(1));
 }
-// Lettering on a path: glyph points are resampled to <= 0.8 mm, then mapped so that distance along the text becomes arc length
-// along the path (starting at `offset` mm) and height above the baseline becomes the path's upward normal. The path is a
-// snapshot (obj.along) copied by `text_on_path`, so later edits to the path do not move the lettering until it is attached again.
-function mapAlongPoint(obj){
-  const pts=obj.along.points,closed=Boolean(obj.along.closed),ring=closed?[...pts,pts[0]]:pts,cum=[0];for(let i=1;i<ring.length;i++)cum.push(cum[i-1]+Math.hypot(ring[i][0]-ring[i-1][0],ring[i][1]-ring[i-1][1]));const total=cum.at(-1)||1;
-  const at=sRaw=>{let sPos=closed?((sRaw%total)+total)%total:sRaw,i=1;if(sPos>=0)while(i<cum.length-1&&cum[i]<sPos)i++;const a=ring[i-1],b=ring[i],seg=cum[i]-cum[i-1]||1,f=(sPos-cum[i-1])/seg,tx=(b[0]-a[0])/seg,ty=(b[1]-a[1])/seg;return {p:[a[0]+(b[0]-a[0])*f,a[1]+(b[1]-a[1])*f],t:[tx,ty]};};
-  const offset=Number(obj.along.offset)||0;
-  return ([X,Y])=>{const {p,t}=at(offset+(X-obj.x)),v=obj.y-Y;return [p[0]+t[1]*v,p[1]-t[0]*v];};
-}
-function mapAlongPath(lines,obj){
-  const map=mapAlongPoint(obj),resample=line=>{const out=[line[0]];for(let i=1;i<line.length;i++){const a=line[i-1],b=line[i],n=Math.max(1,Math.ceil(Math.hypot(b[0]-a[0],b[1]-a[1])/.8));for(let k=1;k<=n;k++)out.push([a[0]+(b[0]-a[0])*k/n,a[1]+(b[1]-a[1])*k/n]);}return out;};
-  return lines.map(line=>resample(line).map(map));
-}
 
 // ---- Inkscape-style path tools -------------------------------------------------------------------------------
 // Offset and stroke-to-shape build a buffer as the union of "capsules" (a segment grown by a radius, round caps and joins).
@@ -332,14 +321,6 @@ function sortByColor(doc){const order=[];for(const o of doc.objects)if(!order.in
 
 // Registry-font lettering: layout -> optional text-on-path -> rotation, returning stitchable primitives in mm (see textlayout.js).
 const TEXT_OPTION_KEYS=['tracking','wordSpacing','lineHeight','align','italic','bold','vertical'];
-function bufferRingsForBold(rings,d){try{const closed=rings.map(closedRing),poly=rings.map(r=>r),grown=bufferSegments(closed,d),result=polygonClipping.union(poly,...grown);const out=[];for(const polygon of result)for(const ring of polygon)out.push(ring.slice(0,-1));return out.length?out:null;}catch{return null;}}
-export function textPrimitives(obj){
-  const font=getFont(obj.font);if(!font)return null;
-  let prims=layoutText(obj,font,{buffer:bufferRingsForBold}).prims;
-  if(obj.along)prims=mapPrimitives(resamplePrimitives(prims),mapAlongPoint(obj));
-  const angle=(Number(obj.rotation)||0)*Math.PI/180;if(angle&&prims.length){const pts=primitiveLines(prims).flat(),cx=(Math.min(...pts.map(p=>p[0]))+Math.max(...pts.map(p=>p[0])))/2,cy=(Math.min(...pts.map(p=>p[1]))+Math.max(...pts.map(p=>p[1])))/2,c=Math.cos(angle),sn=Math.sin(angle);prims=mapPrimitives(prims,([x,y])=>[cx+(x-cx)*c-(y-cy)*sn,cy+(x-cx)*sn+(y-cy)*c]);}
-  return prims;
-}
 // Two-rail satin: needles alternate between the rails every `spacing` mm of rail length; pull compensation widens the column.
 export function satinFromRails(a,b,spacing,comp,rungs=[],compB=comp){
   const cum=r=>{const c=[0];for(let i=1;i<r.length;i++)c.push(c[i-1]+Math.hypot(r[i][0]-r[i-1][0],r[i][1]-r[i-1][1]));return c;},ca=cum(a),cb=cum(b),La=ca.at(-1),Lb=cb.at(-1);if(Math.max(La,Lb)<.2)return {zig:[],centre:[],pairs:[]};
@@ -463,21 +444,6 @@ export function exportAppliqueTemplates(doc){
 function mapPathPoints(o,fn){o.points=o.points.map(p=>fn(p));if(o.holes)o.holes=o.holes.map(h=>h.map(p=>fn(p)));if(o.handles)o.handles=o.handles.map(h=>h?{i:fn(h.i),o:fn(h.o)}:h);}
 function refreshPathBounds(o){const xs=o.points.map(p=>p[0]),ys=o.points.map(p=>p[1]);o.x=Math.min(...xs);o.y=Math.min(...ys);o.w=Math.max(...xs)-o.x;o.h=Math.max(...ys)-o.y;}
 function objectBounds(o){const pts=geometry(o).flat();if(!pts.length)return [o.x,o.y,o.x+o.w,o.y+o.h];return [Math.min(...pts.map(p=>p[0])),Math.min(...pts.map(p=>p[1])),Math.max(...pts.map(p=>p[0])),Math.max(...pts.map(p=>p[1]))];}
-// Corner radii of a rectangle in mm, ordered top-left, top-right, bottom-right, bottom-left. Four `radii` override the uniform `radius`; with neither, all four are 0.
-export function cornerRadii(o){if(Array.isArray(o.radii)&&o.radii.length===4)return o.radii.map(v=>Number(v)||0);const u=Number(o.radius)||0;return [u,u,u,u];}
-function geometry(obj,comp=0) {
-  let lines;
-  if(obj.kind==='text'&&isRegistryFont(obj.font)){const prims=textPrimitives(obj);return prims?primitiveLines(prims):[];}
-  if(obj.kind==='text'){lines=textLines(obj);if(obj.along)lines=mapAlongPath(lines,obj);}
-  else if(obj.kind==='path')lines=[pathOutline(obj),...(obj.holes||[]).map(h=>{const r=h.map(p=>[Number(p[0]),Number(p[1])]);return [...r,r[0]];})];
-  else if(obj.kind==='ellipse') {const pts=[];for(let i=0;i<=64;i++){const a=2*Math.PI*i/64;pts.push([obj.x+obj.w/2+Math.cos(a)*(obj.w/2+comp),obj.y+obj.h/2+Math.sin(a)*(obj.h/2+comp)]);}lines=[pts];}
-  else {const x=obj.x-comp,y=obj.y-comp,w=obj.w+2*comp,h=obj.h+2*comp;const [rTL,rTR,rBR,rBL]=cornerRadii(obj).map(v=>Math.max(0,Math.min(v+(v>0?comp:0),Math.min(w,h)/2)));
-    if(Math.max(rTL,rTR,rBR,rBL)>.05){const pts=[],arc=(cx,cy,r,a0,px,py)=>{if(r<=.05){pts.push([px,py]);return;}for(let k=0;k<=8;k++){const a=a0+Math.PI/2*k/8;pts.push([cx+Math.cos(a)*r,cy+Math.sin(a)*r]);}};arc(x+w-rTR,y+rTR,rTR,-Math.PI/2,x+w,y);arc(x+w-rBR,y+h-rBR,rBR,0,x+w,y+h);arc(x+rBL,y+h-rBL,rBL,Math.PI/2,x,y+h);arc(x+rTL,y+rTL,rTL,Math.PI,x,y);pts.push(pts[0]);lines=[pts];}
-    else lines=[[[x,y],[x+w,y],[x+w,y+h],[x,y+h],[x,y]]];}
-  const angle=(Number(obj.rotation)||0)*Math.PI/180;if(!angle)return lines;
-  const points=lines.flat(),cx=(Math.min(...points.map(p=>p[0]))+Math.max(...points.map(p=>p[0])))/2,cy=(Math.min(...points.map(p=>p[1]))+Math.max(...points.map(p=>p[1])))/2,c=Math.cos(angle),s=Math.sin(angle);
-  return lines.map(line=>line.map(([x,y])=>[cx+(x-cx)*c-(y-cy)*s,cy+(x-cx)*s+(y-cy)*c]));
-}
 function polygonFill(rings,spacing,angle) {
   // Evenly spaced parallel rows with even/odd polygon clipping; each row becomes a boustrophedon path.
   const rad=angle*Math.PI/180,c=Math.cos(rad),s=Math.sin(rad),rotRings=rings.map(r=>r.map(([x,y])=>[x*c+y*s,-x*s+y*c])),rot=rotRings.flat();
