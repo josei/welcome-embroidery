@@ -14,6 +14,8 @@ import {HOOP_PRESETS,hoopSize,hoopLabel} from './hoops.js';
 import {designWarnings,shapeArea,ringArea} from './designChecks.js';
 export {designWarnings,shapeArea};
 import {closeRing,insideRings,clipRuns,satinFromRails,underlayTypes,orientRuns,pinPoint,reverseRuns} from './stitchRuns.js';
+import {makeStitchLayer,importStitchLayer,decodeBase64} from './stitchImport.js';
+export {makeStitchLayer,importStitchLayer};
 export {satinFromRails};
 import {exportSvg,exportPrintTemplate,exportAppliqueTemplates} from './exports.js';
 export {exportSvg,exportPrintTemplate,exportAppliqueTemplates};
@@ -69,21 +71,6 @@ export function batchPlan(doc,{copies=1,gap=3}={}){if(!doc.objects.length)return
 // One document per hoop: copies laid out in the batch grid, centred on the hoop.
 export function batchDocuments(doc,{copies=1,gap=3,names=null}={}){// Name drop writes each name into the lettering marked nameDrop; with none marked, into the first lettering object.
 const marked=doc.objects.filter(o=>o.kind==='text'&&o.nameDrop===true),targets=new Set((marked.length?marked:doc.objects.filter(o=>o.kind==='text').slice(0,1)).map(o=>o.id));if(names&&!targets.size)throw Error('Name drop needs a lettering object in the design.');if(names)copies=names.length;const p=batchPlan(doc,{copies,gap});if(!p||!p.perHoop)return [];const [dw,dh]=p.design,cw=dw+gap,ch=dh+gap,gridW=p.cols*cw-gap,gridH=Math.ceil(p.perHoop/p.cols)*ch-gap,docs=[];for(let start=0;start<copies;start+=p.perHoop){const n=Math.min(p.perHoop,copies-start),d={...structuredClone(doc),objects:[]};for(let k=0;k<n;k++){const col=k%p.cols,row=Math.floor(k/p.cols),dx=-gridW/2+col*cw-p.origin[0],dy=-gridH/2+row*ch-p.origin[1],tag=`${start+k+1}`;for(const o of doc.objects){const c=structuredClone(o);c.id=`${o.id}-${tag}`;if(names&&targets.has(o.id))c.text=names[start+k];if(c.kind==='stitch_layer')c.source={...c.source,originalBytesBase64:null};if(c.clipId)c.clipId=`${c.clipId}-${tag}`;c.x+=dx;c.y+=dy;const sh=([x,y])=>[x+dx,y+dy];if(c.points)c.points=c.points.map(sh);if(c.handles)c.handles=c.handles.map(h=>h?{i:sh(h.i),o:sh(h.o)}:null);if(c.holes)c.holes=c.holes.map(hl=>hl.map(sh));d.objects.push(c);}}validateDocument(d);docs.push(d);}return docs;}
-export function makeStitchLayer(decoded,format,{id=crypto.randomUUID(),name='Imported embroidery',fileName='design',originalBytesBase64=null,sha256=null,size=0}={}){
-  if(!['jef','vp3','dst','sew','pec','pes','exp','hus','xxx','dsb','dsz','tap','tbf','pcs','shv','stx','bro','emd','ksm','10o'].includes(format)||!Array.isArray(decoded?.stitches)||!Array.isArray(decoded?.threads)||!Array.isArray(decoded?.bounds))throw Error('Invalid decoded embroidery source.');
-  const [x0,y0,x1,y1]=decoded.bounds,w=Math.max(.1,x1-x0),h=Math.max(.1,y1-y0);
-  if(decoded.stitches.length>250000)throw Error('This design exceeds the 250,000 stitch import limit.');
-  const first=decoded.threads.find(t=>/^#[0-9a-f]{6}$/i.test(t.color||'')),defaultThread=first?.color||'#527461';
-  const placement={x:-w/2,y:-h/2,w,h};
-  const fileMeta=decoded.metadata&&typeof decoded.metadata==='object'?{...decoded.metadata}:null,layerName=fileMeta?.name||name;
-  return {id,name:layerName,kind:'stitch_layer',...placement,rotation:0,thread:defaultThread,stitch:'run',threads:structuredClone(decoded.threads),stitches:structuredClone(decoded.stitches),threadOverrides:{},source:{format,fileName:String(fileName).slice(0,240),size,sha256,bounds:[...decoded.bounds],coordinateMapping:'source_mm_centered_on_editor_origin',defaultPlacement:placement,defaultThread,warnings:[...(decoded.warnings||[])],...(fileMeta?{metadata:fileMeta}:{}),originalBytesBase64}};
-}
-export function importStitchLayer(bytes,format,metadata={}){
-  const input=bytes instanceof Uint8Array?bytes:new Uint8Array(bytes);
-  if(input.byteLength>1_048_576)throw Error('Integrated machine-file import is limited to 1 MiB so source bytes can be preserved in the .welcome project.');
-  const decoded=decodeEmbroidery(input,format),b64=typeof Buffer!=='undefined'?Buffer.from(input).toString('base64'):btoa(String.fromCharCode(...input));
-  return makeStitchLayer(decoded,format,{...metadata,size:input.byteLength,originalBytesBase64:b64});
-}
 export function measureText(text,font='welcome-mono/1',size=8,options={}){if(isRegistryFont(font)){const f=getFont(font);if(f)return layoutText({...options,text,font,h:size,w:0,x:0,y:0},f,{buffer:null}).width;return String(text).length*size*.6;}if(font==='neon-blinking/1')return [...String(text).toUpperCase()].reduce((n,ch)=>n+(neonFont.glyphs[ch]?.advance||neonFont.glyphs[' '].advance)*size/neonFont.unitsPerEm,0);return String(text).length*size*.72;}
 export function applyOperations(doc,operations) {
   if(!doc||doc.schema!=='welcome/1'||!Array.isArray(doc.objects)||!Array.isArray(operations))throw Error('Invalid Welcome document operation.');
@@ -187,7 +174,6 @@ function roundPathCorners(o,radius,only=null){
 // Position of a path node as a fraction (0..1) of the path's length.
 export function nodeFraction(o,index){const line=pathOutline(o),P=o.points[index],cum=[0];for(let i=1;i<line.length;i++)cum.push(cum[i-1]+distP(line[i],line[i-1]));const total=cum.at(-1)||1;let best=Infinity,at=0;
   for(let i=1;i<line.length;i++){const a=line[i-1],b=line[i],dx=b[0]-a[0],dy=b[1]-a[1],l2=dx*dx+dy*dy,u=l2?Math.max(0,Math.min(1,((P[0]-a[0])*dx+(P[1]-a[1])*dy)/l2)):0,d=Math.hypot(P[0]-a[0]-dx*u,P[1]-a[1]-dy*u);if(d<best-1e-9){best=d;at=cum[i-1]+Math.sqrt(l2)*u;}}return at/total;}
-function decodeBase64(s){if(typeof Buffer!=='undefined')return new Uint8Array(Buffer.from(s,'base64'));const b=atob(s),a=new Uint8Array(b.length);for(let i=0;i<b.length;i++)a[i]=b.charCodeAt(i);return a;}
 function clipLines(lines,maskLines){const poly=ls=>ls.filter(l=>l.length>=3).map(closeRing),a=poly(lines),b=poly(maskLines);if(!a.length||!b.length)return [];
   try{return polygonClipping.intersection(a,b).flatMap(pg=>pg.map(r=>r.map(([x,y])=>[x,y])));}catch{return [];}}
 // Clipping masks: a clipped object is sewn only inside its mask (a closed shape that is itself not sewn). Dangling links are cleaned up after every edit.
