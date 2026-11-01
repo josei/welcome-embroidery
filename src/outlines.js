@@ -50,7 +50,7 @@ function bufferRingsForBold(rings,d){try{const closed=rings.map(closedRing),poly
 
 /**
  * @param {Lettering} obj
- * @returns {Array<any>|null}
+ * @returns {Array<import('./textlayout.js').Prim>|null}
  */
 export function textPrimitives(obj){
   const font=getFont(obj.font);if(!font)return null;

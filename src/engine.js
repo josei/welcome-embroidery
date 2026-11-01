@@ -9,6 +9,7 @@ import {FABRIC_PROFILES,FABRIC_PRESETS,DISTORTION_SCALE,distortionGrid} from './
 import {GLYPHS,parseSvgPath,textLines} from './lettering.js';
 import {geometry,textPrimitives,cornerRadii} from './outlines.js';
 import {pathDirs,motifLoops,motifPairLoops,motifFillRuns,sequinRuns,beadRuns,blingRuns,blingFillRuns} from './embellishments.js';
+import {flipObjects,mapPathPoints,normAngle,objById,objectBounds,objectCenter,refreshPathBounds,rotateObjects,scaleObjects,toPathObject,translateObject} from './transforms.js';
 export {textPrimitives,cornerRadii};
 import {distP,pathOutline,railsFromLine,railsFromCenterline,widthAt} from './pathGeometry.js';
 export {FABRIC_PROFILES,FABRIC_PRESETS,DISTORTION_SCALE,distortionGrid};
@@ -223,7 +224,6 @@ function refreshClips(doc){const ids=new Set(doc.objects.map(o=>o.id));for(const
 const pathSig=p=>JSON.stringify([p.points,p.handles,p.closed,p.smooth,p.rotation]);
 function alongPoints(p){const raw=geometry(p,0)[0],pts=[];for(const q of raw)if(!pts.length||Math.hypot(q[0]-pts.at(-1)[0],q[1]-pts.at(-1)[1])>1e-6)pts.push([+q[0].toFixed(3),+q[1].toFixed(3)]);if(p.closed&&pts.length>1&&pts[0][0]===pts.at(-1)[0]&&pts[0][1]===pts.at(-1)[1])pts.pop();if(pts.length<2||pts.length>1500)throw Error('The path needs 2–1,500 points after smoothing.');return pts;}
 function refreshAlong(doc){for(const t of doc.objects){if(t.kind!=='text'||!t.along?.pathId)continue;const p=doc.objects.find(v=>v.id===t.along.pathId);if(!p||p.kind!=='path'){delete t.along.pathId;delete t.along.sig;continue;}const sig=pathSig(p);if(t.along.sig!==sig){try{t.along.points=alongPoints(p);t.along.closed=Boolean(p.closed);t.along.sig=sig;}catch{}}}}
-function translateObject(o,dx,dy){o.x+=dx;o.y+=dy;if(o.along)o.along.points=o.along.points.map(([x,y])=>[x+dx,y+dy]);if(o.kind==='path')mapPathPoints(o,([x,y])=>[x+dx,y+dy]);}
 // Edge travel for fills: when two points lie on the same outline (outer edge or hole edge), walk the shorter way round it
 // with running stitches instead of jumping, but only for short detours (≤ 10 mm); long ones stay jumps because edge stitches would clutter the fill. The route follows the border, where later rows or the border pass cover it.
 function locateOnRing(ring,p,eps=.05){let arc=0;for(let i=1;i<ring.length;i++){const a=ring[i-1],b=ring[i],dx=b[0]-a[0],dy=b[1]-a[1],len2=dx*dx+dy*dy,len=Math.sqrt(len2);if(len2>0){const t=Math.max(0,Math.min(1,((p[0]-a[0])*dx+(p[1]-a[1])*dy)/len2));if(Math.hypot(p[0]-a[0]-dx*t,p[1]-a[1]-dy*t)<=eps)return arc+len*t;}arc+=len;}return null;}
@@ -288,8 +288,6 @@ function offsetShape(doc,id,distance){const o=closedShapeOrThrow(doc,id),d=Numbe
   const result=d>0?polygonClipping.union(poly,...grown):polygonClipping.difference(poly,...grown);if(!result.length)throw Error('The inset removes the whole shape; use a smaller distance.');replaceWithPolygons(doc,o,[o],result);}
 function strokeToShape(doc,id,width){const o=doc.objects.find(v=>v.id===id);if(!o||o.kind!=='path')throw Error(`Stroke to shape needs a path: ${id}`);const w=Number(width);if(!Number.isFinite(w)||w<=0||w>40)throw Error('Stroke width must be between 0 and 40 mm.');
   const ring=geometry(o,0)[0],grown=bufferSegments([ring],w/2);if(!grown.length)throw Error('The path has no length.');replaceWithPolygons(doc,Object.assign(o,{stitch:'fill'}),[o],grown);}
-function objectCenter(o){const unrotated={...o};delete unrotated.rotation;const pts=geometry(unrotated).flat();if(o.kind==='stitch_layer'||!pts.length)return [o.x+o.w/2,o.y+o.h/2];const xs=pts.map(p=>p[0]),ys=pts.map(p=>p[1]);return [(Math.min(...xs)+Math.max(...xs))/2,(Math.min(...ys)+Math.max(...ys))/2];}
-const normAngle=a=>{let r=((a%360)+360)%360;return r>180?r-360:r;};
 function placeCopy(src,center,pivot,degrees,ids){const copy=structuredClone(src);delete copy.groupId;copy.id=ids.next();copy.name=`${src.name||'Object'} copy`;const c0=objectCenter(src),th=degrees*Math.PI/180;let target=center;if(pivot){const dx=c0[0]-pivot[0],dy=c0[1]-pivot[1];target=[pivot[0]+dx*Math.cos(th)-dy*Math.sin(th),pivot[1]+dx*Math.sin(th)+dy*Math.cos(th)];}
   translateObject(copy,target[0]-c0[0],target[1]-c0[1]);if(degrees)copy.rotation=normAngle((Number(src.rotation)||0)+degrees);return copy;}
 function makeIds(op,n){const given=Array.isArray(op.ids)?op.ids:[];let i=0;return {next:()=>given[i++]||crypto.randomUUID()};}
@@ -346,65 +344,6 @@ export function satinFromRails(a,b,spacing,comp,rungs=[],compB=comp){
   return {zig,centre,pairs};
 }
 
-// ---- Direct-manipulation transforms (selection handles, nudging, flip, convert to path) ---------------------
-const rotatePoint=(p,c,th)=>{const dx=p[0]-c[0],dy=p[1]-c[1],co=Math.cos(th),si=Math.sin(th);return [c[0]+dx*co-dy*si,c[1]+dx*si+dy*co];};
-function bakeRotation(o){if(!o.rotation||o.kind!=='path')return;const c=objectCenter(o),th=o.rotation*Math.PI/180;mapPathPoints(o,p=>rotatePoint(p,c,th));delete o.rotation;refreshPathBounds(o);}
-function objById(doc,id){const o=doc.objects.find(v=>v.id===id);if(!o)throw Error(`Unknown object: ${id}`);return o;}
-function ellipseToPath(o){const cx=o.x+o.w/2,cy=o.y+o.h/2,rx=o.w/2,ry=o.h/2,k=.5522847498,th=(Number(o.rotation)||0)*Math.PI/180,c=[cx,cy],R=p=>th?rotatePoint(p,c,th):p;
-  const nodes=[[cx+rx,cy],[cx,cy+ry],[cx-rx,cy],[cx,cy-ry]],hs=[[[cx+rx,cy-ry*k],[cx+rx,cy+ry*k]],[[cx+rx*k,cy+ry],[cx-rx*k,cy+ry]],[[cx-rx,cy+ry*k],[cx-rx,cy-ry*k]],[[cx-rx*k,cy-ry],[cx+rx*k,cy-ry]]];
-  return {points:nodes.map(R),handles:hs.map(([i,out])=>({i:R(i),o:R(out)}))};}
-// Convert a rectangle, ellipse or lettering into editable path(s). Rotation is baked into the points; the first result keeps the object's id.
-function toPathObject(doc,id){
-  const o=objById(doc,id),at=doc.objects.indexOf(o);
-  if(o.kind==='path')return;
-  if(o.kind==='stitch_layer')throw Error('Imported machine stitches cannot be converted to a path.');
-  const common={thread:o.thread,stitch:o.stitch==='satin'?'fill':o.stitch,...(o.border?{border:true,borderThread:o.borderThread}:{}),...(o.groupId?{groupId:o.groupId}:{}),...(o.visible===false?{visible:false}:{}),...(o.locked?{locked:true}:{})};
-  const keep=Object.fromEntries(['angle','spacing'].filter(k=>o[k]!==undefined).map(k=>[k,o[k]]));
-  if(o.kind==='rect'||o.kind==='ellipse'){
-    const base={id:o.id,name:o.name,kind:'path',x:0,y:0,w:0,h:0,closed:true,...common,...keep};
-    if(o.kind==='rect'){const ring=geometry(o)[0].slice(0,-1).map(([x,y])=>[+x.toFixed(3),+y.toFixed(3)]);Object.assign(base,{points:ring});}
-    else{const e=ellipseToPath(o);Object.assign(base,{points:e.points.map(p=>p.map(v=>+v.toFixed(3))),handles:e.handles.map(h=>({i:h.i.map(v=>+v.toFixed(3)),o:h.o.map(v=>+v.toFixed(3))}))});}
-    doc.objects[at]=base;refreshPathBounds(base);return;}
-  // lettering -> one path per stitch primitive, grouped
-  let prims;if(o.kind==='text'&&isRegistryFont(o.font)){prims=textPrimitives(o);if(!prims)throw Error('Load the font before converting this lettering.');}
-  else prims=geometry(o).map(pts=>({t:'r',pts}));
-  const tidy=r=>{let pts=r.map(([x,y])=>[+x.toFixed(3),+y.toFixed(3)]);if(pts.length>1&&pts[0][0]===pts.at(-1)[0]&&pts[0][1]===pts.at(-1)[1])pts.pop();return pts;};
-  const limited=(pts,max)=>{let r=pts,tol=.02;while(r.length>max&&tol<2){r=simplifyRing(pts,tol);tol*=1.8;}return r;};
-  const made=[];const gid=crypto.randomUUID();
-  for(const pr of prims){
-    if(pr.t==='f'){const [outer,...holes]=pr.rings.map(tidy).map((r,i)=>limited(r,i?200:1000));if(outer.length<3)continue;made.push({kind:'path',points:outer,closed:true,...(holes.length?{holes:holes.filter(h=>h.length>=3).slice(0,20)}:{}),...common,stitch:o.stitch==='run'?'run':'fill'});}
-    else if(pr.t==='s'){const band=tidy([...pr.a,...[...pr.b].reverse()]);if(band.length>=3)made.push({kind:'path',points:limited(band,1000),closed:true,...common,stitch:'fill'});}
-    else if(pr.pts.length>=2)made.push({kind:'path',points:limitedOpen(pr.pts.map(([x,y])=>[+x.toFixed(3),+y.toFixed(3)])),closed:false,...common,stitch:'run'});}
-  if(!made.length)throw Error('This lettering has no outlines to convert.');if(doc.objects.length-1+made.length>100)throw Error(`Converting would create ${made.length} objects and exceed the 100-object limit; shorten the text first.`);
-  made.forEach((m,i)=>{m.id=i?crypto.randomUUID():o.id;m.name=`${(o.name||'Lettering').replace(/^Lettering: /,'')} ${i+1}`;m.w=0;m.h=0;m.x=0;m.y=0;if(made.length>1&&!m.groupId)m.groupId=gid;refreshPathBounds(m);});
-  doc.objects.splice(at,1,...made);
-}
-const simplifyRing=(pts,tol)=>{const r=rdp([...pts,pts[0]],tol).slice(0,-1);return r.length>=3?r:pts;};
-function limitedOpen(pts){let r=pts,tol=.02;while(r.length>1000&&tol<2){r=rdp(pts,tol);tol*=1.8;}return r;}
-function textRange(o){if(isRegistryFont(o.font)){const f=getFont(o.font);return f?[f.size*f.minScale,f.size*f.maxScale]:[2,200];}return o.font==='neon-blinking/1'?[20,60]:[4,16];}
-// Scale objects about (ox,oy). Rotated rectangles/ellipses are converted to paths for non-uniform scaling so the result is exact.
-function scaleObjects(doc,ids,sx,sy,ox,oy){
-  if(![sx,sy,ox,oy].every(Number.isFinite)||Math.abs(sx)<.01||Math.abs(sy)<.01||Math.abs(sx)>100||Math.abs(sy)>100)throw Error('Scale factors must be between 0.01 and 100 (not zero).');
-  if(!Array.isArray(ids)||!ids.length)throw Error('Nothing to scale.');
-  const f=(x,y)=>[ox+(x-ox)*sx,oy+(y-oy)*sy],uniform=Math.abs(Math.abs(sx)-Math.abs(sy))<1e-6,ax=Math.abs(sx),ay=Math.abs(sy);
-  for(const id of ids){let o=objById(doc,id);
-    if((o.kind==='rect'||o.kind==='ellipse')&&o.rotation&&!uniform){toPathObject(doc,id);o=objById(doc,id);}
-    if(o.kind==='path'){bakeRotation(o);mapPathPoints(o,([x,y])=>f(x,y));if(o.satinWidth)o.satinWidth=Math.max(.5,Math.min(12,o.satinWidth*Math.sqrt(ax*ay)));if(o.satinWidthEnd)o.satinWidthEnd=Math.max(.5,Math.min(12,o.satinWidthEnd*Math.sqrt(ax*ay)));refreshPathBounds(o);}
-    else if(o.kind==='rect'||o.kind==='ellipse'||o.kind==='stitch_layer'){const [cx,cy]=f(o.x+o.w/2,o.y+o.h/2);o.w=o.w*ax;o.h=o.h*ay;o.x=cx-o.w/2;o.y=cy-o.h/2;if(o.radius)o.radius=+(o.radius*Math.min(ax,ay)).toFixed(3);if(Array.isArray(o.radii))o.radii=o.radii.map(v=>+((Number(v)||0)*Math.min(ax,ay)).toFixed(3));}
-    else if(o.kind==='text'){const [lo,hi]=textRange(o),h=Math.max(lo,Math.min(hi,o.h*ay)),np=f(o.x,o.y);if(o.along)o.along.points=o.along.points.map(([x,y])=>f(x,y));o.w=Math.min(1000,Math.max(.5,o.w*ax));o.h=+h.toFixed(3);o.x=np[0];o.y=np[1];for(const k of ['tracking','wordSpacing'])if(o[k])o[k]*=ax;if(o.bold)o.bold=Math.min(3,o.bold*ay);}
-  }
-}
-function rotateObjects(doc,ids,angle,cx,cy){
-  if(![angle,cx,cy].every(Number.isFinite))throw Error('Rotation needs an angle and a pivot.');const th=angle*Math.PI/180;
-  for(const id of ids){const o=objById(doc,id),c0=objectCenter(o),c1=rotatePoint(c0,[cx,cy],th);translateObject(o,c1[0]-c0[0],c1[1]-c0[1]);o.rotation=normAngle((Number(o.rotation)||0)+angle);}
-}
-function flipObjects(doc,ids,axis,pivotRaw){
-  if(axis!=='horizontal'&&axis!=='vertical')throw Error('Flip axis must be horizontal or vertical.');const objs=ids.map(id=>objById(doc,id));
-  for(const o of objs)if(o.kind==='text'||o.kind==='stitch_layer')throw Error('Lettering and imported stitches cannot be flipped; convert lettering to paths first.');
-  const bs=objs.map(objectBounds),pivot=pivotRaw??(axis==='horizontal'?(Math.min(...bs.map(b=>b[0]))+Math.max(...bs.map(b=>b[2])))/2:(Math.min(...bs.map(b=>b[1]))+Math.max(...bs.map(b=>b[3])))/2);
-  const m=([x,y])=>axis==='horizontal'?[2*pivot-x,y]:[x,2*pivot-y];
-  for(const o of objs){if(o.kind==='path'){bakeRotation(o);mapPathPoints(o,m);refreshPathBounds(o);}else{const c=[o.x+o.w/2,o.y+o.h/2],nc=m(c);o.x=nc[0]-o.w/2;o.y=nc[1]-o.h/2;if(o.rotation)o.rotation=normAngle(-o.rotation);}}
-}
 // Print template: a 1:1 placement sheet in millimetres (the sheet is the hoop, origin at its centre). Design outlines in green, the hoop dashed red, a centre cross, and a 10 mm scale bar to check the printer's scale before placing fabric.
 export function exportPrintTemplate(doc){
   const {w,h}=hoopSize(doc),f=v=>+Number(v).toFixed(3),esc=t=>String(t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])),x0=-w/2,y0=-h/2,ink='#2f5d4a',d=lines=>lines.map(l=>'M'+l.map(([x,y])=>`${f(x)} ${f(y)}`).join('L')).join('');
@@ -442,9 +381,6 @@ export function exportAppliqueTemplates(doc){
     `<path d="M${margin} 5H${margin+10}" fill="none" stroke="#000" stroke-width="0.3"/><text x="${margin+12}" y="6.5" font-size="2.5" font-family="sans-serif">10 mm</text>`+
     parts.join('')+'</svg>\n';
 }
-function mapPathPoints(o,fn){o.points=o.points.map(p=>fn(p));if(o.holes)o.holes=o.holes.map(h=>h.map(p=>fn(p)));if(o.handles)o.handles=o.handles.map(h=>h?{i:fn(h.i),o:fn(h.o)}:h);}
-function refreshPathBounds(o){const xs=o.points.map(p=>p[0]),ys=o.points.map(p=>p[1]);o.x=Math.min(...xs);o.y=Math.min(...ys);o.w=Math.max(...xs)-o.x;o.h=Math.max(...ys)-o.y;}
-function objectBounds(o){const pts=geometry(o).flat();if(!pts.length)return [o.x,o.y,o.x+o.w,o.y+o.h];return [Math.min(...pts.map(p=>p[0])),Math.min(...pts.map(p=>p[1])),Math.max(...pts.map(p=>p[0])),Math.max(...pts.map(p=>p[1]))];}
 function polygonFill(rings,spacing,angle) {
   // Evenly spaced parallel rows with even/odd polygon clipping; each row becomes a boustrophedon path.
   const rad=angle*Math.PI/180,c=Math.cos(rad),s=Math.sin(rad),rotRings=rings.map(r=>r.map(([x,y])=>[x*c+y*s,-x*s+y*c])),rot=rotRings.flat();
