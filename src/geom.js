@@ -3,7 +3,7 @@
 import polygonClippingModule from './vendor/polygon-clipping.js';
 /** @typedef {[number, number]} Pt */
 // The vendored module ships no type declarations; this names its union, which is all the helpers here use.
-const polygonClipping = /** @type {{union: (...geoms: Array<Pt[][] | Pt[][][]>) => Pt[][][], difference: (subject: Pt[][][], ...clips: Array<Pt[][] | Pt[][][]>) => Pt[][][]}} */ (/** @type {any} */ (polygonClippingModule));
+const polygonClipping = /** @type {{union: (...geoms: Array<Pt[][] | Pt[][][]>) => Pt[][][], difference: (subject: Pt[][] | Pt[][][], ...clips: Array<Pt[][] | Pt[][][]>) => Pt[][][], intersection: (...geoms: Array<Pt[][] | Pt[][][]>) => Pt[][][], xor: (...geoms: Array<Pt[][] | Pt[][][]>) => Pt[][][]}} */ (/** @type {any} */ (polygonClippingModule));
 export {polygonClipping};
 
 /** @param {Pt[]} points @param {number} tol @returns {Pt[]} */
