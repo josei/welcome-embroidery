@@ -21,6 +21,8 @@ import {exportSvg,exportPrintTemplate,exportAppliqueTemplates} from './exports.j
 export {exportSvg,exportPrintTemplate,exportAppliqueTemplates};
 import {validateDocument} from './validate.js';
 export {validateDocument};
+import {sewingWorksheet} from './worksheet.js';
+export {sewingWorksheet};
 import {booleanShapes,knifeShape,offsetShape,strokeToShape} from './shapeOps.js';
 export {HOOP_PRESETS,hoopSize,hoopLabel};
 export {textPrimitives,cornerRadii};
@@ -461,17 +463,6 @@ export function visibleTips(warnings,hidden=[]){const off=new Set(hidden);return
 // Thread plan: the colours in sewing order. A block starts at the first stitch after a colour change or stop, so the same colour sewn twice gives two blocks, as the editor shows it.
 // Two thread strings name the same colour when they differ only in case (#D9897E and #d9897e).
 const sameThread=(a,b)=>String(a).toLowerCase()===String(b).toLowerCase();
-// Printable sewing worksheet for a compiled plan: the thread blocks in sewing order with stitch counts, and the time estimate. Format 'text' or 'svg'. Threads are shown as hex values because the engine has no colour names.
-export function sewingWorksheet(doc,plan,format='text'){
-  if(format!=='text'&&format!=='svg')throw Error(`Unsupported worksheet format: ${format}. Choose text or svg.`);
-  const blocks=threadPlan(plan),total=blocks.reduce((n,b)=>n+b.stitches,0),totalMm=blocks.reduce((n,b)=>n+b.mm,0),time=sewingLabel(sewingSeconds(plan)),name=doc.name||'Untitled',hoop=hoopLabel(hoopSize(doc)),fmt=n=>n.toLocaleString('en-US'),metres=mm=>(mm/1000).toFixed(2);
-  const note=`Estimate: about ${time} (600 stitches a minute, 20 s per colour change or stop, 8 s per trim).`;
-  if(format==='text'){const rows=blocks.map((b,i)=>`${String(i+1).padStart(3)}  ${b.thread.padEnd(9)}  ${fmt(b.stitches).padStart(10)}  ${metres(b.mm).padStart(8)}  ${blockTimeLabel(blockSeconds(b)).padStart(6)}`);
-    return [`Sewing worksheet: ${name}`,`Hoop: ${hoop}`,`Revision ${plan.revision}`,'',`${'No.'.padStart(3)}  ${'Thread'.padEnd(9)}  ${'Stitches'.padStart(10)}  ${'Length (m)'.padStart(10)}  ${'Time'.padStart(6)}`,...rows,'',`Threads: ${blocks.length}   Stitches: ${fmt(total)}${blocks.length?`   Length: ${metres(totalMm)} m`:''}`,note,''].join('\n');}
-  const esc=t=>String(t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])),rowH=8,top=24,H=top+blocks.length*rowH+22;
-  const rows=blocks.map((b,i)=>{const y=top+i*rowH;return `<rect x="6" y="${y-4}" width="6" height="6" fill="${esc(b.thread)}" stroke="#333" stroke-width=".2"/><text x="16" y="${y+1}">${i+1}. ${esc(b.thread)}</text><text x="98" y="${y+1}" text-anchor="end">${metres(b.mm)} m</text><text x="114" y="${y+1}" text-anchor="end">${fmt(b.stitches)}</text>`;}).join('\n');
-  return `<?xml version="1.0" encoding="UTF-8"?>\n<svg xmlns="http://www.w3.org/2000/svg" width="120mm" height="${H}mm" viewBox="0 0 120 ${H}" font-family="sans-serif" font-size="4" fill="#111">\n<title>${esc(name)}</title>\n<text x="6" y="8" font-size="5" font-weight="bold">Sewing worksheet: ${esc(name)}</text>\n<text x="6" y="14">Hoop: ${esc(hoop)} · Revision ${plan.revision}</text>\n<text x="98" y="${top-4}" text-anchor="end">Length</text><text x="114" y="${top-4}" text-anchor="end">Stitches</text>\n${rows}\n<text x="6" y="${H-12}">Threads: ${blocks.length} · Stitches: ${fmt(total)}${blocks.length?` · Length: ${metres(totalMm)} m`:''}</text>\n<text x="6" y="${H-6}">${esc(note)}</text>\n</svg>\n`;
-}
 
 // SVG <path> fill rule. A path with a fill (not none) and no stroke imports as fill objects when its subpaths are closed rings and nest at most two levels: one outer ring (depth 0), holes inside it (depth 1, up to 20 of up to 200 points), and islands inside a hole (depth 2, each its own fill object, up to 1,000 points). Deeper nesting, or several outer rings, keeps the running-outline import and the note says why. Returns {fill, note, holes, islands, depths}: depths gives each subpath's depth, and holes and islands count the depth 1 and depth 2 rings.
 export function svgPathFill(fill,stroke,subpaths){const filled=fill!==null&&fill!==undefined&&fill!=='none',stroked=stroke!==null&&stroke!==undefined&&stroke!=='none';const none={fill:false,note:null,holes:0,islands:0,depths:[]};if(!filled||stroked)return none;
