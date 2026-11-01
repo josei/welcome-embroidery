@@ -29,7 +29,7 @@ const checks = [
  {id: '4', name: 'onclick assignments in app.js', now: count(app, /\.onclick\s*=/g), target: 0, baseline: 92},
  {id: '5', name: 'store reads and writes in app.js (reported, not ratcheted)', now: count(app, /selState\(\)|setSelection\(|interactionNow\(\)|setInteraction\(|clipboardNow\(\)|setClipboard\(|documentNow\(\)|setDocument\(|pathDraftNow\(\)|setPathDraft\(/g), target: 0, baseline: Infinity},
  {id: '5', name: 'state references in app.js (selected, doc, multi, selNode)', now: ['selected', 'doc', 'multi', 'selNode'].reduce((n, name) => n + count(app, new RegExp(`(?<![A-Za-z0-9_$.])${name}(?![A-Za-z0-9_$])`, 'g')), 0), target: 0, baseline: 461},
- {id: '6', name: 'JavaScript files not type-checked', now: count(tsconfig, /"checkJs": false/g) ? sources.filter(f => f.endsWith('.js')).length : 0, target: 0, baseline: 25},
+ {id: '6', name: 'JavaScript files not type-checked', now: count(tsconfig, /"checkJs": false/g) ? sources.filter(f => f.endsWith('.js') && !/^\/\/ @ts-check/m.test(read(f))).length : 0, target: 0, baseline: 21},
  {id: '7', name: 'source files over 500 lines', now: sources.filter(f => read(f).split('\n').length > 500).length, target: 0, baseline: 3},
  {id: '7', name: 'lines over 160 characters', now: markup.split('\n').filter(l => l.length > 160).length, target: 0, baseline: 1155},
 ];
