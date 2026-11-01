@@ -57,3 +57,14 @@ export function designWarnings(doc){
   if(first)out.push({id:first.id,name:first.name||first.kind,message:`Stabilizer for ${profile.label}: ${profile.stabilizer}`,category:'fabric'});
   return out;
 }
+
+// The sewing tip categories, in the order the Tips settings list shows them. Each warning from designWarnings carries one of these ids.
+/** @type {Array<{id: string, label: string}>} */
+export const TIP_CATEGORIES=[{id:'hoop',label:'Outside the hoop'},{id:'duplicate',label:'Duplicate objects'},{id:'fill',label:'Small or thin fills'},{id:'short',label:'Very short paths'},{id:'satin',label:'Satin columns too narrow or too wide'},{id:'lettering',label:'Small lettering'},{id:'fabric',label:'Fabric stabilizer'}];
+// Drops the tips whose category is hidden. A hidden id that is not a category matches nothing, so it is ignored.
+/**
+ * @param {Warning[]} warnings
+ * @param {string[]} [hidden]
+ * @returns {Warning[]}
+ */
+export function visibleTips(warnings,hidden=[]){const off=new Set(hidden);return warnings.filter(w=>!off.has(w.category));}

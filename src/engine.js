@@ -11,10 +11,12 @@ import {geometry,textPrimitives,cornerRadii} from './outlines.js';
 import {pathDirs,motifLoops,motifPairLoops,motifFillRuns,sequinRuns,beadRuns,blingRuns,blingFillRuns} from './embellishments.js';
 import {flipObjects,mapPathPoints,normAngle,objById,objectBounds,refreshPathBounds,rotateObjects,scaleObjects,toPathObject,translateObject} from './transforms.js';
 import {HOOP_PRESETS,hoopSize,hoopLabel} from './hoops.js';
-import {designWarnings,shapeArea,ringArea} from './designChecks.js';
+import {designWarnings,shapeArea,ringArea,TIP_CATEGORIES,visibleTips} from './designChecks.js';
 import {sameThread,parseThreadStock,nearestStockThread} from './threads.js';
 export {parseThreadStock,nearestStockThread};
-export {designWarnings,shapeArea};
+export {designWarnings,shapeArea,TIP_CATEGORIES,visibleTips};
+import {svgPathFill} from './svgImport.js';
+export {svgPathFill};
 import {closeRing,insideRings,clipRuns,satinFromRails,underlayTypes,orientRuns,pinPoint,reverseRuns} from './stitchRuns.js';
 import {makeStitchLayer,importStitchLayer,decodeBase64} from './stitchImport.js';
 export {makeStitchLayer,importStitchLayer};
@@ -362,25 +364,9 @@ export function compile(doc) {
 export {geometry,objectBounds};
 
 
-// The sewing tip categories, in the order the Tips settings list shows them. Each warning from designWarnings carries one of these ids.
-export const TIP_CATEGORIES=[{id:'hoop',label:'Outside the hoop'},{id:'duplicate',label:'Duplicate objects'},{id:'fill',label:'Small or thin fills'},{id:'short',label:'Very short paths'},{id:'satin',label:'Satin columns too narrow or too wide'},{id:'lettering',label:'Small lettering'},{id:'fabric',label:'Fabric stabilizer'}];
-// Drops the tips whose category is hidden. A hidden id that is not a category matches nothing, so it is ignored.
-export function visibleTips(warnings,hidden=[]){const off=new Set(hidden);return warnings.filter(w=>!off.has(w.category));}
 
 // Thread plan: the colours in sewing order. A block starts at the first stitch after a colour change or stop, so the same colour sewn twice gives two blocks, as the editor shows it.
 // Two thread strings name the same colour when they differ only in case (#D9897E and #d9897e).
 
-// SVG <path> fill rule. A path with a fill (not none) and no stroke imports as fill objects when its subpaths are closed rings and nest at most two levels: one outer ring (depth 0), holes inside it (depth 1, up to 20 of up to 200 points), and islands inside a hole (depth 2, each its own fill object, up to 1,000 points). Deeper nesting, or several outer rings, keeps the running-outline import and the note says why. Returns {fill, note, holes, islands, depths}: depths gives each subpath's depth, and holes and islands count the depth 1 and depth 2 rings.
-export function svgPathFill(fill,stroke,subpaths){const filled=fill!==null&&fill!==undefined&&fill!=='none',stroked=stroke!==null&&stroke!==undefined&&stroke!=='none';const none={fill:false,note:null,holes:0,islands:0,depths:[]};if(!filled||stroked)return none;
-const closedRing=pts=>pts.length>=3&&Math.hypot(pts[0][0]-pts.at(-1)[0],pts[0][1]-pts.at(-1)[1])<1e-9;
-const outlineNote=(text)=>({...none,note:text});
-if(!subpaths.every(closedRing))return outlineNote(subpaths.length===1?'A filled path that is not closed imports as an outline.':'A filled path with several subpaths, some not closed, imports as an outline.');
-const rings=subpaths.map(r=>r.slice(0,-1));
-const depths=rings.map((r,i)=>rings.reduce((n,q,j)=>n+(j!==i&&insideRings([q],r[0])?1:0),0));
-if(depths.filter(d=>d===0).length!==1)return outlineNote('A filled path with several outer shapes imports as an outline: its counters would otherwise fill in.');
-const holes=depths.filter(d=>d===1).length,islands=depths.filter(d=>d===2).length;
-const deep=depths.some(d=>d>2);const tooBig=rings.some((r,i)=>(depths[i]===1&&r.length>200)||(depths[i]===2&&r.length>1000))||holes>20||islands>20;
-if(deep||tooBig)return outlineNote('A filled path with counters nested deeper than an island in a hole, or too many points, imports as an outline.');
-return {fill:true,note:null,holes,islands,depths};}
 // Measure tool: the straight-line distance between two points in mm, with its x and y parts (b minus a, so the signs say which way the second point lies).
 export function measureBetween(a,b){const dx=b[0]-a[0],dy=b[1]-a[1];return {distance:Math.hypot(dx,dy),dx,dy};}
