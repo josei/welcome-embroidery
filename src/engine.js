@@ -5,6 +5,8 @@ import {planPhoto,planRippleFill,planCrossStitch,planContourFill,planSpiralFill,
 import {layoutText,primitiveLines,mapPrimitives,resamplePrimitives,MAX_TEXT_CHARS} from './textlayout.js';
 import {nearestJefColor} from './jefPalette.js';
 import {decodeEmbroidery,SEW_CHART,PEC_CHART} from './readers.js';
+import {FABRIC_PROFILES,FABRIC_PRESETS,DISTORTION_SCALE,distortionGrid} from './fabrics.js';
+export {FABRIC_PROFILES,FABRIC_PRESETS,DISTORTION_SCALE,distortionGrid};
 import {threadPlan,blockSeconds,blockTimeLabel,sewingSeconds,threadSpans,sewingSecondsUpTo,sewingLabel} from './sewingTime.js';
 import {encodeJef,encodeVp3,encodePec,encodePes,encodePesV6,encodeSew,encodeTbf,encodeXxx,encodeU01,encodeExp,encodeDst,encodeCol,encodeEdr,layerCanPassThrough,sourceMatches,vp3LayerHasUnsupportedTravel} from './encoders.js';
 export {encodeJef,encodeVp3,encodePec,encodePes,encodePesV6,encodeSew,encodeTbf,encodeXxx,encodeU01,encodeExp,encodeDst,encodeCol,encodeEdr};
@@ -16,61 +18,6 @@ const GLYPHS = {
  A:[[0,1,.5,0],[.5,0,1,1],[.22,.62,.78,.62]],B:[[0,1,0,0],[0,0,.68,0],[.68,0,1,.2],[1,.2,.68,.48],[0,.48,.68,.48],[.68,.48,1,.72],[1,.72,.68,1],[0,1,.68,1]],C:[[1,.12,.72,0],[.72,0,.2,0],[.2,0,0,.22],[0,.22,0,.78],[0,.78,.2,1],[.2,1,.75,1],[.75,1,1,.88]],D:[[0,1,0,0],[0,0,.55,0],[.55,0,1,.22],[1,.22,1,.78],[1,.78,.55,1],[.55,1,0,1]],E:[[1,0,0,0],[0,0,0,1],[0,.5,.8,.5],[0,1,1,1]],F:[[0,1,0,0],[0,0,1,0],[0,.5,.78,.5]],G:[[1,.16,.76,0],[.76,0,.2,0],[.2,0,0,.2],[0,.2,0,.8],[0,.8,.2,1],[.2,1,1,1],[1,1,1,.56],[1,.56,.58,.56]],H:[[0,0,0,1],[1,0,1,1],[0,.5,1,.5]],I:[[.18,0,.82,0],[.5,0,.5,1],[.18,1,.82,1]],J:[[.2,0,1,0],[.65,0,.65,.78],[.65,.78,.48,1],[.48,1,.16,1],[.16,1,0,.82]],K:[[0,0,0,1],[1,0,0,.56],[.42,.42,1,1]],L:[[0,0,0,1],[0,1,1,1]],M:[[0,1,0,0],[0,0,.5,.52],[.5,.52,1,0],[1,0,1,1]],N:[[0,1,0,0],[0,0,1,1],[1,1,1,0]],O:[[.22,0,.78,0],[.78,0,1,.2],[1,.2,1,.8],[1,.8,.78,1],[.78,1,.22,1],[.22,1,0,.8],[0,.8,0,.2],[0,.2,.22,0]],P:[[0,1,0,0],[0,0,.72,0],[.72,0,1,.18],[1,.18,.72,.5],[.72,.5,0,.5]],Q:[[.22,0,.78,0],[.78,0,1,.2],[1,.2,1,.8],[1,.8,.78,1],[.78,1,.22,1],[.22,1,0,.8],[0,.8,0,.2],[0,.2,.22,0],[.58,.68,1,1]],R:[[0,1,0,0],[0,0,.72,0],[.72,0,1,.18],[1,.18,.72,.5],[.72,.5,0,.5],[.55,.5,1,1]],S:[[1,.12,.78,0],[.78,0,.2,0],[.2,0,0,.2],[0,.2,.2,.42],[.2,.42,.8,.58],[.8,.58,1,.78],[1,.78,.78,1],[.78,1,.15,1],[.15,1,0,.87]],T:[[0,0,1,0],[.5,0,.5,1]],U:[[0,0,0,.78],[0,.78,.2,1],[.2,1,.8,1],[.8,1,1,.78],[1,.78,1,0]],V:[[0,0,.5,1],[.5,1,1,0]],W:[[0,0,.18,1],[.18,1,.5,.58],[.5,.58,.82,1],[.82,1,1,0]],X:[[0,0,1,1],[1,0,0,1]],Y:[[0,0,.5,.5],[1,0,.5,.5],[.5,.5,.5,1]],Z:[[0,0,1,0],[1,0,0,1],[0,1,1,1]],'0':[[.2,0,.8,0],[.8,0,1,.2],[1,.2,1,.8],[1,.8,.8,1],[.8,1,.2,1],[.2,1,0,.8],[0,.8,0,.2],[0,.2,.2,0]],'1':[[.2,.18,.5,0],[.5,0,.5,1],[.2,1,.8,1]],'2':[[0,.2,.2,0],[.2,0,.8,0],[.8,0,1,.2],[1,.2,0,1],[0,1,1,1]],'3':[[0,.15,.2,0],[.2,0,.8,0],[.8,0,1,.2],[1,.2,.55,.48],[.55,.48,1,.72],[1,.72,.8,1],[.8,1,.15,1],[.15,1,0,.86]],'4':[[0,0,0,.55],[0,.55,1,.55],[.72,0,.72,1]],'5':[[1,0,0,0],[0,0,0,.48],[0,.48,.8,.48],[.8,.48,1,.7],[1,.7,.8,1],[.8,1,.1,1]],'6':[[.9,0,.2,0],[.2,0,0,.28],[0,.28,0,.8],[0,.8,.2,1],[.2,1,.8,1],[.8,1,1,.8],[1,.8,.8,.56],[.8,.56,0,.56]],'7':[[0,0,1,0],[1,0,.25,1]],'8':[[.2,0,.8,0],[.8,0,1,.22],[1,.22,.5,.5],[.5,.5,0,.22],[0,.22,.2,0],[.5,.5,1,.78],[1,.78,.8,1],[.8,1,.2,1],[.2,1,0,.78],[0,.78,.5,.5]],'9':[[.9,.44,.2,.44],[.2,.44,0,.22],[0,.22,.2,0],[.2,0,.8,0],[.8,0,1,.2],[1,.2,1,.72],[1,.72,.8,1],[.8,1,.2,1]]
 };
 
-// Fabric presets: the values in fabricProfiles.js, written into the document settings by set_settings { fabric }. An explicit key in the same operation overrides a preset.
-// Fabric profiles: the document settings a fabric sets in one set_settings step, and the stabilizer to suggest for it.
-// The numbers are industry starting points for embroidery on these fabrics, not measurements from a machine. Test a
-// sample before a production run, and change a value here if a sample says so: the engine, the MCP schema and the
-// Fabric select all read this table.
-// Each value's reason is written beside it. The same profile names its stabilizer, shown as a sewing tip.
-export const FABRIC_PROFILES = {
- woven: {
-  label: 'Woven (default)',
-  stretch: 1, // the reference: a woven takes the stitches with no give
-  stabilizer: 'tear-away backing for a plain woven fabric.',
-  // Document defaults, so choosing woven returns every value to where a new document starts.
-  values: {spacing: .4, stitchLength: 3, stagger: 4, underlay: true, underlayType: 'auto', compensation: .2},
- },
- knit: {
-  label: 'Stretchy knit',
-  stretch: 1.6, // starting point: a knit gives under the stitches, so it pulls and puckers the most
-  stabilizer: 'cut-away mesh. A knit stretches, so the backing has to stay under the stitches; tear-away lets the stitches pucker.',
-  values: {
-   spacing: .45, // a little more open, so the stretch does not crowd the rows together
-   stitchLength: 3, // unchanged: the length is not the problem on a knit
-   stagger: 4,
-   underlay: true, // the underlay holds the knit down under the top stitches
-   underlayType: 'auto',
-   compensation: .5, // a knit pulls in more, so the satin and fill are sewn wider
-  },
- },
- towel: {
-  label: 'Terry towel or fleece',
-  stretch: 1.3, // starting point: a loop pile gives some way under the stitches
-  stabilizer: 'tear-away backing with a water-soluble topping on the loops, so the stitches do not sink into the pile.',
-  values: {
-   spacing: .5, // open rows, so the stitches do not flatten the loops
-   stitchLength: 2.5, // shorter, so loose loops do not catch on long stitches
-   stagger: 8, // more needle phases, so the pile does not show a seam in the fill
-   underlay: true,
-   underlayType: 'auto',
-   compensation: .4, // the pile takes up the stitches, so the fill is sewn slightly wider
-  },
- },
- denim: {
-  label: 'Denim',
-  stretch: .8, // starting point: a dense woven gives less than a plain one
-  stabilizer: 'cut-away or heavy tear-away backing for a dense, stable woven.',
-  values: {
-   spacing: .35, // a denser fill, which the stable fabric can hold without puckering
-   stitchLength: 3,
-   stagger: 4,
-   underlay: true,
-   underlayType: 'auto',
-   compensation: .25, // a woven that barely pulls in
-  },
- },
-};
-export const FABRIC_PRESETS=Object.fromEntries(Object.entries(FABRIC_PROFILES).map(([key,profile])=>[key,profile.values]));
 // Organize fonts: each custom font in the document, with the lettering objects that use it.
 // Bundled fonts (Ink/Stitch and open TrueType, registry ids) that lettering in the document uses, with the lettering that uses each. Read-only: bundled fonts ship with the app and are not removed here.
 export function bundledFontUsage(doc){const m=new Map();for(const o of doc.objects){if(o.kind!=='text'||!isRegistryFont(o.font)||o.font.startsWith('custom/'))continue;if(!m.has(o.font))m.set(o.font,[]);m.get(o.font).push(o.name||'Lettering');}return [...m].map(([id,uses])=>({id,uses}));}
@@ -1048,28 +995,3 @@ export function parseThreadStock(text){const entries=String(text??'').split(/[\s
 export function nearestStockThread(hex,stock){if(!Array.isArray(stock)||!stock.length)return null;const rgb=h=>[0,2,4].map(i=>parseInt(h.slice(1+i,3+i),16));const a=rgb(hex);let best=null;stock.forEach((s,i)=>{const b=rgb(s),d=(b[0]-a[0])**2+(b[1]-a[1])**2+(b[2]-a[2])**2;if(!best||d<best.distance)best={hex:s,index:i+1,distance:d};});return best;}
 // Measure tool: the straight-line distance between two points in mm, with its x and y parts (b minus a, so the signs say which way the second point lies).
 export function measureBetween(a,b){const dx=b[0]-a[0],dy=b[1]-a[1];return {distance:Math.hypot(dx,dy),dx,dy};}
-// Pull estimate for the 3D preview: the stitches that land in each cell of the hoop, scaled by how far the chosen fabric
-// stretches. It shows where the fabric is likely to pull and pucker. It is a guide for where to look, not a simulation of
-// the machine. A cell whose stretch-adjusted density equals DISTORTION_SCALE shows 63% of the colour, and denser cells show more.
-// The pull direction is across the stitch lines in each cell (the stitch lines' normal), from the average line direction there.
-export const DISTORTION_SCALE=1.5;
-export function distortionGrid(plan,fabric,hoop,cell=2){
-  const profile=FABRIC_PROFILES[fabric]??FABRIC_PROFILES.woven,stretch=profile.stretch;
-  const x0=-hoop.w/2,y0=-hoop.h/2,cols=Math.max(1,Math.ceil(hoop.w/cell)),rows=Math.max(1,Math.ceil(hoop.h/cell));
-  const counts=new Float32Array(cols*rows),axialC=new Float32Array(cols*rows),axialS=new Float32Array(cols*rows);
-  const cellOf=(x,y)=>{const c=Math.floor((x-x0)/cell),r=Math.floor((y-y0)/cell);return c>=0&&c<cols&&r>=0&&r<rows?r*cols+c:-1;};
-  let prev=null;
-  for(const s of plan.stitches){
-    if(s.cmd!=='stitch'){prev=null;continue;}
-    const i=cellOf(s.x,s.y);if(i>=0)counts[i]++;
-    if(prev){const dx=s.x-prev.x,dy=s.y-prev.y,len2=dx*dx+dy*dy,j=cellOf((s.x+prev.x)/2,(s.y+prev.y)/2);
-      if(j>=0&&len2>0){axialC[j]+=(dx*dx-dy*dy)/len2;axialS[j]+=2*dx*dy/len2;}}
-    prev=s;
-  }
-  const values=new Float32Array(cols*rows),dirs=new Float32Array(cols*rows*2);let peak=0;
-  for(let i=0;i<counts.length;i++){
-    const pull=counts[i]/(cell*cell)*stretch;values[i]=1-Math.exp(-pull/DISTORTION_SCALE);peak=Math.max(peak,values[i]);
-    if(axialC[i]||axialS[i]){const theta=0.5*Math.atan2(axialS[i],axialC[i]);dirs[i*2]=-Math.sin(theta);dirs[i*2+1]=Math.cos(theta);}
-  }
-  return {cols,rows,cell,x0,y0,values,dirs,peak,stretch,label:profile.label};
-}
