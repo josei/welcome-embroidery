@@ -25,7 +25,9 @@ import {sewingWorksheet} from './worksheet.js';
 export {sewingWorksheet};
 import {initialDocument,batchPlan,batchDocuments} from './document.js';
 export {initialDocument,batchPlan,batchDocuments};
-import {booleanShapes,knifeShape,offsetShape,strokeToShape} from './shapeOps.js';
+import {booleanShapes,knifeShape,offsetShape,strokeToShape,isClosedShape} from './shapeOps.js';
+import {countSmallHoles,removeSmallHoles,isSmallIsland,removeSmallIslands} from './cleanup.js';
+export {isClosedShape,countSmallHoles,isSmallIsland};
 export {HOOP_PRESETS,hoopSize,hoopLabel};
 export {textPrimitives,cornerRadii};
 import {distP,railsFromLine,railsFromCenterline,widthAt} from './pathGeometry.js';
@@ -133,7 +135,6 @@ function clipLines(lines,maskLines){const poly=ls=>ls.filter(l=>l.length>=3).map
   try{return polygonClipping.intersection(a,b).flatMap(pg=>pg.map(r=>r.map(([x,y])=>[x,y])));}catch{return [];}}
 // Clipping masks: a clipped object is sewn only inside its mask (a closed shape that is itself not sewn). Dangling links are cleaned up after every edit.
 // A closed shape: a rectangle, an ellipse or a closed path. Clip masks and appliqué from a group use only these.
-export const isClosedShape=o=>Boolean(o)&&(o.kind==='rect'||o.kind==='ellipse'||(o.kind==='path'&&o.closed));
 function refreshClips(doc){const ids=new Set(doc.objects.map(o=>o.id));for(const o of doc.objects)if(o.clipId&&(!ids.has(o.clipId)||o.clipId===o.id||!isClosedShape(doc.objects.find(v=>v.id===o.clipId))))delete o.clipId;const used=new Set(doc.objects.map(o=>o.clipId).filter(Boolean));for(const o of doc.objects){if(o.mask&&!used.has(o.id))delete o.mask;else if(!o.mask&&used.has(o.id))o.mask=true;}}
 // Lettering attached to a path keeps following it: the path's outline is re-read whenever the path changes (moving the lettering itself does not reattach it).
 const pathSig=p=>JSON.stringify([p.points,p.handles,p.closed,p.smooth,p.rotation]);
@@ -173,13 +174,6 @@ function polygonFill(rings,spacing,angle) {
 function sampleLine(a,b,maxLen=2.5){const dist=Math.hypot(b[0]-a[0],b[1]-a[1]),n=Math.max(1,Math.ceil(dist/maxLen)),o=[];for(let i=1;i<=n;i++)o.push([a[0]+(b[0]-a[0])*i/n,a[1]+(b[1]-a[1])*i/n]);return o;}
 
 // Remove small holes: every hole under 1 mm² is dropped from the selected closed paths (other holes stay). Holes are rings in the same millimetre coordinates as the outline.
-const holeArea=h=>{let a=0;for(let i=0;i<h.length;i++){const p=h[i],q=h[(i+1)%h.length];a+=p[0]*q[1]-q[0]*p[1];}return Math.abs(a/2);};
-// How many of a path's holes are under 1 mm² (the ones remove_small_holes drops).
-export function countSmallHoles(o,maxArea=1){return (o?.holes||[]).filter(h=>holeArea(h)<maxArea).length;}
-function removeSmallHoles(doc,ids,maxArea=1){if(!Array.isArray(ids)||!ids.length)throw Error('Remove small holes needs the closed paths to clean.');if(!(Number.isFinite(maxArea)&&maxArea>=.1&&maxArea<=20))throw Error('The hole limit must be 0.1 to 20 mm².');for(const id of ids){const o=objById(doc,id);if(!(o.kind==='path'&&o.closed===true))throw Error('Remove small holes works on closed paths.');if(!o.holes)continue;const kept=o.holes.filter(h=>holeArea(h)>=maxArea);if(kept.length)o.holes=kept;else delete o.holes;}}
-// Remove small islands: a closed shape whose area (its outline less its holes) is under the island limit is deleted as a whole object. Boolean and knife results already come out as separate objects, so this clears the tiny pieces they leave.
-export function isSmallIsland(o,maxArea=1){return isClosedShape(o)&&shapeArea(geometry(o,0))<maxArea;}
-function removeSmallIslands(doc,ids,maxArea=1){if(!Array.isArray(ids)||!ids.length)throw Error('Remove small islands needs the closed shapes to check.');if(!(Number.isFinite(maxArea)&&maxArea>=.1&&maxArea<=20))throw Error('The island limit must be 0.1 to 20 mm².');for(const id of ids)if(!isClosedShape(objById(doc,id)))throw Error('Remove small islands works on closed shapes.');const drop=new Set(ids.filter(id=>isSmallIsland(objById(doc,id),maxArea)));for(let i=doc.objects.length-1;i>=0;i--)if(drop.has(doc.objects[i].id))doc.objects.splice(i,1);}
 function fillRuns(rings,o,doc,comp,from=null){
   const sPt=pinPoint(o,o.startAt),ePt=pinPoint(o,o.endAt);if(sPt)from=sPt;
   const closed=rings.map(closedRing).filter(r=>r.length>=4);if(!closed.length)return {under:[],top:[]};

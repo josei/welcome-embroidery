@@ -10,6 +10,13 @@ import {shapeArea} from './designChecks.js';
 /** @typedef {import('./transforms.js').Obj} Obj */
 /** @typedef {import('./transforms.js').Doc} Doc */
 
+// A rectangle, an ellipse or a closed path: the shapes that boolean, clip and cleanup operations take.
+/**
+ * @param {{kind?: string, closed?: boolean}|null|undefined} o
+ * @returns {boolean}
+ */
+export const isClosedShape=o=>{if(!o)return false;return o.kind==='rect'||o.kind==='ellipse'||(o.kind==='path'&&Boolean(o.closed));};
+
 // Boolean shape operations on closed shapes (rectangle, ellipse, closed path, with holes) using polygon-clipping.
 // The result replaces the operands: the first result polygon keeps the first operand's id, further pieces get new ids.
 /**
