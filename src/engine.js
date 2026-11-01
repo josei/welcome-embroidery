@@ -13,6 +13,8 @@ import {flipObjects,mapPathPoints,normAngle,objById,objectBounds,objectCenter,re
 import {HOOP_PRESETS,hoopSize,hoopLabel} from './hoops.js';
 import {designWarnings,shapeArea,ringArea} from './designChecks.js';
 export {designWarnings,shapeArea};
+import {closeRing,insideRings,clipRuns,satinFromRails,underlayTypes,orientRuns,pinPoint,reverseRuns} from './stitchRuns.js';
+export {satinFromRails};
 import {exportSvg,exportPrintTemplate,exportAppliqueTemplates} from './exports.js';
 export {exportSvg,exportPrintTemplate,exportAppliqueTemplates};
 import {validateDocument} from './validate.js';
@@ -186,24 +188,8 @@ function roundPathCorners(o,radius,only=null){
 export function nodeFraction(o,index){const line=pathOutline(o),P=o.points[index],cum=[0];for(let i=1;i<line.length;i++)cum.push(cum[i-1]+distP(line[i],line[i-1]));const total=cum.at(-1)||1;let best=Infinity,at=0;
   for(let i=1;i<line.length;i++){const a=line[i-1],b=line[i],dx=b[0]-a[0],dy=b[1]-a[1],l2=dx*dx+dy*dy,u=l2?Math.max(0,Math.min(1,((P[0]-a[0])*dx+(P[1]-a[1])*dy)/l2)):0,d=Math.hypot(P[0]-a[0]-dx*u,P[1]-a[1]-dy*u);if(d<best-1e-9){best=d;at=cum[i-1]+Math.sqrt(l2)*u;}}return at/total;}
 function decodeBase64(s){if(typeof Buffer!=='undefined')return new Uint8Array(Buffer.from(s,'base64'));const b=atob(s),a=new Uint8Array(b.length);for(let i=0;i<b.length;i++)a[i]=b.charCodeAt(i);return a;}
-// Geometry clipping to a mask: closed outlines are intersected exactly; runs of stitches are cut where they leave the mask.
-const closeRing=r=>{const q=r.map(([x,y])=>[x,y]);if(q.length&&(q[0][0]!==q.at(-1)[0]||q[0][1]!==q.at(-1)[1]))q.push([...q[0]]);return q;};
 function clipLines(lines,maskLines){const poly=ls=>ls.filter(l=>l.length>=3).map(closeRing),a=poly(lines),b=poly(maskLines);if(!a.length||!b.length)return [];
   try{return polygonClipping.intersection(a,b).flatMap(pg=>pg.map(r=>r.map(([x,y])=>[x,y])));}catch{return [];}}
-function insideRings(rings,p){let inside=false;for(const ring of rings)for(let i=0,j=ring.length-1;i<ring.length;j=i++){const [xi,yi]=ring[i],[xj,yj]=ring[j];if((yi>p[1])!==(yj>p[1])&&p[0]<(xj-xi)*(p[1]-yi)/(yj-yi)+xi)inside=!inside;}return inside;}
-// edgeClose: each cut end gets a short back-stitch over its last segment, so a cut run closes on the mask edge.
-function clipRuns(runs,rings,edgeClose=false){
-  const edges=[];for(const r of rings)for(let i=1;i<r.length;i++)edges.push([r[i-1],r[i]]);const out=[];
-  for(const run of runs){let cur=null,first=true;const flush=()=>{if(cur&&cur.length>1){const pts=edgeClose&&cur.length>2?[...cur,...cur.slice(-3,-1).reverse()]:cur;out.push({...run,pts,jump:first?run.jump:true});}first=false;cur=null;};
-    const pts=run.pts;if(pts.length<2)continue;
-    if(insideRings(rings,pts[0])){cur=[pts[0]];}
-    for(let i=1;i<pts.length;i++){const a=pts[i-1],b=pts[i],ts=[0,1],dx=b[0]-a[0],dy=b[1]-a[1];
-      for(const [c,d] of edges){const ex=d[0]-c[0],ey=d[1]-c[1],den=dx*ey-dy*ex;if(Math.abs(den)<1e-12)continue;const t=((c[0]-a[0])*ey-(c[1]-a[1])*ex)/den,u=((c[0]-a[0])*dy-(c[1]-a[1])*dx)/den;if(t>1e-9&&t<1-1e-9&&u>=0&&u<=1)ts.push(t);}
-      ts.sort((x,y)=>x-y);
-      for(let k=1;k<ts.length;k++){const t0=ts[k-1],t1=ts[k];if(t1-t0<1e-9)continue;const p0=[a[0]+dx*t0,a[1]+dy*t0],p1=[a[0]+dx*t1,a[1]+dy*t1],mid=[(p0[0]+p1[0])/2,(p0[1]+p1[1])/2];
-        if(insideRings(rings,mid)){if(!cur)cur=[p0];cur.push(p1);}else flush();}}
-    flush();}
-  return out;}
 // Clipping masks: a clipped object is sewn only inside its mask (a closed shape that is itself not sewn). Dangling links are cleaned up after every edit.
 // A closed shape: a rectangle, an ellipse or a closed path. Clip masks and appliqué from a group use only these.
 export const isClosedShape=o=>Boolean(o)&&(o.kind==='rect'||o.kind==='ellipse'||(o.kind==='path'&&o.closed));
@@ -308,29 +294,6 @@ function sortByColor(doc){const order=[];for(const o of doc.objects)if(!order.in
 
 // Registry-font lettering: layout -> optional text-on-path -> rotation, returning stitchable primitives in mm (see textlayout.js).
 const TEXT_OPTION_KEYS=['tracking','wordSpacing','lineHeight','align','italic','bold','vertical'];
-// Two-rail satin: needles alternate between the rails every `spacing` mm of rail length; pull compensation widens the column.
-export function satinFromRails(a,b,spacing,comp,rungs=[],compB=comp){
-  const cum=r=>{const c=[0];for(let i=1;i<r.length;i++)c.push(c[i-1]+Math.hypot(r[i][0]-r[i-1][0],r[i][1]-r[i-1][1]));return c;},ca=cum(a),cb=cum(b),La=ca.at(-1),Lb=cb.at(-1);if(Math.max(La,Lb)<.2)return {zig:[],centre:[],pairs:[]};
-  const at=(r,c,t)=>{let i=1;while(i<c.length-1&&c[i]<t)i++;const seg=c[i]-c[i-1]||1,f=Math.max(0,Math.min(1,(t-c[i-1])/seg));return [r[i-1][0]+(r[i][0]-r[i-1][0])*f,r[i-1][1]+(r[i][1]-r[i-1][1])*f];};
-  // Rungs pair a position on rail A with one on rail B; between two rungs the rails advance in proportion, so letters whose rails differ in length do not twist.
-  // A rung end can sit close to several parts of a rail (bends, rings), so each end keeps every plausible position and a small dynamic program picks the sequence that is nearest overall while advancing along the rail.
-  const options=(r,c,p)=>{const out=[];for(let i=1;i<r.length;i++){const dx=r[i][0]-r[i-1][0],dy=r[i][1]-r[i-1][1],l2=dx*dx+dy*dy,u=l2?Math.max(0,Math.min(1,((p[0]-r[i-1][0])*dx+(p[1]-r[i-1][1])*dy)/l2)):0;out.push([c[i-1]+Math.sqrt(l2)*u,Math.hypot(p[0]-r[i-1][0]-dx*u,p[1]-r[i-1][1]-dy*u)]);}const best=Math.min(...out.map(v=>v[1])),keep=out.filter(v=>v[1]<=best*1.6+.8).sort((u,v)=>u[0]-v[0]),res=[];for(const v of keep){const last=res.at(-1);if(last&&v[0]-last[0]<.05){if(v[1]<last[1])res[res.length-1]=v;}else res.push(v);}return res;};
-  // Rungs usually overshoot the rails, so the rail position of a rung is where the rung crosses the rail; only a rung that misses a rail falls back to the nearest point of that rail.
-  const crossings=(r,c,p,q)=>{const out=[],rx=q[0]-p[0],ry=q[1]-p[1];for(let i=1;i<r.length;i++){const sx=r[i][0]-r[i-1][0],sy=r[i][1]-r[i-1][1],den=rx*sy-ry*sx;if(Math.abs(den)<1e-9)continue;const t=((r[i-1][0]-p[0])*sy-(r[i-1][1]-p[1])*sx)/den,u=((r[i-1][0]-p[0])*ry-(r[i-1][1]-p[1])*rx)/den;if(t>=0&&t<=1&&u>=0&&u<=1)out.push([c[i-1]+Math.hypot(sx,sy)*u,0]);}return out;};
-  const railOptions=(r,c,p,q,end)=>{const x=crossings(r,c,p,q);return x.length?x:options(r,c,end);};
-  const monotone=sets=>{const n=sets.length,cost=sets.map(s=>s.map(()=>0)),from=sets.map(s=>s.map(()=>-1));sets[0]?.forEach((v,j)=>{cost[0][j]=v[1];});
-    for(let k=1;k<n;k++)sets[k].forEach((v,j)=>{let bestC=Infinity,bestI=-1;sets[k-1].forEach((u,i)=>{const c=cost[k-1][i]+Math.max(0,u[0]-v[0])*3;if(c<bestC){bestC=c;bestI=i;}});cost[k][j]=bestC+v[1];from[k][j]=bestI;});
-    const out=Array(n);if(!n)return out;let j=cost[n-1].indexOf(Math.min(...cost[n-1]));for(let k=n-1;k>=0;k--){out[k]=sets[k][j][0];j=from[k][j];}return out;};
-  const sides=rungs.map(([p,q])=>{const d=(r,v)=>Math.min(...r.map(w=>Math.hypot(w[0]-v[0],w[1]-v[1])));return d(a,p)+d(b,q)<=d(a,q)+d(b,p)?[p,q]:[q,p];});
-  const order=sides.map((sd,i)=>[(railOptions(a,ca,rungs[i][0],rungs[i][1],sd[0])[0]||[0])[0],i]).sort((u,v)=>u[0]-v[0]).map(v=>v[1]),ta=monotone(order.map(i=>railOptions(a,ca,rungs[i][0],rungs[i][1],sides[i][0]))),tb=monotone(order.map(i=>railOptions(b,cb,rungs[i][0],rungs[i][1],sides[i][1])));
-  const anchors=[[0,0]];order.forEach((_,k)=>anchors.push([ta[k],tb[k]]));
-  anchors.sort((u,v)=>u[0]-v[0]);anchors.push([La,Lb]);for(let i=1;i<anchors.length;i++)anchors[i][1]=Math.max(anchors[i][1],anchors[i-1][1]);
-  if(globalThis.__dbgAnchors)globalThis.__dbgAnchors(anchors,ca,cb);
-  const zig=[],centre=[],pairs=[];let flip=0;
-  for(let s=1;s<anchors.length;s++){const [a0,b0]=anchors[s-1],[a1,b1]=anchors[s],len=Math.max(a1-a0,b1-b0);if(len<1e-6&&s<anchors.length-1)continue;const n=Math.max(1,Math.ceil(len/spacing));
-    for(let k=(s===1?0:1);k<=n;k++){const f=k/n,pa=at(a,ca,a0+(a1-a0)*f),pb=at(b,cb,b0+(b1-b0)*f),dx=pa[0]-pb[0],dy=pa[1]-pb[1],l=Math.hypot(dx,dy)||1;pairs.push([pa,pb]);centre.push([(pa[0]+pb[0])/2,(pa[1]+pb[1])/2]);zig.push(flip++%2?[pb[0]-dx/l*compB,pb[1]-dy/l*compB]:[pa[0]+dx/l*comp,pa[1]+dy/l*comp]);}}
-  return {zig,centre,pairs};
-}
 
 function polygonFill(rings,spacing,angle) {
   // Evenly spaced parallel rows with even/odd polygon clipping; each row becomes a boustrophedon path.
@@ -353,19 +316,6 @@ function removeSmallHoles(doc,ids,maxArea=1){if(!Array.isArray(ids)||!ids.length
 // Remove small islands: a closed shape whose area (its outline less its holes) is under the island limit is deleted as a whole object. Boolean and knife results already come out as separate objects, so this clears the tiny pieces they leave.
 export function isSmallIsland(o,maxArea=1){return isClosedShape(o)&&shapeArea(geometry(o,0))<maxArea;}
 function removeSmallIslands(doc,ids,maxArea=1){if(!Array.isArray(ids)||!ids.length)throw Error('Remove small islands needs the closed shapes to check.');if(!(Number.isFinite(maxArea)&&maxArea>=.1&&maxArea<=20))throw Error('The island limit must be 0.1 to 20 mm².');for(const id of ids)if(!isClosedShape(objById(doc,id)))throw Error('Remove small islands works on closed shapes.');const drop=new Set(ids.filter(id=>isSmallIsland(objById(doc,id),maxArea)));for(let i=doc.objects.length-1;i>=0;i--)if(drop.has(doc.objects[i].id))doc.objects.splice(i,1);}
-function underlayTypes(o,doc,kind,metric){
-  let t=o.underlayType;if(t===undefined)t=doc.settings.underlay===false?'none':(doc.settings.underlayType??'auto');
-  const set=t==='none'?new Set():t==='auto'?new Set(kind==='fill'?(metric>=40?['contour','fill']:['contour']):(metric<2?['center']:metric<4.5?['contour']:['contour','zigzag'])):new Set(String(t).split('+').filter(x=>(kind==='fill'?['contour','fill','laydown']:['center','contour','zigzag']).includes(x)));
-  if(o.raised&&kind==='satin')for(const x of ['center','zigzag'])set.add(x);
-  return set;
-}
-// Open runs start at their nearer end; closed rings (contour underlay) are rotated to start at their point nearest to the needle.
-const orientRuns=(runs,from,rotateLoops=false)=>{let cur=from;return runs.map(r=>{let pts=r.pts;if(cur&&rotateLoops&&r.loop&&pts.length>3){let k=0,best=Infinity;pts.forEach((p,i)=>{const d=distP(cur,p);if(d<best){best=d;k=i;}});pts=[...pts.slice(k),...pts.slice(0,k)];}else if(cur&&pts.length>3&&distP(pts[0],pts.at(-1))<1e-6){let k=0,best=Infinity;pts.forEach((p,i)=>{const d=distP(cur,p);if(d<best){best=d;k=i;}});if(k&&k<pts.length-1)pts=[...pts.slice(k,-1),...pts.slice(0,k+1)];}else if(cur&&distP(cur,pts[0])>distP(cur,pts.at(-1)))pts=[...pts].reverse();cur=pts.at(-1);return {...r,pts};});};
-// Fill: [contour underlay] -> [tatami underlay at 90°] -> top fill planned as a routed auto-fill. All parameters can be set per object.
-const pinCache=new WeakMap();
-// startAt / endAt are fractions of the object's bounding box, so they follow the object when it moves or scales. Lettering sews glyph by glyph and ignores them.
-function pinPoint(o,f){if(!f||o.kind==='text')return null;let b=pinCache.get(o);if(!b){b=objectBounds(o);pinCache.set(o,b);}return [b[0]+f[0]*(b[2]-b[0]),b[1]+f[1]*(b[3]-b[1])];}
-const reverseRuns=runs=>[...runs].reverse().map(r=>({...r,pts:[...r.pts].reverse()}));
 function fillRuns(rings,o,doc,comp,from=null){
   const sPt=pinPoint(o,o.startAt),ePt=pinPoint(o,o.endAt);if(sPt)from=sPt;
   const closed=rings.map(closedRing).filter(r=>r.length>=4);if(!closed.length)return {under:[],top:[]};
