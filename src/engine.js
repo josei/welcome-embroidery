@@ -1,6 +1,8 @@
 // Deterministic stitch compiler and JEF/VP3 serializers. Document units are mm.
 import {polygonClipping,bufferSegments,closedRing,openRing} from './geom.js';
 import {getFont,isRegistryFont,registerDocumentFonts} from './fonts.js';
+import {bundledFontUsage,customFontUsage,measureText} from './fontHelpers.js';
+export {bundledFontUsage,customFontUsage,measureText};
 import {planPhoto,planRippleFill,planCrossStitch,planContourFill,planSpiralFill,planGuidedFill,planMeanderFill,planFill,planContour,planFillUnderlay,sampleRun,makeInside,chainRuns} from './stitchplan.js';
 import {layoutText,primitiveLines,mapPrimitives,resamplePrimitives,MAX_TEXT_CHARS} from './textlayout.js';
 import {nearestJefColor} from './jefPalette.js';
@@ -44,15 +46,11 @@ import {threadPlan,blockSeconds,blockTimeLabel,sewingSeconds,threadSpans,sewingS
 import {encodeJef,encodeVp3,encodePec,encodePes,encodePesV6,encodeSew,encodeTbf,encodeXxx,encodeU01,encodeExp,encodeDst,encodeCol,encodeEdr,encode,layerCanPassThrough,sourceMatches,vp3LayerHasUnsupportedTravel} from './encoders.js';
 export {encodeJef,encodeVp3,encodePec,encodePes,encodePesV6,encodeSew,encodeTbf,encodeXxx,encodeU01,encodeExp,encodeDst,encodeCol,encodeEdr,encode};
 export {threadPlan,blockSeconds,blockTimeLabel,sewingSeconds,threadSpans,sewingSecondsUpTo};
-import neonFont from '../fonts/neon_blinking/glyphs.js';
 const round = n => Math.round(n * 10) / 10;
 
 // Organize fonts: each custom font in the document, with the lettering objects that use it.
 // Bundled fonts (Ink/Stitch and open TrueType, registry ids) that lettering in the document uses, with the lettering that uses each. Read-only: bundled fonts ship with the app and are not removed here.
-export function bundledFontUsage(doc){const m=new Map();for(const o of doc.objects){if(o.kind!=='text'||!isRegistryFont(o.font)||o.font.startsWith('custom/'))continue;if(!m.has(o.font))m.set(o.font,[]);m.get(o.font).push(o.name||'Lettering');}return [...m].map(([id,uses])=>({id,uses}));}
-export function customFontUsage(doc){return Object.entries(doc.customFonts||{}).map(([id,f])=>({id,name:f.name||id,uses:doc.objects.filter(o=>o.kind==='text'&&o.font===`custom/${id}`).map(o=>o.name||'Lettering')}));}
 export function jefWarnings(plan,format='jef'){if(format!=='jef'||!plan.bounds)return [];const w=plan.bounds[2]-plan.bounds[0],h=plan.bounds[3]-plan.bounds[1];return w>=200||h>=200?[`Warning: ${w.toFixed(0)} × ${h.toFixed(0)} mm is beyond the largest JEF hoop code (200 × 200 mm); the file gets hoop code 0 and no hoop-edge distances, and machines may reject it.`]:[];}
-export function measureText(text,font='welcome-mono/1',size=8,options={}){if(isRegistryFont(font)){const f=getFont(font);if(f)return layoutText({...options,text,font,h:size,w:0,x:0,y:0},f,{buffer:null}).width;return String(text).length*size*.6;}if(font==='neon-blinking/1')return [...String(text).toUpperCase()].reduce((n,ch)=>n+(neonFont.glyphs[ch]?.advance||neonFont.glyphs[' '].advance)*size/neonFont.unitsPerEm,0);return String(text).length*size*.72;}
 export function applyOperations(doc,operations) {
   if(!doc||doc.schema!=='welcome/1'||!Array.isArray(doc.objects)||!Array.isArray(operations))throw Error('Invalid Welcome document operation.');
   for(const op of operations){
