@@ -31,8 +31,8 @@ export {FABRIC_PROFILES,FABRIC_PRESETS,DISTORTION_SCALE,distortionGrid};
 export {parseSvgPath};
 export {railsFromLine,widthAt};
 import {threadPlan,blockSeconds,blockTimeLabel,sewingSeconds,threadSpans,sewingSecondsUpTo,sewingLabel} from './sewingTime.js';
-import {encodeJef,encodeVp3,encodePec,encodePes,encodePesV6,encodeSew,encodeTbf,encodeXxx,encodeU01,encodeExp,encodeDst,encodeCol,encodeEdr,layerCanPassThrough,sourceMatches,vp3LayerHasUnsupportedTravel} from './encoders.js';
-export {encodeJef,encodeVp3,encodePec,encodePes,encodePesV6,encodeSew,encodeTbf,encodeXxx,encodeU01,encodeExp,encodeDst,encodeCol,encodeEdr};
+import {encodeJef,encodeVp3,encodePec,encodePes,encodePesV6,encodeSew,encodeTbf,encodeXxx,encodeU01,encodeExp,encodeDst,encodeCol,encodeEdr,encode,layerCanPassThrough,sourceMatches,vp3LayerHasUnsupportedTravel} from './encoders.js';
+export {encodeJef,encodeVp3,encodePec,encodePes,encodePesV6,encodeSew,encodeTbf,encodeXxx,encodeU01,encodeExp,encodeDst,encodeCol,encodeEdr,encode};
 export {threadPlan,blockSeconds,blockTimeLabel,sewingSeconds,threadSpans,sewingSecondsUpTo};
 import neonFont from '../fonts/neon_blinking/glyphs.js';
 const round = n => Math.round(n * 10) / 10;
@@ -439,18 +439,6 @@ export function compile(doc) {
     objectCounts[id]=(objectCounts[id]||0)+n;
   });
   return {revision:doc.revision,stitches,bounds,count,objectCounts,threadLength:Math.round(length*1.12),colors:[...new Set(stitches.filter(s=>s.cmd==='stitch'||s.cmd==='color').map(s=>s.thread).filter(Boolean))],errors:[...new Set(errors)],issues};
-}
-export function encode(plan,format,color,hoop=110,document=null){
-  if(document)hoop=hoopSize(document);
-  if(!(['jef','vp3','dst','exp','pec','pes','pes6','sew','u01','xxx','tbf','col','edr'].includes(format)))throw Error(`Unsupported machine format: ${format}. Choose JEF, VP3, DST, EXP, PEC, PES, PES v6, SEW, U01, XXX, TBF, COL or EDR.`);
-  if(plan.errors.length)throw Error(plan.errors.join(' '));
-  const layers=(document?.objects||[]).filter(o=>o.visible!==false&&o.kind==='stitch_layer');
-  if(layers.length===1&&document.objects.length===1&&layerCanPassThrough(layers[0],format)){
-    const bytes=Uint8Array.from(atob(layers[0].source.originalBytesBase64),c=>c.charCodeAt(0));
-    if(bytes.byteLength===layers[0].source.size){try{const checked=decodeEmbroidery(bytes,format);if(sourceMatches(checked,layers[0]))return bytes;}catch{}}
-  }
-  if(format==='vp3'&&layers.some(o=>vp3LayerHasUnsupportedTravel(o.stitches)))throw Error('This VP3 design contains intra-block travel, trim, or stop commands the current VP3 writer cannot preserve after edits. Leading color-block origin moves and no-op moves are preserved. Export JEF or restore the unchanged VP3 source.');
-  if(format==='jef')return encodeJef(plan,color,hoop);if(format==='dst')return encodeDst(plan,document?.name||'Welcome');if(format==='exp')return encodeExp(plan);if(format==='pec')return encodePec(plan,document?.name||'Welcome');if(format==='pes')return encodePes(plan,document?.name||'Welcome');if(format==='pes6')return encodePesV6(plan,document?.name||'Welcome');if(format==='sew')return encodeSew(plan);if(format==='u01')return encodeU01(plan);if(format==='xxx')return encodeXxx(plan);if(format==='tbf')return encodeTbf(plan,document?.name||'Welcome');if(format==='col')return encodeCol(plan);if(format==='edr')return encodeEdr(plan);return encodeVp3(plan,color);
 }
 export {geometry,objectBounds};
 

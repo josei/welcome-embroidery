@@ -4,6 +4,14 @@
 import {threadPlan} from './sewingTime.js';
 import {SEW_CHART,PEC_CHART} from './readers.js';
 import {nearestJefColor} from './jefPalette.js';
+import {hoopSize} from './hoops.js';
+import {decodeEmbroidery} from './readers.js';
+
+/**
+ * A design: its objects, and the stitch layers imported into it keep their source bytes.
+ * @typedef {{name?: string, hoop?: number, hoopH?: number, objects: Array<import('./transforms.js').Obj & {visible?: boolean, stitches?: Array<{x: number, y: number, cmd: string, thread: string}>, threads?: Record<string, {color?: string}>, threadOverrides?: Record<string, string>, source?: {format: string, bounds: number[], size?: number, defaultPlacement: {x: number, y: number, w: number, h: number}, originalBytesBase64?: string|null, defaultThread: string}}>}} Document
+ * @typedef {Document['objects'][number] & {source: NonNullable<Document['objects'][number]['source']>, stitches: NonNullable<Document['objects'][number]['stitches']>, threadOverrides: Record<string, string>, threads: Record<string, {color?: string}>}} Layer
+ */
 
 /**
  * @typedef {{x: number, y: number, cmd: string, thread: string}} PlanStitch
@@ -25,7 +33,7 @@ const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
 
 /** @type {(s: string, n: number) => number[]} */
 const ascii=(s,n)=>Array.from({length:n},(_,i)=>s.charCodeAt(i)||0);
-/** @param {Plan} plan @param {string} [color] @param {number} [hoop] @returns {Uint8Array} */
+/** @param {Plan} plan @param {string} [color] @param {number|{w: number, h: number}} [hoop] @returns {Uint8Array} */
 export function encodeJef(plan,color='#527461',hoop=110) {
   if(plan.errors.length)throw Error(plan.errors.join(' '));
   // A true STOP is written like pyembroidery does: the 80 01 code with an extra thread slot whose palette entry is 0 (toggled back to the previous colour on the next STOP).
@@ -94,14 +102,14 @@ export function encodeVp3(plan,color='#527461') {
   patch(designPatch);patch(filePatch);return new Uint8Array(out);
 }
 /**
- * @param {{kind: string, x: number, y: number, w: number, h: number, rotation?: number, thread: string, threadOverrides: object, source: {format: string, originalBytesBase64: string|null, defaultThread: string, defaultPlacement: {x: number, y: number, w: number, h: number}}}} o
+ * @param {{kind: string, x: number, y: number, w: number, h: number, rotation?: number, thread?: string, threadOverrides: object, source: {format: string, originalBytesBase64?: string|null, defaultThread: string, defaultPlacement: {x: number, y: number, w: number, h: number}}}} o
  * @param {string} format
  * @returns {boolean}
  */
 export function layerCanPassThrough(o,format){const p=o.source.defaultPlacement;return Boolean(o.kind==='stitch_layer'&&o.source.format===format&&o.source.originalBytesBase64&&o.x===p.x&&o.y===p.y&&o.w===p.w&&o.h===p.h&&(o.rotation||0)===0&&o.thread===o.source.defaultThread&&Object.keys(o.threadOverrides).length===0);}
 /**
- * @param {{bounds: number[], threads: unknown[], stitches: PlanStitch[]}} decoded
- * @param {{source: {bounds: number[]}, threads: unknown[], stitches: PlanStitch[]}} o
+ * @param {{bounds: number[], threads: unknown, stitches: Array<{x: number, y: number, cmd: string, thread: unknown}>}} decoded
+ * @param {{source: {bounds: number[]}, threads: unknown, stitches: Array<{x: number, y: number, cmd: string, thread: unknown}>}} o
  * @returns {boolean}
  */
 export function sourceMatches(decoded,o){if(JSON.stringify(decoded.bounds)!==JSON.stringify(o.source.bounds)||JSON.stringify(decoded.threads)!==JSON.stringify(o.threads)||decoded.stitches.length!==o.stitches.length)return false;for(let i=0;i<decoded.stitches.length;i++){const a=decoded.stitches[i],b=o.stitches[i];if(a.x!==b.x||a.y!==b.y||a.cmd!==b.cmd||a.thread!==b.thread)return false;}return true;}
@@ -431,3 +439,25 @@ export function encodeCol(plan){const cols=colourList(plan),lines=[String(cols.l
 // Thread colour list (EDR, the binary form pyembroidery reads and writes): four bytes per colour, red, green, blue and a zero pad byte, in the same order as COL.
 /** @param {Plan} plan @returns {Uint8Array} */
 export function encodeEdr(plan){return Uint8Array.from(colourList(plan).flatMap(([r,g,b])=>[r,g,b,0]));}
+
+/**
+ * Writes a compiled plan in one machine format. An unchanged imported file is returned as its source bytes.
+ * @param {Plan} plan
+ * @param {string} format
+ * @param {string} [color]
+ * @param {number|{w: number, h: number}} [hoop]
+ * @param {Document|null} [document]
+ * @returns {Uint8Array}
+ */
+export function encode(plan,format,color,hoop=110,document=null){
+  if(document)hoop=hoopSize(document);
+  if(!(['jef','vp3','dst','exp','pec','pes','pes6','sew','u01','xxx','tbf','col','edr'].includes(format)))throw Error(`Unsupported machine format: ${format}. Choose JEF, VP3, DST, EXP, PEC, PES, PES v6, SEW, U01, XXX, TBF, COL or EDR.`);
+  if(plan.errors.length)throw Error(plan.errors.join(' '));
+  const layers=/** @type {Layer[]} */((document?.objects||[]).filter(o=>o.visible!==false&&o.kind==='stitch_layer'));
+  if(layers.length===1&&document?.objects.length===1&&layerCanPassThrough(layers[0],format)){
+    const bytes=Uint8Array.from(atob(/** @type {string} */(layers[0].source.originalBytesBase64)),c=>c.charCodeAt(0));
+    if(bytes.byteLength===layers[0].source.size){try{const checked=decodeEmbroidery(bytes,format);if(sourceMatches(checked,layers[0]))return bytes;}catch{}}
+  }
+  if(format==='vp3'&&layers.some(o=>vp3LayerHasUnsupportedTravel(o.stitches)))throw Error('This VP3 design contains intra-block travel, trim, or stop commands the current VP3 writer cannot preserve after edits. Leading color-block origin moves and no-op moves are preserved. Export JEF or restore the unchanged VP3 source.');
+  if(format==='jef')return encodeJef(plan,color,hoop);if(format==='dst')return encodeDst(plan,document?.name||'Welcome');if(format==='exp')return encodeExp(plan);if(format==='pec')return encodePec(plan,document?.name||'Welcome');if(format==='pes')return encodePes(plan,document?.name||'Welcome');if(format==='pes6')return encodePesV6(plan,document?.name||'Welcome');if(format==='sew')return encodeSew(plan);if(format==='u01')return encodeU01(plan);if(format==='xxx')return encodeXxx(plan);if(format==='tbf')return encodeTbf(plan,document?.name||'Welcome');if(format==='col')return encodeCol(plan);if(format==='edr')return encodeEdr(plan);return encodeVp3(plan,color);
+}
