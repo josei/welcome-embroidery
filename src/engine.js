@@ -12,6 +12,8 @@ import {pathDirs,motifLoops,motifPairLoops,motifFillRuns,sequinRuns,beadRuns,bli
 import {flipObjects,mapPathPoints,normAngle,objById,objectBounds,refreshPathBounds,rotateObjects,scaleObjects,toPathObject,translateObject} from './transforms.js';
 import {HOOP_PRESETS,hoopSize,hoopLabel} from './hoops.js';
 import {designWarnings,shapeArea,ringArea} from './designChecks.js';
+import {sameThread,parseThreadStock,nearestStockThread} from './threads.js';
+export {parseThreadStock,nearestStockThread};
 export {designWarnings,shapeArea};
 import {closeRing,insideRings,clipRuns,satinFromRails,underlayTypes,orientRuns,pinPoint,reverseRuns} from './stitchRuns.js';
 import {makeStitchLayer,importStitchLayer,decodeBase64} from './stitchImport.js';
@@ -367,7 +369,6 @@ export function visibleTips(warnings,hidden=[]){const off=new Set(hidden);return
 
 // Thread plan: the colours in sewing order. A block starts at the first stitch after a colour change or stop, so the same colour sewn twice gives two blocks, as the editor shows it.
 // Two thread strings name the same colour when they differ only in case (#D9897E and #d9897e).
-const sameThread=(a,b)=>String(a).toLowerCase()===String(b).toLowerCase();
 
 // SVG <path> fill rule. A path with a fill (not none) and no stroke imports as fill objects when its subpaths are closed rings and nest at most two levels: one outer ring (depth 0), holes inside it (depth 1, up to 20 of up to 200 points), and islands inside a hole (depth 2, each its own fill object, up to 1,000 points). Deeper nesting, or several outer rings, keeps the running-outline import and the note says why. Returns {fill, note, holes, islands, depths}: depths gives each subpath's depth, and holes and islands count the depth 1 and depth 2 rings.
 export function svgPathFill(fill,stroke,subpaths){const filled=fill!==null&&fill!==undefined&&fill!=='none',stroked=stroke!==null&&stroke!==undefined&&stroke!=='none';const none={fill:false,note:null,holes:0,islands:0,depths:[]};if(!filled||stroked)return none;
@@ -381,9 +382,5 @@ const holes=depths.filter(d=>d===1).length,islands=depths.filter(d=>d===2).lengt
 const deep=depths.some(d=>d>2);const tooBig=rings.some((r,i)=>(depths[i]===1&&r.length>200)||(depths[i]===2&&r.length>1000))||holes>20||islands>20;
 if(deep||tooBig)return outlineNote('A filled path with counters nested deeper than an island in a hole, or too many points, imports as an outline.');
 return {fill:true,note:null,holes,islands,depths};}
-// The user's own thread stock: a list of six-digit hex colours, one per line (commas and spaces are also accepted). Returns the valid colours, each once, and how many entries were not valid colours.
-export function parseThreadStock(text){const entries=String(text??'').split(/[\s,]+/).filter(Boolean);const colours=[];let invalid=0;for(const e of entries){const m=e.match(/^#?([0-9a-f]{6})$/i);if(!m){invalid++;continue;}const hex='#'+m[1].toLowerCase();if(!colours.includes(hex))colours.push(hex);}return {colours,invalid};}
-// The nearest thread in the stock to a colour, by squared RGB distance: {hex, index (1-based in the stock), distance}, or null when the stock is empty.
-export function nearestStockThread(hex,stock){if(!Array.isArray(stock)||!stock.length)return null;const rgb=h=>[0,2,4].map(i=>parseInt(h.slice(1+i,3+i),16));const a=rgb(hex);let best=null;stock.forEach((s,i)=>{const b=rgb(s),d=(b[0]-a[0])**2+(b[1]-a[1])**2+(b[2]-a[2])**2;if(!best||d<best.distance)best={hex:s,index:i+1,distance:d};});return best;}
 // Measure tool: the straight-line distance between two points in mm, with its x and y parts (b minus a, so the signs say which way the second point lies).
 export function measureBetween(a,b){const dx=b[0]-a[0],dy=b[1]-a[1];return {distance:Math.hypot(dx,dy),dx,dy};}
