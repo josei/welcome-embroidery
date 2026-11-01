@@ -10,6 +10,12 @@ import {GLYPHS,parseSvgPath,textLines} from './lettering.js';
 import {geometry,textPrimitives,cornerRadii} from './outlines.js';
 import {pathDirs,motifLoops,motifPairLoops,motifFillRuns,sequinRuns,beadRuns,blingRuns,blingFillRuns} from './embellishments.js';
 import {flipObjects,mapPathPoints,normAngle,objById,objectBounds,objectCenter,refreshPathBounds,rotateObjects,scaleObjects,toPathObject,translateObject} from './transforms.js';
+import {HOOP_PRESETS,hoopSize,hoopLabel} from './hoops.js';
+import {designWarnings,shapeArea,ringArea} from './designChecks.js';
+export {designWarnings,shapeArea};
+import {exportSvg,exportPrintTemplate,exportAppliqueTemplates} from './exports.js';
+export {exportSvg,exportPrintTemplate,exportAppliqueTemplates};
+export {HOOP_PRESETS,hoopSize,hoopLabel};
 export {textPrimitives,cornerRadii};
 import {distP,pathOutline,railsFromLine,railsFromCenterline,widthAt} from './pathGeometry.js';
 export {FABRIC_PROFILES,FABRIC_PRESETS,DISTORTION_SCALE,distortionGrid};
@@ -26,26 +32,6 @@ const round = n => Math.round(n * 10) / 10;
 // Bundled fonts (Ink/Stitch and open TrueType, registry ids) that lettering in the document uses, with the lettering that uses each. Read-only: bundled fonts ship with the app and are not removed here.
 export function bundledFontUsage(doc){const m=new Map();for(const o of doc.objects){if(o.kind!=='text'||!isRegistryFont(o.font)||o.font.startsWith('custom/'))continue;if(!m.has(o.font))m.set(o.font,[]);m.get(o.font).push(o.name||'Lettering');}return [...m].map(([id,uses])=>({id,uses}));}
 export function customFontUsage(doc){return Object.entries(doc.customFonts||{}).map(([id,f])=>({id,name:f.name||id,uses:doc.objects.filter(o=>o.kind==='text'&&o.font===`custom/${id}`).map(o=>o.name||'Lettering')}));}
-// Hoop presets. 100 x 100 mm is Brother's 4x4 hoop (SA443) and 180 x 130 mm its 5x7 hoop (SA444, listed as 180mm x 130mm); 260 x 160 mm is the 6x10 hoop, listed as 160 x 260 mm by one retailer guide. The long side is the width. The 110 x 110 mm default is Welcome's own.
-export const HOOP_PRESETS=[{key:'110x110',w:110,h:110},{key:'100x100',w:100,h:100},{key:'180x130',w:180,h:130},{key:'260x160',w:260,h:160}];
-export function hoopSize(d){const w=Number(d.hoop);return {w,h:Number(d.hoopH??w)};}
-export const hoopLabel=({w,h})=>w===h?`${w} mm`:`${w} × ${h} mm`;
-// Plain SVG for Inkscape and friends: millimetre units, origin at the hoop centre, one element per object (fills with even-odd
-// holes, satin as a thick butt-capped stroke along the centreline, running stitches and lettering as thin strokes, imported
-// machine stitches as per-colour polylines). It is a design interchange file, not a stitch plan.
-export function exportSvg(doc){
-  const hs=hoopSize(doc),f=v=>+Number(v).toFixed(3),esc=t=>String(t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])),d=(lines,close=false)=>lines.map(l=>'M'+l.map(([x,y])=>`${f(x)} ${f(y)}`).join('L')+(close?'Z':'')).join('');
-  const out=[];
-  for(const o of doc.objects){if(o.visible===false)continue;const title=`<title>${esc(o.name||o.kind)}</title>`;
-    if(o.kind==='stitch_layer'){const [x0,y0,x1,y1]=o.source.bounds,sx=o.w/Math.max(.1,x1-x0),sy=o.h/Math.max(.1,y1-y0),a=(Number(o.rotation)||0)*Math.PI/180,c=Math.cos(a),sn=Math.sin(a),cx=o.x+o.w/2,cy=o.y+o.h/2,paths=new Map();let prev=null;
-      for(const st of o.stitches){const lx=(st.x-(x0+x1)/2)*sx,ly=(st.y-(y0+y1)/2)*sy,p=[cx+lx*c-ly*sn,cy+lx*sn+ly*c];if(st.cmd==='stitch'){const col=o.threadOverrides?.[st.thread]||o.threads[st.thread]?.color||o.thread;if(!paths.has(col))paths.set(col,'');paths.set(col,paths.get(col)+(prev?`M${f(prev[0])} ${f(prev[1])}L${f(p[0])} ${f(p[1])}`:`M${f(p[0])} ${f(p[1])}`));prev=p;}else prev=(st.cmd==='trim'||st.cmd==='end')?null:p;}
-      out.push(`<g>${title}${[...paths].map(([col,dd])=>`<path d="${dd}" fill="none" stroke="${col}" stroke-width=".3" stroke-linecap="round"/>`).join('')}</g>`);continue;}
-    const lines=geometry(o,0);if(!lines.length)continue;
-    if(o.kind==='path'&&o.stitch==='satin')out.push(`<path d="${d([lines[0]])}" fill="none" stroke="${o.thread}" stroke-width="${f(o.satinWidth??3)}" stroke-linecap="butt" stroke-linejoin="round">${title}</path>`);
-    else if(o.stitch==='fill'&&o.kind!=='text'&&(o.kind!=='path'||o.closed))out.push(`<path d="${d(lines,true)}" fill="${o.thread}" fill-rule="evenodd"${o.border?` stroke="${o.borderThread||o.thread}" stroke-width="${f(Math.max(.5,Number(o.borderWidth)||0))}"`:''}>${title}</path>`);
-    else out.push(`<path d="${d(lines)}" fill="none" stroke="${o.thread}" stroke-width=".4" stroke-linecap="round" stroke-linejoin="round">${title}</path>`);}
-  return `<?xml version="1.0" encoding="UTF-8"?>\n<svg xmlns="http://www.w3.org/2000/svg" width="${f(hs.w)}mm" height="${f(hs.h)}mm" viewBox="${f(-hs.w/2)} ${f(-hs.h/2)} ${f(hs.w)} ${f(hs.h)}">\n<title>${esc(doc.name)}</title>\n${out.join('\n')}\n</svg>\n`;
-}
 export function jefWarnings(plan,format='jef'){if(format!=='jef'||!plan.bounds)return [];const w=plan.bounds[2]-plan.bounds[0],h=plan.bounds[3]-plan.bounds[1];return w>=200||h>=200?[`Warning: ${w.toFixed(0)} × ${h.toFixed(0)} mm is beyond the largest JEF hoop code (200 × 200 mm); the file gets hoop code 0 and no hoop-edge distances, and machines may reject it.`]:[];}
 export function initialDocument() {
   return {schema:'welcome/1',name:'Botanical badge',revision:0,hoop:110,settings:{spacing:.4,angle:32,underlay:true,compensation:.2},objects:[
@@ -344,43 +330,6 @@ export function satinFromRails(a,b,spacing,comp,rungs=[],compB=comp){
   return {zig,centre,pairs};
 }
 
-// Print template: a 1:1 placement sheet in millimetres (the sheet is the hoop, origin at its centre). Design outlines in green, the hoop dashed red, a centre cross, and a 10 mm scale bar to check the printer's scale before placing fabric.
-export function exportPrintTemplate(doc){
-  const {w,h}=hoopSize(doc),f=v=>+Number(v).toFixed(3),esc=t=>String(t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])),x0=-w/2,y0=-h/2,ink='#2f5d4a',d=lines=>lines.map(l=>'M'+l.map(([x,y])=>`${f(x)} ${f(y)}`).join('L')).join('');
-  const out=[];
-  for(const o of doc.objects){if(o.visible===false)continue;
-    if(o.kind==='stitch_layer'){out.push(`<rect x="${f(o.x)}" y="${f(o.y)}" width="${f(o.w)}" height="${f(o.h)}" fill="none" stroke="${ink}" stroke-width="0.2"/>`);continue;}
-    const lines=geometry(o,0);if(lines.length)out.push(`<path d="${d(lines)}" fill="none" stroke="${ink}" stroke-width="0.2" stroke-linejoin="round"/>`);}
-  return `<?xml version="1.0" encoding="UTF-8"?>\n<svg xmlns="http://www.w3.org/2000/svg" width="${f(w)}mm" height="${f(h)}mm" viewBox="${f(x0)} ${f(y0)} ${f(w)} ${f(h)}">`+
-    `<title>${esc(doc.name||'Design')} print template</title>`+
-    `<rect x="${f(x0)}" y="${f(y0)}" width="${f(w)}" height="${f(h)}" fill="none" stroke="#c0392b" stroke-width="0.3" stroke-dasharray="2 1"/>`+
-    `<path d="M-5 0H5M0 -5V5" fill="none" stroke="#c0392b" stroke-width="0.2"/>`+
-    out.join('')+
-    `<path d="M${f(x0+5)} ${f(y0+h-5)}H${f(x0+15)}" fill="none" stroke="#000" stroke-width="0.3"/>`+
-    `<text x="${f(x0+5)}" y="${f(y0+h-7)}" font-size="2.5" font-family="sans-serif">10 mm</text>`+
-    // A check line for measuring the printout: 100 mm, or the hoop width less 10 mm when the hoop is narrower. Print at 100%; the line should measure exactly the length named on it.
-    `<path d="M${f(x0+5)} ${f(y0+h-15)}H${f(x0+5+Math.min(100,w-10))}" fill="none" stroke="#000" stroke-width="0.3"/>`+
-    `<text x="${f(x0+5)}" y="${f(y0+h-17)}" font-size="2.5" font-family="sans-serif">${f(Math.min(100,w-10))} mm check: measure this line</text>`+
-    `<text x="${f(x0+3)}" y="${f(y0+4)}" font-size="2.5" font-family="sans-serif">${esc(doc.name||'Design')} · 1:1 placement sheet</text></svg>\n`;
-}
-// Appliqué templates: each appliqué piece's outline on its own, 1:1 in mm, stacked down one SVG sheet under its name and size, for cutting the fabric piece. A scale bar sits at the top. Throws when there is no appliqué piece.
-export function exportAppliqueTemplates(doc){
-  const pieces=doc.objects.filter(o=>o.applique&&o.visible!==false);
-  if(!pieces.length)throw Error('No appliqué pieces to print. Make an appliqué from a group of closed shapes first.');
-  const f=v=>+Number(v).toFixed(3),esc=t=>String(t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])),margin=10,gap=12,ink='#000';
-  const parts=[];let top=margin,W=0;
-  for(const o of pieces){const lines=geometry(o,0).filter(l=>l.length>1);if(!lines.length)continue;
-    const xs=lines.flat().map(p=>p[0]),ys=lines.flat().map(p=>p[1]),x0=xs.reduce((a,b)=>Math.min(a,b)),y0=ys.reduce((a,b)=>Math.min(a,b)),w=xs.reduce((a,b)=>Math.max(a,b))-x0,h=ys.reduce((a,b)=>Math.max(a,b))-y0;
-    const dx=margin-x0,dy=top+6-y0,d=lines.map(l=>'M'+l.map(([x,y])=>`${f(x+dx)} ${f(y+dy)}`).join('L')).join('');
-    parts.push(`<text x="${f(margin)}" y="${f(top+3.5)}" font-size="3" font-family="sans-serif">${esc(o.name||o.id)} · ${w.toFixed(1)} × ${h.toFixed(1)} mm</text>`+`<path d="${d}" fill="none" stroke="${ink}" stroke-width="0.2" stroke-linejoin="round"/>`);
-    W=Math.max(W,w+2*margin,70);top+=h+6+gap;}
-  if(!parts.length)throw Error('The appliqué pieces have no outline to print.');
-  const H=top-gap+margin;
-  return `<?xml version="1.0" encoding="UTF-8"?>\n<svg xmlns="http://www.w3.org/2000/svg" width="${f(W)}mm" height="${f(H)}mm" viewBox="0 0 ${f(W)} ${f(H)}">`+
-    `<title>${esc(doc.name||'Design')} appliqué templates</title>`+
-    `<path d="M${margin} 5H${margin+10}" fill="none" stroke="#000" stroke-width="0.3"/><text x="${margin+12}" y="6.5" font-size="2.5" font-family="sans-serif">10 mm</text>`+
-    parts.join('')+'</svg>\n';
-}
 function polygonFill(rings,spacing,angle) {
   // Evenly spaced parallel rows with even/odd polygon clipping; each row becomes a boustrophedon path.
   const rad=angle*Math.PI/180,c=Math.cos(rad),s=Math.sin(rad),rotRings=rings.map(r=>r.map(([x,y])=>[x*c+y*s,-x*s+y*c])),rot=rotRings.flat();
@@ -485,14 +434,11 @@ export function validateDocument(doc){
   return doc;
 }
 
-// ---- stitch planning per object: underlay, auto-fill, satin ---------------------------------------------------
-const ringArea=r=>{let a=0;for(let i=1;i<r.length;i++)a+=r[i-1][0]*r[i][1]-r[i][0]*r[i-1][1];return Math.abs(a/2);};
 // Remove small holes: every hole under 1 mm² is dropped from the selected closed paths (other holes stay). Holes are rings in the same millimetre coordinates as the outline.
 const holeArea=h=>{let a=0;for(let i=0;i<h.length;i++){const p=h[i],q=h[(i+1)%h.length];a+=p[0]*q[1]-q[0]*p[1];}return Math.abs(a/2);};
 // How many of a path's holes are under 1 mm² (the ones remove_small_holes drops).
 export function countSmallHoles(o,maxArea=1){return (o?.holes||[]).filter(h=>holeArea(h)<maxArea).length;}
 function removeSmallHoles(doc,ids,maxArea=1){if(!Array.isArray(ids)||!ids.length)throw Error('Remove small holes needs the closed paths to clean.');if(!(Number.isFinite(maxArea)&&maxArea>=.1&&maxArea<=20))throw Error('The hole limit must be 0.1 to 20 mm².');for(const id of ids){const o=objById(doc,id);if(!(o.kind==='path'&&o.closed===true))throw Error('Remove small holes works on closed paths.');if(!o.holes)continue;const kept=o.holes.filter(h=>holeArea(h)>=maxArea);if(kept.length)o.holes=kept;else delete o.holes;}}
-function shapeArea(rings){const as=rings.map(ringArea).sort((a,b)=>b-a);return Math.max(0,as[0]-as.slice(1).reduce((n,v)=>n+v,0));}
 // Remove small islands: a closed shape whose area (its outline less its holes) is under the island limit is deleted as a whole object. Boolean and knife results already come out as separate objects, so this clears the tiny pieces they leave.
 export function isSmallIsland(o,maxArea=1){return isClosedShape(o)&&shapeArea(geometry(o,0))<maxArea;}
 function removeSmallIslands(doc,ids,maxArea=1){if(!Array.isArray(ids)||!ids.length)throw Error('Remove small islands needs the closed shapes to check.');if(!(Number.isFinite(maxArea)&&maxArea>=.1&&maxArea<=20))throw Error('The island limit must be 0.1 to 20 mm².');for(const id of ids)if(!isClosedShape(objById(doc,id)))throw Error('Remove small islands works on closed shapes.');const drop=new Set(ids.filter(id=>isSmallIsland(objById(doc,id),maxArea)));for(let i=doc.objects.length-1;i>=0;i--)if(drop.has(doc.objects[i].id))doc.objects.splice(i,1);}
@@ -706,32 +652,6 @@ export function encode(plan,format,color,hoop=110,document=null){
 }
 export {geometry,objectBounds};
 
-// Plain-language sewing advice for a design, so an agent (or a person) hears about likely problems before sewing. Thresholds follow common embroidery practice.
-export function designWarnings(doc){
-  // A warning may carry a fix: the edit operations that clear it, applied as one undo step. Only the unambiguous cases have one.
-  const out=[],hoopW=doc.hoop,hoopH=doc.hoopH??doc.hoop,seen=new Map(),
-    w=(o,message,category,fix)=>out.push({id:o.id,name:o.name||o.kind,message,category,...(fix?{fix}:{})});
-  for(const o of doc.objects){
-    if(o.visible===false||o.mask||o.kind==='stitch_layer')continue;let b;try{b=objectBounds(o);}catch{continue;}const bw=b[2]-b[0],bh=b[3]-b[1],label=o.name||o.id;
-    if(b[0]<-hoopW/2||b[1]<-hoopH/2||b[2]>hoopW/2||b[3]>hoopH/2){
-      // The fix moves the object inside the hoop, when it is no bigger than the hoop.
-      const fits=bw<=hoopW&&bh<=hoopH,dx=b[0]<-hoopW/2?-hoopW/2-b[0]:b[2]>hoopW/2?hoopW/2-b[2]:0,dy=b[1]<-hoopH/2?-hoopH/2-b[1]:b[3]>hoopH/2?hoopH/2-b[3]:0;
-      w(o,`${label} reaches outside the ${hoopW}×${hoopH} mm hoop.`,'hoop',fits?[{op:'translate',ids:[o.id],dx:+dx.toFixed(3),dy:+dy.toFixed(3)}]:undefined);
-    }
-    const key=[o.kind,o.stitch,o.thread,Math.round(b[0]),Math.round(b[1]),Math.round(b[2]),Math.round(b[3])].join('|');if(seen.has(key))w(o,`${label} is a duplicate of ${seen.get(key)}: it would be sewn twice. Delete one.`,'duplicate',[{op:'delete',id:o.id}]);else seen.set(key,label);
-    const filled=o.stitch==='fill'&&o.kind!=='text'&&(o.kind!=='path'||o.closed);
-    if(filled&&!o.photo){const lines=geometry(o,0).filter(l=>l.length>=4);if(lines.length){const area=shapeArea(lines),per=lines.reduce((n,r)=>n+r.reduce((m,p,i)=>i?m+distP(p,r[i-1]):m,0),0),mean=per?2*area/per:0;
-      if(Math.min(bw,bh)<2||area<6)w(o,`${label} is ${bw.toFixed(1)}×${bh.toFixed(1)} mm, too small for a clean fill. Make it at least about 2 mm across, or use a satin column or running stitch.`,'fill',[{op:'set_object',id:o.id,stitch:'run'}]);
-      else if(Math.min(bw,bh)<4.5||area<25)w(o,`${label} is a small fill (${bw.toFixed(1)}×${bh.toFixed(1)} mm): it will sew, but the rows are very short and can look dense or rough. A satin stitch or a slightly larger shape usually sews cleaner.`,'fill');
-      else if(mean<1.4)w(o,`${label} is mostly narrower than 1.4 mm, so a fill will skip or look thin. Use a satin column along its centre line.`,'fill');}}
-    if(o.kind==='path'&&!filled){const len=pathOutline(o).reduce((n,p,i,a)=>i?n+distP(p,a[i-1]):0,0);if(len<2)w(o,`${label} is only ${len.toFixed(1)} mm long; stitches this short are skipped or bunch up.`,'short');
-      if(o.stitch==='satin'){const wd=Math.max(Number(o.satinWidth)||3,Number(o.satinWidthEnd)||0);if((Number(o.satinWidth)||3)<1)w(o,`${label} is a satin column under 1 mm wide, which is hard to sew cleanly. Use a running stitch, or widen it to at least 1.5 mm.`,'satin',[{op:'set_object',id:o.id,satinWidth:1.5}]);if(wd>7)w(o,`${label} is a satin column wider than 7 mm; long satin stitches snag. Use a fill, or split it into narrower columns.`,'satin');}}
-    if(o.kind==='text'&&Number(o.h)<5&&isRegistryFont(o.font)&&getFont(o.font)?.kind!=='line')w(o,`${label} is only ${Number(o.h).toFixed(1)} mm tall; lettering under about 5 mm rarely sews cleanly in a satin or fill font.`,'lettering');
-  }
-  const fabric=doc.settings?.fabric,profile=fabric&&fabric!=='woven'?FABRIC_PROFILES[fabric]:null,first=profile&&doc.objects.find(o=>o.visible!==false&&!o.mask&&o.kind!=='stitch_layer');
-  if(first)out.push({id:first.id,name:first.name||first.kind,message:`Stabilizer for ${profile.label}: ${profile.stabilizer}`,category:'fabric'});
-  return out;
-}
 
 // The sewing tip categories, in the order the Tips settings list shows them. Each warning from designWarnings carries one of these ids.
 export const TIP_CATEGORIES=[{id:'hoop',label:'Outside the hoop'},{id:'duplicate',label:'Duplicate objects'},{id:'fill',label:'Small or thin fills'},{id:'short',label:'Very short paths'},{id:'satin',label:'Satin columns too narrow or too wide'},{id:'lettering',label:'Small lettering'},{id:'fabric',label:'Fabric stabilizer'}];
