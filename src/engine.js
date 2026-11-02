@@ -35,7 +35,7 @@ import {sewingWorksheet} from './worksheet.js';
 export {sewingWorksheet};
 import {initialDocument,batchPlan,batchDocuments} from './document.js';
 export {initialDocument,batchPlan,batchDocuments};
-import {booleanShapes,knifeShape,offsetShape,strokeToShape,isClosedShape} from './shapeOps.js';
+import {booleanShapes,knifeShape,offsetShape,strokeToShape,isClosedShape,appliqueGroup} from './shapeOps.js';
 import {countSmallHoles,removeSmallHoles,isSmallIsland,removeSmallIslands} from './cleanup.js';
 export {isClosedShape,countSmallHoles,isSmallIsland};
 export {HOOP_PRESETS,hoopSize,hoopLabel};
@@ -136,13 +136,6 @@ export function applyOperations(doc,operations) {
   refreshAlong(doc);refreshClips(doc);
   return doc;
 }
-// Appliqué from a group: the selected closed shapes become fills, and the bottom-most one (first in the object order) stays the fabric the others are laid on. Each other shape becomes an appliqué: its placement line, tack-down and satin cover, as a single object's appliqué already sews. Shapes are kept in their object order.
-function appliqueGroup(doc,ids){if(!Array.isArray(ids)||ids.length<2)throw Error('Appliqué from a group needs two or more closed shapes.');if(new Set(ids).size!==ids.length)throw Error('Each shape can be chosen once.');
-  // Open paths, text and other objects in the selection are left as they are; only the closed shapes take part, and at least two must remain.
-  const objs=ids.map(id=>objById(doc,id)).filter(isClosedShape);if(objs.length<2)throw Error('Appliqué from a group needs two or more closed shapes.');
-  const ordered=doc.objects.filter(o=>objs.includes(o));const [base,...top]=ordered;
-  for(const o of ordered)o.stitch='fill';
-  delete base.applique;for(const o of top)o.applique=true;}
 
 
 // Registry-font lettering: layout -> optional text-on-path -> rotation, returning stitchable primitives in mm (see textlayout.js).

@@ -9,6 +9,8 @@ import {shapeArea} from './designChecks.js';
 /** @typedef {import('./geom.js').Pt} Pt */
 /** @typedef {import('./transforms.js').Obj} Obj */
 /** @typedef {import('./transforms.js').Doc} Doc */
+/** @typedef {import('./transforms.js').Obj & {[key: string]: any}} ShapeItem */
+/** @typedef {{objects: ShapeItem[]}} ShapeDoc */
 
 // A closed shape: a rectangle, an ellipse or a closed path. Clip masks and appliqué from a group use only these.
 /**
@@ -114,3 +116,16 @@ export function offsetShape(doc,id,distance){const o=closedShapeOrThrow(doc,id),
  */
 export function strokeToShape(doc,id,width){const o=doc.objects.find(v=>v.id===id);if(!o||o.kind!=='path')throw Error(`Stroke to shape needs a path: ${id}`);const w=Number(width);if(!Number.isFinite(w)||w<=0||w>40)throw Error('Stroke width must be between 0 and 40 mm.');
   const ring=geometry(o,0)[0],grown=bufferSegments([ring],w/2);if(!grown.length)throw Error('The path has no length.');replaceWithPolygons(doc,Object.assign(o,{stitch:'fill'}),[o],grown);}
+
+// Appliqué from a group: the selected closed shapes become fills, and the bottom-most one (first in the object order) stays the fabric the others are laid on. Each other shape becomes an appliqué: its placement line, tack-down and satin cover, as a single object's appliqué already sews. Shapes are kept in their object order.
+/**
+ * @param {ShapeDoc} doc
+ * @param {string[]} ids
+ * @returns {void}
+ */
+export function appliqueGroup(doc,ids){if(!Array.isArray(ids)||ids.length<2)throw Error('Appliqué from a group needs two or more closed shapes.');if(new Set(ids).size!==ids.length)throw Error('Each shape can be chosen once.');
+  // Open paths, text and other objects in the selection are left as they are; only the closed shapes take part, and at least two must remain.
+  const objs=/** @type {ShapeItem[]} */(ids.map(id=>objById(doc,id)).filter(isClosedShape));if(objs.length<2)throw Error('Appliqué from a group needs two or more closed shapes.');
+  const ordered=doc.objects.filter(o=>objs.includes(o));const [base,...top]=ordered;
+  for(const o of ordered)o.stitch='fill';
+  delete base.applique;for(const o of top)o.applique=true;}
