@@ -40,3 +40,9 @@ export function sewTime(p){const m=Math.max(1,Math.round(sewingSeconds(p)/60));r
  * @returns {string}
  */
 export function tipKey(w){return `${w.id}|${w.category}|${w.message}`;}
+
+/**
+ * @param {any} d the document to send to the stitch worker
+ * @returns {any} a copy without the reference image
+ */
+export function forWorker(d){const c=clone(d);delete c.reference;return c;}

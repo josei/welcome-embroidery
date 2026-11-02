@@ -64,7 +64,8 @@ import {getFont,registerFont,loadFont,isRegistryFont,documentFontIds,registerDoc
 import {createFontPicker,fetchFontIndex,LEGACY} from './fontui.js';
 import {ttfToFont} from './ttf.js';
 import {distortionGrid,blockSeconds,blockTimeLabel,bundledFontUsage,countSmallHoles,isSmallIsland,isClosedShape,exportAppliqueTemplates,cornerRadii,svgPathFill,parseThreadStock,nearestStockThread,HOOP_PRESETS,customFontUsage,exportPrintTemplate,batchDocuments,batchPlan,designWarnings,TIP_CATEGORIES,visibleTips,measureBetween,widthAt,nodeFraction,initialDocument,geometry,applyOperations,validateDocument,measureText,parseSvgPath,makeStitchLayer,objectBounds,hoopSize,jefWarnings,exportSvg,textPrimitives,threadPlan,threadSpans,sewingSeconds,sewingSecondsUpTo,sewingWorksheet} from './engine.js';
-import {clone,esc,download,safeProjectFilename,sewTime,tipKey} from './appHelpers.js';
+import {clone,esc,download,safeProjectFilename,sewTime,tipKey,forWorker} from './appHelpers.js';
+import {photoUrl} from './photoUrl.js';
 import {withSavedHoop,STOCK_KEY,threadStock,TIPS_KEY,hiddenTips,ignoredTipsKey,ignoredTips} from './storedPrefs.js';
 const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)],svgNS='http://www.w3.org/2000/svg';
 setDocument({doc:withSavedHoop(initialDocument()),history:[],future:[],dirty:true});
@@ -766,8 +767,6 @@ const setAccordion=(which,v)=>{if(!selState().selected)return;const o=documentNo
 
 
 // Photo stitch: a picture becomes a rectangle with grey samples; the zigzag rows are planned at compile time.
-const photoUrls=new Map();
-function photoUrl(ph){const key=ph.pw+'x'+ph.ph+':'+ph.data.slice(0,64)+ph.data.length;let u=photoUrls.get(key);if(u)return u;const c=document.createElement('canvas');c.width=ph.pw;c.height=ph.ph;const ctx=c.getContext('2d'),img=ctx.createImageData(ph.pw,ph.ph),bin=atob(ph.data);for(let i=0;i<ph.pw*ph.ph;i++){const g=bin.charCodeAt(i)||0;img.data[i*4]=img.data[i*4+1]=img.data[i*4+2]=g;img.data[i*4+3]=255;}ctx.putImageData(img,0,0);u=c.toDataURL('image/png');photoUrls.set(key,u);return u;}
 $('#photo').onclick=()=>$('#photoFile').click();
 $('#photoFile').onchange=async e=>{const file=e.target.files[0];e.target.value='';if(!file)return;try{
   const bmp=await createImageBitmap(file),hs=hoopSize(documentNow().doc),wMm=Math.max(10,Math.min(80,hs.w-10)),hMm0=wMm*bmp.height/bmp.width,hMm=Math.min(hMm0,hs.h-10),w=hMm<hMm0?hMm*bmp.width/bmp.height:wMm,h=hMm;
@@ -826,7 +825,6 @@ $('#traceGo').onclick=async()=>{const file=$('#traceFile').files[0],info=$('#tra
   }catch(err){info.textContent=err.message||t('That picture could not be read.');}};
 
 // Reference image: a picture under the shapes to draw over. Stored in the project, never sewn, never sent to the stitch worker or an agent.
-function forWorker(d){const c=clone(d);delete c.reference;return c;}
 function renderReference(){const layer=$('#refLayer');if(!layer)return;layer.replaceChildren();const r=documentNow().doc.reference;
   setStitchRow('refEmpty',Boolean(r));
 setStitchRow('refControls',!r);
