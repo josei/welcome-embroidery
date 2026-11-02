@@ -477,3 +477,14 @@ export function planPhoto(gray,pw,ph,box,{spacing=.7,contrast=1.4,invert=false,p
     /** @type {Pt[]|null} */ let cur=null;let k=0;for(let i=0;i<samples.length;i++){if(skip[i]){cur=null;continue;}const {u,d}=samples[i],amp=d*spacing*.48,off=amp<.03?0:(k++%2?amp:-amp);if(!cur){cur=[];runs.push({pts:cur});}cur.push([box.x+u*box.w,y+off]);}}
   return runs.filter(r=>r.pts.length>=2);
 }
+
+// Points along a straight line from a to b, at most maxLen apart, not including a.
+/**
+ * @param {Pt} a
+ * @param {Pt} b
+ * @param {number} [maxLen]
+ * @returns {Pt[]}
+ */
+export function sampleLine(a,b,maxLen=2.5){const dist=Math.hypot(b[0]-a[0],b[1]-a[1]),n=Math.max(1,Math.ceil(dist/maxLen));
+  /** @type {Pt[]} */
+  const o=[];for(let i=1;i<=n;i++)o.push(/** @type {Pt} */([a[0]+(b[0]-a[0])*i/n,a[1]+(b[1]-a[1])*i/n]));return o;}

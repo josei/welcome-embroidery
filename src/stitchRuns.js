@@ -197,3 +197,16 @@ pinCache.set(o,b);
 }
 /** @type {(runs: Run[]) => Run[]} */
 export const reverseRuns=runs=>[...runs].reverse().map(r=>({...r,pts:[...r.pts].reverse()}));
+
+// Bar tack across the end of a buttonhole: a short zigzag between the two rails, stepping outwards from the column.
+/**
+ * @param {Pt} a
+ * @param {Pt} b
+ * @param {Pt} na
+ * @param {Pt} nb
+ * @param {boolean} [jump]
+ * @returns {Run[]}
+ */
+export function bartack(a,b,na,nb,jump){const dx=a[0]-na[0],dy=a[1]-na[1],l=Math.hypot(dx,dy)||1,ux=dx/l,uy=dy/l;
+  /** @type {Pt[]} */
+  const pts=[];for(let k=0;k<6;k++){const p=k%2?b:a,s=Math.floor(k/2)*.35;pts.push(/** @type {Pt} */([p[0]+ux*s,p[1]+uy*s]));}return [{pts,jump}];}

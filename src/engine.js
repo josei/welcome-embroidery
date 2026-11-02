@@ -3,7 +3,7 @@ import {polygonClipping,closedRing} from './geom.js';
 import {getFont,isRegistryFont,registerDocumentFonts} from './fonts.js';
 import {bundledFontUsage,customFontUsage,measureText} from './fontHelpers.js';
 export {bundledFontUsage,customFontUsage,measureText};
-import {planPhoto,planRippleFill,planCrossStitch,planContourFill,planSpiralFill,planGuidedFill,planMeanderFill,planFill,planContour,planFillUnderlay,sampleRun,makeInside,chainRuns} from './stitchplan.js';
+import {planPhoto,planRippleFill,planCrossStitch,planContourFill,planSpiralFill,planGuidedFill,planMeanderFill,planFill,planContour,planFillUnderlay,sampleRun,makeInside,chainRuns,sampleLine} from './stitchplan.js';
 import {FABRIC_PROFILES,FABRIC_PRESETS,DISTORTION_SCALE,distortionGrid} from './fabrics.js';
 import {GLYPHS,parseSvgPath} from './lettering.js';
 import {geometry,textPrimitives,cornerRadii} from './outlines.js';
@@ -17,7 +17,7 @@ export {parseThreadStock,nearestStockThread};
 export {designWarnings,shapeArea,TIP_CATEGORIES,visibleTips};
 import {svgPathFill} from './svgImport.js';
 export {svgPathFill};
-import {closeRing,clipRuns,satinFromRails,underlayTypes,orientRuns,pinPoint,reverseRuns} from './stitchRuns.js';
+import {closeRing,clipRuns,satinFromRails,underlayTypes,orientRuns,pinPoint,reverseRuns,bartack} from './stitchRuns.js';
 import {makeStitchLayer,importStitchLayer,decodeBase64} from './stitchImport.js';
 export {makeStitchLayer,importStitchLayer};
 export {satinFromRails};
@@ -63,7 +63,6 @@ function polygonFill(rings,spacing,angle) {
     const row=[];for(let i=0;i+1<xs.length;i+=2)row.push([[xs[i],y],[xs[i+1],y]]);if(reverse){row.reverse();for(const seg of row)seg.reverse();}for(const [a,b] of row)lines.push([un(a),un(b)]);if(row.length)reverse=!reverse;}
   return lines;
 }
-function sampleLine(a,b,maxLen=2.5){const dist=Math.hypot(b[0]-a[0],b[1]-a[1]),n=Math.max(1,Math.ceil(dist/maxLen)),o=[];for(let i=1;i<=n;i++)o.push([a[0]+(b[0]-a[0])*i/n,a[1]+(b[1]-a[1])*i/n]);return o;}
 
 // Remove small holes: every hole under 1 mm² is dropped from the selected closed paths (other holes stay). Holes are rings in the same millimetre coordinates as the outline.
 function fillRuns(rings,o,doc,comp,from=null){
@@ -101,8 +100,6 @@ function fillRuns(rings,o,doc,comp,from=null){
   return {under:[],top:chainRuns([...oriented,...topPlan],28,inside)};
 }
 // Satin between two rails: [centre walk] [contour walk] [zigzag] underlay, then the column itself.
-// Bar tack across the end of a buttonhole: a short zigzag between the two rails, stepping outwards from the column.
-function bartack(a,b,na,nb,jump){const dx=a[0]-na[0],dy=a[1]-na[1],l=Math.hypot(dx,dy)||1,ux=dx/l,uy=dy/l,pts=[];for(let k=0;k<6;k++){const p=k%2?b:a,s=Math.floor(k/2)*.35;pts.push([p[0]+ux*s,p[1]+uy*s]);}return [{pts,jump}];}
 function satinRuns(a,b,rungs,o,doc,spacing,comp,from=null){
   const sPt=pinPoint(o,o.startAt),ePt=pinPoint(o,o.endAt);if(sPt)from=sPt;
   const {zig,pairs}=satinFromRails(a,b,spacing,o.pullRight??comp,rungs,o.pullLeft??comp);if(zig.length<2)return {under:[],top:[]};
