@@ -7,11 +7,12 @@
  * @typedef {{thread: string, start: number, end: number, stitches: number}} Span
  */
 
+// Thread plan: the colours in sewing order. A block starts at the first stitch after a colour change or stop, so the same colour sewn twice gives two blocks, as the editor shows it.
+// Thread blocks in sewing order. `mm` is the thread sewn in the block: the distance between consecutive stitches, so a jump or trim between two stitches adds nothing.
 /**
  * @param {{stitches: PlanStitch[]}} plan
  * @returns {Block[]}
  */
-// Thread blocks in sewing order. `mm` is the thread sewn in the block: the distance between consecutive stitches, so a jump or trim between two stitches adds nothing.
 export function threadPlan(plan){
   /** @type {Block[]} */ const blocks=[];
   /** @type {Block|null} */ let cur=null;

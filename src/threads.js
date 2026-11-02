@@ -6,6 +6,7 @@
 /** @typedef {{hex: string, index: number, distance: number}} NearestThread */
 
 // Two thread colours are the same when they match without case.
+// Two thread strings name the same colour when they differ only in case (#D9897E and #d9897e).
 /** @type {(a: unknown, b: unknown) => boolean} */
 export const sameThread=(a,b)=>String(a).toLowerCase()===String(b).toLowerCase();
 
