@@ -65,8 +65,8 @@ import {createFontPicker,fetchFontIndex,LEGACY} from './fontui.js';
 import {ttfToFont} from './ttf.js';
 import {distortionGrid,blockSeconds,blockTimeLabel,bundledFontUsage,countSmallHoles,isSmallIsland,isClosedShape,exportAppliqueTemplates,cornerRadii,svgPathFill,parseThreadStock,nearestStockThread,HOOP_PRESETS,customFontUsage,exportPrintTemplate,batchDocuments,batchPlan,designWarnings,TIP_CATEGORIES,visibleTips,measureBetween,widthAt,nodeFraction,initialDocument,geometry,applyOperations,validateDocument,measureText,parseSvgPath,makeStitchLayer,objectBounds,hoopSize,jefWarnings,exportSvg,textPrimitives,threadPlan,threadSpans,sewingSeconds,sewingSecondsUpTo,sewingWorksheet} from './engine.js';
 import {clone,esc,download,safeProjectFilename,sewTime,tipKey} from './appHelpers.js';
+import {withSavedHoop,STOCK_KEY,threadStock,TIPS_KEY,hiddenTips,ignoredTipsKey,ignoredTips} from './storedPrefs.js';
 const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)],svgNS='http://www.w3.org/2000/svg';
-const withSavedHoop=d=>{try{const h=JSON.parse(localStorage.getItem('welcome.hoop')||'null');if(h&&Number.isFinite(h.w)&&Number.isFinite(h.h)&&h.w>=10&&h.w<=400&&h.h>=10&&h.h<=400){d.hoop=h.w;if(h.h===h.w)delete d.hoopH;else d.hoopH=h.h;}}catch{}return d;};
 setDocument({doc:withSavedHoop(initialDocument()),history:[],future:[],dirty:true});
 let plan=null,worker=new Worker(new URL('./worker.js',import.meta.url),{type:'module'}),workerFailure=null,seq=0,generation=0,pending=new Map(),editMode=false,canvasView=null,snapOn=false,gridSize=1,playIndex=null,playbackTimer=null;
 worker.onmessage=e=>{if(e.data.generation!==generation)return;const p=pending.get(e.data.id);if(!p)return;pending.delete(e.data.id);e.data.ok?p.resolve(e.data):p.reject(Error(e.data.error));};
@@ -927,8 +927,6 @@ threadsReady=true;syncThreads();
 
 // Thread plan: the colours in sewing order with their stitch counts.
 // The user's own thread stock, kept per browser as the text of the My threads box.
-const STOCK_KEY='welcome.threadStock';
-function threadStock(){try{return parseThreadStock(localStorage.getItem(STOCK_KEY)||'');}catch{return parseThreadStock('');}}
 setThreadStock({text:(()=>{try{return localStorage.getItem(STOCK_KEY)||'';}catch{return '';}})()});
 threadStockActions.commit=text=>{setThreadStock({text});try{localStorage.setItem(STOCK_KEY,text);}catch{}renderPlan();};
 function renderPlan(){const list=$('#planList');if(!list)return;list.replaceChildren();
@@ -969,17 +967,8 @@ document.addEventListener('keydown',e=>{if(canvasView.inField(e))return;if((e.ct
 // Sewing tips: plain-language advice (too-small fills, very narrow satin, tiny lettering, duplicates ...) from the same checks agents get over MCP.
 var tipsCache={rev:-1,key:'',list:[]};
 // Sewing tips the user has switched off in the Tips settings list, kept per browser.
-const TIPS_KEY='welcome.hiddenTips';
-function hiddenTips(){try{const v=JSON.parse(localStorage.getItem(TIPS_KEY)||'[]');return Array.isArray(v)?v.filter(x=>typeof x==='string'):[];}catch{return [];}}
 // A tip is ignored for its object while its message is the same: the message carries the dimensions, so a changed object shows it again.
 // Function declarations and var: render can run before this part of the module is reached, so these must already exist.
-function ignoredTipsKey(){return 'welcome.ignoredTips';}
-function ignoredTips(){
- try{
-  const v=JSON.parse(localStorage.getItem(ignoredTipsKey())||'[]');
-  return new Set(Array.isArray(v)?v.filter(x=>typeof x==='string'):[]);
- }catch{return new Set();}
-}
 // Keyed on the document object: undo can give a document the same revision as an earlier state, so the revision is not a safe key.
 function sewingTips(){const doc=documentNow().doc;if(!tipsCache||tipsCache.doc!==doc){let list=[];try{list=designWarnings(doc);}catch{}tipsCache={doc,list};}const ignored=ignoredTips();return visibleTips(tipsCache.list,hiddenTips()).filter(w=>!ignored.has(tipKey(w)));}
 function buildTipsList(){const box=$('#tipsList');if(!box)return;const hidden=new Set(hiddenTips());box.replaceChildren();for(const c of TIP_CATEGORIES){const label=document.createElement('label'),cb=document.createElement('input');cb.type='checkbox';cb.checked=!hidden.has(c.id);cb.onchange=()=>{const off=new Set(hiddenTips());if(cb.checked)off.delete(c.id);else off.add(c.id);try{localStorage.setItem(TIPS_KEY,JSON.stringify([...off]));}catch{}render();};label.append(cb,' ',t(c.label));box.append(label);}}
