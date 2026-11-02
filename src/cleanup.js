@@ -20,6 +20,7 @@ const holeArea=h=>{let a=0;for(let i=0;i<h.length;i++){const p=h[i],q=h[(i+1)%h.
  * @returns {number}
  */
 export function countSmallHoles(o,maxArea=1){return (/** @type {Pt[][]} */(o?.holes||[])).filter(h=>holeArea(h)<maxArea).length;}
+// Remove small holes: every hole under 1 mm² is dropped from the selected closed paths (other holes stay). Holes are rings in the same millimetre coordinates as the outline.
 /**
  * @param {Doc} doc
  * @param {string[]} ids
