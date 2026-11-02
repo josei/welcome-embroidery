@@ -64,6 +64,7 @@ import {getFont,registerFont,loadFont,isRegistryFont,documentFontIds,registerDoc
 import {createFontPicker,fetchFontIndex,LEGACY} from './fontui.js';
 import {ttfToFont} from './ttf.js';
 import {distortionGrid,blockSeconds,blockTimeLabel,bundledFontUsage,countSmallHoles,isSmallIsland,isClosedShape,exportAppliqueTemplates,cornerRadii,svgPathFill,parseThreadStock,nearestStockThread,HOOP_PRESETS,customFontUsage,exportPrintTemplate,batchDocuments,batchPlan,designWarnings,TIP_CATEGORIES,visibleTips,measureBetween,widthAt,nodeFraction,initialDocument,geometry,applyOperations,validateDocument,measureText,parseSvgPath,makeStitchLayer,objectBounds,hoopSize,jefWarnings,exportSvg,textPrimitives,threadPlan,threadSpans,sewingSeconds,sewingSecondsUpTo,sewingWorksheet} from './engine.js';
+import {clone,esc,download,safeProjectFilename,sewTime,tipKey} from './appHelpers.js';
 const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)],svgNS='http://www.w3.org/2000/svg';
 const withSavedHoop=d=>{try{const h=JSON.parse(localStorage.getItem('welcome.hoop')||'null');if(h&&Number.isFinite(h.w)&&Number.isFinite(h.h)&&h.w>=10&&h.w<=400&&h.h>=10&&h.h<=400){d.hoop=h.w;if(h.h===h.w)delete d.hoopH;else d.hoopH=h.h;}}catch{}return d;};
 setDocument({doc:withSavedHoop(initialDocument()),history:[],future:[],dirty:true});
@@ -76,12 +77,10 @@ function request(data,transfer=[]){return new Promise((resolve,reject)=>{if(work
 let lastPlan=null,compileError='',compileTimer=null,compiling=false;
 function scheduleCompile(delay=450){clearTimeout(compileTimer);if(!documentNow().doc.objects.length||workerFailure){compileError='';return;}compileTimer=setTimeout(()=>compileNow(),delay);}
 function clearComputed(){if(plan)lastPlan=plan;generation++;for(const item of pending.values())item.reject(new DOMException('The document changed.','AbortError'));pending.clear();if(playbackTimer)clearInterval(playbackTimer);playbackTimer=null;playIndex=null;plan=null;setSewingCounts({});syncPlaybackControls();scheduleCompile();}
-function clone(v){return structuredClone(v);}
 function transact(fn){const before=clone(documentNow().doc),beforeSelected=selState().selected;try{fn();validateDocument(documentNow().doc);}catch(error){setDocument({doc:before});setSelection({selected: beforeSelected});render();toast(error.message);return false;}const current=documentNow(),nextHistory=[...current.history,before];if(nextHistory.length>80)nextHistory.shift();setDocument({doc:{...current.doc,revision:before.revision+1},history:nextHistory,future:[],dirty:true});clearComputed();render();if(viewMode.get()==='preview'&&documentNow().doc.objects.length)compileNow();return true;}
 function edit(operations,after=()=>{}){return transact(()=>{applyOperations(documentNow().doc,operations);after();});}
 function toast(s){const t=$('#toast');t.textContent=s;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2600);}
 function selectedObject(){return documentNow().doc.objects.find(o=>o.id===selState().selected);}
-function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 // The simulation bar (PlaybackBar.tsx) reads the playback store; this sets it from the plan and the playback position. Status text stays in statusState.
 let spanCache={plan:null,spans:[],trims:0,metres:0,changes:0};
 function planSpans(){if(spanCache.plan!==plan){const spans=plan?threadSpans(plan).map(s=>({...s,seconds:sewingSecondsUpTo(plan,s.start)})):[];spanCache={plan,spans,trims:plan?plan.stitches.filter(s=>s.cmd==='trim').length:0,metres:plan?threadPlan(plan).reduce((n,b)=>n+b.mm,0)/1000:0,changes:Math.max(0,spans.length-1)};}return spanCache;}
@@ -551,7 +550,6 @@ const fontPicker=createFontPicker({button:$('#fontButton'),buttonPreview:$('#fon
 fetchFontIndex().then(index=>{fontIndex=index;populateFontSelect();syncTextInspector(selectedObject());fontPicker.refresh();});
 $('#undo').onclick=()=>{const d=documentNow();if(!d.history.length)return;const prev=d.history.at(-1);setDocument({doc:{...prev,revision:prev.revision+1},history:d.history.slice(0,-1),future:[...d.future,clone(d.doc)],dirty:true});clearComputed();render();};
 $('#redo').onclick=()=>{const d=documentNow();if(!d.future.length)return;const next=d.future.at(-1);setDocument({doc:{...next,revision:next.revision+1},history:[...d.history,clone(d.doc)],future:d.future.slice(0,-1),dirty:true});clearComputed();render();};
-function download(bytes,name,type){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([bytes],{type}));a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);}
 
 // Notes from the last SVG import (for example, a filled path that kept its outline), shown as a toast after the file opens.
 let svgImportNotes=[];
@@ -589,7 +587,6 @@ function importSvg(source){
  validateDocument(d);
  return d;
 }
-function safeProjectFilename(name){return `${String(name||'Untitled').replace(/\.welcome$/i,'').replace(/[^a-z0-9 _-]/gi,'_').trim()||'Untitled'}.welcome`;}
 function projectSave(){setTimeout(()=>{try{const a=JSON.parse(localStorage.getItem('welcome.autosave')||'null');if(a){a.clean=true;localStorage.setItem('welcome.autosave',JSON.stringify(a));}}catch{}},0);download(JSON.stringify(documentNow().doc,null,2),safeProjectFilename(documentNow().doc.name),'application/json');setDocument({dirty: false});render();}
 function acceptProject(next){validateDocument(next);const opened=clone(next);clearComputed();setDocument({doc: opened});setDocument({history: []});setDocument({future: []});setSelection({selected: documentNow().doc.objects[0]?.id||null});setSelection({multi: new Set(selState().selected?[selState().selected]:[])});editMode=false;setSelection({selNode: null});setDocument({dirty: false});render();canvasView?.fitAll();toast('Project opened locally.');}
 async function openArtifact(id){if(!/^[0-9a-f-]{36}$/.test(id))throw Error('Invalid MCP project link.');let response=await fetch(`/artifacts/${id}.welcome`,{credentials:'same-origin',redirect:'error'});if(response.status===404)response=await fetch(`/artifacts/${id}.welcome`,{credentials:'same-origin',redirect:'error'});if(!response.ok)throw Error(`MCP project could not be opened (${response.status}).`);const next=await response.json();acceptProject(next);window.history.replaceState(null,'',location.pathname);}
@@ -909,7 +906,6 @@ async function referenceForAgent({view='annotated',includeShapes=true}={}){
  }
 
 // Sewing time: 600 stitches a minute, 20 s per colour change or stop, 8 s per trim.
-function sewTime(p){const m=Math.max(1,Math.round(sewingSeconds(p)/60));return m>=60?`${Math.floor(m/60)} h ${m%60} min`:`${m} min`;}
 
 // Thread colours: a swatch button per colour select opens a palette (plus recent and custom colours); the select stays as the value holder.
 const threadSelects=['#thread','#blendThread','#blendPalette0','#blendPalette1','#blendPalette2','#blendPalette3'].map(id=>$(id)).filter(Boolean);
@@ -978,7 +974,6 @@ function hiddenTips(){try{const v=JSON.parse(localStorage.getItem(TIPS_KEY)||'[]
 // A tip is ignored for its object while its message is the same: the message carries the dimensions, so a changed object shows it again.
 // Function declarations and var: render can run before this part of the module is reached, so these must already exist.
 function ignoredTipsKey(){return 'welcome.ignoredTips';}
-function tipKey(w){return `${w.id}|${w.category}|${w.message}`;}
 function ignoredTips(){
  try{
   const v=JSON.parse(localStorage.getItem(ignoredTipsKey())||'[]');
