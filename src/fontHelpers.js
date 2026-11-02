@@ -12,6 +12,7 @@ import {layoutText} from './textlayout.js';
 /** @type {{glyphs: Record<string, {advance: number}>, unitsPerEm: number}} */
 const neon=/** @type {any} */(neonFont);
 
+// Bundled fonts (Ink/Stitch and open TrueType, registry ids) that lettering in the document uses, with the lettering that uses each. Read-only: bundled fonts ship with the app and are not removed here.
 /**
  * @param {Doc} doc
  * @returns {Array<{id: string, uses: string[]}>}
@@ -19,6 +20,7 @@ const neon=/** @type {any} */(neonFont);
 export function bundledFontUsage(doc){
   /** @type {Map<string, string[]>} */
   const m=new Map();for(const o of doc.objects){if(o.kind!=='text'||!isRegistryFont(o.font)||o.font.startsWith('custom/'))continue;let uses=m.get(o.font);if(!uses){uses=[];m.set(o.font,uses);}uses.push(o.name||'Lettering');}return [...m].map(([id,uses])=>({id,uses}));}
+// Organize fonts: each custom font in the document, with the lettering objects that use it.
 /**
  * @param {Doc} doc
  * @returns {Array<{id: string, name: string, uses: string[]}>}

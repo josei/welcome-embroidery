@@ -48,6 +48,7 @@ function mapAlongPath(lines,obj){
  */
 function bufferRingsForBold(rings,d){try{const closed=rings.map(closedRing),poly=rings.map(r=>r),grown=bufferSegments(closed,d),result=polygonClipping.union(poly,...grown);const out=[];for(const polygon of result)for(const ring of polygon)out.push(ring.slice(0,-1));return out.length?out:null;}catch{return null;}}
 
+// Registry-font lettering: layout -> optional text-on-path -> rotation, returning stitchable primitives in mm (see textlayout.js).
 /**
  * @param {Lettering} obj
  * @returns {Array<import('./textlayout.js').Prim>|null}
