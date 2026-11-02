@@ -1,3 +1,4 @@
+// @ts-check
 // Deterministic stitch compiler and JEF/VP3 serializers. Document units are mm.
 import {getFont,isRegistryFont,registerDocumentFonts} from './fonts.js';
 import {bundledFontUsage,customFontUsage,measureText} from './fontHelpers.js';
@@ -53,13 +54,19 @@ export {threadPlan,blockSeconds,blockTimeLabel,sewingSeconds,threadSpans,sewingS
 
 
 
+/**
+ * @param {Array<Array<[number, number]>>} rings
+ * @param {number} spacing
+ * @param {number} angle
+ * @returns {Array<number[][]>}
+ */
 function polygonFill(rings,spacing,angle) {
   // Evenly spaced parallel rows with even/odd polygon clipping; each row becomes a boustrophedon path.
   const rad=angle*Math.PI/180,c=Math.cos(rad),s=Math.sin(rad),rotRings=rings.map(r=>r.map(([x,y])=>[x*c+y*s,-x*s+y*c])),rot=rotRings.flat();
   const minY=Math.min(...rot.map(p=>p[1])),maxY=Math.max(...rot.map(p=>p[1])),lines=[];
   // One direction per row: every other row runs right-to-left with its pieces visited in reverse, so the needle always leaves a
   // piece at the edge nearest the next one (a hole edge in the middle of a row, the outer edge between rows).
-  const un=p=>[p[0]*c-p[1]*s,p[0]*s+p[1]*c];let reverse=false;
+  const un=(/** @type {any} */ p)=>[p[0]*c-p[1]*s,p[0]*s+p[1]*c];let reverse=false;
   for(let y=minY+spacing/2;y<maxY;y+=spacing){const xs=[];for(const ring of rotRings)for(let i=0;i<ring.length-1;i++){const [x1,y1]=ring[i],[x2,y2]=ring[i+1];if((y1<=y&&y2>y)||(y2<=y&&y1>y))xs.push(x1+(y-y1)*(x2-x1)/(y2-y1));}xs.sort((a,b)=>a-b);
     const row=[];for(let i=0;i+1<xs.length;i+=2)row.push([[xs[i],y],[xs[i+1],y]]);if(reverse){row.reverse();for(const seg of row)seg.reverse();}for(const [a,b] of row)lines.push([un(a),un(b)]);if(row.length)reverse=!reverse;}
   return lines;

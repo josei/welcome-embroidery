@@ -1,3 +1,4 @@
+// @ts-check
 import {compile,encode} from './engine.js';
 import {loadFont,getFont,isRegistryFont,documentFontIds,registerDocumentFonts} from './fonts.js';
 // Text uses fonts the worker may not have yet: fetch the bundled ones this document needs, and register the ones stored in it.
