@@ -6,119 +6,17 @@ import {layoutText,primitiveLines,mapPrimitives,resamplePrimitives,MAX_TEXT_CHAR
 import {nearestJefColor} from './jefPalette.js';
 import {decodeEmbroidery,SEW_CHART,PEC_CHART} from './readers.js';
 import neonFont from '../fonts/neon_blinking/glyphs.js';
-const round = n => Math.round(n * 10) / 10;
-const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
-const GLYPHS = {
- A:[[0,1,.5,0],[.5,0,1,1],[.22,.62,.78,.62]],B:[[0,1,0,0],[0,0,.68,0],[.68,0,1,.2],[1,.2,.68,.48],[0,.48,.68,.48],[.68,.48,1,.72],[1,.72,.68,1],[0,1,.68,1]],C:[[1,.12,.72,0],[.72,0,.2,0],[.2,0,0,.22],[0,.22,0,.78],[0,.78,.2,1],[.2,1,.75,1],[.75,1,1,.88]],D:[[0,1,0,0],[0,0,.55,0],[.55,0,1,.22],[1,.22,1,.78],[1,.78,.55,1],[.55,1,0,1]],E:[[1,0,0,0],[0,0,0,1],[0,.5,.8,.5],[0,1,1,1]],F:[[0,1,0,0],[0,0,1,0],[0,.5,.78,.5]],G:[[1,.16,.76,0],[.76,0,.2,0],[.2,0,0,.2],[0,.2,0,.8],[0,.8,.2,1],[.2,1,1,1],[1,1,1,.56],[1,.56,.58,.56]],H:[[0,0,0,1],[1,0,1,1],[0,.5,1,.5]],I:[[.18,0,.82,0],[.5,0,.5,1],[.18,1,.82,1]],J:[[.2,0,1,0],[.65,0,.65,.78],[.65,.78,.48,1],[.48,1,.16,1],[.16,1,0,.82]],K:[[0,0,0,1],[1,0,0,.56],[.42,.42,1,1]],L:[[0,0,0,1],[0,1,1,1]],M:[[0,1,0,0],[0,0,.5,.52],[.5,.52,1,0],[1,0,1,1]],N:[[0,1,0,0],[0,0,1,1],[1,1,1,0]],O:[[.22,0,.78,0],[.78,0,1,.2],[1,.2,1,.8],[1,.8,.78,1],[.78,1,.22,1],[.22,1,0,.8],[0,.8,0,.2],[0,.2,.22,0]],P:[[0,1,0,0],[0,0,.72,0],[.72,0,1,.18],[1,.18,.72,.5],[.72,.5,0,.5]],Q:[[.22,0,.78,0],[.78,0,1,.2],[1,.2,1,.8],[1,.8,.78,1],[.78,1,.22,1],[.22,1,0,.8],[0,.8,0,.2],[0,.2,.22,0],[.58,.68,1,1]],R:[[0,1,0,0],[0,0,.72,0],[.72,0,1,.18],[1,.18,.72,.5],[.72,.5,0,.5],[.55,.5,1,1]],S:[[1,.12,.78,0],[.78,0,.2,0],[.2,0,0,.2],[0,.2,.2,.42],[.2,.42,.8,.58],[.8,.58,1,.78],[1,.78,.78,1],[.78,1,.15,1],[.15,1,0,.87]],T:[[0,0,1,0],[.5,0,.5,1]],U:[[0,0,0,.78],[0,.78,.2,1],[.2,1,.8,1],[.8,1,1,.78],[1,.78,1,0]],V:[[0,0,.5,1],[.5,1,1,0]],W:[[0,0,.18,1],[.18,1,.5,.58],[.5,.58,.82,1],[.82,1,1,0]],X:[[0,0,1,1],[1,0,0,1]],Y:[[0,0,.5,.5],[1,0,.5,.5],[.5,.5,.5,1]],Z:[[0,0,1,0],[1,0,0,1],[0,1,1,1]],'0':[[.2,0,.8,0],[.8,0,1,.2],[1,.2,1,.8],[1,.8,.8,1],[.8,1,.2,1],[.2,1,0,.8],[0,.8,0,.2],[0,.2,.2,0]],'1':[[.2,.18,.5,0],[.5,0,.5,1],[.2,1,.8,1]],'2':[[0,.2,.2,0],[.2,0,.8,0],[.8,0,1,.2],[1,.2,0,1],[0,1,1,1]],'3':[[0,.15,.2,0],[.2,0,.8,0],[.8,0,1,.2],[1,.2,.55,.48],[.55,.48,1,.72],[1,.72,.8,1],[.8,1,.15,1],[.15,1,0,.86]],'4':[[0,0,0,.55],[0,.55,1,.55],[.72,0,.72,1]],'5':[[1,0,0,0],[0,0,0,.48],[0,.48,.8,.48],[.8,.48,1,.7],[1,.7,.8,1],[.8,1,.1,1]],'6':[[.9,0,.2,0],[.2,0,0,.28],[0,.28,0,.8],[0,.8,.2,1],[.2,1,.8,1],[.8,1,1,.8],[1,.8,.8,.56],[.8,.56,0,.56]],'7':[[0,0,1,0],[1,0,.25,1]],'8':[[.2,0,.8,0],[.8,0,1,.22],[1,.22,.5,.5],[.5,.5,0,.22],[0,.22,.2,0],[.5,.5,1,.78],[1,.78,.8,1],[.8,1,.2,1],[.2,1,0,.78],[0,.78,.5,.5]],'9':[[.9,.44,.2,.44],[.2,.44,0,.22],[0,.22,.2,0],[.2,0,.8,0],[.8,0,1,.2],[1,.2,1,.72],[1,.72,.8,1],[.8,1,.2,1]]
-};
+import {FABRIC_PROFILES, FABRIC_PRESETS} from './fabricProfiles.js';
+import {round,clamp} from './mathHelpers.js';
+import {GLYPHS} from './monoGlyphs.js';
+import {hoopSize,hoopLabel} from './hoops.js';
 
-// Fabric presets: the values in fabricProfiles.js, written into the document settings by set_settings { fabric }. An explicit key in the same operation overrides a preset.
-// Fabric profiles: the document settings a fabric sets in one set_settings step, and the stabilizer to suggest for it.
-// The numbers are industry starting points for embroidery on these fabrics, not measurements from a machine. Test a
-// sample before a production run, and change a value here if a sample says so: the engine, the MCP schema and the
-// Fabric select all read this table.
-// Each value's reason is written beside it. The same profile names its stabilizer, shown as a sewing tip.
-export const FABRIC_PROFILES = {
- woven: {
-  label: 'Woven (default)',
-  stretch: 1, // the reference: a woven takes the stitches with no give
-  stabilizer: 'tear-away backing for a plain woven fabric.',
-  // Document defaults, so choosing woven returns every value to where a new document starts.
-  values: {spacing: .4, stitchLength: 3, stagger: 4, underlay: true, underlayType: 'auto', compensation: .2},
- },
- knit: {
-  label: 'Stretchy knit',
-  stretch: 1.6, // starting point: a knit gives under the stitches, so it pulls and puckers the most
-  stabilizer: 'cut-away mesh. A knit stretches, so the backing has to stay under the stitches; tear-away lets the stitches pucker.',
-  values: {
-   spacing: .45, // a little more open, so the stretch does not crowd the rows together
-   stitchLength: 3, // unchanged: the length is not the problem on a knit
-   stagger: 4,
-   underlay: true, // the underlay holds the knit down under the top stitches
-   underlayType: 'auto',
-   compensation: .5, // a knit pulls in more, so the satin and fill are sewn wider
-  },
- },
- towel: {
-  label: 'Terry towel or fleece',
-  stretch: 1.3, // starting point: a loop pile gives some way under the stitches
-  stabilizer: 'tear-away backing with a water-soluble topping on the loops, so the stitches do not sink into the pile.',
-  values: {
-   spacing: .5, // open rows, so the stitches do not flatten the loops
-   stitchLength: 2.5, // shorter, so loose loops do not catch on long stitches
-   stagger: 8, // more needle phases, so the pile does not show a seam in the fill
-   underlay: true,
-   underlayType: 'auto',
-   compensation: .4, // the pile takes up the stitches, so the fill is sewn slightly wider
-  },
- },
- denim: {
-  label: 'Denim',
-  stretch: .8, // starting point: a dense woven gives less than a plain one
-  stabilizer: 'cut-away or heavy tear-away backing for a dense, stable woven.',
-  values: {
-   spacing: .35, // a denser fill, which the stable fabric can hold without puckering
-   stitchLength: 3,
-   stagger: 4,
-   underlay: true,
-   underlayType: 'auto',
-   compensation: .25, // a woven that barely pulls in
-  },
- },
-};
-export const FABRIC_PRESETS=Object.fromEntries(Object.entries(FABRIC_PROFILES).map(([key,profile])=>[key,profile.values]));
-// Organize fonts: each custom font in the document, with the lettering objects that use it.
-// Bundled fonts (Ink/Stitch and open TrueType, registry ids) that lettering in the document uses, with the lettering that uses each. Read-only: bundled fonts ship with the app and are not removed here.
-export function bundledFontUsage(doc){const m=new Map();for(const o of doc.objects){if(o.kind!=='text'||!isRegistryFont(o.font)||o.font.startsWith('custom/'))continue;if(!m.has(o.font))m.set(o.font,[]);m.get(o.font).push(o.name||'Lettering');}return [...m].map(([id,uses])=>({id,uses}));}
-export function customFontUsage(doc){return Object.entries(doc.customFonts||{}).map(([id,f])=>({id,name:f.name||id,uses:doc.objects.filter(o=>o.kind==='text'&&o.font===`custom/${id}`).map(o=>o.name||'Lettering')}));}
-// Hoop presets. 100 x 100 mm is Brother's 4x4 hoop (SA443) and 180 x 130 mm its 5x7 hoop (SA444, listed as 180mm x 130mm); 260 x 160 mm is the 6x10 hoop, listed as 160 x 260 mm by one retailer guide. The long side is the width. The 110 x 110 mm default is Welcome's own.
-export const HOOP_PRESETS=[{key:'110x110',w:110,h:110},{key:'100x100',w:100,h:100},{key:'180x130',w:180,h:130},{key:'260x160',w:260,h:160}];
-export function hoopSize(d){const w=Number(d.hoop);return {w,h:Number(d.hoopH??w)};}
-export const hoopLabel=({w,h})=>w===h?`${w} mm`:`${w} × ${h} mm`;
-// Plain SVG for Inkscape and friends: millimetre units, origin at the hoop centre, one element per object (fills with even-odd
-// holes, satin as a thick butt-capped stroke along the centreline, running stitches and lettering as thin strokes, imported
-// machine stitches as per-colour polylines). It is a design interchange file, not a stitch plan.
-export function exportSvg(doc){
-  const hs=hoopSize(doc),f=v=>+Number(v).toFixed(3),esc=t=>String(t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])),d=(lines,close=false)=>lines.map(l=>'M'+l.map(([x,y])=>`${f(x)} ${f(y)}`).join('L')+(close?'Z':'')).join('');
-  const out=[];
-  for(const o of doc.objects){if(o.visible===false)continue;const title=`<title>${esc(o.name||o.kind)}</title>`;
-    if(o.kind==='stitch_layer'){const [x0,y0,x1,y1]=o.source.bounds,sx=o.w/Math.max(.1,x1-x0),sy=o.h/Math.max(.1,y1-y0),a=(Number(o.rotation)||0)*Math.PI/180,c=Math.cos(a),sn=Math.sin(a),cx=o.x+o.w/2,cy=o.y+o.h/2,paths=new Map();let prev=null;
-      for(const st of o.stitches){const lx=(st.x-(x0+x1)/2)*sx,ly=(st.y-(y0+y1)/2)*sy,p=[cx+lx*c-ly*sn,cy+lx*sn+ly*c];if(st.cmd==='stitch'){const col=o.threadOverrides?.[st.thread]||o.threads[st.thread]?.color||o.thread;if(!paths.has(col))paths.set(col,'');paths.set(col,paths.get(col)+(prev?`M${f(prev[0])} ${f(prev[1])}L${f(p[0])} ${f(p[1])}`:`M${f(p[0])} ${f(p[1])}`));prev=p;}else prev=(st.cmd==='trim'||st.cmd==='end')?null:p;}
-      out.push(`<g>${title}${[...paths].map(([col,dd])=>`<path d="${dd}" fill="none" stroke="${col}" stroke-width=".3" stroke-linecap="round"/>`).join('')}</g>`);continue;}
-    const lines=geometry(o,0);if(!lines.length)continue;
-    if(o.kind==='path'&&o.stitch==='satin')out.push(`<path d="${d([lines[0]])}" fill="none" stroke="${o.thread}" stroke-width="${f(o.satinWidth??3)}" stroke-linecap="butt" stroke-linejoin="round">${title}</path>`);
-    else if(o.stitch==='fill'&&o.kind!=='text'&&(o.kind!=='path'||o.closed))out.push(`<path d="${d(lines,true)}" fill="${o.thread}" fill-rule="evenodd"${o.border?` stroke="${o.borderThread||o.thread}" stroke-width="${f(Math.max(.5,Number(o.borderWidth)||0))}"`:''}>${title}</path>`);
-    else out.push(`<path d="${d(lines)}" fill="none" stroke="${o.thread}" stroke-width=".4" stroke-linecap="round" stroke-linejoin="round">${title}</path>`);}
-  return `<?xml version="1.0" encoding="UTF-8"?>\n<svg xmlns="http://www.w3.org/2000/svg" width="${f(hs.w)}mm" height="${f(hs.h)}mm" viewBox="${f(-hs.w/2)} ${f(-hs.h/2)} ${f(hs.w)} ${f(hs.h)}">\n<title>${esc(doc.name)}</title>\n${out.join('\n')}\n</svg>\n`;
-}
-export function jefWarnings(plan,format='jef'){if(format!=='jef'||!plan.bounds)return [];const w=plan.bounds[2]-plan.bounds[0],h=plan.bounds[3]-plan.bounds[1];return w>=200||h>=200?[`Warning: ${w.toFixed(0)} × ${h.toFixed(0)} mm is beyond the largest JEF hoop code (200 × 200 mm); the file gets hoop code 0 and no hoop-edge distances, and machines may reject it.`]:[];}
-export function initialDocument() {
-  return {schema:'welcome/1',name:'Botanical badge',revision:0,hoop:110,settings:{spacing:.4,angle:32,underlay:true,compensation:.2},objects:[
-    // Six-petal blossom: a smooth Bézier rosette (not a flat ellipse) filled with tatami rows blended across a
-    // three-colour palette (coral -> peach -> gold) for thread-painted shading, finished with a crisp satin-like border.
-    {id:'flower',name:'Wildflower',kind:'path',closed:true,smooth:true,
-      points:[[0,-28.8],[3.6,-22.24],[11.09,-22.4],[7.2,-16],[11.09,-9.6],[3.6,-9.76],[0,-3.2],[-3.6,-9.76],[-11.09,-9.6],[-7.2,-16],[-11.09,-22.4],[-3.6,-22.24]],
-      handles:[{i:[-2.5,-28.8],o:[2.5,-28.8]},{i:[1.44,-23.48],o:[5.76,-20.99]},{i:[9.84,-24.56],o:[12.33,-20.24]},{i:[7.2,-18.5],o:[7.2,-13.5]},{i:[12.33,-11.76],o:[9.84,-7.44]},{i:[5.76,-11.01],o:[1.44,-8.52]},{i:[2.5,-3.2],o:[-2.5,-3.2]},{i:[-1.44,-8.52],o:[-5.76,-11.01]},{i:[-9.84,-7.44],o:[-12.33,-11.76]},{i:[-7.2,-13.5],o:[-7.2,-18.5]},{i:[-12.33,-20.24],o:[-9.84,-24.56]},{i:[-5.76,-20.99],o:[-1.44,-23.48]}],
-      x:-11.09,y:-28.8,w:22.18,h:25.6,
-      thread:'#d9897e',stitch:'fill',fillMethod:'rows',blendPalette:['#d9897e','#e5b089','#d3ad61'],blendAngle:-100,border:true,borderThread:'#b5614f'},
-    // Spiral-stitched center with its own ring border, so the eye lands on a round swirl rather than a flat dot.
-    {id:'center',name:'Flower center',kind:'ellipse',x:-4.2,y:-20.2,w:8.4,h:8.4,thread:'#d3ad61',stitch:'fill',fillMethod:'spiral',underlayType:'center',border:true,borderThread:'#9c7a3a'},
-    // Curved satin stem tapering from a wider base to a fine tip at the blossom: real tapered rails, not a thin running line.
-    {id:'stem',name:'Stem',kind:'path',closed:false,smooth:false,
-      points:[[2,24],[-3,10],[1,-3]],
-      handles:[{i:[3.67,28.67],o:[0.33,19.33]},{i:[-2.67,19],o:[-3.33,1]},{i:[-0.33,1.33],o:[2.33,-7.33]}],
-      x:-3,y:-3,w:5,h:27,
-      thread:'#89a377',stitch:'satin',satinWidth:2.4,satinWidthEnd:.8,cap:'round'},
-    // Pointed lanceolate leaf (Bézier again, not an ellipse) with a contour fill that reads as natural venation, plus a border.
-    {id:'leaf',name:'Leaf',kind:'path',closed:true,smooth:true,
-      points:[[-7,5],[-10.6,-6.45],[-27.35,-7.72],[-21.45,1.86]],
-      handles:[{i:[-9.44,3.47],o:[-4.56,6.53]},{i:[-3.88,-2.25],o:[-17.32,-10.65]},{i:[-24.5,-5.94],o:[-30.2,-9.5]},{i:[-28.17,-2.34],o:[-14.73,6.06]}],
-      x:-27.35,y:-7.72,w:20.35,h:12.72,
-      thread:'#527461',stitch:'fill',fillMethod:'contour',border:true,borderThread:'#38503f'},
-    // Cursive wordmark in a bundled script font (filled, not a mono running line), so the lettering reads as sewn calligraphy.
-    {id:'letters',name:'Lettering',kind:'text',text:'Bloom',x:-13.45,y:33,w:26.9,h:11,thread:'#527461',stitch:'fill',fillMethod:'rows',font:'ttf/greatvibes'}
-  ]};
-}
+export {FABRIC_PROFILES, FABRIC_PRESETS} from './fabricProfiles.js';
+export {bundledFontUsage,customFontUsage} from './fontUsage.js';
+export {HOOP_PRESETS,hoopSize,hoopLabel} from './hoops.js';
+export {exportSvg} from './svgExport.js';
+export {jefWarnings} from './exportWarnings.js';
+export {initialDocument} from './initialDocument.js';
 // Batch plan: how many copies of the whole design fit in one hoop, with a gap between copies, and how many hoops N copies need.
 export function batchPlan(doc,{copies=1,gap=3}={}){if(!doc.objects.length)return null;const boxes=doc.objects.map(objectBounds),x0=Math.min(...boxes.map(b=>b[0])),y0=Math.min(...boxes.map(b=>b[1])),x1=Math.max(...boxes.map(b=>b[2])),y1=Math.max(...boxes.map(b=>b[3])),hoopW=doc.hoop,hoopH=doc.hoopH??doc.hoop,cols=Math.floor((hoopW+gap)/(x1-x0+gap)),rows=Math.floor((hoopH+gap)/(y1-y0+gap)),perHoop=Math.max(0,cols*rows);return {design:[x1-x0,y1-y0],origin:[x0,y0],hoop:[hoopW,hoopH],cols,rows,perHoop,copies,hoopsNeeded:perHoop?Math.ceil(copies/perHoop):null,gap};}
 // One document per hoop: copies laid out in the batch grid, centred on the hoop.
