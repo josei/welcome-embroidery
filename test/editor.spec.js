@@ -33,8 +33,19 @@ test('browser design, settings, history, local project and offline compilation/e
  await page.locator('#new').click();await expect(page.locator('.object-row')).toHaveCount(0);
  await page.locator('#file').setInputFiles({name:'bad.welcome',mimeType:'application/json',buffer:Buffer.from(JSON.stringify({...source,objects:[{...source.objects[0],kind:'triangle'}]}))});await expect(page.locator('.object-row')).toHaveCount(0);await expect(page.locator('#toast')).toContainText('unsupported kind');
  await page.locator('#file').setInputFiles({name:'reopened.welcome',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(source))});await expect(page.locator('.object-row')).toHaveCount(7);await expect(page.locator('#name')).toHaveValue('Garden badge');
- await page.locator('#rect').click();await expect(page.locator('#saved')).toHaveText('Unsaved');
- for(const format of ['jef','vp3']){const download=page.waitForEvent('download');await page.locator('#export').click();await page.locator('#format').selectOption(format);await page.locator('#download').click();const file=await download;await file.saveAs(`/tmp/welcome-browser.${format}`);expect(file.suggestedFilename()).toContain(`.${format}`);await expect(page.locator('#saved')).toHaveText('Unsaved');}
+ await page.locator('#rect').click();await expect(page.locator('#saved')).toHaveCount(0);
+ for(const format of ['jef','vp3']){const download=page.waitForEvent('download');await page.locator('#export').click();await page.locator('#format').selectOption(format);await page.locator('#download').click();const file=await download;await file.saveAs(`/tmp/welcome-browser.${format}`);expect(file.suggestedFilename()).toContain(`.${format}`);await expect(page.locator('#saved')).toHaveCount(0);}
+ expect(errors).toEqual([]);
+});
+
+test('top bar has no save indicator: a started and canceled download leaves no saved text',async({page})=>{
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));
+ await page.goto('/');await page.locator('#rect').click();
+ await expect(page.locator('header.top')).not.toContainText(/saved/i);
+ await page.locator('#export').click();const download=page.waitForEvent('download');await page.locator('#download').click();await download;
+ await expect(page.locator('header.top')).not.toContainText(/saved/i);
+ await page.locator('#export').click();await page.locator('#exportDialog button',{hasText:'Cancel'}).click();await expect(page.locator('#exportDialog')).toBeHidden();
+ await expect(page.locator('#saved')).toHaveCount(0);await expect(page.locator('header.top')).not.toContainText(/saved/i);
  expect(errors).toEqual([]);
 });
 
@@ -55,7 +66,7 @@ test('pinned JEF import renders a stitch layer, saves source commands, transform
  const errors=[];page.on('pageerror',e=>errors.push(e.message));const fixture=pinnedMachineFixture('jef'),bytes=Buffer.from(fixture.bytes);await page.goto('/');page.on('dialog',dialog=>dialog.accept());await page.locator('#new').click();await expect(page.locator('.object-row')).toHaveCount(0);await page.locator('#importMachine').click();await page.locator('#machineFile').setInputFiles({name:'sample.jef',mimeType:'application/octet-stream',buffer:bytes});
  await expect(page.locator('.object-row')).toHaveCount(1);const layer=page.locator('.object-row').last();await expect(layer).toContainText('machine stitches');await expect(page.locator('#sourceInfo')).toContainText('201 commands');const id=await layer.getAttribute('data-id');
  const unchanged=page.waitForEvent('download');await page.locator('#export').click();await page.locator('#format').selectOption('jef');await page.locator('#download').click();const originalExport=await unchanged;const originalPath='/tmp/welcome-import-original.jef';await originalExport.saveAs(originalPath);expect(Buffer.compare(await (await import('node:fs/promises')).readFile(originalPath),bytes)).toBe(0);
- const x=Number(await page.locator('#posX').inputValue());await page.locator('#posX').fill(String(x+2));await page.locator('#posX').press('Tab');await page.locator('#rotation').fill('2');await page.locator('#rotation').press('Tab');await page.locator('#thread').selectOption('#d9897e');await expect(page.locator('#saved')).toHaveText('Unsaved');
+ const x=Number(await page.locator('#posX').inputValue());await page.locator('#posX').fill(String(x+2));await page.locator('#posX').press('Tab');await page.locator('#rotation').fill('2');await page.locator('#rotation').press('Tab');await page.locator('#thread').selectOption('#d9897e');await expect(page.locator('#saved')).toHaveCount(0);
  await page.locator('#undo').click();await page.locator('#redo').click();await expect(page.locator('.object-row').last()).toHaveAttribute('data-id',id);const saved=page.waitForEvent('download');await page.locator('#save').click();const projectFile=await saved,projectPath='/tmp/welcome-import-project.welcome';await projectFile.saveAs(projectPath);const fs=await import('node:fs/promises'),projectText=await fs.readFile(projectPath,'utf8'),project=JSON.parse(projectText),savedLayer=project.objects.find(o=>o.id===id);expect(savedLayer.kind).toBe('stitch_layer');expect(savedLayer.stitches).toHaveLength(201);expect(savedLayer.source.originalBytesBase64.length).toBeGreaterThan(0);await page.locator('#file').setInputFiles({name:'reopened.welcome',mimeType:'application/json',buffer:Buffer.from(projectText)});await expect(page.locator('#sourceInfo')).toContainText('201 commands');
  await page.locator('#machineFile').setInputFiles({name:'broken.jef',mimeType:'application/octet-stream',buffer:Buffer.from([1,2,3])});await expect(page.locator('.object-row')).toHaveCount(1);await expect(page.locator('#toast')).toContainText('Invalid embroidery file');expect(errors).toEqual([]);
  const changedDownload=page.waitForEvent('download');await page.locator('#export').click();await page.locator('#download').click();const changed=await changedDownload,changedPath='/tmp/welcome-import-edited.jef';await changed.saveAs(changedPath);const decoded=decodeEmbroidery(new Uint8Array(await fs.readFile(changedPath)),'jef');expect(decoded.stitches.filter(s=>s.cmd==='stitch')).toHaveLength(30);
@@ -189,7 +200,7 @@ test('agent relay: the Agent dialog creates a private link and an MCP client edi
   const client=new Client({name:'e2e-agent',version:'1'});await client.connect(new StreamableHTTPClientTransport(new URL(link)));
   const call=(name,args)=>client.callTool({name,arguments:args});const inspect=await call('document_inspect',{documentId:'live'});expect(inspect.structuredContent.objects).toHaveLength(0);
   const applied=await call('document_apply',{documentId:'live',expectedRevision:inspect.structuredContent.revision,operations:[{op:'add_shape',id:'agent-rect',kind:'rect',x:-15,y:-10,width:30,height:20,thread:'#d9897e'},{op:'add_text',id:'agent-text',text:'HI',x:-8,y:14,height:8}]});expect(applied.isError).toBeFalsy();
-  await expect(page.locator('.object-row')).toHaveCount(2);await expect(page.locator('#shapes [data-id="agent-rect"]')).toBeAttached();await expect(page.locator('#saved')).toHaveText('Unsaved');
+  await expect(page.locator('.object-row')).toHaveCount(2);await expect(page.locator('#shapes [data-id="agent-rect"]')).toBeAttached();await expect(page.locator('#saved')).toHaveCount(0);
   await page.locator('#undo').click();await expect(page.locator('.object-row')).toHaveCount(0);const stale=await call('document_apply',{documentId:'live',expectedRevision:applied.structuredContent.revision,operations:[{op:'delete',id:'agent-rect'}]});expect(stale.isError).toBe(true);
   const plan=await call('embroidery_compile',{documentId:'live',expectedRevision:(await call('document_inspect',{documentId:'live'})).structuredContent.revision});expect(plan.isError).toBe(true);
   await expect(page.locator('#copyEndpoint')).toHaveClass(/agent-active/);
@@ -436,7 +447,7 @@ test('lettering is edited on the canvas: live outlines while typing, Enter commi
  const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());await page.locator('#new').click();
  await page.locator('#letter').click();const text=page.locator('#shapes g.shape').first();let before=await text.boundingBox();const b=before;
  await page.mouse.dblclick(b.x+b.width/2,b.y+b.height/2);await expect(page.locator('#canvasText')).toBeFocused();await page.keyboard.type('ROSES AND MORE');await expect.poll(async()=>(await text.boundingBox()).width).toBeGreaterThan(before.width*1.6);
- await expect(page.locator('#saved')).toHaveText('Unsaved');await page.keyboard.press('Enter');await expect(page.locator('#canvasText')).toHaveCount(0);await expect(page.locator('.object-row').first()).toContainText('ROSES AND MORE');
+ await expect(page.locator('#saved')).toHaveCount(0);await page.keyboard.press('Enter');await expect(page.locator('#canvasText')).toHaveCount(0);await expect(page.locator('.object-row').first()).toContainText('ROSES AND MORE');
  await page.keyboard.press('Control+z');await expect(page.locator('.object-row').first()).toContainText('BLOOM');expect((await text.boundingBox()).width).toBeCloseTo(before.width,0);
  await page.locator('.object-row').first().click();await page.keyboard.press('Enter');await page.keyboard.type('X');await page.keyboard.press('Escape');await expect(page.locator('.object-row').first()).toContainText('BLOOM');await expect(page.locator('#canvasText')).toHaveCount(0);expect(errors).toEqual([]);
 });
@@ -1017,7 +1028,7 @@ test('autosave: an edited design is offered back after a reload; starting fresh 
  await page.goto('/');page.on('dialog',d=>d.accept());await page.locator('#new').click();await page.locator('#rect').click();await page.locator('#ellipse').click();await expect(page.locator('.object-row')).toHaveCount(2);
  await page.locator('#name').fill('Autosaved badge');await page.locator('#name').press('Enter');await page.waitForTimeout(1200);
  await page.reload();await expect(page.locator('#restoreDialog')).toBeVisible();await expect(page.locator('#restoreInfo')).toContainText('Autosaved badge');await expect(page.locator('#restoreInfo')).toContainText('2 objects');
- await page.locator('#restoreYes').click();await expect(page.locator('#restoreDialog')).toBeHidden();await expect(page.locator('.object-row')).toHaveCount(2);await expect(page.locator('#name')).toHaveValue('Autosaved badge');await expect(page.locator('#saved')).toHaveText('Unsaved');
+ await page.locator('#restoreYes').click();await expect(page.locator('#restoreDialog')).toBeHidden();await expect(page.locator('.object-row')).toHaveCount(2);await expect(page.locator('#name')).toHaveValue('Autosaved badge');await expect(page.locator('#saved')).toHaveCount(0);
  await page.reload();await expect(page.locator('#restoreDialog')).toBeVisible();await page.locator('#restoreNo').click();await expect(page.locator('#restoreDialog')).toBeHidden();await expect(page.locator('.object-row')).toHaveCount(5);
  await page.reload();await expect(page.locator('#restoreDialog')).toBeHidden();
  expect(errors).toEqual([]);
