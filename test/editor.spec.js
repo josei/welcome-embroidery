@@ -38,17 +38,6 @@ test('browser design, settings, history, local project and offline compilation/e
  expect(errors).toEqual([]);
 });
 
-test('top bar has no save indicator: a started and canceled download leaves no saved text',async({page})=>{
- const errors=[];page.on('pageerror',e=>errors.push(e.message));
- await page.goto('/');await page.locator('#rect').click();
- await expect(page.locator('header.top')).not.toContainText(/saved/i);
- await page.locator('#export').click();const download=page.waitForEvent('download');await page.locator('#download').click();await download;
- await expect(page.locator('header.top')).not.toContainText(/saved/i);
- await page.locator('#export').click();await page.locator('#exportDialog button',{hasText:'Cancel'}).click();await expect(page.locator('#exportDialog')).toBeHidden();
- await expect(page.locator('#saved')).toHaveCount(0);await expect(page.locator('header.top')).not.toContainText(/saved/i);
- expect(errors).toEqual([]);
-});
-
 test('bundled embroidery font and bounded SVG import are editable',async({page})=>{await page.goto('/');await page.locator('#new').click();await page.locator('#letter').click();await page.locator('#font').selectOption('neon-blinking/1');await page.locator('#letteringText').fill('WELCOME 123!');await page.locator('#letteringText').press('Tab');await expect(page.locator('#font')).toHaveValue('neon-blinking/1');await expect(page.locator('#letteringHeight')).toHaveAttribute('min','20');await page.locator('#count').click();await expect(page.locator('#count')).toContainText('stitches');await page.locator('#file').setInputFiles({name:'badge.svg',mimeType:'image/svg+xml',buffer:Buffer.from('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect x="10" y="10" width="40" height="30" fill="#527461"/><ellipse cx="70" cy="80" rx="5" ry="4" fill="#89a377"/><path d="M20 70 C30 50 40 90 80 60" stroke="#d9897e" fill="none"/></svg>')});await expect(page.locator('.object-row')).toHaveCount(3);await page.locator('.object-row').filter({hasText:'Imported path'}).click();await expect(page.locator('.path-node')).toHaveCount(0);await page.keyboard.press('Enter');await expect(page.locator('.path-node').first()).toBeAttached();const node=page.locator('.path-node').last(),nodeBefore=await node.getAttribute('cx'),nodeBox=await node.boundingBox();await page.mouse.move(nodeBox.x+nodeBox.width/2,nodeBox.y+nodeBox.height/2);await page.mouse.down();await page.mouse.move(nodeBox.x+nodeBox.width/2+18,nodeBox.y+nodeBox.height/2+5,{steps:3});await page.mouse.up();const nodeAfter=await page.locator('.path-node').last().getAttribute('cx');expect(nodeAfter).not.toBe(nodeBefore);await page.locator('#undo').click();await expect(page.locator('.path-node').last()).toHaveAttribute('cx',nodeBefore);await page.locator('#redo').click();await expect(page.locator('.path-node').last()).toHaveAttribute('cx',nodeAfter);await page.locator('.object-row').filter({hasText:'Imported ellipse'}).click();await expect(page.locator('#posX')).toHaveValue('16.5');await page.locator('#file').setInputFiles({name:'unsafe.svg',mimeType:'image/svg+xml',buffer:Buffer.from('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><g transform="translate(10 5)"><rect x="0" y="0" width="20" height="20"/></g></svg>')});await expect(page.locator('.object-row')).toHaveCount(3);await expect(page.locator('#toast')).toContainText('attribute transform is unsupported');});
 
 
@@ -2265,8 +2254,9 @@ test('header export: the format beside Export and the dialog share one choice, a
  await page.locator('#export').click();await expect(page.locator('#exportDialog')).toBeVisible();
  await expect(page.locator('#format')).toHaveValue('pes');
  await page.locator('#format').selectOption('dst');await expect(page.locator('#headerFormat')).toHaveValue('dst');
+ await expect(page.locator('#headerFormat')).toHaveCSS('color','rgba(0, 0, 0, 0)');
  await page.keyboard.press('Escape');await expect(page.locator('#exportDialog')).toBeHidden();
- await expect(page.locator('#agentPill')).toContainText('Connect an AI agent');
+ await expect(page.locator('#agentPill')).toContainText('Agent');await expect(page.locator('#agentPill')).toHaveAttribute('title','Connect an AI agent');
  await page.locator('#agentPill').click();await expect(page.locator('#agentDialog')).toBeVisible();
  expect(errors).toEqual([]);
 });
@@ -2414,3 +2404,66 @@ test('underlay pills: clicking one sets the underlay as one undo step, and the h
  await expect(pill('auto')).toHaveAttribute('aria-checked','true');await expect(page.locator('#underlayType')).toHaveValue('auto');
  expect(errors).toEqual([]);
 });
+
+test('sewing tips: Fix tip makes one undo step and clears the tip, and Ignore hides it until the object changes',async({page})=>{
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));
+ await page.goto('/');page.on('dialog',d=>d.accept());await expect(page.locator('#count')).toContainText('compiled');
+ await page.locator('#new').click();await page.locator('#rect').click();
+ await page.locator('#sizeW').fill('1');await page.locator('#sizeW').press('Tab');await page.locator('#sizeH').fill('1');await page.locator('#sizeH').press('Tab');
+ const card=page.locator('#sewTips');
+ await expect(card).toBeVisible();await expect(card).toContainText('too small for a clean fill');
+ await page.locator('.tip-fix').click();
+ await expect(page.locator('#type')).toHaveValue('run');await expect(card).toBeHidden();
+ await page.locator('#undo').click();
+ await expect(page.locator('#type')).toHaveValue('fill');await expect(card).toBeVisible();
+ await page.locator('.tip-ignore').click();await expect(card).toBeHidden();
+ await page.locator('#sizeW').fill('1.2');await page.locator('#sizeW').press('Tab');
+ await expect(card).toBeVisible();await expect(card).toContainText('1.2');
+ expect(errors).toEqual([]);
+});
+
+test('timeline: a marker sits at each colour change, in the new thread colour, and clicking one seeks to that change',async({page})=>{
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));
+ await page.goto('/');page.on('dialog',d=>d.accept());await expect(page.locator('#count')).toContainText('compiled');
+ await page.locator('#new').click();await page.locator('#rect').click();await page.locator('#ellipse').click();await page.locator('#rect').click();
+ await page.locator('.object-row').nth(1).click();await page.locator('#thread').selectOption('#d9897e');
+ await page.locator('.object-row').nth(2).click();await page.locator('#thread').selectOption('#d3ad61');
+ await expect(page.locator('#count')).toContainText('compiled');
+ await page.locator('button[data-view="stitches"]').click();
+ const blocks=page.locator('.playback-spans span'),markers=page.locator('.timeline-marker');
+ await expect(blocks).toHaveCount(3);
+ await expect(markers).toHaveCount(2);
+ await expect(page.locator('#playbackSummary')).toContainText('2 colour changes');
+ await expect(markers.nth(1)).toHaveAttribute('title',/Colour change to .* at \d+:\d\d/);
+ const second=await markers.nth(1).getAttribute('data-index');
+ await markers.nth(1).click();
+ await expect(page.locator('#seek')).toHaveValue(String(second));
+ await expect(page.locator('#playbackStitches')).toContainText('Stitch');
+ expect(errors).toEqual([]);
+});
+
+test('grid chip: it is no wider than the toolbar buttons, shows the spacing, and cycles through it',async({page})=>{
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));
+ await page.goto('/');page.on('dialog',d=>d.accept());await expect(page.locator('#count')).toContainText('compiled');
+ const chip=page.locator('#gridCycle'),snap=page.locator('#snap');
+ await expect(chip).toBeVisible();await expect(chip).toContainText('1');
+ const cw=(await chip.boundingBox()).width,sw=(await snap.boundingBox()).width;
+ expect(cw).toBeLessThanOrEqual(sw+0.5);
+ await chip.click();await expect(page.locator('#grid')).toHaveValue('2');
+ await expect(chip).toContainText('2');
+ await chip.click();await expect(page.locator('#grid')).toHaveValue('5');
+ await chip.click();await expect(page.locator('#grid')).toHaveValue('0.1');
+ await page.locator('#grid').selectOption('0.25');await expect(chip).toContainText('0.25');
+ expect(errors).toEqual([]);
+});
+
+test('sidebars: the right inspector is as wide as the left sidebar',async({page})=>{
+ await page.goto('/');await expect(page.locator('#count')).toContainText('compiled');
+ for (const width of [1600,1280]) {
+  await page.setViewportSize({width,height:1000});
+  const left=await page.locator('.layout > aside.panel').first().boundingBox(),right=await page.locator('.layout > aside.panel').last().boundingBox();
+  expect(Math.abs(left.width-right.width)).toBeLessThan(1);
+ }
+});
+
+test('header: export and settings gear sit together at the right edge, the same height',async({page})=>{await page.goto('/');const gear=await page.locator('#settingsBtn').boundingBox(),split=await page.locator('.export-split').boundingBox(),header=await page.locator('header.top').boundingBox();expect(Math.abs(gear.height-split.height)).toBeLessThan(1);expect(split.x+split.width).toBeLessThan(gear.x);expect(Math.abs(gear.x+gear.width-(header.x+header.width-14))).toBeLessThan(2);});

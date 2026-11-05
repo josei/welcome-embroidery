@@ -30,6 +30,8 @@ import {PathTool, PenTool, SelectTool, ToolButtons} from './ToolButtons';
 import {TransformPanel} from './TransformPanel';
 import {ObjectList, ObjectListHead} from './ObjectList';
 import {PlaybackBar} from './PlaybackBar';
+import {TipCard} from './TipCard';
+import {GridControl} from './GridControl';
 import {ViewSwitch} from './ViewSwitch';
 // The editor layout: the object list, the canvas and the inspector. Rendered by React; ids match the markup it replaced, because app.js wires them by id.
 export function EditorLayout() {
@@ -146,32 +148,7 @@ export function EditorLayout() {
               </svg>
             </button>
             <SnapObjectButton />
-            <select
-              id={"grid"}
-              className={"tb-wide"}
-              aria-label={"Grid size"}
-              title={"Grid spacing: the distance Snap to grid snaps to"}
-              defaultValue={"1"}
-            >
-              <option value={"0.1"}>
-                {"Grid 0.1 mm"}
-              </option>
-              <option value={"0.25"}>
-                {"Grid 0.25 mm"}
-              </option>
-              <option value={"0.5"}>
-                {"Grid 0.5 mm"}
-              </option>
-              <option value={"1"}>
-                {"Grid 1 mm"}
-              </option>
-              <option value={"2"}>
-                {"Grid 2 mm"}
-              </option>
-              <option value={"5"}>
-                {"Grid 5 mm"}
-              </option>
-            </select>
+            <GridControl />
             <AlignButtons />
             <FlipButtons />
             <ActionButton flag="group" hideWhenDisabled className={"icon-button"} aria-label={"Group (Ctrl+G)"} title={"Group (Ctrl+G)"} data-tooltip={"Group (Ctrl+G)"} id={"group"}>
@@ -278,8 +255,7 @@ export function EditorLayout() {
       </main>
       <aside className={"panel"}>
         <SelectionHeading />
-        <div id={"sewTips"} className={"sew-tips"} role={"status"} hidden={true}>
-        </div>
+        <TipCard />
         <details id={"tipsSettings"} className={"tips-settings"}>
           <summary>
             {"Sewing tips to show"}

@@ -1,3 +1,4 @@
+// @ts-check
 /**
  * A small store: one value, read with get(), replaced with set(), and watched with subscribe().
  * React reads it with useSyncExternalStore, so a component re-renders when the value changes.

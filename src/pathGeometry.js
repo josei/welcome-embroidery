@@ -1,60 +1,167 @@
 // @ts-check
-// Path geometry and clipping: corner rounding, a node's position along a path, clipping to a mask, lettering on a path, and translation.
-import {polygonClipping} from './geom.js';
-import {geometry,mapPathPoints,pathOutline,refreshPathBounds,distP} from './engine.js';
-// Replace each straight corner node by two nodes joined with a circular arc (cubic approximation) of the given radius; limited to half of each neighbouring segment.
-export function roundPathCorners(/** @type {any} */ o,/** @type {any} */ radius,/** @type {any} */ only=null){
-  const n=o.points.length,pts=o.points.map((/** @type {any} */ p)=>[Number(p[0]),Number(p[1])]),hs=o.handles?o.handles.map((/** @type {any} */ h)=>h||null):pts.map(()=>null),outP=[],outH=[];let changed=0;
-  const straightOut=(/** @type {any} */ i)=>!hs[i]||!hs[i].o||(Math.abs(hs[i].o[0]-pts[i][0])<1e-9&&Math.abs(hs[i].o[1]-pts[i][1])<1e-9),straightIn=(/** @type {any} */ i)=>!hs[i]||!hs[i].i||(Math.abs(hs[i].i[0]-pts[i][0])<1e-9&&Math.abs(hs[i].i[1]-pts[i][1])<1e-9);
-  for(let i=0;i<n;i++){
-    const inner=o.closed||(i>0&&i<n-1),pi=(i+n-1)%n,ni=(i+1)%n;
-    if(!inner||(only&&!only.includes(i))||!straightIn(i)||!straightOut(i)||!straightOut(pi)||!straightIn(ni)){outP.push(o.points[i]);outH.push(hs[i]);continue;}
-    const P=pts[i],A=pts[pi],B=pts[ni],l1=Math.hypot(A[0]-P[0],A[1]-P[1]),l2=Math.hypot(B[0]-P[0],B[1]-P[1]);if(l1<1e-6||l2<1e-6){outP.push(o.points[i]);outH.push(hs[i]);continue;}
-    const u=[(A[0]-P[0])/l1,(A[1]-P[1])/l1],v=[(B[0]-P[0])/l2,(B[1]-P[1])/l2],cos=Math.max(-1,Math.min(1,u[0]*v[0]+u[1]*v[1])),th=Math.acos(cos);
-    if(th<.06||th>Math.PI-.06){outP.push(o.points[i]);outH.push(hs[i]);continue;}
-    const d=Math.min(radius/Math.tan(th/2),l1/2,l2/2),r=d*Math.tan(th/2),h=4/3*Math.tan((Math.PI-th)/4)*r,t1=[P[0]+u[0]*d,P[1]+u[1]*d],t2=[P[0]+v[0]*d,P[1]+v[1]*d],q=(/** @type {any} */ x)=>+x.toFixed(3);
-    outP.push([q(t1[0]),q(t1[1])],[q(t2[0]),q(t2[1])]);
-    outH.push({i:[q(t1[0]),q(t1[1])],o:[q(t1[0]-u[0]*h),q(t1[1]-u[1]*h)]},{i:[q(t2[0]-v[0]*h),q(t2[1]-v[1]*h)],o:[q(t2[0]),q(t2[1])]});changed++;}
-  if(!changed)throw Error('No straight corner nodes to round. Select a path with corners, or select the corner nodes.');
-  if(outP.length>1000)throw Error('A path is limited to 1,000 points.');
-  o.points=outP;o.handles=outH;refreshPathBounds(o);
+// Path outlines and satin rails: the curve a path sews along (straight, Bezier or smooth spline), the rails of a satin column drawn
+// along it, and the satin zigzag. The engine re-exports the names it uses, so callers keep importing them from engine.js.
+
+/** @typedef {import('./geom.js').Pt} Pt */
+/**
+ * @typedef {{points: Pt[], handles?: Array<{i?: Pt, o?: Pt}|null>, closed?: boolean, smooth?: boolean, satinWidth?: number, satinWidthEnd?: number, widthStops?: Array<[number, number]>, join?: string, cap?: string}} PathLike
+ * @typedef {{a: Pt[], b: Pt[], rungs: Array<[Pt, Pt]>}} Rails
+ */
+
+/**
+ * The last item of a non-empty list.
+ * @template T
+ * @param {T[]} list
+ * @returns {T}
+ */
+const last=list=>/** @type {T} */(list.at(-1));
+
+// Centripetal-free uniform Catmull-Rom through every node, sampled per segment.
+/**
+ * @param {Pt[]} pts
+ * @param {boolean} closed
+ * @returns {Pt[]}
+ */
+function splinePoints(pts,closed){
+  /** @type {Pt[]} */ const out=[];
+  const n=pts.length,segments=closed?n:n-1;
+  /** @type {(i: number) => Pt} */
+  const at=i=>closed?pts[((i%n)+n)%n]:pts[Math.max(0,Math.min(n-1,i))];
+  for(let i=0;i<segments;i++){const p0=at(i-1),p1=at(i),p2=at(i+1),p3=at(i+2),steps=Math.max(4,Math.min(24,Math.ceil(Math.hypot(p2[0]-p1[0],p2[1]-p1[1])/1.5)));for(let k=0;k<steps;k++){const t=k/steps,t2=t*t,t3=t2*t;out.push(/** @type {Pt} */([0,1].map(a=>.5*((2*p1[a])+(-p0[a]+p2[a])*t+(2*p0[a]-5*p1[a]+4*p2[a]-p3[a])*t2+(-p0[a]+3*p1[a]-3*p2[a]+p3[a])*t3)))); }}
+  out.push(closed?out[0]:[...pts[n-1]]);return out;
 }
-// Position of a path node as a fraction (0..1) of the path's length.
-export function nodeFraction(/** @type {any} */ o,/** @type {any} */ index){const line=pathOutline(o),P=o.points[index],cum=[0];for(let i=1;i<line.length;i++)cum.push(cum[i-1]+distP(line[i],line[i-1]));const total=cum.at(-1)||1;let best=Infinity,at=0;
-  for(let i=1;i<line.length;i++){const a=line[i-1],b=line[i],dx=b[0]-a[0],dy=b[1]-a[1],l2=dx*dx+dy*dy,u=l2?Math.max(0,Math.min(1,((P[0]-a[0])*dx+(P[1]-a[1])*dy)/l2)):0,d=Math.hypot(P[0]-a[0]-dx*u,P[1]-a[1]-dy*u);if(d<best-1e-9){best=d;at=cum[i-1]+Math.sqrt(l2)*u;}}return at/total;}
-export function decodeBase64(/** @type {any} */ s){const B=/** @type {any} */ (globalThis).Buffer;if(typeof B!=='undefined')return new Uint8Array(B.from(s,'base64'));const b=atob(s),a=new Uint8Array(b.length);for(let i=0;i<b.length;i++)a[i]=b.charCodeAt(i);return a;}
-// Geometry clipping to a mask: closed outlines are intersected exactly; runs of stitches are cut where they leave the mask.
-export const closeRing=(/** @type {any} */ r)=>{const q=r.map((/** @type {any[]} */ [x,y])=>[x,y]);if(q.length&&(q[0][0]!==q.at(-1)[0]||q[0][1]!==q.at(-1)[1]))q.push([...q[0]]);return q;};
-export function clipLines(/** @type {any} */ lines,/** @type {any} */ maskLines){const poly=(/** @type {any} */ ls)=>ls.filter((/** @type {any} */ l)=>l.length>=3).map(closeRing),a=poly(lines),b=poly(maskLines);if(!a.length||!b.length)return [];
-  try{return /** @type {any} */ (polygonClipping).intersection(a,b).flatMap((/** @type {any} */ pg)=>pg.map((/** @type {any} */ r)=>r.map((/** @type {any[]} */ [x,y])=>[x,y])));}catch{return [];}}
-export function insideRings(/** @type {any} */ rings,/** @type {any} */ p){let inside=false;for(const ring of rings)for(let i=0,j=ring.length-1;i<ring.length;j=i++){const [xi,yi]=ring[i],[xj,yj]=ring[j];if((yi>p[1])!==(yj>p[1])&&p[0]<(xj-xi)*(p[1]-yi)/(yj-yi)+xi)inside=!inside;}return inside;}
-// edgeClose: each cut end gets a short back-stitch over its last segment, so a cut run closes on the mask edge.
-export function clipRuns(/** @type {any} */ runs,/** @type {any} */ rings,edgeClose=false){
-  const edges=[];for(const r of rings)for(let i=1;i<r.length;i++)edges.push([r[i-1],r[i]]);const out=/** @type {any[]} */ ([]);
-  for(const run of runs){let cur=/** @type {any} */ (null),first=true;const flush=()=>{if(cur&&cur.length>1){const pts=edgeClose&&cur.length>2?[...cur,...cur.slice(-3,-1).reverse()]:cur;out.push({...run,pts,jump:first?run.jump:true});}first=false;cur=null;};
-    const pts=run.pts;if(pts.length<2)continue;
-    if(insideRings(rings,pts[0])){cur=[pts[0]];}
-    for(let i=1;i<pts.length;i++){const a=pts[i-1],b=pts[i],ts=[0,1],dx=b[0]-a[0],dy=b[1]-a[1];
-      for(const [c,d] of edges){const ex=d[0]-c[0],ey=d[1]-c[1],den=dx*ey-dy*ex;if(Math.abs(den)<1e-12)continue;const t=((c[0]-a[0])*ey-(c[1]-a[1])*ex)/den,u=((c[0]-a[0])*dy-(c[1]-a[1])*dx)/den;if(t>1e-9&&t<1-1e-9&&u>=0&&u<=1)ts.push(t);}
-      ts.sort((x,y)=>x-y);
-      for(let k=1;k<ts.length;k++){const t0=ts[k-1],t1=ts[k];if(t1-t0<1e-9)continue;const p0=[a[0]+dx*t0,a[1]+dy*t0],p1=[a[0]+dx*t1,a[1]+dy*t1],mid=[(p0[0]+p1[0])/2,(p0[1]+p1[1])/2];
-        if(insideRings(rings,mid)){if(!cur)cur=[p0];cur.push(p1);}else flush();}}
-    flush();}
-  return out;}
-// Clipping masks: a clipped object is sewn only inside its mask (a closed shape that is itself not sewn). Dangling links are cleaned up after every edit.
-// A closed shape: a rectangle, an ellipse or a closed path. Clip masks and appliqué from a group use only these.
-export const isClosedShape=(/** @type {any} */ o)=>Boolean(o)&&(o.kind==='rect'||o.kind==='ellipse'||(o.kind==='path'&&o.closed));
-export function refreshClips(/** @type {any} */ doc){const ids=new Set(doc.objects.map((/** @type {any} */ o)=>o.id));for(const o of doc.objects)if(o.clipId&&(!ids.has(o.clipId)||o.clipId===o.id||!isClosedShape(doc.objects.find((/** @type {any} */ v)=>v.id===o.clipId))))delete o.clipId;const used=new Set(doc.objects.map((/** @type {any} */ o)=>o.clipId).filter(Boolean));for(const o of doc.objects){if(o.mask&&!used.has(o.id))delete o.mask;else if(!o.mask&&used.has(o.id))o.mask=true;}}
-// Lettering attached to a path keeps following it: the path's outline is re-read whenever the path changes (moving the lettering itself does not reattach it).
-export const pathSig=(/** @type {any} */ p)=>JSON.stringify([p.points,p.handles,p.closed,p.smooth,p.rotation]);
-export function alongPoints(/** @type {any} */ p){const raw=geometry(p,0)[0],/** @type {any[]} */ pts=[];for(const q of raw)if(!pts.length||Math.hypot(q[0]-pts.at(-1)[0],q[1]-pts.at(-1)[1])>1e-6)pts.push([+q[0].toFixed(3),+q[1].toFixed(3)]);if(p.closed&&pts.length>1&&pts[0][0]===pts.at(-1)[0]&&pts[0][1]===pts.at(-1)[1])pts.pop();if(pts.length<2||pts.length>1500)throw Error('The path needs 2–1,500 points after smoothing.');return pts;}
-export function refreshAlong(/** @type {any} */ doc){for(const t of doc.objects){if(t.kind!=='text'||!t.along?.pathId)continue;const p=doc.objects.find((/** @type {any} */ v)=>v.id===t.along.pathId);if(!p||p.kind!=='path'){delete t.along.pathId;delete t.along.sig;continue;}const sig=pathSig(p);if(t.along.sig!==sig){try{t.along.points=alongPoints(p);t.along.closed=Boolean(p.closed);t.along.sig=sig;}catch{}}}}
-export function translateObject(/** @type {any} */ o,/** @type {any} */ dx,/** @type {any} */ dy){o.x+=dx;o.y+=dy;if(o.along)o.along.points=o.along.points.map((/** @type {any[]} */ [x,y])=>[x+dx,y+dy]);if(o.kind==='path')mapPathPoints(o,(/** @type {any[]} */ [x,y])=>[x+dx,y+dy]);}
-// Edge travel for fills: when two points lie on the same outline (outer edge or hole edge), walk the shorter way round it
-// with running stitches instead of jumping, but only for short detours (≤ 10 mm); long ones stay jumps because edge stitches would clutter the fill. The route follows the border, where later rows or the border pass cover it.
-export function locateOnRing(/** @type {any} */ ring,/** @type {any} */ p,eps=.05){let arc=0;for(let i=1;i<ring.length;i++){const a=ring[i-1],b=ring[i],dx=b[0]-a[0],dy=b[1]-a[1],len2=dx*dx+dy*dy,len=Math.sqrt(len2);if(len2>0){const t=Math.max(0,Math.min(1,((p[0]-a[0])*dx+(p[1]-a[1])*dy)/len2));if(Math.hypot(p[0]-a[0]-dx*t,p[1]-a[1]-dy*t)<=eps)return arc+len*t;}arc+=len;}return null;}
-export function ringRoute(/** @type {any} */ rings,/** @type {any} */ p,/** @type {any} */ q,maxLength=10){for(const ring of rings){const s1=locateOnRing(ring,p),s2=locateOnRing(ring,q);if(s1===null||s2===null)continue;
-  const cum=[0];for(let i=1;i<ring.length;i++)cum.push(cum[i-1]+Math.hypot(ring[i][0]-ring[i-1][0],ring[i][1]-ring[i-1][1]));const L=/** @type {number} */ (cum.at(-1));if(L<=0)continue;
-  const fwd=(s2-s1+L)%L,back=L-fwd,forward=fwd<=back,dist=Math.min(fwd,back);if(dist>maxLength)return null;
-  const out=[];if(forward){for(let i=0;i<ring.length-1;i++){const pos=(cum[i]-s1+L)%L;if(pos>1e-6&&pos<fwd-1e-6)out.push({pos,pt:ring[i]});}}else{for(let i=ring.length-2;i>=0;i--){const pos=(s1-cum[i]+L)%L;if(pos>1e-6&&pos<back-1e-6)out.push({pos,pt:ring[i]});}}
-  out.sort((a,b)=>a.pos-b.pos);return [...out.map(o=>o.pt),q];}return null;}
+
+/**
+ * @param {PathLike} o
+ * @returns {Pt[]}
+ */
+function bezierOutline(o){
+  /** @type {Pt[]} */ const pts=o.points.map(p=>/** @type {Pt} */([Number(p[0]),Number(p[1])]));
+  const n=pts.length,segments=o.closed?n:n-1;
+  /** @type {Pt[]} */ const out=[[...pts[0]]];
+  for(let i=0;i<segments;i++){const j=(i+1)%n,p0=pts[i],p3=pts[j],p1=o.handles?.[i]?.o||p0,p2=o.handles?.[j]?.i||p3,steps=Math.max(4,Math.min(32,Math.ceil((Math.hypot(p1[0]-p0[0],p1[1]-p0[1])+Math.hypot(p2[0]-p1[0],p2[1]-p1[1])+Math.hypot(p3[0]-p2[0],p3[1]-p2[1]))/1.5)));
+    for(let k=1;k<=steps;k++){const t=k/steps,u=1-t;out.push(/** @type {Pt} */([0,1].map(a=>u*u*u*p0[a]+3*u*u*t*p1[a]+3*u*t*t*p2[a]+t*t*t*p3[a])));}}
+  return out;
+}
+
+/**
+ * @param {PathLike} o
+ * @returns {boolean}
+ */
+function hasHandles(o){return Array.isArray(o.handles)&&o.handles.some(Boolean);}
+
+/**
+ * @param {PathLike} o
+ * @returns {Pt[]}
+ */
+export function pathOutline(o){if(hasHandles(o)&&o.points.length>=2)return bezierOutline(o);/** @type {Pt[]} */ const pts=o.points.map(p=>/** @type {Pt} */([Number(p[0]),Number(p[1])]));if(o.smooth&&pts.length>=3)return splinePoints(pts,Boolean(o.closed));return o.closed?[...pts,pts[0]]:pts;}
+
+/**
+ * @param {PathLike} o
+ * @param {number} spacing
+ * @param {number} comp
+ * @returns {Pt[]}
+ */
+function satinZigzag(o,spacing,comp){
+  // Satin column: needles alternate between the two rails (centerline offset by half the width plus pull compensation), one crossing every `spacing` mm along the path.
+  const line=pathOutline(o),half=Math.max(.25,(Number(o.satinWidth)||3)/2+comp);
+  /** @type {number[]} */ const cum=[0];
+  for(let i=1;i<line.length;i++)cum.push(cum[i-1]+Math.hypot(line[i][0]-line[i-1][0],line[i][1]-line[i-1][1]));
+  const total=last(cum);if(total<.2)return [];
+  /** @type {(t: number) => Pt} */
+  const at=t=>{t=Math.max(0,Math.min(total,t));let i=1;while(i<cum.length-1&&cum[i]<t)i++;const seg=cum[i]-cum[i-1]||1,f=(t-cum[i-1])/seg;return [line[i-1][0]+(line[i][0]-line[i-1][0])*f,line[i-1][1]+(line[i][1]-line[i-1][1])*f];};
+  const n=Math.max(1,Math.ceil(total/spacing));
+  /** @type {Pt[]} */ const out=[];
+  for(let k=0;k<=n;k++){const t=Math.min(total,k*total/n),a=at(t-Math.min(.3,spacing/2)),b=at(t+Math.min(.3,spacing/2)),tx=b[0]-a[0],ty=b[1]-a[1],tl=Math.hypot(tx,ty)||1,side=k%2?-1:1,p=at(t);out.push([p[0]-ty/tl*half*side,p[1]+tx/tl*half*side]);}
+  return out;
+}
+
+// ---- stitch planning per object: underlay, auto-fill, satin ---------------------------------------------------
+/** @type {(a: Pt, b: Pt) => number} */
+export const distP=(a,b)=>Math.hypot(a[0]-b[0],a[1]-b[1]);
+
+// Rails of a satin column drawn as a centre line with a width.
+// Rails of a satin column drawn along a line. `halfAt(t)` is the half width at fraction t (0..1) of the length, so columns can taper or follow a width profile.
+// Corners get a join (round, miter or bevel) and open ends a cap (butt, round or square). The pairs that matter at corners and caps are returned as rungs so
+// the needles fan around the inner corner instead of being paired by length.
+/**
+ * @param {Pt[]} line
+ * @param {(t: number) => number} halfAt
+ * @param {{join?: string, cap?: string, capStart?: string, capEnd?: string, closed?: boolean}} [opt]
+ * @returns {Rails|null}
+ */
+export function railsFromLine(line,halfAt,opt={}){
+  const join=opt.join||'round',capS=opt.capStart||opt.cap||'butt',capE=opt.capEnd||opt.cap||'butt',closed=Boolean(opt.closed);
+  /** @type {Pt[]} */ const pts=[];
+  for(const p of line)if(!pts.length||distP(p,last(pts))>1e-6)pts.push([p[0],p[1]]);
+  if(closed&&pts.length>2&&distP(pts[0],last(pts))<1e-6)pts.pop();
+  const n=pts.length;if(n<2)return null;
+  const segs=closed?n:n-1;
+  /** @type {Pt[]} */ const dirs=[];
+  /** @type {number[]} */ const lens=[];
+  /** @type {number[]} */ const cum=[0];
+  for(let i=0;i<segs;i++){const a=pts[i],b=pts[(i+1)%n],l=distP(a,b);lens.push(l);dirs.push([(b[0]-a[0])/l,(b[1]-a[1])/l]);cum.push(cum[i]+l);}
+  const total=cum[segs];if(total<.2)return null;
+  /** @type {Pt[]} */ const A=[];
+  /** @type {Pt[]} */ const B=[];
+  /** @type {Array<[Pt, Pt]>} */ const rungs=[];
+  /** @type {(d: Pt) => Pt} */
+  const left=d=>[-d[1],d[0]];
+  /** @type {(s: number) => number} */
+  const hw=s=>Math.max(.25,halfAt(Math.min(1,Math.max(0,s/total))));
+  /** @type {(pa: Pt, pb: Pt, rung?: boolean) => void} */
+  const emit=(pa,pb,rung=false)=>{A.push(pa);B.push(pb);if(rung)rungs.push([pa,pb]);};
+  /** @type {(P: Pt, d: Pt, h: number) => [Pt, Pt]} */
+  const off=(P,d,h)=>{const nrm=left(d);return [[P[0]+nrm[0]*h,P[1]+nrm[1]*h],[P[0]-nrm[0]*h,P[1]-nrm[1]*h]];};
+  /** @type {(P: Pt, d: Pt, h: number, kind: string, atStart: boolean) => void} */
+  const cap=(P,d,h,kind,atStart)=>{ // pairs beyond the end point, ordered along the rails
+    if(kind==='butt'){const [pa,pb]=off(P,d,h);emit(pa,pb,true);return;}
+    const m=Math.max(2,Math.ceil(h/.3));
+    /** @type {Array<[Pt, Pt]>} */ const out=[];
+    for(let k=0;k<=m;k++){const x=h*(1-k/m),w=kind==='round'?h*Math.sqrt(Math.max(0,1-(x/h)**2)):h,c=/** @type {Pt} */([P[0]+(atStart?-1:1)*d[0]*x,P[1]+(atStart?-1:1)*d[1]*x]),[pa,pb]=off(c,d,w);out.push([pa,pb]);}
+    if(atStart){out.forEach(([pa,pb],k)=>emit(pa,pb,k===0||k===out.length-1));}
+    else{out.reverse().forEach(([pa,pb],k)=>emit(pa,pb,k===0||k===out.length-1));}
+  };
+  /** @type {(P: Pt, dp: Pt, dn: Pt, s: number, minLen: number) => void} */
+  const corner=(P,dp,dn,s,minLen)=>{
+    const h=hw(s),cross=dp[0]*dn[1]-dp[1]*dn[0],dot=dp[0]*dn[0]+dp[1]*dn[1],ang=Math.atan2(cross,dot),np=left(dp),nn=left(dn);
+    let mx=np[0]+nn[0],my=np[1]+nn[1];const ml=Math.hypot(mx,my);
+    if(Math.abs(ang)<.3||ml<1e-6){if(ml<1e-6){const [pa,pb]=off(P,dn,h);emit(pa,pb);return;}mx/=ml;my/=ml;const k=h/Math.cos(ang/2);emit([P[0]+mx*k,P[1]+my*k],[P[0]-mx*k,P[1]-my*k]);return;}
+    mx/=ml;my/=ml;
+    const so=cross>0?-1:1,innerD=Math.min(h/Math.cos(ang/2),Math.max(.2,minLen*.9)+h),inner=/** @type {Pt} */([P[0]-so*mx*innerD,P[1]-so*my*innerD]);
+    /** @type {(outer: Pt, rung: boolean) => void} */
+    const pair=(outer,rung)=>{if(cross>0)emit(inner,outer,rung);else emit(outer,inner,rung);};
+    const o0=/** @type {Pt} */([P[0]+so*np[0]*h,P[1]+so*np[1]*h]),o1=/** @type {Pt} */([P[0]+so*nn[0]*h,P[1]+so*nn[1]*h]);
+    if(join==='miter'&&Math.cos(ang/2)>=1/3&&innerD+h/Math.cos(ang/2)<=11.5){pair([P[0]+so*mx*h/Math.cos(ang/2),P[1]+so*my*h/Math.cos(ang/2)],true);}
+    else if(join==='round'){const t0=Math.atan2(so*np[1],so*np[0]);let dl=Math.atan2(so*nn[1],so*nn[0])-t0;while(dl>Math.PI)dl-=2*Math.PI;while(dl<-Math.PI)dl+=2*Math.PI;const k=Math.max(2,Math.ceil(Math.abs(dl)*h/.4));for(let j=0;j<=k;j++){const t=t0+dl*j/k;pair([P[0]+Math.cos(t)*h,P[1]+Math.sin(t)*h],j===0||j===k);}}
+    else{pair(o0,true);pair(o1,true);}
+  };
+  // where the inner rails meet at a sharp corner, the offset lines end earlier than the segment does
+  const setback=Array.from({length:n},(_,i)=>{if(!closed&&(i===0||i===n-1))return 0;const dp=dirs[(i+segs-1)%segs],dn=dirs[i%segs],ang=Math.atan2(dp[0]*dn[1]-dp[1]*dn[0],dp[0]*dn[0]+dp[1]*dn[1]);return Math.abs(ang)<.3?0:Math.min(hw(cum[i])*Math.abs(Math.tan(ang/2)),lens[(i+segs-1)%segs]/2,lens[i%segs]/2);});
+  /** @type {(i: number, from0: number, to0: number) => void} */
+  const along=(i,from0,to0)=>{const from=from0+setback[i],to=to0-setback[(i+1)%n],step=.5,m=Math.floor((to-from)/step);for(let k=1;k<m;k++){const u=from+(to-from)*k/m,P=/** @type {Pt} */([pts[i][0]+dirs[i][0]*u,pts[i][1]+dirs[i][1]*u]),[pa,pb]=off(P,dirs[i],hw(cum[i]+u));emit(pa,pb);}};
+  if(closed)corner(pts[0],dirs[segs-1],dirs[0],0,Math.min(lens[segs-1],lens[0]));else cap(pts[0],dirs[0],hw(0),capS,true);
+  if(!closed){const [pa,pb]=off(pts[0],dirs[0],hw(0));emit(pa,pb,true);}
+  for(let i=0;i<segs;i++){
+    along(i,0,lens[i]);
+    if(i<segs-1)corner(pts[i+1],dirs[i],dirs[i+1],cum[i+1],Math.min(lens[i],lens[i+1]));
+    else if(!closed){const [pa,pb]=off(last(pts),dirs[i],hw(total));emit(pa,pb,true);cap(last(pts),dirs[i],hw(total),capE,false);}
+  }
+  if(closed){A.push(A[0]);B.push(B[0]);}
+  return {a:A,b:B,rungs};
+}
+
+// Width of a satin path at fraction t: a width profile (`widthStops`, smooth between stops) wins over the plain start/end taper.
+/**
+ * @param {PathLike} o
+ * @param {number} t
+ * @returns {number}
+ */
+export function widthAt(o,t){const st=o.widthStops;if(Array.isArray(st)&&st.length){if(t<=st[0][0])return st[0][1];for(let i=1;i<st.length;i++)if(t<=st[i][0]){const f=(t-st[i-1][0])/((st[i][0]-st[i-1][0])||1),e=f*f*(3-2*f);return st[i-1][1]+(st[i][1]-st[i-1][1])*e;}return last(st)[1];}
+  const w0=Math.max(.5,Number(o.satinWidth)||3),w1=Math.max(.5,Number(o.satinWidthEnd)||w0);return w0+(w1-w0)*t;}
+
+/**
+ * @param {PathLike} o
+ * @returns {Rails|null}
+ */
+export function railsFromCenterline(o){return railsFromLine(pathOutline(o),t=>widthAt(o,t)/2,{join:o.join,cap:o.cap,closed:Boolean(o.closed)});}

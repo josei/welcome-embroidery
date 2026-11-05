@@ -1,11 +1,48 @@
+// @ts-check
 // Browser side of the agent relay: owns the session secrets, long-polls for jobs from the server and answers them
 // against the open document. The owner key stays in this tab's sessionStorage; the link token is what agents get.
 const KEY='welcome.agentSession';
+/**
+ * @param {unknown} body
+ * @param {AbortSignal} [signal]
+ * @returns {RequestInit}
+ */
 const json=(body,signal)=>({method:'POST',headers:{'content-type':'application/json','x-welcome-client':'1'},body:JSON.stringify(body),signal,credentials:'same-origin',cache:'no-store'});
 
+/**
+ * @typedef {{token: string, ownerKey: string}} Session
+ * @typedef {{status: string, mcpUrl: string|null, agentLastSeen: number|null, agentCalls: number, message: string}} AgentState
+ */
+/**
+ * @typedef {Object} Deps the editor's document and edit functions, from app.js
+ * @property {() => any} getDocument
+ * @property {(operations: any, expectedRevision: any) => any} applyRemote
+ * @property {(layer: any, expectedRevision: any) => any} addLayerRemote
+ * @property {(payload: any) => any} getReference
+ * @property {(state: AgentState) => void} [onChange]
+ */
+/**
+ * @typedef {Object} Bridge
+ * @property {() => AgentState} state
+ * @property {() => boolean} hasSession
+ * @property {() => Promise<boolean>} start
+ * @property {() => void} resume
+ * @property {(options?: {renew?: boolean}) => Promise<any>} revoke
+ */
+/**
+ * @param {Deps} deps
+ * @returns {Bridge}
+ */
 export function createAgentBridge({getDocument,applyRemote,addLayerRemote,getReference,onChange}){
-  let session=null,running=false,abort=null,state={status:'idle',mcpUrl:null,agentLastSeen:null,agentCalls:0,message:''};
+  /** @type {Session|null} */
+  let session=null;
+  let running=false;
+  /** @type {AbortController|null} */
+  let abort=null;
+  /** @type {AgentState} */
+  let state={status:'idle',mcpUrl:null,agentLastSeen:null,agentCalls:0,message:''};
   try{session=JSON.parse(sessionStorage.getItem(KEY)||'null');}catch{}
+  /** @type {(patch: Partial<AgentState>) => void} */
   const set=patch=>{state={...state,...patch};onChange?.(state);};
   const url=()=>session?`${location.origin}/mcp/${session.token}`:null;
   async function create(){
@@ -14,6 +51,10 @@ export function createAgentBridge({getDocument,applyRemote,addLayerRemote,getRef
     const body=await response.json().catch(()=>({}));if(!response.ok){set({status:'error',message:body.error||'Could not create an agent link.'});return false;}
     session={token:body.token,ownerKey:body.ownerKey};try{sessionStorage.setItem(KEY,JSON.stringify(session));}catch{}return true;
   }
+  /**
+   * @param {any} job a job from the server's relay (its fields are read as sent)
+   * @returns {Promise<{ok: boolean, result?: any, error?: string}>}
+   */
   async function handle(job){
     try{
       if(job.type==='get_document')return {ok:true,result:{document:getDocument()}};
@@ -21,7 +62,7 @@ export function createAgentBridge({getDocument,applyRemote,addLayerRemote,getRef
       if(job.type==='apply_ops'){return {ok:true,result:applyRemote(job.payload.operations,job.payload.expectedRevision)};}
       if(job.type==='add_layer')return {ok:true,result:addLayerRemote(job.payload.layer,job.payload.expectedRevision)};
       return {ok:false,error:`Unknown job type ${job.type}.`};
-    }catch(error){return {ok:false,error:error.message};}
+    }catch(error){return {ok:false,error:/** @type {any} */(error).message};}
   }
   async function loop(){
     if(running)return;running=true;let failures=0;
@@ -35,7 +76,7 @@ export function createAgentBridge({getDocument,applyRemote,addLayerRemote,getRef
         const active=body.agentLastSeen&&Date.now()-body.agentLastSeen<120_000;
         set({status:active?'active':'waiting',mcpUrl:url(),agentLastSeen:body.agentLastSeen,agentCalls:body.agentCalls,message:''});
         for(const job of body.jobs||[]){const reply=await handle(job);await fetch('/api/relay/reply',json({ownerKey:session.ownerKey,id:job.id,...reply}));}
-      }catch(error){if(!running||error.name==='AbortError')break;failures++;set({status:'error',message:'Lost connection to the Welcome server; retrying…'});await new Promise(r=>setTimeout(r,Math.min(15000,1000*2**failures)));}
+      }catch(error){if(!running||/** @type {any} */(error).name==='AbortError')break;failures++;set({status:'error',message:'Lost connection to the Welcome server; retrying…'});await new Promise(r=>setTimeout(r,Math.min(15000,1000*2**failures)));}
     }
     running=false;
   }

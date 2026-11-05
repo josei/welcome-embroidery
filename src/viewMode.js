@@ -1,3 +1,4 @@
+// @ts-check
 import {createStore} from './store.js';
 
 /** @typedef {'design' | 'stitches' | 'preview'} ViewMode */

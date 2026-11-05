@@ -1,3 +1,4 @@
+// @ts-check
 // Janome JEF thread chart colors, ported from pinned Ink/Stitch pystitch.
 const colors = [
   [1, 0x000000], // Black
@@ -79,5 +80,10 @@ const colors = [
   [77, 0xe3c4b4], // Beige Gray
   [78, 0xe3ac81], // Bamboo
 ];
+/** @type {(a: number[], b: number[]) => number} */
 const distance=(a,b)=>((a[0]-b[0])**2+(a[1]-b[1])**2+(a[2]-b[2])**2);
+/**
+ * @param {string} hex
+ * @returns {number}
+ */
 export function nearestJefColor(hex){const rgb=hex.match(/[0-9a-f]{2}/gi)?.map(x=>parseInt(x,16))||[0,0,0];let best=colors[0],score=Infinity;for(const [index,c] of colors){const next=distance(rgb,[(c>>16)&255,(c>>8)&255,c&255]);if(next<score){best=[index,c];score=next;}}return best[0];}

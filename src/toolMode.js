@@ -1,3 +1,4 @@
+// @ts-check
 import {createStore} from './store.js';
 
 /** @typedef {'select' | 'path' | 'pen' | 'line' | 'polygon' | 'star' | 'measure' | 'knife'} ToolName */

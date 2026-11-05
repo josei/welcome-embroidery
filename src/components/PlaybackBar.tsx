@@ -1,6 +1,7 @@
 import {useSyncExternalStore} from 'react';
 import {blockTimeLabel} from '../engine.js';
 import {t} from '../i18n.js';
+import {threadName} from '../threadPalette.js';
 import {playbackActions, playbackState} from '../playbackState.js';
 // The simulation bar below the canvas, rendered by React: play and restart, the time and stitch count, the thread blocks as a
 // track with the seek position on it, and the summary. Ids match the markup it replaced, because app.js and the tests use them.
@@ -25,6 +26,22 @@ export function PlaybackBar() {
    </div>
    <div className="playback-track">
     <div className="playback-slider">
+    {/* A marker at each colour change, in the new thread's colour: clicking it seeks to that change. */}
+    {p.spans.slice(1).map(s => {
+     const name = threadName(s.thread), when = blockTimeLabel(s.seconds);
+     return (
+      <button
+       key={s.start}
+       type="button"
+       className="timeline-marker"
+       data-index={s.start}
+       style={{left: `${(s.start / p.seekMax) * 100}%`, background: s.thread}}
+       title={t('Colour change to {n} at {time}', {n: name, time: when})}
+       aria-label={t('Colour change to {n} at {time}', {n: name, time: when})}
+       onClick={() => playbackActions.seek(s.start)}
+      />
+     );
+    })}
     <div className="playback-spans" aria-hidden="true">
      {p.spans.map((s, i) => (
       <span key={i} style={{flex: `${s.end - s.start} 1 0`, background: s.thread, opacity: p.index >= s.end ? 1 : p.index > s.start ? 0.8 : 0.45}} />
