@@ -6,6 +6,7 @@ import {geometry,objectBounds,hoopSize} from './engine.js';
 import {drawScene} from './canvasScene.js';
 import {createCanvasEditing} from './canvasEditing.js';
 import {createCanvasTools} from './canvasTools.js';
+import {deletingGuideState,handModeState,panningState} from './canvasModeState.js';
 
 const SVG='http://www.w3.org/2000/svg',PX_PER_MM=96/25.4;
 const el=(/** @type {any} */ tag,attrs={})=>{const n=document.createElementNS(SVG,tag);for(const [k,v] of Object.entries(attrs))n.setAttribute(k,v);return n;};
@@ -79,8 +80,8 @@ export function createCanvas(/** @type {any} */ api){
     const mouse=e.deltaMode===1||(Math.abs(e.deltaY)>=100&&e.deltaX===0&&Number.isInteger(e.deltaY));
     if(e.ctrlKey||e.metaKey||mouse)zoomAt(Math.exp(-e.deltaY*(e.ctrlKey?.01:.0016)),e.clientX,e.clientY);else{vp.cx+=e.deltaX/vp.s;vp.cy+=e.deltaY/vp.s;apply();}},{passive:false});
   new ResizeObserver(()=>apply()).observe(container);
-  document.addEventListener('keydown',e=>{if(e.code==='Space'&&!inField(e)){spaceDown=true;container.classList.add('panning');if(e.target===document.body)e.preventDefault();}});
-  document.addEventListener('keyup',e=>{if(e.code==='Space'){spaceDown=false;container.classList.remove('panning');}});
+  document.addEventListener('keydown',e=>{if(e.code==='Space'&&!inField(e)){spaceDown=true;panningState.set(true);if(e.target===document.body)e.preventDefault();}});
+  document.addEventListener('keyup',e=>{if(e.code==='Space'){spaceDown=false;panningState.set(false);}});
 
   // ---- rulers and guides ------------------------------------------------------------------------------------
   function niceStep(){for(const s of [.5,1,2,5,10,20,50,100,200,500])if(s*vp.s>=42)return s;return 1000;}
@@ -224,15 +225,8 @@ export function createCanvas(/** @type {any} */ api){
   };
   const deg=(/** @type {any} */ r)=>r*180/Math.PI;
 
-  const touches=new Map();let handMode=false;
-  const handBtn=container.querySelector('#handTool');
-  function setHand(/** @type {any} */ on){handMode=on;
-  container.classList.toggle('hand',on);
-  handBtn?.setAttribute('aria-pressed',String(on));
-  handBtn?.classList.toggle('active-tool',on);
-  }
-  handBtn?.addEventListener('click',()=>setHand(!handMode));
-  function cancelState(){if(!state)return;restore(state.els||[]);overlay.removeAttribute('transform');state=null;smartLines=[];container.classList.remove('panning','deleting-guide');refresh();}
+  const touches=new Map();
+  function cancelState(){if(!state)return;restore(state.els||[]);overlay.removeAttribute('transform');state=null;smartLines=[];panningState.set(false);deletingGuideState.set(false);refresh();}
   function pinchState(){const [a,b]=touches.values(),r=container.getBoundingClientRect(),{w,h}=size(),mx=(a.x+b.x)/2-r.left,my=(a.y+b.y)/2-r.top;return {type:'pinch',dist:Math.hypot(a.x-b.x,a.y-b.y)||1,s0:vp.s,wx:vp.cx+(mx-w/2)/vp.s,wy:vp.cy+(my-h/2)/vp.s};}
   function pinchTo(/** @type {any} */ s){const [a,b]=touches.values(),r=container.getBoundingClientRect(),{w,h}=size(),mx=(a.x+b.x)/2-r.left,my=(a.y+b.y)/2-r.top;
   vp.s=Math.max(.4,Math.min(160,s.s0*Math.hypot(a.x-b.x,a.y-b.y)/s.dist));
@@ -245,12 +239,12 @@ export function createCanvas(/** @type {any} */ api){
     if(e.pointerType!=='touch')return;
     touches.set(e.pointerId,{x:e.clientX,y:e.clientY});
     if(touches.size!==2)return;
-    cancelState();state=pinchState();container.classList.add('panning');
+    cancelState();state=pinchState();panningState.set(true);
   });
 
   svg.addEventListener('pointerdown',(/** @type {any} */ e)=>{
     if(e.pointerType==='touch'&&touches.size>0)return;
-    if(e.button===1||(e.button===0&&(spaceDown||handMode))){e.preventDefault();state={type:'pan',x:e.clientX,y:e.clientY,cx:vp.cx,cy:vp.cy,pid:e.pointerId};container.classList.add('panning');svg.setPointerCapture?.(e.pointerId);return;}
+    if(e.button===1||(e.button===0&&(spaceDown||handModeState.get()))){e.preventDefault();state={type:'pan',x:e.clientX,y:e.clientY,cx:vp.cx,cy:vp.cy,pid:e.pointerId};panningState.set(true);svg.setPointerCapture?.(e.pointerId);return;}
     if(e.button===0&&api.tool()==='measure'){e.preventDefault();tools.measureClick(coord(e));return;}
     if(e.button===0&&api.tool()==='knife'){e.preventDefault();tools.knifeClick(coord(e));return;}
     if(e.button!==0||api.tool()!=='select')return;
@@ -324,7 +318,7 @@ export function createCanvas(/** @type {any} */ api){
     overlay.append(el('line',{class:'guide guide-preview',x1:x?pos:-big,x2:x?pos:big,y1:x?-big:pos,y2:x?big:pos}));
     }state.pos=pos;
     state.out=out;
-    container.classList.toggle('deleting-guide',out&&state.index!==null);
+    deletingGuideState.set(Boolean(out&&state.index!==null));
     return;
     }
     const q=coord(e);
@@ -353,10 +347,10 @@ export function createCanvas(/** @type {any} */ api){
       refresh({...f,W:f.W*sx,H:f.H*sy,c:toWorld(f,ax+(-ax)*sx,ay+(-ay)*sy)},`${(f.W*sx).toFixed(1)} × ${(f.H*sy).toFixed(1)} mm`);overlay.querySelectorAll('.sel-handle').forEach(()=>{});}
   });
   window.addEventListener('pointerup',e=>{
-    if(touches.delete(e.pointerId)&&state?.type==='pinch'&&touches.size<2){state=null;container.classList.remove('panning');}
+    if(touches.delete(e.pointerId)&&state?.type==='pinch'&&touches.size<2){state=null;panningState.set(false);}
     if(!state)return;const s=state;
-    if(s.type==='pan'){state=null;container.classList.remove('panning');return;}
-    if(e.pointerId!==s.pid)return;state=null;overlay.removeAttribute('transform');smartLines=[];container.classList.remove('deleting-guide');
+    if(s.type==='pan'){state=null;panningState.set(false);return;}
+    if(e.pointerId!==s.pid)return;state=null;overlay.removeAttribute('transform');smartLines=[];deletingGuideState.set(false);
     if(s.type==='guide'){overlay.querySelectorAll('.guide-preview').forEach((/** @type {any} */ n)=>n.remove());
     if(s.pos===undefined){refresh();
     return;
@@ -375,7 +369,7 @@ export function createCanvas(/** @type {any} */ api){
     if(s.type==='rotate'){restore(s.els);if(Math.abs(s.angle)>.05)api.commit([{op:'rotate',ids:s.ids,angle:s.angle,cx:s.f.c[0],cy:s.f.c[1]}]);else refresh();return;}
     if(s.type==='resize'){restore(s.els);if(!s.anchor||(Math.abs(s.sx-1)<1e-4&&Math.abs(s.sy-1)<1e-4)){refresh();return;}commitResize(s);}
   });
-  window.addEventListener('pointercancel',e=>{touches.delete(e.pointerId);if(state?.type==='pinch'){state=null;container.classList.remove('panning');return;}cancelState();});
+  window.addEventListener('pointercancel',e=>{touches.delete(e.pointerId);if(state?.type==='pinch'){state=null;panningState.set(false);return;}cancelState();});
 
   // ---- context menu ------------------------------------------------------------------------------------------
   function closeMenu(){menu?.remove();menu=null;}

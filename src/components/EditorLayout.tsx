@@ -42,6 +42,7 @@ import {toolbarActions} from '../toolbarCommands.js';
 import {viewMode} from '../viewMode.js';
 import {gridSnapState} from '../gridSnapState.js';
 import {editModeState} from '../editModeState.js';
+import {deletingGuideState, handModeState, panningState} from '../canvasModeState.js';
 // The editor layout: the object list, the canvas and the inspector. Rendered by React; ids match the markup it
 // replaced, because the keyboard shortcuts and tests address them.
 export function EditorLayout() {
@@ -49,6 +50,11 @@ export function EditorLayout() {
  const view = useSyncExternalStore(viewMode.subscribe, viewMode.get);
  const snapping = useSyncExternalStore(gridSnapState.subscribe, gridSnapState.get);
  const editing = useSyncExternalStore(editModeState.subscribe, editModeState.get);
+ const hand = useSyncExternalStore(handModeState.subscribe, handModeState.get);
+ const panning = useSyncExternalStore(panningState.subscribe, panningState.get);
+ const deletingGuide = useSyncExternalStore(deletingGuideState.subscribe, deletingGuideState.get);
+ const canvasClass = ['canvas', hand && 'hand', snapping && 'snapping', view === 'preview' && 'preview-mode', panning && 'panning',
+  deletingGuide && 'deleting-guide'].filter(Boolean).join(' ');
  return (
   <>
     <div className={"layout"}>
@@ -62,7 +68,7 @@ export function EditorLayout() {
         <HoopFields />
       </aside>
       <main className={view === 'design' ? 'design-view' : undefined}>
-        <div className={['canvas', snapping && 'snapping', view === 'preview' && 'preview-mode'].filter(Boolean).join(' ')}>
+        <div className={canvasClass}>
           <div className={"tool-row tool-rail"} aria-label={"Tools"}>
             <SelectTool />
             <AddShapeButton kind={"rect"} id={"rect"} label={"Add rectangle"} icon={"rect"} />

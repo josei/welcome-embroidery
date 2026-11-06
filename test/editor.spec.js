@@ -1122,6 +1122,15 @@ test('hand tool drags the view and the select tool does not',async({page})=>{
  await page.locator('#handTool').click();await expect(page.locator('#handTool')).toHaveAttribute('aria-pressed','false');
 });
 
+test('hand mode keeps its cursor across a grid and view change',async({page})=>{
+ await page.goto('/');await page.locator('#handTool').click();await expect(page.locator('#handTool')).toHaveAttribute('aria-pressed','true');
+ await expect(page.locator('#art')).toHaveCSS('cursor','grab');
+ await page.locator('#snap').click();await expect(page.locator('.canvas')).toHaveClass(/\bhand\b/);await expect(page.locator('#art')).toHaveCSS('cursor','grab');
+ await page.locator('#snap').click();await page.locator('button[data-view="preview"]').click();await expect(page.locator('.canvas')).toHaveClass(/\bhand\b/);
+ await page.locator('button[data-view="design"]').click();await expect(page.locator('#art')).toHaveCSS('cursor','grab');
+ await page.locator('#handTool').click();await expect(page.locator('#handTool')).toHaveAttribute('aria-pressed','false');await expect(page.locator('.canvas')).not.toHaveClass(/\bhand\b/);
+});
+
 test.describe('touch gestures',()=>{
  test.use({hasTouch:true});
  test('two fingers pinch to zoom the view',async({page,browserName})=>{
