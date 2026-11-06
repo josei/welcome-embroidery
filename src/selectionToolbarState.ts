@@ -1,6 +1,6 @@
 import {createStore} from './store.js';
 
-/** Which selection-toolbar buttons are disabled (true means disabled). app.js works it out from the selection and sets it. */
+/** Which selection-toolbar buttons are disabled (true means disabled). toolbarSync works it out from the selection and sets it. */
 export interface SelectionToolbar {
   subtract: boolean;
   union: boolean;
@@ -19,7 +19,7 @@ export const selectionToolbarState = createStore<SelectionToolbar>({
 
 /**
  * The buttons call press() with their name, and clip()/unclip()/textOnPath()/textOffPath() for the mask and text-on-path
- * buttons. app.js sets them, because each one edits the selected objects.
+ * buttons. configureSelectionToolbarActions sets them, because each one edits the selected objects.
  */
 export const selectionToolbarActions: {
   press: (name: ToolbarName) => void;

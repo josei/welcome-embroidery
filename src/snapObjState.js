@@ -17,7 +17,7 @@ function readSaved() {
 export const snapObjState = createStore(readSaved());
 
 /**
- * The toolbar button calls toggle(). app.js sets it at start-up, because turning snapping on or off
+ * The toolbar button calls toggle(). configureToolbarCommands sets it, because turning snapping on or off
  * also saves the choice, clears the snap marker and shows a message.
  * @type {{toggle: () => void}}
  */

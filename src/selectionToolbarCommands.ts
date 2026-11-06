@@ -1,6 +1,7 @@
 // The canvas toolbar's clip-mask and text-on-path buttons: each one runs one operation through the editor's edit command.
 import {documentNow} from './documentState.js';
 import {selState, setSelection} from './selectionState.js';
+import {orderedIds} from './selectionCommands.js';
 import {selectionToolbarActions} from './selectionToolbarState.js';
 
 /** What the selection toolbar's clip and text buttons need from the editor. */
@@ -70,5 +71,20 @@ export function configureSelectionToolbarActions(next: SelectionToolbarApi) {
   selectionToolbarActions.textOffPath = () => {
     const ids = [...selState().multi].filter(id => objects().find(o => o.id === id)?.along);
     if (ids.length) wired().edit(ids.map(textId => ({op: 'text_off_path', textId})));
+  };
+  // Flip works on the selection in document order; the subtract, union and intersect buttons run a boolean shape
+  // command and leave the result as the only selected object.
+  selectionToolbarActions.press = name => {
+    if (name === 'flipH' || name === 'flipV') {
+      const ids = orderedIds();
+      if (ids.length) wired().edit([{op: 'flip', ids, axis: name === 'flipH' ? 'horizontal' : 'vertical'}]);
+      return;
+    }
+    const ids = objects().map(o => o.id).filter(id => selState().multi.has(id));
+    if (ids.length < 2) return;
+    wired().edit([{op: 'boolean', mode: name, ids}], () => {
+      setSelection({selected: ids[0]});
+      setSelection({multi: new Set([ids[0]])});
+    });
   };
 }

@@ -1,6 +1,8 @@
 // The line, measure, polygon and star tool buttons, rendered by React. The active tool comes from toolMode.
 import {useSyncExternalStore} from 'react';
 import {toolActions, toolMode} from '../toolMode.js';
+import {gridSnapActions, gridSnapState} from '../gridSnapState.js';
+import {toolbarActions} from '../toolbarCommands.js';
 
 function toolClass(current: string, name: string) {
  return current === name ? 'icon-button active-tool' : 'icon-button';
@@ -34,5 +36,24 @@ export function PathTool() {
  const label = current === 'path' ? 'Finish path (Enter · click first point to close · Esc cancels)' : 'Draw path (N)';
  return (
   <button className={toolClass(current, 'path')} onClick={() => toolActions.press('path')} aria-label={label} title={label} data-tooltip={label} id="path"><svg className="icon"><use href="#i-path"/></svg></button>
+ );
+}
+
+// The add rectangle, ellipse and lettering buttons. Each adds its shape through the same canvas command as before.
+export function AddShapeButton({kind, id, label, icon}: {kind: 'rect' | 'ellipse' | 'text'; id: string; label: string; icon: string}) {
+ return (
+  <button className="icon-button" id={id} aria-label={label} title={label} data-tooltip={label} onClick={() => toolbarActions.addShape(kind)}>
+   <svg className="icon"><use href={`#i-${icon}`}/></svg>
+  </button>
+ );
+}
+
+// The snap-to-the-grid toggle. Its active state comes from gridSnapState; its click flips the setting and says what changed.
+export function GridSnapButton() {
+ const on = useSyncExternalStore(gridSnapState.subscribe, gridSnapState.get);
+ return (
+  <button className={on ? 'icon-button active-tool' : 'icon-button'} aria-label="Snap to grid" title="Snap to grid" data-tooltip="Snap to grid" id="snap" onClick={() => gridSnapActions.toggle()}>
+   <svg className="icon"><use href="#i-snap"/></svg>
+  </button>
  );
 }

@@ -1,7 +1,6 @@
 import {documentNow,setDocument,documentActions} from './documentState.js';
 import {configureInspector, syncInspector} from './inspector.js';
 import {configureLettering, ensureDocFonts, ensureFontLoaded, fitHeight, initFontPicker, kickFontLoads, letteringTextFont} from './letteringFonts.js';
-import {setHoopFields,hoopActions} from './hoopState.js';
 import {setShortcutsOpen,shortcutsState} from './shortcutsState.js';
 import {restoreActions,setRestore} from './restoreState.js';
 import {configureStitchPanel, syncStitchPanel} from './stitchPanel.js';
@@ -10,7 +9,6 @@ import {configureBatchExport, syncBatchInfo} from './batchExport.js';
 import {configureSewingOrder, moveSelection} from './sewingOrder.js';
 import {configureShapePathActions} from './shapePathCommands.js';
 import {configureSelectionToolbarActions} from './selectionToolbarCommands.js';
-import {setActions} from './actionState.js';
 import {stitchChoiceActions} from './stitchChoicesState.js';
 import {capRowsActions} from './capRowsState.js';
 import {blingRowsActions} from './blingRowsState.js';
@@ -34,13 +32,18 @@ import {pathDraftNow,setPathDraft} from './pathDraftState.js';
 import {interactionNow,setInteraction} from './interactionState.js';
 import {clipboardNow,setClipboard} from './clipboardState.js';
 import {selState,setSelection} from './selectionState.js';
+import {editModeNow,setEditMode} from './editModeState.js';
+import {configureSelectionCommands,copySelection,nudge,orderedIds,pasteClipboard,removeSelected,selectAll,selectIds,selectedObject} from './selectionCommands.js';
+import {configureLayersCommands} from './layersCommands.js';
+import {configureToolbarCommands} from './toolbarCommands.js';
+import {configureContextMenu,menuItems} from './contextMenu.js';
+import {configureHoopCommands} from './hoopCommands.js';
+import {configureGridSnap,gridSnapState} from './gridSnapState.js';
+import {configureZoom,setZoomPercent} from './zoomState.js';
+import './toolbarSync.js';
 import {setStatus,statusActions} from './statusState.js';
 import {setStitchRow} from './stitchRowsState.js';
-import {alignState,alignActions} from './alignState.js';
-import {selectionToolbarState,selectionToolbarActions} from './selectionToolbarState.js';
-import {nodeButtonsState} from './nodeButtonsState.js';
 import {knifeState} from './knifeState.js';
-import {snapObjState,snapObjActions} from './snapObjState.js';
 import {measureState} from './measureState.js';
 import {pinState,pinActions,pinClearActions} from './pinState.js';
 import {pivotState} from './pivotState.js';
@@ -52,21 +55,20 @@ import {traceImage,traceOps,traceLines,traceLineOps} from './trace.js';
 import {createAgentBridge} from './agent.js';
 import {createThreadPreview} from './preview3d.js';
 import {previewState,setPreviewState,previewActions} from './previewState.js';
-import {layersActions} from './layersState.js';
 import {exportFormatState} from './exportFormatState.js';
 import {playbackActions,setPlayback} from './playbackState.js';
 import {setSewingCounts} from './sewingCountsState.js';
 import {sewTipActions,setSewTips} from './sewTipsState.js';
-import {gridActions,setGridValue} from './gridState.js';
+import {configureGrid,gridState} from './gridState.js';
 import {createCanvas} from './canvas.js';
 import {configureCanvasText, enterEdit} from './canvasText.js';
 import {configureReference, referenceForAgent} from './referencePicture.js';
-import {distortionGrid,blockSeconds,blockTimeLabel,bundledFontUsage,exportAppliqueTemplates,cornerRadii,svgPathFill,parseThreadStock,nearestStockThread,HOOP_PRESETS,customFontUsage,exportPrintTemplate,designWarnings,TIP_CATEGORIES,visibleTips,measureBetween,initialDocument,geometry,applyOperations,validateDocument,parseSvgPath,makeStitchLayer,objectBounds,hoopSize,jefWarnings,exportSvg,threadPlan,threadSpans,sewingSeconds,sewingSecondsUpTo,sewingWorksheet} from './engine.js';
+import {distortionGrid,blockSeconds,blockTimeLabel,bundledFontUsage,exportAppliqueTemplates,cornerRadii,svgPathFill,parseThreadStock,nearestStockThread,customFontUsage,exportPrintTemplate,designWarnings,TIP_CATEGORIES,visibleTips,measureBetween,initialDocument,geometry,applyOperations,validateDocument,parseSvgPath,makeStitchLayer,objectBounds,hoopSize,jefWarnings,exportSvg,threadPlan,threadSpans,sewingSeconds,sewingSecondsUpTo,sewingWorksheet} from './engine.js';
 import {clone,download,safeProjectFilename,sewTime,tipKey,forWorker} from './appHelpers.js';
 import {withSavedHoop,STOCK_KEY,threadStock,TIPS_KEY,hiddenTips,ignoredTipsKey,ignoredTips} from './storedPrefs.js';
 const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)],svgNS='http://www.w3.org/2000/svg';
 setDocument({doc:withSavedHoop(initialDocument()),history:[],future:[],dirty:true});
-let plan=null,worker=new Worker(new URL('./worker.js',import.meta.url),{type:'module'}),workerFailure=null,seq=0,generation=0,pending=new Map(),editMode=false,canvasView=null,snapOn=false,gridSize=1,playIndex=null,playbackTimer=null;
+let plan=null,worker=new Worker(new URL('./worker.js',import.meta.url),{type:'module'}),workerFailure=null,seq=0,generation=0,pending=new Map(),canvasView=null,playIndex=null,playbackTimer=null;
 worker.onmessage=e=>{if(e.data.generation!==generation)return;const p=pending.get(e.data.id);if(!p)return;pending.delete(e.data.id);e.data.ok?p.resolve(e.data):p.reject(Error(e.data.error));};
 function failPending(error){workerFailure??=error;for(const item of pending.values())item.reject(workerFailure);pending.clear();}
 worker.addEventListener('error',e=>{e.preventDefault();failPending(Error(`Stitch worker failed to load or run${e.message?`: ${e.message}`:''}. Reload the editor and try again.`));});
@@ -78,7 +80,6 @@ function clearComputed(){if(plan)lastPlan=plan;generation++;for(const item of pe
 function transact(fn){const before=clone(documentNow().doc),beforeSelected=selState().selected;try{fn();validateDocument(documentNow().doc);}catch(error){setDocument({doc:before});setSelection({selected: beforeSelected});render();toast(error.message);return false;}const current=documentNow(),nextHistory=[...current.history,before];if(nextHistory.length>80)nextHistory.shift();setDocument({doc:{...current.doc,revision:before.revision+1},history:nextHistory,future:[],dirty:true});clearComputed();render();if(viewMode.get()==='preview'&&documentNow().doc.objects.length)compileNow();return true;}
 function edit(operations,after=()=>{}){return transact(()=>{applyOperations(documentNow().doc,operations);after();});}
 function toast(s){const t=$('#toast');t.textContent=s;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2600);}
-function selectedObject(){return documentNow().doc.objects.find(o=>o.id===selState().selected);}
 // The simulation bar (PlaybackBar.tsx) reads the playback store; this sets it from the plan and the playback position. Status text stays in statusState.
 let spanCache={plan:null,spans:[],trims:0,metres:0,changes:0};
 function planSpans(){if(spanCache.plan!==plan){const spans=plan?threadSpans(plan).map(s=>({...s,seconds:sewingSecondsUpTo(plan,s.start)})):[];spanCache={plan,spans,trims:plan?plan.stitches.filter(s=>s.cmd==='trim').length:0,metres:plan?threadPlan(plan).reduce((n,b)=>n+b.mm,0)/1000:0,changes:Math.max(0,spans.length-1)};}return spanCache;}
@@ -124,23 +125,6 @@ function render(){syncBatchInfo();
  if(selState().selNode!==null&&!(selectedObject()?.points?.[selState().selNode]))setSelection({selNode: null});
  {const pts=selectedObject()?.points;setSelection({selNodes: new Set([...selState().selNodes].filter(i=>pts?.[i]))});}
  
- $('#snap').classList.toggle('active-tool',snapOn);
- $('.canvas').classList.toggle('snapping',snapOn);
- const nMulti=selState().multi.size;
- alignState.set({align:nMulti<1,distribute:nMulti<3});
- {const picked=[...selState().multi].map(id=>documentNow().doc.objects.find(o=>o.id===id)).filter(Boolean);setActions({textOnPath:!(picked.length===2&&picked.some(o=>o.kind==='text')&&picked.some(o=>o.kind==='path'))});setActions({textOffPath:!picked.some(o=>o.along)});}
- selectionToolbarState.set({...selectionToolbarState.get(),subtract:nMulti<2,union:nMulti<2,intersect:nMulti<2});
- setActions({group:nMulti<2});
- setActions({ungroup:![...selState().multi].some(id=>documentNow().doc.objects.find(o=>o.id===id)?.groupId)});
- setActions({editNodes:selState().multi.size!==1||selectedObject()?.kind==='stitch_layer'});
- $('#editNodes').classList.toggle('active-tool',editMode);
- selectionToolbarState.set({...selectionToolbarState.get(),flip:!selState().multi.size});
- nodeButtonsState.set({add:selectedObject()?.kind!=='path',del:selState().selNode===null,smooth:selState().selNode===null,corner:selState().selNode===null||!selectedObject()?.handles?.[selState().selNode]});
- document.querySelector('.canvas').classList.toggle('preview-mode',viewMode.get()==='preview');
- document.querySelector('.layout main').classList.toggle('design-view',viewMode.get()==='design');
- setActions({undo:!documentNow().history.length});
- setActions({redo:!documentNow().future.length});
- setActions({duplicate:!selState().selected,remove:!selState().selected});
  canvasView?.drawScene();
 canvasView?.drawControls();
 const tips=sewingTips();
@@ -152,32 +136,15 @@ renderSewTips(tips);
 }
 let lastDown=null;
 
-// The object list (ObjectList.tsx) calls these: they change the selection or the document, as the list did before it moved to React.
-layersActions.select=(ids,primary)=>selectIds(ids,primary);
-layersActions.setVisible=(ids,visible)=>edit(ids.map(id=>({op:'set_object',id,visible})));
-layersActions.setLocked=(ids,locked)=>edit(ids.map(id=>({op:'set_object',id,locked})));
-layersActions.reorder=(id,index)=>edit([{op:'reorder',id,index}]);
-layersActions.rename=(id,text)=>{const o=documentNow().doc.objects.find(v=>v.id===id),name=text?.trim();if(o&&name&&name!==o.name)edit([{op:'set_object',id,name}]);};
 
-$('#rect').onclick=()=>canvasView.add('rect');$('#ellipse').onclick=()=>canvasView.add('ellipse');$('#letter').onclick=()=>canvasView.add('text');
 
 let segReady=false,threadsReady=false;
-$('#group').onclick=()=>{const ids=[...selState().multi];if(ids.length>=2)edit([{op:'group',ids}]);};
-$('#ungroup').onclick=()=>{const ids=[...selState().multi];if(ids.length)edit([{op:'ungroup',ids}]);};
-const setHoop=(w,h)=>{if(edit([{op:'set_hoop',width:w,height:h}])){try{localStorage.setItem('welcome.hoop',JSON.stringify(hoopSize(documentNow().doc)));}catch{}canvasView?.fitHoop();}};
-hoopActions.preset=key=>{const p=HOOP_PRESETS.find(v=>v.key===key);if(p){setHoop(p.w,p.h);return;}const cur=hoopSize(documentNow().doc);setHoopFields({preset:HOOP_PRESETS.some(v=>v.w===cur.w&&v.h===cur.h)?key:'custom'});};
-hoopActions.rotate=()=>{if(edit([{op:'rotate_hoop'}])){try{localStorage.setItem('welcome.hoop',JSON.stringify(hoopSize(documentNow().doc)));}catch{}canvasView?.fitHoop();}};
-hoopActions.commit=(field,text)=>{const h=hoopSize(documentNow().doc);if(field==='hoopW')setHoop(Number(text),h.h);else setHoop(h.w,Number(text));};
-snapObjActions.toggle=()=>{const on=!snapObjState.get();snapObjState.set(on);try{localStorage.setItem('welcome.snapObj',on?'1':'0');}catch{}canvasView.showSnap(null);toast(on?'Snapping to other objects on.':'Snapping to other objects off.');};
-$('#snap').onclick=()=>{snapOn=!snapOn;render();toast(snapOn?`Snap to ${gridSize} mm grid on.`:'Snap off.');};
-// The grid select and the grid chip (GridControl.tsx) call this: it sets the snap grid and shows the new spacing.
-gridActions.choose=v=>{gridSize=Number(v);setGridValue(v);render();};
-alignActions.press=name=>{const ids=[...selState().multi];if(name==='horizontal'||name==='vertical'){if(ids.length>=3)edit([{op:'distribute',ids,axis:name}]);return;}if(!ids.length)return;edit([{op:'align',ids,edge:name,...(ids.length===1?{to:'hoop'}:{})}]);};
-$('#duplicate').onclick=()=>{const ids=[...selState().multi];if(!ids.length)return;const copies=ids.map(id=>[id,crypto.randomUUID()]),regroup=ids.length>1&&new Set(ids.map(id=>documentNow().doc.objects.find(o=>o.id===id)?.groupId)).size===1&&documentNow().doc.objects.find(o=>o.id===ids[0])?.groupId;edit([...copies.map(([id,newId])=>({op:'duplicate',id,newId,dx:3,dy:3})),...(regroup?[{op:'group',ids:copies.map(c=>c[1])}]:[])],()=>{setSelection({multi: new Set(copies.map(c=>c[1]))});setSelection({selected: copies.at(-1)[1]});});};
-function removeSelected(){const ids=[...selState().multi];if(!ids.length)return;edit(ids.map(id=>({op:'delete',id})),()=>{setSelection({selected: null});setSelection({multi: new Set()});setSelection({selNode: null});});}$('#remove').onclick=removeSelected;
-
-const runBoolean=mode=>{const ids=documentNow().doc.objects.map(o=>o.id).filter(id=>selState().multi.has(id));if(ids.length>=2)edit([{op:'boolean',mode,ids}],()=>{setSelection({selected: ids[0]});setSelection({multi: new Set([ids[0]])});});};
-selectionToolbarActions.press=name=>{if(name==='flipH'){const ids=orderedIds();if(ids.length)edit([{op:'flip',ids,axis:'horizontal'}]);}else if(name==='flipV'){const ids=orderedIds();if(ids.length)edit([{op:'flip',ids,axis:'vertical'}]);}else runBoolean(name);};
+configureSelectionCommands({edit,transact,render,toast});
+configureLayersCommands({edit});
+configureToolbarCommands({edit,render,toast,clearComputed,addShape:kind=>canvasView.add(kind),clearSnapMarker:()=>canvasView.showSnap(null)});
+configureHoopCommands({edit,fitHoop:()=>canvasView?.fitHoop()});
+configureGrid({render});
+configureGridSnap({render,toast});
 configureArray({edit,toast});
 configureShapePathActions({edit,toast,render});
 configureSelectionToolbarActions({edit});
@@ -203,8 +170,6 @@ satinEndRowsActions.commit=(field,text)=>{if(selState().selected)edit([{op:'set_
 capRowsActions.commit=(field,text)=>{if(field==='appliqueWidth'){if(selState().selected)edit([{op:'set_object',id:selState().selected,appliqueWidth:Number(text)}]);return;}if(field==='compensation'){if(selState().selected)edit([{op:'set_object',id:selState().selected,compensation:text===''?null:Number(text)}]);return;}const o=selectedObject();if(o&&selState().selNode!==null)edit([{op:'set_width_at_node',id:o.id,index:selState().selNode,width:Number(text)}]);};
 blingRowsActions.choose=(field,value)=>{if(!selState().selected)return;if(field==='motifPair'){edit([{op:'set_object',id:selState().selected,motifPair:value,...(value?{satinWidth:selectedObject()?.satinWidth??4}:{})}]);return;}const v=field==='blingRings'?Number(value):value;edit([{op:'set_object',id:selState().selected,[field]:v}]);};
 initFontPicker();
-$('#undo').onclick=()=>{const d=documentNow();if(!d.history.length)return;const prev=d.history.at(-1);setDocument({doc:{...prev,revision:prev.revision+1},history:d.history.slice(0,-1),future:[...d.future,clone(d.doc)],dirty:true});clearComputed();render();};
-$('#redo').onclick=()=>{const d=documentNow();if(!d.future.length)return;const next=d.future.at(-1);setDocument({doc:{...next,revision:next.revision+1},history:[...d.history,clone(d.doc)],future:d.future.slice(0,-1),dirty:true});clearComputed();render();};
 
 // Notes from the last SVG import (for example, a filled path that kept its outline), shown as a toast after the file opens.
 let svgImportNotes=[];
@@ -243,12 +208,12 @@ function importSvg(source){
  return d;
 }
 function projectSave(){setTimeout(()=>{try{const a=JSON.parse(localStorage.getItem('welcome.autosave')||'null');if(a){a.clean=true;localStorage.setItem('welcome.autosave',JSON.stringify(a));}}catch{}},0);download(JSON.stringify(documentNow().doc,null,2),safeProjectFilename(documentNow().doc.name),'application/json');setDocument({dirty: false});render();}
-function acceptProject(next){validateDocument(next);const opened=clone(next);clearComputed();setDocument({doc: opened});setDocument({history: []});setDocument({future: []});setSelection({selected: documentNow().doc.objects[0]?.id||null});setSelection({multi: new Set(selState().selected?[selState().selected]:[])});editMode=false;setSelection({selNode: null});setDocument({dirty: false});render();canvasView?.fitAll();toast('Project opened locally.');}
+function acceptProject(next){validateDocument(next);const opened=clone(next);clearComputed();setDocument({doc: opened});setDocument({history: []});setDocument({future: []});setSelection({selected: documentNow().doc.objects[0]?.id||null});setSelection({multi: new Set(selState().selected?[selState().selected]:[])});setEditMode(false);setSelection({selNode: null});setDocument({dirty: false});render();canvasView?.fitAll();toast('Project opened locally.');}
 async function openArtifact(id){if(!/^[0-9a-f-]{36}$/.test(id))throw Error('Invalid MCP project link.');let response=await fetch(`/artifacts/${id}.welcome`,{credentials:'same-origin',redirect:'error'});if(response.status===404)response=await fetch(`/artifacts/${id}.welcome`,{credentials:'same-origin',redirect:'error'});if(!response.ok)throw Error(`MCP project could not be opened (${response.status}).`);const next=await response.json();acceptProject(next);window.history.replaceState(null,'',location.pathname);}
 
 documentActions.rename=text=>{const name=text.trim();if(!name){toast('Project name cannot be empty.');return false;}edit([{op:'rename_document',name}]);return true;};
 $('#save').onclick=projectSave;
-$('#new').onclick=()=>{editMode=false;if(documentNow().dirty&&!confirm(t('Discard unsaved changes?')))return;clearComputed();setDocument({doc: withSavedHoop({...initialDocument(),name:'Untitled design',objects:[]})});setDocument({history: []});setDocument({future: []});setSelection({selected: null});setSelection({multi: new Set()});setDocument({dirty: true});render();canvasView?.fitHoop();};
+$('#new').onclick=()=>{setEditMode(false);if(documentNow().dirty&&!confirm(t('Discard unsaved changes?')))return;clearComputed();setDocument({doc: withSavedHoop({...initialDocument(),name:'Untitled design',objects:[]})});setDocument({history: []});setDocument({future: []});setSelection({selected: null});setSelection({multi: new Set()});setDocument({dirty: true});render();canvasView?.fitHoop();};
 $('#open').onclick=()=>$('#file').click();
 $('#file').onchange=async e=>{const f=e.target.files[0];if(!f)return;try{if(f.size>33_554_432)throw Error('Welcome project files are limited to 32 MiB.');if(f.name.toLowerCase().endsWith('.svg')){acceptProject(importSvg(await f.text()));if(svgImportNotes.length)toast(svgImportNotes.join(' '));}else if((f.name.toLowerCase().endsWith('.welcome')||f.name.toLowerCase().endsWith('.welcome'))||f.name.toLowerCase().endsWith('.json'))acceptProject(JSON.parse(await f.text()));else if(f.name.toLowerCase().endsWith('.dxf')){const r=dxfDocument(await f.text());acceptProject(r.doc);const skipped=Object.entries(r.skipped).map(([k,n])=>`${n} ${k}`).join(', ');toast(`DXF imported: ${r.doc.objects.length} path${r.doc.objects.length===1?'':'s'}${skipped?`; skipped ${skipped}`:''}${r.bulged?`; ${r.bulged} arc${r.bulged===1?'':'s'} sewn as straight segments`:''}.`);}else throw Error('Open a .welcome project, SVG or ASCII DXF here. Use Import JEF / VP3 for machine files.');}catch(err){toast(err.message);}e.target.value='';};
 $('#importMachine').onclick=()=>$('#machineFile').click();
@@ -291,33 +256,13 @@ $('#agentRevoke').onclick=async()=>{if(confirm(t('Revoke this link? Agents using
 $('#agentUrl').onfocus=e=>e.target.select();
 agent.resume();
 // ---- canvas: viewport, selection handles, marquee, context menu -------------------------------------------------
-$('#editNodes').onclick=()=>{const o=selectedObject();if(o&&selState().multi.size===1)enterEdit(o);else toast('Select one shape, path or lettering first.');};
-const orderedIds=()=>documentNow().doc.objects.map(o=>o.id).filter(id=>selState().multi.has(id));
-function selectIds(ids,primary){const prev=selState().selected;setSelection({multi: new Set(ids)});setSelection({selected: primary??ids.at(-1)??null});setSelection({selNode: null});setSelection({selNodes: new Set()});if(!(ids.length===1&&selState().selected===prev&&editMode))editMode=false;render();}
-function copySelection(){const ids=new Set(orderedIds());if(!ids.size)return false;setClipboard({clipboard: {objects:documentNow().doc.objects.filter(o=>ids.has(o.id)).map(clone),pastes:0}});toast(`Copied ${ids.size} object${ids.size===1?'':'s'}.`);return true;}
-function pasteClipboard(){if(!clipboardNow().clipboard)return;const pastes=clipboardNow().clipboard.pastes+1;setClipboard({clipboard:{...clipboardNow().clipboard,pastes}});const off=4*pastes,remap=new Map(),made=clipboardNow().clipboard.objects.map(o=>{const c=clone(o);c.id=crypto.randomUUID();c.name=`${o.name||o.kind} copy`;if(o.groupId){if(!remap.has(o.groupId))remap.set(o.groupId,crypto.randomUUID());c.groupId=remap.get(o.groupId);}return c;});
- transact(()=>{for(const c of made){const dx=off,dy=off;c.x+=dx;c.y+=dy;if(c.kind==='path'){c.points=c.points.map(([x,y])=>[x+dx,y+dy]);if(c.handles)c.handles=c.handles.map(h=>h&&{i:[h.i[0]+dx,h.i[1]+dy],o:[h.o[0]+dx,h.o[1]+dy]});if(c.holes)c.holes=c.holes.map(r=>r.map(([x,y])=>[x+dx,y+dy]));}if(c.along)c.along.points=c.along.points.map(([x,y])=>[x+dx,y+dy]);setDocument({doc:{...documentNow().doc,objects:[...documentNow().doc.objects,c]}});}setSelection({selected: made.at(-1).id});setSelection({multi: new Set(made.map(c=>c.id))});setSelection({selNode: null});editMode=false;});
- }
-function nudge(dx,dy){const o=selectedObject();if(editMode&&o?.kind==='path'&&(selState().selNodes.size||selState().selNode!==null)){edit([{op:'move_path_points',id:o.id,indexes:selState().selNodes.size?[...selState().selNodes]:[selState().selNode],dx,dy}]);return;}const ids=orderedIds();if(ids.length)edit([{op:'translate',ids,dx,dy}]);}
-const selectAll=()=>{const o=selectedObject();if(editMode&&o?.kind==='path'){setSelection({selNodes: new Set(o.points.map((_,i)=>i))});setSelection({selNode: null});render();return;}selectIds(documentNow().doc.objects.filter(o=>o.visible!==false&&!o.locked).map(o=>o.id));};
-function menuItems(o,p){
- const has=Boolean(selState().multi.size),one=selState().multi.size===1,sel=documentNow().doc.objects.filter(v=>selState().multi.has(v.id)),canGroup=selState().multi.size>1,grouped=sel.some(v=>v.groupId),kindPath=one&&selectedObject()?.kind==='path';
- const act=(fn)=>()=>fn();const click=id=>()=>$(id).click();
- if(!has)return [{label:'Paste',key:'Ctrl+V',disabled:!clipboardNow().clipboard,run:pasteClipboard},{label:'Select all',key:'Ctrl+A',run:selectAll},'-',{label:'Fit hoop in view',key:'Shift+0',run:()=>canvasView.fitHoop()},{label:'Fit everything',key:'Shift+1',run:()=>canvasView.fitAll()}];
- return [{label:one&&selectedObject().kind==='text'?'Edit text':kindPath?'Edit nodes':'Edit nodes (convert to path)',key:'Enter',disabled:!one||selectedObject().kind==='stitch_layer',run:()=>enterEdit(selectedObject())},
-  {label:'Convert to path',key:'Ctrl+Shift+C',disabled:!sel.some(v=>v.kind!=='path'&&v.kind!=='stitch_layer'),run:()=>edit([{op:'to_path',ids:sel.filter(v=>v.kind!=='path'&&v.kind!=='stitch_layer').map(v=>v.id)}])},'-',
-  {label:'Cut',key:'Ctrl+X',run:()=>{if(copySelection())removeSelected();}},{label:'Copy',key:'Ctrl+C',run:copySelection},{label:'Paste',key:'Ctrl+V',disabled:!clipboardNow().clipboard,run:pasteClipboard},{label:'Duplicate',key:'Ctrl+D',run:click('#duplicate')},{label:'Copy style',key:'Ctrl+Alt+C',disabled:!one,run:copyStyle},{label:'Paste style',key:'Ctrl+Alt+V',disabled:!clipboardNow().styleClip,run:pasteStyle},{label:'Delete',key:'Del',run:removeSelected},'-',
-  {label:'Group',key:'Ctrl+G',disabled:!canGroup,run:click('#group')},{label:'Ungroup',key:'Ctrl+Shift+G',disabled:!grouped,run:click('#ungroup')},'-',
-  {label:'Sew first (to back)',key:'Home',run:()=>moveSelection('back')},{label:'Sew earlier',key:'[',run:()=>moveSelection('backward')},{label:'Sew later',key:']',run:()=>moveSelection('forward')},{label:'Sew last (to front)',key:'End',run:()=>moveSelection('front')},'-',
-  {label:sel.every(v=>v.locked)?'Unlock':'Lock',run:()=>edit(sel.map(v=>({op:'set_object',id:v.id,locked:!sel.every(w=>w.locked)})))},{label:'Hide',run:()=>edit(sel.map(v=>({op:'set_object',id:v.id,visible:false})))},'-',
-  {label:'Zoom to selection',key:'Shift+2',run:()=>canvasView.fitSelection()},{label:'Select all',key:'Ctrl+A',run:selectAll}];
-}
-canvasView=createCanvas({svg:$('#art'),container:$('.canvas'),overlay:$('#overlay'),doc:()=>documentNow().doc,ids:orderedIds,tool:()=>toolMode.get(),pivot:()=>pivotState.get().pivot,knife:()=>knifeState.get(),measure:()=>measureState.get(),pickPivot:p=>{if(!pivotState.get().picking)return false;pivotState.set({pivot:[Math.round(p[0]*10)/10,Math.round(p[1]*10)/10],picking:false});render();canvasView.refresh();return true;},snapPt:p=>canvasView.snapPt(p),snapOn:()=>snapOn,gridSize:()=>gridSize,isEditing:()=>editMode,setEditing:v=>{editMode=v;},selectedObject,textFont:letteringTextFont,ensureFontLoaded,fitHeight,
- select:selectIds,commit:(ops,after)=>edit(ops,after),render,toast,selectNodesIn:(r,add)=>{const o=selectedObject();if(o?.kind!=='path')return;const inside=o.points.map((p,i)=>[p,i]).filter(([p])=>p[0]>=r[0]&&p[0]<=r[2]&&p[1]>=r[1]&&p[1]<=r[3]).map(([,i])=>i);setSelection({selNodes: new Set(add?[...selState().selNodes,...inside]:inside)});setSelection({selNode: inside.at(-1)??null});render();},dblclick:(o,p)=>{canvasView.markObjectDblclick();if(o.kind==='path'&&editMode&&selState().selected===o.id)canvasView.insertNodeAt(o,p);else enterEdit(o);},menuItems,
- onViewport:()=>{canvasView?.drawControls();const z=$('#zoomPct');if(z)z.textContent=`${canvasView?canvasView.percent():100}%`;},
- zoomUi:(zoomAt,fitHoop,fitAll,zoom100)=>{$('#zoomIn').onclick=()=>zoomAt(1.25);$('#zoomOut').onclick=()=>zoomAt(1/1.25);$('#zoomFit').onclick=fitHoop;$('#zoomAll').onclick=fitAll;$('#zoomPct').onclick=zoom100;}});
+canvasView=createCanvas({svg:$('#art'),container:$('.canvas'),overlay:$('#overlay'),doc:()=>documentNow().doc,ids:orderedIds,tool:()=>toolMode.get(),pivot:()=>pivotState.get().pivot,knife:()=>knifeState.get(),measure:()=>measureState.get(),pickPivot:p=>{if(!pivotState.get().picking)return false;pivotState.set({pivot:[Math.round(p[0]*10)/10,Math.round(p[1]*10)/10],picking:false});render();canvasView.refresh();return true;},snapPt:p=>canvasView.snapPt(p),snapOn:()=>gridSnapState.get(),gridSize:()=>Number(gridState.get().value),isEditing:editModeNow,setEditing:setEditMode,selectedObject,textFont:letteringTextFont,ensureFontLoaded,fitHeight,
+ select:selectIds,commit:(ops,after)=>edit(ops,after),render,toast,selectNodesIn:(r,add)=>{const o=selectedObject();if(o?.kind!=='path')return;const inside=o.points.map((p,i)=>[p,i]).filter(([p])=>p[0]>=r[0]&&p[0]<=r[2]&&p[1]>=r[1]&&p[1]<=r[3]).map(([,i])=>i);setSelection({selNodes: new Set(add?[...selState().selNodes,...inside]:inside)});setSelection({selNode: inside.at(-1)??null});render();},dblclick:(o,p)=>{canvasView.markObjectDblclick();if(o.kind==='path'&&editModeNow()&&selState().selected===o.id)canvasView.insertNodeAt(o,p);else enterEdit(o);},menuItems,
+ onViewport:()=>{canvasView?.drawControls();setZoomPercent(`${canvasView?canvasView.percent():100}%`);},
+ zoomUi:configureZoom});
 canvasView.fitHoop();
-configureCanvasText({edit,render,selectIds,setEditing:on=>{editMode=on;},toScreen:(x,y)=>canvasView.toScreen(x,y)});
+configureContextMenu({edit,copyStyle,pasteStyle,fitHoop:()=>canvasView.fitHoop(),fitAll:()=>canvasView.fitAll(),fitSelection:()=>canvasView.fitSelection()});
+configureCanvasText({edit,render,selectIds,setEditing:setEditMode,toScreen:(x,y)=>canvasView.toScreen(x,y)});
 configureReference({edit,toast,coord:e=>canvasView.coord(e)});
 configureStitchPanel({edit,orderedIds,toast});
 // ---- keyboard ---------------------------------------------------------------------------------------------------
@@ -337,13 +282,13 @@ if(pathDraftNow().pathMode){if(e.key==='Enter'){e.preventDefault();canvasView.en
  if(e.key==='[')return moveSelection('backward');
  if(e.key===']')return moveSelection('forward');
  if(e.key==='Home'&&selState().multi.size){e.preventDefault();return moveSelection('back');}if(e.key==='End'&&selState().multi.size){e.preventDefault();return moveSelection('front');}
- if(e.key.startsWith('Arrow')&&selState().multi.size&&mod&&!editMode){e.preventDefault();const ids=orderedIds(),bs=documentNow().doc.objects.filter(o=>ids.includes(o.id)).map(objectBounds),x0=Math.min(...bs.map(b=>b[0])),y0=Math.min(...bs.map(b=>b[1])),W=Math.max(...bs.map(b=>b[2]))-x0,H=Math.max(...bs.map(b=>b[3]))-y0,step=e.shiftKey?5:1;
+ if(e.key.startsWith('Arrow')&&selState().multi.size&&mod&&!editModeNow()){e.preventDefault();const ids=orderedIds(),bs=documentNow().doc.objects.filter(o=>ids.includes(o.id)).map(objectBounds),x0=Math.min(...bs.map(b=>b[0])),y0=Math.min(...bs.map(b=>b[1])),W=Math.max(...bs.map(b=>b[2]))-x0,H=Math.max(...bs.map(b=>b[3]))-y0,step=e.shiftKey?5:1;
   if(e.altKey){if(e.key==='ArrowLeft'||e.key==='ArrowRight'){const a=(e.key==='ArrowRight'?1:-1)*(e.shiftKey?15:1);edit([{op:'rotate',ids,angle:a,cx:x0+W/2,cy:y0+H/2}]);}}
   else if(e.key==='ArrowRight'||e.key==='ArrowLeft'){const sx=Math.max(.02,(W+(e.key==='ArrowRight'?step:-step))/W);edit([{op:'scale',ids,sx,sy:1,ox:x0,oy:y0}]);}else if(e.key==='ArrowDown'||e.key==='ArrowUp'){const sy=Math.max(.02,(H+(e.key==='ArrowDown'?step:-step))/H);edit([{op:'scale',ids,sx:1,sy,ox:x0,oy:y0}]);}return;
   }
- if(e.key.startsWith('Arrow')&&selState().multi.size&&!mod){e.preventDefault();const step=e.altKey?.1:e.shiftKey?5:snapOn?gridSize:1;nudge(e.key==='ArrowLeft'?-step:e.key==='ArrowRight'?step:0,e.key==='ArrowUp'?-step:e.key==='ArrowDown'?step:0);return;}
- if((e.key==='Delete'||e.key==='Backspace')&&selState().selected){e.preventDefault();if(editMode&&selState().selNode!==null)canvasView.deleteNode();else removeSelected();return;}
- if(e.key==='Escape'){if(toolMode.get()!=='select')canvasView.setTool('select');else if(editMode){editMode=false;setSelection({selNode: null});render();}else{setSelection({selected: null});setSelection({multi: new Set()});setSelection({selNode: null});render();}}
+ if(e.key.startsWith('Arrow')&&selState().multi.size&&!mod){e.preventDefault();const step=e.altKey?.1:e.shiftKey?5:gridSnapState.get()?Number(gridState.get().value):1;nudge(e.key==='ArrowLeft'?-step:e.key==='ArrowRight'?step:0,e.key==='ArrowUp'?-step:e.key==='ArrowDown'?step:0);return;}
+ if((e.key==='Delete'||e.key==='Backspace')&&selState().selected){e.preventDefault();if(editModeNow()&&selState().selNode!==null)canvasView.deleteNode();else removeSelected();return;}
+ if(e.key==='Escape'){if(toolMode.get()!=='select')canvasView.setTool('select');else if(editModeNow()){setEditMode(false);setSelection({selNode: null});render();}else{setSelection({selected: null});setSelection({multi: new Set()});setSelection({selNode: null});render();}}
 });
 render();
 const openId=new URL(location.href).searchParams.get('open');if(openId)openArtifact(openId).catch(error=>toast(error.message));

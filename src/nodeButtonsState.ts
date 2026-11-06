@@ -1,6 +1,6 @@
 import {createStore} from './store.js';
 
-/** Which path-node buttons are disabled (true means disabled). app.js works it out from the selection and sets it; the buttons read it. */
+/** Which path-node buttons are disabled (true means disabled). toolbarSync works it out from the selection and sets it; the buttons read it. */
 export interface NodeButtons {
   add: boolean;
   del: boolean;

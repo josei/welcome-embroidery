@@ -36,9 +36,19 @@ import {PlaybackBar} from './PlaybackBar';
 import {TipCard} from './TipCard';
 import {GridControl} from './GridControl';
 import {ViewSwitch} from './ViewSwitch';
-// The editor layout: the object list, the canvas and the inspector. Rendered by React; ids match the markup it replaced, because app.js wires them by id.
+import {ZoomBar} from './ZoomBar';
+import {AddShapeButton, GridSnapButton} from './ToolButtons';
+import {toolbarActions} from '../toolbarCommands.js';
+import {viewMode} from '../viewMode.js';
+import {gridSnapState} from '../gridSnapState.js';
+import {editModeState} from '../editModeState.js';
+// The editor layout: the object list, the canvas and the inspector. Rendered by React; ids match the markup it
+// replaced, because the keyboard shortcuts and tests address them.
 export function EditorLayout() {
  const layout = useSyncExternalStore(layoutState.subscribe, layoutState.get);
+ const view = useSyncExternalStore(viewMode.subscribe, viewMode.get);
+ const snapping = useSyncExternalStore(gridSnapState.subscribe, gridSnapState.get);
+ const editing = useSyncExternalStore(editModeState.subscribe, editModeState.get);
  return (
   <>
     <div className={"layout"}>
@@ -51,26 +61,14 @@ export function EditorLayout() {
         <ObjectList />
         <HoopFields />
       </aside>
-      <main>
-        <div className={"canvas"}>
+      <main className={view === 'design' ? 'design-view' : undefined}>
+        <div className={['canvas', snapping && 'snapping', view === 'preview' && 'preview-mode'].filter(Boolean).join(' ')}>
           <div className={"tool-row tool-rail"} aria-label={"Tools"}>
             <SelectTool />
-            <button className={"icon-button"} id={"rect"} aria-label={"Add rectangle"} title={"Add rectangle"} data-tooltip={"Add rectangle"}>
-              <svg className={"icon"}>
-                <use href={"#i-rect"} />
-              </svg>
-            </button>
-            <button className={"icon-button"} id={"ellipse"} aria-label={"Add ellipse"} title={"Add ellipse"} data-tooltip={"Add ellipse"}>
-              <svg className={"icon"}>
-                <use href={"#i-ellipse"} />
-              </svg>
-            </button>
+            <AddShapeButton kind={"rect"} id={"rect"} label={"Add rectangle"} icon={"rect"} />
+            <AddShapeButton kind={"ellipse"} id={"ellipse"} label={"Add ellipse"} icon={"ellipse"} />
             <PathTool />
-            <button className={"icon-button"} id={"letter"} aria-label={"Add lettering"} title={"Add lettering"} data-tooltip={"Add lettering"}>
-              <svg className={"icon"}>
-                <use href={"#i-text"} />
-              </svg>
-            </button>
+            <AddShapeButton kind={"text"} id={"letter"} label={"Add lettering"} icon={"text"} />
             <ToolButtons />
             <button
               className={"icon-button"}
@@ -108,53 +106,15 @@ export function EditorLayout() {
           </div>
           <canvas id={"preview3d"} hidden={true} aria-label={"3D thread preview. Drag to orbit, scroll to zoom, double-click to reset."}>
           </canvas>
-          <div className={"zoombar"} role={"toolbar"} aria-label={"Zoom"}>
-            <button type={"button"} id={"zoomOut"} className={"icon-button"} aria-label={"Zoom out (−)"} title={"Zoom out (−)"}>
-              <svg className={"icon"}>
-                <use href={"#i-minus"} />
-              </svg>
-            </button>
-            <button type={"button"} id={"zoomPct"} className={"zoom-pct"} title={"Reset to 100% (Shift+0)"}>
-              {"100%"}
-            </button>
-            <button type={"button"} id={"zoomIn"} className={"icon-button"} aria-label={"Zoom in (+)"} title={"Zoom in (+)"}>
-              <svg className={"icon"}>
-                <use href={"#i-new"} />
-              </svg>
-            </button>
-            <button
-              type={"button"}
-              id={"handTool"}
-              className={"icon-button"}
-              aria-label={"Hand tool: drag to pan"}
-              title={"Hand tool: drag to pan"}
-              aria-pressed={"false"}
-            >
-              <svg className={"icon"}>
-                <use href={"#i-hand"} />
-              </svg>
-            </button>
-            <span className={"sep"}>
-            </span>
-            <button type={"button"} id={"zoomFit"} className={"zoom-text"} title={"Fit the hoop in view"}>
-              {"Hoop"}
-            </button>
-            <button type={"button"} id={"zoomAll"} className={"zoom-text"} title={"Fit everything (Shift+1)"}>
-              {"All"}
-            </button>
-          </div>
+          <ZoomBar />
           <PreviewPanel />
           <div className={"floating"} role={"toolbar"} aria-label={"Canvas tools"}>
-            <button className={"icon-button"} aria-label={"Snap to grid"} title={"Snap to grid"} data-tooltip={"Snap to grid"} id={"snap"}>
-              <svg className={"icon"}>
-                <use href={"#i-snap"} />
-              </svg>
-            </button>
+            <GridSnapButton />
             <SnapObjectButton />
             <GridControl />
             <AlignButtons />
             <FlipButtons />
-            <ActionButton flag="group" hideWhenDisabled className={"icon-button"} aria-label={"Group (Ctrl+G)"} title={"Group (Ctrl+G)"} data-tooltip={"Group (Ctrl+G)"} id={"group"}>
+            <ActionButton flag="group" hideWhenDisabled className={"icon-button"} aria-label={"Group (Ctrl+G)"} title={"Group (Ctrl+G)"} data-tooltip={"Group (Ctrl+G)"} id={"group"} onClick={() => toolbarActions.group()}>
               <svg className={"icon"}>
                 <use href={"#i-group"} />
               </svg>
@@ -165,6 +125,7 @@ export function EditorLayout() {
               title={"Ungroup (Ctrl+Shift+G)"}
               data-tooltip={"Ungroup (Ctrl+Shift+G)"}
               id={"ungroup"}
+              onClick={() => toolbarActions.ungroup()}
             >
               <svg className={"icon"}>
                 <use href={"#i-ungroup"} />
@@ -220,11 +181,12 @@ export function EditorLayout() {
               </svg>
             </ActionButton>
             <ActionButton flag="editNodes" hideWhenDisabled
-              className={"icon-button tb-start"}
+              className={editing ? "icon-button tb-start active-tool" : "icon-button tb-start"}
               aria-label={"Edit nodes (Enter) — converts rectangles and ellipses to paths"}
               title={"Edit nodes (Enter) — converts rectangles and ellipses to paths"}
               data-tooltip={"Edit nodes (Enter) — converts rectangles and ellipses to paths"}
               id={"editNodes"}
+              onClick={() => toolbarActions.editNodes()}
             >
               <svg className={"icon"}>
                 <use href={"#i-node-edit"} />
