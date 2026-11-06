@@ -3,6 +3,7 @@
 // resize/rotate handles (oriented for a single rotated shape), smart snapping, marquee selection and the context menu.
 // Document state stays in app.js; this module talks to it through `api`.
 import {geometry,objectBounds,hoopSize} from './engine.js';
+import {drawScene} from './canvasScene.js';
 
 const SVG='http://www.w3.org/2000/svg',PX_PER_MM=96/25.4;
 const el=(/** @type {any} */ tag,attrs={})=>{const n=document.createElementNS(SVG,tag);for(const [k,v] of Object.entries(attrs))n.setAttribute(k,v);return n;};
@@ -388,5 +389,5 @@ export function createCanvas(/** @type {any} */ api){
   });
 
   api.zoomUi?.(zoomAt,fitHoop,fitAll,zoomTo100);
-  return {vp,apply,refresh,fitHoop,fitAll,fitSelection,zoomAt,zoomTo100,toScreen,scale:()=>vp.s,percent:()=>Math.round(vp.s/PX_PER_MM*100),hit,closeMenu,isDragging:()=>Boolean(state),inField,RULER};
+  return {vp,apply,refresh,drawScene,fitHoop,fitAll,fitSelection,zoomAt,zoomTo100,toScreen,scale:()=>vp.s,percent:()=>Math.round(vp.s/PX_PER_MM*100),hit,closeMenu,isDragging:()=>Boolean(state),inField,RULER};
 }

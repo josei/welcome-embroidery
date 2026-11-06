@@ -63,9 +63,8 @@ import {createCanvas} from './canvas.js';
 import {getFont,registerFont,loadFont,isRegistryFont,documentFontIds,registerDocumentFonts} from './fonts.js';
 import {createFontPicker,fetchFontIndex,LEGACY} from './fontui.js';
 import {ttfToFont} from './ttf.js';
-import {distortionGrid,blockSeconds,blockTimeLabel,bundledFontUsage,countSmallHoles,isSmallIsland,isClosedShape,exportAppliqueTemplates,cornerRadii,svgPathFill,parseThreadStock,nearestStockThread,HOOP_PRESETS,customFontUsage,exportPrintTemplate,batchDocuments,batchPlan,designWarnings,TIP_CATEGORIES,visibleTips,measureBetween,widthAt,nodeFraction,initialDocument,geometry,applyOperations,validateDocument,measureText,parseSvgPath,makeStitchLayer,objectBounds,hoopSize,jefWarnings,exportSvg,textPrimitives,threadPlan,threadSpans,sewingSeconds,sewingSecondsUpTo,sewingWorksheet} from './engine.js';
+import {distortionGrid,blockSeconds,blockTimeLabel,bundledFontUsage,countSmallHoles,isSmallIsland,isClosedShape,exportAppliqueTemplates,cornerRadii,svgPathFill,parseThreadStock,nearestStockThread,HOOP_PRESETS,customFontUsage,exportPrintTemplate,batchDocuments,batchPlan,designWarnings,TIP_CATEGORIES,visibleTips,measureBetween,widthAt,nodeFraction,initialDocument,geometry,applyOperations,validateDocument,measureText,parseSvgPath,makeStitchLayer,objectBounds,hoopSize,jefWarnings,exportSvg,threadPlan,threadSpans,sewingSeconds,sewingSecondsUpTo,sewingWorksheet} from './engine.js';
 import {clone,esc,download,safeProjectFilename,sewTime,tipKey,forWorker} from './appHelpers.js';
-import {photoUrl} from './photoUrl.js';
 import {withSavedHoop,STOCK_KEY,threadStock,TIPS_KEY,hiddenTips,ignoredTipsKey,ignoredTips} from './storedPrefs.js';
 const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)],svgNS='http://www.w3.org/2000/svg';
 setDocument({doc:withSavedHoop(initialDocument()),history:[],future:[],dirty:true});
@@ -100,8 +99,6 @@ const fetchJson=path=>fetch(new URL('../'+path,import.meta.url)).then(r=>{if(!r.
 const ensureFontLoaded=id=>(!isRegistryFont(id)||id.startsWith('custom/')||getFont(id))?Promise.resolve():loadFont(id,fetchJson);
 async function ensureDocFonts(){registerDocumentFonts(documentNow().doc);await Promise.all(documentFontIds(documentNow().doc).map(ensureFontLoaded));}
 function kickFontLoads(){registerDocumentFonts(documentNow().doc);for(const id of documentFontIds(documentNow().doc)){if(id.startsWith('custom/')||getFont(id)||fontLoading.has(id)||fontFailed.has(id))continue;fontLoading.add(id);ensureFontLoaded(id).then(()=>{fontLoading.delete(id);render();},()=>{fontLoading.delete(id);fontFailed.add(id);toast(`Font ${id} could not be loaded.`);});}}
-function appendTextShapes(group,o){const prims=textPrimitives(o)||[],thread=o.thread,mk=(attrs)=>{const el=document.createElementNS(svgNS,'path');for(const [k,v] of Object.entries(attrs))el.setAttribute(k,v);group.append(el);};const d=(rings,close)=>rings.map(r=>'M'+r.map(p=>`${p[0].toFixed(2)} ${p[1].toFixed(2)}`).join('L')+(close?'Z':'')).join('');
-  for(const p of prims){if(p.t==='f')mk({d:d(p.rings,true),fill:thread,'fill-opacity':'.85','fill-rule':'evenodd',stroke:'none'});else if(p.t==='s')mk({d:d([[...p.a,...[...p.b].reverse()]],true),fill:thread,'fill-opacity':'.7',stroke:'none'});else mk({d:d([p.pts],false),fill:'none',stroke:thread,'stroke-width':'.4','stroke-linecap':'round','stroke-linejoin':'round'});}}
 const preview3d=createThreadPreview($('#preview3d'));let preview3dPlan=null,pullFabric=null;
 // The pull estimate: computed from the compiled plan and the fabric, and shown only while the 3D view and the checkbox are on.
 function refreshPull(){const st=previewState.get(),doc=documentNow().doc;if(!st.pull||!st.threeD||!preview3dPlan){preview3d.setPull(null);if(st.note)setPreviewState({note:''});return;}const grid=distortionGrid(preview3dPlan,doc.settings.fabric??'woven',hoopSize(doc));preview3d.setPull(grid);setPreviewState({note:t('Peak estimate {n}% of the scale on {fabric}. Lines show the direction the fabric pulls. A guide for where to look: it uses stitch density, stitch direction and fabric stretch, not a simulation of the machine.',{n:Math.round(grid.peak*100),fabric:t(grid.label)})});}
@@ -156,50 +153,7 @@ function render(){updateBatchInfo();
  setActions({undo:!documentNow().history.length});
  setActions({redo:!documentNow().future.length});
  setActions({duplicate:!selState().selected,remove:!selState().selected});
- const hoop=hoopSize(documentNow().doc);
- const setRect=(id,w,h,rx)=>{const r=$(id);r.setAttribute('x',-w/2);r.setAttribute('y',-h/2);r.setAttribute('width',w);r.setAttribute('height',h);r.setAttribute('rx',rx);};
- setRect('#hoopOuter',hoop.w+8,hoop.h+8,7);
- setRect('#hoopRing',hoop.w,hoop.h,4);
- setRect('#hoopLinen',hoop.w-2.4,hoop.h-2.4,3);
- setHoopFields({hoopW:String(hoop.w),hoopH:String(hoop.h),preset:HOOP_PRESETS.some(p=>p.w===hoop.w&&p.h===hoop.h)?`${hoop.w}x${hoop.h}`:'custom'});
- 
- const g=$('#shapes');
- g.replaceChildren();
- const defs=document.createElementNS(svgNS,'defs'),clipDone=new Set();
- g.append(defs);
- for(const o of documentNow().doc.objects){const element=document.createElementNS(svgNS,o.kind==='text'||o.kind==='stitch_layer'?'g':o.kind==='ellipse'?'ellipse':o.kind==='path'?(o.holes?.length?'path':'polyline'):(Array.isArray(o.radii)?'path':'rect'));element.classList.add('shape');element.dataset.id=o.id;if(o.clipId){const m=documentNow().doc.objects.find(v=>v.id===o.clipId);if(m){if(!clipDone.has(m.id)){clipDone.add(m.id);const cp=document.createElementNS(svgNS,'clipPath');cp.setAttribute('id','clip-'+m.id);const pa=document.createElementNS(svgNS,'path');pa.setAttribute('d',geometry(m,0).map(r=>'M'+r.map(q=>q.join(',')).join('L')+'Z').join(''));pa.setAttribute('clip-rule','evenodd');cp.append(pa);defs.append(cp);}element.setAttribute('clip-path',`url(#clip-${m.id})`);}}
-  if(o.photo){const pat=document.createElementNS(svgNS,'pattern');pat.setAttribute('id','photo-'+o.id);pat.setAttribute('patternUnits','userSpaceOnUse');pat.setAttribute('x',o.x);pat.setAttribute('y',o.y);pat.setAttribute('width',o.w);pat.setAttribute('height',o.h);const im=document.createElementNS(svgNS,'image');im.setAttribute('href',photoUrl(o.photo));im.setAttribute('width',o.w);im.setAttribute('height',o.h);im.setAttribute('preserveAspectRatio','none');pat.append(im);defs.append(pat);element.dataset.gradient='photo-'+o.id;}
-  if((o.blendThread||o.blendPalette)&&o.stitch==='fill'&&o.kind!=='text'){const a=((o.blendAngle!==undefined?o.blendAngle-90:(o.angle??documentNow().doc.settings.angle))||0)*Math.PI/180,c=Math.cos(a),sn=Math.sin(a),cx=o.x+o.w/2,cy=o.y+o.h/2,L=Math.abs(o.w*sn)+Math.abs(o.h*c)||1,lg=document.createElementNS(svgNS,'linearGradient');lg.setAttribute('id','blend-'+o.id);lg.setAttribute('gradientUnits','userSpaceOnUse');lg.setAttribute('x1',cx+sn*L/2);lg.setAttribute('y1',cy-c*L/2);lg.setAttribute('x2',cx-sn*L/2);lg.setAttribute('y2',cy+c*L/2);let s0=o.blendStart??0,s1=o.blendEnd??1,c0=o.thread,c1=o.blendThread;if(s0>s1){[s0,s1]=[s1,s0];[c0,c1]=[c1,c0];}const pal=o.blendPalette,palN=pal?.length,stops=pal?[[0,pal[0]],...pal.map((c,k)=>[(o.blendStart??0)+((o.blendEnd??1)-(o.blendStart??0))*k/(palN-1),c]),[1,pal[palN-1]]]:[[0,c0],[s0,c0],[s1,c1],[1,c1]];for(const [off,col] of stops){const st=document.createElementNS(svgNS,'stop');st.setAttribute('offset',off);st.setAttribute('stop-color',col);lg.append(st);}defs.append(lg);element.dataset.gradient='blend-'+o.id;}element.setAttribute('fill',o.stitch==='run'||(o.kind==='path'&&!(o.closed&&o.stitch==='fill'))||o.kind==='text'||o.kind==='stitch_layer'?'none':o.thread);
-  if(element.dataset.gradient)element.setAttribute('fill',`url(#${element.dataset.gradient})`);
-  if(o.mask){element.classList.add('mask-shape');element.setAttribute('fill','none');}if(o.kind==='path'&&o.closed&&o.stitch==='fill')element.setAttribute('fill-opacity','.85');
-  element.setAttribute('stroke',o.thread);
-  element.setAttribute('stroke-width','.45');
-  if(o.kind==='stitch_layer'){
-   const [x0,y0,x1,y1]=o.source.bounds,sx=o.w/Math.max(.1,x1-x0),sy=o.h/Math.max(.1,y1-y0),a=(o.rotation||0)*Math.PI/180,c=Math.cos(a),s=Math.sin(a),cx=o.x+o.w/2,cy=o.y+o.h/2,coords=st=>{const lx=(st.x-(x0+x1)/2)*sx,ly=(st.y-(y0+y1)/2)*sy;return [cx+lx*c-ly*s,cy+lx*s+ly*c];};
-   let paths=new Map(),travel='',previous=null;
-   for(const st of o.stitches){const p=coords(st);if(st.cmd==='jump'){if(previous)travel+=`M${previous[0]} ${previous[1]}L${p[0]} ${p[1]}`;previous=p;continue;}if(st.cmd==='trim'||st.cmd==='end'){previous=null;continue;}if(st.cmd==='stitch'){const col=o.threadOverrides[st.thread]||o.threads[st.thread].color||o.thread;if(!paths.has(col))paths.set(col,'');paths.set(col,paths.get(col)+(previous?`M${previous[0]} ${previous[1]}L${p[0]} ${p[1]}`:`M${p[0]} ${p[1]}`));previous=p;}}
-   for(const [col,d] of paths){const path=document.createElementNS(svgNS,'path');path.setAttribute('d',d);path.setAttribute('fill','none');path.setAttribute('stroke',col);path.setAttribute('stroke-width','.32');element.append(path);}if(travel){const jumps=document.createElementNS(svgNS,'path');jumps.setAttribute('d',travel);jumps.setAttribute('fill','none');jumps.setAttribute('stroke','#909992');jumps.setAttribute('stroke-width','.2');jumps.setAttribute('stroke-dasharray','.7 .7');element.append(jumps);}
-  }else if(o.kind==='text'&&isRegistryFont(o.font)){appendTextShapes(element,o);
-  }else if(o.kind==='text'){for(const line of geometry(o)){const p=document.createElementNS(svgNS,'polyline');p.setAttribute('points',line.map(pt=>pt.join(',')).join(' '));element.append(p);}}else if(o.kind==='ellipse'){element.setAttribute('cx',o.x+o.w/2);
-  element.setAttribute('cy',o.y+o.h/2);
-  element.setAttribute('rx',o.w/2);
-  element.setAttribute('ry',o.h/2);
-  }else if(o.kind==='path'&&o.holes?.length){element.setAttribute('d',geometry(o).map(r=>'M'+r.map(p=>p.join(' ')).join('L')+'Z').join(''));
-  element.setAttribute('fill-rule','evenodd');
-  }else if(o.kind==='path'){element.setAttribute('points',geometry(o)[0].map(p=>p.join(',')).join(' '));
-  }else if(o.kind==='rect'&&Array.isArray(o.radii)){element.setAttribute('d','M'+geometry(o)[0].map(p=>p.join(' ')).join('L')+'Z');
-  }else{element.setAttribute('x',o.x);
-  element.setAttribute('y',o.y);
-  element.setAttribute('width',o.w);
-  element.setAttribute('height',o.h);
-  element.setAttribute('rx',Math.min(o.radius||0,o.w/2,o.h/2));
-  }if(o.rotation&&o.kind!=='path'&&o.kind!=='text'&&o.kind!=='stitch_layer')element.setAttribute('transform',`rotate(${o.rotation} ${o.x+o.w/2} ${o.y+o.h/2})`);if(o.stitch==='satin'&&o.kind==='path'){element.style.strokeWidth=String(o.satinWidth??3);
-  element.style.strokeOpacity='.55';
-  element.setAttribute('stroke-linejoin','round');
-  element.style.strokeLinecap='butt';
-  }if(o.id===selState().selected)element.classList.add('selected');else if(selState().multi.has(o.id))element.classList.add('multi');if(o.border&&o.stitch==='fill'){element.setAttribute('stroke',o.borderThread||o.thread);
-  element.style.strokeWidth='.9';
-  }g.append(element);}
+ canvasView?.drawScene();
 drawControls();const o=selectedObject();setInspectorText({heading:o?.name||'Select an object'});$('#sourceInfo').hidden=o?.kind!=='stitch_layer';
 $('#sourceInfo').innerHTML=o?.kind==='stitch_layer'?`<strong>${esc(o.source.format.toUpperCase())} stitch layer</strong>${o.source.metadata?`<br>${esc([o.source.metadata.name,o.source.metadata.author?t('by {author}',{author:o.source.metadata.author}):''].filter(Boolean).join(' · '))}`:''}<br>${o.stitches.length.toLocaleString()} commands · ${o.threads.length} source threads<br>${esc(o.source.fileName)} · ${(o.source.size/1024).toFixed(1)} KiB<br>Source bounds ${o.source.bounds.map(v=>v.toFixed(1)).join(' × ')} mm<br>${o.source.warnings.length?`<em>${o.source.warnings.map(esc).join('<br>')}</em>`:''}`:'';
 if(o){setStitchChoices({type:['run','satin','motif','sequin','bead','bling'].includes(o.stitch)?o.stitch:'fill'});setStitchRow('satinRow',o.stitch!=='satin');setTypeRows({satinWidth:String(o.satinWidth??3)});setStitchChoices({satinOff:o.kind!=='path'});setStitchChoices({typeDisabled:o.kind==='stitch_layer'});const thread=$('#thread');if(![...thread.options].some(v=>v.value.toLowerCase()===o.thread.toLowerCase())){const opt=document.createElement('option');opt.value=o.thread;opt.textContent=o.kind==='stitch_layer'?'Imported · replace all':'Custom';thread.append(opt);}thread.value=o.thread;setFillValues({spacing:String(o.spacing??documentNow().doc.settings.spacing),angle:String(o.angle??documentNow().doc.settings.angle)});setStitchRow('fillReset',['spacing','angle','stitchLength','stagger','underlayType','underlayInset','underlaySpacing'].every(k=>o[k]===undefined));{const isPath=o.kind==='path',canFill=o.kind==='text'?getFont(o.font)?.kind==='outline':(o.kind!=='path'||o.closed);
