@@ -1,46 +1,44 @@
-import {documentNow,setDocument,settingsActions,documentActions} from './documentState.js';
+import {documentNow,setDocument,documentActions} from './documentState.js';
 import {setTransformFields,transformActions} from './transformState.js';
 import {setHoopFields,hoopActions} from './hoopState.js';
 import {setShortcutsOpen,shortcutsState} from './shortcutsState.js';
 import {restoreActions,setRestore} from './restoreState.js';
 import {setInspectorText} from './inspectorTextState.js';
+import {configureStitchPanel, syncStitchPanel} from './stitchPanel.js';
 import {setActions} from './actionState.js';
-import {setSelectionLabels} from './selectionLabelsState.js';
 import {letteringFieldsState,setLetteringFields,letteringActions} from './letteringFieldsState.js';
-import {setStitchChoices,stitchChoiceActions} from './stitchChoicesState.js';
-import {setLayout} from './layoutState.js';
-import {setCapRows,capRowsActions} from './capRowsState.js';
-import {setBlingRows,blingRowsActions} from './blingRowsState.js';
-import {setSatinEndRows,satinEndRowsActions} from './satinEndRowsState.js';
-import {setRunRows,runRowsActions} from './runRowsState.js';
-import {setAccordionRows,accordionRowsActions} from './accordionRowsState.js';
-import {setTypeRows,typeRowsActions} from './typeRowsState.js';
-import {setRaisedRows,raisedRowsActions} from './raisedRowsState.js';
-import {setFillValues,fillValuesActions} from './fillValuesState.js';
-import {setGuideButtons} from './guideButtonState.js';
+import {stitchChoiceActions} from './stitchChoicesState.js';
+import {capRowsActions} from './capRowsState.js';
+import {blingRowsActions} from './blingRowsState.js';
+import {satinEndRowsActions} from './satinEndRowsState.js';
+import {runRowsActions} from './runRowsState.js';
+import {accordionRowsActions} from './accordionRowsState.js';
+import {typeRowsActions} from './typeRowsState.js';
+import {raisedRowsActions} from './raisedRowsState.js';
+import {fillValuesActions} from './fillValuesState.js';
 import {agentLinkActions, setAgentLink} from './agentLinkState.js';
-import {setPhotoRows,photoRowsActions} from './photoRowsState.js';
+import {photoRowsActions} from './photoRowsState.js';
 import {THREAD_PALETTE,threadName} from './threadPalette.js';
 import {openThreadPopover,closeThreadPopover,threadPopoverState} from './threadPopoverState.js';
 import {setFontsDialogOpen} from './fontsDialogState.js';
-import {setPathRows,pathRowsActions} from './pathRowsState.js';
-import {setLoopRows,loopRowsActions} from './loopRowsState.js';
+import {pathRowsActions} from './pathRowsState.js';
+import {loopRowsActions} from './loopRowsState.js';
 import {setThreadStock,threadStockActions} from './threadStockState.js';
-import {setRadius,radiusActions} from './radiusState.js';
+import {radiusActions} from './radiusState.js';
 import {setSettingsOpen} from './settingsState.js';
 import {pathDraftNow,setPathDraft} from './pathDraftState.js';
 import {interactionNow,setInteraction} from './interactionState.js';
 import {clipboardNow,setClipboard} from './clipboardState.js';
 import {selState,setSelection} from './selectionState.js';
 import {setStatus,statusActions} from './statusState.js';
-import {setStitchRow,stitchRowsState} from './stitchRowsState.js';
+import {setStitchRow} from './stitchRowsState.js';
 import {alignState,alignActions} from './alignState.js';
 import {selectionToolbarState,selectionToolbarActions} from './selectionToolbarState.js';
 import {nodeButtonsState} from './nodeButtonsState.js';
 import {knifeState} from './knifeState.js';
 import {snapObjState,snapObjActions} from './snapObjState.js';
 import {measureState} from './measureState.js';
-import {pinState,pinActions,pinClearState,pinClearActions} from './pinState.js';
+import {pinState,pinActions,pinClearActions} from './pinState.js';
 import {pivotState,pivotActions} from './pivotState.js';
 import {toolMode} from './toolMode.js';
 import {viewMode,viewActions} from './viewMode.js';
@@ -54,7 +52,6 @@ import {layersActions} from './layersState.js';
 import {exportFormatState} from './exportFormatState.js';
 import {playbackActions,setPlayback} from './playbackState.js';
 import {setSewingCounts} from './sewingCountsState.js';
-import {underlayActions,underlayState} from './underlayState.js';
 import {sewTipActions,setSewTips} from './sewTipsState.js';
 import {gridActions,setGridValue} from './gridState.js';
 import {createCanvas} from './canvas.js';
@@ -63,7 +60,7 @@ import {configureReference, referenceForAgent} from './referencePicture.js';
 import {getFont,registerFont,loadFont,isRegistryFont,documentFontIds,registerDocumentFonts} from './fonts.js';
 import {createFontPicker,fetchFontIndex,LEGACY} from './fontui.js';
 import {ttfToFont} from './ttf.js';
-import {distortionGrid,blockSeconds,blockTimeLabel,bundledFontUsage,countSmallHoles,isSmallIsland,isClosedShape,exportAppliqueTemplates,cornerRadii,svgPathFill,parseThreadStock,nearestStockThread,HOOP_PRESETS,customFontUsage,exportPrintTemplate,batchDocuments,batchPlan,designWarnings,TIP_CATEGORIES,visibleTips,measureBetween,widthAt,nodeFraction,initialDocument,geometry,applyOperations,validateDocument,measureText,parseSvgPath,makeStitchLayer,objectBounds,hoopSize,jefWarnings,exportSvg,threadPlan,threadSpans,sewingSeconds,sewingSecondsUpTo,sewingWorksheet} from './engine.js';
+import {distortionGrid,blockSeconds,blockTimeLabel,bundledFontUsage,countSmallHoles,isSmallIsland,isClosedShape,exportAppliqueTemplates,cornerRadii,svgPathFill,parseThreadStock,nearestStockThread,HOOP_PRESETS,customFontUsage,exportPrintTemplate,batchDocuments,batchPlan,designWarnings,TIP_CATEGORIES,visibleTips,measureBetween,initialDocument,geometry,applyOperations,validateDocument,measureText,parseSvgPath,makeStitchLayer,objectBounds,hoopSize,jefWarnings,exportSvg,threadPlan,threadSpans,sewingSeconds,sewingSecondsUpTo,sewingWorksheet} from './engine.js';
 import {clone,esc,download,safeProjectFilename,sewTime,tipKey,forWorker} from './appHelpers.js';
 import {withSavedHoop,STOCK_KEY,threadStock,TIPS_KEY,hiddenTips,ignoredTipsKey,ignoredTips} from './storedPrefs.js';
 const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)],svgNS='http://www.w3.org/2000/svg';
@@ -155,133 +152,17 @@ function render(){updateBatchInfo();
  canvasView?.drawScene();
 canvasView?.drawControls();const o=selectedObject();setInspectorText({heading:o?.name||'Select an object'});$('#sourceInfo').hidden=o?.kind!=='stitch_layer';
 $('#sourceInfo').innerHTML=o?.kind==='stitch_layer'?`<strong>${esc(o.source.format.toUpperCase())} stitch layer</strong>${o.source.metadata?`<br>${esc([o.source.metadata.name,o.source.metadata.author?t('by {author}',{author:o.source.metadata.author}):''].filter(Boolean).join(' · '))}`:''}<br>${o.stitches.length.toLocaleString()} commands · ${o.threads.length} source threads<br>${esc(o.source.fileName)} · ${(o.source.size/1024).toFixed(1)} KiB<br>Source bounds ${o.source.bounds.map(v=>v.toFixed(1)).join(' × ')} mm<br>${o.source.warnings.length?`<em>${o.source.warnings.map(esc).join('<br>')}</em>`:''}`:'';
-if(o){setStitchChoices({type:['run','satin','motif','sequin','bead','bling'].includes(o.stitch)?o.stitch:'fill'});setStitchRow('satinRow',o.stitch!=='satin');setTypeRows({satinWidth:String(o.satinWidth??3)});setStitchChoices({satinOff:o.kind!=='path'});setStitchChoices({typeDisabled:o.kind==='stitch_layer'});const thread=$('#thread');if(![...thread.options].some(v=>v.value.toLowerCase()===o.thread.toLowerCase())){const opt=document.createElement('option');opt.value=o.thread;opt.textContent=o.kind==='stitch_layer'?'Imported · replace all':'Custom';thread.append(opt);}thread.value=o.thread;setFillValues({spacing:String(o.spacing??documentNow().doc.settings.spacing),angle:String(o.angle??documentNow().doc.settings.angle)});setStitchRow('fillReset',['spacing','angle','stitchLength','stagger','underlayType','underlayInset','underlaySpacing'].every(k=>o[k]===undefined));{const isPath=o.kind==='path',canFill=o.kind==='text'?getFont(o.font)?.kind==='outline':(o.kind!=='path'||o.closed);
-setStitchRow('pathProps',!isPath);setPathRows({closed:Boolean(o.closed),smooth:Boolean(o.smooth),disabled:!isPath});setStitchChoices({fillOff:!canFill});const borderOff=!(canFill&&o.stitch==='fill');setRunRows({border:Boolean(o.border),borderDisabled:borderOff});
-const bv=o.borderThread||o.thread;setRunRows({borderThread:bv,borderThreadDisabled:borderOff||(!o.border&&!o.applique)});
-}setTransformFields({posX:Number(o.x).toFixed(1),posY:Number(o.y).toFixed(1),sizeW:Number(o.w||0).toFixed(1),sizeH:Number(o.h||0).toFixed(1),rotation:String(Number(o.rotation||0))});
-setStitchRow('alongRow',!o.along);setLetteringFields({alongOffset:String(o.along?.offset??0)});syncTextInspector(o);}else{syncTextInspector(null);
-setFillValues({spacing:String(documentNow().doc.settings.spacing),angle:String(documentNow().doc.settings.angle)});setStitchRow('fillReset',true);
-setStitchRow('alongRow',true);
-setStitchRow('satinRow',true);setStitchChoices({typeDisabled:false});setStitchRow('pathProps',true);setRunRows({borderDisabled:true,borderThreadDisabled:true});}
+if(o){
+setTransformFields({posX:Number(o.x).toFixed(1),posY:Number(o.y).toFixed(1),sizeW:Number(o.w||0).toFixed(1),sizeH:Number(o.h||0).toFixed(1),rotation:String(Number(o.rotation||0))});
+setLetteringFields({alongOffset:String(o.along?.offset??0)});syncTextInspector(o);}else{syncTextInspector(null);}
  
  setStatus({count:compileError?`⚠ Can't compile: ${compileError}`:plan?`${t('{n} stitches',{n:plan.count.toLocaleString()})} · ${plan.errors.length?plan.errors[0]:t('compiled')}`:documentNow().doc.objects.length?'Compiling…':'Nothing to sew yet'});
  setStatus({countError:Boolean(compileError)||Boolean(plan?.errors.length)});
  {const errs=plan?.issues||[],tips=sewingTips();setStatus({issuesHidden:errs.length+tips.length===0,issuesText:`⚠ ${[errs.length?t(errs.length===1?'1 issue':'{n} issues',{n:errs.length}):'',tips.length?t(tips.length===1?'1 sewing tip':'{n} sewing tips',{n:tips.length}):''].filter(Boolean).join(' · ')}`,issuesTitle:[...errs,...tips].map(i=>t(i.message)).join('\n')});renderSewTips(tips);}setInspectorText({summary:plan?t('{n} stitches · {m} m estimated thread · {c} thread colors',{n:plan.count.toLocaleString(),m:(plan.threadLength/1000).toFixed(1),c:plan.colors.length})+' · '+t('about {t} to sew',{t:sewTime(plan)})+(plan.errors.length?' · '+plan.errors.join(' '):''):'No generated stitches.'});
- syncSections();
+ syncStitchPanel();
  renderSimulation();
  canvasView?.refresh();
 }
-// Only the controls that apply to the current selection are shown (lettering for lettering, path tools for shapes and paths, ...).
-function syncSections(){
- const picked=documentNow().doc.objects.filter(o=>selState().multi.has(o.id)),n=picked.length,o=selectedObject(),kind=o?.kind;
- const only=k=>n>=1&&picked.every(v=>v.kind===k),onlyAny=ks=>n>=1&&picked.every(v=>ks.includes(v.kind)),fillable=picked.some(v=>v.stitch==='fill'&&(v.kind==='rect'||v.kind==='ellipse'||(v.kind==='path'&&v.closed)||(v.kind==='text'&&getFont(v.font)?.kind==='outline')));
- setLayout({secTransform:!(n>=1)});
- setLayout({secStitch:false});
- setLayout({secText:!(n===1&&kind==='text')});
- setLayout({secPath:!picked.some(v=>['rect','ellipse','path'].includes(v.kind))});
- setLayout({secArray:!(n>=1)});
- setLayout({secOrder:!(n>=1)});
- setSelectionLabels({hintHidden:n>=1});
- setSelectionLabels({stitchTitle:n?'Stitching':'Fill defaults for new objects'});
- setLayout({typeHidden:n===0||onlyAny(['text','stitch_layer'])});setLayout({threadHidden:n===0});if(n===0)setStitchRow('satinRow',true);
- {const lettered=picked.some(v=>v.kind==='text'&&isRegistryFont(v.font));setLayout({spacingHidden:!(n===0||fillable||lettered||picked.some(v=>v.stitch==='satin')),spacingLabel:lettered&&!fillable?'Stitch spacing (mm) · lower = denser':'Row spacing (mm)'});}setLayout({angleHidden:!(n===0||fillable)});
- {const src=o||{},st=documentNow().doc.settings,satinish=picked.some(v=>v.stitch==='satin'||(v.kind==='text'&&getFont(v.font)?.kind==='stitch')),underlayable=n===0||fillable||satinish;
-  const set=(id,v)=>{if(document.activeElement!==$(id))$(id).value=v;};
-  set('#stitchLength',src.stitchLength??st.stitchLength??3);
-  setRunRows({stagger:String(src.stagger??st.stagger??4)});
-  const fillTypes=[['auto','Auto (by size)'],['none','None'],['contour','Edge walk'],['fill','Tatami (90°)'],['laydown','Laydown (wide rows)'],['contour+fill','Edge walk + tatami']],satinTypes=[['auto','Auto (by width)'],['none','None'],['center','Centre run'],['contour','Edge walk'],['zigzag','Zigzag'],['center+zigzag','Centre + zigzag'],['contour+zigzag','Edge walk + zigzag']];
-  const types=satinish&&!fillable?satinTypes:fillTypes;
-  const cur=src.underlayType??(st.underlay===false?'none':(st.underlayType??'auto')),shownUnderlay=types.some(t=>t[0]===cur)?cur:'auto';
-  underlayState.set({types:types.map(([value,label])=>({value,label})),value:shownUnderlay});
-  set('#underlayInset',src.underlayInset??.4);set('#underlaySpacing',src.underlaySpacing??(satinish&&!fillable?2:2.2));
-  const showDetails=underlayable&&!['none','auto',undefined].includes(shownUnderlay);
-  {const one=n===1&&o&&o.kind!=='text'&&o.kind!=='stitch_layer'&&(fillable||o.stitch==='satin');
-setStitchRow('pinRow',!one);if(!one)pinState.set(null);pinClearState.set(Boolean(o&&(o.startAt||o.endAt)));}
-  {const rectOnly=n===1&&o?.kind==='rect';setStitchRow('radiusRow',!rectOnly);if(rectOnly)setRadius({radius:String(o.radius??0)});if(rectOnly){const rr=cornerRadii(o);setRadius({radiusTL:String(rr[0]),radiusTR:String(rr[1]),radiusBR:String(rr[2]),radiusBL:String(rr[3])});}
-  const taper=n===1&&o?.kind==='path'&&(o.stitch==='satin'||(o.stitch==='motif'&&o.motifPair));
-setStitchRow('satinEndRow',!taper);if(taper)setSatinEndRows({satinWidthEnd:String(o.satinWidthEnd??'')});
-setRaisedRows({satinRaised:Boolean(o?.raised),satinButtonhole:Boolean(o?.buttonhole)});setBlingRows({motifPair:Boolean(o?.motifPair)});
-setStitchRow('motifPairRow',o?.stitch!=='motif');
-{const motifish=['motif','sequin','bead','bling'].includes(o?.stitch)||['motif','sequin','bling'].includes(o?.fillMethod),sequin=o?.stitch==='sequin',bead=o?.stitch==='bead',blingLike=o?.stitch==='bling'||o?.fillMethod==='bling';setStitchRow('motifSpacingRow',!motifish);
-setStitchRow('motifSizeRow',!motifish);setTypeRows({motifSpacing:String(o?.motifSpacing??(sequin||o?.fillMethod==='sequin'||blingLike?8:bead?6:4))});
-setTypeRows({motifSize:String(o?.motifSize??(sequin||o?.fillMethod==='sequin'?3:bead?2:blingLike?4:1.6))});
-setStitchRow('motifShapeRow',o?.stitch!=='motif');
-setStitchRow('edgeCloseRow',!(o?.clipId&&['run','satin'].includes(o?.stitch)));setRaisedRows({edgeClose:Boolean(o?.edgeClose)});
-setLoopRows({motifShape:o?.motifShape??'circle'});setStitchRow('blingShapeRow',!(o?.stitch==='bling'||o?.fillMethod==='bling'));
-setStitchRow('sequinTwinRow',o?.stitch!=='sequin');setBlingRows({sequinTwin:o?.sequinTwin===true});
-setStitchRow('stoneTurnRow',!(o?.stitch==='bling'&&['square','hexagon','star','baguette','marquise','pear','cushion','oval','heart','teardrop'].includes(o?.blingShape??'round')));
-setBlingRows({stoneTurn:o?.stoneTurn!==false});setStitchRow('blingRingsRow',!(o?.stitch==='bling'||o?.fillMethod==='bling'));
-setStitchRow('beadShapeRow',o?.stitch!=='bead');setBlingRows({beadShape:o?.beadShape??'dash'});setStitchRow('beadTwinRow',o?.stitch!=='bead');
-setBlingRows({beadTwin:o?.beadTwin===true});setBlingRows({blingRings:String(o?.blingRings??2)});setBlingRows({blingShape:o?.blingShape??'round'});
-const motifAlong=n===1&&o?.kind==='path'&&o?.stitch==='motif';
-setStitchRow('motifWarpRow',!(motifAlong||n===1&&o?.kind!=='text'&&o?.kind!=='stitch_layer'&&o?.fillMethod==='motif'));
-setLoopRows({motifAlong:Boolean(motifAlong)});
-setLoopRows({motifWarp:o?.motifWarp??'none'});
-}setStitchRow('satinButtonholeRow',o?.stitch!=='satin'||o?.kind!=='path'||o?.closed);
-setStitchRow('satinRaisedRow',o?.stitch!=='satin');
-setStitchRow('fillRaisedRow',!(n===1&&o?.stitch==='fill'&&o?.kind!=='text'));setRaisedRows({fillRaised:Boolean(o?.raised)});
-setStitchRow('raisedSpacingRow',!(n===1&&o?.stitch==='fill'&&o?.kind!=='text'&&o?.raised));
-if(o)setRaisedRows({raisedSpacing:String(o.raisedSpacing??'')});
-setStitchRow('raisedAngleRow',stitchRowsState.get().raisedSpacingRow);
-setStitchRow('laydownSpacingRow',!(n===1&&o?.stitch==='fill'&&String(o?.underlayType??'').includes('laydown')));
-if(o)setRunRows({laydownSpacing:String(o.laydownSpacing??'')});
-if(o)setRaisedRows({raisedAngle:String(o.raisedAngle??'')});
-const bordered=picked.length>0&&picked.every(v=>v.border)&&fillable;setStitchRow('borderWidthRow',!bordered);
-if(bordered)setRunRows({borderWidth:String(o?.borderWidth??0)});
-  const fp=$('#followPath');
-  if(n===1&&o?.kind==='text'){const paths=documentNow().doc.objects.filter(v=>v.kind==='path'),want=['',...paths.map(v=>v.id)].join('|')+(o.along&&!o.along.pathId?'|custom':'');if(fp.dataset.set!==want){fp.replaceChildren(new Option(t('Not on a path'),''),...paths.map(v=>new Option(v.name||v.id,v.id)));if(o.along&&!o.along.pathId)fp.append(new Option(t('Custom path'),'__custom'));fp.dataset.set=want;}fp.value=o.along?(o.along.pathId||'__custom'):'';}}
-  {const method=o?.fillMethod||'rows',single=n===1&&o&&o.kind!=='text'&&o.kind!=='stitch_layer',runPick=single&&o.stitch==='run';
-  setStitchRow('crossRow',!(single&&fillable&&method==='cross'));if(o)setAccordionRows({crossSize:String(o.crossSize??2.5)});
-setStitchRow('runStyleRow',!runPick);if(o)setStitchChoices({runStyle:o.runStyle||'single'});setStitchRow('stemWidthRow',!(runPick&&o?.runStyle==='stem'));
-if(o)setRunRows({stemWidth:String(o.stemWidth??'')});
-setStitchRow('varianceRow',!(single&&fillable&&['rows','guided'].includes(method)));
-if(o)setRunRows({lengthVariance:String(Math.round((o.lengthVariance??0)*100))});
-  setStitchRow('appliqueRow',!(single&&fillable));setCapRows({applique:Boolean(o?.applique)});
-setStitchRow('appliqueWidthRow',!(single&&fillable&&o.applique));
-if(o)setCapRows({appliqueWidth:String(o.appliqueWidth??2.5)});
-  setStitchRow('compRow',!(single&&(fillable||o.stitch==='satin')));
-setStitchRow('pullRightRow',!(single&&o.kind==='path'&&o.stitch==='satin'));
-setStitchRow('pullLeftRow',stitchRowsState.get().pullRightRow);
-setStitchRow('endInsetStartRow',!(single&&o?.kind==='path'&&o?.stitch==='satin'));
-setStitchRow('endInsetEndRow',!(single&&o?.kind==='path'&&o?.stitch==='satin'));
-if(o)setSatinEndRows({endInsetStart:String(o.endInsetStart??o.endInset??''),endInsetEnd:String(o.endInsetEnd??o.endInset??''),pullRight:String(o.pullRight??''),pullLeft:String(o.pullLeft??'')});
-if(o)setCapRows({compensation:String(o.compensation??'')});}
-  {const single2=n===1&&o&&o.kind!=='text'&&o.kind!=='stitch_layer';setStitchRow('pinCenter',!(single2&&fillable&&o.fillMethod==='ripple'));
-setStitchRow('underpathRow',!(single2&&fillable&&!o.photo&&!o.applique&&['rows',undefined].includes(o.fillMethod)));
-setRunRows({underpath:o?.underpath!==false});
-  setStitchRow('maskRow',!(n===1&&o?.clipId));
-  const ph=n===1&&o?.photo;
-  setStitchRow('photoBox',!ph);
-  if(ph){setPhotoRows({spacing:String(o.photo.spacing??.7),contrast:String(o.photo.contrast??1.4),invert:Boolean(o.photo.invert)});setPhotoRows({thread2:o.photo.thread2||'',thread3:o.photo.thread3||'',thread4:o.photo.thread4||''});setStitchRow('photoThread3Row',!o.photo.thread2);setStitchRow('photoThread4Row',!o.photo.thread3);}}
-  {const satinPath=n===1&&o?.kind==='path'&&o.stitch==='satin',bw=Number(o?.borderWidth)>0&&picked.every(v=>v.border);
-  setStitchRow('capRow',!satinPath&&!(n===1&&o?.kind==='path'&&o.stitch==='run'&&false));setStitchRow('joinRow',!(satinPath||(n>=1&&bw&&fillable)));
-  if(o){setStitchChoices({cap:o.cap||'butt',join:o.join||'round'});}
-const nw=satinPath&&selState().selNode!==null&&selState().selNode<o.points.length;setStitchRow('nodeWidthRow',!nw);
-if(nw)setCapRows({nodeWidth:widthAt(o,nodeFraction(o,selState().selNode)).toFixed(1)});
-  setStitchRow('widthClearRow',!(satinPath&&o.widthStops));
-  const blendable=n===1&&o&&fillable&&o.kind!=='text'&&o.kind!=='stitch_layer'&&!o.photo;
-  setStitchRow('blendRow',!blendable);
-  if(blendable){$('#blendThread').value=o.blendThread||'';setStitchRow('blendRange',!(o.blendThread||o.blendPalette));for(let k=0;k<4;k++){const s=$('#blendPalette'+k),v=o.blendPalette?.[k]||'';if(v&&![...s.options].some(x=>x.value.toLowerCase()===v.toLowerCase()))s.append(new Option(threadName(v),v));s.value=v;}if(document.activeElement!==$('#blendAngle'))$('#blendAngle').value=o.blendAngle??'';if(document.activeElement!==$('#blendStart'))$('#blendStart').value=Math.round((o.blendStart??0)*100);if(document.activeElement!==$('#blendEnd'))$('#blendEnd').value=Math.round((o.blendEnd??1)*100);}
-  const ordered=[...selState().multi].map(id=>documentNow().doc.objects.find(v=>v.id===id)).filter(Boolean).sort((a,b)=>documentNow().doc.objects.indexOf(a)-documentNow().doc.objects.indexOf(b)),top=ordered.at(-1);
-  setActions({clip:!(ordered.length>=2&&top&&(top.kind==='rect'||top.kind==='ellipse'||(top.kind==='path'&&top.closed)))});
-  setActions({unclip:!ordered.some(v=>v.clipId||v.mask)});
-  }
-  {const m=['contour','spiral','meander','guided','cross','ripple','motif','sequin','bling'].includes(src.fillMethod)?src.fillMethod:'rows';setStitchChoices({fillMethod:m});setStitchRow('methodRow',!fillable||n===0);
-setStitchRow('accordionStartRow',!(n===1&&fillable&&m==='rows'));
-setStitchRow('accordionEndRow',!(n===1&&fillable&&m==='rows'));
-setStitchRow('accordionEaseRow',!(n===1&&fillable&&m==='rows'));if(o)setAccordionRows({accordionEase:String(o.accordionEase??'linear')});
-if(o)setAccordionRows({accordionStart:String(o.accordionStart??'')});
-if(o)setAccordionRows({accordionEnd:String(o.accordionEnd??'')});const g=n===1&&fillable&&m==='guided';setStitchRow('guideRow',!g);
-if(!g)setInteraction({guideDraft: null});$('#guideDraw').textContent=t(interactionNow().guideDraft?'Finish guide':'Draw guide');$('#guideDraw').classList.toggle('armed',!!interactionNow().guideDraft);
-setGuideButtons({clearDisabled:!o?.guide});$('#angle').closest('label').hidden=!(n===0||(fillable&&(m==='rows')));}
-setStitchRow('stitchLenRow',!(n===0||fillable||(n===1&&o?.stitch==='run'&&o.kind!=='text'&&o.kind!=='stitch_layer')));
-{const mm=src.fillMethod||'rows';setStitchRow('staggerRow',!(n===0||(fillable&&['rows','guided'].includes(mm))));}setStitchRow('underlayRow',!underlayable);
-setStitchRow('underlayDetails',!showDetails);}
- setLayout({borderHidden:!fillable,borderThreadHidden:!fillable});if(n===0||only('stitch_layer'))setStitchRow('pathProps',true);
- setInspectorText({heading:n>1?`${n} objects selected`:(o?.name||'Select an object')});
- for(const [id,kinds] of [['#offsetBtn',['rect','ellipse','path']],['#strokeBtn',['path']],['#simpBtn',['path']],['#reverseBtn',['path']],['#splitBtn',['path']],['#joinBtn',['path']]])$(id).disabled=!picked.some(v=>kinds.includes(v.kind));
-}
-
 let lastDown=null;
 
 // The object list (ObjectList.tsx) calls these: they change the selection or the document, as the list did before it moved to React.
@@ -308,12 +189,6 @@ alignActions.press=name=>{const ids=[...selState().multi];if(name==='horizontal'
 $('#duplicate').onclick=()=>{const ids=[...selState().multi];if(!ids.length)return;const copies=ids.map(id=>[id,crypto.randomUUID()]),regroup=ids.length>1&&new Set(ids.map(id=>documentNow().doc.objects.find(o=>o.id===id)?.groupId)).size===1&&documentNow().doc.objects.find(o=>o.id===ids[0])?.groupId;edit([...copies.map(([id,newId])=>({op:'duplicate',id,newId,dx:3,dy:3})),...(regroup?[{op:'group',ids:copies.map(c=>c[1])}]:[])],()=>{setSelection({multi: new Set(copies.map(c=>c[1]))});setSelection({selected: copies.at(-1)[1]});});};
 function removeSelected(){const ids=[...selState().multi];if(!ids.length)return;edit(ids.map(id=>({op:'delete',id})),()=>{setSelection({selected: null});setSelection({multi: new Set()});setSelection({selNode: null});});}$('#remove').onclick=removeSelected;
 
-$('#thread').onchange=e=>{if(selState().selected)edit([{op:'set_object',id:selState().selected,thread:e.target.value}]);};
-$('#fillResetBtn').onclick=()=>{if(selState().selected)edit(orderedIds().map(id=>({op:'set_object',id,spacing:null,angle:null,stitchLength:null,stagger:null,underlayType:null,underlayInset:null,underlaySpacing:null})));};
-for(const [id,key,parse] of [['stitchLength','stitchLength',Number],['underlayInset','underlayInset',Number],['underlaySpacing','underlaySpacing',Number]])$('#'+id).onchange=e=>{const v=parse(e.target.value);if(selState().multi.size)edit(orderedIds().map(oid=>({op:'set_object',id:oid,[key]:v})));else edit([{op:'set_settings',[key]:v}]);};
-// The underlay pills (and their hidden select) call this: it writes the chosen underlay to the selected objects, or the document when none is selected.
-underlayActions.choose=v=>{if(selState().multi.size)edit(orderedIds().map(oid=>({op:'set_object',id:oid,underlayType:v})));else edit([{op:'set_settings',underlayType:v}]);};
-settingsActions.set=patch=>edit([{op:'set_settings',...patch}]);
 const runBoolean=mode=>{const ids=documentNow().doc.objects.map(o=>o.id).filter(id=>selState().multi.has(id));if(ids.length>=2)edit([{op:'boolean',mode,ids}],()=>{setSelection({selected: ids[0]});setSelection({multi: new Set([ids[0]])});});};
 selectionToolbarActions.press=name=>{if(name==='flipH'){const ids=orderedIds();if(ids.length)edit([{op:'flip',ids,axis:'horizontal'}]);}else if(name==='flipV'){const ids=orderedIds();if(ids.length)edit([{op:'flip',ids,axis:'vertical'}]);}else runBoolean(name);};
 const pickedObjects=()=>documentNow().doc.objects.filter(o=>selState().multi.has(o.id));
@@ -527,6 +402,7 @@ canvasView=createCanvas({svg:$('#art'),container:$('.canvas'),overlay:$('#overla
 canvasView.fitHoop();
 configureCanvasText({edit,render,selectIds,setEditing:on=>{editMode=on;},toScreen:(x,y)=>canvasView.toScreen(x,y)});
 configureReference({edit,toast,coord:e=>canvasView.coord(e)});
+configureStitchPanel({edit,orderedIds,toast});
 // ---- keyboard ---------------------------------------------------------------------------------------------------
 document.addEventListener('keydown',e=>{
  if(canvasView.inField(e))return;const mod=e.ctrlKey||e.metaKey,key=e.key.toLowerCase();
@@ -585,16 +461,12 @@ for(const d of $$('details.sec-fold')){try{d.open=localStorage.getItem('welcome.
 
 
 
-$('#followPath').onchange=e=>{const o=selectedObject();if(!o||o.kind!=='text')return;const v=e.target.value;if(v==='__custom')return;if(!v){if(o.along)edit([{op:'text_off_path',textId:o.id}]);}else edit([{op:'text_on_path',textId:o.id,pathId:v}]);};
 $('#roundBtn').onclick=()=>{const o=selectedObject(),r=Number($('#roundMm').value);if(!o||!(r>0))return;if(o.kind==='rect')edit([{op:'set_object',id:o.id,radius:r}]);else if(o.kind==='path')edit([{op:'round_corners',id:o.id,radius:r,...(selState().selNodes.size?{indexes:[...selState().selNodes]}:{})}],()=>{setSelection({selNodes: new Set()});setSelection({selNode: null});});else toast('Rounding works on rectangles and paths. Convert the shape to a path first.');};
 
 // Line ends and corners, per-node widths, colour blend, clipping masks
 
 
 $('#widthClear').onclick=()=>{if(selState().selected)edit([{op:'set_object',id:selState().selected,widthStops:null}]);};
-$('#blendThread').onchange=e=>{if(selState().selected)edit([{op:'set_object',id:selState().selected,blendThread:e.target.value||null,blendPalette:null,...(e.target.value?{}:{blendStart:null,blendEnd:null})}]);};
-for(let k=0;k<4;k++)$('#blendPalette'+k).onchange=()=>{if(!selState().selected)return;const cols=[0,1,2,3].map(j=>$('#blendPalette'+j).value).filter(Boolean);if(cols.length===1){toast(t('Choose at least two colours for a palette.'));return;}edit([{op:'set_object',id:selState().selected,blendPalette:cols.length?cols:null,blendThread:null,...(cols.length?{}:{blendStart:null,blendEnd:null})}]);};
-for(const [id,key] of [['#blendStart','blendStart'],['#blendEnd','blendEnd']])$(id).onchange=e=>{if(selState().selected){const v=Math.max(0,Math.min(100,Number(e.target.value)||0))/100;edit([{op:'set_object',id:selState().selected,[key]:v}]);}};
 $('#clipBtn').onclick=()=>{const ordered=[...selState().multi].map(id=>documentNow().doc.objects.find(v=>v.id===id)).filter(Boolean).sort((a,b)=>documentNow().doc.objects.indexOf(a)-documentNow().doc.objects.indexOf(b)),top=ordered.at(-1);if(ordered.length<2||!top)return;edit([{op:'clip',ids:ordered.slice(0,-1).map(v=>v.id),maskId:top.id}],()=>{setSelection({multi: new Set(ordered.slice(0,-1).map(v=>v.id))});setSelection({selected: ordered[0].id});});};
 $('#unclipBtn').onclick=()=>{const ids=new Set();for(const id of selState().multi){const o=documentNow().doc.objects.find(v=>v.id===id);if(!o)continue;if(o.clipId)ids.add(o.id);if(o.mask)for(const v of documentNow().doc.objects)if(v.clipId===o.id)ids.add(v.id);}if(ids.size)edit([{op:'release_clip',ids:[...ids]}]);};
 
@@ -603,9 +475,6 @@ $('#unclipBtn').onclick=()=>{const ids=new Set();for(const id of selState().mult
 
 
 
-accordionRowsActions.commit=(field,text)=>{if(field==='crossSize'){if(selState().selected)edit([{op:'set_object',id:selState().selected,crossSize:Number(text)}]);return;}setAccordion(field,text===''?null:Number(text));};
-accordionRowsActions.choose=(field,value)=>{if(selState().selected)edit([{op:'set_object',id:selState().selected,accordionEase:value}]);};
-const setAccordion=(which,v)=>{if(!selState().selected)return;const o=documentNow().doc.objects.find(x=>x.id===selState().selected),other=which==='accordionStart'?'accordionEnd':'accordionStart';if(v===null)return edit([{op:'set_object',id:selState().selected,accordionStart:null,accordionEnd:null}]);edit([{op:'set_object',id:selState().selected,[which]:v,[other]:o?.[other]??v}]);};
 
 
 // Photo stitch: a picture becomes a rectangle with grey samples; the zigzag rows are planned at compile time.
@@ -630,7 +499,6 @@ $('#photoFile').onchange=async e=>{const file=e.target.files[0];e.target.value='
 const setPhoto=patch=>{const o=selectedObject();if(o?.photo)edit([{op:'set_object',id:o.id,photo:{...o.photo,...patch}}]);};
 photoRowsActions.commit=(field,text)=>setPhoto({[field]:field==='spacing'?Math.max(.3,Math.min(2,Number(text)||.7)):Math.max(.4,Math.min(3,Number(text)||1.4))});
 photoRowsActions.choose=(field,checked)=>setPhoto({invert:checked});
-$('#blendAngle').onchange=e=>{if(selState().selected)edit([{op:'set_object',id:selState().selected,blendAngle:e.target.value===''?null:Number(e.target.value)}]);};
 $('#selectMask').onclick=()=>{const o=selectedObject();if(o?.clipId&&documentNow().doc.objects.some(v=>v.id===o.clipId))selectIds([o.clipId],o.clipId);};
 const photoThreadKeys=['thread2','thread3','thread4'];
 photoRowsActions.pickThread=(key,hex)=>{const o=selectedObject();if(!o?.photo)return;const ph={...o.photo};

@@ -3,6 +3,7 @@ import {stitchRowsState} from '../stitchRowsState.js';
 import {useSyncExternalStore} from 'react';
 import {letteringActions, letteringFieldsState} from '../letteringFieldsState.js';
 import {useDraftInput} from './useDraftInput';
+import {stitchPanelActions, stitchPanelState} from '../stitchPanelState.js';
 // The lettering panel, rendered by React. Ids match the markup it replaced, because app.js wires them by id.
 // The Fill and Outline choices for outline fonts: the value, its label and its icon.
 const STITCH_CHOICES: Array<[string, string, string]> = [['fill', 'Fill', 'i-fill'], ['run', 'Outline (running)', 'i-run']];
@@ -10,6 +11,7 @@ export function LetteringPanel() {
  const layout = useSyncExternalStore(layoutState.subscribe, layoutState.get);
  const rows = useSyncExternalStore(stitchRowsState.subscribe, stitchRowsState.get);
  const l = useSyncExternalStore(letteringFieldsState.subscribe, letteringFieldsState.get);
+ const panel = useSyncExternalStore(stitchPanelState.subscribe, stitchPanelState.get);
  const along = useDraftInput(l.alongOffset, text => letteringActions.commit('alongOffset', text), 'store');
  const text = useDraftInput(l.text, v => letteringActions.commit('text', v), 'typed', false);
  const height = useDraftInput(l.height, v => letteringActions.commit('height', v));
@@ -19,7 +21,7 @@ export function LetteringPanel() {
  const boldMm = useDraftInput(l.boldMm, v => letteringActions.commit('boldMm', v));
  const italicDeg = useDraftInput(l.italicDeg, v => letteringActions.commit('italicDeg', v));
  return (
-  <section id="secText" data-sec="" hidden={layout.secText}><h4>Lettering</h4><label id="followRow">Follow path<select id="followPath" title="Make the lettering follow a path; it stays attached when the path is edited"></select></label><label id="alongRow" hidden={rows.alongRow}>Offset along path (mm)<input id="alongOffset" type="number" step="0.5" {...along} /></label>
+  <section id="secText" data-sec="" hidden={layout.secText}><h4>Lettering</h4><label id="followRow">Follow path<select id="followPath" title="Make the lettering follow a path; it stays attached when the path is edited" value={panel.followPathValue} onChange={e => stitchPanelActions.chooseFollowPath(e.target.value)}>{panel.followPathOptions.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}</select></label><label id="alongRow" hidden={rows.alongRow}>Offset along path (mm)<input id="alongOffset" type="number" step="0.5" {...along} /></label>
 <div className="font-field"><span className="font-label">Font</span><button id="fontButton" type="button" className="font-button" aria-haspopup="dialog" aria-expanded="false" aria-controls="fontPanel"><svg id="fontButtonPreview" className="font-preview" aria-hidden="true"></svg><span id="fontButtonName">Welcome Mono</span><svg className="icon chevron" aria-hidden="true"><use href="#i-chevron"/></svg></button>
 <select id="font" className="sr-only" tabIndex={-1} aria-label="Embroidery font" value={l.fontValue} onChange={e => letteringActions.choose('font', e.target.value)}>{l.fontOptions.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}</select></div>
 <label className="block">Text<textarea id="letteringText" rows={2} maxLength={120} aria-label="Lettering text" {...text} disabled={l.textOff} /></label>
