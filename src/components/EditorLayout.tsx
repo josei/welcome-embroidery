@@ -4,7 +4,7 @@ import {PreviewPanel} from './PreviewPanel';
 import {useSyncExternalStore} from 'react';
 import {SelectionHint} from './SelectionHint';
 import {ActionButton} from './ActionButton';
-import {DesignSummary, SelectionHeading} from './InspectorText';
+import {DesignSummary, SelectionHeading, SourceInfo} from './InspectorText';
 import {AlignButtons} from './AlignButtons';
 import {ArrayPanel} from './ArrayPanel';
 import {DocumentSettings, FabricSection} from './DocumentSettings';
@@ -266,8 +266,7 @@ export function EditorLayout() {
           </div>
         </details>
         <SelectionHint />
-        <section id={"sourceInfo"} hidden={true}>
-        </section>
+        <SourceInfo />
         <TransformPanel />
         <section id={"secStitch"} data-sec={""} hidden={layout.secStitch}>
           <StitchTypeRows />

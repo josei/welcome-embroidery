@@ -23,15 +23,15 @@ const checks = [
  {id: '1', name: 'placeholders (data-react-panel markers, transitional: reported, not ratcheted)', now: count(shell, /data-react-panel=/g), target: 0, baseline: Infinity},
  {id: '1', name: 'shell.html present', now: fs.existsSync(path.join(root, 'src/shell.html')) ? 1 : 0, target: 0, baseline: 0},
  {id: '2', name: 'raw HTML injection (dangerouslySetInnerHTML files)', now: sources.filter(f => read(f).includes('dangerouslySetInnerHTML')).length, target: 0, baseline: 0},
- {id: '3', name: 'DOM lookups in app.js', now: count(app, /\$\(|document\.querySelector/g), target: 0, baseline: 177},
- {id: '3', name: 'direct DOM writes in app.js', now: count(app, /\$\([^)]*\)\.(textContent|innerHTML|hidden|disabled|value|title|onclick|onchange|oninput|onpointerdown)\s*=|classList\.(toggle|add|remove)|setAttribute\(/g), target: 0, baseline: 106},
+ {id: '3', name: 'DOM lookups in app.js', now: count(app, /\$\(|document\.querySelector/g), target: 0, baseline: 166},
+ {id: '3', name: 'direct DOM writes in app.js', now: count(app, /\$\([^)]*\)\.(textContent|innerHTML|hidden|disabled|value|title|onclick|onchange|oninput|onpointerdown)\s*=|classList\.(toggle|add|remove)|setAttribute\(/g), target: 0, baseline: 104},
  {id: '4', name: 'addEventListener calls in app.js', now: count(app, /addEventListener\(/g), target: 0, baseline: 18},
  {id: '4', name: 'onclick assignments in app.js', now: count(app, /\.onclick\s*=/g), target: 0, baseline: 59},
- {id: '5', name: 'store reads and writes in app.js', now: count(app, /selState\(\)|setSelection\(|interactionNow\(\)|setInteraction\(|clipboardNow\(\)|setClipboard\(|documentNow\(\)|setDocument\(|pathDraftNow\(\)|setPathDraft\(/g), target: 0, baseline: 357},
- {id: '5', name: 'state references in app.js (selected, doc, multi, selNode)', now: ['selected', 'doc', 'multi', 'selNode'].reduce((n, name) => n + count(app, new RegExp(`(?<![A-Za-z0-9_$.])${name}(?![A-Za-z0-9_$])`, 'g')), 0), target: 0, baseline: 67},
+ {id: '5', name: 'store reads and writes in app.js', now: count(app, /selState\(\)|setSelection\(|interactionNow\(\)|setInteraction\(|clipboardNow\(\)|setClipboard\(|documentNow\(\)|setDocument\(|pathDraftNow\(\)|setPathDraft\(/g), target: 0, baseline: 339},
+ {id: '5', name: 'state references in app.js (selected, doc, multi, selNode)', now: ['selected', 'doc', 'multi', 'selNode'].reduce((n, name) => n + count(app, new RegExp(`(?<![A-Za-z0-9_$.])${name}(?![A-Za-z0-9_$])`, 'g')), 0), target: 0, baseline: 66},
  {id: '6', name: 'JavaScript files not type-checked', now: count(tsconfig, /"checkJs": false/g) ? sources.filter(f => f.endsWith('.js') && !/^\/\/ @ts-check/m.test(read(f))).length : 0, target: 0, baseline: 1},
  {id: '7', name: 'source files over 500 lines', now: sources.filter(f => read(f).split('\n').length > 500).length, target: 0, baseline: 2},
- {id: '7', name: 'lines over 160 characters', now: markup.split('\n').filter(l => l.length > 160).length, target: 0, baseline: 1024},
+ {id: '7', name: 'lines over 160 characters', now: markup.split('\n').filter(l => l.length > 160).length, target: 0, baseline: 1002},
 ];
 
 let regressed = false;

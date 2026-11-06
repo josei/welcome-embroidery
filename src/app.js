@@ -1,12 +1,11 @@
 import {documentNow,setDocument,documentActions} from './documentState.js';
-import {setTransformFields,transformActions} from './transformState.js';
+import {configureInspector, syncInspector} from './inspector.js';
+import {configureLettering, ensureDocFonts, ensureFontLoaded, fitHeight, initFontPicker, kickFontLoads, letteringTextFont} from './letteringFonts.js';
 import {setHoopFields,hoopActions} from './hoopState.js';
 import {setShortcutsOpen,shortcutsState} from './shortcutsState.js';
 import {restoreActions,setRestore} from './restoreState.js';
-import {setInspectorText} from './inspectorTextState.js';
 import {configureStitchPanel, syncStitchPanel} from './stitchPanel.js';
 import {setActions} from './actionState.js';
-import {letteringFieldsState,setLetteringFields,letteringActions} from './letteringFieldsState.js';
 import {stitchChoiceActions} from './stitchChoicesState.js';
 import {capRowsActions} from './capRowsState.js';
 import {blingRowsActions} from './blingRowsState.js';
@@ -39,7 +38,7 @@ import {knifeState} from './knifeState.js';
 import {snapObjState,snapObjActions} from './snapObjState.js';
 import {measureState} from './measureState.js';
 import {pinState,pinActions,pinClearActions} from './pinState.js';
-import {pivotState,pivotActions} from './pivotState.js';
+import {pivotState} from './pivotState.js';
 import {toolMode} from './toolMode.js';
 import {viewMode,viewActions} from './viewMode.js';
 import {dxfDocument,exportDxf} from './dxf.js';
@@ -57,11 +56,8 @@ import {gridActions,setGridValue} from './gridState.js';
 import {createCanvas} from './canvas.js';
 import {configureCanvasText, enterEdit} from './canvasText.js';
 import {configureReference, referenceForAgent} from './referencePicture.js';
-import {getFont,registerFont,loadFont,isRegistryFont,documentFontIds,registerDocumentFonts} from './fonts.js';
-import {createFontPicker,fetchFontIndex,LEGACY} from './fontui.js';
-import {ttfToFont} from './ttf.js';
-import {distortionGrid,blockSeconds,blockTimeLabel,bundledFontUsage,countSmallHoles,isSmallIsland,isClosedShape,exportAppliqueTemplates,cornerRadii,svgPathFill,parseThreadStock,nearestStockThread,HOOP_PRESETS,customFontUsage,exportPrintTemplate,batchDocuments,batchPlan,designWarnings,TIP_CATEGORIES,visibleTips,measureBetween,initialDocument,geometry,applyOperations,validateDocument,measureText,parseSvgPath,makeStitchLayer,objectBounds,hoopSize,jefWarnings,exportSvg,threadPlan,threadSpans,sewingSeconds,sewingSecondsUpTo,sewingWorksheet} from './engine.js';
-import {clone,esc,download,safeProjectFilename,sewTime,tipKey,forWorker} from './appHelpers.js';
+import {distortionGrid,blockSeconds,blockTimeLabel,bundledFontUsage,countSmallHoles,isSmallIsland,isClosedShape,exportAppliqueTemplates,cornerRadii,svgPathFill,parseThreadStock,nearestStockThread,HOOP_PRESETS,customFontUsage,exportPrintTemplate,batchDocuments,batchPlan,designWarnings,TIP_CATEGORIES,visibleTips,measureBetween,initialDocument,geometry,applyOperations,validateDocument,parseSvgPath,makeStitchLayer,objectBounds,hoopSize,jefWarnings,exportSvg,threadPlan,threadSpans,sewingSeconds,sewingSecondsUpTo,sewingWorksheet} from './engine.js';
+import {clone,download,safeProjectFilename,sewTime,tipKey,forWorker} from './appHelpers.js';
 import {withSavedHoop,STOCK_KEY,threadStock,TIPS_KEY,hiddenTips,ignoredTipsKey,ignoredTips} from './storedPrefs.js';
 const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)],svgNS='http://www.w3.org/2000/svg';
 setDocument({doc:withSavedHoop(initialDocument()),history:[],future:[],dirty:true});
@@ -90,12 +86,6 @@ function syncPlaybackControls(){
  const percent=length?Math.floor(limit/length*100):0;
  setStatus({playback:`${sewn.toLocaleString()} / ${plan.count.toLocaleString()} stitches · ${percent}%`,needle:current?`Needle ${current.x.toFixed(1)}, ${current.y.toFixed(1)} mm`:'Needle at start'});
 }
-// ---- fonts: bundled fonts load on demand; the document's own (loaded-from-file) fonts are registered from doc.customFonts
-let fontIndex=[...LEGACY],newTextFont='welcome-mono/1';const fontLoading=new Set(),fontFailed=new Set();
-const fetchJson=path=>fetch(new URL('../'+path,import.meta.url)).then(r=>{if(!r.ok)throw Error(`Font file ${path} could not be loaded (${r.status}).`);return r.json();});
-const ensureFontLoaded=id=>(!isRegistryFont(id)||id.startsWith('custom/')||getFont(id))?Promise.resolve():loadFont(id,fetchJson);
-async function ensureDocFonts(){registerDocumentFonts(documentNow().doc);await Promise.all(documentFontIds(documentNow().doc).map(ensureFontLoaded));}
-function kickFontLoads(){registerDocumentFonts(documentNow().doc);for(const id of documentFontIds(documentNow().doc)){if(id.startsWith('custom/')||getFont(id)||fontLoading.has(id)||fontFailed.has(id))continue;fontLoading.add(id);ensureFontLoaded(id).then(()=>{fontLoading.delete(id);render();},()=>{fontLoading.delete(id);fontFailed.add(id);toast(`Font ${id} could not be loaded.`);});}}
 const preview3d=createThreadPreview($('#preview3d'));let preview3dPlan=null,pullFabric=null;
 // The pull estimate: computed from the compiled plan and the fabric, and shown only while the 3D view and the checkbox are on.
 function refreshPull(){const st=previewState.get(),doc=documentNow().doc;if(!st.pull||!st.threeD||!preview3dPlan){preview3d.setPull(null);if(st.note)setPreviewState({note:''});return;}const grid=distortionGrid(preview3dPlan,doc.settings.fabric??'woven',hoopSize(doc));preview3d.setPull(grid);setPreviewState({note:t('Peak estimate {n}% of the scale on {fabric}. Lines show the direction the fabric pulls. A guide for where to look: it uses stitch density, stitch direction and fabric stretch, not a simulation of the machine.',{n:Math.round(grid.peak*100),fabric:t(grid.label)})});}
@@ -150,15 +140,10 @@ function render(){updateBatchInfo();
  setActions({redo:!documentNow().future.length});
  setActions({duplicate:!selState().selected,remove:!selState().selected});
  canvasView?.drawScene();
-canvasView?.drawControls();const o=selectedObject();setInspectorText({heading:o?.name||'Select an object'});$('#sourceInfo').hidden=o?.kind!=='stitch_layer';
-$('#sourceInfo').innerHTML=o?.kind==='stitch_layer'?`<strong>${esc(o.source.format.toUpperCase())} stitch layer</strong>${o.source.metadata?`<br>${esc([o.source.metadata.name,o.source.metadata.author?t('by {author}',{author:o.source.metadata.author}):''].filter(Boolean).join(' · '))}`:''}<br>${o.stitches.length.toLocaleString()} commands · ${o.threads.length} source threads<br>${esc(o.source.fileName)} · ${(o.source.size/1024).toFixed(1)} KiB<br>Source bounds ${o.source.bounds.map(v=>v.toFixed(1)).join(' × ')} mm<br>${o.source.warnings.length?`<em>${o.source.warnings.map(esc).join('<br>')}</em>`:''}`:'';
-if(o){
-setTransformFields({posX:Number(o.x).toFixed(1),posY:Number(o.y).toFixed(1),sizeW:Number(o.w||0).toFixed(1),sizeH:Number(o.h||0).toFixed(1),rotation:String(Number(o.rotation||0))});
-setLetteringFields({alongOffset:String(o.along?.offset??0)});syncTextInspector(o);}else{syncTextInspector(null);}
- 
- setStatus({count:compileError?`⚠ Can't compile: ${compileError}`:plan?`${t('{n} stitches',{n:plan.count.toLocaleString()})} · ${plan.errors.length?plan.errors[0]:t('compiled')}`:documentNow().doc.objects.length?'Compiling…':'Nothing to sew yet'});
- setStatus({countError:Boolean(compileError)||Boolean(plan?.errors.length)});
- {const errs=plan?.issues||[],tips=sewingTips();setStatus({issuesHidden:errs.length+tips.length===0,issuesText:`⚠ ${[errs.length?t(errs.length===1?'1 issue':'{n} issues',{n:errs.length}):'',tips.length?t(tips.length===1?'1 sewing tip':'{n} sewing tips',{n:tips.length}):''].filter(Boolean).join(' · ')}`,issuesTitle:[...errs,...tips].map(i=>t(i.message)).join('\n')});renderSewTips(tips);}setInspectorText({summary:plan?t('{n} stitches · {m} m estimated thread · {c} thread colors',{n:plan.count.toLocaleString(),m:(plan.threadLength/1000).toFixed(1),c:plan.colors.length})+' · '+t('about {t} to sew',{t:sewTime(plan)})+(plan.errors.length?' · '+plan.errors.join(' '):''):'No generated stitches.'});
+canvasView?.drawControls();
+const tips=sewingTips();
+syncInspector({plan,compileError,tips});
+renderSewTips(tips);
  syncStitchPanel();
  renderSimulation();
  canvasView?.refresh();
@@ -216,59 +201,11 @@ $('#removeSmallHoles').onclick=()=>{const ids=[...selState().multi].filter(id=>i
 $('#removeSmallIslands').onclick=()=>{const ids=[...selState().multi].filter(id=>isClosedShape(documentNow().doc.objects.find(o=>o.id===id))),maxArea=Number($('#smallIslandArea').value);if(!(maxArea>=.1&&maxArea<=20)){toast(t('The island limit must be 0.1 to 20 mm².'));return;}const count=ids.filter(id=>isSmallIsland(documentNow().doc.objects.find(o=>o.id===id),maxArea)).length;if(!count){toast(t('No islands under {a} mm² in the selection.',{a:maxArea}));return;}edit([{op:'remove_small_islands',ids,maxArea}],()=>toast(t('Removed small islands: {n}.',{n:count})));};
 $('#textOnPath').onclick=()=>{const picked=[...selState().multi].map(id=>documentNow().doc.objects.find(o=>o.id===id)).filter(Boolean),t=picked.find(o=>o.kind==='text'),p=picked.find(o=>o.kind==='path');if(t&&p)edit([{op:'text_on_path',textId:t.id,pathId:p.id}],()=>{setSelection({selected: t.id});setSelection({multi: new Set([t.id])});});};
 $('#textOffPath').onclick=()=>{const ids=[...selState().multi].filter(id=>documentNow().doc.objects.find(o=>o.id===id)?.along);if(ids.length)edit(ids.map(textId=>({op:'text_off_path',textId})));};
-letteringActions.commit=(field,text)=>{if(field==='alongOffset'){const o=selectedObject();if(o?.along)edit([{op:'set_along_offset',textId:o.id,offset:Number(text)}]);return;}const o=textObj();if(!o)return;if(field==='text'){let t=text;if(!isRegistryFont(o.font))t=t.replace(/\n/g,' ').toUpperCase().slice(0,24);if(!t.trim()){toast('Lettering needs some text.');syncTextInspector(o);return false;}edit([{op:'set_object',id:o.id,text:t}]);return;}if(field==='height'){const height=Number(text);edit([{op:'transform',id:o.id,height,width:measureText(o.text,o.font||'welcome-mono/1',height,o)}]);return;}const key={tracking:'tracking',wordSpacing:'wordSpacing',lineHeight:'lineHeight',boldMm:'bold',italicDeg:'italic'}[field];edit([{op:'set_object',id:o.id,[key]:Number(text)}]);};
-letteringActions.choose=(field,value)=>{if(field==='font'){setFont(value);return;}const o=textObj();if(!o)return;if(field==='vertical'){if(value&&!isRegistryFont(o.font)){toast(t('Vertical lettering needs a bundled or loaded font. Choose one in Font.'));return false;}if(edit([{op:'set_object',id:o.id,vertical:value}])&&value)fitVerticalToHoop(o.id);return;}if(field==='nameDrop'){edit([{op:'set_object',id:o.id,nameDrop:value}]);return;}if(field==='stitch')edit([{op:'set_object',id:o.id,stitch:value}]);};
-letteringActions.press=(name,value)=>{const o=textObj();if(!o)return;if(name==='bold')edit([{op:'set_object',id:o.id,bold:o.bold>0?0:Math.max(.4,Math.round(o.h*.03*10)/10)}]);else if(name==='italic')edit([{op:'set_object',id:o.id,italic:o.italic>0?0:12}]);else edit([{op:'set_object',id:o.id,align:value}]);};
+configureLettering({edit, transact, toast, render});
 $('#organizeFonts').onclick=()=>{setFontsDialogOpen(true);$('#fontsDialog').showModal();};
 $('#removeUnusedFonts').onclick=()=>{const before=Object.keys(documentNow().doc.customFonts||{}).length;edit([{op:'remove_unused_fonts'}]);const removed=before-Object.keys(documentNow().doc.customFonts||{}).length;toast(removed?`Removed ${removed} unused font${removed===1?'':'s'}.`:'No unused fonts to remove.');};
-// With a pivot set, the rotation field turns the whole selection by the change about the pivot; without one, each object's own rotation is set.
-transformActions.commit=(field,text)=>{if(!selState().selected)return;if(field==='rotation'){const v=Number(text);if(!Number.isFinite(v))return;if(pivotState.get().pivot){const turn=((v-(Number(selectedObject()?.rotation)||0))+540)%360-180;if(turn)edit([{op:'rotate',ids:[...selState().multi],angle:turn,cx:pivotState.get().pivot[0],cy:pivotState.get().pivot[1]}]);return;}edit([{op:'transform',id:selState().selected,rotation:v}]);return;}const key={posX:'x',posY:'y',sizeW:'width',sizeH:'height'}[field];edit([{op:'transform',id:selState().selected,[key]:Number(text)}]);};
-pivotActions.togglePick=()=>{const cur=pivotState.get();pivotState.set({...cur,picking:!cur.picking});};
-pivotActions.reset=()=>{pivotState.set({pivot:null,picking:false});render();canvasView.refresh();};
-// New text and font switches start at the font's own design size, shrunk (within the font's size range) so the line fits 85% of the hoop width.
-function fitHeight(fid,text,opts={}){const f=isRegistryFont(fid)?getFont(fid):null;if(!f)return fid==='neon-blinking/1'?20:8;const lo=f.size*f.minScale,hi=f.size*f.maxScale,limit=hoopSize(documentNow().doc).w*.85,w=measureText(text,fid,f.size,opts);let h=f.size;if(w>limit)h=f.size*limit/w;return Math.max(lo,Math.min(hi,+h.toFixed(2)));}
-const textObj=()=>{const o=selectedObject();return o?.kind==='text'?o:null;};
-function syncTextInspector(o){
- const isText=o?.kind==='text',fid=isText?(o.font||'welcome-mono/1'):newTextFont,f=isRegistryFont(fid)?getFont(fid):null,legacyNeon=fid==='neon-blinking/1',registry=isRegistryFont(fid);
- const lo=f?+(f.size*f.minScale).toFixed(2):legacyNeon?20:registry?2:4,hi=f?+(f.size*f.maxScale).toFixed(2):legacyNeon?60:registry?200:16;
- const entry=fontIndex.find(x=>x.fid===fid),custom=fid.startsWith('custom/')?documentNow().doc.customFonts?.[fid.slice(7)]:null;
- let fontOptions=letteringFieldsState.get().fontOptions;
- if(!fontOptions.some(op=>op.value===fid))fontOptions=[...fontOptions,{value:fid,label:fid}];
- setLetteringFields({textOff:!isText,styleOff:!isText||!registry,text:isText?o.text:'',height:String(isText?+Number(o.h).toFixed(2):(f?.size??(legacyNeon?20:8))),heightMin:String(lo),heightMax:String(hi),heightTitle:`${lo}–${hi} mm for this font`,fontOptions,fontValue:fid,tracking:String(o?.tracking??0),wordSpacing:String(o?.wordSpacing??0),lineHeight:String(o?.lineHeight??1),boldMm:String(o?.bold??0),italicDeg:String(o?.italic??0),bold:Boolean(o?.bold>0),italic:Boolean(o?.italic>0),align:o?.align||'left',vertical:Boolean(o?.vertical),nameDrop:Boolean(o?.nameDrop),stitch:o?.stitch==='run'?'run':'fill',fontInfoHidden:!(entry||custom),fontInfoText:custom?`${custom.name} — loaded from a file; stored inside this project. ${custom.license||'Check the licence of the font file before sharing the design.'}`:entry?`${entry.name} — ${entry.license||''}${entry.original&&entry.original!==entry.name?` · ${t('based on')} ${entry.original}`:''}${!registry?' · '+t('single-line font: spacing, bold and italic apply to bundled outline/stitch fonts; pick a satin or fill font to set the stitch density'):''}`:''});
- setStitchRow('textStitchRow',!(isText&&f?.kind==='outline'));
- fontPicker?.refreshButton();
-}
-async function setFont(fid){
- try{await ensureFontLoaded(fid);}catch(error){toast(error.message);syncTextInspector(selectedObject());return;}
- newTextFont=fid;const o=textObj(),f=isRegistryFont(fid)?getFont(fid):null;
- if(o){const legacy=!isRegistryFont(fid),height=fitHeight(fid,o.text.split('\n').reduce((a,b)=>a.length>=b.length?a:b,''),o),text=legacy?o.text.replace(/\n/g,' ').toUpperCase().slice(0,24):o.text;
-  edit([{op:'set_object',id:o.id,font:fid,text,stitch:f?.kind==='outline'?(getFont(o.font)?.kind==='outline'&&o.stitch==='run'?'run':'fill'):'run'},{op:'transform',id:o.id,height,width:measureText(text,fid,height,o)}]);
-  }
- else syncTextInspector(null);
-}
+configureInspector({edit, render, refreshCanvas:()=>canvasView.refresh()});
 
-
-
-
-
-
-
-
-// Vertical lettering fits the hoop: a column taller than 90% of the hoop height is scaled down by its height ratio, with the width kept in proportion (the same transform the lettering height field uses).
-function fitVerticalToHoop(id){const o=documentNow().doc.objects.find(v=>v.id===id);if(!o?.vertical)return;const b=objectBounds(o),colH=b[3]-b[1],limit=hoopSize(documentNow().doc).h*.9;if(!(colH>limit)||!(o.h>0))return;const height=+(o.h*limit/colH).toFixed(2);if(edit([{op:'transform',id,height,width:measureText(o.text,o.font||'welcome-mono/1',height,o)}])){const o2=documentNow().doc.objects.find(v=>v.id===id),b2=objectBounds(o2),cx=(b2[0]+b2[2])/2,cy=(b2[1]+b2[3])/2;edit([{op:'transform',id,x:o2.x-cx,y:o2.y-cy}]);toast(t('Vertical lettering fitted to the hoop at {h} mm.',{h:height}));}}
-
-
-async function loadFontFile(file){
- try{if(file.size>12_000_000)throw Error('Font files over 12 MB are not supported.');const bytes=new Uint8Array(await file.arrayBuffer()),base=file.name.replace(/\.[^.]+$/,'').replace(/[^A-Za-z0-9_.-]+/g,'_').slice(0,32)||'font';let id=base,n=1;while(documentNow().doc.customFonts?.[id]||getFont(`custom/${id}`))id=`${base}_${++n}`;
-  const font=ttfToFont(bytes,{id,name:file.name.replace(/\.[^.]+$/,''),license:'Loaded from a local file — check its licence',keywords:['truetype','outline','custom']});
-  if(Object.keys(font.glyphs).length<10)throw Error('That font has too few Latin glyphs.');
-  delete font.id;
-  const key=`custom/${id}`;registerFont(key,{...font,id});
-  const o=textObj();
-  const ok=transact(()=>{(documentNow().doc.customFonts||={})[id]=font;if(o){const t=documentNow().doc.objects.find(v=>v.id===o.id);t.font=key;t.stitch='fill';t.h=font.size;t.w=measureText(t.text,key,font.size,t);}});
-  if(ok){newTextFont=key;fontIndex=[...fontIndex.filter(f=>f.fid!==key),{fid:key,id,name:font.name,kind:'outline',keywords:['truetype','outline','custom'],license:font.license,size:font.size,minScale:font.minScale,maxScale:font.maxScale}];populateFontSelect();toast(`Loaded ${font.name}. It is stored in this project.`);syncTextInspector(selectedObject());}
- }catch(error){toast(error.message);}
-}
 stitchChoiceActions.choose=(id,value)=>{if(id==='fillMethod'){const v=value==='rows'?null:value;if(selState().multi.size)edit(orderedIds().map(oid=>({op:'set_object',id:oid,fillMethod:v})));else edit([{op:'set_settings',fillMethod:v}]);return;}if(id==='cap'||id==='join'){const ids=[...selState().multi];if(ids.length)edit(ids.map(i=>({op:'set_object',id:i,[id]:value==='butt'&&id==='cap'||value==='round'&&id==='join'?null:value})));return;}if(id==='runStyle'){if(selState().selected)edit([{op:'set_object',id:selState().selected,runStyle:value==='single'?null:value}]);return;}if(id==='type'){if(selState().selected)edit([{op:'set_object',id:selState().selected,stitch:value}]);}};
 capRowsActions.choose=(field,checked)=>{if(selState().selected)edit([{op:'set_object',id:selState().selected,applique:checked?true:null}]);};
 runRowsActions.commit=(field,text)=>{if(field==='borderWidth'){const ids=[...selState().multi];if(ids.length)edit(ids.map(id=>({op:'set_object',id,borderWidth:Number(text)>0?Number(text):null})));return;}if(selState().selected)edit([{op:'set_object',id:selState().selected,[field]:field==='lengthVariance'?(Math.max(0,Math.min(50,Number(text)||0))/100||null):(text===''?null:Number(text))}]);};
@@ -283,9 +220,7 @@ typeRowsActions.commit=(field,text)=>{if(selState().selected)edit([{op:'set_obje
 satinEndRowsActions.commit=(field,text)=>{if(selState().selected)edit([{op:'set_object',id:selState().selected,[field]:text===''?null:Number(text)}]);};
 capRowsActions.commit=(field,text)=>{if(field==='appliqueWidth'){if(selState().selected)edit([{op:'set_object',id:selState().selected,appliqueWidth:Number(text)}]);return;}if(field==='compensation'){if(selState().selected)edit([{op:'set_object',id:selState().selected,compensation:text===''?null:Number(text)}]);return;}const o=selectedObject();if(o&&selState().selNode!==null)edit([{op:'set_width_at_node',id:o.id,index:selState().selNode,width:Number(text)}]);};
 blingRowsActions.choose=(field,value)=>{if(!selState().selected)return;if(field==='motifPair'){edit([{op:'set_object',id:selState().selected,motifPair:value,...(value?{satinWidth:selectedObject()?.satinWidth??4}:{})}]);return;}const v=field==='blingRings'?Number(value):value;edit([{op:'set_object',id:selState().selected,[field]:v}]);};
-function populateFontSelect(){setLetteringFields({fontOptions:fontIndex.map(f=>({value:f.fid,label:f.name}))});}
-const fontPicker=createFontPicker({button:$('#fontButton'),buttonPreview:$('#fontButtonPreview'),buttonName:$('#fontButtonName'),panel:$('#fontPanel'),search:$('#fontSearch'),chips:$('#fontChips'),list:$('#fontList'),loadFile:$('#fontLoadFile'),fileInput:$('#fontFile'),getIndex:()=>[...fontIndex,...Object.entries(documentNow().doc.customFonts||{}).filter(([id])=>!fontIndex.some(f=>f.fid===`custom/${id}`)).map(([id,f])=>({fid:`custom/${id}`,id,name:f.name,kind:'outline',keywords:['truetype','custom'],license:f.license,size:f.size,minScale:f.minScale,maxScale:f.maxScale}))],getCurrent:()=>textObj()?.font||newTextFont,getSample:()=>(textObj()?.text||'Hello 123').split('\n')[0].slice(0,14),getColor:()=>textObj()?.thread||'#1d2925',ensureLoaded:ensureFontLoaded,onPick:setFont,onLoadFile:loadFontFile});
-fetchFontIndex().then(index=>{fontIndex=index;populateFontSelect();syncTextInspector(selectedObject());fontPicker.refresh();});
+initFontPicker();
 $('#undo').onclick=()=>{const d=documentNow();if(!d.history.length)return;const prev=d.history.at(-1);setDocument({doc:{...prev,revision:prev.revision+1},history:d.history.slice(0,-1),future:[...d.future,clone(d.doc)],dirty:true});clearComputed();render();};
 $('#redo').onclick=()=>{const d=documentNow();if(!d.future.length)return;const next=d.future.at(-1);setDocument({doc:{...next,revision:next.revision+1},history:[...d.history,clone(d.doc)],future:d.future.slice(0,-1),dirty:true});clearComputed();render();};
 
@@ -395,7 +330,7 @@ function menuItems(o,p){
   {label:sel.every(v=>v.locked)?'Unlock':'Lock',run:()=>edit(sel.map(v=>({op:'set_object',id:v.id,locked:!sel.every(w=>w.locked)})))},{label:'Hide',run:()=>edit(sel.map(v=>({op:'set_object',id:v.id,visible:false})))},'-',
   {label:'Zoom to selection',key:'Shift+2',run:()=>canvasView.fitSelection()},{label:'Select all',key:'Ctrl+A',run:selectAll}];
 }
-canvasView=createCanvas({svg:$('#art'),container:$('.canvas'),overlay:$('#overlay'),doc:()=>documentNow().doc,ids:orderedIds,tool:()=>toolMode.get(),pivot:()=>pivotState.get().pivot,knife:()=>knifeState.get(),measure:()=>measureState.get(),pickPivot:p=>{if(!pivotState.get().picking)return false;pivotState.set({pivot:[Math.round(p[0]*10)/10,Math.round(p[1]*10)/10],picking:false});render();canvasView.refresh();return true;},snapPt:p=>canvasView.snapPt(p),snapOn:()=>snapOn,gridSize:()=>gridSize,isEditing:()=>editMode,setEditing:v=>{editMode=v;},selectedObject,textFont:()=>newTextFont,ensureFontLoaded,fitHeight,
+canvasView=createCanvas({svg:$('#art'),container:$('.canvas'),overlay:$('#overlay'),doc:()=>documentNow().doc,ids:orderedIds,tool:()=>toolMode.get(),pivot:()=>pivotState.get().pivot,knife:()=>knifeState.get(),measure:()=>measureState.get(),pickPivot:p=>{if(!pivotState.get().picking)return false;pivotState.set({pivot:[Math.round(p[0]*10)/10,Math.round(p[1]*10)/10],picking:false});render();canvasView.refresh();return true;},snapPt:p=>canvasView.snapPt(p),snapOn:()=>snapOn,gridSize:()=>gridSize,isEditing:()=>editMode,setEditing:v=>{editMode=v;},selectedObject,textFont:letteringTextFont,ensureFontLoaded,fitHeight,
  select:selectIds,commit:(ops,after)=>edit(ops,after),render,toast,selectNodesIn:(r,add)=>{const o=selectedObject();if(o?.kind!=='path')return;const inside=o.points.map((p,i)=>[p,i]).filter(([p])=>p[0]>=r[0]&&p[0]<=r[2]&&p[1]>=r[1]&&p[1]<=r[3]).map(([,i])=>i);setSelection({selNodes: new Set(add?[...selState().selNodes,...inside]:inside)});setSelection({selNode: inside.at(-1)??null});render();},dblclick:(o,p)=>{canvasView.markObjectDblclick();if(o.kind==='path'&&editMode&&selState().selected===o.id)canvasView.insertNodeAt(o,p);else enterEdit(o);},menuItems,
  onViewport:()=>{canvasView?.drawControls();const z=$('#zoomPct');if(z)z.textContent=`${canvasView?canvasView.percent():100}%`;},
  zoomUi:(zoomAt,fitHoop,fitAll,zoom100)=>{$('#zoomIn').onclick=()=>zoomAt(1.25);$('#zoomOut').onclick=()=>zoomAt(1/1.25);$('#zoomFit').onclick=fitHoop;$('#zoomAll').onclick=fitAll;$('#zoomPct').onclick=zoom100;}});
