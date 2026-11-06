@@ -4,6 +4,7 @@
 // Document state stays in app.js; this module talks to it through `api`.
 import {geometry,objectBounds,hoopSize} from './engine.js';
 import {drawScene} from './canvasScene.js';
+import {createCanvasEditing} from './canvasEditing.js';
 
 const SVG='http://www.w3.org/2000/svg',PX_PER_MM=96/25.4;
 const el=(/** @type {any} */ tag,attrs={})=>{const n=document.createElementNS(SVG,tag);for(const [k,v] of Object.entries(attrs))n.setAttribute(k,v);return n;};
@@ -32,6 +33,13 @@ export function createCanvas(/** @type {any} */ api){
   const rulerTop=container.querySelector('#rulerTop'),rulerLeft=container.querySelector('#rulerLeft'),guidesLayer=svg.querySelector('#guides');
   const size=()=>{const r=container.getBoundingClientRect();return {w:Math.max(200,r.width),h:Math.max(200,r.height)};};
   const inField=(/** @type {any} */ e)=>e.target.closest?.('input,select,textarea,[contenteditable="true"],#fontPanel');
+
+  // The edit-mode overlay and its pointer listeners live here, next to the rest of the canvas's pointer handling.
+  const editing=createCanvasEditing({...api,scale:()=>vp.s});
+  window.addEventListener('pointermove',(/** @type {any} */ e)=>editing.pointerMove(e));
+  window.addEventListener('pointerup',(/** @type {any} */ e)=>editing.finishDrag(e));
+  window.addEventListener('pointercancel',(/** @type {any} */ e)=>editing.finishDrag(e));
+  window.addEventListener('pointerup',()=>editing.showSnap(null));
 
   // ---- viewport ---------------------------------------------------------------------------------------------
   function toScreen(/** @type {any} */ x,/** @type {any} */ y){const {w,h}=size();return [(x-vp.cx)*vp.s+w/2,(y-vp.cy)*vp.s+h/2];}
@@ -389,5 +397,7 @@ export function createCanvas(/** @type {any} */ api){
   });
 
   api.zoomUi?.(zoomAt,fitHoop,fitAll,zoomTo100);
-  return {vp,apply,refresh,drawScene,fitHoop,fitAll,fitSelection,zoomAt,zoomTo100,toScreen,scale:()=>vp.s,percent:()=>Math.round(vp.s/PX_PER_MM*100),hit,closeMenu,isDragging:()=>Boolean(state),inField,RULER};
+  return {vp,apply,refresh,drawScene,fitHoop,fitAll,fitSelection,zoomAt,zoomTo100,toScreen,scale:()=>vp.s,percent:()=>Math.round(vp.s/PX_PER_MM*100),hit,closeMenu,isDragging:()=>Boolean(state),inField,RULER,
+    px:editing.px,drawControls:editing.drawControls,showSnap:editing.showSnap,
+    snapPt:editing.snapPt,insertNodeAt:editing.insertNodeAt,deleteNode:editing.deleteNode};
 }
