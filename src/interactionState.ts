@@ -32,10 +32,21 @@ export interface RefDrag {
   ny?: number;
 }
 
+/** The lettering text box open over the canvas: the object, its text before editing, the box's size and position in pixels, and its character limit. */
+export interface CanvasTextEdit {
+  id: string;
+  original: string;
+  maxLength: number;
+  left: number;
+  top: number;
+  width: number;
+  height: number;
+}
+
 export interface Interaction {
   guideDraft: Array<[number, number]> | null;
   refMoving: boolean;
-  canvasText: {id: string; original: string; ta: HTMLTextAreaElement} | null;
+  canvasText: CanvasTextEdit | null;
   nodeDrag: PathNodeDrag | null;
   refDrag: RefDrag | null;
 }

@@ -1,4 +1,5 @@
 import {layoutState} from '../layoutState.js';
+import {CanvasTextEditor} from './CanvasTextEditor';
 import {PreviewPanel} from './PreviewPanel';
 import {useSyncExternalStore} from 'react';
 import {SelectionHint} from './SelectionHint';
@@ -247,6 +248,7 @@ export function EditorLayout() {
             <g id={"stitches"}>
             </g>
           </svg>
+          <CanvasTextEditor />
         </div>
         <footer>
           <PlaybackBar />

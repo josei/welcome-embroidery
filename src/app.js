@@ -60,6 +60,7 @@ import {underlayActions,underlayState} from './underlayState.js';
 import {sewTipActions,setSewTips} from './sewTipsState.js';
 import {gridActions,setGridValue} from './gridState.js';
 import {createCanvas} from './canvas.js';
+import {configureCanvasText, enterEdit} from './canvasText.js';
 import {getFont,registerFont,loadFont,isRegistryFont,documentFontIds,registerDocumentFonts} from './fonts.js';
 import {createFontPicker,fetchFontIndex,LEGACY} from './fontui.js';
 import {ttfToFont} from './ttf.js';
@@ -503,26 +504,6 @@ agent.resume();
 $('#editNodes').onclick=()=>{const o=selectedObject();if(o&&selState().multi.size===1)enterEdit(o);else toast('Select one shape, path or lettering first.');};
 const orderedIds=()=>documentNow().doc.objects.map(o=>o.id).filter(id=>selState().multi.has(id));
 function selectIds(ids,primary){const prev=selState().selected;setSelection({multi: new Set(ids)});setSelection({selected: primary??ids.at(-1)??null});setSelection({selNode: null});setSelection({selNodes: new Set()});if(!(ids.length===1&&selState().selected===prev&&editMode))editMode=false;render();}
-// Lettering is edited right on the canvas: a text box opens over the object and the stitch outlines update as you type (Enter commits as one undo step, Shift+Enter adds a line, Esc cancels).
-function startCanvasText(o){if(interactionNow().canvasText)return;const b=objectBounds(o),[x0,y0]=canvasView.toScreen(b[0],b[1]),[x1,y1]=canvasView.toScreen(b[2],b[3]),ta=document.createElement('textarea');ta.id='canvasText';ta.value=o.text;ta.setAttribute('aria-label','Edit lettering text');ta.maxLength=isRegistryFont(o.font)?120:24;
- Object.assign(ta.style,{left:`${Math.max(26,x0-8)}px`,top:`${Math.max(26,y0-10)}px`,width:`${Math.max(180,x1-x0+24)}px`,height:`${Math.max(44,Math.min(160,y1-y0+20))}px`});
- $('.canvas').append(ta);
- setInteraction({canvasText: {id:o.id,original:o.text,ta}});
- ta.focus();
- ta.select();
- ta.oninput=()=>liveText(o.id,ta.value);
- ta.onkeydown=e=>{e.stopPropagation();if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();finishCanvasText(true);}else if(e.key==='Escape'){e.preventDefault();finishCanvasText(false);}};
- ta.onblur=()=>finishCanvasText(true);
- }
-function liveText(id,value){const o=documentNow().doc.objects.find(v=>v.id===id);if(!o)return;const t=isRegistryFont(o.font)?value:value.replace(/\n/g,' ').toUpperCase().slice(0,24);if(!t.trim())return;o.text=t;o.w=measureText(t,o.font||'welcome-mono/1',o.h,o);render();}
-function finishCanvasText(commit){if(!interactionNow().canvasText)return;const {id,original,ta}=interactionNow().canvasText;setInteraction({canvasText: null});const value=ta.value;ta.onblur=null;ta.remove();const o=documentNow().doc.objects.find(v=>v.id===id);if(!o)return;o.text=original;o.w=measureText(original,o.font||'welcome-mono/1',o.h,o);
- const t=isRegistryFont(o.font)?value:value.replace(/\n/g,' ').toUpperCase().slice(0,24);
- if(commit&&t.trim()&&t!==original)edit([{op:'set_object',id,text:t}]);
- else render();
- }
-function enterEdit(o){if(!o||o.kind==='stitch_layer')return;if(o.kind==='text'){selectIds([o.id],o.id);startCanvasText(o);return;}
- if(o.kind==='path'){selectIds([o.id],o.id);editMode=true;render();return;}
- edit([{op:'to_path',ids:[o.id]}],()=>{setSelection({selected: o.id});setSelection({multi: new Set([o.id])});editMode=true;setSelection({selNode: null});});}
 function copySelection(){const ids=new Set(orderedIds());if(!ids.size)return false;setClipboard({clipboard: {objects:documentNow().doc.objects.filter(o=>ids.has(o.id)).map(clone),pastes:0}});toast(`Copied ${ids.size} object${ids.size===1?'':'s'}.`);return true;}
 function pasteClipboard(){if(!clipboardNow().clipboard)return;const pastes=clipboardNow().clipboard.pastes+1;setClipboard({clipboard:{...clipboardNow().clipboard,pastes}});const off=4*pastes,remap=new Map(),made=clipboardNow().clipboard.objects.map(o=>{const c=clone(o);c.id=crypto.randomUUID();c.name=`${o.name||o.kind} copy`;if(o.groupId){if(!remap.has(o.groupId))remap.set(o.groupId,crypto.randomUUID());c.groupId=remap.get(o.groupId);}return c;});
  transact(()=>{for(const c of made){const dx=off,dy=off;c.x+=dx;c.y+=dy;if(c.kind==='path'){c.points=c.points.map(([x,y])=>[x+dx,y+dy]);if(c.handles)c.handles=c.handles.map(h=>h&&{i:[h.i[0]+dx,h.i[1]+dy],o:[h.o[0]+dx,h.o[1]+dy]});if(c.holes)c.holes=c.holes.map(r=>r.map(([x,y])=>[x+dx,y+dy]));}if(c.along)c.along.points=c.along.points.map(([x,y])=>[x+dx,y+dy]);setDocument({doc:{...documentNow().doc,objects:[...documentNow().doc.objects,c]}});}setSelection({selected: made.at(-1).id});setSelection({multi: new Set(made.map(c=>c.id))});setSelection({selNode: null});editMode=false;});
@@ -546,6 +527,7 @@ canvasView=createCanvas({svg:$('#art'),container:$('.canvas'),overlay:$('#overla
  onViewport:()=>{canvasView?.drawControls();const z=$('#zoomPct');if(z)z.textContent=`${canvasView?canvasView.percent():100}%`;},
  zoomUi:(zoomAt,fitHoop,fitAll,zoom100)=>{$('#zoomIn').onclick=()=>zoomAt(1.25);$('#zoomOut').onclick=()=>zoomAt(1/1.25);$('#zoomFit').onclick=fitHoop;$('#zoomAll').onclick=fitAll;$('#zoomPct').onclick=zoom100;}});
 canvasView.fitHoop();
+configureCanvasText({edit,render,selectIds,setEditing:on=>{editMode=on;},toScreen:(x,y)=>canvasView.toScreen(x,y)});
 // ---- keyboard ---------------------------------------------------------------------------------------------------
 document.addEventListener('keydown',e=>{
  if(canvasView.inField(e))return;const mod=e.ctrlKey||e.metaKey,key=e.key.toLowerCase();
