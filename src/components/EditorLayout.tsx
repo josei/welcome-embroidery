@@ -12,6 +12,7 @@ import {HoopFields} from './HoopFields';
 import {LetteringPanel} from './LetteringPanel';
 import {PathNodeButtons} from './PathNodeButtons';
 import {PathPanel} from './PathPanel';
+import {ReferenceLayer, referenceCanvasHandlers} from './ReferenceLayer';
 import {ReferencePicture} from './ReferencePicture';
 import {BooleanButtons, FlipButtons} from './SelectionToolbarButtons';
 import {SewingOrder} from './SewingOrder';
@@ -226,7 +227,7 @@ export function EditorLayout() {
             </ActionButton>
             <PathNodeButtons />
           </div>
-          <svg id={"art"} viewBox={"-60 -60 120 120"}>
+          <svg id={"art"} viewBox={"-60 -60 120 120"} {...referenceCanvasHandlers}>
             <defs>
               <pattern id={"linen"} width={"2.6"} height={"2.6"} patternUnits={"userSpaceOnUse"}>
                 <path d={"M0 0H2.6M0 0V2.6"} stroke={"#a9a397"} strokeOpacity={".11"} strokeWidth={".18"} />
@@ -235,8 +236,7 @@ export function EditorLayout() {
             <rect id={"hoopOuter"} className={"hoop-outer"} x={"-58"} y={"-58"} width={"116"} height={"116"} rx={"7"} />
             <rect id={"hoopRing"} className={"hoop"} x={"-54"} y={"-54"} width={"108"} height={"108"} rx={"4"} />
             <rect id={"hoopLinen"} className={"linen"} x={"-52.8"} y={"-52.8"} width={"105.6"} height={"105.6"} rx={"3"} />
-            <g id={"refLayer"} pointerEvents={"none"}>
-            </g>
+            <ReferenceLayer />
             <g id={"shapes"}>
             </g>
             <g id={"controls"}>

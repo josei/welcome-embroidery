@@ -1,6 +1,5 @@
 import {documentNow,setDocument,settingsActions,documentActions} from './documentState.js';
 import {setTransformFields,transformActions} from './transformState.js';
-import {setReferenceFields,referenceActions} from './referenceFieldsState.js';
 import {setHoopFields,hoopActions} from './hoopState.js';
 import {setShortcutsOpen,shortcutsState} from './shortcutsState.js';
 import {restoreActions,setRestore} from './restoreState.js';
@@ -24,7 +23,6 @@ import {setPhotoRows,photoRowsActions} from './photoRowsState.js';
 import {THREAD_PALETTE,threadName} from './threadPalette.js';
 import {openThreadPopover,closeThreadPopover,threadPopoverState} from './threadPopoverState.js';
 import {setFontsDialogOpen} from './fontsDialogState.js';
-import {referenceMoveActions} from './referenceFieldsState.js';
 import {setPathRows,pathRowsActions} from './pathRowsState.js';
 import {setLoopRows,loopRowsActions} from './loopRowsState.js';
 import {setThreadStock,threadStockActions} from './threadStockState.js';
@@ -61,6 +59,7 @@ import {sewTipActions,setSewTips} from './sewTipsState.js';
 import {gridActions,setGridValue} from './gridState.js';
 import {createCanvas} from './canvas.js';
 import {configureCanvasText, enterEdit} from './canvasText.js';
+import {configureReference, referenceForAgent} from './referencePicture.js';
 import {getFont,registerFont,loadFont,isRegistryFont,documentFontIds,registerDocumentFonts} from './fonts.js';
 import {createFontPicker,fetchFontIndex,LEGACY} from './fontui.js';
 import {ttfToFont} from './ttf.js';
@@ -119,7 +118,6 @@ function renderSimulation(){
  {const use3d=viewMode.get()==='preview'&&Boolean(plan)&&preview3d.available;setPreviewState({threeD:use3d});let fresh=false;if(use3d&&preview3dPlan!==plan){preview3d.setPlan(plan,hoopSize(documentNow().doc));preview3dPlan=plan;fresh=true;}if(use3d)preview3d.setLimit(active?playIndex:null);if(preview3d.available){preview3d.show(use3d);$('#art').style.visibility=use3d?'hidden':'';$('#controls').style.display=use3d?'none':$('#controls').style.display;}const fabricNow=documentNow().doc.settings.fabric??'woven';if(preview3d.available)preview3d.setFabric(fabricNow);if(use3d&&(fresh||fabricNow!==pullFabric)){pullFabric=fabricNow;refreshPull();}}
  if(segReady){if(threadsReady)syncThreads();}if(typeof renderPlan==='function'&&threadsReady)renderPlan();
  window.__autosaveHook?.();
- renderReference();
  $('#shapes').style.opacity=viewMode.get()==='stitches'?.18:viewMode.get()==='preview'&&plan?0:viewMode.get()==='preview'?.55:1;
  $('#controls').style.display=viewMode.get()==='design'?'':'none';
  syncPlaybackControls();
@@ -528,6 +526,7 @@ canvasView=createCanvas({svg:$('#art'),container:$('.canvas'),overlay:$('#overla
  zoomUi:(zoomAt,fitHoop,fitAll,zoom100)=>{$('#zoomIn').onclick=()=>zoomAt(1.25);$('#zoomOut').onclick=()=>zoomAt(1/1.25);$('#zoomFit').onclick=fitHoop;$('#zoomAll').onclick=fitAll;$('#zoomPct').onclick=zoom100;}});
 canvasView.fitHoop();
 configureCanvasText({edit,render,selectIds,setEditing:on=>{editMode=on;},toScreen:(x,y)=>canvasView.toScreen(x,y)});
+configureReference({edit,toast,coord:e=>canvasView.coord(e)});
 // ---- keyboard ---------------------------------------------------------------------------------------------------
 document.addEventListener('keydown',e=>{
  if(canvasView.inField(e))return;const mod=e.ctrlKey||e.metaKey,key=e.key.toLowerCase();
@@ -667,70 +666,6 @@ $('#traceGo').onclick=async()=>{const file=$('#traceFile').files[0],info=$('#tra
     toast(t('Traced {n} shapes in {c} colours.',{n:ids.length,c:new Set(result.regions.map(g=>g.color)).size})+(result.dropped?' '+t('{n} small regions were left out.',{n:result.dropped}):'')+(running?' '+t('Thin regions sewn as running outline: {n}.',{n:running}):''));
   }catch(err){info.textContent=err.message||t('That picture could not be read.');}};
 
-// Reference image: a picture under the shapes to draw over. Stored in the project, never sewn, never sent to the stitch worker or an agent.
-function renderReference(){const layer=$('#refLayer');if(!layer)return;layer.replaceChildren();const r=documentNow().doc.reference;
-  setStitchRow('refEmpty',Boolean(r));
-setStitchRow('refControls',!r);
-setStitchRow('refRemove',!r);$('#refLoad').textContent=t(r?'Replace picture…':'Load picture…');
-  if(!r){setInteraction({refMoving: false});$('#art').classList.remove('ref-moving');return;}
-  if(r.visible!==false&&viewMode.get()!=='preview'){const im=document.createElementNS(svgNS,'image');im.setAttribute('href',r.data);im.setAttribute('x',r.x);im.setAttribute('y',r.y);im.setAttribute('width',r.w);im.setAttribute('height',r.h);im.setAttribute('preserveAspectRatio','none');im.setAttribute('opacity',r.opacity??.5);layer.append(im);}
-  const set=(id,v)=>{if(document.activeElement!==$(id))$(id).value=v;};
-  set('#refOpacity',Math.round((r.opacity??.5)*100));
-  setReferenceFields({refX:String(+r.x.toFixed(2)),refY:String(+r.y.toFixed(2)),refW:String(+r.w.toFixed(2)),refH:String(+r.h.toFixed(2))});
-  setReferenceFields({refVisible:r.visible!==false,refLocked:Boolean(r.locked)});
-  
-  if(r.locked){setInteraction({refMoving: false});$('#art').classList.remove('ref-moving');}
-  }
-async function loadReference(file){try{const bmp=await createImageBitmap(file),hs=hoopSize(documentNow().doc),scale=Math.min(1,1400/Math.max(bmp.width,bmp.height)),w=Math.max(1,Math.round(bmp.width*scale)),h=Math.max(1,Math.round(bmp.height*scale)),c=document.createElement('canvas');c.width=w;c.height=h;const ctx=c.getContext('2d');ctx.fillStyle='#fff';ctx.fillRect(0,0,w,h);ctx.drawImage(bmp,0,0,w,h);
-  let q=.85,data=c.toDataURL('image/jpeg',q);while(data.length>1_200_000&&q>.4){q-=.1;data=c.toDataURL('image/jpeg',q);}
-  if(data.length>1_400_000)throw Error(t('That picture is too large to keep in the project.'));
-  const fit=Math.min((hs.w-4)/bmp.width,(hs.h-4)/bmp.height),mw=+(bmp.width*fit).toFixed(2),mh=+(bmp.height*fit).toFixed(2);
-  edit([{op:'set_reference',data,x:+(-mw/2).toFixed(2),y:+(-mh/2).toFixed(2),w:mw,h:mh,opacity:documentNow().doc.reference?.opacity??.5,visible:true,locked:false,name:String(file.name||'picture').slice(0,200)}]);
-  const d=$('#secRef');
-  if(d)d.open=true;
-  toast(t('Reference picture loaded. Draw on top of it; it is not sewn.'));
- }catch(err){toast(err.message||t('That picture could not be read.'));}}
-$('#refLoad').onclick=()=>$('#refFile').click();
-$('#refFile').onchange=e=>{const f=e.target.files[0];e.target.value='';if(f)loadReference(f);};
-$('#refRemove').onclick=()=>edit([{op:'clear_reference'}]);
-$('#refOpacity').oninput=e=>{const im=$('#refLayer image');if(im)im.setAttribute('opacity',Number(e.target.value)/100);};
-$('#refOpacity').onchange=e=>edit([{op:'set_reference',opacity:Math.max(.05,Math.min(1,Number(e.target.value)/100))}]);
-referenceActions.choose=(field,checked)=>edit([{op:'set_reference',...(field==='refVisible'?{visible:checked}:{locked:checked})}]);
-referenceActions.commit=(field,text)=>{const r=documentNow().doc.reference;if(field==='refX'||field==='refY'){const key=field==='refX'?'x':'y';if(!Number.isFinite(Number(text)))return false;edit([{op:'set_reference',[key]:Number(text)}]);return;}if(field==='refW'){const w=Number(text);if(!(r&&w>=1))return false;edit([{op:'set_reference',w,h:+(r.h*w/r.w).toFixed(2)}]);return;}const h=Number(text);if(!(r&&h>=1))return false;edit([{op:'set_reference',h,w:+(r.w*h/r.h).toFixed(2)}]);};
-$('#refFit').onclick=()=>{const r=documentNow().doc.reference;if(!r)return;const hs=hoopSize(documentNow().doc),f=Math.min((hs.w-4)/r.w,(hs.h-4)/r.h),w=+(r.w*f).toFixed(2),h=+(r.h*f).toFixed(2);edit([{op:'set_reference',x:+(-w/2).toFixed(2),y:+(-h/2).toFixed(2),w,h}]);};
-referenceMoveActions.toggle=()=>{if(!documentNow().doc.reference||documentNow().doc.reference.locked)return;setInteraction({refMoving: !interactionNow().refMoving});$('#art').classList.toggle('ref-moving',interactionNow().refMoving);if(interactionNow().refMoving)toast(t('Drag on the canvas to move the picture. Press the button again to go back to drawing.'));};
-$('#art').addEventListener('pointerdown',e=>{if(!interactionNow().refMoving||e.button!==0||!documentNow().doc.reference)return;e.preventDefault();e.stopImmediatePropagation();const r=documentNow().doc.reference,start=canvasView.coord(e);setInteraction({refDrag: {start,x:r.x,y:r.y,pointerId:e.pointerId}});$('#art').setPointerCapture?.(e.pointerId);},true);
-window.addEventListener('pointermove',e=>{if(!interactionNow().refDrag||e.pointerId!==interactionNow().refDrag.pointerId)return;const q=canvasView.coord(e),im=$('#refLayer image');setInteraction({refDrag: {...interactionNow().refDrag, nx: interactionNow().refDrag.x+q[0]-interactionNow().refDrag.start[0]}});setInteraction({refDrag: {...interactionNow().refDrag, ny: interactionNow().refDrag.y+q[1]-interactionNow().refDrag.start[1]}});if(im){im.setAttribute('x',interactionNow().refDrag.nx);im.setAttribute('y',interactionNow().refDrag.ny);}});
-window.addEventListener('pointerup',e=>{if(!interactionNow().refDrag||e.pointerId!==interactionNow().refDrag.pointerId)return;const d=interactionNow().refDrag;setInteraction({refDrag: null});if(d.nx!==undefined&&(Math.abs(d.nx-d.x)>.01||Math.abs(d.ny-d.y)>.01))edit([{op:'set_reference',x:+d.nx.toFixed(2),y:+d.ny.toFixed(2)}]);});
-renderReference();
-
-// What an agent gets for the reference picture: the placement in millimetres plus either the raw picture or an annotated view (the picture where it sits in the
-// document, a millimetre grid with labels, the hoop outline, the origin and optionally the current shapes) so coordinates can be read straight off the image.
-async function referenceForAgent({view='annotated',includeShapes=true}={}){
-  const r=documentNow().doc.reference;if(!r)return {placement:null,hoop:hoopSize(documentNow().doc),image:null};
-  const placement={x:r.x,y:r.y,w:r.w,h:r.h,opacity:r.opacity??.5,visible:r.visible!==false,locked:Boolean(r.locked),name:r.name||null},hs=hoopSize(documentNow().doc);
-  if(view==='raw')return {placement,hoop:hs,image:r.data};
-  const bmp=await createImageBitmap(await (await fetch(r.data)).blob()),m=6,x0=Math.min(-hs.w/2,r.x)-m,y0=Math.min(-hs.h/2,r.y)-m,x1=Math.max(hs.w/2,r.x+r.w)+m,y1=Math.max(hs.h/2,r.y+r.h)+m,W=x1-x0,H=y1-y0,scale=Math.min(1000/W,1000/H),cw=Math.round(W*scale),ch=Math.round(H*scale),c=document.createElement('canvas');
-  c.width=cw;
-  c.height=ch;
-  const ctx=c.getContext('2d'),X=x=>(x-x0)*scale,Y=y=>(y-y0)*scale;
-  ctx.fillStyle='#fff';ctx.fillRect(0,0,cw,ch);ctx.drawImage(bmp,X(r.x),Y(r.y),r.w*scale,r.h*scale);
-  ctx.lineWidth=1;ctx.font='12px sans-serif';ctx.textBaseline='top';
-  for(let gx=Math.ceil(x0/10)*10;gx<=x1;gx+=10){const major=gx%20===0;ctx.strokeStyle=major?'rgba(0,90,120,.45)':'rgba(0,90,120,.18)';ctx.beginPath();ctx.moveTo(X(gx),0);ctx.lineTo(X(gx),ch);ctx.stroke();if(major){ctx.fillStyle='#04506a';ctx.fillText(String(gx),X(gx)+2,2);}}
-  for(let gy=Math.ceil(y0/10)*10;gy<=y1;gy+=10){const major=gy%20===0;ctx.strokeStyle=major?'rgba(0,90,120,.45)':'rgba(0,90,120,.18)';ctx.beginPath();ctx.moveTo(0,Y(gy));ctx.lineTo(cw,Y(gy));ctx.stroke();if(major){ctx.fillStyle='#04506a';ctx.fillText(String(gy),2,Y(gy)+2);}}
-  ctx.strokeStyle='#d03a2a';ctx.lineWidth=2;ctx.setLineDash([8,5]);ctx.strokeRect(X(-hs.w/2),Y(-hs.h/2),hs.w*scale,hs.h*scale);ctx.setLineDash([]);
-  ctx.strokeStyle='#d03a2a';
-  ctx.beginPath();
-  ctx.moveTo(X(0)-10,Y(0));
-  ctx.lineTo(X(0)+10,Y(0));
-  ctx.moveTo(X(0),Y(0)-10);
-  ctx.lineTo(X(0),Y(0)+10);
-  ctx.stroke();
-  ctx.fillStyle='#d03a2a';
-  ctx.fillText('0,0',X(0)+6,Y(0)+6);
-  if(includeShapes)for(const o of documentNow().doc.objects){if(o.visible===false||o.kind==='stitch_layer')continue;let lines;try{lines=geometry(o,0);}catch{continue;}ctx.strokeStyle=o.thread||'#1c725d';ctx.lineWidth=2;for(const line of lines){if(line.length<2)continue;ctx.beginPath();line.forEach(([px,py],i)=>i?ctx.lineTo(X(px),Y(py)):ctx.moveTo(X(px),Y(py)));ctx.stroke();}}
-  return {placement,hoop:hs,image:c.toDataURL('image/png'),imageBox:{x:+x0.toFixed(2),y:+y0.toFixed(2),w:+W.toFixed(2),h:+H.toFixed(2),pixelsPerMm:+scale.toFixed(3)}};
-}
 
 // One shared tooltip, fixed to the viewport and above everything: above the control when there is room, below otherwise, kept inside the window.
 {const tip=document.createElement('div');tip.id='tooltip';tip.setAttribute('role','tooltip');document.body.append(tip);let current=null;
