@@ -1,25 +1,56 @@
+import {useEffect, useRef, useSyncExternalStore} from 'react';
 import {KeysDialog} from './KeysDialog';
 import {RestoreDialog} from './RestoreDialog';
-import {useSyncExternalStore} from 'react';
+import {TraceDialog} from './TraceDialog';
 import {agentLinkState} from '../agentLinkState.js';
+import {agentDialogState, copyAgentLink, revokeAgentLink, setAgentDialogOpen} from '../agentDialog.js';
 import {EXPORT_FORMATS, exportFormatState, setExportFormat} from '../exportFormatState.js';
+import {exportDialogState, setExportDialog} from '../exportDialogState.js';
+import {exportCurrent, MACHINE_FORMATS} from '../exportCommands.js';
 import {documentState} from '../documentState.js';
 import {bundledFontUsage, customFontUsage} from '../engine.js';
 import {getFont} from '../fonts.js';
 import {fontsDialogState, setFontsDialogOpen} from '../fontsDialogState.js';
+import {removeUnusedFonts} from '../fontsDialogCommands.js';
 import {SettingsDialog} from './SettingsDialog';
 import {ThreadPopover} from './ThreadPopover';
-// The dialogs and overlays that sit above the layout. Rendered by React; ids match the markup it replaced, because app.js wires them by id.
+// The dialogs and overlays that sit above the layout. Rendered by React; ids match the markup it replaced, because tests
+// and the commands address them.
 export function EditorOverlays() {
  const agent = useSyncExternalStore(agentLinkState.subscribe, agentLinkState.get);
+ const agentOpen = useSyncExternalStore(agentDialogState.subscribe, agentDialogState.get);
  const exportFormat = useSyncExternalStore(exportFormatState.subscribe, exportFormatState.get);
+ const exportDialog = useSyncExternalStore(exportDialogState.subscribe, exportDialogState.get);
  const {doc} = useSyncExternalStore(documentState.subscribe, documentState.get);
  const fontsOpen = useSyncExternalStore(fontsDialogState.subscribe, fontsDialogState.get);
  const documentReady = Array.isArray(doc.objects) && fontsOpen; // the store starts empty; the lists are worked out when the dialog opens
  const customFonts = documentReady ? customFontUsage(doc) : [], bundledFonts = documentReady ? bundledFontUsage(doc) : [];
+ const agentDialog = useRef<HTMLDialogElement>(null);
+ const fontsDialog = useRef<HTMLDialogElement>(null);
+ const exportElement = useRef<HTMLDialogElement>(null);
+ const agentUrl = useRef<HTMLInputElement>(null);
+ // Each dialog is opened with showModal, which React cannot render; the store says whether it should be open.
+ useEffect(() => {
+  const element = agentDialog.current;
+  if (!element) return;
+  if (agentOpen && !element.open) element.showModal();
+  if (!agentOpen && element.open) element.close();
+ }, [agentOpen]);
+ useEffect(() => {
+  const element = fontsDialog.current;
+  if (!element) return;
+  if (fontsOpen && !element.open) element.showModal();
+  if (!fontsOpen && element.open) element.close();
+ }, [fontsOpen]);
+ useEffect(() => {
+  const element = exportElement.current;
+  if (!element) return;
+  if (exportDialog.open && !element.open) element.showModal();
+  if (!exportDialog.open && element.open) element.close();
+ }, [exportDialog.open]);
  return (
   <>
-    <dialog id={"agentDialog"}>
+    <dialog id={"agentDialog"} ref={agentDialog} onClose={() => setAgentDialogOpen(false)}>
       <form method={"dialog"}>
         <h2>
           {"Connect an AI agent"}
@@ -29,13 +60,18 @@ export function EditorOverlays() {
         </p>
         <label className={"agent-field"}>
           {"MCP endpoint (private link)"}
-          <input id={"agentUrl"} readOnly={true} spellCheck={"false"} value={agent.url} />
+          <input id={"agentUrl"} ref={agentUrl} readOnly={true} spellCheck={"false"} value={agent.url} onFocus={e => e.target.select()} />
         </label>
         <div className={"agent-actions"}>
-          <button type={"button"} id={"agentCopy"} disabled={!agent.ready}>
+          <button
+            type={"button"}
+            id={"agentCopy"}
+            disabled={!agent.ready}
+            onClick={async () => { if (!(await copyAgentLink())) agentUrl.current?.select(); }}
+          >
             {"Copy URL"}
           </button>
-          <button type={"button"} id={"agentRevoke"} disabled={!agent.ready}>
+          <button type={"button"} id={"agentRevoke"} disabled={!agent.ready} onClick={() => void revokeAgentLink()}>
             {"Revoke & make new link"}
           </button>
         </div>
@@ -72,7 +108,7 @@ export function EditorOverlays() {
       </div>
     </div>
     {" "}
-    <dialog id={"fontsDialog"} aria-labelledby={"fontsTitle"} onClose={() => setFontsDialogOpen(false)}>
+    <dialog id={"fontsDialog"} ref={fontsDialog} aria-labelledby={"fontsTitle"} onClose={() => setFontsDialogOpen(false)}>
       <form method={"dialog"}>
         <h2 id={"fontsTitle"}>
           {"Organize fonts"}
@@ -87,7 +123,7 @@ export function EditorOverlays() {
         <p className={"dlg-note"}>
           {"Fonts used by lettering are kept. Removing a font that lettering uses is not offered."}
         </p>
-        <button type={"button"} id={"removeUnusedFonts"} disabled={!customFontUsage(doc).some(f => !f.uses.length)}>
+        <button type={"button"} id={"removeUnusedFonts"} disabled={!customFontUsage(doc).some(f => !f.uses.length)} onClick={() => removeUnusedFonts()}>
           {"Remove unused fonts"}
         </button>
         <button>
@@ -95,73 +131,12 @@ export function EditorOverlays() {
         </button>
       </form>
     </dialog>
-    <dialog id={"traceDialog"}>
-      <form method={"dialog"}>
-        <h2>
-          {"Trace a picture"}
-        </h2>
-        <p className={"dlg-note"}>
-          {"Turns a logo, drawing or clip art into filled shapes, one per colour region. For photographs use the photo sti"}
-          {"tch tool instead."}
-        </p>
-        <label className={"agent-field"}>
-          {"Picture"}
-          <input id={"traceFile"} type={"file"} accept={"image/*"} />
-        </label>
-        <label>
-          {"Mode"}
-          <select id={"traceMode"}>
-            <option value={"regions"}>
-              {"Colour regions (filled shapes)"}
-            </option>
-            <option value={"lines"}>
-              {"Line art (strokes)"}
-            </option>
-          </select>
-        </label>
-        <label id={"traceColorsRow"}>
-          {"Colours"}
-          <input id={"traceColors"} type={"number"} min={"2"} max={"16"} defaultValue={"6"} />
-        </label>
-        <label>
-          {"Detail"}
-          <select id={"traceDetail"} defaultValue={"0.5"}>
-            <option value={"0.3"}>
-              {"Fine"}
-            </option>
-            <option value={"0.5"}>
-              {"Normal"}
-            </option>
-            <option value={"1.2"}>
-              {"Smooth"}
-            </option>
-          </select>
-        </label>
-        <label>
-          {"Width (mm)"}
-          <input id={"traceWidth"} type={"number"} min={"10"} max={"200"} step={"1"} defaultValue={"60"} />
-        </label>
-        <label id={"traceBgRow"}>
-          {"Skip the background colour "}
-          <input id={"traceBg"} type={"checkbox"} defaultChecked={true} />
-        </label>
-        <p id={"traceInfo"} role={"status"}>
-        </p>
-        <div className={"agent-actions"}>
-          <button type={"button"} id={"traceGo"}>
-            {"Trace"}
-          </button>
-          <button value={"cancel"}>
-            {"Cancel"}
-          </button>
-        </div>
-      </form>
-    </dialog>
+    <TraceDialog />
     <KeysDialog />
     <SettingsDialog />
     <RestoreDialog />
     <ThreadPopover />
-    <dialog id={"exportDialog"}>
+    <dialog id={"exportDialog"} ref={exportElement} onClose={() => setExportDialog({open: false})}>
       <form method={"dialog"}>
         <h2>
           {"Export embroidery"}
@@ -169,10 +144,20 @@ export function EditorOverlays() {
         <select id={"format"} value={exportFormat.format} onChange={e => setExportFormat(e.target.value)}>
           {EXPORT_FORMATS.map(f => <option key={f.value} value={f.value}>{f.label}</option>)}
         </select>
-        <label id={"worksheetRow"} className={"check-row"} hidden={true}>
-          <input type={"checkbox"} id={"withWorksheet"} />
+        <label id={"worksheetRow"} className={"check-row"} hidden={!MACHINE_FORMATS.includes(exportFormat.format)}>
+          <input
+            type={"checkbox"}
+            id={"withWorksheet"}
+            checked={exportDialog.withWorksheet}
+            onChange={e => setExportDialog({withWorksheet: e.target.checked})}
+          />
           {" Also download the sewing worksheet "}
-          <select id={"withWorksheetFormat"} aria-label={"Worksheet format for the download"}>
+          <select
+            id={"withWorksheetFormat"}
+            aria-label={"Worksheet format for the download"}
+            value={exportDialog.worksheetFormat}
+            onChange={e => setExportDialog({worksheetFormat: e.target.value === 'svg' ? 'svg' : 'text'})}
+          >
             <option value={"text"}>
               {"Text (.txt)"}
             </option>
@@ -181,7 +166,7 @@ export function EditorOverlays() {
             </option>
           </select>
         </label>
-        <button id={"download"}>
+        <button id={"download"} onClick={e => { e.preventDefault(); void exportCurrent(); }}>
           {"Compile & download"}
         </button>
         <button>

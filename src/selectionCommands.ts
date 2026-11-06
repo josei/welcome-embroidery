@@ -157,3 +157,10 @@ export function removeSelected() {
     setSelection({selNode: null});
   });
 }
+
+/** Selects the shape that clips the selected object, so it can be moved or edited on its own. */
+export function selectClipMask() {
+  const object = selectedObject();
+  const clipId = object?.clipId;
+  if (typeof clipId === 'string' && objects().some(o => o.id === clipId)) selectIds([clipId], clipId);
+}

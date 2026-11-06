@@ -32,6 +32,7 @@ import {ThreadPlan} from './ThreadPlan';
 import {PathTool, PenTool, SelectTool, ToolButtons} from './ToolButtons';
 import {TransformPanel} from './TransformPanel';
 import {ObjectList, ObjectListHead} from './ObjectList';
+import {PhotoStitch} from './PhotoStitch';
 import {PlaybackBar} from './PlaybackBar';
 import {TipCard} from './TipCard';
 import {GridControl} from './GridControl';
@@ -43,6 +44,7 @@ import {viewMode} from '../viewMode.js';
 import {gridSnapState} from '../gridSnapState.js';
 import {editModeState} from '../editModeState.js';
 import {deletingGuideState, handModeState, panningState} from '../canvasModeState.js';
+import {setTraceDialogOpen} from '../traceDialogState.js';
 // The editor layout: the object list, the canvas and the inspector. Rendered by React; ids match the markup it
 // replaced, because the keyboard shortcuts and tests address them.
 export function EditorLayout() {
@@ -82,23 +84,13 @@ export function EditorLayout() {
               aria-label={"Trace a picture into filled shapes"}
               title={"Trace a picture into filled shapes"}
               data-tooltip={"Trace a picture into filled shapes"}
+              onClick={() => setTraceDialogOpen(true)}
             >
               <svg className={"icon"}>
                 <use href={"#i-trace"} />
               </svg>
             </button>
-            <button
-              className={"icon-button"}
-              id={"photo"}
-              aria-label={"Photo stitch from a picture"}
-              title={"Photo stitch from a picture"}
-              data-tooltip={"Photo stitch from a picture"}
-            >
-              <svg className={"icon"}>
-                <use href={"#i-photo"} />
-              </svg>
-            </button>
-            <input id={"photoFile"} type={"file"} accept={"image/*"} hidden={true} />
+            <PhotoStitch />
             <PenTool />
           </div>
           <div className={"canvas-views"}>

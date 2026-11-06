@@ -1,4 +1,4 @@
-import {documentNow,setDocument,documentActions} from './documentState.js';
+import {documentNow,setDocument} from './documentState.js';
 import {configureInspector, syncInspector} from './inspector.js';
 import {configureLettering, ensureDocFonts, ensureFontLoaded, fitHeight, initFontPicker, kickFontLoads, letteringTextFont} from './letteringFonts.js';
 import {setShortcutsOpen,shortcutsState} from './shortcutsState.js';
@@ -18,16 +18,13 @@ import {accordionRowsActions} from './accordionRowsState.js';
 import {typeRowsActions} from './typeRowsState.js';
 import {raisedRowsActions} from './raisedRowsState.js';
 import {fillValuesActions} from './fillValuesState.js';
-import {agentLinkActions, setAgentLink} from './agentLinkState.js';
-import {photoRowsActions} from './photoRowsState.js';
+import {setAgentLink} from './agentLinkState.js';
 import {THREAD_PALETTE,threadName} from './threadPalette.js';
 import {openThreadPopover,closeThreadPopover,threadPopoverState} from './threadPopoverState.js';
-import {setFontsDialogOpen} from './fontsDialogState.js';
 import {pathRowsActions} from './pathRowsState.js';
 import {loopRowsActions} from './loopRowsState.js';
 import {setThreadStock,threadStockActions} from './threadStockState.js';
 import {radiusActions} from './radiusState.js';
-import {setSettingsOpen} from './settingsState.js';
 import {pathDraftNow,setPathDraft} from './pathDraftState.js';
 import {interactionNow,setInteraction} from './interactionState.js';
 import {clipboardNow,setClipboard} from './clipboardState.js';
@@ -48,14 +45,11 @@ import {measureState} from './measureState.js';
 import {pinState,pinActions,pinClearActions} from './pinState.js';
 import {pivotState} from './pivotState.js';
 import {toolMode} from './toolMode.js';
-import {viewMode,viewActions} from './viewMode.js';
-import {dxfDocument,exportDxf} from './dxf.js';
+import {viewMode} from './viewMode.js';
 import {t} from './i18n.js';
-import {traceImage,traceOps,traceLines,traceLineOps} from './trace.js';
 import {createAgentBridge} from './agent.js';
 import {createThreadPreview} from './preview3d.js';
 import {previewState,setPreviewState,previewActions} from './previewState.js';
-import {exportFormatState} from './exportFormatState.js';
 import {playbackActions,setPlayback} from './playbackState.js';
 import {setSewingCounts} from './sewingCountsState.js';
 import {sewTipActions,setSewTips} from './sewTipsState.js';
@@ -63,8 +57,15 @@ import {configureGrid,gridState} from './gridState.js';
 import {createCanvas} from './canvas.js';
 import {configureCanvasText, enterEdit} from './canvasText.js';
 import {configureReference, referenceForAgent} from './referencePicture.js';
-import {distortionGrid,blockSeconds,blockTimeLabel,bundledFontUsage,exportAppliqueTemplates,cornerRadii,svgPathFill,parseThreadStock,nearestStockThread,customFontUsage,exportPrintTemplate,designWarnings,TIP_CATEGORIES,visibleTips,measureBetween,initialDocument,geometry,applyOperations,validateDocument,parseSvgPath,makeStitchLayer,objectBounds,hoopSize,jefWarnings,exportSvg,threadPlan,threadSpans,sewingSeconds,sewingSecondsUpTo,sewingWorksheet} from './engine.js';
+import {distortionGrid,blockSeconds,blockTimeLabel,bundledFontUsage,cornerRadii,parseThreadStock,nearestStockThread,customFontUsage,designWarnings,TIP_CATEGORIES,visibleTips,measureBetween,initialDocument,geometry,applyOperations,validateDocument,objectBounds,hoopSize,threadPlan,threadSpans,sewingSeconds,sewingSecondsUpTo,sewingWorksheet} from './engine.js';
 import {clone,download,safeProjectFilename,sewTime,tipKey,forWorker} from './appHelpers.js';
+import {configureProjectIO,openArtifact,restoreProject} from './projectIO.js';
+import {configureExportCommands} from './exportCommands.js';
+import {configureViewCommands} from './viewCommands.js';
+import {configurePhotoCommands} from './photoCommands.js';
+import {configureTraceCommands} from './traceCommands.js';
+import {configureFontsDialog} from './fontsDialogCommands.js';
+import {configureAgentDialog} from './agentDialog.js';
 import {withSavedHoop,STOCK_KEY,threadStock,TIPS_KEY,hiddenTips,ignoredTipsKey,ignoredTips} from './storedPrefs.js';
 const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)],svgNS='http://www.w3.org/2000/svg';
 setDocument({doc:withSavedHoop(initialDocument()),history:[],future:[],dirty:true});
@@ -151,8 +152,22 @@ configureSelectionToolbarActions({edit});
 configureSewingOrder({edit});
 
 configureLettering({edit, transact, toast, render});
-$('#organizeFonts').onclick=()=>{setFontsDialogOpen(true);$('#fontsDialog').showModal();};
-$('#removeUnusedFonts').onclick=()=>{const before=Object.keys(documentNow().doc.customFonts||{}).length;edit([{op:'remove_unused_fonts'}]);const removed=before-Object.keys(documentNow().doc.customFonts||{}).length;toast(removed?`Removed ${removed} unused font${removed===1?'':'s'}.`:'No unused fonts to remove.');};
+configureFontsDialog({edit, toast});
+configureProjectIO({
+ clearComputed, render, toast, edit, transact, request,
+ compileNow:()=>compileNow(),
+ fitAll:()=>canvasView?.fitAll(),
+ fitHoop:()=>canvasView?.fitHoop(),
+});
+configureExportCommands({request, ensureFonts: ensureDocFonts, toast, render, setPlan:next=>{plan=next;}});
+configureViewCommands({
+ hasPlan:()=>Boolean(plan),
+ stopPlayback:()=>{if(playbackTimer){clearInterval(playbackTimer);playbackTimer=null;}playIndex=null;},
+ compile:()=>compileNow(),
+ render,
+});
+configurePhotoCommands({edit, toast});
+configureTraceCommands({edit, toast});
 configureInspector({edit, render, refreshCanvas:()=>canvasView.refresh()});
 
 stitchChoiceActions.choose=(id,value)=>{if(id==='fillMethod'){const v=value==='rows'?null:value;if(selState().multi.size)edit(orderedIds().map(oid=>({op:'set_object',id:oid,fillMethod:v})));else edit([{op:'set_settings',fillMethod:v}]);return;}if(id==='cap'||id==='join'){const ids=[...selState().multi];if(ids.length)edit(ids.map(i=>({op:'set_object',id:i,[id]:value==='butt'&&id==='cap'||value==='round'&&id==='join'?null:value})));return;}if(id==='runStyle'){if(selState().selected)edit([{op:'set_object',id:selState().selected,runStyle:value==='single'?null:value}]);return;}if(id==='type'){if(selState().selected)edit([{op:'set_object',id:selState().selected,stitch:value}]);}};
@@ -171,59 +186,6 @@ capRowsActions.commit=(field,text)=>{if(field==='appliqueWidth'){if(selState().s
 blingRowsActions.choose=(field,value)=>{if(!selState().selected)return;if(field==='motifPair'){edit([{op:'set_object',id:selState().selected,motifPair:value,...(value?{satinWidth:selectedObject()?.satinWidth??4}:{})}]);return;}const v=field==='blingRings'?Number(value):value;edit([{op:'set_object',id:selState().selected,[field]:v}]);};
 initFontPicker();
 
-// Notes from the last SVG import (for example, a filled path that kept its outline), shown as a toast after the file opens.
-let svgImportNotes=[];
-function importSvg(source){
- svgImportNotes=[];
- if(source.length>1_000_000||/<!DOCTYPE|<!ENTITY/i.test(source))throw Error('SVG files must be under 1 MB and cannot declare entities.');
- const xml=new DOMParser().parseFromString(source,'image/svg+xml');
- if(xml.querySelector('parsererror'))throw Error('Invalid SVG XML.');
- const root=xml.documentElement;
- if(root.localName!=='svg')throw Error('SVG root element is required.');
- const rootAllowed=new Set(['xmlns','viewBox','width','height','version','id']);
- for(const a of [...root.attributes])if(!rootAllowed.has(a.name))throw Error(`SVG root attribute ${a.name} is unsupported; transforms and inherited styles are rejected.`);
- const vb=(root.getAttribute('viewBox')||'0 0 100 100').trim().split(/[ ,]+/).map(Number);
- if(vb.length!==4||vb.some(v=>!Number.isFinite(v))||vb[2]<=0||vb[3]<=0||vb[2]>100000||vb[3]>100000)throw Error('SVG needs a finite, positive viewBox no larger than 100,000 units.');
- const scale=Math.min(110/vb[2],110/vb[3]),ox=-(vb[0]+vb[2]/2)*scale,oy=-(vb[1]+vb[3]/2)*scale,objects=[];let pointTotal=0;
- for(const el of [...root.querySelectorAll('*')]){const tag=el.localName;const allowed=tag==='g'?new Set(['id']):({rect:new Set(['id','x','y','width','height','rx','ry','fill','stroke']),ellipse:new Set(['id','cx','cy','rx','ry','fill','stroke']),line:new Set(['id','x1','y1','x2','y2','fill','stroke','stroke-width']),polyline:new Set(['id','points','fill','stroke','stroke-width']),path:new Set(['id','d','fill','stroke','stroke-width'])})[tag];if(!allowed)throw Error(`SVG element <${tag}> is outside the supported safe subset.`);for(const a of [...el.attributes])if(!allowed.has(a.name)||/^on/i.test(a.name))throw Error(`SVG attribute ${a.name} is unsupported; transforms and inherited styles are rejected.`);if(tag==='g')continue;
-  const fill=el.getAttribute('fill'),stroke=el.getAttribute('stroke'),raw=fill&&fill!=='none'?fill:stroke||'#527461';
-  if(!/^#[0-9a-f]{6}$/i.test(raw))throw Error('SVG colors must be six-digit hexadecimal values.');
-  const thread=raw.toLowerCase();
-  const id=crypto.randomUUID();
-  if(tag==='rect'||tag==='ellipse'){const isEllipse=tag==='ellipse',cx=Number(el.getAttribute('cx')||0),cy=Number(el.getAttribute('cy')||0),rx=Number(el.getAttribute('rx')||0),ry=Number(el.getAttribute('ry')||0),x=isEllipse?cx-rx:Number(el.getAttribute('x')||0),y=isEllipse?cy-ry:Number(el.getAttribute('y')||0),w=Number(el.getAttribute(isEllipse?'rx':'width')||0)*(isEllipse?2:1),h=Number(el.getAttribute(isEllipse?'ry':'height')||0)*(isEllipse?2:1);if(![x,y,w,h].every(Number.isFinite)||w<=0||h<=0)throw Error('SVG shapes require finite positive dimensions.');objects.push({id,name:'Imported '+(tag==='rect'?'rectangle':'ellipse'),kind:tag==='rect'?'rect':'ellipse',x:x*scale+ox,y:y*scale+oy,w:w*scale,h:h*scale,thread,stitch:fill&&fill!=='none'?'fill':'run'});}
-  else {let paths=[];if(tag==='path'){const d=el.getAttribute('d')||'';if(d.length>200000)throw Error('SVG path data exceeds 200,000 characters.');paths=parseSvgPath(d);}else{const rawpts=tag==='line'?[el.getAttribute('x1')||0,el.getAttribute('y1')||0,el.getAttribute('x2')||0,el.getAttribute('y2')||0].map(Number):(el.getAttribute('points')||'').trim().split(/[ ,]+/).map(Number);if(rawpts.length<4||rawpts.length%2||rawpts.some(v=>!Number.isFinite(v)))throw Error('SVG line and polyline coordinates are invalid.');paths=[Array.from({length:rawpts.length/2},(_,i)=>rawpts.slice(i*2,i*2+2))];}
-   // A stroke-only path with a stroke-width of 0.3 mm or more (after the viewBox scale) sews as a satin column of that width; without a stroke-width it stays a running stitch, as before.
- const swAttr=el.getAttribute('stroke-width'),strokeMm=swAttr===null?NaN:Number(swAttr)*scale,strokeOnly=(fill===null||fill==='none')&&stroke!==null&&stroke!=='none',satinStroke=strokeOnly&&strokeMm>=.3;
- const fillRule=tag==='path'?svgPathFill(fill,stroke,paths):{fill:false,note:null,holes:0,islands:0,depths:[]};
- if(fillRule.note&&!svgImportNotes.includes(fillRule.note))svgImportNotes.push(fillRule.note);
-  if(fillRule.fill){const toMm=pts=>pts.slice(0,-1).map(([x,y])=>[x*scale+ox,y*scale+oy]);const outerAt=fillRule.depths.indexOf(0),mm=toMm(paths[outerAt]);pointTotal+=paths.reduce((n,r)=>n+r.length,0);if(pointTotal>5000)throw Error('SVG import is limited to 5,000 path points.');const fillAt=(pts,holeList)=>{const xs=pts.map(p=>p[0]),ys=pts.map(p=>p[1]);return {id:crypto.randomUUID(),name:'Imported fill',kind:'path',x:Math.min(...xs),y:Math.min(...ys),w:0,h:0,points:pts,thread,closed:true,stitch:'fill',...(holeList.length?{holes:holeList}:{})};};
-    const holeRings=paths.filter((_,i)=>fillRule.depths[i]===1).map(toMm);objects.push(fillAt(mm,holeRings));
-    paths.forEach((r,i)=>{if(fillRule.depths[i]===2)objects.push(fillAt(toMm(r),[]));});}
-  else for(const points of paths){if(points.length<2)continue;pointTotal+=points.length;if(points.length>1000||pointTotal>5000)throw Error('SVG import is limited to 5,000 path points.');const mm=points.map(([x,y])=>[x*scale+ox,y*scale+oy]),xs=mm.map(p=>p[0]),ys=mm.map(p=>p[1]);objects.push({id:crypto.randomUUID(),name:'Imported path',kind:'path',x:Math.min(...xs),y:Math.min(...ys),w:0,h:0,points:mm,thread,...(satinStroke?{stitch:'satin',satinWidth:Math.max(.5,Math.min(12,strokeMm))}:{stitch:'run'})});}
-  }
-  if(objects.length>100)throw Error('SVG import is limited to 100 editable objects.');
- }
- const d={schema:'welcome/1',name:'Imported SVG',revision:0,hoop:110,settings:{spacing:.4,angle:32,underlay:true,compensation:.2},objects};
- validateDocument(d);
- return d;
-}
-function projectSave(){setTimeout(()=>{try{const a=JSON.parse(localStorage.getItem('welcome.autosave')||'null');if(a){a.clean=true;localStorage.setItem('welcome.autosave',JSON.stringify(a));}}catch{}},0);download(JSON.stringify(documentNow().doc,null,2),safeProjectFilename(documentNow().doc.name),'application/json');setDocument({dirty: false});render();}
-function acceptProject(next){validateDocument(next);const opened=clone(next);clearComputed();setDocument({doc: opened});setDocument({history: []});setDocument({future: []});setSelection({selected: documentNow().doc.objects[0]?.id||null});setSelection({multi: new Set(selState().selected?[selState().selected]:[])});setEditMode(false);setSelection({selNode: null});setDocument({dirty: false});render();canvasView?.fitAll();toast('Project opened locally.');}
-async function openArtifact(id){if(!/^[0-9a-f-]{36}$/.test(id))throw Error('Invalid MCP project link.');let response=await fetch(`/artifacts/${id}.welcome`,{credentials:'same-origin',redirect:'error'});if(response.status===404)response=await fetch(`/artifacts/${id}.welcome`,{credentials:'same-origin',redirect:'error'});if(!response.ok)throw Error(`MCP project could not be opened (${response.status}).`);const next=await response.json();acceptProject(next);window.history.replaceState(null,'',location.pathname);}
-
-documentActions.rename=text=>{const name=text.trim();if(!name){toast('Project name cannot be empty.');return false;}edit([{op:'rename_document',name}]);return true;};
-$('#save').onclick=projectSave;
-$('#new').onclick=()=>{setEditMode(false);if(documentNow().dirty&&!confirm(t('Discard unsaved changes?')))return;clearComputed();setDocument({doc: withSavedHoop({...initialDocument(),name:'Untitled design',objects:[]})});setDocument({history: []});setDocument({future: []});setSelection({selected: null});setSelection({multi: new Set()});setDocument({dirty: true});render();canvasView?.fitHoop();};
-$('#open').onclick=()=>$('#file').click();
-$('#file').onchange=async e=>{const f=e.target.files[0];if(!f)return;try{if(f.size>33_554_432)throw Error('Welcome project files are limited to 32 MiB.');if(f.name.toLowerCase().endsWith('.svg')){acceptProject(importSvg(await f.text()));if(svgImportNotes.length)toast(svgImportNotes.join(' '));}else if((f.name.toLowerCase().endsWith('.welcome')||f.name.toLowerCase().endsWith('.welcome'))||f.name.toLowerCase().endsWith('.json'))acceptProject(JSON.parse(await f.text()));else if(f.name.toLowerCase().endsWith('.dxf')){const r=dxfDocument(await f.text());acceptProject(r.doc);const skipped=Object.entries(r.skipped).map(([k,n])=>`${n} ${k}`).join(', ');toast(`DXF imported: ${r.doc.objects.length} path${r.doc.objects.length===1?'':'s'}${skipped?`; skipped ${skipped}`:''}${r.bulged?`; ${r.bulged} arc${r.bulged===1?'':'s'} sewn as straight segments`:''}.`);}else throw Error('Open a .welcome project, SVG or ASCII DXF here. Use Import JEF / VP3 for machine files.');}catch(err){toast(err.message);}e.target.value='';};
-$('#importMachine').onclick=()=>$('#machineFile').click();
-$('#machineFile').onchange=async e=>{const f=e.target.files[0];if(!f)return;try{const lower=f.name.toLowerCase(),format=lower.endsWith('.jef')?'jef':lower.endsWith('.vp3')?'vp3':lower.endsWith('.dst')?'dst':lower.endsWith('.sew')?'sew':lower.endsWith('.pec')?'pec':lower.endsWith('.pes')?'pes':lower.endsWith('.exp')?'exp':lower.endsWith('.hus')?'hus':lower.endsWith('.xxx')?'xxx':lower.endsWith('.dsb')?'dsb':lower.endsWith('.dsz')?'dsz':lower.endsWith('.tap')?'tap':lower.endsWith('.tbf')?'tbf':lower.endsWith('.pcs')?'pcs':lower.endsWith('.shv')?'shv':lower.endsWith('.stx')?'stx':lower.endsWith('.bro')?'bro':lower.endsWith('.emd')?'emd':lower.endsWith('.ksm')?'ksm':lower.endsWith('.10o')?'10o':null;if(!format)throw Error(t('Choose a .jef, .vp3, .dst, .sew, .pec, .pes, .exp, .hus, .xxx, .dsb, .dsz, .tap, .tbf, .pcs, .shv, .stx, .bro, .emd, .ksm or .10o file.'));if(f.size>1_048_576)throw Error('Machine-file imports are limited to 1 MiB so original source bytes fit in the project.');const bytes=await f.arrayBuffer(),result=await request({type:'import',format,bytes,fileName:f.name},[bytes]);const layer=makeStitchLayer(result.decoded,format,{fileName:f.name,sha256:result.sha256,size:f.size,originalBytesBase64:result.sourceBytesBase64});const committed=transact(()=>{setDocument({doc:{...documentNow().doc,objects:[...documentNow().doc.objects,layer]}});setSelection({selected: layer.id});});if(committed){toast(`Imported ${f.name} as a ${format.toUpperCase()} stitch layer.`);compileNow();}}catch(err){toast(err.message);}e.target.value='';};
-viewActions.choose=chosen=>{viewMode.set(chosen);if(chosen==='design'){if(playbackTimer){clearInterval(playbackTimer);playbackTimer=null;}playIndex=null;}if(chosen!=='design'&&!plan)compileNow();render();};
-const MACHINE_FORMATS=['jef','vp3','dst','exp','pec','pes','pes6','sew','u01','xxx','tbf'];
-function syncWorksheetRow(){$('#worksheetRow').hidden=!MACHINE_FORMATS.includes(exportFormatState.get().format);}
-exportFormatState.subscribe(syncWorksheetRow);
-$('#export').onclick=()=>{syncWorksheetRow();$('#exportDialog').showModal();};
-$('#download').onclick=async e=>{e.preventDefault();await ensureDocFonts().catch(()=>{});if(exportFormatState.get().format==='dxf'){const r=exportDxf(documentNow().doc),skipped=Object.values(r.skipped).reduce((a,b)=>a+b,0);download(r.text,`${safeProjectFilename(documentNow().doc.name).replace(/\.welcome$/i,'')}.dxf`,'application/dxf');$('#exportDialog').close();toast(`DXF exported: ${r.count} path${r.count===1?'':'s'}${skipped?`; ${skipped} stitch layer${skipped===1?'':'s'} skipped (no outline)`:''}.`);return;}if(exportFormatState.get().format==='applique-print'){let svg;try{svg=exportAppliqueTemplates(documentNow().doc);}catch(err){toast(err.message);return;}download(svg,`${safeProjectFilename(documentNow().doc.name).replace(/\.welcome$/i,'')}-applique-templates.svg`,'image/svg+xml');$('#exportDialog').close();toast('Appliqué templates exported at 1:1. Print at 100% and check the 10 mm bar before cutting fabric.');return;}if(exportFormatState.get().format==='print'){download(exportPrintTemplate(documentNow().doc),`${safeProjectFilename(documentNow().doc.name).replace(/\.welcome$/i,'')}-template.svg`,'image/svg+xml');$('#exportDialog').close();toast('Print template exported at 1:1. Print it at 100% and check the 10 mm bar before placing fabric.');return;}if(exportFormatState.get().format==='svg'){download(exportSvg(documentNow().doc),`${safeProjectFilename(documentNow().doc.name).replace(/\.welcome$/i,'')}.svg`,'image/svg+xml');$('#exportDialog').close();toast('SVG exported (design only, not a stitch plan).');return;}try{const revision=documentNow().doc.revision,result=await request({type:'export',document:forWorker(documentNow().doc),format:exportFormatState.get().format,color:selectedObject()?.thread||'#527461'});if(result.plan.revision!==revision||revision!==documentNow().doc.revision)throw Error('The document changed during export. Export the current revision again.');plan=result.plan;const base=safeProjectFilename(documentNow().doc.name).replace(/\.welcome$/i,'');download(result.bytes,`${base}.${exportFormatState.get().format==='pes6'?'pes':exportFormatState.get().format}`, 'application/octet-stream');const withSheet=$('#worksheetRow').hidden===false&&$('#withWorksheet').checked,sheetFormat=$('#withWorksheetFormat').value;if(withSheet)download(sewingWorksheet(documentNow().doc,result.plan,sheetFormat),`${base}-worksheet.${sheetFormat==='svg'?'svg':'txt'}`,sheetFormat==='svg'?'image/svg+xml':'text/plain');render();$('#exportDialog').close();toast(t('{fmt} exported from revision {n}.',{fmt:exportFormatState.get().format.toUpperCase(),n:result.plan.revision})+(withSheet?t(' The sewing worksheet is downloaded with it.'):'')+jefWarnings(result.plan,exportFormatState.get().format).map(w=>' '+t(w)).join(''));}catch(err){if(err.name!=='AbortError')toast(err.message);}};
 async function compileNow(manual=false){compiling=true;try{await ensureDocFonts();const revision=documentNow().doc.revision,result=await request({type:'compile',document:forWorker(documentNow().doc)});if(result.plan.revision!==revision||revision!==documentNow().doc.revision)return;plan=result.plan;lastPlan=plan;setSewingCounts(plan.objectCounts||{});compileError='';playIndex=null;compiling=false;render();}catch(err){if(err.name!=='AbortError'){compileError=err.message;compiling=false;render();if(manual===true||manual instanceof Event)toast(err.message);}}finally{if(!plan&&compileError)compiling=false;}}statusActions.compile=()=>compileNow(true);
 let issueAt=0;
 statusActions.issues=()=>{const list=[...(plan?.issues||[]),...sewingTips()];if(!list.length)return;const issue=list[issueAt++%list.length];selectIds([...canvasView.withGroup(issue.id)],issue.id);canvasView.fitSelection();};
@@ -247,13 +209,7 @@ function addLayerRemote(layer,expected){
 }
 const agentTexts={idle:'Not connected.',waiting:'Connected. Waiting for an agent to use the link.',active:'Agent active.',error:'Connection problem.',unavailable:'Agent relay unavailable.'};
 const agent=createAgentBridge({getReference:o=>referenceForAgent(o),getDocument:()=>{const c=clone(documentNow().doc);if(c.reference)c.reference={...c.reference,data:'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==',pictureOmitted:true};return c;},applyRemote,addLayerRemote,onChange:state=>{setAgentLink({statusText:`${t(agentTexts[state.status]||'')}${state.status==='active'?` ${t(state.agentCalls===1?'1 request so far.':`${state.agentCalls} requests so far.`)}`:''} ${state.message||''}`.trim(),url:state.mcpUrl||'',ready:Boolean(state.mcpUrl),waiting:state.status==='waiting'||state.status==='active',active:state.status==='active'});}});
-async function openAgentDialog(){setSettingsOpen(false);$('#agentDialog').showModal();if(!agent.hasSession())await agent.start();}
-$('#copyEndpoint').onclick=openAgentDialog;
-agentLinkActions.open=openAgentDialog;
-if(document.querySelector('meta[name="welcome-static"]'))setStitchRow('copyEndpoint',true);
-$('#agentCopy').onclick=async()=>{const url=$('#agentUrl').value;try{await navigator.clipboard.writeText(url);toast('Copied the private MCP link.');}catch{$('#agentUrl').select();toast('Select and copy the link.');}};
-$('#agentRevoke').onclick=async()=>{if(confirm(t('Revoke this link? Agents using it lose access immediately.')))await agent.revoke();};
-$('#agentUrl').onfocus=e=>e.target.select();
+configureAgentDialog({bridge: agent, toast});
 agent.resume();
 // ---- canvas: viewport, selection handles, marquee, context menu -------------------------------------------------
 canvasView=createCanvas({svg:$('#art'),container:$('.canvas'),overlay:$('#overlay'),doc:()=>documentNow().doc,ids:orderedIds,tool:()=>toolMode.get(),pivot:()=>pivotState.get().pivot,knife:()=>knifeState.get(),measure:()=>measureState.get(),pickPivot:p=>{if(!pivotState.get().picking)return false;pivotState.set({pivot:[Math.round(p[0]*10)/10,Math.round(p[1]*10)/10],picking:false});render();canvasView.refresh();return true;},snapPt:p=>canvasView.snapPt(p),snapOn:()=>gridSnapState.get(),gridSize:()=>Number(gridState.get().value),isEditing:editModeNow,setEditing:setEditMode,selectedObject,textFont:letteringTextFont,ensureFontLoaded,fitHeight,
@@ -335,64 +291,6 @@ for(const d of $$('details.sec-fold')){try{d.open=localStorage.getItem('welcome.
 
 
 
-// Photo stitch: a picture becomes a rectangle with grey samples; the zigzag rows are planned at compile time.
-$('#photo').onclick=()=>$('#photoFile').click();
-$('#photoFile').onchange=async e=>{const file=e.target.files[0];e.target.value='';if(!file)return;try{
-  const bmp=await createImageBitmap(file),hs=hoopSize(documentNow().doc),wMm=Math.max(10,Math.min(80,hs.w-10)),hMm0=wMm*bmp.height/bmp.width,hMm=Math.min(hMm0,hs.h-10),w=hMm<hMm0?hMm*bmp.width/bmp.height:wMm,h=hMm;
-  const pw=Math.max(8,Math.min(320,Math.round(w/.45))),ph=Math.max(8,Math.min(320,Math.round(pw*h/w))),c=document.createElement('canvas');
-  c.width=pw;
-  c.height=ph;
-  const ctx=c.getContext('2d');
-  ctx.fillStyle='#fff';
-  ctx.fillRect(0,0,pw,ph);
-  ctx.drawImage(bmp,0,0,pw,ph);
-  const px=ctx.getImageData(0,0,pw,ph).data,gray=new Uint8Array(pw*ph);
-  for(let i=0;i<pw*ph;i++)gray[i]=Math.round(.299*px[i*4]+.587*px[i*4+1]+.114*px[i*4+2]);
-  let bin='';
-  for(let i=0;i<gray.length;i+=0x8000)bin+=String.fromCharCode(...gray.subarray(i,i+0x8000));
-  const id=crypto.randomUUID();
-  edit([{op:'add_shape',id,kind:'rect',name:'Photo',x:+(-w/2).toFixed(2),y:+(-h/2).toFixed(2),width:+w.toFixed(2),height:+h.toFixed(2)},{op:'set_object',id,photo:{pw,ph,data:btoa(bin),spacing:.7,contrast:1.4}}],()=>{setSelection({selected: id});setSelection({multi: new Set([id])});});
-  toast('Photo stitch added. Adjust spacing and contrast in the sidebar.');
- }catch(err){toast(err.message||'That picture could not be read.');}};
-const setPhoto=patch=>{const o=selectedObject();if(o?.photo)edit([{op:'set_object',id:o.id,photo:{...o.photo,...patch}}]);};
-photoRowsActions.commit=(field,text)=>setPhoto({[field]:field==='spacing'?Math.max(.3,Math.min(2,Number(text)||.7)):Math.max(.4,Math.min(3,Number(text)||1.4))});
-photoRowsActions.choose=(field,checked)=>setPhoto({invert:checked});
-$('#selectMask').onclick=()=>{const o=selectedObject();if(o?.clipId&&documentNow().doc.objects.some(v=>v.id===o.clipId))selectIds([o.clipId],o.clipId);};
-const photoThreadKeys=['thread2','thread3','thread4'];
-photoRowsActions.pickThread=(key,hex)=>{const o=selectedObject();if(!o?.photo)return;const ph={...o.photo};
-  if(hex)ph[key]=hex;else for(const k of photoThreadKeys.slice(photoThreadKeys.indexOf(key)))delete ph[k];
-  edit([{op:'set_object',id:o.id,photo:ph}]);};
-
-// Image tracing: picture -> colour regions -> filled paths (with holes), grouped.
-$('#traceBtn').onclick=()=>{$('#traceInfo').textContent='';$('#traceDialog').showModal();};
-$('#traceMode').onchange=()=>{const lines=$('#traceMode').value==='lines';$('#traceColorsRow').hidden=lines;$('#traceBgRow').hidden=lines;};
-$('#traceGo').onclick=async()=>{const file=$('#traceFile').files[0],info=$('#traceInfo');if(!file){info.textContent=t('Choose a picture first.');return;}
-  try{info.textContent=t('Tracing…');await new Promise(r=>setTimeout(r,20));
-    const bmp=await createImageBitmap(file),scale=Math.min(1,640/Math.max(bmp.width,bmp.height)),w=Math.max(2,Math.round(bmp.width*scale)),h=Math.max(2,Math.round(bmp.height*scale)),c=document.createElement('canvas');
-    c.width=w;
-    c.height=h;
-    const ctx=c.getContext('2d',{willReadFrequently:true});
-    ctx.drawImage(bmp,0,0,w,h);
-    const px=ctx.getImageData(0,0,w,h).data,hs0=hoopSize(documentNow().doc),wmm=Math.min(Number($('#traceWidth').value)||60,hs0.w-6);
-    if($('#traceMode').value==='lines'){const lr=traceLines(px,w,h,{minLength:Math.max(5,w/70),detail:Number($('#traceDetail').value)>=1?1.4:.8});
-      if(!lr.paths.length){info.textContent=t('Nothing to trace: no dark strokes were found.');return;}
-      if(documentNow().doc.objects.length+lr.paths.length>100){info.textContent=t('The document would exceed 100 objects; trace with fewer colours or delete some objects first.');return;}
-      const lo=traceLineOps(lr,{widthMm:wmm,maxHeightMm:hs0.h-6});
-      $('#traceDialog').close();
-      edit(lo.ops,()=>{setSelection({multi: new Set(lo.ids)});setSelection({selected: lo.ids[0]});});
-      toast(t('Traced {n} strokes.',{n:lo.ids.length})+(lr.dropped?' '+t('{n} small regions were left out.',{n:lr.dropped}):''));
-      return;
-      }
-    const result=traceImage(px,w,h,{colors:Number($('#traceColors').value)||6,detail:Number($('#traceDetail').value)||.5,background:$('#traceBg').checked?'auto':'none',minArea:Math.max(6,w*h/30000)});
-    if(!result.regions.length){info.textContent=t('Nothing to trace: only the background colour was found.');return;}
-    const hs=hoopSize(documentNow().doc),{ops,ids,running}=traceOps(result,{widthMm:Math.min(Number($('#traceWidth').value)||60,hs.w-6),maxHeightMm:hs.h-6});
-    if(documentNow().doc.objects.length+ids.length>100){info.textContent=t('The document would exceed 100 objects; trace with fewer colours or delete some objects first.');return;}
-    $('#traceDialog').close();
-    edit(ops,()=>{setSelection({multi: new Set(ids)});setSelection({selected: ids[0]});});
-    toast(t('Traced {n} shapes in {c} colours.',{n:ids.length,c:new Set(result.regions.map(g=>g.color)).size})+(result.dropped?' '+t('{n} small regions were left out.',{n:result.dropped}):'')+(running?' '+t('Thin regions sewn as running outline: {n}.',{n:running}):''));
-  }catch(err){info.textContent=err.message||t('That picture could not be read.');}};
-
-
 // One shared tooltip, fixed to the viewport and above everything: above the control when there is room, below otherwise, kept inside the window.
 {const tip=document.createElement('div');tip.id='tooltip';tip.setAttribute('role','tooltip');document.body.append(tip);let current=null;
  const hide=()=>{current=null;tip.classList.remove('show');};
@@ -424,7 +322,7 @@ threadsReady=true;syncThreads();
  window.__autosaveHook=schedule;window.addEventListener('pagehide',write);
  const raw=(()=>{try{return localStorage.getItem('welcome.autosave');}catch{return null;}})();
  if(raw&&!new URL(location.href).searchParams.get('open')){try{const saved=JSON.parse(raw);validateDocument(clone(saved.doc));
-   if(!saved.clean&&saved.doc.revision>0&&saved.doc.objects.length>0){const ago=Math.max(1,Math.round((Date.now()-saved.savedAt)/60000));setRestore({info:t('"{name}", {n} objects, edited {m} min ago.',{name:saved.doc.name,n:saved.doc.objects.length,m:ago})});restoreActions.yes=()=>{try{acceptProject(saved.doc);setDocument({dirty: true});render();}catch(err){toast(err.message);}setRestore({open:false});};restoreActions.no=()=>{try{localStorage.removeItem('welcome.autosave');}catch{}setRestore({open:false});};queueMicrotask(()=>setRestore({open:true}));}}catch{try{localStorage.removeItem('welcome.autosave');}catch{}}}
+   if(!saved.clean&&saved.doc.revision>0&&saved.doc.objects.length>0){const ago=Math.max(1,Math.round((Date.now()-saved.savedAt)/60000));setRestore({info:t('"{name}", {n} objects, edited {m} min ago.',{name:saved.doc.name,n:saved.doc.objects.length,m:ago})});restoreActions.yes=()=>{restoreProject(saved.doc);setRestore({open:false});};restoreActions.no=()=>{try{localStorage.removeItem('welcome.autosave');}catch{}setRestore({open:false});};queueMicrotask(()=>setRestore({open:true}));}}catch{try{localStorage.removeItem('welcome.autosave');}catch{}}}
 }
 
 // Thread plan: the colours in sewing order with their stitch counts.
