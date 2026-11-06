@@ -402,19 +402,7 @@ export function syncStitchPanel() {
     const nw = Boolean(satinPath && selNode !== null && o && selNode < (o.points?.length ?? 0));
     setStitchRow('nodeWidthRow', !nw);
     if (nw && o && selNode !== null) {
-      const path = {
-        id: o.id,
-        kind: o.kind,
-        x: Number(o.x ?? 0),
-        y: Number(o.y ?? 0),
-        w: Number(o.w ?? 0),
-        h: Number(o.h ?? 0),
-        points: o.points ?? [],
-        thread: o.thread,
-        closed: Boolean(o.closed),
-        widthStops: o.widthStops,
-      };
-      setCapRows({nodeWidth: widthAt(path, nodeFraction(path, selNode)).toFixed(1)});
+      setCapRows({nodeWidth: widthAt(o as never, nodeFraction(o as never, selNode)).toFixed(1)});
     }
     setStitchRow('widthClearRow', !(satinPath && o?.widthStops));
     const blendable = Boolean(n === 1 && o && fillable && o.kind !== 'text' && o.kind !== 'stitch_layer' && !o.photo);
