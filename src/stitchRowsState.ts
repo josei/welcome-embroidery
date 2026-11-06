@@ -8,7 +8,7 @@ export const stitchRowsState = createStore<Record<string, boolean>>({
   alongRow: false,
   appliqueRow: true,
   appliqueWidthRow: true,
-  arrAngleRow: false,
+  arrAngleRow: true,
   beadShapeRow: true,
   beadTwinRow: true,
   blendRange: false,

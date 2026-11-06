@@ -5,6 +5,9 @@ import {setHoopFields,hoopActions} from './hoopState.js';
 import {setShortcutsOpen,shortcutsState} from './shortcutsState.js';
 import {restoreActions,setRestore} from './restoreState.js';
 import {configureStitchPanel, syncStitchPanel} from './stitchPanel.js';
+import {configureArray} from './arrayState.js';
+import {configureBatchExport, syncBatchInfo} from './batchExport.js';
+import {configureSewingOrder, moveSelection} from './sewingOrder.js';
 import {setActions} from './actionState.js';
 import {stitchChoiceActions} from './stitchChoicesState.js';
 import {capRowsActions} from './capRowsState.js';
@@ -56,7 +59,7 @@ import {gridActions,setGridValue} from './gridState.js';
 import {createCanvas} from './canvas.js';
 import {configureCanvasText, enterEdit} from './canvasText.js';
 import {configureReference, referenceForAgent} from './referencePicture.js';
-import {distortionGrid,blockSeconds,blockTimeLabel,bundledFontUsage,countSmallHoles,isSmallIsland,isClosedShape,exportAppliqueTemplates,cornerRadii,svgPathFill,parseThreadStock,nearestStockThread,HOOP_PRESETS,customFontUsage,exportPrintTemplate,batchDocuments,batchPlan,designWarnings,TIP_CATEGORIES,visibleTips,measureBetween,initialDocument,geometry,applyOperations,validateDocument,parseSvgPath,makeStitchLayer,objectBounds,hoopSize,jefWarnings,exportSvg,threadPlan,threadSpans,sewingSeconds,sewingSecondsUpTo,sewingWorksheet} from './engine.js';
+import {distortionGrid,blockSeconds,blockTimeLabel,bundledFontUsage,countSmallHoles,isSmallIsland,isClosedShape,exportAppliqueTemplates,cornerRadii,svgPathFill,parseThreadStock,nearestStockThread,HOOP_PRESETS,customFontUsage,exportPrintTemplate,designWarnings,TIP_CATEGORIES,visibleTips,measureBetween,initialDocument,geometry,applyOperations,validateDocument,parseSvgPath,makeStitchLayer,objectBounds,hoopSize,jefWarnings,exportSvg,threadPlan,threadSpans,sewingSeconds,sewingSecondsUpTo,sewingWorksheet} from './engine.js';
 import {clone,download,safeProjectFilename,sewTime,tipKey,forWorker} from './appHelpers.js';
 import {withSavedHoop,STOCK_KEY,threadStock,TIPS_KEY,hiddenTips,ignoredTipsKey,ignoredTips} from './storedPrefs.js';
 const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)],svgNS='http://www.w3.org/2000/svg';
@@ -109,11 +112,8 @@ function renderSimulation(){
  $('#controls').style.display=viewMode.get()==='design'?'':'none';
  syncPlaybackControls();
 }
-function batchNameList(){return $('#batchNames').value.split('\n').map(v=>v.trim()).filter(Boolean);}
-function updateBatchInfo(){const names=batchNameList(),copies=names.length||Math.max(1,Math.round(Number($('#arrCount').value))||1),p=batchPlan(documentNow().doc,{copies});$('#batchInfo').textContent=!p?'':p.perHoop?t('{perHoop} copies fit one {hoop} mm hoop ({cols} × {rows}). {copies} copies need {hoops} hoop(s).',{perHoop:p.perHoop,hoop:`${p.hoop[0]}×${p.hoop[1]}`,cols:p.cols,rows:p.rows,copies,hoops:p.hoopsNeeded}):t('The design does not fit in one hoop.');}
-$('#batchNames').oninput=()=>updateBatchInfo();
-$('#batchExport').onclick=async()=>{const names=batchNameList(),copies=names.length||Math.max(1,Math.round(Number($('#arrCount').value))||1);let docs;try{docs=batchDocuments(documentNow().doc,{copies,names:names.length?names:null});}catch(error){toast(error.message);return;}if(!docs.length){toast(t('The design does not fit in one hoop.'));return;}await ensureDocFonts().catch(()=>{});const format=$('#batchFormat').value,base=safeProjectFilename(documentNow().doc.name).replace(/\.welcome$/i,''),color=selectedObject()?.thread||'#527461';for(const [i,d] of docs.entries()){const result=await request({type:'export',document:forWorker(d),format,color});download(result.bytes,`${base}-hoop${i+1}.${format==='pes6'?'pes':format}`,'application/octet-stream');}toast(t('{n} {fmt} files exported, one per hoop.',{n:docs.length,fmt:format.toUpperCase()}));};
-function render(){updateBatchInfo();
+configureBatchExport({request,ensureFonts:ensureDocFonts,toast});
+function render(){syncBatchInfo();
  kickFontLoads();
  if(selState().selected&&!documentNow().doc.objects.some(o=>o.id===selState().selected))setSelection({selected: null});
  setSelection({multi: new Set([...selState().multi].filter(id=>documentNow().doc.objects.some(o=>o.id===id)))});
@@ -185,14 +185,8 @@ $('#reverseBtn').onclick=()=>{const ids=pickedObjects().filter(o=>o.kind==='path
 $('#splitBtn').onclick=()=>{const o=selectedObject();if(o?.kind==='path'&&selState().selNode!==null)afterOps([{op:'split_path',id:o.id,index:selState().selNode}],o.id);else toast('Select a path and one of its nodes first.');};
 $('#joinBtn').onclick=()=>{const ids=pickedObjects().filter(o=>o.kind==='path'&&!o.closed).map(o=>o.id);if(ids.length>=2)afterOps([{op:'join_paths',ids}],ids[0]);else toast('Select two or more open paths to join.');};
 $('#selectSame').onclick=()=>{const o=selectedObject();if(!o)return;setSelection({multi: new Set(documentNow().doc.objects.filter(v=>v.thread.toLowerCase()===o.thread.toLowerCase()).map(v=>v.id))});render();};
-const arrayUi=()=>{const m=$('#arrMode').value;$('#arrALabel').firstChild.textContent=m==='radial'?'Centre X (mm)':'Step X (mm)';$('#arrBLabel').firstChild.textContent=m==='radial'?'Centre Y (mm)':'Step Y (mm)';$('#arrALabel').style.display=$('#arrBLabel').style.display=m==='along'?'none':'';setStitchRow('arrAngleRow',m!=='radial');};
-$('#arrMode').onchange=arrayUi;arrayUi();
-$('#arrBtn').onclick=()=>{const m=$('#arrMode').value,count=Number($('#arrCount').value),picked=pickedObjects();let op;
- if(m==='along'){const path=picked.find(o=>o.kind==='path'),motif=picked.find(o=>o!==path);if(!path||!motif||picked.length!==2){toast('Select the motif and the path to follow (two objects).');return;}op={op:'array',id:motif.id,mode:'along',pathId:path.id,count};}
- else{const o=selectedObject();if(!o){toast('Select an object to repeat.');return;}op=m==='linear'?{op:'array',id:o.id,mode:'linear',count,dx:Number($('#arrA').value),dy:Number($('#arrB').value)}:{op:'array',id:o.id,mode:'radial',count,cx:Number($('#arrA').value),cy:Number($('#arrB').value),angle:Number($('#arrAngle').value)};}
- edit([op]);};
-for(const [id,to] of [['ordBack','back'],['ordBackward','backward'],['ordForward','forward'],['ordFront','front']])$('#'+id).onclick=()=>{const ids=to==='back'||to==='forward'?documentNow().doc.objects.map(o=>o.id).filter(v=>selState().multi.has(v)).reverse():documentNow().doc.objects.map(o=>o.id).filter(v=>selState().multi.has(v));if(ids.length)edit(ids.map(i=>({op:'reorder',id:i,to})));};
-$('#ordSort').onclick=()=>edit([{op:'sort_by_color'}]);
+configureArray({edit,toast});
+configureSewingOrder({edit});
 $('#redworkOutline').onclick=()=>{if(selState().selected)edit([{op:'redwork_outline',id:selState().selected}]);};
 
 $('#appliqueGroup').onclick=()=>{const ids=[...selState().multi],closed=ids.filter(id=>isClosedShape(documentNow().doc.objects.find(o=>o.id===id))),skipped=ids.length-closed.length;if(closed.length<2){toast(t('Appliqué from a group needs two or more closed shapes.'));return;}edit([{op:'applique_group',ids:closed}],()=>{if(skipped)toast(t('{n} open objects left as they are.',{n:skipped}));});};
@@ -326,7 +320,7 @@ function menuItems(o,p){
   {label:'Convert to path',key:'Ctrl+Shift+C',disabled:!sel.some(v=>v.kind!=='path'&&v.kind!=='stitch_layer'),run:()=>edit([{op:'to_path',ids:sel.filter(v=>v.kind!=='path'&&v.kind!=='stitch_layer').map(v=>v.id)}])},'-',
   {label:'Cut',key:'Ctrl+X',run:()=>{if(copySelection())removeSelected();}},{label:'Copy',key:'Ctrl+C',run:copySelection},{label:'Paste',key:'Ctrl+V',disabled:!clipboardNow().clipboard,run:pasteClipboard},{label:'Duplicate',key:'Ctrl+D',run:click('#duplicate')},{label:'Copy style',key:'Ctrl+Alt+C',disabled:!one,run:copyStyle},{label:'Paste style',key:'Ctrl+Alt+V',disabled:!clipboardNow().styleClip,run:pasteStyle},{label:'Delete',key:'Del',run:removeSelected},'-',
   {label:'Group',key:'Ctrl+G',disabled:!canGroup,run:click('#group')},{label:'Ungroup',key:'Ctrl+Shift+G',disabled:!grouped,run:click('#ungroup')},'-',
-  {label:'Sew first (to back)',key:'Home',run:click('#ordBack')},{label:'Sew earlier',key:'[',run:click('#ordBackward')},{label:'Sew later',key:']',run:click('#ordForward')},{label:'Sew last (to front)',key:'End',run:click('#ordFront')},'-',
+  {label:'Sew first (to back)',key:'Home',run:()=>moveSelection('back')},{label:'Sew earlier',key:'[',run:()=>moveSelection('backward')},{label:'Sew later',key:']',run:()=>moveSelection('forward')},{label:'Sew last (to front)',key:'End',run:()=>moveSelection('front')},'-',
   {label:sel.every(v=>v.locked)?'Unlock':'Lock',run:()=>edit(sel.map(v=>({op:'set_object',id:v.id,locked:!sel.every(w=>w.locked)})))},{label:'Hide',run:()=>edit(sel.map(v=>({op:'set_object',id:v.id,visible:false})))},'-',
   {label:'Zoom to selection',key:'Shift+2',run:()=>canvasView.fitSelection()},{label:'Select all',key:'Ctrl+A',run:selectAll}];
 }
@@ -352,9 +346,9 @@ if(pathDraftNow().pathMode){if(e.key==='Enter'){e.preventDefault();canvasView.en
  if(mod&&key==='d'){e.preventDefault();$('#duplicate').click();return;}if(mod&&key==='g'){e.preventDefault();(e.shiftKey?$('#ungroup'):$('#group')).click();return;}
  if(mod&&e.shiftKey&&key==='c'){e.preventDefault();const ids=orderedIds().filter(id=>{const o=documentNow().doc.objects.find(v=>v.id===id);return o.kind!=='path'&&o.kind!=='stitch_layer';});if(ids.length)edit([{op:'to_path',ids}]);return;}
  if(e.key==='Enter'&&selState().multi.size===1){e.preventDefault();enterEdit(selectedObject());return;}
- if(e.key==='[')return $('#ordBackward').click();
- if(e.key===']')return $('#ordForward').click();
- if(e.key==='Home'&&selState().multi.size){e.preventDefault();return $('#ordBack').click();}if(e.key==='End'&&selState().multi.size){e.preventDefault();return $('#ordFront').click();}
+ if(e.key==='[')return moveSelection('backward');
+ if(e.key===']')return moveSelection('forward');
+ if(e.key==='Home'&&selState().multi.size){e.preventDefault();return moveSelection('back');}if(e.key==='End'&&selState().multi.size){e.preventDefault();return moveSelection('front');}
  if(e.key.startsWith('Arrow')&&selState().multi.size&&mod&&!editMode){e.preventDefault();const ids=orderedIds(),bs=documentNow().doc.objects.filter(o=>ids.includes(o.id)).map(objectBounds),x0=Math.min(...bs.map(b=>b[0])),y0=Math.min(...bs.map(b=>b[1])),W=Math.max(...bs.map(b=>b[2]))-x0,H=Math.max(...bs.map(b=>b[3]))-y0,step=e.shiftKey?5:1;
   if(e.altKey){if(e.key==='ArrowLeft'||e.key==='ArrowRight'){const a=(e.key==='ArrowRight'?1:-1)*(e.shiftKey?15:1);edit([{op:'rotate',ids,angle:a,cx:x0+W/2,cy:y0+H/2}]);}}
   else if(e.key==='ArrowRight'||e.key==='ArrowLeft'){const sx=Math.max(.02,(W+(e.key==='ArrowRight'?step:-step))/W);edit([{op:'scale',ids,sx,sy:1,ox:x0,oy:y0}]);}else if(e.key==='ArrowDown'||e.key==='ArrowUp'){const sy=Math.max(.02,(H+(e.key==='ArrowDown'?step:-step))/H);edit([{op:'scale',ids,sx:1,sy,ox:x0,oy:y0}]);}return;
