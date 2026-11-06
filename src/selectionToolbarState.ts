@@ -17,7 +17,20 @@ export const selectionToolbarState = createStore<SelectionToolbar>({
   flip: true,
 });
 
-/** The buttons call press() with their name. app.js sets it, because each one edits the selected objects. */
-export const selectionToolbarActions: {press: (name: ToolbarName) => void} = {
+/**
+ * The buttons call press() with their name, and clip()/unclip()/textOnPath()/textOffPath() for the mask and text-on-path
+ * buttons. app.js sets them, because each one edits the selected objects.
+ */
+export const selectionToolbarActions: {
+  press: (name: ToolbarName) => void;
+  clip: () => void;
+  unclip: () => void;
+  textOnPath: () => void;
+  textOffPath: () => void;
+} = {
   press() {},
+  clip() {},
+  unclip() {},
+  textOnPath() {},
+  textOffPath() {},
 };

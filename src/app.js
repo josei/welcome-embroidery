@@ -8,6 +8,8 @@ import {configureStitchPanel, syncStitchPanel} from './stitchPanel.js';
 import {configureArray} from './arrayState.js';
 import {configureBatchExport, syncBatchInfo} from './batchExport.js';
 import {configureSewingOrder, moveSelection} from './sewingOrder.js';
+import {configureShapePathActions} from './shapePathCommands.js';
+import {configureSelectionToolbarActions} from './selectionToolbarCommands.js';
 import {setActions} from './actionState.js';
 import {stitchChoiceActions} from './stitchChoicesState.js';
 import {capRowsActions} from './capRowsState.js';
@@ -59,7 +61,7 @@ import {gridActions,setGridValue} from './gridState.js';
 import {createCanvas} from './canvas.js';
 import {configureCanvasText, enterEdit} from './canvasText.js';
 import {configureReference, referenceForAgent} from './referencePicture.js';
-import {distortionGrid,blockSeconds,blockTimeLabel,bundledFontUsage,countSmallHoles,isSmallIsland,isClosedShape,exportAppliqueTemplates,cornerRadii,svgPathFill,parseThreadStock,nearestStockThread,HOOP_PRESETS,customFontUsage,exportPrintTemplate,designWarnings,TIP_CATEGORIES,visibleTips,measureBetween,initialDocument,geometry,applyOperations,validateDocument,parseSvgPath,makeStitchLayer,objectBounds,hoopSize,jefWarnings,exportSvg,threadPlan,threadSpans,sewingSeconds,sewingSecondsUpTo,sewingWorksheet} from './engine.js';
+import {distortionGrid,blockSeconds,blockTimeLabel,bundledFontUsage,exportAppliqueTemplates,cornerRadii,svgPathFill,parseThreadStock,nearestStockThread,HOOP_PRESETS,customFontUsage,exportPrintTemplate,designWarnings,TIP_CATEGORIES,visibleTips,measureBetween,initialDocument,geometry,applyOperations,validateDocument,parseSvgPath,makeStitchLayer,objectBounds,hoopSize,jefWarnings,exportSvg,threadPlan,threadSpans,sewingSeconds,sewingSecondsUpTo,sewingWorksheet} from './engine.js';
 import {clone,download,safeProjectFilename,sewTime,tipKey,forWorker} from './appHelpers.js';
 import {withSavedHoop,STOCK_KEY,threadStock,TIPS_KEY,hiddenTips,ignoredTipsKey,ignoredTips} from './storedPrefs.js';
 const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)],svgNS='http://www.w3.org/2000/svg';
@@ -176,25 +178,11 @@ function removeSelected(){const ids=[...selState().multi];if(!ids.length)return;
 
 const runBoolean=mode=>{const ids=documentNow().doc.objects.map(o=>o.id).filter(id=>selState().multi.has(id));if(ids.length>=2)edit([{op:'boolean',mode,ids}],()=>{setSelection({selected: ids[0]});setSelection({multi: new Set([ids[0]])});});};
 selectionToolbarActions.press=name=>{if(name==='flipH'){const ids=orderedIds();if(ids.length)edit([{op:'flip',ids,axis:'horizontal'}]);}else if(name==='flipV'){const ids=orderedIds();if(ids.length)edit([{op:'flip',ids,axis:'vertical'}]);}else runBoolean(name);};
-const pickedObjects=()=>documentNow().doc.objects.filter(o=>selState().multi.has(o.id));
-const afterOps=(ops,sel)=>edit(ops,()=>{if(sel){setSelection({selected: sel});setSelection({multi: new Set([sel])});}});
-$('#offsetBtn').onclick=()=>{const o=selectedObject();if(o)afterOps([{op:'offset',id:o.id,distance:Number($('#offsetMm').value)}],o.id);};
-$('#strokeBtn').onclick=()=>{const o=selectedObject();if(o)afterOps([{op:'stroke_to_shape',id:o.id,width:Number($('#strokeW').value)}],o.id);};
-$('#simpBtn').onclick=()=>{const o=selectedObject();if(o)afterOps([{op:'simplify_path',id:o.id,tolerance:Number($('#simpTol').value)}],o.id);};
-$('#reverseBtn').onclick=()=>{const ids=pickedObjects().filter(o=>o.kind==='path').map(o=>o.id);if(ids.length)edit(ids.map(id=>({op:'reverse_path',id})));};
-$('#splitBtn').onclick=()=>{const o=selectedObject();if(o?.kind==='path'&&selState().selNode!==null)afterOps([{op:'split_path',id:o.id,index:selState().selNode}],o.id);else toast('Select a path and one of its nodes first.');};
-$('#joinBtn').onclick=()=>{const ids=pickedObjects().filter(o=>o.kind==='path'&&!o.closed).map(o=>o.id);if(ids.length>=2)afterOps([{op:'join_paths',ids}],ids[0]);else toast('Select two or more open paths to join.');};
-$('#selectSame').onclick=()=>{const o=selectedObject();if(!o)return;setSelection({multi: new Set(documentNow().doc.objects.filter(v=>v.thread.toLowerCase()===o.thread.toLowerCase()).map(v=>v.id))});render();};
 configureArray({edit,toast});
+configureShapePathActions({edit,toast,render});
+configureSelectionToolbarActions({edit});
 configureSewingOrder({edit});
-$('#redworkOutline').onclick=()=>{if(selState().selected)edit([{op:'redwork_outline',id:selState().selected}]);};
 
-$('#appliqueGroup').onclick=()=>{const ids=[...selState().multi],closed=ids.filter(id=>isClosedShape(documentNow().doc.objects.find(o=>o.id===id))),skipped=ids.length-closed.length;if(closed.length<2){toast(t('Appliqué from a group needs two or more closed shapes.'));return;}edit([{op:'applique_group',ids:closed}],()=>{if(skipped)toast(t('{n} open objects left as they are.',{n:skipped}));});};
-$('#redworkGroup').onclick=()=>{const ids=[...selState().multi];if(ids.length)edit([{op:'redwork_group',ids}]);};
-$('#removeSmallHoles').onclick=()=>{const ids=[...selState().multi].filter(id=>isClosedShape(documentNow().doc.objects.find(o=>o.id===id))&&documentNow().doc.objects.find(o=>o.id===id).kind==='path'),maxArea=Number($('#smallHoleArea').value);if(!(maxArea>=.1&&maxArea<=20)){toast(t('The hole limit must be 0.1 to 20 mm².'));return;}const count=ids.reduce((n,id)=>n+countSmallHoles(documentNow().doc.objects.find(o=>o.id===id),maxArea),0);if(!count){toast(t('No holes under {a} mm² in the selection.',{a:maxArea}));return;}edit([{op:'remove_small_holes',ids,maxArea}],()=>toast(t('Removed small holes: {n}.',{n:count})));};
-$('#removeSmallIslands').onclick=()=>{const ids=[...selState().multi].filter(id=>isClosedShape(documentNow().doc.objects.find(o=>o.id===id))),maxArea=Number($('#smallIslandArea').value);if(!(maxArea>=.1&&maxArea<=20)){toast(t('The island limit must be 0.1 to 20 mm².'));return;}const count=ids.filter(id=>isSmallIsland(documentNow().doc.objects.find(o=>o.id===id),maxArea)).length;if(!count){toast(t('No islands under {a} mm² in the selection.',{a:maxArea}));return;}edit([{op:'remove_small_islands',ids,maxArea}],()=>toast(t('Removed small islands: {n}.',{n:count})));};
-$('#textOnPath').onclick=()=>{const picked=[...selState().multi].map(id=>documentNow().doc.objects.find(o=>o.id===id)).filter(Boolean),t=picked.find(o=>o.kind==='text'),p=picked.find(o=>o.kind==='path');if(t&&p)edit([{op:'text_on_path',textId:t.id,pathId:p.id}],()=>{setSelection({selected: t.id});setSelection({multi: new Set([t.id])});});};
-$('#textOffPath').onclick=()=>{const ids=[...selState().multi].filter(id=>documentNow().doc.objects.find(o=>o.id===id)?.along);if(ids.length)edit(ids.map(textId=>({op:'text_off_path',textId})));};
 configureLettering({edit, transact, toast, render});
 $('#organizeFonts').onclick=()=>{setFontsDialogOpen(true);$('#fontsDialog').showModal();};
 $('#removeUnusedFonts').onclick=()=>{const before=Object.keys(documentNow().doc.customFonts||{}).length;edit([{op:'remove_unused_fonts'}]);const removed=before-Object.keys(documentNow().doc.customFonts||{}).length;toast(removed?`Removed ${removed} unused font${removed===1?'':'s'}.`:'No unused fonts to remove.');};
@@ -390,14 +378,10 @@ for(const d of $$('details.sec-fold')){try{d.open=localStorage.getItem('welcome.
 
 
 
-$('#roundBtn').onclick=()=>{const o=selectedObject(),r=Number($('#roundMm').value);if(!o||!(r>0))return;if(o.kind==='rect')edit([{op:'set_object',id:o.id,radius:r}]);else if(o.kind==='path')edit([{op:'round_corners',id:o.id,radius:r,...(selState().selNodes.size?{indexes:[...selState().selNodes]}:{})}],()=>{setSelection({selNodes: new Set()});setSelection({selNode: null});});else toast('Rounding works on rectangles and paths. Convert the shape to a path first.');};
 
 // Line ends and corners, per-node widths, colour blend, clipping masks
 
 
-$('#widthClear').onclick=()=>{if(selState().selected)edit([{op:'set_object',id:selState().selected,widthStops:null}]);};
-$('#clipBtn').onclick=()=>{const ordered=[...selState().multi].map(id=>documentNow().doc.objects.find(v=>v.id===id)).filter(Boolean).sort((a,b)=>documentNow().doc.objects.indexOf(a)-documentNow().doc.objects.indexOf(b)),top=ordered.at(-1);if(ordered.length<2||!top)return;edit([{op:'clip',ids:ordered.slice(0,-1).map(v=>v.id),maskId:top.id}],()=>{setSelection({multi: new Set(ordered.slice(0,-1).map(v=>v.id))});setSelection({selected: ordered[0].id});});};
-$('#unclipBtn').onclick=()=>{const ids=new Set();for(const id of selState().multi){const o=documentNow().doc.objects.find(v=>v.id===id);if(!o)continue;if(o.clipId)ids.add(o.id);if(o.mask)for(const v of documentNow().doc.objects)if(v.clipId===o.id)ids.add(v.id);}if(ids.size)edit([{op:'release_clip',ids:[...ids]}]);};
 
 
 // Embroidery options: cross stitch size, run style, length variation, appliqué, per-object compensation

@@ -23,11 +23,13 @@ export function setCapRows(patch: Partial<CapRows>) {
   capRowsState.set({...capRowsState.get(), ...patch});
 }
 
-/** The cap rows call commit(field, text) for a committed number, and choose('applique', checked) for the checkbox. app.js runs them. */
+/** The cap rows call commit(field, text) for a committed number, choose('applique', checked) for the checkbox, and clearWidth() for the button. */
 export const capRowsActions: {
   commit: (field: 'appliqueWidth' | 'compensation' | 'nodeWidth', text: string) => void;
   choose: (field: 'applique', checked: boolean) => void;
+  clearWidth: () => void;
 } = {
   commit() {},
   choose() {},
+  clearWidth() {},
 };

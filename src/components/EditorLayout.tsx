@@ -12,6 +12,7 @@ import {HoopFields} from './HoopFields';
 import {LetteringPanel} from './LetteringPanel';
 import {PathNodeButtons} from './PathNodeButtons';
 import {PathPanel} from './PathPanel';
+import {selectionToolbarActions} from '../selectionToolbarState.js';
 import {ReferenceLayer, referenceCanvasHandlers} from './ReferenceLayer';
 import {ReferencePicture} from './ReferencePicture';
 import {BooleanButtons, FlipButtons} from './SelectionToolbarButtons';
@@ -176,6 +177,7 @@ export function EditorLayout() {
               title={"Clip: use the top selected shape as a mask for the other selected objects"}
               data-tooltip={"Clip: use the top selected shape as a mask for the other selected objects"}
               id={"clipBtn"}
+              onClick={() => selectionToolbarActions.clip()}
             >
               <svg className={"icon"}>
                 <use href={"#i-clip"} />
@@ -187,6 +189,7 @@ export function EditorLayout() {
               title={"Release the clipping mask"}
               data-tooltip={"Release the clipping mask"}
               id={"unclipBtn"}
+              onClick={() => selectionToolbarActions.unclip()}
             >
               <svg className={"icon"}>
                 <use href={"#i-unclip"} />
@@ -198,6 +201,7 @@ export function EditorLayout() {
               title={"Put the selected lettering on the selected path"}
               data-tooltip={"Put the selected lettering on the selected path"}
               id={"textOnPath"}
+              onClick={() => selectionToolbarActions.textOnPath()}
             >
               <svg className={"icon"}>
                 <use href={"#i-text-path"} />
@@ -209,6 +213,7 @@ export function EditorLayout() {
               title={"Detach lettering from its path"}
               data-tooltip={"Detach lettering from its path"}
               id={"textOffPath"}
+              onClick={() => selectionToolbarActions.textOffPath()}
             >
               <svg className={"icon"}>
                 <use href={"#i-text-detach"} />

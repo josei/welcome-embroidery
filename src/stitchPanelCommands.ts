@@ -4,6 +4,7 @@ import {selState} from './selectionState.js';
 import {setStitchPanel, stitchPanelActions, stitchPanelState} from './stitchPanelState.js';
 import {underlayActions} from './underlayState.js';
 import {accordionRowsActions} from './accordionRowsState.js';
+import {capRowsActions} from './capRowsState.js';
 import {t} from './i18n.js';
 import type {StitchPanelApi} from './stitchPanel.js';
 
@@ -137,5 +138,8 @@ export function configureStitchPanelActions(next: StitchPanelApi) {
     if (selState().selected) {
       wired().edit([{op: 'set_object', id: selState().selected, accordionEase: value}]);
     }
+  };
+  capRowsActions.clearWidth = () => {
+    if (selState().selected) wired().edit([{op: 'set_object', id: selState().selected, widthStops: null}]);
   };
 }
