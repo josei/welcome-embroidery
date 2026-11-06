@@ -7,5 +7,5 @@ import {createStore} from './store.js';
  * @property {[number, number] | null} b the second point in mm, or null until it is clicked
  */
 
-/** The measure tool's points, or null before the first click. The readout reads it; app.js changes it. */
+/** The measure tool's points, or null before the first click. The readout reads it; canvasTools.js changes it. */
 export const measureState = createStore(/** @type {MeasurePoints | null} */ (null));

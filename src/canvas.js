@@ -5,6 +5,7 @@
 import {geometry,objectBounds,hoopSize} from './engine.js';
 import {drawScene} from './canvasScene.js';
 import {createCanvasEditing} from './canvasEditing.js';
+import {createCanvasTools} from './canvasTools.js';
 
 const SVG='http://www.w3.org/2000/svg',PX_PER_MM=96/25.4;
 const el=(/** @type {any} */ tag,attrs={})=>{const n=document.createElementNS(SVG,tag);for(const [k,v] of Object.entries(attrs))n.setAttribute(k,v);return n;};
@@ -34,8 +35,17 @@ export function createCanvas(/** @type {any} */ api){
   const size=()=>{const r=container.getBoundingClientRect();return {w:Math.max(200,r.width),h:Math.max(200,r.height)};};
   const inField=(/** @type {any} */ e)=>e.target.closest?.('input,select,textarea,[contenteditable="true"],#fontPanel');
 
+  // The draw tools own the canvas pointer listeners that add points and drag out shapes, and the measure/knife clicks.
+  // They are created first so the edit-mode overlay can use their coord.
+  const tools=createCanvasTools({...api,canvas:{
+    refresh:()=>refresh(),
+    snapPt:(/** @type {any} */ p)=>editing.snapPt(p),
+    showSnap:(/** @type {any} */ hit)=>editing.showSnap(hit),
+    px:(/** @type {number} */ n)=>editing.px(n),
+  }});
+
   // The edit-mode overlay and its pointer listeners live here, next to the rest of the canvas's pointer handling.
-  const editing=createCanvasEditing({...api,scale:()=>vp.s});
+  const editing=createCanvasEditing({...api,coord:tools.coord,scale:()=>vp.s});
   window.addEventListener('pointermove',(/** @type {any} */ e)=>editing.pointerMove(e));
   window.addEventListener('pointerup',(/** @type {any} */ e)=>editing.finishDrag(e));
   window.addEventListener('pointercancel',(/** @type {any} */ e)=>editing.finishDrag(e));
@@ -201,7 +211,7 @@ export function createCanvas(/** @type {any} */ api){
   }
 
   // ---- pointer interaction (select tool) ---------------------------------------------------------------------
-  const coord=api.coord;
+  const coord=tools.coord;
   const shapeEls=(/** @type {any} */ ids)=>ids.map((/** @type {any} */ id)=>svg.querySelector(`#shapes [data-id="${id}"]`)).filter(Boolean);
   const stash=(/** @type {any} */ elements)=>elements.map((/** @type {any} */ n)=>({n,t:n.getAttribute('transform')||''}));
   const restore=(/** @type {any} */ list)=>{for(const {n,t} of list){if(t)n.setAttribute('transform',t);
@@ -241,8 +251,8 @@ export function createCanvas(/** @type {any} */ api){
   svg.addEventListener('pointerdown',(/** @type {any} */ e)=>{
     if(e.pointerType==='touch'&&touches.size>0)return;
     if(e.button===1||(e.button===0&&(spaceDown||handMode))){e.preventDefault();state={type:'pan',x:e.clientX,y:e.clientY,cx:vp.cx,cy:vp.cy,pid:e.pointerId};container.classList.add('panning');svg.setPointerCapture?.(e.pointerId);return;}
-    if(e.button===0&&api.tool()==='measure'){e.preventDefault();api.measureClick(coord(e));return;}
-    if(e.button===0&&api.tool()==='knife'){e.preventDefault();api.knifeClick(coord(e));return;}
+    if(e.button===0&&api.tool()==='measure'){e.preventDefault();tools.measureClick(coord(e));return;}
+    if(e.button===0&&api.tool()==='knife'){e.preventDefault();tools.knifeClick(coord(e));return;}
     if(e.button!==0||api.tool()!=='select')return;
     if(api.pickPivot?.(coord(e))){e.preventDefault();e.stopPropagation();return;}
     if(e.target.closest?.('.path-node,.path-handle'))return;
@@ -255,7 +265,7 @@ export function createCanvas(/** @type {any} */ api){
     const now=performance.now();
     if(lastClick&&now-lastClick.t<380&&lastClick.id===o.id&&Math.hypot(p[0]-lastClick.p[0],p[1]-lastClick.p[1])*vp.s<8){lastClick=null;api.dblclick(o,p);return;}
     lastClick={t:now,id:o.id,p};
-    const group=api.withGroup(o.id),cur=new Set(api.ids());
+    const group=tools.withGroup(o.id),cur=new Set(api.ids());
     if(e.shiftKey){const next=new Set(cur);if([...group].every(id=>cur.has(id))&&cur.size>group.size)for(const id of group)next.delete(id);else for(const id of group)next.add(id);api.select([...next],[...next].includes(o.id)?o.id:[...next].at(-1));return;}
     const wasSelected=cur.has(o.id);if(!wasSelected)api.select([...group],o.id);
     const ids=api.ids(),f=/** @type {any} */(frame()),box=f?.oriented?objectBounds(api.doc().objects.find((/** @type {any} */ v)=>v.id===ids[0])):f.b;
@@ -356,9 +366,9 @@ export function createCanvas(/** @type {any} */ api){
     else api.commit([{op:'move_guide',index:s.index,pos:s.pos}]);
     return;
     }
-    if(s.type==='move'){restore(s.els);if(s.moved&&Math.hypot(...s.delta)>.02)api.commit([{op:'translate',ids:s.ids,dx:s.delta[0],dy:s.delta[1]}]);else{if(!s.moved&&api.ids().length>1&&!e.shiftKey&&s.wasSelected){const g=api.withGroup(s.clicked.id);api.select([...g],s.clicked.id);}else refresh();}return;}
+    if(s.type==='move'){restore(s.els);if(s.moved&&Math.hypot(...s.delta)>.02)api.commit([{op:'translate',ids:s.ids,dx:s.delta[0],dy:s.delta[1]}]);else{if(!s.moved&&api.ids().length>1&&!e.shiftKey&&s.wasSelected){const g=tools.withGroup(s.clicked.id);api.select([...g],s.clicked.id);}else refresh();}return;}
     if(s.type==='marquee'){const r=s.rect;if(!r||(r[2]-r[0])*vp.s<4&&(r[3]-r[1])*vp.s<4){if(!s.add)api.select([],null);else refresh();return;}
-      const picked=new Set(s.add?api.ids():[]);for(const o of api.doc().objects){if(o.visible===false||o.locked)continue;const b=objectBounds(o);if(b[2]>=r[0]&&b[0]<=r[2]&&b[3]>=r[1]&&b[1]<=r[3])for(const id of api.withGroup(o.id))picked.add(id);}
+      const picked=new Set(s.add?api.ids():[]);for(const o of api.doc().objects){if(o.visible===false||o.locked)continue;const b=objectBounds(o);if(b[2]>=r[0]&&b[0]<=r[2]&&b[3]>=r[1]&&b[1]<=r[3])for(const id of tools.withGroup(o.id))picked.add(id);}
       api.select([...picked],[...picked].at(-1)??null);return;}
     if(s.type==='nodemarquee'){const r=s.rect;if(!r||(r[2]-r[0])*vp.s<4&&(r[3]-r[1])*vp.s<4){if(!s.add)api.select([],null);else refresh();return;}api.selectNodesIn(r,s.add);return;}
     if(s.type==='angle'){if(Math.abs(s.next-s.deg)<.05){refresh();return;}api.commit([{op:'set_object',id:s.id,angle:s.next}]);return;}
@@ -372,7 +382,7 @@ export function createCanvas(/** @type {any} */ api){
   document.addEventListener('pointerdown',e=>{if(menu&&!menu.contains(e.target))closeMenu();},true);
   document.addEventListener('keydown',e=>{if(e.key==='Escape')closeMenu();});
   svg.addEventListener('contextmenu',(/** @type {any} */ e)=>{
-    if(api.tool()!=='select')return;e.preventDefault();const p=coord(e),o=hit(p);if(o&&!api.ids().includes(o.id))api.select([...api.withGroup(o.id)],o.id);
+    if(api.tool()!=='select')return;e.preventDefault();const p=coord(e),o=hit(p);if(o&&!api.ids().includes(o.id))api.select([...tools.withGroup(o.id)],o.id);
     const items=api.menuItems(o,p);if(!items.length)return;closeMenu();
     menu=document.createElement('div');menu.id='ctxMenu';menu.setAttribute('role','menu');
     for(const it of items){if(it==='-'){menu.append(document.createElement('hr'));
@@ -399,5 +409,7 @@ export function createCanvas(/** @type {any} */ api){
   api.zoomUi?.(zoomAt,fitHoop,fitAll,zoomTo100);
   return {vp,apply,refresh,drawScene,fitHoop,fitAll,fitSelection,zoomAt,zoomTo100,toScreen,scale:()=>vp.s,percent:()=>Math.round(vp.s/PX_PER_MM*100),hit,closeMenu,isDragging:()=>Boolean(state),inField,RULER,
     px:editing.px,drawControls:editing.drawControls,showSnap:editing.showSnap,
-    snapPt:editing.snapPt,insertNodeAt:editing.insertNodeAt,deleteNode:editing.deleteNode};
+    snapPt:editing.snapPt,insertNodeAt:editing.insertNodeAt,deleteNode:editing.deleteNode,
+    add:tools.add,coord,withGroup:tools.withGroup,setTool:tools.setTool,endPath:tools.endPath,
+    drawPathPreview:tools.drawPathPreview,continueDigitizing:tools.continueDigitizing,markObjectDblclick:tools.markObjectDblclick};
 }
