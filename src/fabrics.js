@@ -7,7 +7,8 @@
  * @typedef {{label: string, stretch: number, stabilizer: string, values: FabricValues}} FabricProfile
  */
 
-// Fabric presets: the values in src/fabrics.js, written into the document settings by set_settings { fabric }. An explicit key in the same operation overrides a preset.
+// Fabric presets: the values in src/fabrics.js, written into the document settings by set_settings { fabric }. An explicit key in the same operation overrides
+// a preset.
 // Fabric profiles: the document settings a fabric sets in one set_settings step, and the stabilizer to suggest for it.
 // The numbers are industry starting points for embroidery on these fabrics, not measurements from a machine. Test a
 // sample before a production run, and change a value here if a sample says so: the engine, the MCP schema and the
@@ -74,7 +75,8 @@ export const DISTORTION_SCALE=1.5;
  * @param {string} fabric
  * @param {{w: number, h: number}} hoop
  * @param {number} [cell]
- * @returns {{cols: number, rows: number, cell: number, x0: number, y0: number, values: Float32Array, dirs: Float32Array, peak: number, stretch: number, label: string}}
+ * @returns {{cols: number, rows: number, cell: number, x0: number, y0: number, values: Float32Array, dirs: Float32Array, peak: number, stretch: number, label:
+  * string}}
  */
 export function distortionGrid(plan,fabric,hoop,cell=2){
   const profile=FABRIC_PROFILES[fabric]??FABRIC_PROFILES.woven,stretch=profile.stretch;

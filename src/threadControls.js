@@ -72,7 +72,9 @@ export function renderPlan() {
     pick.onchange = () => {
       const from = block.thread, to = pick.value;
       if (!to) return;
-      const count = documentNow().doc.objects.filter((/** @type {any} */ object) => object.kind !== 'stitch_layer' && object.thread && object.thread.toLowerCase() === from.toLowerCase()).length;
+      const count =
+        documentNow().doc.objects.filter((/** @type {any} */ object) => object.kind !== 'stitch_layer' && object.thread && object.thread.toLowerCase() ===
+        from.toLowerCase()).length;
       editor.edit([{op: 'replace_thread', from, to}]);
       editor.toast(t('Replaced {thread} in {n} objects.', {thread: from, n: count}));
     };
@@ -83,7 +85,8 @@ export function renderPlan() {
     name.textContent = `${i + 1}. ${threadName(block.thread)}`;
     const count = document.createElement('span');
     count.className = 'n';
-    count.textContent = `${t('{n} stitches', {n: block.stitches.toLocaleString()})} · ${(block.mm / 1000).toFixed(2)} m · ${blockTimeLabel(blockSeconds(block))}`;
+    count.textContent = `${t('{n} stitches', {n: block.stitches.toLocaleString()})} · ${(block.mm / 1000).toFixed(2)} m · ` +
+    `${blockTimeLabel(blockSeconds(block))}`;
     row.append(swatch, name, count);
     row.append(pick);
     const near = nearestStockThread(block.thread, stock.colours);
@@ -141,7 +144,8 @@ function mountWorksheet() {
       }
       const format = /** @type {'text'|'svg'} */ (/** @type {HTMLSelectElement} */ (document.getElementById('worksheetFormat')).value);
       const base = safeProjectFilename(documentNow().doc.name).replace(/\.welcome$/i, '');
-      download(sewingWorksheet(/** @type {any} */ (documentNow().doc), current, format), `${base}-worksheet.${format === 'svg' ? 'svg' : 'txt'}`, format === 'svg' ? 'image/svg+xml' : 'text/plain');
+      download(sewingWorksheet(/** @type {any} */ (documentNow().doc), current, format), `${base}-worksheet.${format === 'svg' ? 'svg' : 'txt'}`,
+        format === 'svg' ? 'image/svg+xml' : 'text/plain');
       editor.toast(t('Sewing worksheet downloaded.'));
     };
   }

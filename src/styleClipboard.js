@@ -8,8 +8,12 @@ import {selectedObject} from './selectionCommands.js';
 import {t} from './i18n.js';
 import {editor} from './editorContext.js';
 
-const STYLE_KEYS = ['thread', 'spacing', 'angle', 'stitchLength', 'stagger', 'underlayType', 'underlayInset', 'underlaySpacing', 'fillMethod', 'crossSize', 'border', 'borderThread', 'borderWidth', 'join', 'cap', 'blendThread', 'blendPalette', 'blendStart', 'blendEnd', 'blendAngle', 'compensation', 'runStyle', 'lengthVariance', 'underpath'];
-const FILL_ONLY = new Set(['spacing', 'angle', 'stagger', 'fillMethod', 'crossSize', 'blendThread', 'blendPalette', 'blendStart', 'blendEnd', 'blendAngle', 'lengthVariance', 'underpath', 'border', 'borderThread', 'borderWidth']);
+const STYLE_KEYS = ['thread', 'spacing', 'angle', 'stitchLength', 'stagger', 'underlayType', 'underlayInset', 'underlaySpacing', 'fillMethod', 'crossSize',
+  'border', 'borderThread', 'borderWidth', 'join', 'cap', 'blendThread', 'blendPalette', 'blendStart', 'blendEnd', 'blendAngle', 'compensation', 'runStyle',
+  'lengthVariance', 'underpath'];
+const FILL_ONLY =
+  new Set(['spacing', 'angle', 'stagger', 'fillMethod', 'crossSize', 'blendThread', 'blendPalette', 'blendStart', 'blendEnd', 'blendAngle', 'lengthVariance',
+  'underpath', 'border', 'borderThread', 'borderWidth']);
 
 /** Copies the selected object's stitching style into the clipboard. */
 export function copyStyle() {

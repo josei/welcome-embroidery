@@ -7,7 +7,11 @@ import {parseThreadStock} from './threads.js';
  * @param {any} d the document being opened or created
  * @returns {any}
  */
-export const withSavedHoop=d=>{try{const h=JSON.parse(localStorage.getItem('welcome.hoop')||'null');if(h&&Number.isFinite(h.w)&&Number.isFinite(h.h)&&h.w>=10&&h.w<=400&&h.h>=10&&h.h<=400){d.hoop=h.w;if(h.h===h.w)delete d.hoopH;else d.hoopH=h.h;}}catch{}return d;};
+export const withSavedHoop=d=>
+  {
+  try{const h=JSON.parse(localStorage.getItem('welcome.hoop')||'null');
+  if(h&&Number.isFinite(h.w)&&Number.isFinite(h.h)&&h.w>=10&&h.w<=400&&h.h>=10&&h.h<=400){d.hoop=h.w;if(h.h===h.w)delete d.hoopH;else d.hoopH=h.h;}}catch{
+  }return d;};
 
 /** The key the thread stock is saved under. */
 export const STOCK_KEY='welcome.threadStock';
@@ -23,7 +27,9 @@ export const TIPS_KEY='welcome.hiddenTips';
 /**
  * @returns {string[]}
  */
-export function hiddenTips(){try{const v=JSON.parse(localStorage.getItem(TIPS_KEY)||'[]');return Array.isArray(v)?v.filter((/** @type {any} */ x)=>typeof x==='string'):[];}catch{return [];}}
+export function hiddenTips(){
+  try{const v=JSON.parse(localStorage.getItem(TIPS_KEY)||'[]');return Array.isArray(v)?v.filter((/** @type {any} */ x)=>typeof x==='string'):[];}catch{
+  return [];}}
 
 /**
  * @returns {string}

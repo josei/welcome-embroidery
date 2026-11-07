@@ -48,7 +48,8 @@ worker.addEventListener('error', (/** @type {any} */ e) => {
   e.preventDefault();
   failPending(Error(`Stitch worker failed to load or run${e.message ? `: ${e.message}` : ''}. Reload the editor and try again.`));
 });
-worker.addEventListener('messageerror', () => failPending(Error('The stitch worker returned data the editor could not read. Reload the editor and try again.')));
+worker.addEventListener('messageerror', () =>
+  failPending(Error('The stitch worker returned data the editor could not read. Reload the editor and try again.')));
 
 /**
  * @param {any} data
