@@ -28,21 +28,33 @@ export const isClosedShape=o=>{if(!o)return false;return o.kind==='rect'||o.kind
  * @returns {void}
  */
 export function booleanShapes(doc,mode,ids){
-  if(!['union','intersect','subtract','xor'].includes(mode))throw Error(`Unknown boolean mode: ${mode}`);if(!Array.isArray(ids)||ids.length<2||new Set(ids).size!==ids.length)throw Error('A boolean operation needs at least two different objects.');
-  const objs=ids.map(id=>{const o=doc.objects.find(v=>v.id===id);if(!o)throw Error(`Unknown object: ${id}`);if(o.kind==='text'||o.kind==='stitch_layer'||(o.kind==='path'&&!o.closed))throw Error('Boolean operations work on closed shapes: rectangle, ellipse or closed path.');return o;});
+  if(!['union','intersect','subtract','xor'].includes(mode))throw Error(`Unknown boolean mode: ${mode}`);
+    if(!Array.isArray(ids)||ids.length<2||new Set(ids).size!==ids.length)throw Error('A boolean operation needs at least two different objects.');
+  const objs=
+    ids.map(id=>
+    {const o=doc.objects.find(v=>v.id===id);if(!o)throw Error(`Unknown object: ${id}`);
+    if(o.kind==='text'||o.kind==='stitch_layer'||(o.kind==='path'&&!o.closed))throw Error(
+    'Boolean operations work on closed shapes: rectangle, ellipse or closed path.');return o;});
   /** @type {(r: Pt[]) => Pt[]} */
-  const ring=r=>{const pts=r.map(([x,y])=>/** @type {Pt} */([x,y]));if(pts.length>1&&pts[0][0]===pts[pts.length-1][0]&&pts[0][1]===pts[pts.length-1][1])pts.pop();return pts;};
+  const ring=r=>
+    {const pts=r.map(([x,y])=>/** @type {Pt} */([x,y]));if(pts.length>1&&pts[0][0]===pts[pts.length-1][0]&&pts[0][1]===pts[pts.length-1][1])pts.pop();
+    return pts;};
   const polys=objs.map(o=>geometry(o,0).map(ring)),[first,...rest]=polys;
-  const result=(mode==='union'?polygonClipping.union:mode==='intersect'?polygonClipping.intersection:mode==='xor'?polygonClipping.xor:polygonClipping.difference)(first,...rest);
+  const result=(mode==='union'?polygonClipping.union:mode==='intersect'?polygonClipping.intersection:mode==='xor'?polygonClipping.xor:
+    polygonClipping.difference)(first,...rest);
   if(!result.length)throw Error(mode==='intersect'?'The shapes do not overlap, so the intersection is empty.':'The result is empty.');
   replaceWithPolygons(doc,objs[0],objs,result);
 }
 
-// Knife: cut a closed shape along the straight line through two points. The cut is a thin strip (0.02 mm) along that line, extended past the shape's bounds, subtracted from the shape; the pieces then become separate objects, as with booleans. A line that does not cut the shape is refused.
-// Knife: cut a closed shape along a polyline (two or more points). Each segment is a thin strip (0.02 mm wide), extended a little at both ends so the strips overlap at the joints, and the strips are subtracted from the shape; the pieces become separate objects, as with booleans. The first and last segments reach past the shape's bounds. A line that does not cut the shape is refused, and so is a polyline that crosses itself.
+// Knife: cut a closed shape along the straight line through two points. The cut is a thin strip (0.02 mm) along that line, extended past the shape's bounds,
+// subtracted from the shape; the pieces then become separate objects, as with booleans. A line that does not cut the shape is refused.
+// Knife: cut a closed shape along a polyline (two or more points). Each segment is a thin strip (0.02 mm wide), extended a little at both ends so the strips
+// overlap at the joints, and the strips are subtracted from the shape; the pieces become separate objects, as with booleans. The first and last segments reach
+// past the shape's bounds. A line that does not cut the shape is refused, and so is a polyline that crosses itself.
 /** @type {(p1: Pt, p2: Pt, p3: Pt, p4: Pt) => boolean} */
 const segmentsCross=(p1,p2,p3,p4)=>{
-/** @type {(a: Pt, b: Pt, c: Pt) => number} */ const d=(a,b,c)=>(b[0]-a[0])*(c[1]-a[1])-(b[1]-a[1])*(c[0]-a[0]);const d1=d(p3,p4,p1),d2=d(p3,p4,p2),d3=d(p1,p2,p3),d4=d(p1,p2,p4);return d1*d2<0&&d3*d4<0;};
+/** @type {(a: Pt, b: Pt, c: Pt) => number} */ const d=(a,b,c)=>(b[0]-a[0])*(c[1]-a[1])-(b[1]-a[1])*(c[0]-a[0]);const d1=d(p3,p4,p1),d2=d(p3,p4,p2),d3=
+  d(p1,p2,p3),d4=d(p1,p2,p4);return d1*d2<0&&d3*d4<0;};
 
 /**
  * @param {Doc} doc
@@ -53,11 +65,16 @@ const segmentsCross=(p1,p2,p3,p4)=>{
 export function knifeShape(doc,id,points){
   const o=objById(doc,id);
   if(!(o.kind==='rect'||o.kind==='ellipse'||(o.kind==='path'&&o.closed)))throw Error('Knife cuts a closed shape: a rectangle, an ellipse or a closed path.');
-  if(!Array.isArray(points)||points.length<2||points.some(p=>!Array.isArray(p)||p.length!==2||!p.every(Number.isFinite)))throw Error('The knife needs two or more points.');
-  for(let i=1;i<points.length;i++)if(Math.hypot(points[i][0]-points[i-1][0],points[i][1]-points[i-1][1])<1e-6)throw Error('The knife needs two different points.');
-  for(let i=0;i<points.length-1;i++)for(let j=i+2;j<points.length-1;j++)if(segmentsCross(points[i],points[i+1],points[j],points[j+1]))throw Error('The knife line crosses itself.');
+  if(!Array.isArray(points)||points.length<2||points.some(p=>!Array.isArray(p)||p.length!==2||!p.every(Number.isFinite)))throw Error(
+    'The knife needs two or more points.');
+  for(let i=1;i<points.length;i++)if(Math.hypot(points[i][0]-points[i-1][0],points[i][1]-points[i-1][1])<1e-6)throw Error(
+    'The knife needs two different points.');
+  for(let i=0;i<points.length-1;i++)for(let j=i+2;j<points.length-1;j++)if(segmentsCross(points[i],points[i+1],points[j],points[j+1]))throw Error(
+    'The knife line crosses itself.');
   /** @type {(r: Pt[]) => Pt[]} */
-  const ring=r=>{const pts=r.map(([x,y])=>/** @type {Pt} */([x,y]));if(pts.length>1&&pts[0][0]===pts[pts.length-1][0]&&pts[0][1]===pts[pts.length-1][1])pts.pop();return pts;};
+  const ring=r=>
+    {const pts=r.map(([x,y])=>/** @type {Pt} */([x,y]));if(pts.length>1&&pts[0][0]===pts[pts.length-1][0]&&pts[0][1]===pts[pts.length-1][1])pts.pop();
+    return pts;};
   const poly=geometry(o,0).map(ring);
   const bb=objectBounds(o),ext=Math.hypot(bb[2]-bb[0],bb[3]-bb[1])+1,joint=.05,last=points.length-2;
   /** @type {Pt[][]} */ const strips=[];
@@ -83,9 +100,16 @@ function replaceWithPolygons(doc,base,objs,result){
   /** @type {(r: Pt[]) => Pt[]} */
   const round=r=>r.slice(0,-1).map(([x,y])=>[+x.toFixed(3),+y.toFixed(3)]);
   /** @type {Obj[]} */ const made=[];
-  result.forEach((poly,k)=>{const [outer,...holes]=poly.map(round);if(outer.length<3||outer.length>1000||holes.length>20||holes.some(h=>h.length<3||h.length>200))throw Error('The result is too complex (outer ring up to 1,000 points, up to 20 holes of up to 200 points). Simplify the shapes first.');
-    const o=/** @type {Obj} */(k===0?base:{id:crypto.randomUUID(),name:`${base.name||'Shape'} ${k+1}`,thread:base.thread,stitch:base.stitch,...(base.border?{border:true,borderThread:base.borderThread}:{})});
-    for(const key of /** @type {Array<keyof Obj>} */(['rotation','smooth','handles','holes','satinWidth','text','font','along']))delete o[key];Object.assign(o,{kind:'path',points:outer,closed:true,stitch:base.stitch==='run'?'run':'fill',w:0,h:0,x:0,y:0});if(holes.length)o.holes=holes;refreshPathBounds(o);made.push(o);});
+  result.forEach((poly,k)=>
+    {const [outer,...holes]=poly.map(round);
+    if(outer.length<3||outer.length>1000||holes.length>20||holes.some(h=>h.length<3||h.length>200))throw Error(
+    'The result is too complex (outer ring up to 1,000 points, up to 20 holes of up to 200 points). Simplify the shapes first.');
+    const o=/** @type {Obj} */(k===0?base:
+      {id:crypto.randomUUID(),name:`${base.name||'Shape'} ${k+1}`,thread:base.thread,stitch:base.stitch,
+      ...(base.border?{border:true,borderThread:base.borderThread}:{})});
+    for(const key of /** @type {Array<keyof Obj>} */(['rotation','smooth','handles','holes','satinWidth','text','font','along']))delete o[key];
+      Object.assign(o,{kind:'path',points:outer,closed:true,stitch:base.stitch==='run'?'run':'fill',w:0,h:0,x:0,y:0});if(holes.length)o.holes=holes;
+      refreshPathBounds(o);made.push(o);});
   doc.objects=doc.objects.filter(o=>!objs.includes(o)||o===base);const baseAt=doc.objects.indexOf(base);doc.objects.splice(baseAt+1,0,...made.slice(1));
 }
 
@@ -96,7 +120,9 @@ function replaceWithPolygons(doc,base,objs,result){
  * @param {string} id
  * @returns {Obj}
  */
-function closedShapeOrThrow(doc,id){const o=doc.objects.find(v=>v.id===id);if(!o)throw Error(`Unknown object: ${id}`);if(o.kind==='text'||o.kind==='stitch_layer'||(o.kind==='path'&&!o.closed))throw Error('This works on closed shapes: rectangle, ellipse or closed path.');return o;}
+function closedShapeOrThrow(doc,id){const o=doc.objects.find(v=>v.id===id);if(!o)throw Error(`Unknown object: ${id}`);
+  if(o.kind==='text'||o.kind==='stitch_layer'||(o.kind==='path'&&!o.closed))throw Error('This works on closed shapes: rectangle, ellipse or closed path.');
+  return o;}
 
 /**
  * @param {Doc} doc
@@ -104,9 +130,11 @@ function closedShapeOrThrow(doc,id){const o=doc.objects.find(v=>v.id===id);if(!o
  * @param {number} distance
  * @returns {void}
  */
-export function offsetShape(doc,id,distance){const o=closedShapeOrThrow(doc,id),d=Number(distance);if(!Number.isFinite(d)||d===0||Math.abs(d)>50)throw Error('Offset distance must be a non-zero number of mm, at most 50 in either direction.');
+export function offsetShape(doc,id,distance){const o=closedShapeOrThrow(doc,id),d=Number(distance);
+  if(!Number.isFinite(d)||d===0||Math.abs(d)>50)throw Error('Offset distance must be a non-zero number of mm, at most 50 in either direction.');
   const rings=geometry(o,0).map(closedRing),poly=rings.map(r=>r.slice(0,-1)),grown=bufferSegments(rings,Math.abs(d));
-  const result=d>0?polygonClipping.union(poly,...grown):polygonClipping.difference(poly,...grown);if(!result.length)throw Error('The inset removes the whole shape; use a smaller distance.');replaceWithPolygons(doc,o,[o],result);}
+  const result=d>0?polygonClipping.union(poly,...grown):polygonClipping.difference(poly,...grown);
+    if(!result.length)throw Error('The inset removes the whole shape; use a smaller distance.');replaceWithPolygons(doc,o,[o],result);}
 
 /**
  * @param {Doc} doc
@@ -114,18 +142,24 @@ export function offsetShape(doc,id,distance){const o=closedShapeOrThrow(doc,id),
  * @param {number} width
  * @returns {void}
  */
-export function strokeToShape(doc,id,width){const o=doc.objects.find(v=>v.id===id);if(!o||o.kind!=='path')throw Error(`Stroke to shape needs a path: ${id}`);const w=Number(width);if(!Number.isFinite(w)||w<=0||w>40)throw Error('Stroke width must be between 0 and 40 mm.');
-  const ring=geometry(o,0)[0],grown=bufferSegments([ring],w/2);if(!grown.length)throw Error('The path has no length.');replaceWithPolygons(doc,Object.assign(o,{stitch:'fill'}),[o],grown);}
+export function strokeToShape(doc,id,width){const o=doc.objects.find(v=>v.id===id);if(!o||o.kind!=='path')throw Error(`Stroke to shape needs a path: ${id}`);
+  const w=Number(width);if(!Number.isFinite(w)||w<=0||w>40)throw Error('Stroke width must be between 0 and 40 mm.');
+  const ring=geometry(o,0)[0],grown=bufferSegments([ring],w/2);if(!grown.length)throw Error('The path has no length.');
+    replaceWithPolygons(doc,Object.assign(o,{stitch:'fill'}),[o],grown);}
 
-// Appliqué from a group: the selected closed shapes become fills, and the bottom-most one (first in the object order) stays the fabric the others are laid on. Each other shape becomes an appliqué: its placement line, tack-down and satin cover, as a single object's appliqué already sews. Shapes are kept in their object order.
+// Appliqué from a group: the selected closed shapes become fills, and the bottom-most one (first in the object order) stays the fabric the others are laid on.
+// Each other shape becomes an appliqué: its placement line, tack-down and satin cover, as a single object's appliqué already sews. Shapes are kept in their
+// object order.
 /**
  * @param {ShapeDoc} doc
  * @param {string[]} ids
  * @returns {void}
  */
-export function appliqueGroup(doc,ids){if(!Array.isArray(ids)||ids.length<2)throw Error('Appliqué from a group needs two or more closed shapes.');if(new Set(ids).size!==ids.length)throw Error('Each shape can be chosen once.');
+export function appliqueGroup(doc,ids){if(!Array.isArray(ids)||ids.length<2)throw Error('Appliqué from a group needs two or more closed shapes.');
+  if(new Set(ids).size!==ids.length)throw Error('Each shape can be chosen once.');
   // Open paths, text and other objects in the selection are left as they are; only the closed shapes take part, and at least two must remain.
-  const objs=/** @type {ShapeItem[]} */(ids.map(id=>objById(doc,id)).filter(isClosedShape));if(objs.length<2)throw Error('Appliqué from a group needs two or more closed shapes.');
+  const objs=/** @type {ShapeItem[]} */(ids.map(id=>objById(doc,id)).filter(isClosedShape));
+    if(objs.length<2)throw Error('Appliqué from a group needs two or more closed shapes.');
   const ordered=doc.objects.filter(o=>objs.includes(o));const [base,...top]=ordered;
   for(const o of ordered)o.stitch='fill';
   delete base.applique;for(const o of top)o.applique=true;}
