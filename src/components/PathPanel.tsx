@@ -40,29 +40,29 @@ export function PathPanel() {
     ) =>
     shapePathActions.removeSmallHoles(smallHoleAreaRef.current?.value ??
     '')} title="Drops every hole under the hole limit from the selected closed paths"
-      data-tooltip="Drops every hole under the hole limit from the selected closed paths">Remove small holes</button><label>Hole limit (
-    mm²)<input id="smallHoleArea" ref={smallHoleAreaRef} type="number" min="0.1" max="20" step="0.1" defaultValue="1"
+      data-tooltip="Drops every hole under the hole limit from the selected closed paths">Remove small holes</button><label>{"Hole limit ("}
+    {"mm²)"}<input id="smallHoleArea" ref={smallHoleAreaRef} type="number" min="0.1" max="20" step="0.1" defaultValue="1"
       title="Holes smaller than this area (0.1-20 mm²) are removed" /></label><button type="button" id="removeSmallIslands" onClick={(
     ) =>
     shapePathActions.removeSmallIslands(smallIslandAreaRef.current?.value ??
     '')} title="Deletes every selected closed shape under the island limit (outline less holes)"
-      data-tooltip="Deletes every selected closed shape under the island limit (outline less holes)">Remove small islands</button><label>Island limit (
-    mm²)<input id="smallIslandArea" ref={smallIslandAreaRef} type="number" min="0.1" max="20" step="0.1" defaultValue="1"
+      data-tooltip="Deletes every selected closed shape under the island limit (outline less holes)">Remove small islands</button><label>{"Island limit ("}
+    {"mm²)"}<input id="smallIslandArea" ref={smallIslandAreaRef} type="number" min="0.1" max="20" step="0.1" defaultValue="1"
       title="Closed shapes smaller than this area (0.1-20 mm², outline less holes) are deleted" /></label></div>
-<div className="tool-grid"><label>Offset (
-  mm)<input id="offsetMm" ref={offsetMmRef} type="number" step="0.5" defaultValue="1" /></label><button id="offsetBtn" onClick={() =>
+<div className="tool-grid"><label>{"Offset ("}
+  {"mm)"}<input id="offsetMm" ref={offsetMmRef} type="number" step="0.5" defaultValue="1" /></label><button id="offsetBtn" onClick={() =>
   shapePathActions.offset(offsetMmRef.current?.value ??
   '')} disabled={panel.pathOffset} title="Grow (positive) or shrink (negative) the selected closed shape">Offset</button>
-<label>Stroke width (
-  mm)<input id="strokeW" ref={strokeWRef} type="number" min="0.5" max="40" step="0.5" defaultValue="3" /></label><button id="strokeBtn" onClick={() =>
+<label>{"Stroke width ("}
+  {"mm)"}<input id="strokeW" ref={strokeWRef} type="number" min="0.5" max="40" step="0.5" defaultValue="3" /></label><button id="strokeBtn" onClick={() =>
   shapePathActions.strokeToShape(strokeWRef.current?.value ??
   '')} disabled={panel.pathStroke} title="Turn the selected path into a filled shape of this width">Stroke → shape</button>
-<label>Simplify (
-  mm)<input id="simpTol" ref={simpTolRef} type="number" min="0.05" max="10" step="0.05" defaultValue="0.2" /></label><button id="simpBtn" onClick={() =>
+<label>{"Simplify ("}
+  {"mm)"}<input id="simpTol" ref={simpTolRef} type="number" min="0.05" max="10" step="0.05" defaultValue="0.2" /></label><button id="simpBtn" onClick={() =>
   shapePathActions.simplify(simpTolRef.current?.value ??
   '')} disabled={panel.pathSimplify} title="Remove nodes that change the path by less than this">Simplify</button></div>
-<div className="tool-grid"><label>Round corners (
-  mm)<input id="roundMm" ref={roundMmRef} type="number" min="0.5" max="200" step="0.5" defaultValue="2" /></label><button id="roundBtn" onClick={() =>
+<div className="tool-grid"><label>{"Round corners ("}
+  {"mm)"}<input id="roundMm" ref={roundMmRef} type="number" min="0.5" max="200" step="0.5" defaultValue="2" /></label><button id="roundBtn" onClick={() =>
   shapePathActions.roundCorners(roundMmRef.current?.value ??
   '')} title="Round the corners: rectangles get a corner radius, paths get arcs at their corner nodes (selected nodes only, when some are selected)">Round
     corners</button></div>

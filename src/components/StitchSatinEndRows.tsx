@@ -17,20 +17,20 @@ export function StitchSatinEndRows() {
  const pullRight = useDraftInput(satin.pullRight, text => satinEndRowsActions.commit('pullRight', text));
  const pullLeft = useDraftInput(satin.pullLeft, text => satinEndRowsActions.commit('pullLeft', text));
  return (
-  <><label id="endInsetStartRow" hidden={rows.endInsetStartRow}>Satin end inset: start (
-    mm)<input id="endInsetStart" {...endInsetStart} type="number" min="0" max="2" step="0.1" placeholder="0"
+  <><label id="endInsetStartRow" hidden={rows.endInsetStartRow}>{"Satin end inset: start ("}
+    {"mm)"}<input id="endInsetStart" {...endInsetStart} type="number" min="0" max="2" step="0.1" placeholder="0"
       title="Moves the first needle of the satin column inward, so the start stitch is shorter" /></label><label id="endInsetEndRow"
-        hidden={rows.endInsetEndRow}>Satin end inset: end (
-    mm)<input id="endInsetEnd" {...endInsetEnd} type="number" min="0" max="2" step="0.1" placeholder="0"
+        hidden={rows.endInsetEndRow}>{"Satin end inset: end ("}
+    {"mm)"}<input id="endInsetEnd" {...endInsetEnd} type="number" min="0" max="2" step="0.1" placeholder="0"
       title="Moves the last needle of the satin column inward, so the end stitch is shorter" /></label><label id="pullRightRow"
-        hidden={rows.pullRightRow}>Satin pull on the right (
-    mm)<input id="pullRight" {...pullRight} type="number" min="0" max="2" step="0.05" placeholder="pull compensation"
+        hidden={rows.pullRightRow}>{"Satin pull on the right ("}
+    {"mm)"}<input id="pullRight" {...pullRight} type="number" min="0" max="2" step="0.05" placeholder="pull compensation"
       title={"Pulls the right-hand satin rail (as seen walking along the path) out by this much; leave empty to use the pull " +
-        "compensation"} /></label><label id="pullLeftRow" hidden={rows.pullLeftRow}>Satin pull on the left (
-    mm)<input id="pullLeft" {...pullLeft} type="number" min="0" max="2" step="0.05" placeholder="pull compensation"
+        "compensation"} /></label><label id="pullLeftRow" hidden={rows.pullLeftRow}>{"Satin pull on the left ("}
+    {"mm)"}<input id="pullLeft" {...pullLeft} type="number" min="0" max="2" step="0.05" placeholder="pull compensation"
       title={"Pulls the left-hand satin rail (as seen walking along the path) out by this much; leave empty to use the pull " +
-        "compensation"} /></label><label id="borderWidthRow" hidden={rows.borderWidthRow}>Border width (
-    mm)<input id="borderWidth" {...borderWidth} type="number" min="0" max="12" step="0.5"
+        "compensation"} /></label><label id="borderWidthRow" hidden={rows.borderWidthRow}>{"Border width ("}
+    {"mm)"}<input id="borderWidth" {...borderWidth} type="number" min="0" max="12" step="0.5"
       title="0 sews a plain running outline; more makes a satin border of that width" /></label><label hidden={layout.borderThreadHidden}>Border
         thread<ThreadSelect id="borderThread" label="Border thread" value={run.borderThread} disabled={run.borderThreadDisabled} onPick={hex =>
     runRowsActions.choose('borderThread', hex)} /></label></>

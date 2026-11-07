@@ -24,8 +24,8 @@ export function LetteringPanel() {
   <section id="secText" data-sec="" hidden={layout.secText}><h4>Lettering</h4><label id="followRow">Follow path<select id="followPath"
     title="Make the lettering follow a path; it stays attached when the path is edited" value={panel.followPathValue} onChange={e =>
     stitchPanelActions.chooseFollowPath(e.target.value)}>{panel.followPathOptions.map(o =>
-    <option key={o.value} value={o.value}>{o.label}</option>)}</select></label><label id="alongRow" hidden={rows.alongRow}>Offset along path (
-    mm)<input id="alongOffset" type="number" step="0.5" {...along} /></label>
+    <option key={o.value} value={o.value}>{o.label}</option>)}</select></label><label id="alongRow" hidden={rows.alongRow}>{"Offset along path ("}
+    {"mm)"}<input id="alongOffset" type="number" step="0.5" {...along} /></label>
 <div className="font-field"><span className="font-label">Font</span><button id="fontButton" type="button" className="font-button" aria-haspopup="dialog"
   aria-expanded="false" aria-controls="fontPanel"><svg id="fontButtonPreview" className="font-preview" aria-hidden="true"></svg><span
     id="fontButtonName">Welcome Mono</span><svg className="icon chevron" aria-hidden="true"><use href="#i-chevron"/></svg></button>
@@ -51,22 +51,23 @@ export function LetteringPanel() {
     id="alignRight" className="icon-button" data-align-text="right" aria-pressed={l.align ===
   'right'} disabled={l.styleOff} onClick={() =>
   letteringActions.press('align', 'right')} title="Align right" aria-label="Align right"><svg className="icon"><use href="#i-al-right"/></svg></button></div>
-<div className="tool-grid text-options"><label>Letter spacing (
-  mm)<input id="tracking" type="number" min="-10" max="30" step="0.1" {...tracking} disabled={l.styleOff} /></label><span></span><label>Word spacing (
-  mm)<input id="wordSpacing" type="number" min="-10" max="50" step="0.5" {...wordSpacing} disabled={l.styleOff} /></label><span></span><label>Line height (
-  ×)<input id="lineHeight" type="number" min="0.5" max="3" step="0.05" {...lineHeight} disabled={l.styleOff} /></label><label style={{gridColumn:
-    '1 / -1'}}>Vertical (
-  one letter under another)<input id="textVertical" type="checkbox" className="icon-check" checked={l.vertical} disabled={l.styleOff} onChange={e =>
+<div className="tool-grid text-options"><label>{"Letter spacing ("}
+  {"mm)"}<input id="tracking" type="number" min="-10" max="30" step="0.1" {...tracking} disabled={l.styleOff} /></label><span></span><label>{"Word spacing ("}
+  {"mm)"}<input id="wordSpacing" type="number" min="-10" max="50" step="0.5" {...wordSpacing} disabled={l.styleOff} /></label><span></span>
+  <label>{"Line height ("}
+  {"×)"}<input id="lineHeight" type="number" min="0.5" max="3" step="0.05" {...lineHeight} disabled={l.styleOff} /></label><label style={{gridColumn:
+    '1 / -1'}}>{"Vertical ("}
+  {"one letter under another)"}<input id="textVertical" type="checkbox" className="icon-check" checked={l.vertical} disabled={l.styleOff} onChange={e =>
   letteringActions.choose('vertical',
   e.target.checked)} /></label><label style={{gridColumn: '1 / -1'}}>Name drop: this lettering takes each name<input id="textNameDrop" type="checkbox"
     className="icon-check" checked={l.nameDrop} onChange={e =>
-  letteringActions.choose('nameDrop', e.target.checked)} /></label><span></span><label>Bold (
-  mm)<input id="boldMm" type="number" min="0" max="3" step="0.1" {...boldMm} disabled={l.styleOff} /></label><span></span><label>Italic (
-  °)<input id="italicDeg" type="number" min="0" max="35" step="1" {...italicDeg} disabled={l.styleOff} /></label><span></span></div>
+  letteringActions.choose('nameDrop', e.target.checked)} /></label><span></span><label>{"Bold ("}
+  {"mm)"}<input id="boldMm" type="number" min="0" max="3" step="0.1" {...boldMm} disabled={l.styleOff} /></label><span></span><label>{"Italic ("}
+  {"°)"}<input id="italicDeg" type="number" min="0" max="35" step="1" {...italicDeg} disabled={l.styleOff} /></label><span></span></div>
 <label id="textStitchRow" hidden={rows.textStitchRow}>Outline fonts sew as<select id="textStitch" className="sr-only" tabIndex={-1} value={l.stitch}
   disabled={l.textOff} onChange={e =>
-  letteringActions.choose('stitch', e.target.value)}><option value="fill">Fill</option><option value="run">Outline (
-  running)</option></select><div className="icon-seg" role="radiogroup" aria-label="Outline fonts sew as">{STITCH_CHOICES.map(([value, label, icon]) =>
+  letteringActions.choose('stitch', e.target.value)}><option value="fill">Fill</option><option value="run">{"Outline ("}
+  {"running)"}</option></select><div className="icon-seg" role="radiogroup" aria-label="Outline fonts sew as">{STITCH_CHOICES.map(([value, label, icon]) =>
   <button key={value} type="button" data-value={value} title={label} aria-label={label} role="radio" aria-checked={l.stitch ===
   value} aria-pressed={l.stitch === value} onClick={e =>
   { e.preventDefault(); if (l.stitch !== value) letteringActions.choose('stitch', value);

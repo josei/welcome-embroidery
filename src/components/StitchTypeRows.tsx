@@ -30,14 +30,15 @@ export function StitchTypeRows() {
     {value: 'bead', label: 'Beads', icon: 'i-satin', thumb: 'bead'}, {value: 'bling', label: 'Bling', icon: 'i-ripple', thumb: 'bling'}]} onChoose={v =>
     stitchChoiceActions.choose('type', v)} /></label><label hidden={layout.threadHidden}>Thread<select id="thread" value={panel.threadValue} onChange={e =>
     stitchPanelActions.chooseThread(e.target.value)}>{panel.threadOptions.map(o =>
-    <option key={o.value} value={o.value}>{o.label}</option>)}</select></label><label id="satinRow" hidden={rows.satinRow}>Satin width (
-    mm)<input id="satinWidth" {...satinWidth} type="number" min="0.5" max="12" step="0.5" /></label><label id="motifSpacingRow"
-      hidden={rows.motifSpacingRow}>Spacing (
-    mm)<input id="motifSpacing" {...motifSpacing} type="number" min="1" max="20" step="0.5" /></label><label id="motifSizeRow" hidden={rows.motifSizeRow}>Size (
-    mm)<input id="motifSize" {...motifSize} type="number" min="0.4" max="6" step="0.2" /></label><label id="motifShapeRow"
+    <option key={o.value} value={o.value}>{o.label}</option>)}</select></label><label id="satinRow" hidden={rows.satinRow}>{"Satin width ("}
+    {"mm)"}<input id="satinWidth" {...satinWidth} type="number" min="0.5" max="12" step="0.5" /></label><label id="motifSpacingRow"
+      hidden={rows.motifSpacingRow}>{"Spacing ("}
+    {"mm)"}<input id="motifSpacing" {...motifSpacing} type="number" min="1" max="20" step="0.5" /></label>
+    <label id="motifSizeRow" hidden={rows.motifSizeRow}>{"Size ("}
+    {"mm)"}<input id="motifSize" {...motifSize} type="number" min="0.4" max="6" step="0.2" /></label><label id="motifShapeRow"
       hidden={rows.motifShapeRow}>Loop shape<select id="motifShape" value={loop.motifShape} onChange={e =>
-    loopRowsActions.choose('motifShape', e.target.value)}><option value="circle">Circle</option><option value="leaf">Leaf (
-    along the path)</option></select></label><label id="motifWarpRow" hidden={rows.motifWarpRow}>Loop size warp<select id="motifWarp"
+    loopRowsActions.choose('motifShape', e.target.value)}><option value="circle">Circle</option><option value="leaf">{"Leaf ("}
+    {"along the path)"}</option></select></label><label id="motifWarpRow" hidden={rows.motifWarpRow}>Loop size warp<select id="motifWarp"
       title="Shrinks the motif loops from one edge of the shape to the other, or from the start of a motif path to its end (approximate depth cue)"
         value={loop.motifWarp} onChange={e =>
     loopRowsActions.choose('motifWarp',
