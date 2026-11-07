@@ -5,20 +5,26 @@
 import {rdp} from './geom.js';
 
 const srgb=(/** @type {any} */ v)=>{v/=255;return v<=.04045?v/12.92:Math.pow((v+.055)/1.055,2.4);};
-export function rgbToLab(/** @type {any} */ r,/** @type {any} */ g,/** @type {any} */ b){const R=srgb(r),G=srgb(g),B=srgb(b),x=(R*.4124+G*.3576+B*.1805)/.95047,y=R*.2126+G*.7152+B*.0722,z=(R*.0193+G*.1192+B*.9505)/1.08883,f=(/** @type {any} */ t)=>t>.008856?Math.cbrt(t):7.787*t+16/116;
+export function rgbToLab(/** @type {any} */ r,/** @type {any} */ g,/** @type {any} */ b){const R=srgb(r),G=srgb(g),B=srgb(b),x=(R*.4124+G*.3576+B*.1805)/.95047,
+  y=R*.2126+G*.7152+B*.0722,z=(R*.0193+G*.1192+B*.9505)/1.08883,f=(/** @type {any} */ t)=>t>.008856?Math.cbrt(t):7.787*t+16/116;
 return [116*f(y)-16,500*(f(x)-f(y)),200*(f(y)-f(z))];
 }
-const hex=(/** @type {any} */ r,/** @type {any} */ g,/** @type {any} */ b)=>'#'+[r,g,b].map(v=>Math.max(0,Math.min(255,Math.round(v))).toString(16).padStart(2,'0')).join('');
+const hex=(/** @type {any} */ r,/** @type {any} */ g,/** @type {any} */ b)=>
+  '#'+[r,g,b].map(v=>Math.max(0,Math.min(255,Math.round(v))).toString(16).padStart(2,'0')).join('');
 
 // RGBA -> RGB over white, then a 3x3 median per channel: it removes JPEG noise and single stray pixels without inventing in-between colours at edges
 function prepare(/** @type {any} */ rgba,/** @type {any} */ w,/** @type {any} */ h){const out=new Uint8ClampedArray(w*h*3);
 for(let i=0;i<w*h;i++){const a=rgba[i*4+3]/255;
 for(let c=0;c<3;c++)out[i*3+c]=Math.round(rgba[i*4+c]*a+255*(1-a));
 }
-  const med=new Uint8ClampedArray(out.length),buf=new Array(9);for(let y=0;y<h;y++)for(let x=0;x<w;x++)for(let c=0;c<3;c++){let n=0;for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++){const xx=Math.min(w-1,Math.max(0,x+dx)),yy=Math.min(h-1,Math.max(0,y+dy));buf[n++]=out[(yy*w+xx)*3+c];}buf.sort((p,q)=>p-q);med[(y*w+x)*3+c]=buf[4];}
+  const med=new Uint8ClampedArray(out.length),buf=new Array(9);
+    for(let y=0;y<h;y++)for(let x=0;x<w;x++)for(let c=0;c<3;c++){let n=0;
+    for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++){const xx=Math.min(w-1,Math.max(0,x+dx)),yy=Math.min(h-1,Math.max(0,y+dy));buf[n++]=out[(yy*w+xx)*3+c];
+    }buf.sort((p,q)=>p-q);med[(y*w+x)*3+c]=buf[4];}
   return med;}
 
-// Palette: the colours that actually occur are put in a histogram (5 bits per channel); seeds are chosen by farthest-first in Lab, weighted by how common a colour is,
+// Palette: the colours that actually occur are put in a histogram (5 bits per channel); seeds are chosen by farthest-first in Lab, weighted by how common a
+// colour is,
 // then refined with a few k-means passes so antialiased in-between colours do not become palette entries.
 export function buildPalette(/** @type {any} */ rgb,/** @type {any} */ n){const hist=new Map();
 for(let i=0;i<rgb.length;i+=3){const k=((rgb[i]>>3)<<10)|((rgb[i+1]>>3)<<5)|(rgb[i+2]>>3);
@@ -27,12 +33,17 @@ hist.set(k,(hist.get(k)||0)+1);
   const items=[...hist].map(([k,c])=>{const r=((k>>10)&31)*8+4,g=((k>>5)&31)*8+4,b=(k&31)*8+4;return {rgb:[r,g,b],lab:rgbToLab(r,g,b),c};});
   const d2=(/** @type {any} */ p,/** @type {any} */ q)=>(p[0]-q[0])**2+(p[1]-q[1])**2+(p[2]-q[2])**2;
   const centers=[items.reduce((m,p)=>p.c>m.c?p:m).lab.slice()],minD=items.map(p=>d2(p.lab,centers[0]));
-  while(centers.length<Math.min(n,items.length)){let bi=-1,bs=0;items.forEach((p,i)=>{const sc=minD[i]*Math.pow(p.c,.35);if(sc>bs){bs=sc;bi=i;}});if(bi<0||bs<9)break;centers.push(items[bi].lab.slice());items.forEach((p,i)=>{minD[i]=Math.min(minD[i],d2(p.lab,centers.at(-1)));});}
-  for(let it=0;it<8;it++){const sum=centers.map(()=>[0,0,0,0]);for(const p of items){let bj=0,bd=Infinity;centers.forEach((q,j)=>{const d=d2(p.lab,q);if(d<bd){bd=d;bj=j;}});const s=sum[bj];s[0]+=p.lab[0]*p.c;s[1]+=p.lab[1]*p.c;s[2]+=p.lab[2]*p.c;s[3]+=p.c;}centers.forEach((q,j)=>{if(sum[j][3]){q[0]=sum[j][0]/sum[j][3];q[1]=sum[j][1]/sum[j][3];q[2]=sum[j][2]/sum[j][3];}});}
+  while(centers.length<Math.min(n,items.length)){let bi=-1,bs=0;items.forEach((p,i)=>{const sc=minD[i]*Math.pow(p.c,.35);if(sc>bs){bs=sc;bi=i;}});
+    if(bi<0||bs<9)break;centers.push(items[bi].lab.slice());items.forEach((p,i)=>{minD[i]=Math.min(minD[i],d2(p.lab,centers.at(-1)));});}
+  for(let it=0;it<8;it++){const sum=centers.map(()=>[0,0,0,0]);
+    for(const p of items){let bj=0,bd=Infinity;centers.forEach((q,j)=>{const d=d2(p.lab,q);if(d<bd){bd=d;bj=j;}});const s=sum[bj];s[0]+=p.lab[0]*p.c;s[1]+=
+    p.lab[1]*p.c;s[2]+=p.lab[2]*p.c;s[3]+=p.c;}centers.forEach((q,j)=>
+    {if(sum[j][3]){q[0]=sum[j][0]/sum[j][3];q[1]=sum[j][1]/sum[j][3];q[2]=sum[j][2]/sum[j][3];}});}
   // report the RGB of the most common real colour closest to each centre (a colour that exists in the picture rather than an average)
   return centers.map(q=>{let best=items[0],bd=Infinity;for(const p of items){const d=d2(p.lab,q)/Math.pow(p.c,.2);if(d<bd){bd=d;best=p;}}return best.rgb;});}
 
-function label(/** @type {any} */ rgb,/** @type {any} */ w,/** @type {any} */ h,/** @type {any} */ palette){const labs=palette.map((/** @type {any} */ p)=>rgbToLab(p[0],p[1],p[2])),out=new Uint8Array(w*h),cache=new Map();
+function label(/** @type {any} */ rgb,/** @type {any} */ w,/** @type {any} */ h,/** @type {any} */ palette){const labs=
+  palette.map((/** @type {any} */ p)=>rgbToLab(p[0],p[1],p[2])),out=new Uint8Array(w*h),cache=new Map();
   for(let i=0;i<w*h;i++){const k=((rgb[i*3]>>2)<<12)|((rgb[i*3+1]>>2)<<6)|(rgb[i*3+2]>>2);
   let l=cache.get(k);
   if(l===undefined){const lab=rgbToLab(rgb[i*3],rgb[i*3+1],rgb[i*3+2]);
@@ -70,7 +81,8 @@ export function maskLoops(/** @type {any} */ mask,/** @type {any} */ w,/** @type
       let pick=0;
       if(list.length>1){const dx=cx-px,dy=cy-py;
       let bestTurn=-9;
-      list.forEach((/** @type {any} */ nxy,/** @type {any} */ i)=>{const nx=nxy[0],ny=nxy[1];const ex=nx-cx,ey=ny-cy,cross=dx*ey-dy*ex;if(cross>bestTurn){bestTurn=cross;pick=i;}});
+      list.forEach((/** @type {any} */ nxy,/** @type {any} */ i)=>
+        {const nx=nxy[0],ny=nxy[1];const ex=nx-cx,ey=ny-cy,cross=dx*ey-dy*ex;if(cross>bestTurn){bestTurn=cross;pick=i;}});
       }   // prefer the turn that keeps diagonal neighbours apart
         const [nx,ny]=list.splice(pick,1)[0];px=cx;py=cy;cx=nx;cy=ny;}
       if(ring.length>=3)loops.push(ring);}}
@@ -83,7 +95,9 @@ if((yi>p[1])!==(yj>p[1])&&p[0]<(xj-xi)*(p[1]-yi)/(yj-yi)+xi)c=!c;
 }return c;
 };
 function smooth(/** @type {any} */ ring,/** @type {any} */ passes){let r=ring;
-for(let k=0;k<passes;k++){r=r.map((/** @type {any} */ p,/** @type {any} */ i)=>{const a=r[(i+r.length-1)%r.length],b=r[(i+1)%r.length];return [(a[0]+2*p[0]+b[0])/4,(a[1]+2*p[1]+b[1])/4];});
+for(let k=0;k<passes;k++){r=
+  r.map((/** @type {any} */ p,/** @type {any} */ i)=>
+  {const a=r[(i+r.length-1)%r.length],b=r[(i+1)%r.length];return [(a[0]+2*p[0]+b[0])/4,(a[1]+2*p[1]+b[1])/4];});
 }return r;
 }
 function simplify(/** @type {any} */ ring,/** @type {any} */ tol,/** @type {any} */ maxPts){let t=tol,out=ring;
@@ -95,7 +109,8 @@ t*=1.5;
 }
 
 // options: colors (2-16), detail (px tolerance, 0.4-3), minArea (px²), background ('auto'|'none'|index), maxRegions
-export function traceImage(/** @type {any} */ rgba,/** @type {any} */ w,/** @type {any} */ h,{colors=6,detail=.4,minArea=12,background='auto',maxRegions=60,smoothing=2,curves=true}={}){
+export function traceImage(/** @type {any} */ rgba,/** @type {any} */ w,/** @type {any} */ h,
+  {colors=6,detail=.4,minArea=12,background='auto',maxRegions=60,smoothing=2,curves=true}={}){
   if(!(w>=2&&h>=2)||rgba.length<w*h*4)throw Error('The picture is empty.');
   const rgb=prepare(rgba,w,h),palette=buildPalette(rgb,Math.max(2,Math.min(16,colors)));
   let lab=label(rgb,w,h,palette);lab=majority(lab,w,h,palette.length);
@@ -119,26 +134,40 @@ export function traceImage(/** @type {any} */ rgba,/** @type {any} */ w,/** @typ
     for(const o of outers)if(inside(o.ring,hl.ring[0])&&(!host||o.a<host.a))host=o;
     if(host)host.holes.push(hl.ring);
     }
-    for(const o of outers){const g=/** @type {any} */({color:hex(p[0],p[1],p[2]),index:j,area:o.a-o.holes.reduce((s,r)=>s+Math.abs(area(r)),0),rings:[simplify(o.ring,detail,900),...o.holes.slice(0,20).map(r=>simplify(r,detail,190))]});
-      if(curves){const err=Math.max(.9,detail*1.8),fit=fitRing(o.ring,err);if(fit&&fit.points.length>=3&&fit.points.length<=900&&Math.abs(area(fit.flat)-Math.abs(o.a))<=Math.max(2,Math.abs(o.a)*.04)){g.curve={points:fit.points,handles:fit.handles};
-        g.rings=[g.rings[0],...o.holes.slice(0,20).map(r=>{const hf=fitRing(r,err);return hf&&Math.abs(area(hf.flat)-Math.abs(area(r)))<=Math.max(2,Math.abs(area(r))*.06)?simplify(hf.flat,.15,190):simplify(r,detail,190);})];}}
+    for(const o of outers){
+      const g=/** @type {any} */(
+      {color:hex(p[0],p[1],p[2]),index:j,area:o.a-o.holes.reduce((s,r)=>s+Math.abs(area(r)),0),
+      rings:[simplify(o.ring,detail,900),...o.holes.slice(0,20).map(r=>simplify(r,detail,190))]});
+      if(curves){const err=Math.max(.9,detail*1.8),fit=fitRing(o.ring,err);
+        if(fit&&fit.points.length>=3&&fit.points.length<=900&&Math.abs(area(fit.flat)-Math.abs(o.a))<=Math.max(2,Math.abs(o.a)*.04)){g.curve=
+        {points:fit.points,handles:fit.handles};
+        g.rings=[g.rings[0],
+          ...o.holes.slice(0,20).map(r=>
+          {const hf=fitRing(r,err);return hf&&Math.abs(area(hf.flat)-Math.abs(area(r)))<=Math.max(2,Math.abs(area(r))*.06)?simplify(hf.flat,.15,190):
+          simplify(r,detail,190);})];}}
       regions.push(g);}});
   regions.sort((a,b)=>b.area-a.area);
-  return {palette:palette.map(p=>hex(p[0],p[1],p[2])),background:bg>=0?hex(palette[bg][0],palette[bg][1],palette[bg][2]):null,regions:regions.slice(0,maxRegions),dropped:Math.max(0,regions.length-maxRegions),width:w,height:h};
+  return {palette:palette.map(p=>hex(p[0],p[1],p[2])),background:bg>=0?hex(palette[bg][0],palette[bg][1],palette[bg][2]):null,regions:
+    regions.slice(0,maxRegions),dropped:Math.max(0,regions.length-maxRegions),width:w,height:h};
 }
 
-// A region is sewn as a running outline, not a fill, when it is narrow and elongated: its width (twice area over perimeter, the width of an equivalent band) is under minFillMm, and it is not compact (a disc has perimeter² / (4π·area) of 1, a band many times that).
+// A region is sewn as a running outline, not a fill, when it is narrow and elongated: its width (twice area over perimeter, the width of an equivalent band) is
+// under minFillMm, and it is not compact (a disc has perimeter² / (4π·area) of 1, a band many times that).
 const perimeter=(/** @type {any} */ r)=>{let p=0;for(let i=0;i<r.length;i++){const a=r[i],b=r[(i+1)%r.length];p+=Math.hypot(b[0]-a[0],b[1]-a[1]);}return p;};
 export function isThinRegion(/** @type {any} */ ring,/** @type {any} */ k,minFillMm=2){const a=Math.abs(area(ring)),p=perimeter(ring);
 if(a<=0||p<=0)return false;
 return 2*a/p*k<minFillMm&&p*p/(4*Math.PI*a)>2.5;
 }
-// Operations that create the traced regions as filled paths (largest first, so smaller regions sit on top), centred and scaled to widthMm. Thin, elongated regions become closed running outlines (no holes), counted in running.
+// Operations that create the traced regions as filled paths (largest first, so smaller regions sit on top), centred and scaled to widthMm. Thin, elongated
+// regions become closed running outlines (no holes), counted in running.
 export function traceOps(/** @type {any} */ result,{widthMm=60,maxHeightMm=null,name='Traced image',prefix='trace',minFillMm=2}={}){
-  const k0=widthMm/result.width,k=maxHeightMm&&result.height*k0>maxHeightMm?maxHeightMm/result.height:k0,w=result.width*k,h=result.height*k,ops=/** @type {any[]} */([]),ids=/** @type {any[]} */([]);
+  const k0=widthMm/result.width,k=maxHeightMm&&result.height*k0>maxHeightMm?maxHeightMm/result.height:k0,w=result.width*k,h=result.height*k,
+    ops=/** @type {any[]} */([]),ids=/** @type {any[]} */([]);
   let running=0;
   const map=(/** @type {any} */ ring)=>ring.map((/** @type {number[]} */ q)=>[+(q[0]*k-w/2).toFixed(2),+(q[1]*k-h/2).toFixed(2)]);
-  result.regions.forEach((/** @type {any} */ g,/** @type {any} */ i)=>{const id=`${prefix}-${i+1}`;ids.push(id);const mp=(/** @type {number[]} */ q)=>[+(q[0]*k-w/2).toFixed(2),+(q[1]*k-h/2).toFixed(2)],pts=g.curve?g.curve.points.map(mp):map(g.rings[0]),handles=g.curve?g.curve.handles.map((/** @type {any} */ hh)=>({i:mp(hh.i),o:mp(hh.o)})):null;
+  result.regions.forEach((/** @type {any} */ g,/** @type {any} */ i)=>
+    {const id=`${prefix}-${i+1}`;ids.push(id);const mp=(/** @type {number[]} */ q)=>[+(q[0]*k-w/2).toFixed(2),+(q[1]*k-h/2).toFixed(2)],pts=g.curve?
+    g.curve.points.map(mp):map(g.rings[0]),handles=g.curve?g.curve.handles.map((/** @type {any} */ hh)=>({i:mp(hh.i),o:mp(hh.o)})):null;
     const thin=isThinRegion(g.rings[0],k,minFillMm);if(thin)running++;
     ops.push({op:'add_path',id,name:`${name} ${i+1}`,x:0,y:0,points:pts,closed:true,stitch:thin?'run':'fill',thread:g.color,...(handles?{handles}:{})});
     if(!thin)for(const hole of g.rings.slice(1)){const hp=map(hole);if(hp.length>=3&&hp.length<=200)ops.push({op:'add_hole',id,points:hp});}});
@@ -147,7 +176,8 @@ export function traceOps(/** @type {any} */ result,{widthMm=60,maxHeightMm=null,
 }
 
 // ---- line art ------------------------------------------------------------------------------------------------
-// Dark strokes are thinned to a one pixel skeleton (Zhang-Suen), split into paths between endpoints and junctions, and given the stroke width measured on the picture.
+// Dark strokes are thinned to a one pixel skeleton (Zhang-Suen), split into paths between endpoints and junctions, and given the stroke width measured on the
+// picture.
 function otsu(/** @type {any} */ gray){const hist=new Uint32Array(256);
 for(const g of gray)hist[g]++;
 let total=gray.length,sum=0;
@@ -163,22 +193,32 @@ if(v>best){best=v;
 thr=t;
 }}return thr;
 }
-export function thin(/** @type {any} */ bin,/** @type {any} */ w,/** @type {any} */ h){const img=bin.slice(),at=(/** @type {any} */ x,/** @type {any} */ y)=>x<0||y<0||x>=w||y>=h?0:img[y*w+x];
+export function thin(/** @type {any} */ bin,/** @type {any} */ w,/** @type {any} */ h){const img=bin.slice(),at=(/** @type {any} */ x,/** @type {any} */ y)=>x<
+  0||y<0||x>=w||y>=h?0:img[y*w+x];
 let changed=true,guard=0;
-  while(changed&&guard++<200){changed=false;for(let pass=0;pass<2;pass++){const del=[];for(let y=0;y<h;y++)for(let x=0;x<w;x++){if(!img[y*w+x])continue;const p2=at(x,y-1),p3=at(x+1,y-1),p4=at(x+1,y),p5=at(x+1,y+1),p6=at(x,y+1),p7=at(x-1,y+1),p8=at(x-1,y),p9=at(x-1,y-1),B=p2+p3+p4+p5+p6+p7+p8+p9;if(B<2||B>6)continue;const seq=[p2,p3,p4,p5,p6,p7,p8,p9,p2];let A=0;for(let i=0;i<8;i++)if(!seq[i]&&seq[i+1])A++;if(A!==1)continue;
+  while(changed&&guard++<200){changed=false;
+    for(let pass=0;pass<2;pass++){const del=[];
+    for(let y=0;y<h;y++)for(let x=0;x<w;x++){if(!img[y*w+x])continue;const p2=at(x,y-1),p3=at(x+1,y-1),p4=at(x+1,y),p5=at(x+1,y+1),p6=at(x,y+1),p7=at(x-1,y+1),
+    p8=at(x-1,y),p9=at(x-1,y-1),B=p2+p3+p4+p5+p6+p7+p8+p9;if(B<2||B>6)continue;const seq=[p2,p3,p4,p5,p6,p7,p8,p9,p2];let A=0;
+    for(let i=0;i<8;i++)if(!seq[i]&&seq[i+1])A++;if(A!==1)continue;
       if(pass===0){if(p2*p4*p6!==0||p4*p6*p8!==0)continue;}else{if(p2*p4*p8!==0||p2*p6*p8!==0)continue;}del.push(y*w+x);}
       if(del.length){changed=true;for(const i of del)img[i]=0;}}}
   return img;}
 function distance(/** @type {any} */ bin,/** @type {any} */ w,/** @type {any} */ h){const INF=1e9,d=new Float32Array(w*h);
 for(let i=0;i<w*h;i++)d[i]=bin[i]?INF:0;
-  for(let y=0;y<h;y++)for(let x=0;x<w;x++){const i=y*w+x;if(!d[i])continue;let v=d[i];if(x>0)v=Math.min(v,d[i-1]+1);if(y>0){v=Math.min(v,d[i-w]+1);if(x>0)v=Math.min(v,d[i-w-1]+1.414);if(x<w-1)v=Math.min(v,d[i-w+1]+1.414);}d[i]=v;}
-  for(let y=h-1;y>=0;y--)for(let x=w-1;x>=0;x--){const i=y*w+x;if(!d[i])continue;let v=d[i];if(x<w-1)v=Math.min(v,d[i+1]+1);if(y<h-1){v=Math.min(v,d[i+w]+1);if(x<w-1)v=Math.min(v,d[i+w+1]+1.414);if(x>0)v=Math.min(v,d[i+w-1]+1.414);}d[i]=v;}
+  for(let y=0;y<h;y++)for(let x=0;x<w;x++){const i=y*w+x;if(!d[i])continue;let v=d[i];if(x>0)v=Math.min(v,d[i-1]+1);
+    if(y>0){v=Math.min(v,d[i-w]+1);if(x>0)v=Math.min(v,d[i-w-1]+1.414);if(x<w-1)v=Math.min(v,d[i-w+1]+1.414);}d[i]=v;}
+  for(let y=h-1;y>=0;y--)for(let x=w-1;x>=0;x--){const i=y*w+x;if(!d[i])continue;let v=d[i];if(x<w-1)v=Math.min(v,d[i+1]+1);
+    if(y<h-1){v=Math.min(v,d[i+w]+1);if(x<w-1)v=Math.min(v,d[i+w+1]+1.414);if(x>0)v=Math.min(v,d[i+w-1]+1.414);}d[i]=v;}
   return d;}
 // options: threshold (0-255, default Otsu), minLength (px), detail (RDP px), maxPaths
 export function traceLines(/** @type {any} */ rgba,/** @type {any} */ w,/** @type {any} */ h,{threshold=null,minLength=6,detail=.8,maxPaths=60}={}){
   if(!(w>=2&&h>=2)||rgba.length<w*h*4)throw Error('The picture is empty.');
-  const gray=new Uint8Array(w*h),col=[0,0,0];let nd=0;for(let i=0;i<w*h;i++){const a=rgba[i*4+3]/255,r=rgba[i*4]*a+255*(1-a),g=rgba[i*4+1]*a+255*(1-a),b=rgba[i*4+2]*a+255*(1-a);gray[i]=Math.round(.299*r+.587*g+.114*b);}
-  const thr=threshold??otsu(gray),bin=new Uint8Array(w*h);for(let i=0;i<w*h;i++)if(gray[i]<=thr){bin[i]=1;nd++;col[0]+=rgba[i*4];col[1]+=rgba[i*4+1];col[2]+=rgba[i*4+2];}
+  const gray=new Uint8Array(w*h),col=[0,0,0];let nd=0;
+    for(let i=0;i<w*h;i++){const a=rgba[i*4+3]/255,r=rgba[i*4]*a+255*(1-a),g=rgba[i*4+1]*a+255*(1-a),b=rgba[i*4+2]*a+255*(1-a);gray[i]=
+    Math.round(.299*r+.587*g+.114*b);}
+  const thr=threshold??otsu(gray),bin=new Uint8Array(w*h);
+    for(let i=0;i<w*h;i++)if(gray[i]<=thr){bin[i]=1;nd++;col[0]+=rgba[i*4];col[1]+=rgba[i*4+1];col[2]+=rgba[i*4+2];}
   if(!nd)return {paths:[],color:'#222222',width:w,height:h,dropped:0,threshold:thr};
   const skel=thin(bin,w,h),dt=distance(bin,w,h),nb=(/** @type {any} */ x,/** @type {any} */ y)=>{const out=[];
   for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++){if(!dx&&!dy)continue;
@@ -186,14 +226,17 @@ export function traceLines(/** @type {any} */ rgba,/** @type {any} */ w,/** @typ
   if(xx>=0&&yy>=0&&xx<w&&yy<h&&skel[yy*w+xx])out.push([xx,yy]);
   }return out;
   };
-  const key=(/** @type {any} */ x,/** @type {any} */ y)=>y*w+x,groups=(/** @type {any} */ x,/** @type {any} */ y)=>{const ring=[[0,-1],[1,-1],[1,0],[1,1],[0,1],[-1,1],[-1,0],[-1,-1]].map(([dx,dy])=>{const xx=x+dx,yy=y+dy;return xx>=0&&yy>=0&&xx<w&&yy<h?skel[yy*w+xx]:0;});
+  const key=(/** @type {any} */ x,/** @type {any} */ y)=>y*w+x,groups=(/** @type {any} */ x,/** @type {any} */ y)=>
+    {
+    const ring=[[0,-1],[1,-1],[1,0],[1,1],[0,1],[-1,1],[-1,0],[-1,-1]].map(([dx,dy])=>{const xx=x+dx,yy=y+dy;return xx>=0&&yy>=0&&xx<w&&yy<h?skel[yy*w+xx]:0;});
   let g=0;
   for(let i=0;i<8;i++)if(ring[i]&&!ring[(i+7)%8])g++;
   return g;
   };
   const nodes=new Set();for(let y=0;y<h;y++)for(let x=0;x<w;x++)if(skel[y*w+x]&&groups(x,y)!==2)nodes.add(key(x,y));
   const visited=new Set(),paths=[];
-  const free=(/** @type {any} */ x,/** @type {any} */ y)=>nb(x,y).filter(([a,b])=>!visited.has(key(a,b))).sort((p,q)=>(Math.abs(p[0]-x)+Math.abs(p[1]-y))-(Math.abs(q[0]-x)+Math.abs(q[1]-y)));
+  const free=(/** @type {any} */ x,/** @type {any} */ y)=>
+    nb(x,y).filter(([a,b])=>!visited.has(key(a,b))).sort((p,q)=>(Math.abs(p[0]-x)+Math.abs(p[1]-y))-(Math.abs(q[0]-x)+Math.abs(q[1]-y)));
   const walk=(/** @type {any} */ sx,/** @type {any} */ sy)=>{const pts=[[sx,sy]];
   let cx=sx,cy=sy;
   for(let n=0;n<w*h;n++){const nx=free(cx,cy);
@@ -208,7 +251,9 @@ export function traceLines(/** @type {any} */ rgba,/** @type {any} */ w,/** @typ
   }
       pts.push(step);if(nodes.has(key(step[0],step[1])))break;visited.add(key(step[0],step[1]));cx=step[0];cy=step[1];}return pts;};
   for(const k of nodes){visited.add(k);}
-  for(const k of nodes){const x=k%w,y=Math.floor(k/w);for(const [nx,ny] of nb(x,y)){if(visited.has(key(nx,ny)))continue;if(nodes.has(key(nx,ny)))continue;visited.add(key(nx,ny));const first=[nx,ny],rest=walk(nx,ny);paths.push([[x,y],...rest.length?rest:[first]]);}}
+  for(const k of nodes){const x=k%w,y=Math.floor(k/w);
+    for(const [nx,ny] of nb(x,y)){if(visited.has(key(nx,ny)))continue;if(nodes.has(key(nx,ny)))continue;visited.add(key(nx,ny));const first=[nx,ny],rest=
+    walk(nx,ny);paths.push([[x,y],...rest.length?rest:[first]]);}}
   for(let y=0;y<h;y++)for(let x=0;x<w;x++){if(!skel[y*w+x]||visited.has(key(x,y)))continue;
   visited.add(key(x,y));
   const p=walk(x,y);
@@ -216,16 +261,25 @@ export function traceLines(/** @type {any} */ rgba,/** @type {any} */ w,/** @typ
   if(Math.hypot(q[0][0]-q[q.length-1][0],q[0][1]-q[q.length-1][1])<=1.5)q.push(q[0]);
   paths.push(q);
   }}
-  const out=paths.map(p=>{const len=p.reduce((s,q,i)=>i?s+Math.hypot(q[0]-p[i-1][0],q[1]-p[i-1][1]):0,0),ws=p.map(([x,y])=>dt[y*w+x]).sort((a,b)=>a-b),wpx=Math.max(1,2*ws[Math.floor(ws.length/2)]-1),closed=p.length>3&&Math.hypot(p[0][0]-p[p.length-1][0],p[0][1]-p[p.length-1][1])<=1.5;
-    const s=rdp(p.map(([x,y])=>[x+.5,y+.5]),detail),slen=s.reduce((a,q,i)=>i?a+Math.hypot(q[0]-s[i-1][0],q[1]-s[i-1][1]):0,0);return {pts:s,length:Math.min(len,slen),widthPx:wpx,closed};}).filter(p=>p.length>=minLength&&p.pts.length>=2).sort((a,b)=>b.length-a.length);
+  const out=
+    paths.map(p=>
+    {const len=p.reduce((s,q,i)=>i?s+Math.hypot(q[0]-p[i-1][0],q[1]-p[i-1][1]):0,0),ws=p.map(([x,y])=>dt[y*w+x]).sort((a,b)=>a-b),wpx=
+    Math.max(1,2*ws[Math.floor(ws.length/2)]-1),closed=p.length>3&&Math.hypot(p[0][0]-p[p.length-1][0],p[0][1]-p[p.length-1][1])<=1.5;
+    const s=rdp(p.map(([x,y])=>[x+.5,y+.5]),detail),slen=s.reduce((a,q,i)=>i?a+Math.hypot(q[0]-s[i-1][0],q[1]-s[i-1][1]):0,0);
+      return {pts:s,length:Math.min(len,slen),widthPx:wpx,closed};}).filter(p=>p.length>=minLength&&p.pts.length>=2).sort((a,b)=>b.length-a.length);
   const hexc=hex(col[0]/nd,col[1]/nd,col[2]/nd);
   return {paths:out.slice(0,maxPaths),color:hexc,width:w,height:h,dropped:Math.max(0,out.length-maxPaths),threshold:thr};
 }
 // Operations: thin strokes become running stitch, wider ones satin columns of the measured width.
 export function traceLineOps(/** @type {any} */ result,{widthMm=60,maxHeightMm=null,name='Traced line',prefix='line',thread=null}={}){
-  const k0=widthMm/result.width,k=maxHeightMm&&result.height*k0>maxHeightMm?maxHeightMm/result.height:k0,w=result.width*k,h=result.height*k,ops=/** @type {any[]} */([]),ids=/** @type {any[]} */([]);
-  result.paths.forEach((/** @type {any} */ p,/** @type {any} */ i)=>{const id=`${prefix}-${i+1}`,pts=p.pts.map((/** @type {number[]} */ q)=>[+(q[0]*k-w/2).toFixed(2),+(q[1]*k-h/2).toFixed(2)]);if(pts.length<2)return;ids.push(id);const wmm=p.widthPx*k,satin=wmm>=1.3;
-    ops.push({op:'add_path',id,name:`${name} ${i+1}`,x:0,y:0,points:pts,closed:Boolean(p.closed&&pts.length>=3),stitch:satin?'satin':'run',thread:thread||result.color,...(satin?{satinWidth:+Math.max(.8,Math.min(8,wmm)).toFixed(2)}:{})});});
+  const k0=widthMm/result.width,k=maxHeightMm&&result.height*k0>maxHeightMm?maxHeightMm/result.height:k0,w=result.width*k,h=result.height*k,
+    ops=/** @type {any[]} */([]),ids=/** @type {any[]} */([]);
+  result.paths.forEach((/** @type {any} */ p,/** @type {any} */ i)=>
+    {const id=`${prefix}-${i+1}`,pts=p.pts.map((/** @type {number[]} */ q)=>[+(q[0]*k-w/2).toFixed(2),+(q[1]*k-h/2).toFixed(2)]);if(pts.length<2)return;
+    ids.push(id);const wmm=p.widthPx*k,satin=wmm>=1.3;
+    ops.push(
+      {op:'add_path',id,name:`${name} ${i+1}`,x:0,y:0,points:pts,closed:Boolean(p.closed&&pts.length>=3),stitch:satin?'satin':'run',thread:thread||result.color,
+      ...(satin?{satinWidth:+Math.max(.8,Math.min(8,wmm)).toFixed(2)}:{})});});
   if(ids.length>=2)ops.push({op:'group',ids});
   return {ops,ids,size:[w,h]};
 }
@@ -237,13 +291,17 @@ return [u*u*u*p[0][0]+3*u*u*t*p[1][0]+3*u*t*t*p[2][0]+t*t*t*p[3][0],u*u*u*p[0][1
 const unit=(/** @type {any} */ v)=>{const l=Math.hypot(v[0],v[1])||1;return [v[0]/l,v[1]/l];};
 /** @returns {any} */
 function fitCubic(/** @type {any} */ pts,/** @type {any} */ t1,/** @type {any} */ t2,/** @type {any} */ err,depth=0){
-  const n=pts.length;if(n===2){const d=Math.hypot(pts[1][0]-pts[0][0],pts[1][1]-pts[0][1])/3;return [[pts[0],[pts[0][0]+t1[0]*d,pts[0][1]+t1[1]*d],[pts[1][0]+t2[0]*d,pts[1][1]+t2[1]*d],pts[1]]];}
+  const n=pts.length;
+    if(n===2){const d=Math.hypot(pts[1][0]-pts[0][0],pts[1][1]-pts[0][1])/3;
+    return [[pts[0],[pts[0][0]+t1[0]*d,pts[0][1]+t1[1]*d],[pts[1][0]+t2[0]*d,pts[1][1]+t2[1]*d],pts[1]]];}
   let u=[0];for(let i=1;i<n;i++)u.push(u[i-1]+Math.hypot(pts[i][0]-pts[i-1][0],pts[i][1]-pts[i-1][1]));const L=u.at(-1)||1;u=u.map(v=>v/L);
   let bez=/** @type {any} */(null),worst=Infinity,split=Math.floor(n/2);
   for(let iter=0;iter<=4;iter++){
     // least-squares handle lengths along the end tangents
     let c00=0,c01=0,c11=0,x0=0,x1=0;const [p0,p3]=[pts[0],pts[n-1]];
-    for(let i=0;i<n;i++){const t=u[i],b1=3*(1-t)*(1-t)*t,b2=3*(1-t)*t*t,b0=(1-t)**3,b3=t**3,a1=[t1[0]*b1,t1[1]*b1],a2=[t2[0]*b2,t2[1]*b2],tmp=[pts[i][0]-(p0[0]*(b0+b1)+p3[0]*(b2+b3)),pts[i][1]-(p0[1]*(b0+b1)+p3[1]*(b2+b3))];c00+=a1[0]*a1[0]+a1[1]*a1[1];c01+=a1[0]*a2[0]+a1[1]*a2[1];c11+=a2[0]*a2[0]+a2[1]*a2[1];x0+=a1[0]*tmp[0]+a1[1]*tmp[1];x1+=a2[0]*tmp[0]+a2[1]*tmp[1];}
+    for(let i=0;i<n;i++){const t=u[i],b1=3*(1-t)*(1-t)*t,b2=3*(1-t)*t*t,b0=(1-t)**3,b3=t**3,a1=[t1[0]*b1,t1[1]*b1],a2=[t2[0]*b2,t2[1]*b2],
+      tmp=[pts[i][0]-(p0[0]*(b0+b1)+p3[0]*(b2+b3)),pts[i][1]-(p0[1]*(b0+b1)+p3[1]*(b2+b3))];c00+=a1[0]*a1[0]+a1[1]*a1[1];c01+=a1[0]*a2[0]+a1[1]*a2[1];c11+=
+      a2[0]*a2[0]+a2[1]*a2[1];x0+=a1[0]*tmp[0]+a1[1]*tmp[1];x1+=a2[0]*tmp[0]+a2[1]*tmp[1];}
     const det=c00*c11-c01*c01,seg=Math.hypot(p3[0]-p0[0],p3[1]-p0[1]);let al=det?(x0*c11-x1*c01)/det:0,ar=det?(c00*x1-c01*x0)/det:0;
     if(al<1e-6*seg||ar<1e-6*seg){al=ar=seg/3;}
     bez=[p0,[p0[0]+t1[0]*al,p0[1]+t1[1]*al],[p3[0]+t2[0]*ar,p3[1]+t2[1]*ar],p3];
@@ -251,17 +309,28 @@ function fitCubic(/** @type {any} */ pts,/** @type {any} */ t1,/** @type {any} *
     if(worst<=err*err)return [bez];
     if(worst>err*err*16)break;
     // Newton-Raphson reparameterisation
-    u=u.map((t,i)=>{const q=bz(bez,t),d1=[3*((1-t)**2*(bez[1][0]-bez[0][0])+2*(1-t)*t*(bez[2][0]-bez[1][0])+t*t*(bez[3][0]-bez[2][0])),3*((1-t)**2*(bez[1][1]-bez[0][1])+2*(1-t)*t*(bez[2][1]-bez[1][1])+t*t*(bez[3][1]-bez[2][1]))],d2=[6*((1-t)*(bez[2][0]-2*bez[1][0]+bez[0][0])+t*(bez[3][0]-2*bez[2][0]+bez[1][0])),6*((1-t)*(bez[2][1]-2*bez[1][1]+bez[0][1])+t*(bez[3][1]-2*bez[2][1]+bez[1][1]))],num=(q[0]-pts[i][0])*d1[0]+(q[1]-pts[i][1])*d1[1],den=d1[0]*d1[0]+d1[1]*d1[1]+(q[0]-pts[i][0])*d2[0]+(q[1]-pts[i][1])*d2[1];return den?Math.max(0,Math.min(1,t-num/den)):t;});
+    u=
+      u.map((t,i)=>
+      {const q=bz(bez,t),
+      d1=[3*((1-t)**2*(bez[1][0]-bez[0][0])+2*(1-t)*t*(bez[2][0]-bez[1][0])+t*t*(bez[3][0]-bez[2][0])),
+      3*((1-t)**2*(bez[1][1]-bez[0][1])+2*(1-t)*t*(bez[2][1]-bez[1][1])+t*t*(bez[3][1]-bez[2][1]))],
+      d2=[6*((1-t)*(bez[2][0]-2*bez[1][0]+bez[0][0])+t*(bez[3][0]-2*bez[2][0]+bez[1][0])),
+      6*((1-t)*(bez[2][1]-2*bez[1][1]+bez[0][1])+t*(bez[3][1]-2*bez[2][1]+bez[1][1]))],num=(q[0]-pts[i][0])*d1[0]+(q[1]-pts[i][1])*d1[1],den=d1[0]*d1[0]+d1[1]*
+      d1[1]+(q[0]-pts[i][0])*d2[0]+(q[1]-pts[i][1])*d2[1];return den?Math.max(0,Math.min(1,t-num/den)):t;});
   }
   if(depth>8||n<4)return [bez];
   split=Math.max(1,Math.min(n-2,split));const tc=unit([pts[split-1][0]-pts[split+1][0],pts[split-1][1]-pts[split+1][1]]);
   return [...fitCubic(pts.slice(0,split+1),t1,tc,err,depth+1),...fitCubic(pts.slice(split),[-tc[0],-tc[1]],t2,err,depth+1)];
 }
-// A closed ring (open list of points) -> {points, handles, flat}: corner nodes where the outline turns sharply, smooth nodes elsewhere; flat is the ring sampled from the curves.
+// A closed ring (open list of points) -> {points, handles, flat}: corner nodes where the outline turns sharply, smooth nodes elsewhere; flat is the ring
+// sampled from the curves.
 export function fitRing(/** @type {any} */ ring,err=.8,cornerAngle=.95){
   const n=ring.length;if(n<6)return null;const P=(/** @type {any} */ i)=>ring[((i%n)+n)%n],k=Math.max(2,Math.round(n/40)),turn=[];
-  for(let i=0;i<n;i++){const v1=unit([P(i)[0]-P(i-k)[0],P(i)[1]-P(i-k)[1]]),v2=unit([P(i+k)[0]-P(i)[0],P(i+k)[1]-P(i)[1]]);const ang=Math.acos(Math.max(-1,Math.min(1,v1[0]*v2[0]+v1[1]*v2[1])));turn.push(ang>cornerAngle?ang:0);}
-  let splits=[];for(let i=0;i<n;i++){if(!turn[i])continue;let best=true;for(let d=-k;d<=k;d++){if(!d)continue;const j=((i+d)%n+n)%n;if(turn[j]>turn[i]||(turn[j]===turn[i]&&d<0))best=false;}if(best)splits.push(i);}
+  for(let i=0;i<n;i++){const v1=unit([P(i)[0]-P(i-k)[0],P(i)[1]-P(i-k)[1]]),v2=unit([P(i+k)[0]-P(i)[0],P(i+k)[1]-P(i)[1]]);const ang=
+    Math.acos(Math.max(-1,Math.min(1,v1[0]*v2[0]+v1[1]*v2[1])));turn.push(ang>cornerAngle?ang:0);}
+  let splits=[];
+    for(let i=0;i<n;i++){if(!turn[i])continue;let best=true;
+    for(let d=-k;d<=k;d++){if(!d)continue;const j=((i+d)%n+n)%n;if(turn[j]>turn[i]||(turn[j]===turn[i]&&d<0))best=false;}if(best)splits.push(i);}
   {const kept=[];
   for(const i of splits){const last=kept[kept.length-1];
   if(last!==undefined&&i-last<=2*k){if(turn[i]>turn[last])kept[kept.length-1]=i;
@@ -270,9 +339,18 @@ export function fitRing(/** @type {any} */ ring,err=.8,cornerAngle=.95){
   else kept.shift();
   }splits=kept;
   }
-  if(splits.length<2){const a=splits[0]??0;let far=a,bd=0;for(let i=0;i<n;i++){const d=Math.hypot(P(i)[0]-P(a)[0],P(i)[1]-P(a)[1]);if(d>bd){bd=d;far=i;}}splits=[a,far].sort((x,y)=>x-y);}
-  const segCurves=splits.map((a,si)=>{const b=splits[(si+1)%splits.length],len=((b-a)%n+n)%n||n,seg=[];for(let d=0;d<=len;d++)seg.push(P(a+d));const kk=Math.min(k,seg.length-1),t1=unit([seg[kk][0]-seg[0][0],seg[kk][1]-seg[0][1]]),t2=unit([seg[seg.length-1-kk][0]-seg.at(-1)[0],seg[seg.length-1-kk][1]-seg.at(-1)[1]]);return fitCubic(seg,t1,t2,err);});
+  if(splits.length<2){const a=splits[0]??0;let far=a,bd=0;
+    for(let i=0;i<n;i++){const d=Math.hypot(P(i)[0]-P(a)[0],P(i)[1]-P(a)[1]);if(d>bd){bd=d;far=i;}}splits=[a,far].sort((x,y)=>x-y);}
+  const segCurves=
+    splits.map((a,si)=>
+    {const b=splits[(si+1)%splits.length],len=((b-a)%n+n)%n||n,seg=[];for(let d=0;d<=len;d++)seg.push(P(a+d));const kk=Math.min(k,seg.length-1),t1=
+    unit([seg[kk][0]-seg[0][0],seg[kk][1]-seg[0][1]]),t2=unit([seg[seg.length-1-kk][0]-seg.at(-1)[0],seg[seg.length-1-kk][1]-seg.at(-1)[1]]);
+    return fitCubic(seg,t1,t2,err);});
   const points=/** @type {any[]} */([]),handles=/** @type {any[]} */([]),flat=/** @type {any[]} */([]);
-  segCurves.forEach((curves,si)=>{const prev=segCurves[(si-1+segCurves.length)%segCurves.length];curves.forEach((/** @type {any} */ c,/** @type {any} */ j)=>{points.push(c[0]);handles.push({i:j===0?prev.at(-1)[2]:curves[j-1][2],o:c[1]});const steps=Math.max(3,Math.ceil(Math.hypot(c[3][0]-c[0][0],c[3][1]-c[0][1])/.8));for(let q=0;q<steps;q++)flat.push(bz(c,q/steps));});});
+  segCurves.forEach((curves,si)=>
+    {const prev=segCurves[(si-1+segCurves.length)%segCurves.length];
+    curves.forEach((/** @type {any} */ c,/** @type {any} */ j)=>
+    {points.push(c[0]);handles.push({i:j===0?prev.at(-1)[2]:curves[j-1][2],o:c[1]});const steps=
+    Math.max(3,Math.ceil(Math.hypot(c[3][0]-c[0][0],c[3][1]-c[0][1])/.8));for(let q=0;q<steps;q++)flat.push(bz(c,q/steps));});});
   return {points,handles,flat};
 }
