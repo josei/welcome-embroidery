@@ -16,7 +16,8 @@ export function PreviewPanel() {
     <button type="button" aria-pressed={preview.loupe} onClick={() => previewActions.chooseLoupe(!preview.loupe)}>{t('Loupe 8×')}</button>
    </div>
    <div id="previewPull" hidden={!preview.threeD}>
-    <label><input type="checkbox" id="showPull" checked={preview.pull} onChange={e => previewActions.choosePull(e.target.checked)} /> {t('Show pull for the fabric')}</label>
+    <label><input type="checkbox" id="showPull" checked={preview.pull} onChange={e =>
+      previewActions.choosePull(e.target.checked)} /> {t('Show pull for the fabric')}</label>
     <p id="pullNote" hidden={!preview.pull} role="status">{preview.note}</p>
    </div>
   </>

@@ -5,7 +5,8 @@ import {closeThreadPopover, openThreadPopover, threadPopoverState} from '../thre
 // A thread choice: a hidden select (for the form, the keyboard and the tests) and the button that opens the colour picker.
 // The select's options are the colours the picker offers, plus the current colour when it is not one of them.
 const DEFAULT_THREADS = ['#527461', '#d9897e', '#d3ad61', '#89a377'];
-export function ThreadSelect({id, label, value, onPick, disabled = false}: {id: string; label: string; value: string; onPick: (hex: string) => void; disabled?: boolean}) {
+export function ThreadSelect(
+  {id, label, value, onPick, disabled = false}: {id: string; label: string; value: string; onPick: (hex: string) => void; disabled?: boolean}) {
  const {owner} = useSyncExternalStore(threadPopoverState.subscribe, threadPopoverState.get);
  const options = value && !DEFAULT_THREADS.includes(value) ? [...DEFAULT_THREADS, value] : DEFAULT_THREADS;
  const name = value ? threadName(value) : t('None');

@@ -11,6 +11,8 @@ export function RestoreDialog() {
   if (!open && dialog.open) dialog.close();
  }, [open]);
  return (
-  <dialog id="restoreDialog" ref={ref} onClose={() => setRestore({open: false})}><form method="dialog"><h2>Restore your last design?</h2><p id="restoreInfo" className="dlg-note">{info}</p><div className="agent-actions"><button type="button" id="restoreYes" onClick={() => restoreActions.yes()}>Restore</button><button type="button" id="restoreNo" onClick={() => restoreActions.no()}>Start fresh</button></div></form></dialog>
+  <dialog id="restoreDialog" ref={ref} onClose={() => setRestore({open: false})}><form method="dialog"><h2>Restore your last design?
+    </h2><p id="restoreInfo" className="dlg-note">{info}</p><div className="agent-actions"><button type="button" id="restoreYes" onClick={() =>
+    restoreActions.yes()}>Restore</button><button type="button" id="restoreNo" onClick={() => restoreActions.no()}>Start fresh</button></div></form></dialog>
  );
 }

@@ -14,10 +14,13 @@ export function PlaybackBar() {
  const metresText = t('{m} m thread', {m: p.metres.toFixed(1)});
  return (
   <div className="playback-bar">
-   <button type="button" id="resetPlayback" className="icon-button playback-control" aria-label={t('Restart stitch simulation')} title={t('Restart stitch simulation')} data-tooltip={t('Restart simulation')} onClick={() => playbackActions.restart()}>
+   <button type="button" id="resetPlayback" className="icon-button playback-control" aria-label={t('Restart stitch simulation')} title={t(
+     'Restart stitch simulation')} data-tooltip={t('Restart simulation')} onClick={() => playbackActions.restart()}>
     <svg className="icon"><use href="#i-reset" /></svg>
    </button>
-   <button type="button" id="play" className={`icon-button playback-control${p.playing ? ' playing' : ''}`} aria-label={playLabel} title={playLabel} data-tooltip={p.playing ? t('Pause simulation') : p.hasPlan ? t('Play simulation') : t('Compile and play')} onClick={() => playbackActions.togglePlay()}>
+   <button type="button" id="play" className={`icon-button playback-control${p.playing ? ' playing' : ''}`} aria-label={playLabel} title={playLabel}
+     data-tooltip={p.playing ?
+     t('Pause simulation') : p.hasPlan ? t('Play simulation') : t('Compile and play')} onClick={() => playbackActions.togglePlay()}>
     <svg className="icon"><use href={`#i-${p.playing ? 'pause' : 'play'}`} /></svg>
    </button>
    <div className="playback-time">

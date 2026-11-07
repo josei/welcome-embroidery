@@ -10,7 +10,8 @@ export function StatusRun() {
    <span id="cursorPosition">{s.cursor}</span>
    <MeasureReadout />
    <span id="count" className={s.countError ? 'error' : undefined} onClick={() => statusActions.compile()}>{s.count}</span>
-   <button type="button" id="issuesBtn" className="issues-btn" hidden={s.issuesHidden} title={s.issuesTitle} onClick={() => statusActions.issues()}>{s.issuesText}</button>
+   <button type="button" id="issuesBtn" className="issues-btn" hidden={s.issuesHidden} title={s.issuesTitle} onClick={() =>
+     statusActions.issues()}>{s.issuesText}</button>
    <span id="playbackProgress" aria-live="polite">{s.playback}</span>
    <span id="needlePosition" aria-live="polite">{s.needle}</span>
   </>

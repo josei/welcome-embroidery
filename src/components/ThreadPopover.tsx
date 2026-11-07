@@ -78,7 +78,8 @@ export function ThreadPopover() {
      )}
      <div className="custom">
       <input type="color" value={colour} aria-label={t('Custom colour')} onChange={e => { setColour(e.target.value); setHexText(e.target.value); }} />
-      <input type="text" value={hexText} placeholder="#rrggbb" maxLength={7} aria-label={t('Hex colour')} onChange={e => setHexText(e.target.value)} onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); useTyped(); } }} />
+      <input type="text" value={hexText} placeholder="#rrggbb" maxLength={7} aria-label={t('Hex colour')} onChange={e =>
+        setHexText(e.target.value)} onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); useTyped(); } }} />
       <button type="button" onClick={useTyped}>{t('Use')}</button>
      </div>
     </>

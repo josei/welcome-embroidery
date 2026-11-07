@@ -12,7 +12,8 @@ export function KeysDialog() {
   if (!open && dialog.open) dialog.close();
  }, [open]);
  return (
-  <dialog id="keysDialog" ref={ref} onClose={() => setShortcutsOpen(false)}><form method="dialog"><h2>Keyboard shortcuts</h2><div id="keysList" className="keys-list">{SHORTCUTS.flatMap(([title, rows]) => [
+  <dialog id="keysDialog" ref={ref} onClose={() =>
+    setShortcutsOpen(false)}><form method="dialog"><h2>Keyboard shortcuts</h2><div id="keysList" className="keys-list">{SHORTCUTS.flatMap(([title, rows]) => [
    <h4 key={title}>{t(title)}</h4>,
    ...rows.flatMap(([key, desc]) => [<kbd key={'k' + key + desc}>{key}</kbd>, <span key={'d' + key + desc}>{t(desc)}</span>]),
   ])}</div><button>Close</button></form></dialog>
