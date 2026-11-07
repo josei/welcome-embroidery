@@ -95,7 +95,12 @@ function refreshPull() {
   }
   const grid = distortionGrid(preview3dPlan, doc.settings.fabric ?? 'woven', hoopSize(doc));
   preview3d.setPull(grid);
-  setPreviewState({note: t('Peak estimate {n}% of the scale on {fabric}. Lines show the direction the fabric pulls. A guide for where to look: it uses stitch density, stitch direction and fabric stretch, not a simulation of the machine.', {n: Math.round(grid.peak * 100), fabric: t(grid.label)})});
+  setPreviewState(
+    {note:
+    t(
+    'Peak estimate {n}% of the scale on {fabric}. Lines show the direction the fabric pulls. A guide for where to look: it uses stitch density, stitch ' +
+    'direction and fabric stretch, not a simulation of the machine.',
+    {n: Math.round(grid.peak * 100), fabric: t(grid.label)})});
 }
 
 /** Mounts the 3D preview canvas and wires the preview controls. */
