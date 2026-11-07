@@ -2,7 +2,8 @@ import {createStore} from './store.js';
 
 /**
  * The run values of the selected object: the laydown spacing, the stem width and the stitch length variation as text
- * (empty when unset), underpath travel, the needle stagger, and the border outline with whether its box is disabled. app.js sets them; the rows commit them through runRowsActions.
+ * (empty when unset), underpath travel, the needle stagger, and the border outline with whether its box is disabled. app.js sets them; the rows commit them
+  * through runRowsActions.
  */
 export interface RunRows {
   laydownSpacing: string;

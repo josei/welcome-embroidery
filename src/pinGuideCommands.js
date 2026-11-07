@@ -19,7 +19,8 @@ export function mountPinGuide() {
     pinState.set(pinState.get() === key ? null : key);
     setArmed(Boolean(pinState.get()));
     if (pinState.get()) {
-      editor.toast(key === 'startAt' ? 'Click the canvas to place the start point.' : key === 'endAt' ? 'Click the canvas to place the end point.' : 'Click the canvas to place the ripple centre.');
+      editor.toast(key === 'startAt' ? 'Click the canvas to place the start point.' : key === 'endAt' ? 'Click the canvas to place the end point.' :
+        'Click the canvas to place the ripple centre.');
     }
   };
 

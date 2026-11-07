@@ -7,7 +7,9 @@ const KEY='welcome.agentSession';
  * @param {AbortSignal} [signal]
  * @returns {RequestInit}
  */
-const json=(body,signal)=>({method:'POST',headers:{'content-type':'application/json','x-welcome-client':'1'},body:JSON.stringify(body),signal,credentials:'same-origin',cache:'no-store'});
+const json=(body,signal)=>(
+  {method:'POST',headers:{'content-type':'application/json','x-welcome-client':'1'},body:JSON.stringify(body),signal,credentials:'same-origin',cache:
+  'no-store'});
 
 /**
  * @typedef {{token: string, ownerKey: string}} Session
@@ -46,8 +48,12 @@ export function createAgentBridge({getDocument,applyRemote,addLayerRemote,getRef
   const set=patch=>{state={...state,...patch};onChange?.(state);};
   const url=()=>session?`${location.origin}/mcp/${session.token}`:null;
   async function create(){
-    let response;try{response=await fetch('/api/session',json({}));}catch{set({status:'unavailable',message:'The Welcome server is not reachable.'});return false;}
-    if(response.status===404||response.status===405){set({status:'unavailable',message:'This copy of Welcome is a static site without the agent relay. Run the Welcome server or the desktop app to connect an agent.'});return false;}
+    let response;
+      try{response=await fetch('/api/session',json({}));}catch{set({status:'unavailable',message:'The Welcome server is not reachable.'});return false;}
+    if(response.status===404||response.status===405){
+      set(
+      {status:'unavailable',message:
+      'This copy of Welcome is a static site without the agent relay. Run the Welcome server or the desktop app to connect an agent.'});return false;}
     const body=await response.json().catch(()=>({}));if(!response.ok){set({status:'error',message:body.error||'Could not create an agent link.'});return false;}
     session={token:body.token,ownerKey:body.ownerKey};try{sessionStorage.setItem(KEY,JSON.stringify(session));}catch{}return true;
   }
@@ -70,13 +76,15 @@ export function createAgentBridge({getDocument,applyRemote,addLayerRemote,getRef
       abort=new AbortController();
       try{
         const response=await fetch('/api/relay/poll',json({ownerKey:session.ownerKey},abort.signal));
-        if(response.status===401){session=null;try{sessionStorage.removeItem(KEY);}catch{}set({status:'idle',mcpUrl:null,message:'The agent link ended (expired or revoked).'});break;}
+        if(response.status===401){session=null;
+          try{sessionStorage.removeItem(KEY);}catch{}set({status:'idle',mcpUrl:null,message:'The agent link ended (expired or revoked).'});break;}
         if(!response.ok)throw Error(`poll ${response.status}`);
         failures=0;const body=await response.json();
         const active=body.agentLastSeen&&Date.now()-body.agentLastSeen<120_000;
         set({status:active?'active':'waiting',mcpUrl:url(),agentLastSeen:body.agentLastSeen,agentCalls:body.agentCalls,message:''});
         for(const job of body.jobs||[]){const reply=await handle(job);await fetch('/api/relay/reply',json({ownerKey:session.ownerKey,id:job.id,...reply}));}
-      }catch(error){if(!running||/** @type {any} */(error).name==='AbortError')break;failures++;set({status:'error',message:'Lost connection to the Welcome server; retrying…'});await new Promise(r=>setTimeout(r,Math.min(15000,1000*2**failures)));}
+      }catch(error){if(!running||/** @type {any} */(error).name==='AbortError')break;failures++;
+        set({status:'error',message:'Lost connection to the Welcome server; retrying…'});await new Promise(r=>setTimeout(r,Math.min(15000,1000*2**failures)));}
     }
     running=false;
   }

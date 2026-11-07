@@ -53,7 +53,9 @@ export function mountRowActions() {
       return;
     }
     if (selState().selected) {
-      editor.edit([{op: 'set_object', id: selState().selected, [field]: field === 'lengthVariance' ? (Math.max(0, Math.min(50, Number(text) || 0)) / 100 || null) : (text === '' ? null : Number(text))}]);
+      editor.edit([
+        {op: 'set_object', id: selState().selected, [field]: field ===
+        'lengthVariance' ? (Math.max(0, Math.min(50, Number(text) || 0)) / 100 || null) : (text === '' ? null : Number(text))}]);
     }
   };
 
@@ -108,7 +110,11 @@ export function mountRowActions() {
   };
 
   raisedRowsActions.choose = (field, checked) => {
-    if (selState().selected) editor.edit([{op: 'set_object', id: selState().selected, ...(field === 'fillRaised' || field === 'satinRaised' ? {raised: checked} : field === 'satinButtonhole' ? {buttonhole: checked} : {edgeClose: checked})}]);
+    if (
+      selState().selected) editor.edit([
+      {op: 'set_object', id: selState().selected,
+      ...(field === 'fillRaised' || field === 'satinRaised' ? {raised: checked} : field === 'satinButtonhole' ? {buttonhole: checked} :
+      {edgeClose: checked})}]);
   };
 
   raisedRowsActions.commit = (field, text) => {

@@ -14,7 +14,9 @@ import {transact} from './documentCommands.js';
 import {editor} from './editorContext.js';
 
 /** @type {Record<string, string>} */
-const AGENT_TEXTS = {idle: 'Not connected.', waiting: 'Connected. Waiting for an agent to use the link.', active: 'Agent active.', error: 'Connection problem.', unavailable: 'Agent relay unavailable.'};
+const AGENT_TEXTS =
+  {idle: 'Not connected.', waiting: 'Connected. Waiting for an agent to use the link.', active: 'Agent active.', error: 'Connection problem.', unavailable:
+  'Agent relay unavailable.'};
 
 /** Mounts the bridge and resumes any saved session. */
 export function mountAgentBridge() {
@@ -24,7 +26,8 @@ export function mountAgentBridge() {
    */
   function applyRemote(operations, expected) {
     if (expected !== documentNow().doc.revision) {
-      return {error: 'stale_revision', revision: documentNow().doc.revision, message: `Revision conflict: expected ${expected}, current ${documentNow().doc.revision}. Inspect and retry.`};
+      return {error: 'stale_revision', revision: documentNow().doc.revision,
+        message: `Revision conflict: expected ${expected}, current ${documentNow().doc.revision}. Inspect and retry.`};
     }
     try {
       const trial = clone(documentNow().doc);
@@ -44,7 +47,8 @@ export function mountAgentBridge() {
    */
   function addLayerRemote(layer, expected) {
     if (expected !== documentNow().doc.revision) {
-      return {error: 'stale_revision', revision: documentNow().doc.revision, message: `Revision conflict: expected ${expected}, current ${documentNow().doc.revision}. Inspect and retry.`};
+      return {error: 'stale_revision', revision: documentNow().doc.revision,
+        message: `Revision conflict: expected ${expected}, current ${documentNow().doc.revision}. Inspect and retry.`};
     }
     try {
       const trial = clone(documentNow().doc);
@@ -80,7 +84,10 @@ export function mountAgentBridge() {
     addLayerRemote,
     onChange: state => {
       setAgentLink({
-        statusText: `${t(AGENT_TEXTS[state.status] || '')}${state.status === 'active' ? ` ${t(state.agentCalls === 1 ? '1 request so far.' : `${state.agentCalls} requests so far.`)}` : ''} ${state.message || ''}`.trim(),
+        statusText: `${t(AGENT_TEXTS[state.status] || '')}` +
+        `${state.status === 'active' ? ` ${t(state.agentCalls === 1 ? '1 request so far.' : `${state.agentCalls} requests so far.`)}` : ''} ` +
+        `${state.message || ''}`.trim(
+          ),
         url: state.mcpUrl || '',
         ready: Boolean(state.mcpUrl),
         waiting: state.status === 'waiting' || state.status === 'active',

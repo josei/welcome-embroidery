@@ -35,7 +35,9 @@ export function render() {
   kickFontLoads();
   const selected = selState().selected;
   if (selected && !documentNow().doc.objects.some((/** @type {any} */ object) => object.id === selected)) setSelection({selected: null});
-  setSelection({multi: new Set([...selState().multi].filter((/** @type {string} */ id) => documentNow().doc.objects.some((/** @type {any} */ object) => object.id === id)))});
+  setSelection(
+    {multi:
+    new Set([...selState().multi].filter((/** @type {string} */ id) => documentNow().doc.objects.some((/** @type {any} */ object) => object.id === id)))});
   const primary = selState().selected;
   if (primary && !selState().multi.has(primary)) setSelection({multi: new Set([primary])});
   else if (!primary && selState().multi.size) setSelection({selected: [...selState().multi][0]});
@@ -113,7 +115,8 @@ export function mountCanvas() {
   });
   editor.canvas = canvas;
   canvas.fitHoop();
-  configureContextMenu({edit, copyStyle, pasteStyle, fitHoop: () => canvas.fitHoop(), fitAll: () => canvas.fitAll(), fitSelection: () => canvas.fitSelection()});
+  configureContextMenu(
+    {edit, copyStyle, pasteStyle, fitHoop: () => canvas.fitHoop(), fitAll: () => canvas.fitAll(), fitSelection: () => canvas.fitSelection()});
   configureCanvasText({edit, render, selectIds, setEditing: setEditMode, toScreen: (x, y) => /** @type {[number, number]} */ (canvas.toScreen(x, y))});
   configureReference({edit, toast: editor.toast, coord: event => canvas.coord(event)});
   configureStitchPanel({edit, orderedIds, toast: editor.toast});

@@ -13,7 +13,8 @@ export function clone(v){return structuredClone(v);}
  * @param {unknown} s
  * @returns {string}
  */
-export function esc(s){return String(s).replace(/[&<>"']/g,c=>(/** @type {Record<string, string>} */({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]));}
+export function esc(s){
+  return String(s).replace(/[&<>"']/g,c=>(/** @type {Record<string, string>} */({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]));}
 
 /**
  * @param {BlobPart} bytes
@@ -21,13 +22,15 @@ export function esc(s){return String(s).replace(/[&<>"']/g,c=>(/** @type {Record
  * @param {string} type
  * @returns {void}
  */
-export function download(bytes,name,type){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([bytes],{type}));a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);}
+export function download(bytes,name,type){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([bytes],{type}));a.download=name;a.click();
+  setTimeout(()=>URL.revokeObjectURL(a.href),1000);}
 
 /**
  * @param {string|null|undefined} name
  * @returns {string}
  */
-export function safeProjectFilename(name){return `${String(name||'Untitled').replace(/\.welcome$/i,'').replace(/[^a-z0-9 _-]/gi,'_').trim()||'Untitled'}.welcome`;}
+export function safeProjectFilename(name){
+  return `${String(name||'Untitled').replace(/\.welcome$/i,'').replace(/[^a-z0-9 _-]/gi,'_').trim()||'Untitled'}.welcome`;}
 
 /**
  * @param {any} p the plan's sewing span, as sewingSeconds reads it
