@@ -6,14 +6,26 @@ import {textPrimitives,geometry} from './engine.js';
 import {getFont} from './fonts.js';
 
 const SVG='http://www.w3.org/2000/svg';
-export const LEGACY=[{fid:'welcome-mono/1',name:'Welcome Mono',kind:'line',keywords:['running_stitch','sans_serif','latin'],license:'Original (MIT)',description:'Single-line capitals, 4–16 mm',size:8,minScale:.5,maxScale:2,legacy:true},
-  {fid:'neon-blinking/1',name:'Néon blinking (centerline)',kind:'line',keywords:['running_stitch','sans_serif','latin'],license:'SIL Open Font License v1.1',description:'Ink/Stitch bean-stitch font as plain centerline running stitch',size:40,minScale:.5,maxScale:1.5,legacy:true}];
+export const LEGACY=[
+  {fid:'welcome-mono/1',name:'Welcome Mono',kind:'line',keywords:['running_stitch','sans_serif','latin'],license:'Original (MIT)',description:
+  'Single-line capitals, 4–16 mm',size:8,minScale:.5,maxScale:2,legacy:true},
+  {fid:'neon-blinking/1',name:'Néon blinking (centerline)',kind:'line',keywords:['running_stitch','sans_serif','latin'],license:'SIL Open Font License v1.1',
+    description:'Ink/Stitch bean-stitch font as plain centerline running stitch',size:40,minScale:.5,maxScale:1.5,legacy:true}];
 /** @type {Array<[string, string, (f: any) => boolean]>} */
-export const CATEGORIES=[['all','All',()=>true],['satin','Satin',(/** @type {any} */ f)=>f.keywords?.includes('satin')],['fill','Fill',(/** @type {any} */ f)=>f.kind==='outline'||f.prims?.includes('f')],['running','Running',(/** @type {any} */ f)=>f.keywords?.includes('running_stitch')||f.kind==='line'],['cross','Cross stitch',(/** @type {any} */ f)=>f.keywords?.includes('crossstitch')],
-  ['serif','Serif',(/** @type {any} */ f)=>f.keywords?.includes('serif')],['sans','Sans',(/** @type {any} */ f)=>f.keywords?.some((/** @type {any} */ k)=>k==='sans_serif'||k==='sans')],['script','Script',(/** @type {any} */ f)=>f.keywords?.some((/** @type {any} */ k)=>k==='handwriting'||k==='script')],['display','Display',(/** @type {any} */ f)=>f.keywords?.some((/** @type {any} */ k)=>k==='display'||k==='monogram')],
-  ['tt','TrueType',(/** @type {any} */ f)=>f.kind==='outline'&&f.fid?.startsWith('ttf/')],['ink','Ink/Stitch',(/** @type {any} */ f)=>f.fid?.startsWith('inkstitch/')],['custom','Loaded',(/** @type {any} */ f)=>f.fid?.startsWith('custom/')]];
+export const CATEGORIES=[['all','All',()=>true],['satin','Satin',(/** @type {any} */ f)=>f.keywords?.includes('satin')],['fill','Fill',(/** @type {any} */ f)=>
+  f.kind==='outline'||f.prims?.includes('f')],['running','Running',(/** @type {any} */ f)=>f.keywords?.includes('running_stitch')||f.kind==='line'],['cross',
+  'Cross stitch',(/** @type {any} */ f)=>f.keywords?.includes('crossstitch')],
+  ['serif','Serif',(/** @type {any} */ f)=>f.keywords?.includes('serif')],['sans','Sans',(/** @type {any} */ f)=>
+    f.keywords?.some((/** @type {any} */ k)=>k==='sans_serif'||k==='sans')],['script','Script',(/** @type {any} */ f)=>
+    f.keywords?.some((/** @type {any} */ k)=>k==='handwriting'||k==='script')],['display','Display',(/** @type {any} */ f)=>
+    f.keywords?.some((/** @type {any} */ k)=>k==='display'||k==='monogram')],
+  ['tt','TrueType',(/** @type {any} */ f)=>f.kind==='outline'&&f.fid?.startsWith('ttf/')],['ink','Ink/Stitch',(/** @type {any} */ f)=>
+    f.fid?.startsWith('inkstitch/')],['custom','Loaded',(/** @type {any} */ f)=>f.fid?.startsWith('custom/')]];
 
-export async function fetchFontIndex(){const out=[...LEGACY];for(const group of ['inkstitch','ttf']){try{const r=await fetch(new URL(`../fonts/${group}/index.json`,import.meta.url));if(!r.ok)continue;for(const f of await r.json())out.push({...f,fid:`${group}/${f.id}`});}catch{}}return out;}
+export async function fetchFontIndex(){const out=[...LEGACY];
+  for(const group of ['inkstitch','ttf']){
+  try{const r=await fetch(new URL(`../fonts/${group}/index.json`,import.meta.url));if(!r.ok)continue;
+  for(const f of await r.json())out.push({...f,fid:`${group}/${f.id}`});}catch{}}return out;}
 
 // Draw a font's rendering of `text` into an <svg>. Fills use even-odd rings, satin columns are shown as their band, running stitch as a thin line.
 export function drawPreview(/** @type {any} */ svg,/** @type {any} */ fid,/** @type {any} */ text,color='#1d2925'){
@@ -28,14 +40,19 @@ export function drawPreview(/** @type {any} */ svg,/** @type {any} */ fid,/** @t
   }catch{return false;}
   if(!shapes.length)return false;
   const pts=shapes.flatMap(p=>p.t==='r'?p.pts:p.t==='s'?[...p.a,...p.b]:p.rings.flat());if(!pts.length)return false;
-  const x0=Math.min(...pts.map(p=>p[0])),x1=Math.max(...pts.map(p=>p[0])),y0=Math.min(...pts.map(p=>p[1])),y1=Math.max(...pts.map(p=>p[1])),pad=size*.06,stroke=Math.max((y1-y0),size*.4)/90;
-  svg.setAttribute('viewBox',`${x0-pad} ${y0-pad} ${Math.max(1,x1-x0+pad*2)} ${Math.max(1,y1-y0+pad*2)}`);svg.setAttribute('preserveAspectRatio','xMinYMid meet');
-  const d=(/** @type {any} */ rings,/** @type {any} */ close)=>rings.map((/** @type {any} */ r)=>'M'+r.map((/** @type {any} */ p)=>`${p[0].toFixed(2)} ${p[1].toFixed(2)}`).join('L')+(close?'Z':'')).join('');
+  const x0=Math.min(...pts.map(p=>p[0])),x1=Math.max(...pts.map(p=>p[0])),y0=Math.min(...pts.map(p=>p[1])),y1=Math.max(...pts.map(p=>p[1])),pad=size*.06,
+    stroke=Math.max((y1-y0),size*.4)/90;
+  svg.setAttribute('viewBox',`${x0-pad} ${y0-pad} ${Math.max(1,x1-x0+pad*2)} ${Math.max(1,y1-y0+pad*2)}`);
+    svg.setAttribute('preserveAspectRatio','xMinYMid meet');
+  const d=(/** @type {any} */ rings,/** @type {any} */ close)=>
+    rings.map((/** @type {any} */ r)=>'M'+r.map((/** @type {any} */ p)=>`${p[0].toFixed(2)} ${p[1].toFixed(2)}`).join('L')+(close?'Z':'')).join('');
   const add=(/** @type {any} */ attrs)=>{const el=document.createElementNS(SVG,'path');
   for(const [k,v] of Object.entries(attrs))el.setAttribute(k,v);
   svg.append(el);
   };
-  for(const p of shapes){if(p.t==='f')add({d:d(p.rings,true),fill:color,'fill-rule':'evenodd'});else if(p.t==='s')add({d:d([[...p.a,...[...p.b].reverse()]],true),fill:color,'fill-opacity':'.9'});else add({d:d([p.pts],false),fill:'none',stroke:color,'stroke-width':stroke,'stroke-linecap':'round','stroke-linejoin':'round'});}
+  for(const p of shapes){if(p.t==='f')add({d:d(p.rings,true),fill:color,'fill-rule':'evenodd'});
+    else if(p.t==='s')add({d:d([[...p.a,...[...p.b].reverse()]],true),fill:color,'fill-opacity':'.9'});
+    else add({d:d([p.pts],false),fill:'none',stroke:color,'stroke-width':stroke,'stroke-linecap':'round','stroke-linejoin':'round'});}
   return true;
 }
 
@@ -59,28 +76,48 @@ export function drawPreview(/** @type {any} */ svg,/** @type {any} */ fid,/** @t
  * @property {(file: File) => Promise<void>} onLoadFile
  */
 /** @param {FontPickerDeps} deps */
-export function createFontPicker({button,buttonPreview,buttonName,panel,search,chips,list,loadFile,fileInput,getIndex,getCurrent,getSample,getColor,ensureLoaded,onPick,onLoadFile}){
+export function createFontPicker(
+  {button,buttonPreview,buttonName,panel,search,chips,list,loadFile,fileInput,getIndex,getCurrent,getSample,getColor,ensureLoaded,onPick,onLoadFile}){
   let open=false,category='all',active=-1;
   /** @type {any[]} */
   let rows=[];
   /** @type {IntersectionObserver|null} */
   let observer=null;
-  const visible=()=>getIndex().filter((/** @type {any} */ f)=>(CATEGORIES.find(c=>c[0]===category)?.[2]||(()=>true))(f)&&(!search.value||`${f.name} ${f.license||''} ${f.original||''} ${(f.keywords||[]).join(' ')}`.toLowerCase().includes(search.value.trim().toLowerCase())));
+  const visible=()=>
+    getIndex(
+    ).filter((/** @type {any} */ f)=>(CATEGORIES.find(c=>c[0]===category)?.[2]||(()=>true))(f)&&(
+    !search.value||`${f.name} ${f.license||''} ${f.original||''} ${(f.keywords||[]).join(' ')}`.toLowerCase().includes(search.value.trim().toLowerCase())));
   const label=(/** @type {any} */ f)=>f?.name||'Font';
-  chips.replaceChildren(...CATEGORIES.map(([id,name])=>{const b=document.createElement('button');b.type='button';b.className='chip';b.dataset.cat=id;b.textContent=name;b.setAttribute('aria-pressed',String(id===category));b.onclick=()=>{category=id;[...chips.children].forEach((/** @type {any} */ c)=>c.setAttribute('aria-pressed',String(c.dataset.cat===id)));renderList();};return b;}));
+  chips.replaceChildren(
+    ...CATEGORIES.map(([id,name])=>
+    {const b=document.createElement('button');b.type='button';b.className='chip';b.dataset.cat=id;b.textContent=name;
+    b.setAttribute('aria-pressed',String(id===category));b.onclick=()=>
+    {category=id;[...chips.children].forEach((/** @type {any} */ c)=>c.setAttribute('aria-pressed',String(c.dataset.cat===id)));renderList();};return b;}));
   function renderList(){
     observer?.disconnect();list.replaceChildren();rows=[];const cur=getCurrent(),items=visible();
-    observer=new IntersectionObserver(entries=>{for(const e of entries){if(!e.isIntersecting)continue;observer?.unobserve(/** @type {Element} */(e.target));const f=/** @type {any} */(e.target)._font;(async()=>{try{await ensureLoaded(f.fid);}catch{e.target.classList.add('failed');return;}drawPreview(/** @type {any} */(e.target).querySelector('svg'),f.fid,getSample(),getColor());})();}},{root:list,rootMargin:'120px'});
+    observer=
+      new IntersectionObserver(entries=>
+      {
+      for(const e of entries){if(!e.isIntersecting)continue;observer?.unobserve(/** @type {Element} */(e.target));
+      const f=/** @type {any} */(e.target)._font;(async()=>
+      {
+      try{await ensureLoaded(f.fid);}catch{e.target.classList.add('failed');return;}drawPreview(/** @type {any} */(e.target).querySelector('svg'),f.fid,
+      getSample(),getColor());})();}},{root:list,rootMargin:'120px'});
     for(const f of items){const row=/** @type {any} */(document.createElement('div'));
     row.className='font-row';
     row.setAttribute('role','option');
     row.tabIndex=-1;
     row._font=f;
     row.setAttribute('aria-selected',String(f.fid===cur));
-      const tags=[f.kind==='outline'?'fill':f.kind==='line'?'running':(f.keywords||[]).filter((/** @type {any} */ k)=>['satin','running_stitch','crossstitch','applique','tartan'].includes(k)).map((/** @type {any} */ k)=>k.replace('_stitch','').replace('crossstitch','cross')).slice(0,2).join(' · ')||'stitch'].filter(Boolean);
+      const tags=[f.kind==='outline'?'fill':f.kind==='line'?
+        'running':(
+        f.keywords||[]).filter((/** @type {any} */ k)=>['satin','running_stitch','crossstitch','applique','tartan'].includes(k)).map((/** @type {any} */ k)=>
+        k.replace('_stitch','').replace('crossstitch','cross')).slice(0,2).join(' · ')||'stitch'].filter(Boolean);
       row.innerHTML=`<svg class="font-preview" aria-hidden="true"></svg><div class="font-meta"><b></b><span></span></div>`;
       row.querySelector('b').textContent=label(f);
-      row.querySelector('span').textContent=`${tags[0].split(' · ').map((/** @type {any} */ x)=>t(x)).join(' · ')} · ${(f.license||'').replace('SIL Open Font License','OFL').replace(/ v?1\.1$/,'')}`;
+      row.querySelector(
+        'span').textContent=`${tags[0].split(' · ').map((/** @type {any} */ x)=>t(x)).join(' · ')} · ` +
+        `${(f.license||'').replace('SIL Open Font License','OFL').replace(/ v?1\.1$/,'')}`;
       row.title=`${label(f)} — ${f.license||''}${f.original?` · ${t('based on')} ${f.original}`:''}${f.description?`\n${f.description}`:''}`;
       row.onclick=()=>pick(f.fid);list.append(row);rows.push(row);observer.observe(row);}
     if(!items.length){const empty=document.createElement('p');empty.className='font-empty';empty.textContent='No fonts match.';list.append(empty);}
@@ -88,7 +125,9 @@ export function createFontPicker({button,buttonPreview,buttonName,panel,search,c
   }
   function highlight(){rows.forEach((r,i)=>r.classList.toggle('active',i===active));}
   function pick(/** @type {any} */ fid){close();onPick(fid);}
-  function place(){const r=button.getBoundingClientRect(),w=Math.min(400,innerWidth-16);panel.style.width=w+'px';panel.style.left=Math.max(8,Math.min(innerWidth-w-8,r.right-w))+'px';panel.style.top=Math.min(r.bottom+6,Math.max(8,innerHeight-Math.min(560,innerHeight-16)-8))+'px';panel.style.maxHeight=Math.min(560,innerHeight-16)+'px';}
+  function place(){const r=button.getBoundingClientRect(),w=Math.min(400,innerWidth-16);panel.style.width=w+'px';panel.style.left=
+    Math.max(8,Math.min(innerWidth-w-8,r.right-w))+'px';panel.style.top=Math.min(r.bottom+6,Math.max(8,innerHeight-Math.min(560,innerHeight-16)-8))+'px';
+    panel.style.maxHeight=Math.min(560,innerHeight-16)+'px';}
   function show(){open=true;
   panel.hidden=false;
   button.setAttribute('aria-expanded','true');
@@ -102,8 +141,13 @@ export function createFontPicker({button,buttonPreview,buttonName,panel,search,c
   function close(){if(!open)return;open=false;panel.hidden=true;button.setAttribute('aria-expanded','false');observer?.disconnect();button.focus();}
   button.onclick=()=>open?close():show();
   search.oninput=()=>renderList();
-  panel.addEventListener('keydown',(/** @type {any} */ e)=>{if(e.key==='Escape'){e.stopPropagation();close();}else if(e.key==='ArrowDown'||e.key==='ArrowUp'){e.preventDefault();if(rows.length){active=(active+(e.key==='ArrowDown'?1:-1)+rows.length)%rows.length;highlight();rows[active].scrollIntoView({block:'nearest'});}}else if(e.key==='Enter'&&document.activeElement===search&&rows[active]){e.preventDefault();pick(rows[active]._font.fid);}});
-  document.addEventListener('pointerdown',e=>{if(open&&!panel.contains(/** @type {Node} */(e.target))&&!button.contains(/** @type {Node} */(e.target)))close();});
+  panel.addEventListener('keydown',(/** @type {any} */ e)=>
+    {
+    if(e.key==='Escape'){e.stopPropagation();close();}else if(e.key==='ArrowDown'||e.key==='ArrowUp'){e.preventDefault();
+    if(rows.length){active=(active+(e.key==='ArrowDown'?1:-1)+rows.length)%rows.length;highlight();rows[active].scrollIntoView({block:'nearest'});}}else if(
+    e.key==='Enter'&&document.activeElement===search&&rows[active]){e.preventDefault();pick(rows[active]._font.fid);}});
+  document.addEventListener('pointerdown',e=>
+    {if(open&&!panel.contains(/** @type {Node} */(e.target))&&!button.contains(/** @type {Node} */(e.target)))close();});
   addEventListener('resize',()=>{if(open)place();});
   loadFile.onclick=()=>fileInput.click();
   fileInput.onchange=async()=>{const f=/** @type {FileList} */(fileInput.files)[0];

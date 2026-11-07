@@ -16,7 +16,8 @@ export const isRegistryFont=id=>typeof id==='string'&&/^(inkstitch|ttf|custom)\/
  * @param {any} font
  * @returns {any}
  */
-export function registerFont(key,font){if(!font||typeof font.glyphs!=='object'||!isRegistryFont(key))throw Error('Invalid font data.');registry.set(key,{...font,key});return registry.get(key);}
+export function registerFont(key,font){if(!font||typeof font.glyphs!=='object'||!isRegistryFont(key))throw Error('Invalid font data.');
+  registry.set(key,{...font,key});return registry.get(key);}
 /** @type {(id: string|undefined) => any} */
 export const getFont=id=>registry.get(/** @type {string} */(id));
 /**
@@ -30,16 +31,21 @@ export function fontPath(id){const m=/^(inkstitch|ttf)\/([A-Za-z0-9_.-]+)$/.exec
  * @param {(path: string) => Promise<any>} fetchJson
  * @returns {Promise<any>}
  */
-export async function loadFont(id,fetchJson){if(registry.has(id))return registry.get(id);const path=fontPath(id);if(!path)throw Error(`Font ${id} is not a bundled font.`);
-  if(!pending.has(id))pending.set(id,fetchJson(path).then(font=>{registerFont(id,font);pending.delete(id);return registry.get(id);},error=>{pending.delete(id);throw error;}));return pending.get(id);}
+export async function loadFont(id,fetchJson){if(registry.has(id))return registry.get(id);const path=fontPath(id);
+  if(!path)throw Error(`Font ${id} is not a bundled font.`);
+  if(!pending.has(id))pending.set(id,
+    fetchJson(path).then(font=>{registerFont(id,font);pending.delete(id);return registry.get(id);},error=>{pending.delete(id);throw error;}));
+    return pending.get(id);}
 /**
  * @param {any} doc the editor's untyped document
  * @returns {string[]}
  */
-export function documentFontIds(doc){return [...new Set((doc?.objects||[]).filter((/** @type {any} */ o)=>o.kind==='text'&&isRegistryFont(o.font)).map((/** @type {any} */ o)=>o.font))];}
+export function documentFontIds(doc){
+  return [...new Set((doc?.objects||[]).filter((/** @type {any} */ o)=>o.kind==='text'&&isRegistryFont(o.font)).map((/** @type {any} */ o)=>o.font))];}
 // Register the glyph subsets stored in the document so the engine can lay text out without any network access.
 /**
  * @param {any} doc the editor's untyped document
  * @returns {void}
  */
-export function registerDocumentFonts(doc){for(const [id,font] of Object.entries(doc?.customFonts||{}))if(!registry.has(`custom/${id}`))registerFont(`custom/${id}`,font);}
+export function registerDocumentFonts(doc){
+  for(const [id,font] of Object.entries(doc?.customFonts||{}))if(!registry.has(`custom/${id}`))registerFont(`custom/${id}`,font);}
