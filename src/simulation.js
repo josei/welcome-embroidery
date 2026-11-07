@@ -247,6 +247,3 @@ playbackActions.restart = () => {
   playIndex = 0;
   editor.render();
 };
-
-/** The simulation service as app.js publishes it to the runtime. */
-export const simulation = {resetPlayback, stopPlayback, syncPlaybackControls, renderSimulation};

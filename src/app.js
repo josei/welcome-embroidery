@@ -37,9 +37,7 @@ import {configureFontsDialog} from './fontsDialogCommands.js';
 
 editor.toast = toast;
 editor.edit = edit;
-editor.transact = transact;
 editor.render = render;
-editor.compile = compile;
 
 initializeDocument();
 configureCompile({ensureFonts: ensureDocFonts, onClear: resetPlayback, onCompiled: resetPlaybackIndex});

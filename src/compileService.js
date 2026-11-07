@@ -82,12 +82,6 @@ export function getLastPlan() { return lastPlan; }
 /** The last compile error, or the empty string. */
 export function getCompileError() { return compileError; }
 
-/** Whether a compile is in flight. */
-export function isCompiling() { return compiling; }
-
-/** Whether the worker failed to load or run. */
-export function hasWorkerFailure() { return Boolean(workerFailure); }
-
 /** app.js wires the fonts the compile waits for and the playback reset the document change needs. */
 export function configureCompile(/** @type {{ensureFonts: () => Promise<void>, onClear: () => void, onCompiled: () => void}} */ next) {
   ensureFonts = next.ensureFonts;
@@ -148,8 +142,6 @@ export const compile = {
   setPlan,
   getLastPlan,
   getCompileError,
-  isCompiling,
-  hasWorkerFailure,
   request,
   scheduleCompile,
   clearComputed,
