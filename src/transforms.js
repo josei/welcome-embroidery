@@ -7,7 +7,11 @@ import {rdp} from './geom.js';
 
 /** @typedef {import('./geom.js').Pt} Pt */
 /**
- * @typedef {{id: string, name?: string, kind: string, x: number, y: number, w: number, h: number, rotation?: number, locked?: boolean, bold?: number, tracking?: number, wordSpacing?: number, points?: Pt[], holes?: Pt[][], handles?: Array<{i: Pt, o: Pt}|null>, closed?: boolean, along?: {points: Pt[], closed?: boolean, offset?: number}, font?: string, text?: string, thread?: string, stitch?: string, groupId?: string, visible?: boolean, border?: boolean, borderThread?: string, angle?: number, spacing?: number, satinWidth?: number, satinWidthEnd?: number, radius?: number, radii?: number[], widthStops?: Array<[number, number]>, applique?: boolean, joinKind?: string}} Obj
+ * @typedef {{id: string, name?: string, kind: string, x: number, y: number, w: number, h: number, rotation?: number, locked?: boolean, bold?: number,
+  * tracking?: number, wordSpacing?: number, points?: Pt[], holes?: Pt[][], handles?: Array<{i: Pt, o: Pt}|null>, closed?: boolean, along?: {points: Pt[],
+  * closed?: boolean, offset?: number}, font?: string, text?: string, thread?: string, stitch?: string, groupId?: string, visible?: boolean, border?: boolean,
+  * borderThread?: string, angle?: number, spacing?: number, satinWidth?: number, satinWidthEnd?: number, radius?: number, radii?: number[], widthStops?:
+  * Array<[number, number]>, applique?: boolean, joinKind?: string}} Obj
  * @typedef {{objects: Obj[]}} Doc
  */
 
@@ -68,7 +72,8 @@ return o;
 function ellipseToPath(o){const cx=o.x+o.w/2,cy=o.y+o.h/2,rx=o.w/2,ry=o.h/2,k=.5522847498,th=(Number(o.rotation)||0)*Math.PI/180,c=/** @type {Pt} */([cx,cy]);
   /** @type {(p: Pt) => Pt} */
   const R=p=>th?rotatePoint(p,c,th):p;
-const nodes=/** @type {Pt[]} */([[cx+rx,cy],[cx,cy+ry],[cx-rx,cy],[cx,cy-ry]]),hs=[[[cx+rx,cy-ry*k],[cx+rx,cy+ry*k]],[[cx+rx*k,cy+ry],[cx-rx*k,cy+ry]],[[cx-rx,cy+ry*k],[cx-rx,cy-ry*k]],[[cx-rx*k,cy-ry],[cx+rx*k,cy-ry]]];
+const nodes=/** @type {Pt[]} */([[cx+rx,cy],[cx,cy+ry],[cx-rx,cy],[cx,cy-ry]]),
+  hs=[[[cx+rx,cy-ry*k],[cx+rx,cy+ry*k]],[[cx+rx*k,cy+ry],[cx-rx*k,cy+ry]],[[cx-rx,cy+ry*k],[cx-rx,cy-ry*k]],[[cx-rx*k,cy-ry],[cx+rx*k,cy-ry]]];
 return {points:nodes.map(R),handles:hs.map(([i,out])=>({i:R(/** @type {Pt} */(i)),o:R(/** @type {Pt} */(out))}))};
 }
 // Convert a rectangle, ellipse or lettering into editable path(s). Rotation is baked into the points; the first result keeps the object's id.
@@ -81,7 +86,9 @@ export function toPathObject(doc,id){
 const o=objById(doc,id),at=doc.objects.indexOf(o);
 if(o.kind==='path')return;
 if(o.kind==='stitch_layer')throw Error('Imported machine stitches cannot be converted to a path.');
-const common={thread:o.thread,stitch:o.stitch==='satin'?'fill':o.stitch,...(o.border?{border:true,borderThread:o.borderThread}:{}),...(o.groupId?{groupId:o.groupId}:{}),...(o.visible===false?{visible:false}:{}),...(o.locked?{locked:true}:{})};
+const common=
+  {thread:o.thread,stitch:o.stitch==='satin'?'fill':o.stitch,...(o.border?{border:true,borderThread:o.borderThread}:{}),...(o.groupId?{groupId:o.groupId}:{}),
+  ...(o.visible===false?{visible:false}:{}),...(o.locked?{locked:true}:{})};
 const keep=Object.fromEntries(/** @type {Array<'angle'|'spacing'>} */(['angle','spacing']).filter(k=>o[k]!==undefined).map(k=>[k,o[k]]));
 if(o.kind==='rect'||o.kind==='ellipse'){
 const base={id:o.id,name:o.name,kind:'path',x:0,y:0,w:0,h:0,closed:true,...common,...keep};
@@ -117,16 +124,20 @@ const gid=crypto.randomUUID();
 for(const pr of prims){
 if(pr.t==='f'){const [outer,...holes]=pr.rings.map(tidy).map((r,i)=>limited(r,i?200:1000));
 if(outer.length<3)continue;
-made.push({kind:'path',points:outer,closed:true,...(holes.length?{holes:holes.filter(h=>h.length>=3).slice(0,20)}:{}),...common,stitch:o.stitch==='run'?'run':'fill'});
+made.push(
+  {kind:'path',points:outer,closed:true,...(holes.length?{holes:holes.filter(h=>h.length>=3).slice(0,20)}:{}),...common,stitch:o.stitch==='run'?'run':'fill'});
 }
 else if(pr.t==='s'){const band=tidy([...pr.a,...[...pr.b].reverse()]);
 if(band.length>=3)made.push({kind:'path',points:limited(band,1000),closed:true,...common,stitch:'fill'});
 }
-else if(pr.pts.length>=2)made.push({kind:'path',points:limitedOpen(pr.pts.map(([x,y])=>/** @type {Pt} */([+x.toFixed(3),+y.toFixed(3)]))),closed:false,...common,stitch:'run'});
+else if(pr.pts.length>=2)made.push(
+  {kind:'path',points:limitedOpen(pr.pts.map(([x,y])=>/** @type {Pt} */([+x.toFixed(3),+y.toFixed(3)]))),closed:false,...common,stitch:'run'});
 }
 if(!made.length)throw Error('This lettering has no outlines to convert.');
 if(doc.objects.length-1+made.length>100)throw Error(`Converting would create ${made.length} objects and exceed the 100-object limit; shorten the text first.`);
-made.forEach((m,i)=>{m.id=i?crypto.randomUUID():o.id;m.name=`${(o.name||'Lettering').replace(/^Lettering: /,'')} ${i+1}`;m.w=0;m.h=0;m.x=0;m.y=0;if(made.length>1&&!m.groupId)m.groupId=gid;refreshPathBounds(/** @type {Obj} */(m));});
+made.forEach((m,i)=>
+  {m.id=i?crypto.randomUUID():o.id;m.name=`${(o.name||'Lettering').replace(/^Lettering: /,'')} ${i+1}`;m.w=0;m.h=0;m.x=0;m.y=0;
+  if(made.length>1&&!m.groupId)m.groupId=gid;refreshPathBounds(/** @type {Obj} */(m));});
 doc.objects.splice(at,1,.../** @type {Obj[]} */(made));
 }
 /** @type {(pts: Pt[], tol: number) => Pt[]} */
@@ -161,7 +172,8 @@ return f?[f.size*f.minScale,f.size*f.maxScale]:[2,200];
  * @returns {void}
  */
 export function scaleObjects(doc,ids,sx,sy,ox,oy){
-if(![sx,sy,ox,oy].every(Number.isFinite)||Math.abs(sx)<.01||Math.abs(sy)<.01||Math.abs(sx)>100||Math.abs(sy)>100)throw Error('Scale factors must be between 0.01 and 100 (not zero).');
+if(![sx,sy,ox,oy].every(Number.isFinite)||Math.abs(sx)<.01||Math.abs(sy)<.01||Math.abs(sx)>100||Math.abs(sy)>100)throw Error(
+  'Scale factors must be between 0.01 and 100 (not zero).');
 if(!Array.isArray(ids)||!ids.length)throw Error('Nothing to scale.');
 /** @type {(x: number, y: number) => Pt} */
   const f=(x,y)=>[ox+(x-ox)*sx,oy+(y-oy)*sy],uniform=Math.abs(Math.abs(sx)-Math.abs(sy))<1e-6,ax=Math.abs(sx),ay=Math.abs(sy);
@@ -220,8 +232,10 @@ o.rotation=normAngle((Number(o.rotation)||0)+angle);
 export function flipObjects(doc,ids,axis,pivotRaw){
 if(axis!=='horizontal'&&axis!=='vertical')throw Error('Flip axis must be horizontal or vertical.');
 const objs=ids.map(id=>objById(doc,id));
-for(const o of objs)if(o.kind==='text'||o.kind==='stitch_layer')throw Error('Lettering and imported stitches cannot be flipped; convert lettering to paths first.');
-const bs=objs.map(objectBounds),pivot=pivotRaw??(axis==='horizontal'?(Math.min(...bs.map(b=>b[0]))+Math.max(...bs.map(b=>b[2])))/2:(Math.min(...bs.map(b=>b[1]))+Math.max(...bs.map(b=>b[3])))/2);
+for(const o of objs)if(o.kind==='text'||o.kind==='stitch_layer')throw Error(
+  'Lettering and imported stitches cannot be flipped; convert lettering to paths first.');
+const bs=objs.map(objectBounds),pivot=
+  pivotRaw??(axis==='horizontal'?(Math.min(...bs.map(b=>b[0]))+Math.max(...bs.map(b=>b[2])))/2:(Math.min(...bs.map(b=>b[1]))+Math.max(...bs.map(b=>b[3])))/2);
 /** @type {(p: Pt) => Pt} */
   const m=([x,y])=>axis==='horizontal'?[2*pivot-x,y]:[x,2*pivot-y];
 for(const o of objs){if(o.kind==='path'){bakeRotation(o);

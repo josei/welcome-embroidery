@@ -1,5 +1,6 @@
 // @ts-check
-// ASCII DXF import: LINE, LWPOLYLINE and CIRCLE entities become path objects (a circle is a closed 64-point polygon). Units are taken as millimetres; DXF's y axis points up, so y is flipped to match the editor.
+// ASCII DXF import: LINE, LWPOLYLINE and CIRCLE entities become path objects (a circle is a closed 64-point polygon). Units are taken as millimetres; DXF's y
+// axis points up, so y is flipped to match the editor.
 // Other entities are counted and reported, not imported. Binary DXF is refused.
 import {validateDocument,geometry} from './engine.js';
 
@@ -18,7 +19,8 @@ function dxfPairs(source){
   const lines=source.split(/\r?\n/);
   /** @type {Pair[]} */
   const pairs=[];
-  for(let i=0;i+1<lines.length;i+=2){const code=Number(lines[i].trim());if(!Number.isInteger(code))throw Error('Invalid DXF group code on line '+(i+1)+'.');pairs.push([code,lines[i+1].trim()]);}
+  for(let i=0;i+1<lines.length;i+=2){const code=Number(lines[i].trim());if(!Number.isInteger(code))throw Error('Invalid DXF group code on line '+(i+1)+'.');
+    pairs.push([code,lines[i+1].trim()]);}
   return pairs;
 }
 
@@ -38,7 +40,8 @@ function dxfEntities(/** @type {any} */ pairs){
 }
 
 /** @type {(codes: Pair[], x: number, y: number) => Array<[number, number]>} */
-const numbers=(codes,x,y)=>{const xs=codes.filter(c=>c[0]===x).map(c=>Number(c[1])),ys=codes.filter(c=>c[0]===y).map(c=>Number(c[1]));return xs.map((v,i)=>[v,ys[i]]);};
+const numbers=(codes,x,y)=>
+  {const xs=codes.filter(c=>c[0]===x).map(c=>Number(c[1])),ys=codes.filter(c=>c[0]===y).map(c=>Number(c[1]));return xs.map((v,i)=>[v,ys[i]]);};
 
 // Parses the source into paths (in DXF coordinates) and a count of what was skipped.
 export function parseDxf(/** @type {any} */ source){
@@ -49,12 +52,19 @@ export function parseDxf(/** @type {any} */ source){
   const skipped={};
   let total=0,bulged=0;
   for(const e of entities){
-    if(e.type==='LINE'){const a=numbers(e.codes,10,20)[0],b=numbers(e.codes,11,21)[0];if(!a||!b||[...a,...b].some(v=>!Number.isFinite(v)))throw Error('LINE needs two finite end points.');paths.push({points:[a,b],closed:false});continue;}
-    if(e.type==='LWPOLYLINE'){const flags=Number((e.codes.find(c=>c[0]===70)||[0,'0'])[1]);let pts=numbers(e.codes,10,20);if(pts.some(p=>!Number.isFinite(p[0])||!Number.isFinite(p[1])))throw Error('LWPOLYLINE has a non-numeric vertex.');
+    if(e.type==='LINE'){const a=numbers(e.codes,10,20)[0],b=numbers(e.codes,11,21)[0];
+      if(!a||!b||[...a,...b].some(v=>!Number.isFinite(v)))throw Error('LINE needs two finite end points.');paths.push({points:[a,b],closed:false});continue;}
+    if(e.type==='LWPOLYLINE'){const flags=Number((e.codes.find(c=>c[0]===70)||[0,'0'])[1]);let pts=numbers(e.codes,10,20);
+      if(pts.some(p=>!Number.isFinite(p[0])||!Number.isFinite(p[1])))throw Error('LWPOLYLINE has a non-numeric vertex.');
       if(e.codes.some(c=>c[0]===42&&Number(c[1])!==0))bulged++;
-      if(pts.length<2)continue;const closed=(flags&1)===1;if(closed&&pts.length>2&&Math.abs(pts[0][0]-pts[pts.length-1][0])<1e-9&&Math.abs(pts[0][1]-pts[pts.length-1][1])<1e-9)pts=pts.slice(0,-1);
+      if(pts.length<2)continue;const closed=(flags&1)===1;
+        if(closed&&pts.length>2&&Math.abs(pts[0][0]-pts[pts.length-1][0])<1e-9&&Math.abs(pts[0][1]-pts[pts.length-1][1])<1e-9)pts=pts.slice(0,-1);
       paths.push({points:pts,closed:closed&&pts.length>2});continue;}
-    if(e.type==='CIRCLE'){const c=numbers(e.codes,10,20)[0],r=Number((e.codes.find(x=>x[0]===40)||[0,'NaN'])[1]);if(!c||![...c,r].every(Number.isFinite))throw Error('CIRCLE needs a finite centre and radius.');if(r<=0){skipped.CIRCLE=(skipped.CIRCLE||0)+1;continue;}const N=64,pts=Array.from({length:N},(_,k)=>{const t=k/N*Math.PI*2;return /** @type {[number, number]} */([c[0]+r*Math.cos(t),c[1]+r*Math.sin(t)]);});paths.push({points:pts,closed:true});continue;}
+    if(e.type==='CIRCLE'){const c=numbers(e.codes,10,20)[0],r=Number((e.codes.find(x=>x[0]===40)||[0,'NaN'])[1]);
+      if(!c||![...c,r].every(Number.isFinite))throw Error('CIRCLE needs a finite centre and radius.');
+      if(r<=0){skipped.CIRCLE=(skipped.CIRCLE||0)+1;continue;}const N=64,pts=
+      Array.from({length:N},(_,k)=>{const t=k/N*Math.PI*2;return /** @type {[number, number]} */([c[0]+r*Math.cos(t),c[1]+r*Math.sin(t)]);});
+      paths.push({points:pts,closed:true});continue;}
     skipped[e.type]=(skipped[e.type]||0)+1;}
   for(const p of paths){if(p.points.length>MAX_POINTS)throw Error('A DXF polyline has more than 1,000 points.');total+=p.points.length;}
   if(total>MAX_TOTAL_POINTS)throw Error('DXF import is limited to 5,000 points.');
@@ -68,13 +78,15 @@ export function dxfDocument(/** @type {any} */ source){
   const flipped=paths.map(p=>({...p,points:p.points.map(([x,y])=>[x,-y])})),all=flipped.flatMap(p=>p.points),
     xs=all.map(p=>p[0]),ys=all.map(p=>p[1]),cx=(Math.min(...xs)+Math.max(...xs))/2,cy=(Math.min(...ys)+Math.max(...ys))/2;
   const objects=flipped.map((p,i)=>{const points=p.points.map(([x,y])=>[x-cx,y-cy]),px=points.map(q=>q[0]),py=points.map(q=>q[1]);
-    return {id:crypto.randomUUID(),name:`DXF ${p.closed?'shape':'line'} ${i+1}`,kind:'path',x:Math.min(...px),y:Math.min(...py),w:Math.max(...px)-Math.min(...px),h:Math.max(...py)-Math.min(...py),points,...(p.closed?{closed:true}:{}),thread:'#527461',stitch:'run'};});
+    return {id:crypto.randomUUID(),name:`DXF ${p.closed?'shape':'line'} ${i+1}`,kind:'path',x:Math.min(...px),y:Math.min(...py),w:Math.max(...px)-
+      Math.min(...px),h:Math.max(...py)-Math.min(...py),points,...(p.closed?{closed:true}:{}),thread:'#527461',stitch:'run'};});
   const doc={schema:'welcome/1',name:'Imported DXF',revision:0,hoop:110,settings:{spacing:.4,angle:32,underlay:true,compensation:.2},objects};
   validateDocument(doc);
   return {doc,skipped,bulged};
 }
 
-// Export: each visible object's outline in millimetres, y flipped to DXF's y-up. Two-point open lines become LINE entities; other outlines become LWPOLYLINE entities, closed when the outline is a closed shape. Stitch layers have no outline, so they are counted as skipped.
+// Export: each visible object's outline in millimetres, y flipped to DXF's y-up. Two-point open lines become LINE entities; other outlines become LWPOLYLINE
+// entities, closed when the outline is a closed shape. Stitch layers have no outline, so they are counted as skipped.
 /**
  * @param {any} doc the editor's untyped document
  * @returns {{text: string, count: number, skipped: Record<string, number>}}
@@ -97,7 +109,8 @@ export function exportDxf(doc){
       if(pts.length<2)continue;
       count++;
       if(pts.length===2&&!closed)entities.push(['LINE',[[10,f(pts[0][0])],[20,f(pts[0][1])],[11,f(pts[1][0])],[21,f(pts[1][1])]]]);
-      else entities.push(['LWPOLYLINE',[[90,String(pts.length)],[70,closed?'1':'0'],...(/** @type {Array<[number, string]>} */(pts.flatMap(([x,y])=>[[10,f(x)],[20,f(y)]])))]]);
+      else entities.push([
+        'LWPOLYLINE',[[90,String(pts.length)],[70,closed?'1':'0'],...(/** @type {Array<[number, string]>} */(pts.flatMap(([x,y])=>[[10,f(x)],[20,f(y)]])))]]);
     }
   }
   const out=['0','SECTION','2','HEADER','9','$INSUNITS','70','4','0','ENDSEC','0','SECTION','2','ENTITIES'];
