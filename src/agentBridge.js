@@ -84,10 +84,9 @@ export function mountAgentBridge() {
     addLayerRemote,
     onChange: state => {
       setAgentLink({
-        statusText: `${t(AGENT_TEXTS[state.status] || '')}` +
+        statusText: (`${t(AGENT_TEXTS[state.status] || '')}` +
         `${state.status === 'active' ? ` ${t(state.agentCalls === 1 ? '1 request so far.' : `${state.agentCalls} requests so far.`)}` : ''} ` +
-        `${state.message || ''}`.trim(
-          ),
+        `${state.message || ''}`).trim(),
         url: state.mcpUrl || '',
         ready: Boolean(state.mcpUrl),
         waiting: state.status === 'waiting' || state.status === 'active',
