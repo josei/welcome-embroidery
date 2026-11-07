@@ -11,7 +11,22 @@ function toolClass(current: string, name: string) {
 export function ToolButtons() {
  const current = useSyncExternalStore(toolMode.subscribe, toolMode.get);
  return (
-  <><button className={toolClass(current, 'line')} onClick={() => toolActions.press('line')} aria-label="Line (L, drag)" title="Line (L, drag)" data-tooltip="Line (L, drag)" id="line"><svg className="icon"><use href="#i-line"/></svg></button><button className={toolClass(current, 'measure')} onClick={() => toolActions.press('measure')} id="measure" aria-label="Measure (M)" title="Measure (M)" data-tooltip="Measure (M)"><svg className="icon"><use href="#i-measure"/></svg></button><button className={toolClass(current, 'polygon')} onClick={() => toolActions.press('polygon')} aria-label="Polygon (G, drag from center)" title="Polygon (G, drag from center)" data-tooltip="Polygon (G, drag from center)" id="polygon"><svg className="icon"><use href="#i-polygon"/></svg></button><button className={toolClass(current, 'star')} onClick={() => toolActions.press('star')} aria-label="Star (S, drag from center)" title="Star (S, drag from center)" data-tooltip="Star (S, drag from center)" id="star"><svg className="icon"><use href="#i-star"/></svg></button></>
+  <><button className={toolClass(current, 'line')} onClick={() =>
+    toolActions.press(
+    'line')} aria-label="Line (L, drag)" title="Line (L, drag)" data-tooltip="Line (L, drag)" id="line"><svg className="icon"><use
+      href="#i-line"/></svg></button><button className={toolClass(
+    current, 'measure')} onClick={() =>
+    toolActions.press(
+    'measure')} id="measure" aria-label="Measure (M)" title="Measure (M)" data-tooltip="Measure (M)"><svg className="icon"><use
+      href="#i-measure"/></svg></button><button className={toolClass(
+    current, 'polygon')} onClick={() =>
+    toolActions.press(
+    'polygon')} aria-label="Polygon (G, drag from center)" title="Polygon (G, drag from center)" data-tooltip="Polygon (G, drag from center)"
+      id="polygon"><svg className="icon"><use href="#i-polygon"/></svg></button><button className={toolClass(
+    current, 'star')} onClick={() =>
+    toolActions.press(
+    'star')} aria-label="Star (S, drag from center)" title="Star (S, drag from center)" data-tooltip="Star (S, drag from center)" id="star"><svg
+      className="icon"><use href="#i-star"/></svg></button></>
  );
 }
 
@@ -19,14 +34,19 @@ export function ToolButtons() {
 export function SelectTool() {
  const current = useSyncExternalStore(toolMode.subscribe, toolMode.get);
  return (
-  <button className={toolClass(current, 'select')} onClick={() => toolActions.press('select')} aria-label="Select (V)" title="Select (V)" data-tooltip="Select (V)" id="select"><svg className="icon"><use href="#i-select"/></svg></button>
+  <button className={toolClass(current, 'select')} onClick={() =>
+    toolActions.press(
+    'select')} aria-label="Select (V)" title="Select (V)" data-tooltip="Select (V)" id="select"><svg className="icon"><use href="#i-select"/></svg></button>
  );
 }
 
 export function PenTool() {
  const current = useSyncExternalStore(toolMode.subscribe, toolMode.get);
  return (
-  <button className={toolClass(current, 'pen')} onClick={() => toolActions.press('pen')} aria-label="Pen with curves (P, drag for handles)" title="Pen with curves (P, drag for handles)" data-tooltip="Pen with curves (P, drag for handles)" id="pen"><svg className="icon"><use href="#i-pen"/></svg></button>
+  <button className={toolClass(current, 'pen')} onClick={() =>
+    toolActions.press(
+    'pen')} aria-label="Pen with curves (P, drag for handles)" title="Pen with curves (P, drag for handles)"
+      data-tooltip="Pen with curves (P, drag for handles)" id="pen"><svg className="icon"><use href="#i-pen"/></svg></button>
  );
 }
 
@@ -35,7 +55,8 @@ export function PathTool() {
  const current = useSyncExternalStore(toolMode.subscribe, toolMode.get);
  const label = current === 'path' ? 'Finish path (Enter · click first point to close · Esc cancels)' : 'Draw path (N)';
  return (
-  <button className={toolClass(current, 'path')} onClick={() => toolActions.press('path')} aria-label={label} title={label} data-tooltip={label} id="path"><svg className="icon"><use href="#i-path"/></svg></button>
+  <button className={toolClass(current, 'path')} onClick={() =>
+    toolActions.press('path')} aria-label={label} title={label} data-tooltip={label} id="path"><svg className="icon"><use href="#i-path"/></svg></button>
  );
 }
 
@@ -52,7 +73,9 @@ export function AddShapeButton({kind, id, label, icon}: {kind: 'rect' | 'ellipse
 export function GridSnapButton() {
  const on = useSyncExternalStore(gridSnapState.subscribe, gridSnapState.get);
  return (
-  <button className={on ? 'icon-button active-tool' : 'icon-button'} aria-label="Snap to grid" title="Snap to grid" data-tooltip="Snap to grid" id="snap" onClick={() => gridSnapActions.toggle()}>
+  <button className={on ?
+    'icon-button active-tool' : 'icon-button'} aria-label="Snap to grid" title="Snap to grid" data-tooltip="Snap to grid" id="snap" onClick={() =>
+    gridSnapActions.toggle()}>
    <svg className="icon"><use href="#i-snap"/></svg>
   </button>
  );

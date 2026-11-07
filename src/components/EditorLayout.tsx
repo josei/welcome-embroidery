@@ -112,7 +112,9 @@ export function EditorLayout() {
             <GridControl />
             <AlignButtons />
             <FlipButtons />
-            <ActionButton flag="group" hideWhenDisabled className={"icon-button"} aria-label={"Group (Ctrl+G)"} title={"Group (Ctrl+G)"} data-tooltip={"Group (Ctrl+G)"} id={"group"} onClick={() => toolbarActions.group()}>
+            <ActionButton flag="group" hideWhenDisabled className={"icon-button"} aria-label={"Group (Ctrl+G)"} title={"Group (Ctrl+G)"}
+              data-tooltip={"Group (Ctrl+G)"} id={"group"} onClick={(
+              ) => toolbarActions.group()}>
               <svg className={"icon"}>
                 <use href={"#i-group"} />
               </svg>

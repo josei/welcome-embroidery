@@ -114,8 +114,14 @@ export function EditorOverlays() {
           {"Organize fonts"}
         </h2>
         <ul id={"fontsList"}>
-          {customFonts.map(f => <li key={"c" + f.id}>{`${f.name}: used by ${f.uses.length} lettering object${f.uses.length === 1 ? '' : 's'}${f.uses.length ? ' (' + f.uses.join(', ') + ')' : ''}`}</li>)}
-          {bundledFonts.map(f => <li key={"b" + f.id}>{`${getFont(f.id)?.name || f.id} (bundled, not removed): used by ${f.uses.length} lettering object${f.uses.length === 1 ? '' : 's'} (${f.uses.join(', ')})`}</li>)}
+          {customFonts.map(f =>
+            <li key={"c" +
+              f.id}>{`${f.name}: used by ${f.uses.length} lettering object${f.uses.length === 1 ? '' : 's'}` +
+              `${f.uses.length ? ' (' + f.uses.join(', ') + ')' : ''}`}</li>)}
+          {bundledFonts.map(f =>
+            <li key={"b" +
+              f.id}>{`${getFont(f.id)?.name || f.id} (bundled, not removed): used by ${f.uses.length} lettering ` +
+              `object${f.uses.length === 1 ? '' : 's'} (${f.uses.join(', ')})`}</li>)}
         </ul>
         <p id={"fontsEmpty"} className={"sel-hint"} hidden={customFonts.length + bundledFonts.length > 0}>
           {"This document has no custom fonts. Load a .ttf from the font picker to add one."}
