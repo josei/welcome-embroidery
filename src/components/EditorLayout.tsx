@@ -3,6 +3,7 @@ import {CanvasTextEditor} from './CanvasTextEditor';
 import {PreviewPanel} from './PreviewPanel';
 import {useSyncExternalStore} from 'react';
 import {SelectionHint} from './SelectionHint';
+import {CanvasHint} from './CanvasHint';
 import {ActionButton} from './ActionButton';
 import {DesignSummary, SelectionHeading, SourceInfo} from './InspectorText';
 import {AlignButtons} from './AlignButtons';
@@ -104,6 +105,7 @@ export function EditorLayout() {
           </div>
           <canvas id={"preview3d"} hidden={true} aria-label={"3D thread preview. Drag to orbit, scroll to zoom, double-click to reset."}>
           </canvas>
+          <CanvasHint />
           <ZoomBar />
           <PreviewPanel />
           <div className={"floating"} role={"toolbar"} aria-label={"Canvas tools"}>

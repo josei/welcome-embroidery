@@ -305,3 +305,5 @@ input:not([type=checkbox]):not([type=range]),select,textarea,.panel textarea{fon
 .file-menu-list small{font-size:11px;color:#66726c}
 .list-warning{font-size:12px;color:var(--warn);background:var(--warn-soft);border:1px solid var(--warn-line);border-radius:8px;padding:7px 9px;margin:0 0 6px;line-height:1.4}
 .row-warn{flex:none;color:var(--warn);font-size:13px;line-height:1;cursor:help}
+.empty-hint{margin:4px 2px 0}
+.canvas-hint{position:absolute;left:50%;bottom:16px;transform:translateX(-50%);z-index:2;margin:0;padding:6px 12px;border-radius:99px;background:#fffe;box-shadow:0 2px 8px rgba(0,0,0,.08);font-size:12px;color:#4f5a54;white-space:nowrap;pointer-events:none}

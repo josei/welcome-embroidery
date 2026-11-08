@@ -2769,3 +2769,12 @@ test('a first compile failure marks the row as not compiled, not a bare type nam
  await expect(row.locator('.row-warn')).toHaveCount(0);
  await expect(row.locator('.row-tag')).toContainText('stitches');
 });
+
+test('a blank design shows the start hint in the sewing order and on the canvas, and both go once an object exists',async({page})=>{page.on('dialog',d=>d.accept());
+ await page.goto('/');await page.locator('#new').click();await expect(page.locator('.object-row')).toHaveCount(0);
+ const listHint=page.locator('#objects .empty-hint'),canvasHint=page.locator('#canvasHint');
+ await expect(listHint).toContainText('Pick a tool on the left');await expect(listHint).toBeVisible();
+ await expect(canvasHint).toContainText('pick a tool on the left');await expect(canvasHint).toBeVisible();
+ await page.locator('#rect').click();await expect(page.locator('.object-row')).toHaveCount(1);
+ await expect(listHint).toHaveCount(0);await expect(canvasHint).toHaveCount(0);
+});

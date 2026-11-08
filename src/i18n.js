@@ -38,6 +38,8 @@ const ES={
 'Agent connected':'Agente conectado','Waiting for agent':'Esperando al agente','Agent':'Agente','Waiting':'Esperando','Connected':'Conectado','Export format':
   'Formato de exportación',
 '1 stitch':'1 puntada','{n} stitches':'{n} puntadas','not compiled':'sin compilar',
+'No objects yet. Pick a tool on the left to start, or open a file.':'Aún no hay objetos. Elige una herramienta a la izquierda para empezar, o abre un archivo.',
+'Start here: pick a tool on the left, or open an SVG or embroidery file.':'Empieza aquí: elige una herramienta a la izquierda, o abre un SVG o un archivo de bordado.',
 'Use document value':'Usar el valor del documento',
 'Sets density, underlay, pull compensation and the stabilizer tip for the design. Objects with their own values keep them.':
   'Ajusta la densidad, la base, la compensación de tirón y la estabilización de la tela del diseño. Los objetos con valores propios los mantienen.',
