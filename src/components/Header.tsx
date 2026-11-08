@@ -6,6 +6,7 @@ import {documentActions, documentState} from '../documentState.js';
 import {setSettingsOpen} from '../settingsState.js';
 import {agentLinkState, agentLinkActions} from '../agentLinkState.js';
 import {EXPORT_FORMATS, exportFormatState, setExportFormat} from '../exportFormatState.js';
+import {EMPTY_EXPORT_REASON} from '../exportDialogState.js';
 import {openExportDialog} from '../exportCommands.js';
 import {importMachineFile, newProject, openProjectFile, projectSave} from '../projectIO.js';
 import {saveState} from '../saveState.js';
@@ -44,9 +45,12 @@ function SaveStatus() {
 // Export: the Export button opens the export dialog, and the format beside it is the same choice the dialog shows.
 function ExportSplit() {
  const {format} = useSyncExternalStore(exportFormatState.subscribe, exportFormatState.get);
+ const {doc} = useSyncExternalStore(documentState.subscribe, documentState.get);
+ const blank = (doc.objects ?? []).length === 0;
  return (
   <div className="export-split">
-   <button id="export" onClick={() => openExportDialog()}>Export machine file</button>
+   <button id="export" disabled={blank} title={blank ? EMPTY_EXPORT_REASON : undefined} aria-describedby={blank ? 'exportReason' : undefined} onClick={() => openExportDialog()}>Export machine file</button>
+   {blank && <span id="exportReason" className="export-reason">{t(EMPTY_EXPORT_REASON)}</span>}
    <select id="headerFormat" aria-label={t('Export format')} title={t('Export format')} value={format} onChange={e => setExportFormat(e.target.value)}>
     {EXPORT_FORMATS.map(f => <option key={f.value} value={f.value}>{f.value.toUpperCase()}</option>)}
    </select>

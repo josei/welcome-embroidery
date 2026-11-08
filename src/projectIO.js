@@ -352,7 +352,8 @@ export function newProject() {
   setDocument({future: []});
   setSelection({selected: null});
   setSelection({multi: new Set()});
-  setDocument({dirty: true});
+  // A new design is untouched until its first edit, so it is not "Unsaved" and New does not ask to discard it.
+  setDocument({dirty: false});
   wired().render();
   wired().fitHoop();
 }

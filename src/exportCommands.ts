@@ -1,7 +1,7 @@
 import {documentNow} from './documentState.js';
 import {selectedObject} from './selectionCommands.js';
 import {exportFormatState} from './exportFormatState.js';
-import {exportDialogState, setExportDialog} from './exportDialogState.js';
+import {EMPTY_EXPORT_REASON, exportDialogState, setExportDialog} from './exportDialogState.js';
 import {download, forWorker, safeProjectFilename} from './appHelpers.js';
 import {exportAppliqueTemplates, exportPrintTemplate, exportSvg, jefWarnings, sewingWorksheet} from './engine.js';
 import {exportDxf} from './dxf.js';
@@ -68,6 +68,7 @@ export const EXPORT_TIMEOUT_MS = 10_000;
  */
 export async function exportCurrent() {
   if (exportDialogState.get().busy) return;
+  if (!(documentNow().doc.objects ?? []).length) { setExportDialog({error: EMPTY_EXPORT_REASON}); return; }
   const job = {abandoned: false};
   let timer: ReturnType<typeof setTimeout> | undefined;
   const timeout = new Promise<never>((_, reject) => {

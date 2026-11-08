@@ -292,7 +292,7 @@ export function ObjectList() {
  return (
   <div id="objects" onClick={onClick} onDragStart={onDragStart} onDragOver={onDragOver} onDragLeave={onDragLeave} onDrop={onDrop} onDragEnd={onDragEnd}>
    {issue && <div className="list-warning" role="status">{`⚠ Can't compile: ${issue.message}`}</div>}
-   {objects.length === 0 && <p className="sel-hint empty-hint">{t('No objects yet. Pick a tool on the left to start, or open a file.')}</p>}
+   {objects.length === 0 && <p className="sel-hint empty-hint">{t('No objects yet. Draw a shape or import an image to start.')}</p>}
    {entriesOf(objects, collapsed).map(entry => entry.kind === 'group' ? (
     <GroupRow
      key={`group:${entry.groupId}`}

@@ -5,7 +5,7 @@ import {documentNow} from './documentState.js';
 import {forWorker} from './appHelpers.js';
 import {setSewingCounts} from './sewingCountsState.js';
 import {setCompileIssue} from './compileIssueState.js';
-import {setExportRefusal} from './exportDialogState.js';
+import {setExportRefusal, EMPTY_EXPORT_REASON} from './exportDialogState.js';
 import {editor} from './editorContext.js';
 
 const worker = new Worker(new URL('./worker.js', import.meta.url), {type: 'module'});
@@ -94,7 +94,9 @@ export function configureCompile(/** @type {{ensureFonts: () => Promise<void>, o
 /** Debounced compile after an edit. */
 export function scheduleCompile(delay = 450) {
   clearTimeout(compileTimer);
-  if (!documentNow().doc.objects.length || workerFailure) { compileError = ''; setCompileIssue(null); return; }
+  // A blank design is not a compile failure: nothing is sewn yet, so nothing is reported as an error. Export says why it is disabled.
+  if (!documentNow().doc.objects.length) { compileError = ''; setCompileIssue(null); setExportRefusal(EMPTY_EXPORT_REASON); return; }
+  if (workerFailure) { compileError = ''; setCompileIssue(null); return; }
   compileTimer = setTimeout(() => compileNow(), delay);
 }
 
@@ -112,6 +114,7 @@ export function clearComputed() {
 
 /** Compiles the current document. A manual compile shows worker errors in the toast. */
 export async function compileNow(/** @type {boolean | Event} */ manual = false) {
+  if (!documentNow().doc.objects.length) { plan = null; scheduleCompile(); editor.render(); return; }
   compiling = true;
   try {
     await ensureFonts?.();

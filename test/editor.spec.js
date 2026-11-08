@@ -1367,7 +1367,7 @@ test('laydown underlay is offered for fills and adds a light fill under them',as
 });
 
 test('print template export downloads a 1:1 millimetre placement sheet',async({page})=>{
- const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());await page.locator('#new').click();
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());await page.locator('#new').click();await page.locator('#rect').click();
  const download=page.waitForEvent('download');await page.locator('#export').click();await page.locator('#format').selectOption('print');await page.locator('#download').click();
  const file=await download;expect(file.suggestedFilename()).toMatch(/-template\.svg$/);await file.saveAs('/tmp/welcome-print-template.svg');
  const svg=readFileSync('/tmp/welcome-print-template.svg','utf8');
@@ -2773,10 +2773,28 @@ test('a first compile failure marks the row as not compiled, not a bare type nam
 test('a blank design shows the start hint in the sewing order and on the canvas, and both go once an object exists',async({page})=>{page.on('dialog',d=>d.accept());
  await page.goto('/');await page.locator('#new').click();await expect(page.locator('.object-row')).toHaveCount(0);
  const listHint=page.locator('#objects .empty-hint'),canvasHint=page.locator('#canvasHint');
- await expect(listHint).toContainText('Pick a tool on the left');await expect(listHint).toBeVisible();
+ await expect(listHint).toContainText('Draw a shape or import an image');await expect(listHint).toBeVisible();
  await expect(canvasHint).toContainText('pick a tool on the left');await expect(canvasHint).toBeVisible();
  await page.locator('#rect').click();await expect(page.locator('.object-row')).toHaveCount(1);
  await expect(listHint).toHaveCount(0);await expect(canvasHint).toHaveCount(0);
+});
+
+test('a blank design is neutral: no error, no Unsaved mark, export disabled with its reason; one object enables export',async({page})=>{
+ page.on('dialog',d=>d.accept());const errors=[];page.on('pageerror',e=>errors.push(e.message));
+ await page.goto('/');await page.locator('#new').click();
+ await expect(page.locator('#unsavedMark')).toHaveCount(0);
+ await expect(page.locator('#objects .list-warning')).toHaveCount(0);
+ await expect(page.locator('#count')).not.toHaveClass(/error/);
+ await expect(page.locator('#count')).not.toContainText("Can't compile");
+ await expect(page.locator('#objects .empty-hint')).toContainText('Draw a shape or import an image to start.');
+ await expect(page.locator('#export')).toBeDisabled();
+ await expect(page.locator('#export')).toHaveAttribute('title','Add an object to export');
+ await expect(page.locator('#exportReason')).toHaveText('Add an object to export');
+ await page.locator('#rect').click();
+ await expect(page.locator('#export')).toBeEnabled();
+ await expect(page.locator('#exportReason')).toHaveCount(0);
+ await expect(page.locator('#objects .empty-hint')).toHaveCount(0);
+ expect(errors).toEqual([]);
 });
 
 test('a design past the hoop cannot be exported: the dialog names the object and the overrun for JEF, DST and VP3, and it exports once moved in',async({page})=>{

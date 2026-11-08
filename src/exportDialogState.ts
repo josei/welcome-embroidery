@@ -16,6 +16,9 @@ export interface ExportDialog {
   refusal: string;
 }
 
+/** Why a design with no objects cannot be exported. Shown beside the disabled Export button and as its tooltip. */
+export const EMPTY_EXPORT_REASON = 'Add an object to export';
+
 export const exportDialogState = createStore<ExportDialog>({
   open: false, withWorksheet: false, worksheetFormat: 'text', busy: false, error: '', refusal: '',
 });
