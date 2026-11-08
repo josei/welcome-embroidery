@@ -1,5 +1,5 @@
-import {t} from './i18n.js';
 // @ts-check
+import {t} from './i18n.js';
 // Start/end/ripple points and the guided fill: arm a button, then click the canvas. Each point is stored as a fraction
 // of the object's bounding box, so it follows the object when the object changes.
 import {interactionNow, setInteraction} from './interactionState.js';
