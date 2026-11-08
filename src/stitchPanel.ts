@@ -258,7 +258,8 @@ export function syncStitchPanel() {
   const types = satinish && !fillable ? satinTypes : fillTypes;
   const cur = src.underlayType ?? (settings.underlay === false ? 'none' : (settings.underlayType ?? 'auto'));
   const shownUnderlay = types.some(t => t[0] === cur) ? cur : 'auto';
-  underlayState.set({types: types.map(([value, label]) => ({value, label})), value: shownUnderlay});
+  const tatamiHint = 'Tatami: parallel rows of short stitches, each row offset from the last, so the fill lies flat and even.';
+  underlayState.set({types: types.map(([value, label]) => ({value, label, hint: value.includes('fill') ? tatamiHint : undefined})), value: shownUnderlay});
   panel.underlayInset = String(src.underlayInset ?? .4);
   panel.underlaySpacing = String(src.underlaySpacing ?? (satinish && !fillable ? 2 : 2.2));
   const showDetails = underlayable && !['none', 'auto', undefined].includes(shownUnderlay);

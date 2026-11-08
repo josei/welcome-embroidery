@@ -224,7 +224,7 @@ function GroupRow({groupId, members, open, selectedIds, count, warning, onSelect
  const all = members.every(m => selectedIds.has(m.id));
  const hiddenAll = members.every(m => m.visible === false);
  const lockedAll = members.every(m => m.locked);
- const name = `Group · ${members.length} objects`;
+ const name = `${t('Group')} · ${t('{n} objects', {n: members.length})}`;
  const label = [name, countText(count, warning)].filter(Boolean).join(' · ');
  return (
   <div className="object-line group-line" role="none">
@@ -269,7 +269,7 @@ export function ObjectList() {
  const counts = useSyncExternalStore(sewingCountsState.subscribe, sewingCountsState.get);
  const issue = useSyncExternalStore(compileIssueState.subscribe, compileIssueState.get);
  // The reason a failed compile gives, on the rows it names. The counts above stay on their rows meanwhile.
- const warningFor = (id: string) => (issue?.objectIds.includes(id) ? `Can't compile: ${issue.message}` : undefined);
+ const warningFor = (id: string) => (issue?.objectIds.includes(id) ? t('Can\'t compile: {e}', {e: t(issue.message)}) : undefined);
  const groupWarning = (members: Obj[]) => members.map(m => warningFor(m.id)).find(Boolean);
  const [collapsed, setCollapsed] = useState<Set<string>>(() => new Set());
  const [renaming, setRenaming] = useState<string | null>(null);
@@ -378,7 +378,7 @@ export function ObjectList() {
  };
  return (
   <div id="objects" onClick={onClick} onDragStart={onDragStart} onDragOver={onDragOver} onDragLeave={onDragLeave} onDrop={onDrop} onDragEnd={onDragEnd}>
-   {issue && <div className="list-warning" role="status">{`⚠ Can't compile: ${issue.message}`}</div>}
+   {issue && <div className="list-warning" role="status">{t('⚠ Can\'t compile: {e}', {e: t(issue.message)})}</div>}
    {objects.length === 0 && <p className="sel-hint empty-hint">{t('No objects yet. Draw a shape or import an image to start.')}</p>}
    {objects.length > 0 && (
     <div className="object-rows" role="listbox" aria-label={t('Layers')} aria-multiselectable="true">

@@ -1,8 +1,8 @@
 // @ts-check
+import {ES_ADDITIONS} from './i18nAdditions.js';
 // Tiny UI translation layer: English is the source language, Spanish is looked up by exact string.
-// Static markup and dynamically written text/attributes are translated by a DOM walker + observer;
-// strings with numbers use {name} placeholders.
-export const ES={
+// Static markup and dynamically written text/attributes are translated by a DOM walker + observer; strings with numbers use {name} placeholders.
+export const ES={...ES_ADDITIONS,
 'Import':'Importar','Not connected':'No conectado','Settings: agent connected':'Ajustes: agente conectado','Settings: waiting for agent':'Ajustes: esperando al agente','Messages':'Mensajes','Dismiss':'Descartar','No messages yet.':'Todavía no hay mensajes.',
 'Welcome Embroidery':'Welcome Embroidery','Untitled.welcome':'Sin título.welcome','New design':'Nuevo diseño','Open project or SVG':'Abrir proyecto o SVG',
   'Import JEF, VP3, DST, SEW, PEC, PES, EXP, HUS, XXX, DSB, DSZ, TAP, TBF, PCS, SHV, STX, BRO, EMD, KSM or 10O':
@@ -424,7 +424,7 @@ export const ES={
 'Arrow keys':'Teclas de flecha','Copies the text worksheet to the clipboard':'Copia la hoja de texto al portapapeles','Also download the sewing worksheet':'Descargar también la hoja de bordado','stitch layer':'capa de puntadas','{fmt} stitch layer':'{fmt} capa de puntadas','used by 1 text object':'usada por 1 objeto de texto','used by {n} text objects':'usada por {n} objetos de texto','(bundled, not removed)':'(incluida, no se quita)','Fonts used by text objects are kept. Removing a font that a text object uses is not offered.':'Las fuentes usadas por objetos de texto se conservan. No se ofrece quitar una fuente que use un objeto de texto.',
 'Command palette':'Paleta de comandos','Repeat last action':'Repetir la última acción','Type a command':'Escribe un comando','Matching commands':'Comandos coincidentes','All commands':'Todos los comandos','Commands':'Comandos','No command matches.':'Ningún comando coincide.',
 'No previous action to repeat.':'No hay ninguna acción anterior que repetir.','Nothing to repeat: {command} does not apply to the current selection.':'Nada que repetir: {command} no se aplica a la selección actual.','Select tool':'Herramienta de selección','Rectangle tool':'Herramienta rectángulo','Ellipse tool':'Herramienta elipse','Lettering tool':'Herramienta de texto','Draw path tool':'Herramienta de trazado','Pen with curves tool':'Herramienta pluma con curvas',
-'Line tool':'Herramienta línea','Polygon tool':'Herramienta polígono','Star tool':'Herramienta estrella','Measure tool':'Herramienta medir','Knife tool':'Herramienta cuchillo','Zoom to 100%':'Ampliar al 100 %','Zoom in':'Acercar','Zoom out':'Alejar'
+'Line tool':'Herramienta línea','Polygon tool':'Herramienta polígono','Star tool':'Herramienta estrella','Measure tool':'Herramienta medir','Knife tool':'Herramienta cuchillo','Zoom to 100%':'Ampliar al 100 %','Zoom in':'Acercar','Zoom out':'Alejar',
 };
 /** @type {Array<{re: RegExp, names: string[], out: string}>} */
 const rx=[];

@@ -8,7 +8,7 @@ import {t} from '../i18n.js';
 import {threadName} from '../threadPalette.js';
 // Part of the stitch panel, rendered by React. Ids match the markup it replaced, because app.js wires them by id.
 const FILL_METHODS = [
- {value: 'rows', label: 'Rows (tatami)', icon: 'i-rows'},
+ {value: 'rows', label: 'Rows (tatami)', icon: 'i-rows', hint: 'Tatami: parallel rows of short stitches, each row offset from the last, so the fill lies flat and even.'},
  {value: 'contour', label: 'Contours (concentric)', icon: 'i-contour'},
  {value: 'spiral', label: 'Spiral', icon: 'i-spiral'},
  {value: 'meander', label: 'Meander', icon: 'i-meander'},

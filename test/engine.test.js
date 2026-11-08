@@ -443,6 +443,12 @@ test('i18n: Spanish placeholders and exact strings resolve', async()=>{
   assert.equal(t('Agent applied 5 edits.'),'El agente aplicó 5 ediciones.');
   assert.equal(t('Needle 1.0, 2.0 mm'),'Aguja 1.0, 2.0 mm');
   assert.equal(t('Not translated here'),'Not translated here');
+  // the status and error strings the compile and the new design produce
+  assert.equal(t('Untitled design'),'Diseño sin título');
+  assert.equal(t("⚠ Can't compile: {e}",{e:t('The design has no sewable geometry. Add an object before exporting.')}),
+    '⚠ No se puede compilar: El diseño no tiene geometría para bordar. Añade un objeto antes de exportar.');
+  assert.equal(t('Stitch length (mm)'),'Largo de puntada (mm)');
+  assert.equal(t('fill'),'relleno');
   delete globalThis.location;
 });
 

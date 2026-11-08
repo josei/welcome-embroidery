@@ -117,7 +117,7 @@ export function syncInspector({plan, compileError, tips}: {plan: PlanInfo | null
 
   setStatus({
     count: compileError
-      ? `⚠ Can't compile: ${compileError}`
+      ? t('⚠ Can\'t compile: {e}', {e: t(compileError)})
       : plan
         ? `${t('{n} stitches', {n: plan.count.toLocaleString()})} · ${plan.errors.length ? plan.errors[0] : t('compiled')}`
         : documentNow().doc.objects.length

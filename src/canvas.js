@@ -2,8 +2,8 @@
 // Canvas interaction layer: an infinite pan/zoom viewport with rulers and guides, geometric hit testing, selection with
 // resize/rotate handles (oriented for a single rotated shape), smart snapping, marquee selection and the context menu.
 // Document state stays in app.js; this module talks to it through `api`.
-import {geometry,objectBounds,hoopSize} from './engine.js';
 import {t} from './i18n.js';
+import {geometry,objectBounds,hoopSize} from './engine.js';
 import {drawScene} from './canvasScene.js';
 import {wheelZoomFactor,wheelZooms} from './wheelZoom.js';
 import {createCanvasEditing} from './canvasEditing.js';
@@ -225,7 +225,7 @@ export function createCanvas(/** @type {any} */ api){
     overlay.append(el('line',{class:'sel-stem sel-angle-line',x1:spot.c[0],y1:spot.c[1],x2:hp[0],y2:hp[1]}));
     overlay.append(el('circle',{
       class:'sel-angle','data-handle':'angle',tabindex:0,role:'button',
-      'aria-label':`Fill angle ${deg.toFixed(0)}°. Drag or use the arrow keys to turn the rows.`,
+      'aria-label':t('Fill angle {deg}°. Drag or use the arrow keys to turn the rows.',{deg:deg.toFixed(0)}),
       cx:hp[0],cy:hp[1],r:4*k,
     }));
     if(label){const t=el('text',{class:'sel-note',x:hp[0],y:hp[1]-9*k,'text-anchor':'middle','font-size':11*k});t.textContent=label;overlay.append(t);}

@@ -13,7 +13,7 @@ import {STITCH_LENGTH_RANGE, rangeText} from '../fieldRanges.js';
 const RUN_STYLES = [
  {value: 'single', label: 'Single run', icon: 'i-run'},
  {value: 'bean', label: 'Bean (triple) run', icon: 'i-bean'},
- {value: 'redwork', label: 'Redwork (out and back)', icon: 'i-run'},
+ {value: 'redwork', label: 'Redwork (out and back)', icon: 'i-run', hint: 'Redwork: one run sewn out along a line and back over the same stitches, for a fine outline.'},
  {value: 'stem', label: 'Stem stitch (braid)', icon: 'i-run'},
 ];
 export function StitchRunRows() {
@@ -38,12 +38,12 @@ export function StitchRunRows() {
     runRowsActions.choose('underpath',
     e.target.checked)} title="Hide longer travel stitches under rows that are sewn later instead of jumping" /></label><label id="varianceRow"
       hidden={rows.varianceRow}>{"Stitch length variation (%)"}<input id="lengthVariance" {...lengthVariance.inputProps} type="text" inputMode="decimal" min="0" max="50" step="5"
-      title="Randomises the needle spacing from row to row so the fill shows less pattern (moiré)" />{lengthVariance.note && <span className="clamp-note" role="status">{lengthVariance.note}</span>}</label><label id="stitchLenRow"
+      title="Randomises the needle spacing from row to row so the fill shows less pattern (moiré)" />{lengthVariance.note && <span className="clamp-note" role="status">{lengthVariance.note}</span>}</label><label id="stitchLenRow" title="Stitch length: the distance between needle holes along a stitch, in mm."
         hidden={rows.stitchLenRow}>{"Stitch length (mm)"}<input id="stitchLength" {...stitchLength.inputProps} type="text" inputMode="decimal" min="0.5" max="7" step="0.1" /><span className="field-range">{rangeText(STITCH_LENGTH_RANGE)}</span>{stitchLength.note && <span className="clamp-note" role="status">{stitchLength.note}</span>}</label><label id="staggerRow"
       hidden={rows.staggerRow}>Needle stagger<select id="stagger" value={run.stagger} onChange={e =>
     runRowsActions.choose('stagger',
     e.target.value)}><option value="1">Off</option><option value="2">2 phases</option><option value="4">4 phases</option><option value="8">8
-      phases</option></select></label><label id="underlayRow" className="block" hidden={rows.underlayRow}>Underlay<PillSelect id="underlayType"
+      phases</option></select></label><label id="underlayRow" className="block" hidden={rows.underlayRow} title="Underlay: a first layer of stitches under the top stitches that holds the fabric flat. Automatic by default.">Underlay<PillSelect id="underlayType"
         groupLabel="Underlay" value={underlay.value} options={underlay.types} onChoose={v =>
     underlayActions.choose(v)} /></label><div id="underlayDetails" className="underlay-details" hidden={rows.underlayDetails}><label>{"Inset (mm)"}<input id="underlayInset" {...underlayInset.inputProps} type="text" inputMode="decimal" min="0" max="3" step="0.1" />{underlayInset.note && <span className="clamp-note" role="status">{underlayInset.note}</span>}</label><label>{"Spacing (mm)"}<input id="underlaySpacing" {...underlaySpacing.inputProps} type="text" inputMode="decimal" min="0.5" max="8" step="0.1" />{underlaySpacing.note && <span className="clamp-note" role="status">{underlaySpacing.note}</span>}</label><label id="laydownSpacingRow"
       hidden={rows.laydownSpacingRow}>{"Laydown rows (mm)"}<input id="laydownSpacing" {...laydownSpacing.inputProps} type="text" inputMode="decimal" min="2" max="8" step="0.5" placeholder="4"

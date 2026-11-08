@@ -16,7 +16,7 @@ export function ThreadSelect(
     <option value="">None</option>
     {options.map(hex => <option key={hex} value={hex}>{threadName(hex)}</option>)}
    </select>
-   <button type="button" className="thread-btn" aria-haspopup="dialog" disabled={disabled} aria-label={`${label}: ${name}`}
+   <button type="button" className="thread-btn" aria-haspopup="dialog" disabled={disabled} aria-label={`${t(label)}: ${name}`}
     title={t("Change this object's thread color")} onClick={e => {
     e.preventDefault();
     if (owner?.id === id) closeThreadPopover();

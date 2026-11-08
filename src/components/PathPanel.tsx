@@ -49,8 +49,7 @@ export function PathPanel() {
         color</button><button type="button" id="removeSmallHoles" onClick={(
     ) =>
     shapePathActions.removeSmallHoles(holeArea)} title="Drops every hole under the hole limit from the selected closed paths"
-      data-tooltip="Drops every hole under the hole limit from the selected closed paths">Remove small holes</button><label>{"Hole limit ("}
-    {"mm²)"}<input id="smallHoleArea" type="text" inputMode="decimal" min="0.1" max="20" step="0.1" {...smallHole.inputProps}
+      data-tooltip="Drops every hole under the hole limit from the selected closed paths">Remove small holes</button><label>{"Hole limit (mm²)"}<input id="smallHoleArea" type="text" inputMode="decimal" min="0.1" max="20" step="0.1" {...smallHole.inputProps}
       title="Holes smaller than this area (0.1-20 mm²) are removed" />{smallHole.note && <span className="clamp-note" role="status">{smallHole.note}</span>}</label><button type="button" id="removeSmallIslands" onClick={(
     ) =>
     shapePathActions.removeSmallIslands(islandArea)} title="Deletes every selected closed shape under the island limit (outline less holes)"

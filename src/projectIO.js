@@ -413,7 +413,7 @@ function startNewDesign() {
   setDocId(undefined);
   fileHandle = null;
   setSave({savedAt: null, savedFileName: null});
-  setDocument({doc: withSavedHoop({...initialDocument(), name: 'Untitled design', objects: []})});
+  setDocument({doc: withSavedHoop({...initialDocument(), name: t('Untitled design'), objects: []})});
   setDocument({history: []});
   setDocument({future: []});
   setSelection({selected: null});

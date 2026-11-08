@@ -700,6 +700,55 @@ test.describe('language detection',()=>{
   expect(errors).toEqual([]);
  });
 });
+test('Spanish UI shows no untranslated English in the start, selection, export and compile-error states',async({page})=>{
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));page.on('dialog',d=>d.accept());
+ // English words that would mean a string skipped the translation table. "underlay" is left out on purpose: it stays English with a gloss.
+ const english=/\b(the|and|with|from|your|stitch|stitches|fill|satin|run|untitled|design|select|selected|object|objects|compile|compiling|group|hoop|thread|length|width|angle|pull|trim|fabric|add|drag|click|show|hide|document|off|resize|rotate|copies|colour|can't)\b/i;
+ // Visible text, attributes and option labels as a reader sees them, with the element they sit on.
+ const shown=()=>page.evaluate(()=>{
+  const vis=el=>{const s=getComputedStyle(el),b=el.getBoundingClientRect();return s.display!=='none'&&s.visibility!=='hidden'&&(b.width>0||b.height>0)&&!el.closest('[hidden]');};
+  const out=[];const w=document.createTreeWalker(document.body,NodeFilter.SHOW_TEXT);let n;
+  while(n=w.nextNode()){const v=n.nodeValue.trim(),p=n.parentElement;if(v&&p&&!['SCRIPT','STYLE','TEXTAREA','CODE','OPTION'].includes(p.nodeName)&&vis(p))out.push(v);}
+  for(const el of document.querySelectorAll('[title],[aria-label],[placeholder],[data-tooltip]'))if(vis(el))for(const a of ['title','aria-label','placeholder','data-tooltip'])if(el.getAttribute(a))out.push(el.getAttribute(a));
+  for(const o of document.querySelectorAll('select:not([id*="font" i]) option'))if(vis(o.closest('select')))out.push(o.textContent.trim());
+  return out;});
+ // Kept English terms: each one shown on screen must carry its plain-language gloss as the tooltip (title).
+ const kept=/tatami|redwork|underlay/i;
+ const keptTitles=()=>page.evaluate(()=>{
+  const vis=el=>{const s=getComputedStyle(el),b=el.getBoundingClientRect();return s.display!=='none'&&s.visibility!=='hidden'&&(b.width>0||b.height>0)&&!el.closest('[hidden]');};
+  const out=[];const w=document.createTreeWalker(document.body,NodeFilter.SHOW_TEXT);let n;
+  while(n=w.nextNode()){const v=n.nodeValue.trim(),p=n.parentElement;if(v&&p&&!['SCRIPT','STYLE','TEXTAREA','CODE','OPTION'].includes(p.nodeName)&&vis(p))out.push({text:v,title:p.closest('[title]')?.getAttribute('title')||''});}
+  return out;});
+ // Every attribute and option in the DOM, hidden rows and collapsed panels included: a tooltip the reader can open still has to be Spanish.
+ const allAttrs=()=>page.evaluate(()=>{const out=[];
+  for(const el of document.querySelectorAll('*'))for(const a of ['title','aria-label','data-tooltip','placeholder'])if(el.getAttribute(a))out.push(el.getAttribute(a));
+  for(const o of document.querySelectorAll('select:not([id*="font" i]) option'))out.push(o.textContent.trim());
+  return out;});
+ // Native options for the kept terms carry their gloss too (the select's own label is not enough for a hidden choice).
+ const keptOptions=()=>page.evaluate(()=>[...document.querySelectorAll('option')].filter(o=>/tatami|redwork|underlay/i.test(o.textContent)).map(o=>({text:o.textContent.trim(),title:o.title})));
+ const check=async state=>{const hits=(await shown()).filter(v=>english.test(v));expect(hits,state).toEqual([]);
+  const attrHits=(await allAttrs()).filter(v=>english.test(v));expect(attrHits,state+': untranslated attribute or option').toEqual([]);
+  for(const o of await keptOptions())expect(o.title,state+': gloss for option "'+o.text+'"').toMatch(/^(Tatami|Redwork|Base \(underlay\)):/);
+  for(const {text,title} of (await keptTitles()).filter(k=>kept.test(k.text)))expect(title,state+': gloss for "'+text+'"').toMatch(/^(Tatami|Redwork|Base \(underlay\)):/);};
+ await page.goto('/?lang=es');await expect(page.locator('html')).toHaveAttribute('lang','es');
+ await check('blank start');
+ await page.locator('#new').click();await expect(page.locator('#name')).toHaveValue('Diseño sin título');
+ await check('new design');
+ // A blank design is neutral: Export stays disabled and says why, in Spanish.
+ await expect(page.locator('#exportReason')).toHaveText('Añade un objeto para exportar');
+ // A lettering the bundled alphabet cannot sew is the real compile-error state.
+ await page.locator('#letter').click();await page.locator('#letteringText').fill('WELCOME-');await page.locator('#letteringText').press('Tab');
+ await expect(page.locator('#objects .list-warning')).toContainText('No se puede compilar: El alfabeto de trazo simple incluido no admite: -');
+ await check('compile error');
+ await page.locator('#letteringText').fill('WELCOME');await page.locator('#letteringText').press('Tab');
+ await expect(page.locator('#objects .list-warning')).toHaveCount(0);
+ await check('selected object');
+ await page.locator('#export').click();await expect(page.locator('#exportDialog, dialog[open]').first()).toBeVisible();
+ await check('export dialog');
+ await page.keyboard.press('Escape');
+ expect(errors).toEqual([]);
+});
+
 test.describe('English default',()=>{
  test.use({locale:'fr-FR'});
  test('unsupported locales fall back to English',async({page})=>{await page.goto('/');await expect(page.locator('#export')).toHaveText('Export');});

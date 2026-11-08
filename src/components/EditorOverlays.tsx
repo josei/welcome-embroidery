@@ -75,8 +75,7 @@ export function EditorOverlays() {
           </button>
         </div>
         <p className={"agent-help"}>
-          {"Anyone holding this link can read and edit the design open in this tab, so share it only with your agent. Your design stays in this browser; the server only relays the agent's requests while this tab is open. Closing the tab ends the link. In the agent, use"}
-          {" "}
+          {"Anyone holding this link can read and edit the design open in this tab, so share it only with your agent. Your design stays in this browser; the server only relays the agent's requests while this tab is open. Closing the tab ends the link. In the agent, use "}
           <code>
             {"documentId: \"live\""}
           </code>

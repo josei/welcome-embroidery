@@ -41,7 +41,7 @@ export function DocumentSettings() {
     tie-off <input id="ties" type="checkbox" checked={Boolean(settings.ties)} onChange={e =>
     settingsActions.set({ties: e.target.checked})} /></label><label>Trim long jumps <input id="trims" type="checkbox" checked={Boolean(
     settings.trims)} onChange={e => settingsActions.set({trims: e.target.checked})} /></label><label>{"Trim jumps from (mm)"}<input id="trimMm" type="text" inputMode="decimal" min="2" max="30" step="0.5" placeholder="5"
-      {...trim.inputProps} title="A jump at least this long is trimmed when Trim long jumps is on (2-30 mm, default 5)" />{trim.note && <span className="clamp-note" role="status">{trim.note}</span>}</label><label>Underlay <input
+      {...trim.inputProps} title="A jump at least this long is trimmed when Trim long jumps is on (2-30 mm, default 5)" />{trim.note && <span className="clamp-note" role="status">{trim.note}</span>}</label><label title="Underlay: a first layer of stitches under the top stitches that holds the fabric flat. Automatic by default.">Underlay <input
         id="underlay" type="checkbox" checked={Boolean(
     settings.underlay)} onChange={e =>
     settingsActions.set(

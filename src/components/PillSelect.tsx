@@ -4,13 +4,13 @@ export function PillSelect({id, groupLabel, value, options, onChoose}: {
   id: string;
   groupLabel: string;
   value: string;
-  options: {value: string; label: string}[];
+  options: {value: string; label: string; hint?: string}[];
   onChoose: (value: string) => void;
 }) {
  return (
   <>
    <select id={id} className="sr-only" tabIndex={-1} value={value} onChange={e => onChoose(e.target.value)}>
-    {options.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
+    {options.map(o => <option key={o.value} value={o.value} title={o.hint}>{o.label}</option>)}
    </select>
    <div className="pill-group" role="radiogroup" aria-label={groupLabel}>
     {options.map(o => (
@@ -18,6 +18,7 @@ export function PillSelect({id, groupLabel, value, options, onChoose}: {
       key={o.value}
       type="button"
       data-value={o.value}
+      title={o.hint}
       role="radio"
       aria-checked={value === o.value}
       className={value === o.value ? 'pill on' : 'pill'}
