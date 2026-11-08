@@ -175,7 +175,8 @@ export function syncStitchPanel() {
   setLayout({secArray: !(n >= 1)});
   setLayout({secOrder: !(n >= 1)});
   setSelectionLabels({hintHidden: n >= 1});
-  setSelectionLabels({stitchTitle: n ? 'Stitching' : 'Fill defaults for new objects'});
+  setSelectionLabels({stitchTitle: n ? 'Stitching' : 'For new objects'});
+  setLayout({objectHeadingHidden: n === 0});
   setLayout({typeHidden: n === 0 || (n >= 1 && picked.every(v => ['text', 'stitch_layer'].includes(v.kind)))});
   setLayout({threadHidden: n === 0});
   if (n === 0) setStitchRow('satinRow', true);

@@ -18,6 +18,7 @@ export interface Layout {
   angleHidden: boolean;
   borderHidden: boolean;
   borderThreadHidden: boolean;
+  objectHeadingHidden: boolean;
 }
 
 export const layoutState = createStore<Layout>({
@@ -34,6 +35,7 @@ export const layoutState = createStore<Layout>({
   angleHidden: false,
   borderHidden: false,
   borderThreadHidden: false,
+  objectHeadingHidden: true,
 });
 
 /** Changes some of the layout fields. */

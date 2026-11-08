@@ -139,7 +139,7 @@ const ES={
   'My threads (one hex colour per line)':'Mis hilos (un color hex por línea)','Closest of your threads':'Más cercano de tus hilos',
   '{n} threads, {m} lines ignored':'{n} hilos, {m} líneas ignoradas','Worksheet copied to the clipboard.':'Hoja copiada al portapapeles.',
   'The browser did not allow copying. Use Download instead.':'El navegador no permitió copiar. Usa Descargar.','Rotation (°)':'Rotación (°)','Stitching':
-  'Puntadas','Fill defaults for new objects':'Valores por defecto de relleno para objetos nuevos','Stitch type':'Tipo de puntada','Fill':'Relleno',
+  'Puntadas','For new objects':'Para objetos nuevos','Document':'Documento','Stitch type':'Tipo de puntada','Fill':'Relleno',
   'Running stitch':'Puntada recta','Satin column':'Columna de satén',
 'Thread':'Hilo','Forest':'Bosque','Coral':'Coral','Honey':'Miel','Sage':'Salvia','Satin width (mm)':'Ancho del satén (mm)','Row spacing (mm)':
   'Separación de filas (mm)','Angle (°)':'Ángulo (°)','Stitch length (mm)':'Largo de puntada (mm)',

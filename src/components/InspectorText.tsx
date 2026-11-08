@@ -1,10 +1,12 @@
 import {Fragment, useSyncExternalStore} from 'react';
 import {inspectorTextState} from '../inspectorTextState.js';
+import {layoutState} from '../layoutState.js';
 // The inspector heading, the design summary line and a stitch layer's source details, rendered by React. Ids match the
 // markup they replaced, because app.js looked them up by id.
 export function SelectionHeading() {
  const {heading} = useSyncExternalStore(inspectorTextState.subscribe, inspectorTextState.get);
- return <h3 id="selected">{heading}</h3>;
+ const layout = useSyncExternalStore(layoutState.subscribe, layoutState.get);
+ return <h3 id="selected" hidden={layout.objectHeadingHidden}>{heading}</h3>;
 }
 
 export function DesignSummary() {

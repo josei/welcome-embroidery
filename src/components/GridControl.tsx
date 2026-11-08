@@ -27,7 +27,7 @@ export function GridControl() {
     onClick={() => gridActions.choose(next)}
    >
     <span className="grid-tile" style={{'--cell': `${cell}px`} as React.CSSProperties} aria-hidden="true" />
-    <span className="grid-label">{value}</span>
+    <span className="grid-label">{t('Grid {n} mm', {n: value})}</span>
    </button>
   </>
  );

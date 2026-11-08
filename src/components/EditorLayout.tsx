@@ -253,9 +253,14 @@ export function EditorLayout() {
         <SewingOrder />
         <ReferencePicture />
         <ThreadPlan />
-        <DocumentSettings />
-        <DesignSummary />
-        <FabricSection />
+        <div className={"scope-document"}>
+          <h3 className={"scope-heading"}>
+            {"Document"}
+          </h3>
+          <DocumentSettings />
+          <DesignSummary />
+          <FabricSection />
+        </div>
       </aside>
     </div>
   </>
