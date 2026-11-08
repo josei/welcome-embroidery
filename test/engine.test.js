@@ -1802,3 +1802,17 @@ test('sewing tips with a fix: a tiny fill becomes a running stitch, an object ou
   const after=designWarnings(d).map(w=>w.category);
   assert.ok(!after.includes('fill')&&!after.includes('hoop')&&!after.includes('duplicate'),'the three fixes clear their tips');
 });
+
+test('a compile failure names the text objects the bundled alphabet cannot sew',()=>{
+ const d=initialDocument();
+ d.objects=[
+  {id:'ok',kind:'text',text:'WELCOME',x:-20,y:10,w:40,h:10,thread:'#527461',stitch:'run'},
+  {id:'dash',kind:'text',text:'SALE-50',x:-20,y:-10,w:40,h:10,thread:'#527461',stitch:'run'},
+ ];
+ assert.throws(()=>compile(d),err=>{
+  assert.match(err.message,/does not support: -\. Use A–Z, 0–9 and spaces\./);
+  assert.deepEqual(err.details,{unsupported:['-'],objectIds:['dash']});
+  return true;
+ });
+ d.objects[1].text='SALE 50';assert.equal(compile(d).count>0,true);
+});

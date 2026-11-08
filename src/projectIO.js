@@ -4,6 +4,7 @@
 // editor commands they need once at start-up.
 import {documentActions, documentNow, setDocument} from './documentState.js';
 import {setSave} from './saveState.js';
+import {setSewingCounts} from './sewingCountsState.js';
 import {selState, setSelection} from './selectionState.js';
 import {setEditMode} from './editModeState.js';
 import {clone, download, safeProjectFilename} from './appHelpers.js';
@@ -284,6 +285,7 @@ export function acceptProject(next, notes = []) {
   fileHandle = null;
   setSave({savedAt: null});
   wired().clearComputed();
+  setSewingCounts({});
   setDocument({doc: opened});
   setDocument({history: []});
   setDocument({future: []});
@@ -341,6 +343,7 @@ export function newProject() {
   setEditMode(false);
   if (!confirmDiscard()) return;
   wired().clearComputed();
+  setSewingCounts({});
   setDocId(undefined);
   fileHandle = null;
   setSave({savedAt: null});

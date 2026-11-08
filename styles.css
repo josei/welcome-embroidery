@@ -303,3 +303,5 @@ input:not([type=checkbox]):not([type=range]),select,textarea,.panel textarea{fon
 .file-menu-list kbd{font:inherit;font-size:11px;color:#66726c}
 .file-menu-list .menu-sep{border:0;border-top:1px solid #e3e6e1;margin:4px 2px}
 .file-menu-list small{font-size:11px;color:#66726c}
+.list-warning{font-size:12px;color:var(--warn);background:var(--warn-soft);border:1px solid var(--warn-line);border-radius:8px;padding:7px 9px;margin:0 0 6px;line-height:1.4}
+.row-warn{flex:none;color:var(--warn);font-size:13px;line-height:1;cursor:help}

@@ -4,6 +4,7 @@ import {documentState} from '../documentState.js';
 import {selectionState} from '../selectionState.js';
 import {layersActions} from '../layersState.js';
 import {sewingCountsState} from '../sewingCountsState.js';
+import {compileIssueState} from '../compileIssueState.js';
 import {t} from '../i18n.js';
 // The object list in sewing order, rendered by React. Groups collapse, each row has its eye and lock buttons, a click selects,
 // Shift adds to the selection, a double click renames, and rows drag to reorder. Ids and classes match the markup it replaced,
@@ -104,13 +105,14 @@ function RenameField({name, onDone}: {name: string; onDone: (text: string | null
 // The stitch count as the row shows it: nothing until the design compiles.
 const stitchesText = (count: number) => (count === 1 ? t('1 stitch') : t('{n} stitches', {n: count.toLocaleString()}));
 
-function ObjectRow({o, depth, selected, dropping, renaming, count, onRenameDone}: {
+function ObjectRow({o, depth, selected, dropping, renaming, count, warning, onRenameDone}: {
  o: Obj;
  depth: number;
  selected: boolean;
  dropping: Drop | null;
  renaming: boolean;
  count: number | undefined;
+ warning: string | undefined;
  onRenameDone: (text: string | null) => void;
 }) {
  const name = o.name || o.kind;
@@ -128,6 +130,7 @@ function ObjectRow({o, depth, selected, dropping, renaming, count, onRenameDone}
      {[o.kind === 'stitch_layer' ? 'machine stitches' : o.stitch, count === undefined ? '' : stitchesText(count)].filter(Boolean).join(' · ')}
     </span>
    </span>
+   {warning && <span className="row-warn" role="img" aria-label={warning} title={warning}>⚠</span>}
    <button type="button" className="row-btn row-eye" aria-label={`${hidden ? 'Show' : 'Hide'} ${name}`} title={hidden ? 'Show' : 'Hide'}>
     {icon(hidden ? 'i-eye-off' : 'i-eye')}
    </button>
@@ -143,12 +146,13 @@ function ObjectRow({o, depth, selected, dropping, renaming, count, onRenameDone}
  );
 }
 
-function GroupRow({groupId, members, open, selectedIds, count}: {
+function GroupRow({groupId, members, open, selectedIds, count, warning}: {
  groupId: string;
  members: Obj[];
  open: boolean;
  selectedIds: Set<string>;
  count: number | undefined;
+ warning: string | undefined;
 }) {
  const all = members.every(m => selectedIds.has(m.id));
  const hiddenAll = members.every(m => m.visible === false);
@@ -163,6 +167,7 @@ function GroupRow({groupId, members, open, selectedIds, count}: {
     <span className="row-name">{`Group · ${members.length} objects`}</span>
     {count !== undefined && <span className="row-tag">{stitchesText(count)}</span>}
    </span>
+   {warning && <span className="row-warn" role="img" aria-label={warning} title={warning}>⚠</span>}
    <button type="button" className="row-btn row-eye" aria-label={`${hiddenAll ? 'Show' : 'Hide'} group`}>{icon(hiddenAll ? 'i-eye-off' : 'i-eye')}</button>
    <button type="button" className={`row-btn row-lock${lockedAll ? ' on' : ''}`} aria-label={`${lockedAll ? 'Unlock' : 'Lock'} group`}>
     {icon(lockedAll ? 'i-lock' : 'i-unlock')}
@@ -175,6 +180,10 @@ export function ObjectList() {
  const objects = useObjects();
  const sel = useSyncExternalStore(selectionState.subscribe, selectionState.get);
  const counts = useSyncExternalStore(sewingCountsState.subscribe, sewingCountsState.get);
+ const issue = useSyncExternalStore(compileIssueState.subscribe, compileIssueState.get);
+ // The reason a failed compile gives, on the rows it names. The counts above stay on their rows meanwhile.
+ const warningFor = (id: string) => (issue?.objectIds.includes(id) ? `Can't compile: ${issue.message}` : undefined);
+ const groupWarning = (members: Obj[]) => members.map(m => warningFor(m.id)).find(Boolean);
  const [collapsed, setCollapsed] = useState<Set<string>>(() => new Set());
  const [renaming, setRenaming] = useState<string | null>(null);
  const [drop, setDrop] = useState<Drop | null>(null);
@@ -278,6 +287,7 @@ export function ObjectList() {
  };
  return (
   <div id="objects" onClick={onClick} onDragStart={onDragStart} onDragOver={onDragOver} onDragLeave={onDragLeave} onDrop={onDrop} onDragEnd={onDragEnd}>
+   {issue && <div className="list-warning" role="status">{`⚠ Can't compile: ${issue.message}`}</div>}
    {entriesOf(objects, collapsed).map(entry => entry.kind === 'group' ? (
     <GroupRow
      key={`group:${entry.groupId}`}
@@ -286,6 +296,7 @@ export function ObjectList() {
      open={entry.open}
      selectedIds={sel.multi}
      count={groupCount(entry.members, counts)}
+     warning={groupWarning(entry.members)}
     />
    ) : (
     <ObjectRow
@@ -296,6 +307,7 @@ export function ObjectList() {
      dropping={drop && drop.id === entry.o.id ? drop : null}
      renaming={renaming === entry.o.id}
      count={counts[entry.o.id]}
+     warning={warningFor(entry.o.id)}
      onRenameDone={text => {
       setRenaming(null);
       layersActions.rename(entry.o.id, text);

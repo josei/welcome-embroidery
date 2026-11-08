@@ -2741,3 +2741,18 @@ test('with 30 objects every sewing-order row scrolls clear of the hoop footer',a
   expect(hit,`row ${i}`).toEqual({fully:true,ownsPoint:true,covered:false});
  }
 });
+
+test('a compile failure keeps sewing-order counts and marks the rows it blocks',async({page})=>{
+ await page.goto('/');page.on('dialog',d=>d.accept());await page.locator('#new').click();
+ await page.locator('#letter').click();await page.locator('#letteringText').fill('WELCOME');await page.locator('#letteringText').press('Tab');
+ const row=page.locator('.object-row');await expect(row).toHaveCount(1);await expect(row.locator('.row-tag')).toContainText('stitches');
+ const counted=await row.locator('.row-tag').textContent();
+ await page.locator('#letteringText').fill('WELCOME-');await page.locator('#letteringText').press('Tab');
+ await expect(page.locator('#objects .list-warning')).toContainText("Can't compile: The bundled single-line alphabet does not support: -");
+ await expect(row.locator('.row-warn')).toHaveCount(1);
+ await expect(row.locator('.row-tag')).toHaveText(counted);
+ await page.locator('#letteringText').fill('WELCOME');await page.locator('#letteringText').press('Tab');
+ await expect(page.locator('#objects .list-warning')).toHaveCount(0);
+ await expect(row.locator('.row-warn')).toHaveCount(0);
+ await expect(row.locator('.row-tag')).toHaveText(counted);
+});

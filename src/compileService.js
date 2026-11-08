@@ -4,6 +4,7 @@
 import {documentNow} from './documentState.js';
 import {forWorker} from './appHelpers.js';
 import {setSewingCounts} from './sewingCountsState.js';
+import {setCompileIssue} from './compileIssueState.js';
 import {editor} from './editorContext.js';
 
 const worker = new Worker(new URL('./worker.js', import.meta.url), {type: 'module'});
@@ -34,7 +35,7 @@ worker.onmessage = (/** @type {any} */ e) => {
   const item = pending.get(data.id);
   if (!item) return;
   pending.delete(data.id);
-  data.ok ? item.resolve(data) : item.reject(Error(data.error));
+  data.ok ? item.resolve(data) : item.reject(Object.assign(Error(data.error), {details: data.details}));
 };
 
 /** @param {any} error */
@@ -92,7 +93,7 @@ export function configureCompile(/** @type {{ensureFonts: () => Promise<void>, o
 /** Debounced compile after an edit. */
 export function scheduleCompile(delay = 450) {
   clearTimeout(compileTimer);
-  if (!documentNow().doc.objects.length || workerFailure) { compileError = ''; return; }
+  if (!documentNow().doc.objects.length || workerFailure) { compileError = ''; setCompileIssue(null); return; }
   compileTimer = setTimeout(() => compileNow(), delay);
 }
 
@@ -103,7 +104,7 @@ export function clearComputed() {
   for (const item of pending.values()) item.reject(new DOMException('The document changed.', 'AbortError'));
   pending.clear();
   plan = null;
-  setSewingCounts({});
+  // The last known counts stay on their rows until the next compile replaces them, so a failed compile keeps them.
   onClear?.();
   scheduleCompile();
 }
@@ -120,6 +121,7 @@ export async function compileNow(/** @type {boolean | Event} */ manual = false) 
     lastPlan = plan;
     setSewingCounts(plan.objectCounts || {});
     compileError = '';
+    setCompileIssue(null);
     onCompiled?.();
     compiling = false;
     editor.render();
@@ -127,6 +129,7 @@ export async function compileNow(/** @type {boolean | Event} */ manual = false) 
     const err = /** @type {any} */ (error);
     if (err.name !== 'AbortError') {
       compileError = err.message;
+      setCompileIssue({message: err.message, objectIds: err.details?.objectIds ?? []});
       compiling = false;
       editor.render();
       if (manual === true || manual instanceof Event) editor.toast(err.message);

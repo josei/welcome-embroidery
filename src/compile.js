@@ -28,11 +28,12 @@ export function compile(doc) {
   const spacing=doc.settings.spacing,angle=doc.settings.angle,comp=doc.settings.compensation,hoop=hoopSize(doc);
   registerDocumentFonts(doc);const unloaded=doc.objects.find((/** @type {any} */ o)=>o.kind==='text'&&isRegistryFont(o.font)&&!getFont(o.font));
     if(unloaded)throw Error(`Font ${unloaded.font} is not loaded yet. Open it in the editor or wait for it to load, then try again.`);
-  const missing=[
-    ...new Set(
-    doc.objects.filter((/** @type {any} */ o)=>o.kind==='text'&&o.font!=='neon-blinking/1'&&
-    !isRegistryFont(o.font)).flatMap((/** @type {any} */ o)=>[...String(o.text||'').toUpperCase()]).filter((/** @type {any} */ ch)=>ch!==' '&&!GLYPHS[ch]))];
-  if(missing.length)throw Error(`The bundled single-line alphabet does not support: ${missing.join(' ')}. Use A–Z, 0–9 and spaces.`);
+  const unsupportedChars=(/** @type {any} */ o)=>[...String(o.text||'').toUpperCase()].filter((/** @type {any} */ ch)=>ch!==' '&&!GLYPHS[ch]);
+  const offenders=doc.objects.map((/** @type {any} */ o)=>[o,o.kind==='text'&&o.font!=='neon-blinking/1'&&!isRegistryFont(o.font)?unsupportedChars(o):[]])
+    .filter((/** @type {any} */ [,bad])=>bad.length);
+  const missing=[...new Set(offenders.flatMap((/** @type {any} */ [,bad])=>bad))];
+  if(missing.length)throw Object.assign(Error(`The bundled single-line alphabet does not support: ${missing.join(' ')}. Use A–Z, 0–9 and spaces.`),
+    {details:{unsupported:missing,objectIds:offenders.map((/** @type {any} */ [o])=>o.id)}});
   const records=/** @type {any[]} */([]),errors=[],issues=[];let complexity=0,overall=[Infinity,Infinity,-Infinity,-Infinity];
   for(const o of doc.objects){
     if(o.visible===false||o.mask)continue;
