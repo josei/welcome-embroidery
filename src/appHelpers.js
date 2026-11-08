@@ -30,7 +30,10 @@ export function download(bytes,name,type){const a=document.createElement('a');a.
  * @returns {string}
  */
 export function safeProjectFilename(name){
-  return `${String(name||'Untitled').replace(/\.welcome$/i,'').replace(/[^a-z0-9 _-]/gi,'_').trim()||'Untitled'}.welcome`;}
+  const stem=String(name||'').replace(/\.welcome$/i,'').replace(/[\/\\:*?"<>|\u0000-\u001F\u007F]/g,'_').trim();
+  // Windows reserves these device names, with or without an extension, so the base name gets a trailing `_`.
+  const safe=/^(CON|PRN|AUX|NUL|COM[1-9]|LPT[1-9])(?=\.|$)/i.test(stem)?stem.replace(/^([^.]*)/,'$1_'):stem;
+  return `${safe||'Untitled design'}.welcome`;}
 
 /**
  * @param {any} p the plan's sewing span, as sewingSeconds reads it
