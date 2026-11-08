@@ -573,7 +573,7 @@ test.describe('language detection',()=>{
  test('Spanish browser gets Spanish UI, including dynamic text, and can switch to English',async({page})=>{
   const errors=[];page.on('pageerror',e=>errors.push(e.message));
   await page.goto('/');
-  await expect(page.locator('#export')).toHaveText('Exportar');
+  await expect(page.locator('#export')).toHaveText('Exportar archivo de máquina');
   await expect(page.locator('html')).toHaveAttribute('lang','es');
   await expect(page.locator('#undo')).toHaveAttribute('aria-label','Deshacer');
   await page.locator('#rect').click();
@@ -581,13 +581,13 @@ test.describe('language detection',()=>{
   await expect(page.locator('#stats')).toContainText('puntadas');
   await page.locator('#settingsBtn').click();await expect(page.locator('#settingsDialog')).toBeVisible();await expect(page.locator('#langEs')).toHaveAttribute('aria-pressed','true');await expect(page.locator('#langEn')).toHaveAttribute('aria-pressed','false');
   await page.locator('#langEn').click();
-  await expect(page.locator('#export')).toHaveText('Export');
+  await expect(page.locator('#export')).toHaveText('Export machine file');
   expect(errors).toEqual([]);
  });
 });
 test.describe('English default',()=>{
  test.use({locale:'fr-FR'});
- test('unsupported locales fall back to English',async({page})=>{await page.goto('/');await expect(page.locator('#export')).toHaveText('Export');});
+ test('unsupported locales fall back to English',async({page})=>{await page.goto('/');await expect(page.locator('#export')).toHaveText('Export machine file');});
 });
 
 test('hovering a selected object shows the guides it already lines up with, and they clear when the pointer leaves',async({page})=>{
@@ -2601,4 +2601,19 @@ test('a reference picture that is not an image is left out and the design opens'
  await page.locator('#file').setInputFiles({name:'junk-picture.welcome',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(project))});
  await expect(page.locator('.object-row')).toHaveCount(1);await expect(page.locator('#name')).toHaveValue('Junk picture');
  await expect(page.locator('#toast')).toContainText('could not be read');
+});
+test('export is labelled as a machine file, shows its file name, says it does not save, and import differs from save',async({page})=>{
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));
+ await page.goto('/');
+ await expect(page.locator('#export')).toHaveText('Export machine file');
+ await expect(page.locator('#importMachine')).toHaveAttribute('aria-label','Import JEF / VP3…');
+ await expect(page.locator('#importMachine')).toHaveAttribute('title','Import JEF / VP3…');
+ await expect(page.locator('#importMachine')).toHaveAttribute('data-tooltip','Import JEF / VP3…');
+ expect(await page.locator('#importMachine use').getAttribute('href')).not.toBe(await page.locator('#save use').getAttribute('href'));
+ await page.locator('#export').click();
+ await expect(page.locator('#exportDialog h2')).toHaveText('Export machine file');
+ await page.locator('#format').selectOption('vp3');
+ await expect(page.locator('#exportFileName')).toHaveText(/\.vp3$/);
+ await expect(page.locator('#exportNotice')).toHaveText('Exporting does not save your project. Use Save to keep it as a .welcome file.');
+ expect(errors).toEqual([]);
 });

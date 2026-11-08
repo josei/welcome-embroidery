@@ -78,7 +78,7 @@ function ExportSplit() {
  const {format} = useSyncExternalStore(exportFormatState.subscribe, exportFormatState.get);
  return (
   <div className="export-split">
-   <button id="export" onClick={() => openExportDialog()}>Export</button>
+   <button id="export" onClick={() => openExportDialog()}>Export machine file</button>
    <select id="headerFormat" aria-label={t('Export format')} title={t('Export format')} value={format} onChange={e => setExportFormat(e.target.value)}>
     {EXPORT_FORMATS.map(f => <option key={f.value} value={f.value}>{f.value.toUpperCase()}</option>)}
    </select>
@@ -132,8 +132,8 @@ export function Header() {
     ) =>
     projectFile.current?.click(
     )}><svg className="icon"><use href="#i-open"/></svg></button><button className="icon-button" id="importMachine"
-      aria-label="Import JEF, VP3, DST, SEW, PEC or EXP" title="Import JEF, VP3, DST, SEW, PEC or EXP"
-        data-tooltip="Import JEF, VP3, DST, SEW, PEC or EXP" onClick={(
+      aria-label="Import JEF / VP3…" title="Import JEF / VP3…"
+        data-tooltip="Import JEF / VP3…" onClick={(
     ) =>
     machineFile.current?.click(
     )}><svg className="icon"><use href="#i-import"/></svg></button><button className="icon-button" id="save" aria-label="Save project"

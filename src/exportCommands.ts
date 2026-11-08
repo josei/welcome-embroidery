@@ -48,6 +48,16 @@ function exportBase(): string {
   return safeProjectFilename(documentNow().doc.name).replace(/\.welcome$/i, '');
 }
 
+/** The file name an export of this format downloads as, so the dialog can show it before the download. */
+export function exportFileName(format: string): string {
+  const base = exportBase();
+  if (format === 'dxf') return `${base}.dxf`;
+  if (format === 'applique-print') return `${base}-applique-templates.svg`;
+  if (format === 'print') return `${base}-template.svg`;
+  if (format === 'svg') return `${base}.svg`;
+  return `${base}.${format === 'pes6' ? 'pes' : format}`;
+}
+
 /**
  * Exports the document in the chosen format and closes the dialog on success: DXF, the appliqué and print templates, SVG,
  * or a machine format (with the sewing worksheet beside it when the box is ticked). The dialog stays open on an error.
@@ -60,7 +70,7 @@ export async function exportCurrent() {
   if (format === 'dxf') {
     const result = exportDxf(doc);
     const skipped = Object.values(result.skipped as Record<string, number>).reduce((a, b) => a + b, 0);
-    download(result.text, `${exportBase()}.dxf`, 'application/dxf');
+    download(result.text, exportFileName('dxf'), 'application/dxf');
     setExportDialog({open: false});
     wired().toast(`DXF exported: ${result.count} path${result.count === 1 ? '' : 's'}`
       + `${skipped ? `; ${skipped} stitch layer${skipped === 1 ? '' : 's'} skipped (no outline)` : ''}.`);
@@ -74,19 +84,19 @@ export async function exportCurrent() {
       wired().toast((error as Error).message);
       return;
     }
-    download(svg, `${exportBase()}-applique-templates.svg`, 'image/svg+xml');
+    download(svg, exportFileName('applique-print'), 'image/svg+xml');
     setExportDialog({open: false});
     wired().toast('Appliqué templates exported at 1:1. Print at 100% and check the 10 mm bar before cutting fabric.');
     return;
   }
   if (format === 'print') {
-    download(exportPrintTemplate(doc), `${exportBase()}-template.svg`, 'image/svg+xml');
+    download(exportPrintTemplate(doc), exportFileName('print'), 'image/svg+xml');
     setExportDialog({open: false});
     wired().toast('Print template exported at 1:1. Print it at 100% and check the 10 mm bar before placing fabric.');
     return;
   }
   if (format === 'svg') {
-    download(exportSvg(doc), `${exportBase()}.svg`, 'image/svg+xml');
+    download(exportSvg(doc), exportFileName('svg'), 'image/svg+xml');
     setExportDialog({open: false});
     wired().toast('SVG exported (design only, not a stitch plan).');
     return;
@@ -103,14 +113,13 @@ export async function exportCurrent() {
       throw Error('The document changed during export. Export the current revision again.');
     }
     wired().setPlan(result.plan);
-    const base = exportBase();
     const chosen = exportFormatState.get().format;
-    download(result.bytes, `${base}.${chosen === 'pes6' ? 'pes' : chosen}`, 'application/octet-stream');
+    download(result.bytes, exportFileName(chosen), 'application/octet-stream');
     const dialog = exportDialogState.get();
     const withSheet = MACHINE_FORMATS.includes(chosen) && dialog.withWorksheet;
     if (withSheet) {
       download(sewingWorksheet(doc, result.plan, dialog.worksheetFormat),
-        `${base}-worksheet.${dialog.worksheetFormat === 'svg' ? 'svg' : 'txt'}`,
+        `${exportBase()}-worksheet.${dialog.worksheetFormat === 'svg' ? 'svg' : 'txt'}`,
         dialog.worksheetFormat === 'svg' ? 'image/svg+xml' : 'text/plain');
     }
     wired().render();

@@ -7,7 +7,7 @@ import {agentLinkState} from '../agentLinkState.js';
 import {agentDialogState, copyAgentLink, revokeAgentLink, setAgentDialogOpen} from '../agentDialog.js';
 import {EXPORT_FORMATS, exportFormatState, setExportFormat} from '../exportFormatState.js';
 import {exportDialogState, setExportDialog} from '../exportDialogState.js';
-import {exportCurrent, MACHINE_FORMATS} from '../exportCommands.js';
+import {exportCurrent, exportFileName, MACHINE_FORMATS} from '../exportCommands.js';
 import {documentState} from '../documentState.js';
 import {bundledFontUsage, customFontUsage} from '../engine.js';
 import {getFont} from '../fonts.js';
@@ -147,11 +147,20 @@ export function EditorOverlays() {
     <dialog id={"exportDialog"} ref={exportElement} onClose={() => setExportDialog({open: false})}>
       <form method={"dialog"}>
         <h2>
-          {"Export embroidery"}
+          {"Export machine file"}
         </h2>
         <select id={"format"} value={exportFormat.format} onChange={e => setExportFormat(e.target.value)}>
           {EXPORT_FORMATS.map(f => <option key={f.value} value={f.value}>{f.label}</option>)}
         </select>
+        <p id={"exportFile"}>
+          {"Output file: "}
+          <code id={"exportFileName"}>
+            {exportFileName(exportFormat.format)}
+          </code>
+        </p>
+        <p id={"exportNotice"}>
+          {"Exporting does not save your project. Use Save to keep it as a .welcome file."}
+        </p>
         <label id={"worksheetRow"} className={"check-row"} hidden={!MACHINE_FORMATS.includes(exportFormat.format)}>
           <input
             type={"checkbox"}

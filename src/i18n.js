@@ -190,7 +190,7 @@ const ES={
   'Loaded':'Cargadas','No fonts match.':'Ninguna fuente coincide.',
 'Load a TrueType file…':'Cargar un archivo TrueType…','Fonts shown with your text · OFL / CC-BY-SA licences listed per font':
   'Fuentes mostradas con tu texto · licencias OFL / CC-BY-SA indicadas por fuente',
-'Export embroidery':'Exportar bordado','JEF · Janome':'JEF · Janome','VP3 · Pfaff':'VP3 · Pfaff','DST · Tajima (widely supported)':
+'Export embroidery':'Exportar bordado','Export machine file':'Exportar archivo de máquina','Import JEF / VP3…':'Importar JEF / VP3…','Output file:':'Archivo de salida:','Exporting does not save your project. Use Save to keep it as a .welcome file.':'Exportar no guarda tu proyecto. Usa Guardar para conservarlo como archivo .welcome.','JEF · Janome':'JEF · Janome','VP3 · Pfaff':'VP3 · Pfaff','DST · Tajima (widely supported)':
   'DST · Tajima (muy compatible)','SVG · vector design (Inkscape)':'SVG · diseño vectorial (Inkscape)','Compile & download':'Compilar y descargar','Cancel':
   'Cancelar',
 'Check hoop and thread choices for your machine and materials.':'Revisa el bastidor y los hilos según tu máquina y materiales.','Language':'Idioma',
