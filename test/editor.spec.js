@@ -2666,3 +2666,59 @@ test('drawing tools report aria-pressed and return to Select after one placement
  }
  expect(errors).toEqual([]);
 });
+test('Edit and Arrange menus run the same commands as their shortcuts and disable what does not apply',async({page})=>{
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));page.on('dialog',d=>d.accept());await page.goto('/');await page.locator('#new').click();
+ const rows=page.locator('.object-row');
+ const run=async(menu,item)=>{await page.locator(`#${menu}`).click();await page.locator(`#${item}`).click();};
+ await page.locator('#rect').click();await page.locator('#ellipse').click();await expect(rows).toHaveCount(2);
+ // Nothing selected: every selection command is disabled, and Paste waits for something copied.
+ await page.keyboard.press('Escape');
+ await page.locator('#editMenu').click();
+ for(const id of ['menuCut','menuCopy','menuDuplicate','menuDelete','menuPaste'])await expect(page.locator(`#${id}`)).toBeDisabled();
+ await page.locator('#editMenu').click();
+ await page.locator('#arrangeMenu').click();
+ for(const id of ['menuAlignLeft','menuDistributeH','menuFlipH','menuToFront','menuToBack','menuSubtract'])await expect(page.locator(`#${id}`)).toBeDisabled();
+ await page.locator('#arrangeMenu').click();
+ // One object: align and flip apply (align to the hoop), boolean and distribute do not.
+ await rows.nth(0).click();
+ await page.locator('#arrangeMenu').click();
+ await expect(page.locator('#menuAlignLeft')).toBeEnabled();await expect(page.locator('#menuFlipH')).toBeEnabled();
+ await expect(page.locator('#menuSubtract')).toBeDisabled();await expect(page.locator('#menuDistributeH')).toBeDisabled();
+ await page.locator('#arrangeMenu').click();
+ // Duplicate from the menu gives the same copy as Ctrl+D; Undo from the menu is Ctrl+Z.
+ await run('editMenu','menuDuplicate');await expect(rows).toHaveCount(3);
+ const copyFromMenu=await page.locator('#posX').inputValue();
+ await run('editMenu','menuUndo');await expect(rows).toHaveCount(2);
+ await rows.nth(0).click();await page.keyboard.press('Control+d');await expect(rows).toHaveCount(3);
+ expect(await page.locator('#posX').inputValue()).toBe(copyFromMenu);
+ await page.keyboard.press('Control+z');await expect(rows).toHaveCount(2);
+ // Bring to front from the menu gives the same object order as End.
+ const before=await rows.allTextContents();
+ await rows.nth(0).click();await run('arrangeMenu','menuToFront');
+ const frontFromMenu=await rows.allTextContents();
+ await page.keyboard.press('Control+z');await expect(rows).toHaveText(before);
+ await rows.nth(0).click();await page.keyboard.press('End');
+ expect(await rows.allTextContents()).toEqual(frontFromMenu);
+ await page.keyboard.press('Control+z');await expect(rows).toHaveText(before);
+ // Union from the menu matches the toolbar's union button; both leave one object.
+ await rows.nth(0).click();await rows.nth(1).click({modifiers:['Shift']});
+ await run('arrangeMenu','menuUnion');await expect(rows).toHaveCount(1);
+ const unionFromMenu=await rows.allTextContents();
+ await run('editMenu','menuUndo');await expect(rows).toHaveText(before);
+ await rows.nth(0).click();await rows.nth(1).click({modifiers:['Shift']});await page.locator('#union').click();
+ await expect(rows).toHaveCount(1);expect(await rows.allTextContents()).toEqual(unionFromMenu);
+ await page.keyboard.press('Control+z');await expect(rows).toHaveText(before);
+ // Copy and Paste from the menu add a copy, as Ctrl+V does.
+ await rows.nth(0).click();await run('editMenu','menuCopy');await run('editMenu','menuPaste');await expect(rows).toHaveCount(3);
+ await page.keyboard.press('Control+v');await expect(rows).toHaveCount(4);
+ // Flip from the menu matches the toolbar's flip button. Lettering cannot be flipped, so it is converted to a path first.
+ await page.locator('#letter').click();await page.keyboard.press('Tab');await expect(rows).toHaveCount(5);
+ await rows.filter({hasText:'Lettering'}).click();await page.keyboard.press('Control+Shift+c');
+ const selectedRow=()=>page.locator('.object-row').evaluateAll(els=>els.findIndex(e=>e.classList.contains('selected')));
+ const at=await selectedRow();await rows.nth(at).click();const shapesBefore=await page.locator('#shapes').innerHTML();
+ await run('arrangeMenu','menuFlipH');const flippedFromMenu=await page.locator('#shapes').innerHTML();
+ expect(flippedFromMenu).not.toBe(shapesBefore);
+ await run('editMenu','menuUndo');await rows.nth(at).click();await page.locator('#flipH').click();
+ expect(await page.locator('#shapes').innerHTML()).toBe(flippedFromMenu);
+ expect(errors).toEqual([]);
+});
