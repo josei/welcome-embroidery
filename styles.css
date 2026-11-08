@@ -307,3 +307,4 @@ input:not([type=checkbox]):not([type=range]),select,textarea,.panel textarea{fon
 .row-warn{flex:none;color:var(--warn);font-size:13px;line-height:1;cursor:help}
 .empty-hint{margin:4px 2px 0}
 .canvas-hint{position:absolute;left:50%;bottom:16px;transform:translateX(-50%);z-index:2;margin:0;padding:6px 12px;border-radius:99px;background:#fffe;box-shadow:0 2px 8px rgba(0,0,0,.08);font-size:12px;color:#4f5a54;white-space:nowrap;pointer-events:none}
+input[aria-invalid="true"]{border-color:var(--warn)!important;background:var(--warn-soft)}.field-range{color:#64706a;font-size:11px;margin-left:6px;white-space:nowrap}

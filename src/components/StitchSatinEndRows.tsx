@@ -5,13 +5,15 @@ import {satinEndRowsActions, satinEndRowsState} from '../satinEndRowsState.js';
 import {useDraftInput} from './useDraftInput';
 import {runRowsActions, runRowsState} from '../runRowsState.js';
 import {ThreadSelect} from './ThreadSelect';
+import {BORDER_WIDTH_RANGE, inFieldRange, rangeText} from '../fieldRanges.js';
 // Part of the stitch panel, rendered by React. Ids match the markup it replaced, because app.js wires them by id.
 export function StitchSatinEndRows() {
  const layout = useSyncExternalStore(layoutState.subscribe, layoutState.get);
  const rows = useSyncExternalStore(stitchRowsState.subscribe, stitchRowsState.get);
  const satin = useSyncExternalStore(satinEndRowsState.subscribe, satinEndRowsState.get);
  const run = useSyncExternalStore(runRowsState.subscribe, runRowsState.get);
- const borderWidth = useDraftInput(run.borderWidth, text => runRowsActions.commit('borderWidth', text));
+ const borderWidth = useDraftInput(run.borderWidth, text => runRowsActions.commit('borderWidth', text), 'typed', true,
+  text => inFieldRange(text, BORDER_WIDTH_RANGE));
  const endInsetStart = useDraftInput(satin.endInsetStart, text => satinEndRowsActions.commit('endInsetStart', text));
  const endInsetEnd = useDraftInput(satin.endInsetEnd, text => satinEndRowsActions.commit('endInsetEnd', text));
  const pullRight = useDraftInput(satin.pullRight, text => satinEndRowsActions.commit('pullRight', text));
@@ -31,7 +33,7 @@ export function StitchSatinEndRows() {
       title={"Pulls the left-hand satin rail (as seen walking along the path) out by this much; leave empty to use the pull " +
         "compensation"} /></label><label id="borderWidthRow" hidden={rows.borderWidthRow}>{"Border width ("}
     {"mm)"}<input id="borderWidth" {...borderWidth} type="number" min="0" max="12" step="0.5"
-      title="0 sews a plain running outline; more makes a satin border of that width" /></label><label hidden={layout.borderThreadHidden}>Border
+      title="0 sews a plain running outline; more makes a satin border of that width" /><span className="field-range">{rangeText(BORDER_WIDTH_RANGE)}</span></label><label hidden={layout.borderThreadHidden}>Border
         thread<ThreadSelect id="borderThread" label="Border thread" value={run.borderThread} disabled={run.borderThreadDisabled} onPick={hex =>
     runRowsActions.choose('borderThread', hex)} /></label></>
  );

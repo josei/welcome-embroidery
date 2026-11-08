@@ -20,6 +20,6 @@ export function setFillValues(patch: Partial<FillValues>) {
 }
 
 /** The fill rows call commit(field, text) when a value is committed. app.js edits the selected object, or the document. */
-export const fillValuesActions: {commit: (field: keyof FillValues, text: string) => void} = {
+export const fillValuesActions: {commit: (field: keyof FillValues, text: string) => boolean | void} = {
   commit() {},
 };

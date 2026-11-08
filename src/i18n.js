@@ -12,6 +12,8 @@ const ES={
 'Save As':'Guardar como','Save As…':'Guardar como…','File name':'Nombre del archivo',
 'Arrange':'Organizar','Bring to front':'Traer al frente','Send to back':'Enviar al fondo','Subtract':'Restar','Union':'Unión','Intersect':'Intersecar',
 'Saved {time}':'Guardado {time}','Unsaved':'Sin guardar',
+'Stitch length':'Largo de puntada','Row spacing':'Separación de filas','Border width':'Ancho del borde','The document':'El documento',
+'{field} must be {range}. {object} keeps {kept} mm.':'{field} debe estar entre {range}. {object} mantiene {kept} mm.',
 'Writes to the file you chose':'Escribe en el archivo que elegiste','Downloads the project file':'Descarga el archivo del proyecto',
 'Choose a new file':'Elegir un archivo nuevo','Download under a name you type':'Descargar con el nombre que escribas',
 'This browser downloads the project file. The name below is the file name.':'Este navegador descarga el archivo del proyecto. El nombre de abajo es el nombre del archivo.',

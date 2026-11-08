@@ -2799,3 +2799,43 @@ test('a design past the hoop cannot be exported: the dialog names the object and
  const download=page.waitForEvent('download');await page.locator('#download').click();await download;
  expect(downloaded).toBe(true);
 });
+
+/** Types an out-of-range value into a fill field: it is marked inline, then reverts on the commit key, and the toast says what was kept. */
+async function expectOutOfRangeRevert(page,{field,bad,keep,range,message,commitKey}){
+ const input=page.locator(field),count=await page.locator('#count').textContent();
+ await input.fill(bad);
+ await expect(input).toHaveAttribute('aria-invalid','true');
+ await expect(page.locator(`${field} + .field-range`)).toHaveText(range);
+ await input.press(commitKey);
+ await expect(input).toHaveValue(keep);
+ await expect(input).not.toHaveAttribute('aria-invalid','true');
+ await expect(page.locator('#toast')).toContainText(message);
+ await expect(page.locator('#toast')).not.toContainText('Invalid Welcome project');
+ await expect(page.locator('#count')).toHaveText(count);
+}
+
+async function openRectangle(page){
+ page.on('dialog',d=>d.accept());
+ await page.goto('/');await page.locator('#rect').click();await page.locator('.object-row').filter({hasText:'Rectangle'}).click();
+}
+
+test('an out-of-range fill stitch length is marked inline, reverts on blur, and the toast names the object and the kept value',async({page})=>{
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));
+ await openRectangle(page);await expect(page.locator('#stitchLength')).toBeVisible();
+ await expectOutOfRangeRevert(page,{field:'#stitchLength',bad:'0.1',keep:'3',range:'0.5–7 mm',message:'Stitch length must be 0.5–7 mm. Rectangle keeps 3 mm.',commitKey:'Tab'});
+ expect(errors).toEqual([]);
+});
+
+test('an out-of-range fill row spacing is marked inline, reverts on Enter, and the toast names the object and the kept value',async({page})=>{
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));
+ await openRectangle(page);await expect(page.locator('#spacing')).toBeVisible();
+ await expectOutOfRangeRevert(page,{field:'#spacing',bad:'5',keep:'0.4',range:'0.25–1.2 mm',message:'Row spacing must be 0.25–1.2 mm. Rectangle keeps 0.4 mm.',commitKey:'Enter'});
+ expect(errors).toEqual([]);
+});
+
+test('an out-of-range fill border width is marked inline, reverts on Enter, and the toast names the object and the kept value',async({page})=>{
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));
+ await openRectangle(page);await page.locator('#border').check();await expect(page.locator('#borderWidth')).toBeVisible();
+ await expectOutOfRangeRevert(page,{field:'#borderWidth',bad:'-5',keep:'0',range:'0–12 mm',message:'Border width must be 0–12 mm. Rectangle keeps 0 mm.',commitKey:'Enter'});
+ expect(errors).toEqual([]);
+});

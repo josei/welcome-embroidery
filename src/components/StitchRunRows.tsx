@@ -8,6 +8,7 @@ import {PillSelect} from './PillSelect';
 import {underlayActions, underlayState} from '../underlayState.js';
 import {stitchChoiceActions, stitchChoicesState} from '../stitchChoicesState.js';
 import {stitchPanelActions, stitchPanelState} from '../stitchPanelState.js';
+import {BORDER_WIDTH_RANGE, STITCH_LENGTH_RANGE, inFieldRange, rangeText} from '../fieldRanges.js';
 // Part of the stitch panel, rendered by React. Ids match the markup it replaced, because app.js wires them by id.
 const RUN_STYLES = [
  {value: 'single', label: 'Single run', icon: 'i-run'},
@@ -22,7 +23,8 @@ export function StitchRunRows() {
  const underlay = useSyncExternalStore(underlayState.subscribe, underlayState.get);
  const run = useSyncExternalStore(runRowsState.subscribe, runRowsState.get);
  const panel = useSyncExternalStore(stitchPanelState.subscribe, stitchPanelState.get);
- const stitchLength = useDraftInput(panel.stitchLength, text => stitchPanelActions.commitValue('stitchLength', text));
+ const stitchLength = useDraftInput(panel.stitchLength, text => stitchPanelActions.commitValue('stitchLength', text), 'typed', true,
+  text => inFieldRange(text, STITCH_LENGTH_RANGE));
  const underlayInset = useDraftInput(panel.underlayInset, text => stitchPanelActions.commitValue('underlayInset', text));
  const underlaySpacing = useDraftInput(panel.underlaySpacing, text => stitchPanelActions.commitValue('underlaySpacing', text));
  const laydownSpacing = useDraftInput(run.laydownSpacing, text => runRowsActions.commit('laydownSpacing', text));
@@ -42,7 +44,7 @@ export function StitchRunRows() {
     {")"}<input id="lengthVariance" {...lengthVariance} type="number" min="0" max="50" step="5"
       title="Randomises the needle spacing from row to row so the fill shows less pattern (moiré)" /></label><label id="stitchLenRow"
         hidden={rows.stitchLenRow}>{"Stitch length ("}
-    {"mm)"}<input id="stitchLength" {...stitchLength} type="number" min="0.5" max="7" step="0.1" /></label><label id="staggerRow"
+    {"mm)"}<input id="stitchLength" {...stitchLength} type="number" min="0.5" max="7" step="0.1" /><span className="field-range">{rangeText(STITCH_LENGTH_RANGE)}</span></label><label id="staggerRow"
       hidden={rows.staggerRow}>Needle stagger<select id="stagger" value={run.stagger} onChange={e =>
     runRowsActions.choose('stagger',
     e.target.value)}><option value="1">Off</option><option value="2">2 phases</option><option value="4">4 phases</option><option value="8">8

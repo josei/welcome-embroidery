@@ -6,6 +6,7 @@ import {underlayActions} from './underlayState.js';
 import {accordionRowsActions} from './accordionRowsState.js';
 import {capRowsActions} from './capRowsState.js';
 import {t} from './i18n.js';
+import {STITCH_LENGTH_RANGE, inFieldRange, outOfRangeMessage} from './fieldRanges.js';
 import type {StitchPanelApi} from './stitchPanel.js';
 
 /** The fields the panel's own actions read from the selected object. */
@@ -44,6 +45,10 @@ function setAccordion(which: 'accordionStart' | 'accordionEnd', v: number | null
 export function configureStitchPanelActions(next: StitchPanelApi) {
   api = next;
   stitchPanelActions.commitValue = (field, text) => {
+    if (field === 'stitchLength' && !inFieldRange(text, STITCH_LENGTH_RANGE)) {
+      wired().toast(outOfRangeMessage('Stitch length', STITCH_LENGTH_RANGE, stitchPanelState.get().stitchLength));
+      return false;
+    }
     const v = Number(text);
     if (selState().multi.size) wired().edit(wired().orderedIds().map(id => ({op: 'set_object', id, [field]: v})));
     else wired().edit([{op: 'set_settings', [field]: v}]);

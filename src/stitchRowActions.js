@@ -7,10 +7,11 @@ import {stitchChoiceActions} from './stitchChoicesState.js';
 import {capRowsActions} from './capRowsState.js';
 import {blingRowsActions} from './blingRowsState.js';
 import {satinEndRowsActions} from './satinEndRowsState.js';
-import {runRowsActions} from './runRowsState.js';
+import {runRowsActions, runRowsState} from './runRowsState.js';
 import {typeRowsActions} from './typeRowsState.js';
 import {raisedRowsActions} from './raisedRowsState.js';
-import {fillValuesActions} from './fillValuesState.js';
+import {fillValuesActions, fillValuesState} from './fillValuesState.js';
+import {BORDER_WIDTH_RANGE, ROW_SPACING_RANGE, inFieldRange, outOfRangeMessage} from './fieldRanges.js';
 import {pathRowsActions} from './pathRowsState.js';
 import {loopRowsActions} from './loopRowsState.js';
 import {radiusActions} from './radiusState.js';
@@ -48,6 +49,10 @@ export function mountRowActions() {
 
   runRowsActions.commit = (field, text) => {
     if (field === 'borderWidth') {
+      if (!inFieldRange(text, BORDER_WIDTH_RANGE)) {
+        editor.toast(outOfRangeMessage('Border width', BORDER_WIDTH_RANGE, runRowsState.get().borderWidth));
+        return false;
+      }
       const ids = [...selState().multi];
       if (ids.length) editor.edit(ids.map(id => ({op: 'set_object', id, borderWidth: Number(text) > 0 ? Number(text) : null})));
       return;
@@ -106,6 +111,10 @@ export function mountRowActions() {
   };
 
   fillValuesActions.commit = (field, text) => {
+    if (field === 'spacing' && !inFieldRange(text, ROW_SPACING_RANGE)) {
+      editor.toast(outOfRangeMessage('Row spacing', ROW_SPACING_RANGE, fillValuesState.get().spacing));
+      return false;
+    }
     editor.edit(selState().selected ? [{op: 'set_object', id: selState().selected, [field]: Number(text)}] : [{op: 'set_settings', [field]: Number(text)}]);
   };
 

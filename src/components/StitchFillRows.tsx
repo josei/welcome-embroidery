@@ -6,13 +6,15 @@ import {raisedRowsActions, raisedRowsState} from '../raisedRowsState.js';
 import {fillValuesActions, fillValuesState} from '../fillValuesState.js';
 import {useDraftInput} from './useDraftInput';
 import {SliderField} from './SliderField';
+import {ROW_SPACING_RANGE, inFieldRange, rangeText} from '../fieldRanges.js';
 // Part of the stitch panel, rendered by React. Ids match the markup it replaced, because app.js wires them by id.
 export function StitchFillRows() {
  const layout = useSyncExternalStore(layoutState.subscribe, layoutState.get);
  const rows = useSyncExternalStore(stitchRowsState.subscribe, stitchRowsState.get);
  const raised = useSyncExternalStore(raisedRowsState.subscribe, raisedRowsState.get);
  const fillValues = useSyncExternalStore(fillValuesState.subscribe, fillValuesState.get);
- const spacing = useDraftInput(fillValues.spacing, text => fillValuesActions.commit('spacing', text));
+ const spacing = useDraftInput(fillValues.spacing, text => fillValuesActions.commit('spacing', text), 'typed', true,
+  text => inFieldRange(text, ROW_SPACING_RANGE));
  const angle = useDraftInput(fillValues.angle, text => fillValuesActions.commit('angle', text));
  const raisedSpacing = useDraftInput(raised.raisedSpacing, text => raisedRowsActions.commit('raisedSpacing', text));
  const raisedAngle = useDraftInput(raised.raisedAngle, text => raisedRowsActions.commit('raisedAngle', text));
@@ -45,7 +47,7 @@ export function StitchFillRows() {
     {"mm)"}<input id="satinWidthEnd" {...satinWidthEnd} type="number" min="0.5" max="12" step="0.5" placeholder="same"
       title="Leave empty for a constant width; a different value tapers the column from the start width to this one" /></label><div
         className="slider-field" hidden={layout.spacingHidden}>
-    <label>{layout.spacingLabel}<input id="spacing" {...spacing} type="number" min="0.25" max="1.2" step="0.05" /></label>
+    <label>{layout.spacingLabel}<input id="spacing" {...spacing} type="number" min="0.25" max="1.2" step="0.05" /><span className="field-range">{rangeText(ROW_SPACING_RANGE)}</span></label>
     <SliderField
      id="spacingSlider"
      label={layout.spacingLabel}
