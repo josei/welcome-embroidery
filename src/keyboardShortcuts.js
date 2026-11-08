@@ -25,6 +25,17 @@ function press(id) {
 
 /** Mounts the editor's keyboard handling. */
 export function mountKeyboard() {
+  // File shortcuts run the header buttons. Save also works while a text field has focus, as browsers' Save does;
+  // Open and New wait until focus is outside fields so they never fire while typing.
+  document.addEventListener('keydown', e => {
+    if (!(e.ctrlKey || e.metaKey) || e.altKey || e.shiftKey) return;
+    const key = e.key.toLowerCase();
+    if (key === 's') { e.preventDefault(); press('save'); return; }
+    if (editor.canvas.inField(e)) return;
+    if (key === 'o') { e.preventDefault(); press('open'); }
+    else if (key === 'n') { e.preventDefault(); press('new'); }
+  });
+
   document.addEventListener('keydown', e => {
     const canvas = editor.canvas;
     if (canvas.inField(e)) return;

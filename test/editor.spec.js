@@ -2526,3 +2526,21 @@ test('open elsewhere: a second tab on the same document shows a notice in both, 
  await other.close();await expect(page.locator('#openElsewhere')).toBeHidden();
  expect(errors).toEqual([]);expect(otherErrors).toEqual([]);
 });
+
+test('Ctrl+S saves and is prevented; Ctrl+O and Ctrl+N run Open and New outside fields; Save also works in a field; the ? list shows them',async({page})=>{
+ const errors=[],dialogs=[];page.on('pageerror',e=>errors.push(e.message));page.on('dialog',d=>{dialogs.push(d.message());d.dismiss();});
+ await page.goto('/');await expect(page.locator('#count')).toContainText('compiled');
+ const saved=page.waitForEvent('download');const prevented=await page.evaluate(()=>{const e=new KeyboardEvent('keydown',{key:'s',ctrlKey:true,bubbles:true,cancelable:true});document.body.dispatchEvent(e);return e.defaultPrevented;});
+ expect(prevented).toBe(true);expect((await saved).suggestedFilename()).toMatch(/\.welcome$/);
+ await page.locator('#rect').click();await expect(page.locator('.object-row')).toHaveCount(6);
+ const chooser=page.waitForEvent('filechooser');await page.keyboard.press('Control+o');await chooser;
+ await page.keyboard.press('Control+n');await expect(page.locator('.object-row')).toHaveCount(6);expect(dialogs).toEqual(['Discard unsaved changes?']);
+ await page.evaluate(()=>document.body.insertAdjacentHTML('beforeend','<input id="probe">'));await page.locator('#probe').focus();
+ const chooserInField=page.waitForEvent('filechooser',{timeout:800}).then(()=>true,()=>false);await page.keyboard.press('Control+o');expect(await chooserInField).toBe(false);
+ await page.keyboard.press('Control+n');expect(dialogs).toHaveLength(1);await expect(page.locator('.object-row')).toHaveCount(6);
+ const savedInField=page.waitForEvent('download');await page.keyboard.press('Control+s');await savedInField;
+ await page.evaluate(()=>document.getElementById('probe').remove());await page.locator('#art').hover();
+ await page.keyboard.press('?');await expect(page.locator('#keysList')).toContainText('Ctrl+S');await expect(page.locator('#keysList')).toContainText('Ctrl+O');await expect(page.locator('#keysList')).toContainText('Ctrl+N');await page.keyboard.press('Escape');
+ await page.keyboard.press('Control+n');expect(dialogs).toHaveLength(1);await expect(page.locator('.object-row')).toHaveCount(0);// Save marked the design clean, so New asks nothing
+ expect(errors).toEqual([]);
+});

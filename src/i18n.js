@@ -243,7 +243,7 @@ const ES={
   'Paste style':'Pegar estilo','Copy / paste style':'Copiar / pegar estilo','Select one object to copy its style from.':
   'Selecciona un objeto del que copiar el estilo.','Style copied. Paste it onto other objects with Ctrl+Alt+V.':
   'Estilo copiado. Pégalo en otros objetos con Ctrl+Alt+V.','Copy a style first (Ctrl+Alt+C).':'Copia primero un estilo (Ctrl+Alt+C).','Keyboard shortcuts (?)':
-  'Atajos de teclado (?)','Keyboard shortcuts':'Atajos de teclado','Thread plan':'Plan de hilos',
+  'Atajos de teclado (?)','Keyboard shortcuts':'Atajos de teclado','File':'Archivo','Save':'Guardar','Open':'Abrir','New':'Nuevo','Thread plan':'Plan de hilos',
   'Compile the design to see the thread colours in sewing order.':'Compila el diseño para ver los colores de hilo en orden de bordado.',
   'Download sewing worksheet':'Descargar hoja de bordado','Text (.txt)':'Texto (.txt)','SVG (printable)':'SVG (imprimible)','Sewing worksheet downloaded.':
   'Hoja de bordado descargada.','Compile the design first.':'Compila el diseño primero.','Edit':'Editar','Select':'Seleccionar','Pen with curves':
