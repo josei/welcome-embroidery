@@ -119,7 +119,7 @@ export function createCanvasTools(api){
     $('#art').classList.toggle('drawing',toolMode.get()!=='select');
     $('.sides-row').hidden=!(toolMode.get()==='polygon'||toolMode.get()==='star');
     $('#stitches').replaceChildren();
-    if(toolMode.get()!=='select')api.toast(TOOL_HINTS[toolMode.get()]);
+    if(toolMode.get()!=='select')api.toast(t(TOOL_HINTS[toolMode.get()]));
     if(toolMode.get()!=='select'&&toolMode.get()!=='knife'&&selState().selected){
       setSelection({selected: null});setSelection({multi: new Set()});setSelection({selNode: null});api.render();
     }
@@ -134,7 +134,7 @@ export function createCanvasTools(api){
     setPathDraft({pathMode: true});
     setPathDraft({continueId: o.id});
     setPathDraft({continueStitch: o.stitch||'run'});
-    api.toast('Click to add points. Click the first point to close the path, or press Enter to finish.');
+    api.toast(t('Click to add points. Click the first point to close the path, or press Enter to finish.'));
   }
 
   // Commits the drafted path (or continues the one it started from) and clears the draft. Silent leaves the tool
@@ -200,7 +200,7 @@ export function createCanvasTools(api){
   $('#art').addEventListener('click',(/** @type {any} */ e)=>{
     if(toolMode.get()!=='path')return;
     const raw=coord(e),p=api.canvas.snapPt(raw);
-    if(Math.abs(p[0])>1000||Math.abs(p[1])>1000){api.toast('Path point is outside the supported workspace.');return;}
+    if(Math.abs(p[0])>1000||Math.abs(p[1])>1000){api.toast(t('Path point is outside the supported workspace.'));return;}
     if(pathDraftNow().pathPoints.length>=3
       &&Math.hypot(raw[0]-pathDraftNow().pathPoints[0][0],raw[1]-pathDraftNow().pathPoints[0][1])<2){endPath(true);return;}
     const last=pathDraftNow().pathPoints.at(-1);
@@ -208,7 +208,7 @@ export function createCanvasTools(api){
     setPathDraft({pathPoints:[...pathDraftNow().pathPoints,p]});
     if(pathDraftNow().pathPoints.length>1000){
       setPathDraft({pathPoints:pathDraftNow().pathPoints.slice(0,-1)});
-      api.toast('A path is limited to 1,000 points.');return;
+      api.toast(t('A path is limited to 1,000 points.'));return;
     }
     drawPathPreview();
   });
@@ -275,11 +275,11 @@ export function createCanvasTools(api){
     if(drag&&e.pointerId===drag.pointerId){
       const {start,end}=drag;
       setPathDraft({shapeDrag: null});
-      const t=toolMode.get(),dist=Math.hypot(end[0]-start[0],end[1]-start[1]);
+      const shape=toolMode.get(),dist=Math.hypot(end[0]-start[0],end[1]-start[1]);
       $('#stitches').replaceChildren();
-      if(t==='line'){if(dist<1){api.toast('Drag to draw a line.');return;}addLine(start,end);}
-      else if(dist<1)addPolyShape(t,start,12,-Math.PI/2);
-      else addPolyShape(t,start,dist,Math.atan2(end[1]-start[1],end[0]-start[0]));
+      if(shape==='line'){if(dist<1){api.toast(t('Drag to draw a line.'));return;}addLine(start,end);}
+      else if(dist<1)addPolyShape(shape,start,12,-Math.PI/2);
+      else addPolyShape(shape,start,dist,Math.atan2(end[1]-start[1],end[0]-start[0]));
       setTool('select');
     }
   });
@@ -288,7 +288,7 @@ export function createCanvasTools(api){
   });
   $('#continueDig').onclick=()=>{
     const o=api.selectedObject();
-    if(o?.kind!=='path'){api.toast('Select a path first.');return;}
+    if(o?.kind!=='path'){api.toast(t('Select a path first.'));return;}
     continueDigitizing(o);
   };
   // ---- measure and knife clicks --------------------------------------------------------------------------------

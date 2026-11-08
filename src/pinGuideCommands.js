@@ -1,3 +1,4 @@
+import {t} from './i18n.js';
 // @ts-check
 // Start/end/ripple points and the guided fill: arm a button, then click the canvas. Each point is stored as a fraction
 // of the object's bounding box, so it follows the object when the object changes.
@@ -19,8 +20,8 @@ export function mountPinGuide() {
     pinState.set(pinState.get() === key ? null : key);
     setArmed(Boolean(pinState.get()));
     if (pinState.get()) {
-      editor.toast(key === 'startAt' ? 'Click the canvas to place the start point.' : key === 'endAt' ? 'Click the canvas to place the end point.' :
-        'Click the canvas to place the ripple centre.');
+      editor.toast(t(key === 'startAt' ? 'Click the canvas to place the start point.' : key === 'endAt' ? 'Click the canvas to place the end point.' :
+        'Click the canvas to place the ripple centre.'));
     }
   };
 
@@ -60,7 +61,7 @@ export function mountPinGuide() {
       setInteraction({guideDraft: []});
       pinState.set(null);
       setArmed(true);
-      editor.toast('Click points for the guide, then press Finish guide.');
+      editor.toast(t('Click points for the guide, then press Finish guide.'));
       editor.render();
     };
   }

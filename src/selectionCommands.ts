@@ -1,4 +1,5 @@
 // The selection commands shared by the toolbar, the context menu and the keyboard: what is selected, selecting,
+import {t} from './i18n.js';
 // copying, pasting, nudging, selecting everything and deleting. The canvas calls the same helpers through app.js.
 import {clipboardNow, setClipboard} from './clipboardState.js';
 import {documentNow, setDocument} from './documentState.js';
@@ -83,7 +84,7 @@ export function copySelection(): boolean {
   const ids = new Set(orderedIds());
   if (!ids.size) return false;
   setClipboard({clipboard: {objects: objects().filter(o => ids.has(o.id)).map(o => clone(o) as SelectionObject), pastes: 0}});
-  wired().toast(`Copied ${ids.size} object${ids.size === 1 ? '' : 's'}.`);
+  wired().toast(ids.size === 1 ? t('Copied 1 object.') : t('Copied {n} objects.', {n: ids.size}));
   return true;
 }
 

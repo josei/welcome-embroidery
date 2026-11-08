@@ -1,4 +1,5 @@
 // The canvas toolbar's buttons: add a shape, group, ungroup, duplicate, delete, undo, redo, edit nodes and align or
+import {t} from './i18n.js';
 // distribute. Each runs the same edit, selection and history change as the id-wired handlers it replaces.
 import {documentNow, setDocument} from './documentState.js';
 import {selState, setSelection} from './selectionState.js';
@@ -87,7 +88,7 @@ export function redoDocument() {
 export function editSelectedNodes() {
   const o = selectedObject();
   if (o && selState().multi.size === 1) enterEdit(o);
-  else wired().toast('Select one shape, path or lettering first.');
+  else wired().toast(t('Select one shape, path or lettering first.'));
 }
 
 /** The toolbar buttons and the context menu call these; the ids stay because keyboard shortcuts and tests address them. */
@@ -134,6 +135,6 @@ export function configureToolbarCommands(next: ToolbarApi) {
       // The setting simply is not remembered when the browser refuses storage.
     }
     wired().clearSnapMarker();
-    wired().toast(on ? 'Snapping to other objects on.' : 'Snapping to other objects off.');
+    wired().toast(t(on ? 'Snapping to other objects on.' : 'Snapping to other objects off.'));
   };
 }

@@ -119,7 +119,8 @@ export function kickFontLoads() {
       () => {
         fontLoading.delete(id);
         fontFailed.add(id);
-        wired().toast(`Font ${id} could not be loaded.`, 'error');
+        const name = fontIndex.find(f => f.fid === id)?.name;
+        wired().toast(name ? t('Could not load the font {font}. Choose another font.', {font: name}) : t('Could not load this font. Choose another font.'), 'error');
       },
     );
   }
@@ -302,7 +303,7 @@ export async function loadFontFile(file: File) {
         },
       ];
       populateFontSelect();
-      toast(`Loaded ${font.name}. It is stored in this project.`);
+      toast(t('Loaded {name}. It is stored in this project.', {name: font.name}));
       syncTextInspector(selectedObject() ?? null);
     }
   } catch (error) {
@@ -387,7 +388,7 @@ export function configureLettering(next: LetteringApi) {
     if (field === 'text') {
       const value = storedLetteringText(o, text);
       if (!value.trim()) {
-        wired().toast('Lettering needs some text.', 'error');
+        wired().toast(t('Lettering needs some text.'), 'error');
         syncTextInspector(o);
         return false;
       }

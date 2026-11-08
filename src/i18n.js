@@ -351,10 +351,10 @@ const ES={
 'Warning: {w} × {h} mm is beyond the largest JEF hoop code (200 × 200 mm); the file gets hoop code 0 and no hoop-edge distances, and machines may reject it.':
   'Aviso: {w} × {h} mm supera el mayor código de bastidor JEF (200 × 200 mm); el archivo recibe el código 0 y sin distancias al borde del bastidor, y las ' +
   'máquinas pueden rechazarlo.',
-'Font {id} could not be loaded.':'No se pudo cargar la fuente {id}.','Snap to {n} mm grid on.':'Ajuste a la cuadrícula de {n} mm activado.',
+'Snap to {n} mm grid on.':'Ajuste a la cuadrícula de {n} mm activado.',
   'Loaded {name}. It is stored in this project.':'{name} cargada. Se guarda en este proyecto.','Imported {name} as a {fmt} stitch layer.':
   '{name} importado como capa de puntadas {fmt}.',
-'{fmt} exported from revision {n}.':'{fmt} exportado desde la revisión {n}.','Agent applied {n} edits.':'El agente aplicó {n} ediciones.',
+'Agent applied {n} edits.':'El agente aplicó {n} ediciones.',
   'Agent applied 1 edit.':'El agente aplicó 1 edición.','Agent imported {name}.':'El agente importó {name}.','Copied {n} objects.':'{n} objetos copiados.',
   'Copied 1 object.':'1 objeto copiado.',
 '{n} objects selected':'{n} objetos seleccionados','⚠ {n} issues':'⚠ {n} avisos','⚠ 1 issue':'⚠ 1 aviso','{n} requests so far.':'{n} peticiones hasta ahora.',
@@ -372,6 +372,24 @@ const ES={
 'lettering {id} is {h} mm tall; the size range of {font} is {lo}–{hi} mm.':'el texto {id} mide {h} mm de alto; el rango de tamaño de {font} es de {lo}–{hi} mm.',
 '{name} uses the font {font}, which is not bundled here; it is set in Welcome Mono.':'{name} usa la fuente {font}, que no está incluida aquí; se ha puesto en Welcome Mono.',
 'The reference picture could not be read, so it was left out.':'No se pudo leer la imagen de referencia, así que se ha omitido.',
+'Could not load the font {font}. Choose another font.':'No se pudo cargar la fuente {font}. Elige otra fuente.',
+'Could not load this font. Choose another font.':'No se pudo cargar esta fuente. Elige otra fuente.',
+'DXF file downloaded ({file}).':'Archivo DXF descargado ({file}).',
+'{fmt} file downloaded ({file}).':'Archivo {fmt} descargado ({file}).',
+'1 stitch layer skipped (no outline).':'1 capa de puntadas omitida (sin contorno).',
+'{n} stitch layers skipped (no outline).':'{n} capas de puntadas omitidas (sin contorno).',
+'Appliqué templates downloaded ({file}). Print at 100% and check the 10 mm bar before cutting fabric.':'Plantillas de aplicación descargadas ({file}). Imprime al 100% y comprueba la barra de 10 mm antes de cortar la tela.',
+'Print template downloaded ({file}). Print it at 100% and check the 10 mm bar before placing fabric.':'Plantilla para imprimir descargada ({file}). Imprímela al 100% y comprueba la barra de 10 mm antes de colocar la tela.',
+'SVG file downloaded ({file}) (design only, not a stitch plan).':'Archivo SVG descargado ({file}) (solo el diseño, no un plan de puntadas).',
+'The document changed during export. Export the current revision again.':'El documento cambió durante la exportación. Exporta la versión actual de nuevo.',
+'DXF imported: {paths}':'DXF importado: {paths}',
+'1 path':'1 trazado',
+'{n} paths':'{n} trazados',
+'; skipped {list}':'; omitido: {list}',
+'; 1 arc sewn as straight segments':'; 1 arco bordado como segmento recto',
+'; {n} arcs sewn as straight segments':'; {n} arcos bordados como segmentos rectos',
+'Removed 1 unused font.':'Se quitó 1 fuente sin usar.',
+'Removed {n} unused fonts.':'Se quitaron {n} fuentes sin usar.',
 };
 /** @type {Array<{re: RegExp, names: string[], out: string}>} */
 const rx=[];

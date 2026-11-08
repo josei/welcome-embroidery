@@ -1,4 +1,5 @@
 import {documentNow} from './documentState.js';
+import {t} from './i18n.js';
 import {setSelection} from './selectionState.js';
 import {selectedObject} from './selectionCommands.js';
 import {photoRowsActions} from './photoRowsState.js';
@@ -81,8 +82,8 @@ export async function addPhoto(file: File) {
       setSelection({selected: id});
       setSelection({multi: new Set([id])});
     });
-    wired().toast('Photo stitch added. Adjust spacing and contrast in the sidebar.');
+    wired().toast(t('Photo stitch added. Adjust spacing and contrast in the sidebar.'));
   } catch (error) {
-    wired().toast((error as Error).message || 'That picture could not be read.', 'error');
+    wired().toast((error as Error).message || t('That picture could not be read.'), 'error');
   }
 }

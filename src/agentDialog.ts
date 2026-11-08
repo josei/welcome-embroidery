@@ -44,10 +44,10 @@ export async function openAgentDialog() {
 export async function copyAgentLink(): Promise<boolean> {
   try {
     await navigator.clipboard.writeText(agentLinkState.get().url);
-    wired().toast('Copied the private MCP link.');
+    wired().toast(t('Copied the private MCP link.'));
     return true;
   } catch {
-    wired().toast('Select and copy the link.');
+    wired().toast(t('Select and copy the link.'));
     return false;
   }
 }

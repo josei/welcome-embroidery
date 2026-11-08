@@ -1580,7 +1580,7 @@ test('DXF export downloads the design outlines as a DXF file',async({page})=>{
  const file=await download;expect(file.suggestedFilename()).toMatch(/\.dxf$/);await file.saveAs('/tmp/welcome-export.dxf');
  const text=(await import('node:fs')).readFileSync('/tmp/welcome-export.dxf','utf8');
  expect(text).toContain('LWPOLYLINE');expect(text.trimEnd().endsWith('EOF')).toBe(true);
- await expect(page.locator('#toast')).toContainText('DXF exported');
+ await expect(page.locator('#toast')).toContainText('DXF file downloaded');
  expect(errors).toEqual([]);
 });
 
@@ -2880,5 +2880,22 @@ test('an error toast stays after five seconds, the Messages log keeps both of tw
  await expect(page.locator('#messagesList time')).toHaveCount(2);
  await page.locator('#messagesDialog button').last().click();await expect(page.locator('#messagesDialog')).toBeHidden();
  await alert.locator('.toast-close').click();await expect(alert).toHaveCount(0);
+ expect(errors).toEqual([]);
+});
+
+test('Spanish: export, DXF and photo stitch toasts are translated and name the file, with no English toast text',async({page})=>{
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));
+ await page.goto('/?lang=es');page.on('dialog',d=>d.accept());await page.locator('#new').click();await page.locator('#rect').click();
+ const toast=page.locator('#toast');
+ await page.locator('#export').click();await page.locator('#format').selectOption('jef');
+ const jef=page.waitForEvent('download');await page.locator('#download').click();await jef;
+ await expect(toast).toContainText(/Archivo JEF descargado \(.+\.jef\)\./);
+ await page.locator('#export').click();await page.locator('#format').selectOption('dxf');
+ const dxf=page.waitForEvent('download');await page.locator('#download').click();await dxf;
+ await expect(toast).toContainText(/Archivo DXF descargado \(.+\.dxf\)\./);
+ await page.locator('#photoFile').setInputFiles({name:'ramp.png',mimeType:'image/png',buffer:pngBytes(60,40,(x,y)=>Math.round(255*x/59))});
+ await expect(toast).toContainText('Punto foto añadido. Ajusta la separación y el contraste en la barra lateral.');
+ const shown=await toast.textContent();
+ expect(shown).not.toMatch(/\b(exported|downloaded|added|revision|could not|Click|Select|Copied)\b/);
  expect(errors).toEqual([]);
 });

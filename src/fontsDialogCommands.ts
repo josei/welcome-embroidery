@@ -1,4 +1,5 @@
 import {documentNow} from './documentState.js';
+import {t} from './i18n.js';
 
 /** What the fonts dialog's buttons need from the editor, supplied by app.js. */
 export interface FontsDialogApi {
@@ -25,5 +26,5 @@ export function removeUnusedFonts() {
   const before = Object.keys(documentNow().doc.customFonts || {}).length;
   wired().edit([{op: 'remove_unused_fonts'}]);
   const removed = before - Object.keys(documentNow().doc.customFonts || {}).length;
-  wired().toast(removed ? `Removed ${removed} unused font${removed === 1 ? '' : 's'}.` : 'No unused fonts to remove.');
+  wired().toast(!removed ? t('No unused fonts to remove.') : removed === 1 ? t('Removed 1 unused font.') : t('Removed {n} unused fonts.', {n: removed}));
 }

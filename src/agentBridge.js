@@ -37,7 +37,7 @@ export function mountAgentBridge() {
       return {error: 'invalid_operation', revision: documentNow().doc.revision, message: /** @type {any} */ (error).message};
     }
     editor.edit(operations);
-    editor.toast(`Agent applied ${operations.length} edit${operations.length === 1 ? '' : 's'}.`);
+    editor.toast(operations.length === 1 ? t('Agent applied 1 edit.') : t('Agent applied {n} edits.', {n: operations.length}));
     return {revision: documentNow().doc.revision, document: forWorker(documentNow().doc)};
   }
 
@@ -63,7 +63,7 @@ export function mountAgentBridge() {
     })) {
       return {error: 'invalid_import', revision: documentNow().doc.revision, message: 'The editor rejected the imported layer.'};
     }
-    editor.toast(`Agent imported ${layer.source.fileName}.`);
+    editor.toast(t('Agent imported {name}.', {name: layer.source.fileName}));
     return {revision: documentNow().doc.revision};
   }
 

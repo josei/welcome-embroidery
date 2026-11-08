@@ -77,12 +77,12 @@ export function configureShapePathActions(next: ShapePathApi) {
     const o = objects().find(v => v.id === selState().selected);
     if (o?.kind === 'path' && selState().selNode !== null) {
       afterOps([{op: 'split_path', id: o.id, index: selState().selNode}], o.id);
-    } else wired().toast('Select a path and one of its nodes first.');
+    } else wired().toast(t('Select a path and one of its nodes first.'));
   };
   shapePathActions.join = () => {
     const ids = objects().filter(o => selState().multi.has(o.id)).filter(o => o.kind === 'path' && !o.closed).map(o => o.id);
     if (ids.length >= 2) afterOps([{op: 'join_paths', ids}], ids[0]);
-    else wired().toast('Select two or more open paths to join.');
+    else wired().toast(t('Select two or more open paths to join.'));
   };
   shapePathActions.selectSameThread = () => {
     const o = objects().find(v => v.id === selState().selected);
@@ -151,6 +151,6 @@ export function configureShapePathActions(next: ShapePathApi) {
         setSelection({selNodes: new Set()});
         setSelection({selNode: null});
       });
-    } else wired().toast('Rounding works on rectangles and paths. Convert the shape to a path first.');
+    } else wired().toast(t('Rounding works on rectangles and paths. Convert the shape to a path first.'));
   };
 }

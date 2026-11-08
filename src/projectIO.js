@@ -64,7 +64,7 @@ export function configureProjectIO(next) {
 export function renameProject(text) {
   const name = text.trim();
   if (!name) {
-    wired().toast('Project name cannot be empty.', 'error');
+    wired().toast(t('Project name cannot be empty.'), 'error');
     return false;
   }
   wired().edit([{op: 'rename_document', name}]);
@@ -297,7 +297,7 @@ export function acceptProject(next, notes = []) {
   setDocument({dirty: false});
   wired().render();
   wired().fitAll();
-  wired().toast(['Project opened locally.', ...notes].join(' '));
+  wired().toast([t('Project opened locally.'), ...notes].join(' '));
 }
 
 /**
@@ -383,8 +383,10 @@ export async function openProjectFile(file) {
       acceptProject(dxf.doc);
       const skipped = Object.entries(/** @type {Record<string, number>} */ (dxf.skipped)).map(([k, n]) => `${n} ${k}`).join(', ');
       const paths = dxf.doc.objects.length;
-      wired().toast(`DXF imported: ${paths} path${paths === 1 ? '' : 's'}${skipped ? `; skipped ${skipped}` : ''}`
-        + `${dxf.bulged ? `; ${dxf.bulged} arc${dxf.bulged === 1 ? '' : 's'} sewn as straight segments` : ''}.`);
+      const pathsText = paths === 1 ? t('1 path') : t('{n} paths', {n: paths});
+      const skippedText = skipped ? t('; skipped {list}', {list: skipped}) : '';
+      const arcsText = !dxf.bulged ? '' : dxf.bulged === 1 ? t('; 1 arc sewn as straight segments') : t('; {n} arcs sewn as straight segments', {n: dxf.bulged});
+      wired().toast(t('DXF imported: {paths}', {paths: pathsText}) + skippedText + arcsText + '.');
     } else {
       throw Error('Open a .welcome project, SVG or ASCII DXF here. Use Import JEF / VP3 for machine files.');
     }
@@ -428,7 +430,7 @@ export async function importMachineFile(file) {
       setSelection({selected: layer.id});
     });
     if (committed) {
-      wired().toast(`Imported ${file.name} as a ${format.toUpperCase()} stitch layer.`);
+      wired().toast(t('Imported {name} as a {fmt} stitch layer.', {name: file.name, fmt: format.toUpperCase()}));
       wired().compileNow();
     }
   } catch (error) {

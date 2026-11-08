@@ -100,27 +100,27 @@ async function runExport(job: {abandoned: boolean}) {
     const skipped = Object.values(result.skipped as Record<string, number>).reduce((a, b) => a + b, 0);
     download(result.text, exportFileName('dxf'), 'application/dxf');
     setExportDialog({open: false});
-    wired().toast(`DXF exported: ${result.count} path${result.count === 1 ? '' : 's'}`
-      + `${skipped ? `; ${skipped} stitch layer${skipped === 1 ? '' : 's'} skipped (no outline)` : ''}.`);
+    const skippedNote = !skipped ? '' : skipped === 1 ? ` ${t('1 stitch layer skipped (no outline).')}` : ` ${t('{n} stitch layers skipped (no outline).', {n: skipped})}`;
+    wired().toast(t('DXF file downloaded ({file}).', {file: exportFileName('dxf')}) + skippedNote);
     return;
   }
   if (format === 'applique-print') {
     const svg = exportAppliqueTemplates(doc);
     download(svg, exportFileName('applique-print'), 'image/svg+xml');
     setExportDialog({open: false});
-    wired().toast('Appliqué templates exported at 1:1. Print at 100% and check the 10 mm bar before cutting fabric.');
+    wired().toast(t('Appliqué templates downloaded ({file}). Print at 100% and check the 10 mm bar before cutting fabric.', {file: exportFileName('applique-print')}));
     return;
   }
   if (format === 'print') {
     download(exportPrintTemplate(doc), exportFileName('print'), 'image/svg+xml');
     setExportDialog({open: false});
-    wired().toast('Print template exported at 1:1. Print it at 100% and check the 10 mm bar before placing fabric.');
+    wired().toast(t('Print template downloaded ({file}). Print it at 100% and check the 10 mm bar before placing fabric.', {file: exportFileName('print')}));
     return;
   }
   if (format === 'svg') {
     download(exportSvg(doc), exportFileName('svg'), 'image/svg+xml');
     setExportDialog({open: false});
-    wired().toast('SVG exported (design only, not a stitch plan).');
+    wired().toast(t('SVG file downloaded ({file}) (design only, not a stitch plan).', {file: exportFileName('svg')}));
     return;
   }
   const revision = documentNow().doc.revision;
@@ -132,7 +132,7 @@ async function runExport(job: {abandoned: boolean}) {
   });
   if (job.abandoned) return;
   if (result.plan.revision !== revision || revision !== documentNow().doc.revision) {
-    throw Error('The document changed during export. Export the current revision again.');
+    throw Error(t('The document changed during export. Export the current revision again.'));
   }
   wired().setPlan(result.plan);
   const chosen = exportFormatState.get().format;
@@ -146,7 +146,7 @@ async function runExport(job: {abandoned: boolean}) {
   }
   wired().render();
   setExportDialog({open: false});
-  wired().toast(t('{fmt} exported from revision {n}.', {fmt: chosen.toUpperCase(), n: result.plan.revision})
+  wired().toast(t('{fmt} file downloaded ({file}).', {fmt: chosen.toUpperCase(), file: exportFileName(chosen)})
     + (withSheet ? t(' The sewing worksheet is downloaded with it.') : '')
     + jefWarnings(result.plan as Parameters<typeof jefWarnings>[0], chosen).map(w => ' ' + t(w)).join(''));
 }
