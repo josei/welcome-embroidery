@@ -361,6 +361,11 @@ const ES={
 '{name} — loaded from a file; stored inside this project. Check the licence of the font file before sharing the design.':
   '{name} — cargada desde un archivo; guardada dentro de este proyecto. Revisa la licencia del archivo de fuente antes de compartir el diseño.',
 'x {x} mm · y {y} mm':'x {x} mm · y {y} mm',
+'lettering {id} uses the font “{font}”, which is not bundled or stored in this project.':'el texto {id} usa la fuente “{font}”, que no está incluida ni guardada en este proyecto.',
+'lettering {id} needs text of 1 to {n} characters.':'el texto {id} necesita entre 1 y {n} caracteres.',
+'lettering {id} is {h} mm tall; the size range of {font} is {lo}–{hi} mm.':'el texto {id} mide {h} mm de alto; el rango de tamaño de {font} es de {lo}–{hi} mm.',
+'{name} uses the font {font}, which is not bundled here; it is set in Welcome Mono.':'{name} usa la fuente {font}, que no está incluida aquí; se ha puesto en Welcome Mono.',
+'The reference picture could not be read, so it was left out.':'No se pudo leer la imagen de referencia, así que se ha omitido.',
 };
 /** @type {Array<{re: RegExp, names: string[], out: string}>} */
 const rx=[];
@@ -375,7 +380,7 @@ for(const [k,v] of Object.entries(ES)){
 export function detectLang(){
  try{const q=new URLSearchParams(location.search).get('lang');if(q==='es'||q==='en')return q;}catch{}
  try{const s=localStorage.getItem('welcome.lang');if(s==='es'||s==='en')return s;}catch{}
- for(const l of (navigator.languages?.length?navigator.languages:[navigator.language||'en'])){const p=String(l).toLowerCase().slice(0,2);
+ for(const l of (typeof navigator==='undefined'?['en']:navigator.languages?.length?navigator.languages:[navigator.language||'en'])){const p=String(l).toLowerCase().slice(0,2);
    if(p==='es'||p==='en')return p;}
  return 'en';
 }

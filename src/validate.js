@@ -4,6 +4,20 @@
 import {getFont,isRegistryFont} from './fonts.js';
 import {FABRIC_PRESETS} from './fabrics.js';
 import {MAX_TEXT_CHARS} from './textlayout.js';
+import {t} from './i18n.js';
+
+/**
+ * The name and the height range, in millimetres, that lettering in this font may have.
+ * @param {unknown} font
+ * @returns {{name: string, lo: number, hi: number}}
+ */
+function textSizeRange(font){
+  if(font==='neon-blinking/1')return {name:'Néon blinking',lo:20,hi:60};
+  if(isRegistryFont(font)){const f=getFont(/** @type {string} */ (font));
+    if(f)return {name:f.name||String(font),lo:f.size*f.minScale,hi:f.size*f.maxScale};
+    return {name:String(font),lo:2,hi:200};}
+  return {name:'Welcome Mono',lo:4,hi:16};
+}
 
 // A reference (background) picture for tracing by hand: shown under the shapes in the editor, never sewn.
 /**
@@ -261,12 +275,16 @@ export function validateDocument(doc){
         Object.entries(o.threadOverrides).some(([i,v])=>!/^\d+$/.test(i)||Number(i)>=o.threads.length||
         !color.test(v)))fail(`stitch layer ${o.id} has invalid thread replacements.`);
     }
-    if(o.kind===
-      'text'&&(typeof o.text!=='string'||!o.text.trim()||[...o.text].length>(isRegistryFont(o.font)?MAX_TEXT_CHARS:24)||
-      !Number.isFinite(o.h)||(
-      isRegistryFont(o.font)?(()=>{const f=getFont(o.font);return f?o.h<f.size*f.minScale-1e-6||o.h>f.size*f.maxScale+1e-6:o.h<2||o.h>200;})():(o.font===
-      'neon-blinking/1')?(o.h<20||o.h>60):(o.h<4||o.h>
-      16))))fail(`lettering ${o.id} has unsupported text or size (Welcome Mono 4–16 mm; Néon blinking 20–60 mm; other fonts follow their own size range).`);
+    if(o.kind==='text'){
+      const usable=['welcome-mono/1','neon-blinking/1',undefined].includes(o.font)||
+        (isRegistryFont(o.font)&&(!o.font.startsWith('custom/')||!!doc.customFonts?.[o.font.slice(7)]));
+      if(!usable)fail(t('lettering {id} uses the font “{font}”, which is not bundled or stored in this project.',{id:o.id,font:String(o.font)}));
+      const range=textSizeRange(o.font);
+      if(typeof o.text!=='string'||!o.text.trim()||[...o.text].length>(isRegistryFont(o.font)?MAX_TEXT_CHARS:24))
+        fail(t('lettering {id} needs text of 1 to {n} characters.',{id:o.id,n:String(isRegistryFont(o.font)?MAX_TEXT_CHARS:24)}));
+      if(!Number.isFinite(o.h)||o.h<range.lo-1e-6||o.h>range.hi+1e-6)
+        fail(t('lettering {id} is {h} mm tall; the size range of {font} is {lo}–{hi} mm.',{id:o.id,h:String(o.h),font:range.name,lo:String(range.lo),hi:String(range.hi)}));
+    }
     if(o.kind==='text'){const num=(/** @type {any} */ v,/** @type {number} */ lo,/** @type {number} */ hi)=>v===
       undefined||(Number.isFinite(v)&&v>=lo&&v<=hi);
       if(!num(o.tracking,-10,30)||!num(o.wordSpacing,-10,50)||!num(o.lineHeight,.5,3)||!num(o.italic,0,35)||
@@ -279,10 +297,6 @@ export function validateDocument(doc){
       if(o.vertical){if(String(o.text).includes('\n'))fail(`lettering ${o.id} is vertical, so it can have one line only.`);
       if(o.along)fail(`lettering ${o.id} is vertical, so it cannot follow a path.`);
       if(!isRegistryFont(o.font))fail(`lettering ${o.id} is vertical, which needs a bundled or loaded font.`);}}
-    if(o.kind==='text'&&!['welcome-mono/1','neon-blinking/1',undefined].includes(o.font)&&
-      !(
-      isRegistryFont(o.font)&&(!o.font.startsWith('custom/')||
-      doc.customFonts?.[o.font.slice(7)])))fail(`lettering ${o.id} selects an unsupported or missing font.`);
   }
   if(pointCount>5000)fail('total path point count exceeds 5,000.');
   return doc;

@@ -2582,3 +2582,23 @@ test('Save writes the chosen file and later Saves overwrite it, while Save As al
  await expect.poll(()=>page.evaluate(()=>window.__written.length)).toBe(4);expect(await page.evaluate(()=>window.__pickerCalls.length)).toBe(2);
  expect(errors).toEqual([]);
 });
+
+// Opening a design with an unbundled font or an unreadable reference picture: the design opens, the affected part is
+// repaired or left out, and a toast says what changed.
+test('a design with an unbundled font opens in Welcome Mono and the toast names the font',async({page})=>{page.on('dialog',d=>d.accept());
+ await page.goto('/');await page.locator('#new').click();
+ const project=initialDocument();project.name='Unknown font';project.objects=[];applyOperations(project,[{op:'add_text',id:'t',text:'Hello',x:0,y:0,font:'welcome-mono/1',height:8,thread:'#527461'}]);
+ project.objects[0].font='Lobster';project.objects[0].h=30;
+ await page.locator('#file').setInputFiles({name:'unknown-font.welcome',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(project))});
+ await expect(page.locator('.object-row')).toHaveCount(1);await expect(page.locator('#name')).toHaveValue('Unknown font');
+ await expect(page.locator('#toast')).toContainText('Lobster');await expect(page.locator('#toast')).toContainText('Welcome Mono');
+});
+
+test('a reference picture that is not an image is left out and the design opens',async({page})=>{page.on('dialog',d=>d.accept());
+ await page.goto('/');await page.locator('#new').click();
+ const project=initialDocument();project.name='Junk picture';project.objects=[];applyOperations(project,[{op:'add_text',id:'t',text:'Hello',x:0,y:0,font:'welcome-mono/1',height:8,thread:'#527461'}]);
+ project.reference={data:'data:image/png;base64,'+Buffer.from('this is not a picture').toString('base64'),x:0,y:0,w:50,h:50};
+ await page.locator('#file').setInputFiles({name:'junk-picture.welcome',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(project))});
+ await expect(page.locator('.object-row')).toHaveCount(1);await expect(page.locator('#name')).toHaveValue('Junk picture');
+ await expect(page.locator('#toast')).toContainText('could not be read');
+});

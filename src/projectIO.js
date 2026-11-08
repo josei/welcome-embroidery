@@ -10,14 +10,19 @@ import {clone, download, safeProjectFilename} from './appHelpers.js';
 import {dxfDocument} from './dxf.js';
 import {withSavedHoop} from './storedPrefs.js';
 import {importSvg} from './svgImport.js';
-import {initialDocument, makeStitchLayer, validateDocument} from './engine.js';
+import {initialDocument, makeStitchLayer, measureText, validateDocument} from './engine.js';
 import {t} from './i18n.js';
+import {isRegistryFont, LEGACY_FONTS, loadFont} from './fonts.js';
 import {currentDocId, isDocId, openElsewhere, ownAutosaveKey, setDocId} from './docSlot.js';
 
 /** The largest project file the editor opens. */
 const PROJECT_LIMIT=33_554_432;
 /** The largest machine file the editor imports: the source bytes are kept inside the project. */
 const MACHINE_LIMIT=1_048_576;
+/** The font a lettering object is set in when its own font is neither bundled nor stored in the project. */
+const FALLBACK_FONT = 'welcome-mono/1';
+/** The height range Welcome Mono lettering may have, in millimetres. */
+const FALLBACK_HEIGHT = [4, 16];
 /** The machine formats the import accepts, as file extensions. */
 const MACHINE_EXTENSIONS=['jef','vp3','dst','sew','pec','pes','exp','hus','xxx','dsb','dsz','tap','tbf','pcs','shv','stx','bro','emd','ksm','10o'];
 
@@ -197,11 +202,81 @@ async function writeFile(handle, text) {
 }
 
 /**
+ * Fetches a bundled font file, for loadFont.
+ * @param {string} path
+ * @returns {Promise<any>}
+ */
+const fetchFontJson = (path) => fetch(new URL('../' + path, import.meta.url)).then((r) => {
+  if (!r.ok) throw Error(`Font file ${path} could not be loaded (${r.status}).`);
+  return r.json();
+});
+
+/**
+ * True when the bundled font loads from the app's files.
+ * @param {string} id
+ * @returns {Promise<boolean>}
+ */
+async function loadedOrNot(id) {
+  try {
+    await loadFont(id, fetchFontJson);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * True when the browser can decode the picture: an image element that fails to load is not an image.
+ * @param {string} data a data URL
+ * @returns {Promise<boolean>}
+ */
+function pictureDecodes(data) {
+  return new Promise((resolve) => {
+    const image = new Image();
+    image.onload = () => resolve(image.naturalWidth > 0);
+    image.onerror = () => resolve(false);
+    image.src = data;
+  });
+}
+
+/**
+ * Makes a document read from a file or a link openable before it is validated. Lettering whose font is neither bundled
+ * nor stored in the project is set in Welcome Mono (its height is kept within that font's range), and a reference picture
+ * the browser cannot decode is left out. The rest of the design is untouched. Returns one note per change for the toast.
+ * @param {any} doc the parsed document; changed in place
+ * @returns {Promise<string[]>}
+ */
+async function repairOpened(doc) {
+  /** @type {string[]} */
+  const notes = [];
+  for (const o of Array.isArray(doc?.objects) ? doc.objects : []) {
+    if (!o || o.kind !== 'text' || LEGACY_FONTS.has(o.font)) continue;
+    if (isRegistryFont(o.font)) {
+      // A font stored in the project is always usable; a bundled one must load from the app's files.
+      if (o.font.startsWith('custom/') ? doc.customFonts?.[o.font.slice(7)] : await loadedOrNot(o.font)) continue;
+    }
+    const missing = String(o.font);
+    o.font = FALLBACK_FONT;
+    if (Number.isFinite(o.h)) {
+      o.h = Math.min(FALLBACK_HEIGHT[1], Math.max(FALLBACK_HEIGHT[0], o.h));
+      if (typeof o.text === 'string' && o.text.trim()) o.w = measureText(o.text, FALLBACK_FONT, o.h, o);
+    }
+    notes.push(t('{name} uses the font {font}, which is not bundled here; it is set in Welcome Mono.', {name: o.name || o.id, font: missing}));
+  }
+  if (doc?.reference && !(await pictureDecodes(String(doc.reference.data)))) {
+    delete doc.reference;
+    notes.push(t('The reference picture could not be read, so it was left out.'));
+  }
+  return notes;
+}
+
+/**
  * Opens a validated document as the project: no history, the first object selected, fitted to the view, and clean. The
  * document keeps the id a saved file carries, or takes a new one.
  * @param {any} next
+ * @param {string[]} [notes] what repairOpened changed, shown after the open message
  */
-export function acceptProject(next) {
+export function acceptProject(next, notes = []) {
   const {docId, ...body} = next;
   validateDocument(body);
   const opened = clone(body);
@@ -220,7 +295,7 @@ export function acceptProject(next) {
   setDocument({dirty: false});
   wired().render();
   wired().fitAll();
-  wired().toast('Project opened locally.');
+  wired().toast(['Project opened locally.', ...notes].join(' '));
 }
 
 /**
@@ -233,7 +308,7 @@ export async function openArtifact(id) {
   if (response.status === 404) response = await fetch(`/artifacts/${id}.welcome`, {credentials: 'same-origin', redirect: 'error'});
   if (!response.ok) throw Error(`MCP project could not be opened (${response.status}).`);
   const next = await response.json();
-  acceptProject(next);
+  acceptProject(next, await repairOpened(next));
   window.history.replaceState(null, '', location.pathname);
 }
 
@@ -295,8 +370,9 @@ export async function openProjectFile(file) {
       if (imported.notes.length) wired().toast(imported.notes.join(' '));
     } else if (lower.endsWith('.welcome') || lower.endsWith('.json')) {
       const next = JSON.parse(await file.text());
+      const notes = await repairOpened(next);
       if (!confirmDiscard()) return;
-      acceptProject(next);
+      acceptProject(next, notes);
     } else if (lower.endsWith('.dxf')) {
       const dxf = dxfDocument(await file.text());
       if (!confirmDiscard()) return;
