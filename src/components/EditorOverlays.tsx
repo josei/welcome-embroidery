@@ -185,6 +185,9 @@ export function EditorOverlays() {
     </dialog>
     <div id={"toast"} role={"status"}>
     </div>
+    <div id={"openElsewhere"} role={"status"} hidden={true}>
+      {"This document is open in another tab. Each tab keeps its own edits and autosave copy."}
+    </div>
   </>
  );
 }

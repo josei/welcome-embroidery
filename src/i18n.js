@@ -208,7 +208,7 @@ const ES={
   'SVG exported (design only, not a stitch plan).':'SVG exportado (solo el diseño, no un plan de puntadas).','Copied the private MCP link.':
   'Enlace MCP privado copiado.','Select and copy the link.':'Selecciona y copia el enlace.','Select one shape, path or lettering first.':
   'Selecciona primero una forma, un trazado o un texto.',
-'Discard unsaved changes?':'¿Descartar los cambios sin guardar?','Revoke this link? Agents using it lose access immediately.':
+'Discard unsaved changes?':'¿Descartar los cambios sin guardar?','Saved. This document is also open in another tab.':'Guardado. Este documento también está abierto en otra pestaña.','This document is open in another tab. Each tab keeps its own edits and autosave copy.':'Este documento está abierto en otra pestaña. Cada pestaña guarda sus propios cambios y su copia de autoguardado.','Revoke this link? Agents using it lose access immediately.':
   '¿Revocar este enlace? Los agentes que lo usen perderán el acceso de inmediato.',
 'Paste':'Pegar','Select all':'Seleccionar todo','Fit hoop in view':'Ajustar el bastidor a la vista','Fit everything':'Ajustar todo','Edit text':'Editar texto',
   'Edit nodes':'Editar nodos','Edit nodes (convert to path)':'Editar nodos (convertir a trazado)','Convert to path':'Convertir a trazado',

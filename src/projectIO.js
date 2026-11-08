@@ -11,9 +11,8 @@ import {withSavedHoop} from './storedPrefs.js';
 import {importSvg} from './svgImport.js';
 import {initialDocument, makeStitchLayer, validateDocument} from './engine.js';
 import {t} from './i18n.js';
+import {currentDocId, isDocId, openElsewhere, ownAutosaveKey, setDocId} from './docSlot.js';
 
-/** The autosave key this browser keeps the last design under; saving a project file marks the copy clean. */
-const AUTOSAVE_KEY='welcome.autosave';
 /** The largest project file the editor opens. */
 const PROJECT_LIMIT=33_554_432;
 /** The largest machine file the editor imports: the source bytes are kept inside the project. */
@@ -65,29 +64,38 @@ export function renameProject(text) {
   return true;
 }
 
-/** Saves the document as a .welcome file and marks it, and the autosave copy, clean. */
+/**
+ * Saves the document as a .welcome file, with its document id, and marks this tab's autosave copy clean. Saving while
+ * another tab holds the same document says so: the file is written, but that tab's edits are not part of it.
+ */
 export function projectSave() {
   // The autosave is written on a delay; marking it clean once that write has run keeps a reload from offering it back.
   setTimeout(() => {
     try {
-      const saved = JSON.parse(localStorage.getItem(AUTOSAVE_KEY) || 'null');
+      const saved = JSON.parse(localStorage.getItem(ownAutosaveKey()) || 'null');
       if (saved) {
         saved.clean = true;
-        localStorage.setItem(AUTOSAVE_KEY, JSON.stringify(saved));
+        localStorage.setItem(ownAutosaveKey(), JSON.stringify(saved));
       }
     } catch {}
   }, 0);
   const doc = documentNow().doc;
-  download(JSON.stringify(doc, null, 2), safeProjectFilename(doc.name), 'application/json');
+  download(JSON.stringify({...doc, docId: currentDocId()}, null, 2), safeProjectFilename(doc.name), 'application/json');
   setDocument({dirty: false});
   wired().render();
+  if (openElsewhere()) wired().toast(t('Saved. This document is also open in another tab.'));
 }
 
-/** Opens a validated document as the project: no history, the first object selected, fitted to the view, and clean. */
-/** @param {any} next */
+/**
+ * Opens a validated document as the project: no history, the first object selected, fitted to the view, and clean. The
+ * document keeps the id a saved file carries, or takes a new one.
+ * @param {any} next
+ */
 export function acceptProject(next) {
-  validateDocument(next);
-  const opened = clone(next);
+  const {docId, ...body} = next;
+  validateDocument(body);
+  const opened = clone(body);
+  setDocId(isDocId(docId) ? docId : undefined);
   wired().clearComputed();
   setDocument({doc: opened});
   setDocument({history: []});
@@ -146,6 +154,7 @@ export function newProject() {
   setEditMode(false);
   if (!confirmDiscard()) return;
   wired().clearComputed();
+  setDocId(undefined);
   setDocument({doc: withSavedHoop({...initialDocument(), name: 'Untitled design', objects: []})});
   setDocument({history: []});
   setDocument({future: []});

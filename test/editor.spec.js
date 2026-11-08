@@ -1016,18 +1016,18 @@ test('unsaved work: Open asks first and cancel keeps the design, undo and recove
  const errors=[];page.on('pageerror',e=>errors.push(e.message));
  const dialogs=[];let answer=true;page.on('dialog',d=>{dialogs.push(d.message());if(answer)d.accept();else d.dismiss();});
  await page.goto('/');await page.locator('#new').click();await page.locator('#rect').click();await page.locator('#ellipse').click();await expect(page.locator('.object-row')).toHaveCount(2);
- await page.waitForTimeout(1200);const recovery=await page.evaluate(()=>localStorage.getItem('welcome.autosave'));expect(recovery).toBeTruthy();
+ await page.waitForTimeout(1200);const recovery=await page.evaluate(()=>localStorage.getItem('welcome.autosave:'+sessionStorage.getItem('welcome.tabId')));expect(recovery).toBeTruthy();
  dialogs.length=0;answer=false;
  const replacement={...initialDocument(),name:'Replacement',objects:[]};
  await page.locator('#file').setInputFiles({name:'replacement.welcome',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(replacement))});
  await expect.poll(()=>dialogs.length).toBe(1);expect(dialogs[0]).toBe('Discard unsaved changes?');
  await page.waitForTimeout(300);
  await expect(page.locator('.object-row')).toHaveCount(2);await expect(page.locator('#name')).not.toHaveValue('Replacement');
- expect(await page.evaluate(()=>localStorage.getItem('welcome.autosave'))).toBe(recovery);
+ expect(await page.evaluate(()=>localStorage.getItem('welcome.autosave:'+sessionStorage.getItem('welcome.tabId')))).toBe(recovery);
  await page.reload();await expect(page.locator('#restoreDialog')).toBeVisible();dialogs.length=0;
  await page.locator('#restoreNo').click();await expect.poll(()=>dialogs.length).toBe(1);expect(dialogs[0]).toBe('Discard unsaved changes?');
  await expect(page.locator('#restoreDialog')).toBeVisible();
- const kept=JSON.parse(await page.evaluate(()=>localStorage.getItem('welcome.autosave')));expect(kept.clean).toBe(false);expect(kept.doc).toEqual(JSON.parse(recovery).doc);
+ const kept=JSON.parse(await page.evaluate(()=>localStorage.getItem('welcome.autosave:'+sessionStorage.getItem('welcome.tabId'))));expect(kept.clean).toBe(false);expect(kept.doc).toEqual(JSON.parse(recovery).doc);
  expect(errors).toEqual([]);
 });
 
@@ -2495,3 +2495,34 @@ test('sidebars: the right inspector is as wide as the left sidebar',async({page}
 });
 
 test('header: export and settings gear sit together at the right edge, the same height',async({page})=>{await page.goto('/');const gear=await page.locator('#settingsBtn').boundingBox(),split=await page.locator('.export-split').boundingBox(),header=await page.locator('header.top').boundingBox();expect(Math.abs(gear.height-split.height)).toBeLessThan(1);expect(split.x+split.width).toBeLessThan(gear.x);expect(Math.abs(gear.x+gear.width-(header.x+header.width-14))).toBeLessThan(2);});
+
+test('autosave: each tab keeps its own recovery copy, and a reload restores only that tab\'s design',async({page})=>{
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));page.on('dialog',d=>d.accept());
+ await page.goto('/');await page.locator('#new').click();await page.locator('#name').fill('Alpha');await page.locator('#name').press('Enter');
+ await page.locator('#rect').click();await page.locator('#ellipse').click();await expect(page.locator('.object-row')).toHaveCount(2);
+ const other=await page.context().newPage();const otherErrors=[];other.on('pageerror',e=>otherErrors.push(e.message));other.on('dialog',d=>d.accept());
+ await other.goto('/');await other.locator('#new').click();await other.locator('#name').fill('Beta');await other.locator('#name').press('Enter');
+ await other.locator('#rect').click();await expect(other.locator('.object-row')).toHaveCount(1);
+ await page.waitForTimeout(1200);await other.waitForTimeout(1200);
+ await page.reload();await expect(page.locator('#restoreDialog')).toBeVisible();await expect(page.locator('#restoreInfo')).toContainText('Alpha');
+ await page.locator('#restoreYes').click();await expect(page.locator('#restoreDialog')).toBeHidden();
+ await expect(page.locator('#name')).toHaveValue('Alpha');await expect(page.locator('.object-row')).toHaveCount(2);
+ await other.reload();await expect(other.locator('#restoreDialog')).toBeVisible();await expect(other.locator('#restoreInfo')).toContainText('Beta');
+ await other.locator('#restoreYes').click();await expect(other.locator('#restoreDialog')).toBeHidden();
+ await expect(other.locator('#name')).toHaveValue('Beta');await expect(other.locator('.object-row')).toHaveCount(1);
+ expect(errors).toEqual([]);expect(otherErrors).toEqual([]);
+});
+
+test('open elsewhere: a second tab on the same document shows a notice in both, and it clears when that tab closes',async({page})=>{
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));page.on('dialog',d=>d.accept());
+ await page.goto('/');const docId=await page.evaluate(()=>sessionStorage.getItem('welcome.docId'));
+ const shared=Buffer.from(JSON.stringify({...initialDocument(),name:'Shared badge',objects:[],docId}));
+ await page.locator('#file').setInputFiles({name:'shared.welcome',mimeType:'application/json',buffer:shared});
+ await expect(page.locator('#name')).toHaveValue('Shared badge');await expect(page.locator('#openElsewhere')).toBeHidden();
+ const other=await page.context().newPage();const otherErrors=[];other.on('pageerror',e=>otherErrors.push(e.message));other.on('dialog',d=>d.accept());
+ await other.goto('/');await other.locator('#file').setInputFiles({name:'shared.welcome',mimeType:'application/json',buffer:shared});
+ await expect(other.locator('#name')).toHaveValue('Shared badge');
+ await expect(other.locator('#openElsewhere')).toBeVisible();await expect(page.locator('#openElsewhere')).toBeVisible();
+ await other.close();await expect(page.locator('#openElsewhere')).toBeHidden();
+ expect(errors).toEqual([]);expect(otherErrors).toEqual([]);
+});
