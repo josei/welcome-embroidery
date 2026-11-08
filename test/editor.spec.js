@@ -2543,3 +2543,18 @@ test('unsaved marker and title clear on a .welcome save, and the browser asks be
  await page.reload();await expect.poll(()=>leaveDialogs.length).toBe(1);
  expect(errors).toEqual([]);
 });
+
+test('export and an SVG open leave the unsaved marker set, and reload asks before leaving',async({page})=>{
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));
+ const leaveDialogs=[];page.on('dialog',d=>{if(d.type()==='beforeunload'){leaveDialogs.push(d.type());d.accept();}else d.accept();});
+ await page.goto('/');await page.waitForTimeout(300);
+ await page.locator('#file').setInputFiles({name:'badge.svg',mimeType:'image/svg+xml',buffer:Buffer.from('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect x="10" y="10" width="40" height="30" fill="#527461"/></svg>')});
+ await expect(page.locator('.object-row').first()).toBeVisible();
+ await expect(page.locator('#unsavedMarker')).toBeVisible();await expect(page).toHaveTitle(/^• .+ — Welcome Embroidery$/);
+ await page.reload();await expect.poll(()=>leaveDialogs.length).toBe(1);
+ leaveDialogs.length=0;
+ await page.locator('#rect').click();await expect(page.locator('#unsavedMarker')).toBeVisible();
+ const download=page.waitForEvent('download');await page.locator('#export').click();await page.locator('#format').selectOption('svg');await page.locator('#download').click();await download;
+ await expect(page.locator('#unsavedMarker')).toBeVisible();await expect(page).toHaveTitle(/^• .+ — Welcome Embroidery$/);
+ expect(errors).toEqual([]);
+});

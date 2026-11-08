@@ -190,6 +190,8 @@ export async function openProjectFile(file) {
       const imported = importSvg(await file.text());
       if (!confirmDiscard()) return;
       acceptProject(imported.doc);
+      setDocument({dirty: true});
+      wired().render();
       if (imported.notes.length) wired().toast(imported.notes.join(' '));
     } else if (lower.endsWith('.welcome') || lower.endsWith('.json')) {
       const next = JSON.parse(await file.text());
@@ -199,6 +201,8 @@ export async function openProjectFile(file) {
       const dxf = dxfDocument(await file.text());
       if (!confirmDiscard()) return;
       acceptProject(dxf.doc);
+      setDocument({dirty: true});
+      wired().render();
       const skipped = Object.entries(/** @type {Record<string, number>} */ (dxf.skipped)).map(([k, n]) => `${n} ${k}`).join(', ');
       const paths = dxf.doc.objects.length;
       wired().toast(`DXF imported: ${paths} path${paths === 1 ? '' : 's'}${skipped ? `; skipped ${skipped}` : ''}`
