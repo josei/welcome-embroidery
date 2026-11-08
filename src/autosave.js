@@ -52,7 +52,11 @@ export function mountAutosave() {
       const ago = Math.max(1, Math.round((Date.now() - saved.savedAt) / 60000));
       setRestore({info: t('"{name}", {n} objects, edited {m} min ago.', {name: saved.doc.name, n: saved.doc.objects.length, m: ago})});
       restoreActions.yes = () => { restoreProject(saved.doc); setRestore({open: false}); };
-      restoreActions.no = () => { removeSaved(); setRestore({open: false}); };
+      restoreActions.no = () => {
+        if (!confirm(t('Discard unsaved changes?'))) return;
+        removeSaved();
+        setRestore({open: false});
+      };
       queueMicrotask(() => setRestore({open: true}));
     }
   } catch {

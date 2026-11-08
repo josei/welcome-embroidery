@@ -132,10 +132,19 @@ export function restoreProject(saved) {
   }
 }
 
+/**
+ * Asks before a change throws away unsaved work: true when the document is clean or the user confirms. Cancel leaves the
+ * design, its undo history and the autosave copy untouched.
+ * @returns {boolean}
+ */
+export function confirmDiscard() {
+  return !documentNow().dirty || confirm(t('Discard unsaved changes?'));
+}
+
 /** Starts an empty design, after asking before throwing away unsaved changes. */
 export function newProject() {
   setEditMode(false);
-  if (documentNow().dirty && !confirm(t('Discard unsaved changes?'))) return;
+  if (!confirmDiscard()) return;
   wired().clearComputed();
   setDocument({doc: withSavedHoop({...initialDocument(), name: 'Untitled design', objects: []})});
   setDocument({history: []});
@@ -158,12 +167,16 @@ export async function openProjectFile(file) {
     const lower = file.name.toLowerCase();
     if (lower.endsWith('.svg')) {
       const imported = importSvg(await file.text());
+      if (!confirmDiscard()) return;
       acceptProject(imported.doc);
       if (imported.notes.length) wired().toast(imported.notes.join(' '));
     } else if (lower.endsWith('.welcome') || lower.endsWith('.json')) {
-      acceptProject(JSON.parse(await file.text()));
+      const next = JSON.parse(await file.text());
+      if (!confirmDiscard()) return;
+      acceptProject(next);
     } else if (lower.endsWith('.dxf')) {
       const dxf = dxfDocument(await file.text());
+      if (!confirmDiscard()) return;
       acceptProject(dxf.doc);
       const skipped = Object.entries(/** @type {Record<string, number>} */ (dxf.skipped)).map(([k, n]) => `${n} ${k}`).join(', ');
       const paths = dxf.doc.objects.length;
@@ -206,6 +219,7 @@ export async function importMachineFile(file) {
       size: file.size,
       originalBytesBase64: result.sourceBytesBase64,
     });
+    if (!confirmDiscard()) return;
     const committed = wired().transact(() => {
       setDocument({doc: {...documentNow().doc, objects: [...documentNow().doc.objects, layer]}});
       setSelection({selected: layer.id});
