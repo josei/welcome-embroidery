@@ -2628,3 +2628,34 @@ test('the first-visit sample is a template: New skips the discard confirm until 
 });
 
 test('placing lettering selects it and focuses its text; empty double-click adds nothing',async({page})=>{page.on('dialog',d=>d.accept());const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');await page.locator('#new').click();await page.locator('#letter').click();await expect(page.locator('#letteringText')).toBeFocused();await expect(page.locator('#letteringText')).toBeEnabled();await page.keyboard.type('HELLO');await page.keyboard.press('Tab');await expect(page.locator('.object-row').first()).toContainText('Lettering: HELLO');await expect(page.locator('.object-row')).toHaveCount(1);const a=await page.locator('#art').boundingBox();await page.mouse.dblclick(a.x+30,a.y+30);await expect(page.locator('.object-row')).toHaveCount(1);const t=page.locator('#shapes g.shape').first(),tb=await t.boundingBox();await page.mouse.dblclick(tb.x+tb.width/2,tb.y+tb.height/2);await expect(page.locator('#canvasText')).toBeFocused();await page.keyboard.type('X');await page.keyboard.press('Escape');await expect(page.locator('#canvasText')).toHaveCount(0);await expect(page.locator('.object-row').first()).toContainText('HELLO');expect(errors).toEqual([]);});
+
+// Tool buttons expose their state: the armed tool is aria-pressed="true" and the rest are "false". Each drawing tool
+// returns to Select after one placement, and Add lettering leaves an armed draw tool for Select.
+test('drawing tools report aria-pressed and return to Select after one placement',async({page})=>{page.on('dialog',d=>d.accept());
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));
+ await page.goto('/');await page.locator('#new').click();
+ const pressed=async id=>(await page.locator(`#${id}`).getAttribute('aria-pressed'));
+ const expectOnly=async active=>{for(const id of ['select','line','polygon','star','path','pen','measure']){expect(await pressed(id),id).toBe(id===active?'true':'false');}};
+ await expectOnly('select');
+ const m=await page.evaluate(()=>{const m=document.querySelector('#art').getScreenCTM();return {a:m.a,d:m.d,e:m.e,f:m.f};}),at=(x,y)=>({x:m.a*x+m.e,y:m.d*y+m.f});
+ // Every tool that places an object on one drag or path finish: armed, then Select after the placement.
+ for(const id of ['line','polygon','star']){
+  await page.locator(`#${id}`).click();await expectOnly(id);
+  const a=at(-10,-10),b=at(10,10);await page.mouse.move(a.x,a.y);await page.mouse.down();await page.mouse.move(b.x,b.y,{steps:4});await page.mouse.up();
+  await expectOnly('select');
+ }
+ await page.locator('#path').click();await expectOnly('path');
+ for(const [x,y] of [[-20,-20],[20,-20],[0,20]]){const p=at(x,y);await page.mouse.click(p.x,p.y);}
+ await page.keyboard.press('Enter');await expectOnly('select');
+ await page.locator('#pen').click();await expectOnly('pen');
+ for(const [x,y] of [[-20,0],[0,-10],[20,0]]){const p=at(x,y);await page.mouse.click(p.x,p.y);}
+ await page.keyboard.press('Enter');await expectOnly('select');
+ // Measure stays armed until Esc: it places no object.
+ await page.locator('#measure').click();await expectOnly('measure');
+ await page.keyboard.press('Escape');await expectOnly('select');
+ // Add lettering from an armed draw tool: the line tool is dropped and Select is the pressed one.
+ await page.locator('#line').click();await expectOnly('line');
+ await page.locator('#letter').click();await expectOnly('select');
+ await expect(page.locator('.object-row').filter({hasText:'BLOOM'}).first()).toBeAttached();
+ expect(errors).toEqual([]);
+});

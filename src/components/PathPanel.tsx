@@ -26,7 +26,7 @@ export function PathPanel() {
     shapePathActions.appliqueFromSelection(
     )} title="With two or more closed shapes selected: the bottom-most stays the fabric, and each other shape becomes an appliqué on it"
       data-tooltip="With two or more closed shapes selected: the bottom-most stays the fabric, and each other shape becomes an appliqué on it">Appliqué
-        from selection</button><button type="button" id="knife" className={tool ===
+        from selection</button><button type="button" id="knife" aria-pressed={tool === 'knife'} className={tool ===
     'knife' ? 'active-tool' : undefined} onClick={() =>
     toolActions.press(
     'knife')} title="Knife (K): click two points to cut the selected closed shape along the line between them"
