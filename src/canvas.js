@@ -4,6 +4,7 @@
 // Document state stays in app.js; this module talks to it through `api`.
 import {geometry,objectBounds,hoopSize} from './engine.js';
 import {drawScene} from './canvasScene.js';
+import {wheelZoomFactor,wheelZooms} from './wheelZoom.js';
 import {createCanvasEditing} from './canvasEditing.js';
 import {createCanvasTools} from './canvasTools.js';
 import {deletingGuideState,handModeState,panningState} from './canvasModeState.js';
@@ -82,8 +83,7 @@ export function createCanvas(/** @type {any} */ api){
     r.top,wx=vp.cx+(px-w/2)/vp.s,wy=vp.cy+(py-h/2)/vp.s;vp.s=Math.max(.4,Math.min(160,vp.s*factor));vp.cx=wx-(px-w/2)/vp.s;vp.cy=wy-(py-h/2)/vp.s;apply();}
   function zoomTo100(){zoomAt(PX_PER_MM/vp.s);}
   container.addEventListener('wheel',(/** @type {any} */ e)=>{if(e.target.closest?.('#preview3d,.floating,.zoombar,#ctxMenu'))return;e.preventDefault();
-    const mouse=e.deltaMode===1||(Math.abs(e.deltaY)>=100&&e.deltaX===0&&Number.isInteger(e.deltaY));
-    if(e.ctrlKey||e.metaKey||mouse)zoomAt(Math.exp(-e.deltaY*(e.ctrlKey?.01:.0016)),e.clientX,e.clientY);
+    if(wheelZooms(e))zoomAt(wheelZoomFactor(e),e.clientX,e.clientY);
       else{vp.cx+=e.deltaX/vp.s;vp.cy+=e.deltaY/vp.s;apply();}},{passive:false});
   new ResizeObserver(()=>apply()).observe(container);
   document.addEventListener('keydown',e=>
