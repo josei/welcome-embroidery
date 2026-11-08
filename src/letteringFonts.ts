@@ -59,7 +59,7 @@ interface FontEntry {
 /** What the lettering edits need from the editor, supplied by app.js. */
 export interface LetteringApi {
   /** Runs one undoable command through the document store. */
-  edit(operations: unknown[], after?: () => void): boolean;
+  edit(operations: unknown[], after?: () => void, coalesceKey?: string): boolean;
   /** Runs one undoable command that changes the document itself; false puts the document back. */
   transact(fn: () => void): boolean;
   /** Shows a short message to the user. */
@@ -361,9 +361,21 @@ export function initFontPicker() {
   });
 }
 
+/** The text as the document stores it: one line, upper case, at most 24 characters, unless the font is a registry font. */
+function storedLetteringText(o: NonNullable<ReturnType<typeof textObj>>, text: string): string {
+  return isRegistryFont(o.font) ? text : text.replace(/\n/g, ' ').toUpperCase().slice(0, 24);
+}
+
 /** Wires the lettering edits and the font picker. app.js calls this once, before the first render. */
 export function configureLettering(next: LetteringApi) {
   api = next;
+  letteringActions.preview = text => {
+    const o = textObj();
+    if (!o) return;
+    const value = storedLetteringText(o, text);
+    if (!value.trim() || value === o.text) return;
+    wired().edit([{op: 'set_object', id: o.id, text: value}], undefined, `lettering-text:${o.id}`);
+  };
   letteringActions.commit = (field, text) => {
     if (field === 'alongOffset') {
       const o = selectedObject();
@@ -373,14 +385,13 @@ export function configureLettering(next: LetteringApi) {
     const o = textObj();
     if (!o) return;
     if (field === 'text') {
-      let value = text;
-      if (!isRegistryFont(o.font)) value = value.replace(/\n/g, ' ').toUpperCase().slice(0, 24);
+      const value = storedLetteringText(o, text);
       if (!value.trim()) {
         wired().toast('Lettering needs some text.');
         syncTextInspector(o);
         return false;
       }
-      wired().edit([{op: 'set_object', id: o.id, text: value}]);
+      if (value !== o.text) wired().edit([{op: 'set_object', id: o.id, text: value}]);
       return;
     }
     if (field === 'height') {

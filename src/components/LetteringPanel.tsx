@@ -1,6 +1,7 @@
 import {layoutState} from '../layoutState.js';
 import {stitchRowsState} from '../stitchRowsState.js';
 import {useSyncExternalStore} from 'react';
+import type {ChangeEvent} from 'react';
 import {letteringActions, letteringFieldsState} from '../letteringFieldsState.js';
 import {useDraftInput} from './useDraftInput';
 import {stitchPanelActions, stitchPanelState} from '../stitchPanelState.js';
@@ -13,7 +14,11 @@ export function LetteringPanel() {
  const l = useSyncExternalStore(letteringFieldsState.subscribe, letteringFieldsState.get);
  const panel = useSyncExternalStore(stitchPanelState.subscribe, stitchPanelState.get);
  const along = useDraftInput(l.alongOffset, text => letteringActions.commit('alongOffset', text), 'store');
- const text = useDraftInput(l.text, v => letteringActions.commit('text', v), 'typed', false);
+ const draftText = useDraftInput(l.text, v => letteringActions.commit('text', v), 'typed', false);
+ const text = {...draftText, onChange: (e: ChangeEvent<HTMLTextAreaElement>) => {
+  draftText.onChange(e);
+  letteringActions.preview(e.target.value);
+ }};
  const height = useDraftInput(l.height, v => letteringActions.commit('height', v));
  const tracking = useDraftInput(l.tracking, v => letteringActions.commit('tracking', v));
  const wordSpacing = useDraftInput(l.wordSpacing, v => letteringActions.commit('wordSpacing', v));

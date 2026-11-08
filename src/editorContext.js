@@ -6,7 +6,7 @@
  *   canvas: any,
  *   render: () => void,
  *   toast: (message: string) => void,
- *   edit: (operations: any[], after?: () => void) => boolean,
+ *   edit: (operations: any[], after?: () => void, coalesceKey?: string) => boolean,
  *   transact: (fn: () => void) => boolean,
  *   compile: any,
  *   autosave: {schedule: () => void} | null,
