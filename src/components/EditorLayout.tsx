@@ -20,6 +20,7 @@ import {BooleanButtons, FlipButtons} from './SelectionToolbarButtons';
 import {SewingOrder} from './SewingOrder';
 import {SnapObjectButton} from './SnapObjectButton';
 import {StatusRun} from './StatusRun';
+import {ToastStack} from './ToastStack';
 import {StitchAccordionRows} from './StitchAccordionRows';
 import {StitchBlendRows} from './StitchBlendRows';
 import {StitchBlingRows} from './StitchBlingRows';
@@ -220,6 +221,7 @@ export function EditorLayout() {
           <CanvasTextEditor />
         </div>
         <footer>
+          <ToastStack />
           <PlaybackBar />
           <StatusRun />
         </footer>

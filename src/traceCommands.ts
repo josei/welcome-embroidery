@@ -17,7 +17,7 @@ export interface TraceOptions {
 export interface TraceApi {
   /** Runs the traced shapes as one undo step. */
   edit(operations: Record<string, unknown>[], after?: () => void): boolean;
-  toast(message: string): void;
+  toast(message: string, kind?: 'status' | 'error'): void;
 }
 
 /** What the dialog shows after tracing: the message for its status line, and whether the dialog can close. */

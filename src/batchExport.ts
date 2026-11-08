@@ -13,7 +13,7 @@ export interface BatchApi {
   /** Loads the fonts the export needs before it runs. */
   ensureFonts(): Promise<void>;
   /** Shows a short message to the user. */
-  toast(message: string): void;
+  toast(message: string, kind?: 'status' | 'error'): void;
 }
 
 /** A document object, typed with the one field the batch exports read. */
@@ -77,11 +77,11 @@ export async function exportBatch() {
       names: names.length ? names : null,
     });
   } catch (error) {
-    wired().toast((error as Error).message);
+    wired().toast((error as Error).message, 'error');
     return;
   }
   if (!docs.length) {
-    wired().toast(t('The design does not fit in one hoop.'));
+    wired().toast(t('The design does not fit in one hoop.'), 'error');
     return;
   }
   await wired().ensureFonts().catch(() => {});

@@ -45,7 +45,7 @@ export interface ArrayApi {
   /** Runs one undoable command through the document store. */
   edit(operations: unknown[]): boolean;
   /** Shows a short message to the user. */
-  toast(message: string): void;
+  toast(message: string, kind?: 'status' | 'error'): void;
 }
 
 let api: ArrayApi | null = null;

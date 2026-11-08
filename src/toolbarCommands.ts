@@ -14,7 +14,7 @@ export interface ToolbarApi {
   /** Runs one undoable command through the document store. */
   edit(operations: unknown[], after?: () => void): boolean;
   render(): void;
-  toast(message: string): void;
+  toast(message: string, kind?: 'status' | 'error'): void;
   /** Drops the compiled plan and the playback position after a history change. */
   clearComputed(): void;
   /** Adds a new rectangle, ellipse or lettering object to the canvas. */

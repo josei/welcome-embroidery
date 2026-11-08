@@ -3,6 +3,7 @@
 // Static markup and dynamically written text/attributes are translated by a DOM walker + observer;
 // strings with numbers use {name} placeholders.
 const ES={
+'Messages':'Mensajes','Dismiss':'Descartar','No messages yet.':'Todavía no hay mensajes.',
 'Welcome Embroidery':'Welcome Embroidery','Untitled.welcome':'Sin título.welcome','New design':'Nuevo diseño','Open project or SVG':'Abrir proyecto o SVG',
   'Import JEF, VP3, DST, SEW, PEC, PES, EXP, HUS, XXX, DSB, DSZ, TAP, TBF, PCS, SHV, STX, BRO, EMD, KSM or 10O':
   'Importar JEF, VP3, DST, SEW, PEC, PES, EXP, HUS, XXX, DSB, DSZ, TAP, TBF, PCS, SHV, STX, BRO, EMD, KSM o 10O',

@@ -139,7 +139,7 @@ function mountWorksheet() {
       if (!plan || plan.revision !== documentNow().doc.revision) await compileNow(true);
       const current = getPlan();
       if (!current || current.revision !== documentNow().doc.revision) {
-        editor.toast(getCompileError() || t('Compile the design first.'));
+        editor.toast(getCompileError() || t('Compile the design first.'), 'error');
         return;
       }
       const format = /** @type {'text'|'svg'} */ (/** @type {HTMLSelectElement} */ (document.getElementById('worksheetFormat')).value);
@@ -157,14 +157,14 @@ function mountWorksheet() {
       if (!plan || plan.revision !== documentNow().doc.revision) await compileNow(true);
       const current = getPlan();
       if (!current || current.revision !== documentNow().doc.revision) {
-        editor.toast(getCompileError() || t('Compile the design first.'));
+        editor.toast(getCompileError() || t('Compile the design first.'), 'error');
         return;
       }
       try {
         await navigator.clipboard.writeText(sewingWorksheet(/** @type {any} */ (documentNow().doc), current, 'text'));
         editor.toast(t('Worksheet copied to the clipboard.'));
       } catch {
-        editor.toast(t('The browser did not allow copying. Use Download instead.'));
+        editor.toast(t('The browser did not allow copying. Use Download instead.'), 'error');
       }
     };
   }

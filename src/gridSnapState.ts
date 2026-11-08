@@ -7,7 +7,7 @@ export const gridSnapState = createStore(false);
 /** What turning the grid snap on or off needs from the editor. */
 export interface GridSnapApi {
   render(): void;
-  toast(message: string): void;
+  toast(message: string, kind?: 'status' | 'error'): void;
 }
 
 let api: GridSnapApi | null = null;

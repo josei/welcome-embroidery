@@ -19,7 +19,7 @@ export interface ExportApi {
   request(data: Record<string, unknown>): Promise<{bytes: BlobPart; plan: ExportPlan}>;
   /** Loads the fonts the export needs before it runs. */
   ensureFonts(): Promise<void>;
-  toast(message: string): void;
+  toast(message: string, kind?: 'status' | 'error'): void;
   render(): void;
   /** Makes the compiled plan the one the simulation and the worksheet use. */
   setPlan(plan: ExportPlan): void;

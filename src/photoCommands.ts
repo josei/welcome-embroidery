@@ -8,7 +8,7 @@ import {hoopSize} from './engine.js';
 export interface PhotoApi {
   /** Runs one undoable command through the document store. */
   edit(operations: Record<string, unknown>[], after?: () => void): boolean;
-  toast(message: string): void;
+  toast(message: string, kind?: 'status' | 'error'): void;
 }
 
 let api: PhotoApi | null = null;
@@ -83,6 +83,6 @@ export async function addPhoto(file: File) {
     });
     wired().toast('Photo stitch added. Adjust spacing and contrast in the sidebar.');
   } catch (error) {
-    wired().toast((error as Error).message || 'That picture could not be read.');
+    wired().toast((error as Error).message || 'That picture could not be read.', 'error');
   }
 }

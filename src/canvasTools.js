@@ -55,7 +55,7 @@ export function createCanvasTools(api){
   async function add(/** @type {string} */ kind){
     const id=crypto.randomUUID();
     if(kind==='text'){
-      try{await api.ensureFontLoaded(api.textFont());}catch(/** @type {any} */ error){api.toast(error.message);return;}
+      try{await api.ensureFontLoaded(api.textFont());}catch(/** @type {any} */ error){api.toast(error.message, 'error');return;}
       const f=getFont(api.textFont());
       api.commit([{op:'add_text',id,text:'BLOOM',x:-18,y:18,height:api.fitHeight(api.textFont(),'BLOOM'),
         thread:$('#thread').value,font:api.textFont(),...(f?.kind==='outline'?{stitch:'fill'}:{})}],()=>{

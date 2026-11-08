@@ -2839,3 +2839,28 @@ test('an out-of-range fill border width is marked inline, reverts on Enter, and 
  await expectOutOfRangeRevert(page,{field:'#borderWidth',bad:'-5',keep:'0',range:'0–12 mm',message:'Border width must be 0–12 mm. Rectangle keeps 0 mm.',commitKey:'Enter'});
  expect(errors).toEqual([]);
 });
+
+// Toasts: an error stays on screen until it is dismissed, a confirmation has a timer, and the Messages log keeps what was shown.
+test('an error toast stays after five seconds, the Messages log keeps both of two messages, and the stack clears the status bar at 1100 by 700',async({page})=>{
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));
+ await page.setViewportSize({width:1100,height:700});await page.goto('/');
+ await page.locator('#machineFile').setInputFiles({name:'broken.jef',mimeType:'application/octet-stream',buffer:Buffer.from([1,2,3])});
+ await page.keyboard.press('Control+Alt+V');
+ const alert=page.locator('#toast [role="alert"]');
+ await expect(alert).toContainText('Invalid embroidery file');
+ await expect(page.locator('#toast [role="status"]')).toContainText('Copy a style first');
+ const footer=await page.locator('main > footer').boundingBox(),stack=await alert.boundingBox(),sidebarBottom=await page.locator('.hoop-edit').first().boundingBox();
+ expect(stack.y+stack.height).toBeLessThanOrEqual(footer.y);
+ if(sidebarBottom)expect(stack.x>=sidebarBottom.x+sidebarBottom.width||stack.x+stack.width<=sidebarBottom.x||stack.y+stack.height<=sidebarBottom.y||stack.y>=sidebarBottom.y+sidebarBottom.height).toBe(true);
+ // Hovering the confirmation holds its timer: it is still up after five seconds, and leaves once the pointer moves away.
+ const status=page.locator('#toast [role="status"]'),statusBox=await status.boundingBox();await page.mouse.move(statusBox.x+statusBox.width/2,statusBox.y+statusBox.height/2);
+ await page.waitForTimeout(5000);
+ await expect(alert).toBeVisible();await expect(alert).toContainText('Invalid embroidery file');await expect(status).toBeVisible();
+ await page.mouse.move(5,5);await expect(status).toHaveCount(0,{timeout:9000});
+ await page.locator('#messagesBtn').click();await expect(page.locator('#messagesDialog')).toBeVisible();
+ await expect(page.locator('#messagesList')).toContainText('Invalid embroidery file');await expect(page.locator('#messagesList')).toContainText('Copy a style first');
+ await expect(page.locator('#messagesList time')).toHaveCount(2);
+ await page.locator('#messagesDialog button').last().click();await expect(page.locator('#messagesDialog')).toBeHidden();
+ await alert.locator('.toast-close').click();await expect(alert).toHaveCount(0);
+ expect(errors).toEqual([]);
+});

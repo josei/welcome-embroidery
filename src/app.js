@@ -90,7 +90,7 @@ mountCanvas();
 mountKeyboard();
 render();
 const openId = new URL(location.href).searchParams.get('open');
-if (openId) openArtifact(openId).catch(error => toast(error.message));
+if (openId) openArtifact(openId).catch(error => toast(error.message, 'error'));
 mountPinGuide();
 scheduleCompile(100);
 mountEditorChrome();

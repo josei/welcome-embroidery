@@ -22,7 +22,7 @@ interface AgentBridge {
 /** What the agent dialog needs from the editor, supplied by app.js. */
 export interface AgentDialogApi {
   bridge: AgentBridge;
-  toast(message: string): void;
+  toast(message: string, kind?: 'status' | 'error'): void;
 }
 
 let api: AgentDialogApi | null = null;

@@ -33,7 +33,7 @@ import {configureStitchPanelActions} from './stitchPanelCommands.js';
 export interface StitchPanelApi {
   edit(operations: unknown[], after?: () => void): boolean;
   orderedIds(): string[];
-  toast(message: string): void;
+  toast(message: string, kind?: 'status' | 'error'): void;
 }
 
 interface PhotoValue {

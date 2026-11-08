@@ -1,5 +1,6 @@
 import {useEffect, useRef, useSyncExternalStore} from 'react';
 import {KeysDialog} from './KeysDialog';
+import {MessagesDialog} from './ToastStack';
 import {RestoreDialog} from './RestoreDialog';
 import {SaveAsDialog} from './SaveAsDialog';
 import {TraceDialog} from './TraceDialog';
@@ -206,8 +207,7 @@ export function EditorOverlays() {
         </p>
       </form>
     </dialog>
-    <div id={"toast"} role={"status"}>
-    </div>
+    <MessagesDialog />
     <div id={"openElsewhere"} role={"status"} hidden={true}>
       {"This document is open in another tab. Each tab keeps its own edits and autosave copy."}
     </div>

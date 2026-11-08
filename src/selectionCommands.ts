@@ -36,7 +36,7 @@ export interface SelectionApi {
   /** Runs a change that manages the document itself (paste replaces the whole document). */
   transact(fn: () => void): boolean;
   render(): void;
-  toast(message: string): void;
+  toast(message: string, kind?: 'status' | 'error'): void;
 }
 
 let api: SelectionApi | null = null;

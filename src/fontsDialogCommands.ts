@@ -4,7 +4,7 @@ import {documentNow} from './documentState.js';
 export interface FontsDialogApi {
   /** Runs one undoable command through the document store. */
   edit(operations: Record<string, unknown>[]): boolean;
-  toast(message: string): void;
+  toast(message: string, kind?: 'status' | 'error'): void;
 }
 
 let api: FontsDialogApi | null = null;

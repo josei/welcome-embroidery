@@ -63,7 +63,7 @@ export interface LetteringApi {
   /** Runs one undoable command that changes the document itself; false puts the document back. */
   transact(fn: () => void): boolean;
   /** Shows a short message to the user. */
-  toast(message: string): void;
+  toast(message: string, kind?: 'status' | 'error'): void;
   /** Redraws the editor after a font finishes loading. */
   render(): void;
 }
@@ -119,7 +119,7 @@ export function kickFontLoads() {
       () => {
         fontLoading.delete(id);
         fontFailed.add(id);
-        wired().toast(`Font ${id} could not be loaded.`);
+        wired().toast(`Font ${id} could not be loaded.`, 'error');
       },
     );
   }
@@ -209,7 +209,7 @@ export async function setFont(fid: string) {
   try {
     await ensureFontLoaded(fid);
   } catch (error) {
-    wired().toast((error as Error).message);
+    wired().toast((error as Error).message, 'error');
     syncTextInspector(textObj());
     return;
   }
@@ -306,7 +306,7 @@ export async function loadFontFile(file: File) {
       syncTextInspector(selectedObject() ?? null);
     }
   } catch (error) {
-    toast((error as Error).message);
+    toast((error as Error).message, 'error');
   }
 }
 
@@ -387,7 +387,7 @@ export function configureLettering(next: LetteringApi) {
     if (field === 'text') {
       const value = storedLetteringText(o, text);
       if (!value.trim()) {
-        wired().toast('Lettering needs some text.');
+        wired().toast('Lettering needs some text.', 'error');
         syncTextInspector(o);
         return false;
       }
@@ -419,7 +419,7 @@ export function configureLettering(next: LetteringApi) {
     if (!o) return;
     if (field === 'vertical') {
       if (value && !isRegistryFont(o.font)) {
-        wired().toast(t('Vertical lettering needs a bundled or loaded font. Choose one in Font.'));
+        wired().toast(t('Vertical lettering needs a bundled or loaded font. Choose one in Font.'), 'error');
         return false;
       }
       if (wired().edit([{op: 'set_object', id: o.id, vertical: Boolean(value)}]) && value) fitVerticalToHoop(o.id);

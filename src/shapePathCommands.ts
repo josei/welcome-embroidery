@@ -10,7 +10,7 @@ export interface ShapePathApi {
   /** Runs one undoable command through the document store. */
   edit(operations: unknown[], after?: () => void): boolean;
   /** Shows a short message to the user. */
-  toast(message: string): void;
+  toast(message: string, kind?: 'status' | 'error'): void;
   /** Redraws after a selection-only change, which does not go through edit. */
   render(): void;
 }
@@ -98,7 +98,7 @@ export function configureShapePathActions(next: ShapePathApi) {
     const closed = ids.filter(id => isClosedShape(objects().find(o => o.id === id)));
     const skipped = ids.length - closed.length;
     if (closed.length < 2) {
-      wired().toast(t('Appliqué from a group needs two or more closed shapes.'));
+      wired().toast(t('Appliqué from a group needs two or more closed shapes.'), 'error');
       return;
     }
     wired().edit([{op: 'applique_group', ids: closed}], () => {
@@ -116,7 +116,7 @@ export function configureShapePathActions(next: ShapePathApi) {
     });
     const maxArea = Number(text);
     if (!(maxArea >= .1 && maxArea <= 20)) {
-      wired().toast(t('The hole limit must be 0.1 to 20 mm².'));
+      wired().toast(t('The hole limit must be 0.1 to 20 mm².'), 'error');
       return;
     }
     const count = ids.reduce((n, id) => n + countSmallHoles(objects().find(o => o.id === id), maxArea), 0);
@@ -130,7 +130,7 @@ export function configureShapePathActions(next: ShapePathApi) {
     const ids = [...selState().multi].filter(id => isClosedShape(objects().find(o => o.id === id)));
     const maxArea = Number(text);
     if (!(maxArea >= .1 && maxArea <= 20)) {
-      wired().toast(t('The island limit must be 0.1 to 20 mm².'));
+      wired().toast(t('The island limit must be 0.1 to 20 mm².'), 'error');
       return;
     }
     const count = ids.filter(id => isSmallIsland(objects().find(o => o.id === id), maxArea)).length;

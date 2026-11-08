@@ -5,7 +5,7 @@
  * @typedef {{
  *   canvas: any,
  *   render: () => void,
- *   toast: (message: string) => void,
+ *   toast: (message: string, kind?: 'status' | 'error') => void,
  *   edit: (operations: any[], after?: () => void, coalesceKey?: string) => boolean,
  *   transact: (fn: () => void) => boolean,
  *   compile: any,

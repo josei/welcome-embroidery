@@ -34,7 +34,7 @@ export function transact(fn, coalesceKey) {
     setDocument({doc: before});
     setSelection({selected: beforeSelected});
     editor.render();
-    editor.toast(/** @type {any} */ (error).message);
+    editor.toast(/** @type {any} */ (error).message, 'error');
     return false;
   }
   const current = documentNow(), nextHistory = continuing ? current.history : [...current.history, before];

@@ -31,7 +31,7 @@ const MACHINE_EXTENSIONS=['jef','vp3','dst','sew','pec','pes','exp','hus','xxx',
  * @typedef {Object} ProjectApi What the project commands need from the editor, supplied by app.js.
  * @property {() => void} clearComputed Drops the compiled plan and the playback position after the document is replaced.
  * @property {() => void} render
- * @property {(message: string) => void} toast
+ * @property {(message: string, kind?: 'status' | 'error') => void} toast
  * @property {(operations: Record<string, unknown>[], after?: () => void) => boolean} edit Runs one undoable command.
  * @property {(fn: () => void) => boolean} transact Runs a change that manages the document itself.
  * @property {(data: Record<string, unknown>, transfer?: Transferable[]) => Promise<any>} request Sends one worker job.
@@ -64,7 +64,7 @@ export function configureProjectIO(next) {
 export function renameProject(text) {
   const name = text.trim();
   if (!name) {
-    wired().toast('Project name cannot be empty.');
+    wired().toast('Project name cannot be empty.', 'error');
     return false;
   }
   wired().edit([{op: 'rename_document', name}]);
@@ -131,7 +131,7 @@ function markSaved(revision) {
 
 /** @param {unknown} error */
 function reportSaveError(error) {
-  wired().toast(/** @type {Error} */ (error).message || t('The project could not be saved.'));
+  wired().toast(/** @type {Error} */ (error).message || t('The project could not be saved.'), 'error');
 }
 
 /**
@@ -325,7 +325,7 @@ export function restoreProject(saved) {
     setDocument({dirty: true});
     wired().render();
   } catch (error) {
-    wired().toast(/** @type {Error} */ (error).message);
+    wired().toast(/** @type {Error} */ (error).message, 'error');
   }
 }
 
@@ -388,7 +388,7 @@ export async function openProjectFile(file) {
       throw Error('Open a .welcome project, SVG or ASCII DXF here. Use Import JEF / VP3 for machine files.');
     }
   } catch (error) {
-    wired().toast(/** @type {Error} */ (error).message);
+    wired().toast(/** @type {Error} */ (error).message, 'error');
   }
 }
 
@@ -431,6 +431,6 @@ export async function importMachineFile(file) {
       wired().compileNow();
     }
   } catch (error) {
-    wired().toast(/** @type {Error} */ (error).message);
+    wired().toast(/** @type {Error} */ (error).message, 'error');
   }
 }
