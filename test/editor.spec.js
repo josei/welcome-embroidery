@@ -2722,3 +2722,22 @@ test('Edit and Arrange menus run the same commands as their shortcuts and disabl
  expect(await page.locator('#shapes').innerHTML()).toBe(flippedFromMenu);
  expect(errors).toEqual([]);
 });
+
+test('with 30 objects every sewing-order row scrolls clear of the hoop footer',async({page})=>{page.on('dialog',d=>d.accept());
+ await page.goto('/');await expect(page.locator('#objects .object-row')).toHaveCount(5);
+ await page.locator('#objects .object-row').first().click();for(let i=0;i<26;i++)await page.keyboard.press('Control+d');
+ const rows=page.locator('#objects .object-row');await expect(rows).toHaveCount(31);
+ const list=page.locator('#objects'),hoop=page.locator('.footer.hoop-edit');
+ // The list ends where the hoop footer begins: the footer is its own section, not laid over the rows.
+ const lb=await list.boundingBox(),hb=await hoop.boundingBox();expect(lb.y+lb.height).toBeLessThanOrEqual(hb.y+0.5);
+ // The hoop controls stay on screen and reachable while the list is long.
+ await expect(page.locator('#hoopPreset')).toBeVisible();await expect(page.locator('#hoopRotate')).toBeVisible();
+ // Every row can be scrolled fully into view, and at that point the topmost element at its centre is the row itself.
+ for(let i=0;i<31;i++){
+  const row=rows.nth(i);await row.scrollIntoViewIfNeeded();
+  const hit=await row.evaluate(el=>{const r=el.getBoundingClientRect(),list=document.getElementById('objects').getBoundingClientRect();
+   const top=document.elementFromPoint(r.x+r.width/2,r.y+r.height/2);
+   return {fully:r.top>=list.top-0.5&&r.bottom<=list.bottom+0.5,ownsPoint:Boolean(top&&el.contains(top)),covered:Boolean(top&&top.closest('.footer.hoop-edit'))};});
+  expect(hit,`row ${i}`).toEqual({fully:true,ownsPoint:true,covered:false});
+ }
+});

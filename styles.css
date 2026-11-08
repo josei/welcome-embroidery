@@ -87,6 +87,12 @@ nav .icon-button:first-of-type{margin-left:auto}
 .footer.hoop-edit{display:flex;align-items:center;gap:6px;left:16px;width:224px;right:auto;bottom:16px;font-size:11px;color:#66726c}.hoop-edit input{width:52px;border:1px solid #e3e6e1;border-radius:6px;padding:4px 6px;font:inherit;background:#f6f7f5}.hoop-edit select{border:1px solid #e3e6e1;border-radius:6px;padding:4px;font:inherit;font-size:11px;background:#f6f7f5;width:84px}
 .panel .footer.hoop-edit input{width:46px;padding:4px}.panel .footer.hoop-edit select{width:76px;padding:4px}.footer.hoop-edit{gap:4px;width:224px}
 .hoop-edit{flex-wrap:wrap}
+/* Desktop: the object list scrolls in the left column and the hoop row stays fixed under it, so the rows never sit under the footer. */
+@media (min-width:1101px) and (min-height:501px){
+ .layout>aside.panel:first-child{display:flex;flex-direction:column;overflow:hidden}
+ .layout>aside.panel:first-child>#objects{flex:1 1 auto;min-height:0;overflow-y:auto;margin-top:0}
+ .layout>aside.panel:first-child>.footer.hoop-edit{position:static;flex:0 0 auto;width:auto;margin:10px 0 0;padding-top:10px;border-top:1px solid #e3e6e1}
+}
 #hoopRotate{font-size:11px;padding:3px 8px;border:1px solid #e1e3dd;border-radius:6px;background:#fff;color:#4d5a54}
 
 .icon-button.agent-on{color:var(--teal)}.icon-button.agent-on::before{content:'';position:absolute;top:5px;right:5px;width:7px;height:7px;border-radius:50%;background:#89a377;border:1.5px solid #fff}.icon-button.agent-active::before{background:var(--teal);animation:pulse 1.2s ease-in-out infinite}@keyframes pulse{50%{transform:scale(1.35)}}
