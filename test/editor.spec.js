@@ -2657,5 +2657,11 @@ test('drawing tools report aria-pressed and return to Select after one placement
  await page.locator('#line').click();await expectOnly('line');
  await page.locator('#letter').click();await expectOnly('select');
  await expect(page.locator('.object-row').filter({hasText:'BLOOM'}).first()).toBeAttached();
+ // Add rectangle and Add ellipse are one-shot: never pressed, and Select is pressed after each placement.
+ for(const id of ['rect','ellipse']){
+  await page.locator('#line').click();await expectOnly('line');
+  await page.locator(`#${id}`).click();await expectOnly('select');
+  expect(await pressed(id),id).toBe('false');
+ }
  expect(errors).toEqual([]);
 });

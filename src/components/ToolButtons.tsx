@@ -61,11 +61,11 @@ export function PathTool() {
 }
 
 // The add rectangle, ellipse and lettering buttons. Each adds its shape through the same canvas command as before.
-// Adding is a one-shot action, not a tool, so the button has no pressed state. It still leaves any drawing tool first,
-// so the Select button is the pressed one after the object is placed.
+// Adding is a one-shot action, so it is never armed: aria-pressed is always false. It still leaves any drawing tool
+// first, so the Select button is the pressed one after the object is placed.
 export function AddShapeButton({kind, id, label, icon}: {kind: 'rect' | 'ellipse' | 'text'; id: string; label: string; icon: string}) {
  return (
-  <button className="icon-button" id={id} aria-label={label} title={label} data-tooltip={label} onClick={() => {
+  <button aria-pressed={false} className="icon-button" id={id} aria-label={label} title={label} data-tooltip={label} onClick={() => {
     toolActions.press('select');
     toolbarActions.addShape(kind);
   }}>
