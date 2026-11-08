@@ -1,4 +1,5 @@
-import {useEffect, useRef, useSyncExternalStore} from 'react';
+import {useRef, useSyncExternalStore} from 'react';
+import {useModalDialog} from './useModalDialog';
 import {t} from '../i18n.js';
 import {modifierName} from '../shortcutLabels.js';
 import {SHORTCUTS, setShortcutsOpen, shortcutsState} from '../shortcutsState.js';
@@ -6,12 +7,7 @@ import {SHORTCUTS, setShortcutsOpen, shortcutsState} from '../shortcutsState.js'
 export function KeysDialog() {
  const open = useSyncExternalStore(shortcutsState.subscribe, shortcutsState.get);
  const ref = useRef<HTMLDialogElement>(null);
- useEffect(() => {
-  const dialog = ref.current;
-  if (!dialog) return;
-  if (open && !dialog.open) dialog.showModal();
-  if (!open && dialog.open) dialog.close();
- }, [open]);
+ useModalDialog(ref, open, '#helpBtn');
  return (
   <dialog id="keysDialog" ref={ref} onClose={() =>
     setShortcutsOpen(false)}><form method="dialog"><h2>Keyboard shortcuts</h2><div id="keysList" className="keys-list">{SHORTCUTS.flatMap(([title, rows]) => [

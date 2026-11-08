@@ -1,6 +1,7 @@
 import {useEffect, useRef, useSyncExternalStore} from 'react';
 import {t} from '../i18n.js';
 import {toastActions, toastState} from '../toastState.js';
+import {useModalDialog} from './useModalDialog';
 
 // The toasts on screen. #toast keeps the text of the messages it shows (the tests and the public capture read it), and
 // each message is its own row: a confirmation is role="status" and goes away by itself; an error is role="alert", has a
@@ -62,12 +63,7 @@ export function ToastStack() {
 export function MessagesDialog() {
  const {logOpen, log} = useSyncExternalStore(toastState.subscribe, toastState.get);
  const ref = useRef<HTMLDialogElement>(null);
- useEffect(() => {
-  const dialog = ref.current;
-  if (!dialog) return;
-  if (logOpen && !dialog.open) dialog.showModal();
-  if (!logOpen && dialog.open) dialog.close();
- }, [logOpen]);
+ useModalDialog(ref, logOpen);
  return (
   <dialog id={"messagesDialog"} ref={ref} aria-labelledby={"messagesTitle"} onClose={() => toastActions.setLogOpen(false)}>
    <form method={"dialog"}>

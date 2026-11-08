@@ -90,7 +90,8 @@ export function mountKeyboard() {
       if (ids.length) editor.edit([{op: 'to_path', ids}]);
       return;
     }
-    if (e.key === 'Enter' && selState().multi.size === 1) { e.preventDefault(); enterEdit(selectedObject()); return; }
+    // Enter on a menu bar header or item opens or runs that menu; only elsewhere does it start editing the selected object's nodes.
+    if (e.key === 'Enter' && selState().multi.size === 1 && !(/** @type {any} */ (e.target))?.closest?.('.file-menu')) { e.preventDefault(); enterEdit(selectedObject()); return; }
     if (e.key === '[') return moveSelection('backward');
     if (e.key === ']') return moveSelection('forward');
     if (e.key === 'Home' && selState().multi.size) { e.preventDefault(); return moveSelection('back'); }

@@ -1,4 +1,5 @@
 import {useEffect, useRef, useState, useSyncExternalStore} from 'react';
+import {useModalDialog} from './useModalDialog';
 import {setTraceDialogOpen, traceDialogState} from '../traceDialogState.js';
 import {tracePicture} from '../traceCommands.js';
 import {t} from '../i18n.js';
@@ -14,11 +15,8 @@ export function TraceDialog() {
  const detail = useRef<HTMLSelectElement>(null);
  const width = useRef<HTMLInputElement>(null);
  const background = useRef<HTMLInputElement>(null);
+ useModalDialog(dialog, open);
  useEffect(() => {
-  const element = dialog.current;
-  if (!element) return;
-  if (open && !element.open) element.showModal();
-  if (!open && element.open) element.close();
   if (open) setInfo('');
  }, [open]);
  async function trace() {

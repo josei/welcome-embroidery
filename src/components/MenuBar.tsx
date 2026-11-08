@@ -1,4 +1,6 @@
 import {useEffect, useRef, useState, useSyncExternalStore} from 'react';
+import {flushSync} from 'react-dom';
+import type {KeyboardEvent as ReactKeyboardEvent} from 'react';
 import {actionState} from '../actionState.js';
 import {alignActions, alignState} from '../alignState.js';
 import {clipboardState} from '../clipboardState.js';
@@ -26,26 +28,96 @@ interface Entry {
 }
 type Row = Entry | '-';
 
-// A dropdown: a header button that opens a list of entries. Closes on an outside press, Escape, or after an entry runs.
+// A dropdown: a header button that opens a list of entries. Keyboard: Enter, Space or ArrowDown on the header opens it and
+// focuses the first enabled item (ArrowUp, the last); ArrowUp and ArrowDown move between enabled items and wrap; Home and End
+// go to the first and last; Enter runs an item and closes the menu; Escape closes it and returns focus to the header; Tab
+// closes it and moves on; ArrowLeft and ArrowRight move to the neighbouring header, opening its menu if this one was open.
+// Closes on an outside press, Escape, or after an entry runs.
 function Dropdown({id, label, rows}: {id: string; label: string; rows: Row[]}) {
  const [open, setOpen] = useState(false);
  const wrap = useRef<HTMLDivElement>(null);
+ const trigger = useRef<HTMLButtonElement>(null);
+ // Where focus goes once the menu has rendered: set when a key opens it, cleared when it is used.
+ const focusOnOpen = useRef<'first' | 'last' | null>(null);
+ const enabledItems = () => Array.from(wrap.current?.querySelectorAll<HTMLButtonElement>('[role="menuitem"]:not(:disabled)') ?? []);
  useEffect(() => {
   if (!open) return;
+  const want = focusOnOpen.current;
+  focusOnOpen.current = null;
+  if (want) { const items = enabledItems(); (want === 'first' ? items[0] : items[items.length - 1])?.focus(); }
   const away = (e: Event) => { if (!wrap.current?.contains(e.target as Node)) setOpen(false); };
-  const escape = (e: KeyboardEvent) => { if (e.key === 'Escape') setOpen(false); };
+  const escape = (e: KeyboardEvent) => {
+   if (e.key !== 'Escape') return;
+   setOpen(false);
+   trigger.current?.focus();
+  };
   document.addEventListener('pointerdown', away);
   document.addEventListener('keydown', escape);
   return () => { document.removeEventListener('pointerdown', away); document.removeEventListener('keydown', escape); };
  }, [open]);
+ const openWith = (where: 'first' | 'last' | null) => { focusOnOpen.current = where; setOpen(true); };
+ // Runs an item: the menu closes and focus goes back to the header, so keyboard users stay where they were.
+ const choose = (row: Entry) => { setOpen(false); trigger.current?.focus(); row.run(); };
+ function onKeyDown(e: ReactKeyboardEvent) {
+  // Keys this menu moves focus with stop here, so the canvas shortcuts (arrows nudge, Home/End reorder) do not also act on the
+  // selection. Other keys pass through, so Ctrl+Z and the rest still work with a menu open. Tab closes the menu and moves on.
+  if (e.key === 'Tab') {
+   if (!open) return;
+   flushSync(() => setOpen(false));
+   trigger.current?.focus();
+   return;
+  }
+  if (e.key === 'Escape') {
+   if (!open) return;
+   e.stopPropagation();
+   setOpen(false);
+   trigger.current?.focus();
+   return;
+  }
+  if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
+   const headers = Array.from(wrap.current?.parentElement?.querySelectorAll<HTMLButtonElement>(':scope > .file-menu > button[aria-haspopup]') ?? []);
+   const here = headers.indexOf(trigger.current!);
+   const next = headers[(here + (e.key === 'ArrowRight' ? 1 : -1) + headers.length) % headers.length];
+   if (!next || next === trigger.current) return;
+   e.preventDefault();
+   e.stopPropagation();
+   setOpen(false);
+   next.focus();
+   if (open) next.click(); // a click without a pointer opens that menu with its first item focused
+   return;
+  }
+  if (!open) {
+   if (e.target !== trigger.current) return;
+   if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+    e.preventDefault();
+    e.stopPropagation();
+    openWith(e.key === 'ArrowDown' ? 'first' : 'last');
+   }
+   return;
+  }
+  const items = enabledItems();
+  if (!items.length) return;
+  const at = items.indexOf(document.activeElement as HTMLButtonElement);
+  let target: number | null = null;
+  if (e.key === 'ArrowDown') target = at < 0 ? 0 : (at + 1) % items.length;
+  else if (e.key === 'ArrowUp') target = at < 0 ? items.length - 1 : (at - 1 + items.length) % items.length;
+  else if (e.key === 'Home') target = 0;
+  else if (e.key === 'End') target = items.length - 1;
+  if (target !== null) { e.preventDefault(); e.stopPropagation(); items[target].focus(); }
+ }
  return (
-  <div className="file-menu" ref={wrap}>
-   <button type="button" id={id} aria-haspopup="menu" aria-expanded={open} onClick={() => setOpen(!open)}>{label}</button>
+  <div className="file-menu" ref={wrap} onKeyDown={onKeyDown}>
+   <button ref={trigger} type="button" id={id} aria-haspopup="menu" aria-expanded={open} aria-controls={open ? `${id}List` : undefined}
+    onClick={e => {
+     // A click with no pointer (detail 0) came from the keyboard: Enter or Space opens the menu and focuses its first item.
+     const keyboard = e.detail === 0;
+     if (open) setOpen(false); else openWith(keyboard ? 'first' : null);
+    }}>{label}</button>
    {open && (
     <div role="menu" id={`${id}List`} className="file-menu-list">
      {rows.map((row, i) => row === '-' ? <hr key={`sep${i}`} className="menu-sep" /> : (
       <button key={row.id} type="button" role="menuitem" id={row.id} disabled={row.disabled}
-        className={row.key ? 'menu-item' : undefined} onClick={() => { setOpen(false); row.run(); }}>
+        className={row.key ? 'menu-item' : undefined} onClick={() => choose(row)}>
        <span>{row.label}</span>
        {row.key && <kbd>{row.key}</kbd>}
        {row.hint && <small>{row.hint}</small>}

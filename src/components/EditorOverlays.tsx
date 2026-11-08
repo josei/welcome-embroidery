@@ -1,4 +1,5 @@
-import {useEffect, useRef, useSyncExternalStore} from 'react';
+import {useRef, useSyncExternalStore} from 'react';
+import {useModalDialog} from './useModalDialog';
 import {KeysDialog} from './KeysDialog';
 import {MessagesDialog} from './ToastStack';
 import {RestoreDialog} from './RestoreDialog';
@@ -34,24 +35,9 @@ export function EditorOverlays() {
  const exportElement = useRef<HTMLDialogElement>(null);
  const agentUrl = useRef<HTMLInputElement>(null);
  // Each dialog is opened with showModal, which React cannot render; the store says whether it should be open.
- useEffect(() => {
-  const element = agentDialog.current;
-  if (!element) return;
-  if (agentOpen && !element.open) element.showModal();
-  if (!agentOpen && element.open) element.close();
- }, [agentOpen]);
- useEffect(() => {
-  const element = fontsDialog.current;
-  if (!element) return;
-  if (fontsOpen && !element.open) element.showModal();
-  if (!fontsOpen && element.open) element.close();
- }, [fontsOpen]);
- useEffect(() => {
-  const element = exportElement.current;
-  if (!element) return;
-  if (exportDialog.open && !element.open) element.showModal();
-  if (!exportDialog.open && element.open) element.close();
- }, [exportDialog.open]);
+ useModalDialog(agentDialog, agentOpen);
+ useModalDialog(fontsDialog, fontsOpen);
+ useModalDialog(exportElement, exportDialog.open);
  return (
   <>
     <dialog id={"agentDialog"} ref={agentDialog} onClose={() => setAgentDialogOpen(false)}>

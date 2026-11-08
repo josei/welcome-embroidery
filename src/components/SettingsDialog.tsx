@@ -1,4 +1,5 @@
-import {useEffect, useRef, useSyncExternalStore} from 'react';
+import {useRef, useSyncExternalStore} from 'react';
+import {useModalDialog} from './useModalDialog';
 import {lang, setLanguage, t} from '../i18n.js';
 import {setSettingsOpen, settingsState} from '../settingsState.js';
 import {stitchRowsState} from '../stitchRowsState.js';
@@ -10,12 +11,7 @@ export function SettingsDialog() {
  const rows = useSyncExternalStore(stitchRowsState.subscribe, stitchRowsState.get);
  const agent = useSyncExternalStore(agentLinkState.subscribe, agentLinkState.get);
  const ref = useRef<HTMLDialogElement>(null);
- useEffect(() => {
-  const dialog = ref.current;
-  if (!dialog) return;
-  if (open && !dialog.open) dialog.showModal();
-  if (!open && dialog.open) dialog.close();
- }, [open]);
+ useModalDialog(ref, open, '#helpBtn');
  return (
   <dialog id="settingsDialog" ref={ref} onClose={() => setSettingsOpen(false)}>
    <form method="dialog">

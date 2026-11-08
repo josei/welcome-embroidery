@@ -2918,3 +2918,46 @@ test('deleting an object confirms with a toast whose Undo restores it; the Undo 
  await expect(page.locator('#undo')).toHaveAttribute('aria-label','Undo change');
  await expect(page.locator('#redo')).toHaveAttribute('aria-label','Redo delete Rectangle');
 });
+test('Menus, the shortcut sheet and the export dialog work from the keyboard alone',async({page})=>{
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));page.on('dialog',d=>d.accept());await page.goto('/');await page.locator('#new').click();
+ const rows=page.locator('.object-row');
+ await page.locator('#rect').click();await page.locator('#ellipse').click();await expect(rows).toHaveCount(2);
+ // Edit: Enter opens it and focuses its first enabled item; Enter on Undo runs it, closes the menu, and focus goes back to Edit.
+ await page.locator('#editMenu').focus();await page.keyboard.press('Enter');
+ await expect(page.locator('#menuUndo')).toBeFocused();
+ await page.keyboard.press('Enter');
+ await expect(rows).toHaveCount(1);await expect(page.locator('#editMenu')).toBeFocused();await expect(page.locator('#editMenuList')).toBeHidden();
+ await rows.nth(0).click();
+ // Escape closes an open menu and returns focus to its header; ArrowRight moves to Arrange and ArrowLeft back.
+ await page.locator('#editMenu').focus();await page.keyboard.press('Enter');await expect(page.locator('#editMenuList')).toBeVisible();
+ await page.keyboard.press('Escape');await expect(page.locator('#editMenuList')).toBeHidden();await expect(page.locator('#editMenu')).toBeFocused();
+ await page.keyboard.press('ArrowRight');await expect(page.locator('#arrangeMenu')).toBeFocused();
+ await page.keyboard.press('ArrowDown');await expect(page.locator('#arrangeMenuList')).toBeVisible();
+ await expect(page.locator('#menuAlignLeft')).toBeFocused();
+ await page.keyboard.press('ArrowLeft');await expect(page.locator('#editMenuList')).toBeVisible();await expect(page.locator('#menuUndo')).toBeFocused();
+ // Disabled items are skipped: nothing has been copied, so Paste is disabled and ArrowDown from Copy lands on Duplicate.
+ await page.keyboard.press('Escape');
+ await page.locator('#editMenu').focus();await page.keyboard.press('ArrowDown');
+ await expect(page.locator('#menuUndo')).toBeFocused();
+ await page.keyboard.press('ArrowDown');await expect(page.locator('#menuRedo')).toBeFocused(); // Redo is on after the undo above
+ await page.keyboard.press('ArrowDown');await expect(page.locator('#menuCut')).toBeFocused();
+ await page.keyboard.press('ArrowDown');await expect(page.locator('#menuCopy')).toBeFocused();
+ await page.keyboard.press('ArrowDown');await expect(page.locator('#menuDuplicate')).toBeFocused();
+ await page.keyboard.press('End');await expect(page.locator('#menuDelete')).toBeFocused();
+ await page.keyboard.press('ArrowDown');await expect(page.locator('#menuUndo')).toBeFocused();
+ await page.keyboard.press('ArrowUp');await expect(page.locator('#menuDelete')).toBeFocused();
+ await page.keyboard.press('Home');await expect(page.locator('#menuUndo')).toBeFocused();
+ await page.keyboard.press('Tab');await expect(page.locator('#editMenuList')).toBeHidden();
+ await expect(page.locator('#arrangeMenu')).toBeFocused();
+ // Shortcut sheet: Tab stays inside the dialog, Escape closes it and focus returns to the ? button.
+ await page.keyboard.press('Escape');await page.locator('#helpBtn').focus();await page.keyboard.press('Enter');
+ await expect(page.locator('#keysDialog')).toBeVisible();
+ for(let i=0;i<4;i++){await page.keyboard.press('Tab');expect(await page.evaluate(()=>document.getElementById('keysDialog').contains(document.activeElement))).toBe(true);}
+ await page.keyboard.press('Shift+Tab');expect(await page.evaluate(()=>document.getElementById('keysDialog').contains(document.activeElement))).toBe(true);
+ await page.keyboard.press('Escape');await expect(page.locator('#keysDialog')).toBeHidden();await expect(page.locator('#helpBtn')).toBeFocused();
+ // Export dialog: same rules.
+ await page.locator('#export').focus();await page.keyboard.press('Enter');await expect(page.locator('#exportDialog')).toBeVisible();
+ for(let i=0;i<4;i++){await page.keyboard.press('Tab');expect(await page.evaluate(()=>document.getElementById('exportDialog').contains(document.activeElement))).toBe(true);}
+ await page.keyboard.press('Escape');await expect(page.locator('#exportDialog')).toBeHidden();await expect(page.locator('#export')).toBeFocused();
+ expect(errors).toEqual([]);
+});

@@ -1,4 +1,5 @@
-import {useEffect, useRef, useSyncExternalStore} from 'react';
+import {useRef, useSyncExternalStore} from 'react';
+import {useModalDialog} from './useModalDialog';
 import {saveAsDownload} from '../projectIO.js';
 import {saveState, setSave} from '../saveState.js';
 import {t} from '../i18n.js';
@@ -7,12 +8,7 @@ import {t} from '../i18n.js';
 export function SaveAsDialog() {
  const {saveAsOpen, saveAsName} = useSyncExternalStore(saveState.subscribe, saveState.get);
  const ref = useRef<HTMLDialogElement>(null);
- useEffect(() => {
-  const dialog = ref.current;
-  if (!dialog) return;
-  if (saveAsOpen && !dialog.open) dialog.showModal();
-  if (!saveAsOpen && dialog.open) dialog.close();
- }, [saveAsOpen]);
+ useModalDialog(ref, saveAsOpen);
  return (
   <dialog id="saveAsDialog" ref={ref} onClose={() => setSave({saveAsOpen: false})}>
    <form onSubmit={e => { e.preventDefault(); saveAsDownload(saveAsName); }}>
