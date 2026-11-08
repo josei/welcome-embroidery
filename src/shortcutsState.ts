@@ -3,7 +3,7 @@ import {createStore} from './store.js';
 // The keyboard shortcuts, in the order the dialog lists them. Titles and keys are translated when the dialog renders.
 export const SHORTCUTS: Array<[string, Array<[string, string]>]>
   = [[
-  'File',[['Ctrl+S','Save'],['Ctrl+O','Open'],['Ctrl+N','New']]],
+  'File',[['Ctrl+S','Save'],['Ctrl+Shift+S','Save As'],['Ctrl+O','Open'],['Ctrl+N','New']]],
  [
   'Tools',[['V','Select'],['R','Rectangle'],['O','Ellipse'],['T','Lettering'],['N','Draw path'],['P','Pen with curves'],['L','Line'],['G','Polygon'],['S',
   'Star'],['Enter','Edit nodes / finish a path'],['Esc','Cancel, go back to select']]],

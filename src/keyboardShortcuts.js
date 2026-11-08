@@ -17,6 +17,7 @@ import {t} from './i18n.js';
 import {enterEdit} from './canvasText.js';
 import {copyStyle, pasteStyle} from './styleClipboard.js';
 import {editor} from './editorContext.js';
+import {projectSaveAs} from './projectIO.js';
 
 /** @param {string} id */
 function press(id) {
@@ -26,12 +27,12 @@ function press(id) {
 /** Mounts the editor's keyboard handling. */
 export function mountKeyboard() {
   // File shortcuts run the header buttons. Save also works while a text field has focus, as browsers' Save does;
-  // Open and New wait until focus is outside fields so they never fire while typing.
+  // Open and New wait until focus is outside fields so they never fire while typing. Ctrl+Shift+S is Save As.
   document.addEventListener('keydown', e => {
-    if (!(e.ctrlKey || e.metaKey) || e.altKey || e.shiftKey) return;
+    if (!(e.ctrlKey || e.metaKey) || e.altKey) return;
     const key = e.key.toLowerCase();
-    if (key === 's') { e.preventDefault(); press('save'); return; }
-    if (editor.canvas.inField(e)) return;
+    if (key === 's') { e.preventDefault(); if (e.shiftKey) void projectSaveAs(); else press('save'); return; }
+    if (e.shiftKey || editor.canvas.inField(e)) return;
     if (key === 'o') { e.preventDefault(); press('open'); }
     else if (key === 'n') { e.preventDefault(); press('new'); }
   });

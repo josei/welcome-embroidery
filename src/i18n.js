@@ -8,7 +8,13 @@ const ES={
   'Importar JEF, VP3, DST, SEW, PEC, PES, EXP, HUS, XXX, DSB, DSZ, TAP, TBF, PCS, SHV, STX, BRO, EMD, KSM o 10O',
   'Choose a .jef, .vp3, .dst, .sew, .pec, .pes, .exp, .hus, .xxx, .dsb, .dsz, .tap, .tbf, .pcs, .shv, .stx, .bro, .emd, .ksm or .10o file.':
   'Elige un archivo .jef, .vp3, .dst, .sew, .pec, .pes, .exp, .hus, .xxx, .dsb, .dsz, .tap, .tbf, .pcs, .shv, .stx, .bro, .emd, .ksm o .10o.','Save project':
-  'Guardar proyecto','Settings':'Ajustes','Show pull for the fabric':'Mostrar la tracción de la tela',
+  'Guardar proyecto','Settings':'Ajustes',
+'Save As':'Guardar como','Save As…':'Guardar como…','File name':'Nombre del archivo',
+'Saved {time}':'Guardado {time}','Unsaved':'Sin guardar',
+'Writes to the file you chose':'Escribe en el archivo que elegiste','Downloads the project file':'Descarga el archivo del proyecto',
+'Choose a new file':'Elegir un archivo nuevo','Download under a name you type':'Descargar con el nombre que escribas',
+'This browser downloads the project file. The name below is the file name.':'Este navegador descarga el archivo del proyecto. El nombre de abajo es el nombre del archivo.',
+'The project could not be saved.':'No se pudo guardar el proyecto.','Show pull for the fabric':'Mostrar la tracción de la tela',
   ['Peak estimate {n}% of the scale on {fabric}. Lines show the direction the fabric pulls. A guide for where to look: it uses stitch density, stitch ' +
   'direction and fabric stretch, not a simulation of the machine.']:
   'Estimación máxima del {n}% de la escala en {fabric}. Las líneas muestran la dirección en la que tira la tela. Una guía para saber dónde mirar: usa la ' +

@@ -1,6 +1,7 @@
 import {useEffect, useRef, useSyncExternalStore} from 'react';
 import {KeysDialog} from './KeysDialog';
 import {RestoreDialog} from './RestoreDialog';
+import {SaveAsDialog} from './SaveAsDialog';
 import {TraceDialog} from './TraceDialog';
 import {agentLinkState} from '../agentLinkState.js';
 import {agentDialogState, copyAgentLink, revokeAgentLink, setAgentDialogOpen} from '../agentDialog.js';
@@ -141,6 +142,7 @@ export function EditorOverlays() {
     <KeysDialog />
     <SettingsDialog />
     <RestoreDialog />
+    <SaveAsDialog />
     <ThreadPopover />
     <dialog id={"exportDialog"} ref={exportElement} onClose={() => setExportDialog({open: false})}>
       <form method={"dialog"}>

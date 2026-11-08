@@ -1,5 +1,5 @@
 import {stitchRowsState} from '../stitchRowsState.js';
-import {useRef, useSyncExternalStore} from 'react';
+import {useEffect, useRef, useState, useSyncExternalStore} from 'react';
 import {ActionButton} from './ActionButton';
 import {useDraftInput} from './useDraftInput';
 import {documentActions, documentState} from '../documentState.js';
@@ -7,7 +7,8 @@ import {setSettingsOpen} from '../settingsState.js';
 import {agentLinkState, agentLinkActions} from '../agentLinkState.js';
 import {EXPORT_FORMATS, exportFormatState, setExportFormat} from '../exportFormatState.js';
 import {openExportDialog} from '../exportCommands.js';
-import {importMachineFile, newProject, openProjectFile, projectSave} from '../projectIO.js';
+import {hasFilePicker, importMachineFile, newProject, openProjectFile, projectSave, projectSaveAs} from '../projectIO.js';
+import {saveState} from '../saveState.js';
 import {toolbarActions} from '../toolbarCommands.js';
 import {t} from '../i18n.js';
 // The project name field: it shows the document name, and a committed change is an edit (see documentActions).
@@ -28,6 +29,50 @@ function AgentPill() {
   </button>
  );
 }
+// The save feedback: the unsaved marker while the design has changes, then the time of the last save in this tab.
+function SaveStatus() {
+ const {dirty} = useSyncExternalStore(documentState.subscribe, documentState.get);
+ const {savedAt} = useSyncExternalStore(saveState.subscribe, saveState.get);
+ if (dirty) return <span id="unsavedMark" className="save-status unsaved">{t('Unsaved')}</span>;
+ if (savedAt === null) return null;
+ const when = new Date(savedAt);
+ const time = `${String(when.getHours()).padStart(2, '0')}:${String(when.getMinutes()).padStart(2, '0')}`;
+ return <span id="savedStatus" className="save-status" role="status">{t('Saved {time}', {time})}</span>;
+}
+
+// The File menu: Save and Save As, the same commands as the floppy icon and Ctrl+S / Ctrl+Shift+S. Each item says which
+// way it saves in this browser: to the file the user picks, or as a download.
+function FileMenu() {
+ const [open, setOpen] = useState(false);
+ const wrap = useRef<HTMLDivElement>(null);
+ useEffect(() => {
+  if (!open) return;
+  const away = (e: Event) => { if (!wrap.current?.contains(e.target as Node)) setOpen(false); };
+  const escape = (e: KeyboardEvent) => { if (e.key === 'Escape') setOpen(false); };
+  document.addEventListener('pointerdown', away);
+  document.addEventListener('keydown', escape);
+  return () => { document.removeEventListener('pointerdown', away); document.removeEventListener('keydown', escape); };
+ }, [open]);
+ const picker = hasFilePicker();
+ return (
+  <div className="file-menu" ref={wrap}>
+   <button type="button" id="fileMenu" aria-haspopup="menu" aria-expanded={open} onClick={() => setOpen(!open)}>{t('File')}</button>
+   {open && (
+    <div role="menu" id="fileMenuList" className="file-menu-list">
+     <button type="button" role="menuitem" id="menuSave" onClick={() => { setOpen(false); void projectSave(); }}>
+      <span>{t('Save')}</span>
+      <small>{picker ? t('Writes to the file you chose') : t('Downloads the project file')}</small>
+     </button>
+     <button type="button" role="menuitem" id="menuSaveAs" onClick={() => { setOpen(false); void projectSaveAs(); }}>
+      <span>{t('Save As…')}</span>
+      <small>{picker ? t('Choose a new file') : t('Download under a name you type')}</small>
+     </button>
+    </div>
+   )}
+  </div>
+ );
+}
+
 // Export: the Export button opens the export dialog, and the format beside it is the same choice the dialog shows.
 function ExportSplit() {
  const {format} = useSyncExternalStore(exportFormatState.subscribe, exportFormatState.get);
@@ -78,7 +123,7 @@ export function Header() {
         "-67L3485 -116L3499 -142L3504 -178L3497 -211L3488 -220L3476 -223L3462 -219L3403 -163L3368 -137L3327 -115L3285 -100L3247 -95L3205 -100L3174 -115L3162 " +
         "-127L3152 -141L3243 -171L3308 -209L3344 -249L3360 -282L3369 -338L3363 -381L3356 -400L3347 -417L3319 -444L3302 -454L3263 -465L3220 -465L3179 " +
         "-457L3142 -442L3093 -405L3066 -373L3036 -319L3020 -265L3016 -227ZM3136 -219L3140 -267L3152 -307L3175 -344L3206 -365L3240 -365L3253 -356L3260 " +
-        "-343L3261 -308L3244 -276L3229 -261L3198 -241L3159 -225Z"}/></svg></a><ProjectName /><button className="icon-button" id="new"
+        "-343L3261 -308L3244 -276L3229 -261L3198 -241L3159 -225Z"}/></svg></a><FileMenu /><ProjectName /><SaveStatus /><button className="icon-button" id="new"
           aria-label="New design" title="New design" data-tooltip="New design" onClick={(
     ) =>
     newProject(

@@ -283,3 +283,12 @@ input:not([type=checkbox]):not([type=range]),select,textarea,.panel textarea{fon
 
 /* Export format: only the chevron shows; the chosen format is still the select's value and is listed when opened. */
 .export-split select{color:transparent;appearance:none;-webkit-appearance:none;width:30px;max-width:none;padding:0;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' fill='none' stroke='%23fff' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") no-repeat center}
+
+/* Save feedback and the File menu */
+.save-status{font-size:12px;color:#66726c;white-space:nowrap}
+.save-status.unsaved{color:#8a5a00}
+.file-menu{position:relative}
+.file-menu-list{position:absolute;top:calc(100% + 6px);left:0;z-index:30;display:grid;gap:2px;min-width:240px;padding:6px;background:#fff;border:1px solid #e3e6e1;border-radius:8px;box-shadow:0 8px 24px #1d292533}
+.file-menu-list button{display:grid;gap:2px;justify-items:start;width:100%;border:0;padding:8px 10px;text-align:left}
+.file-menu-list button:hover{background:#eef1ec}
+.file-menu-list small{font-size:11px;color:#66726c}

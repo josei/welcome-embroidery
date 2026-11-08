@@ -3,6 +3,7 @@
 // file, starting a new design and the `?open=` link. The header's buttons and file inputs call these; app.js wires the
 // editor commands they need once at start-up.
 import {documentActions, documentNow, setDocument} from './documentState.js';
+import {setSave} from './saveState.js';
 import {selState, setSelection} from './selectionState.js';
 import {setEditMode} from './editModeState.js';
 import {clone, download, safeProjectFilename} from './appHelpers.js';
@@ -64,12 +65,49 @@ export function renameProject(text) {
   return true;
 }
 
+/** The File System Access handle of the file the first Save chose; later Saves overwrite it. Null until one is chosen. */
+/** @type {any} */
+let fileHandle = null;
+
+/** The file types the picker offers: Welcome project files. */
+const PROJECT_TYPES = [{description: 'Welcome project', accept: {'application/json': ['.welcome']}}];
+
 /**
- * Saves the document as a .welcome file, with its document id, and marks this tab's autosave copy clean. Saving while
- * another tab holds the same document says so: the file is written, but that tab's edits are not part of it.
+ * True where the browser can pick the file to write (Chromium). Elsewhere Save downloads the file and Save As asks for a name.
+ * @returns {boolean}
  */
-export function projectSave() {
-  // The autosave is written on a delay; marking it clean once that write has run keeps a reload from offering it back.
+export function hasFilePicker() {
+  return typeof (/** @type {any} */ (window)).showSaveFilePicker === 'function';
+}
+
+/**
+ * Shows the browser's save picker. Starts the picker synchronously, so a click that calls it keeps its user activation.
+ * @returns {Promise<any|null>} the chosen handle, or null when the user cancels
+ */
+async function chooseFile() {
+  try {
+    return await (/** @type {any} */ (window)).showSaveFilePicker({suggestedName: safeProjectFilename(documentNow().doc.name), types: PROJECT_TYPES});
+  } catch (error) {
+    if (/** @type {Error} */ (error).name === 'AbortError') return null;
+    throw error;
+  }
+}
+
+/**
+ * The open project as the text a .welcome file holds, with its document id, and the revision it was taken from.
+ * @returns {{text: string, revision: number, name: string}}
+ */
+function projectText() {
+  const doc = documentNow().doc;
+  return {text: JSON.stringify({...doc, docId: currentDocId()}, null, 2), revision: doc.revision, name: doc.name};
+}
+
+/**
+ * Records a successful save: the unsaved marker clears (unless the design changed while the file was written) and the
+ * time is stamped. The autosave copy is marked clean once its delayed write has run, so a reload does not offer it back.
+ * @param {number} revision the revision that was written
+ */
+function markSaved(revision) {
   setTimeout(() => {
     try {
       const saved = JSON.parse(localStorage.getItem(ownAutosaveKey()) || 'null');
@@ -79,11 +117,83 @@ export function projectSave() {
       }
     } catch {}
   }, 0);
-  const doc = documentNow().doc;
-  download(JSON.stringify({...doc, docId: currentDocId()}, null, 2), safeProjectFilename(doc.name), 'application/json');
-  setDocument({dirty: false});
+  if (documentNow().doc.revision === revision) setDocument({dirty: false});
+  setSave({savedAt: Date.now()});
   wired().render();
   if (openElsewhere()) wired().toast(t('Saved. This document is also open in another tab.'));
+}
+
+/** @param {unknown} error */
+function reportSaveError(error) {
+  wired().toast(/** @type {Error} */ (error).message || t('The project could not be saved.'));
+}
+
+/**
+ * Save. Where the browser has a file picker, the first Save asks for a file and later Saves overwrite it. Elsewhere Save
+ * downloads the project file under its document name.
+ */
+export async function projectSave() {
+  try {
+    if (!hasFilePicker()) {
+      const {text, revision, name} = projectText();
+      download(text, safeProjectFilename(name), 'application/json');
+      markSaved(revision);
+      return;
+    }
+    if (!fileHandle) {
+      const handle = await chooseFile();
+      if (!handle) return;
+      fileHandle = handle;
+    }
+    const {text, revision} = projectText();
+    await writeFile(fileHandle, text);
+    markSaved(revision);
+  } catch (error) {
+    reportSaveError(error);
+  }
+}
+
+/**
+ * Save As. Where the browser has a file picker, it always asks for a file and that file becomes the one Save overwrites.
+ * Elsewhere it opens the name prompt; the name it is given is the download's file name.
+ */
+export async function projectSaveAs() {
+  if (!hasFilePicker()) {
+    setSave({saveAsOpen: true, saveAsName: documentNow().doc.name || 'Untitled'});
+    return;
+  }
+  try {
+    const handle = await chooseFile();
+    if (!handle) return;
+    const {text, revision} = projectText();
+    await writeFile(handle, text);
+    fileHandle = handle;
+    markSaved(revision);
+  } catch (error) {
+    reportSaveError(error);
+  }
+}
+
+/**
+ * Save As on the download fallback: downloads the project under the name the user typed.
+ * @param {string} name
+ */
+export function saveAsDownload(name) {
+  const {text, revision} = projectText();
+  download(text, safeProjectFilename(name), 'application/json');
+  setSave({saveAsOpen: false});
+  markSaved(revision);
+}
+
+/**
+ * Writes the text to a picked file.
+ * @param {any} handle
+ * @param {string} text
+ */
+async function writeFile(handle, text) {
+  const writable = await handle.createWritable();
+  await writable.write(text);
+  await writable.close();
 }
 
 /**
@@ -96,6 +206,8 @@ export function acceptProject(next) {
   validateDocument(body);
   const opened = clone(body);
   setDocId(isDocId(docId) ? docId : undefined);
+  fileHandle = null;
+  setSave({savedAt: null});
   wired().clearComputed();
   setDocument({doc: opened});
   setDocument({history: []});
@@ -155,6 +267,8 @@ export function newProject() {
   if (!confirmDiscard()) return;
   wired().clearComputed();
   setDocId(undefined);
+  fileHandle = null;
+  setSave({savedAt: null});
   setDocument({doc: withSavedHoop({...initialDocument(), name: 'Untitled design', objects: []})});
   setDocument({history: []});
   setDocument({future: []});

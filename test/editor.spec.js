@@ -4,6 +4,9 @@ import {pinnedMachineFixture,readMachineFixtures} from './fixture-archive.js';
 import {decodeEmbroidery} from '../src/readers.js';
 import {withPesMetadata} from './pes-with-metadata.js';
 import {initialDocument,importStitchLayer,applyOperations,compile,geometry} from '../src/engine.js';
+// Chromium has the File System Access picker, which a headless test cannot drive. Every test runs the download fallback
+// unless it installs its own picker (see the picker test at the end of this file).
+test.beforeEach(async({page})=>{await page.addInitScript(()=>{delete window.showSaveFilePicker;});});
 
 test('browser design, settings, history, local project and offline compilation/export',async({page})=>{page.on('dialog',d=>d.accept());
  const errors=[];page.on('pageerror',e=>errors.push(e.message));page.on('console',m=>{if(m.type()==='error')errors.push(m.text());});
@@ -2542,5 +2545,40 @@ test('Ctrl+S saves and is prevented; Ctrl+O and Ctrl+N run Open and New outside 
  await page.evaluate(()=>document.getElementById('probe').remove());await page.locator('#art').hover();
  await page.keyboard.press('?');await expect(page.locator('#keysList')).toContainText('Ctrl+S');await expect(page.locator('#keysList')).toContainText('Ctrl+O');await expect(page.locator('#keysList')).toContainText('Ctrl+N');await page.keyboard.press('Escape');
  await page.keyboard.press('Control+n');expect(dialogs).toHaveLength(1);await expect(page.locator('.object-row')).toHaveCount(0);// Save marked the design clean, so New asks nothing
+ expect(errors).toEqual([]);
+});
+
+test('Save downloads the project each time without a file picker, and Save As names the download',async({page})=>{
+ await page.goto('/');
+ await page.locator('#rect').click();await expect(page.locator('#unsavedMark')).toHaveText('Unsaved');
+ const first=page.waitForEvent('download');await page.locator('#save').click();const a=await first;
+ await expect(page.locator('#unsavedMark')).toHaveCount(0);await expect(page.locator('#savedStatus')).toContainText('Saved');
+ expect(a.suggestedFilename()).toMatch(/\.welcome$/);
+ // Chromium adds its own (1) suffix on disk to a second download with the same name; Playwright only exposes the requested name.
+ const second=page.waitForEvent('download');await page.locator('#save').click();const b=await second;
+ expect(b.suggestedFilename()).toBe(a.suggestedFilename());await expect(page.locator('#savedStatus')).toContainText('Saved');
+ await page.locator('#fileMenu').click();await expect(page.locator('#menuSaveAs')).toContainText('Download under a name you type');
+ await page.locator('#menuSaveAs').click();await page.locator('#saveAsName').fill('My logo');
+ const third=page.waitForEvent('download');await page.locator('#saveAsConfirm').click();expect((await third).suggestedFilename()).toBe('My logo.welcome');
+ await expect(page.locator('#saveAsDialog')).toBeHidden();
+});
+
+test('Save writes the chosen file and later Saves overwrite it, while Save As always asks',async({page})=>{
+ await page.addInitScript(()=>{
+  window.__pickerCalls=[];window.__written=[];
+  window.showSaveFilePicker=async opts=>{window.__pickerCalls.push(opts.suggestedName);return {name:'chosen.welcome',createWritable:async()=>({write:async text=>{window.__written.push(text);},close:async()=>{}})};};
+ });
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));
+ await page.goto('/');
+ await page.locator('#save').click();await expect(page.locator('#savedStatus')).toContainText('Saved');
+ expect(await page.evaluate(()=>window.__pickerCalls.length)).toBe(1);
+ await page.locator('#rect').click();await expect(page.locator('#unsavedMark')).toBeVisible();
+ await page.locator('#save').click();await expect(page.locator('#unsavedMark')).toHaveCount(0);
+ expect(await page.evaluate(()=>window.__pickerCalls.length)).toBe(1);
+ expect(await page.evaluate(()=>window.__written.length)).toBe(2);
+ expect(JSON.parse(await page.evaluate(()=>window.__written[1])).schema).toBe('welcome/1');
+ await page.keyboard.press('Control+Shift+S');await expect.poll(()=>page.evaluate(()=>window.__pickerCalls.length)).toBe(2);
+ await page.locator('#fileMenu').click();await page.locator('#menuSave').click();
+ await expect.poll(()=>page.evaluate(()=>window.__written.length)).toBe(4);expect(await page.evaluate(()=>window.__pickerCalls.length)).toBe(2);
  expect(errors).toEqual([]);
 });
