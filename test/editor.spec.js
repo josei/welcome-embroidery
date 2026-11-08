@@ -373,7 +373,7 @@ test('element tree: groups appear as collapsible parents, visibility and lock to
  await page.locator('.object-row').nth(2).locator('.row-name').dblclick();await page.locator('.row-rename').fill('Tail piece');await page.locator('.row-rename').press('Enter');await expect(page.locator('.object-row').nth(2)).toContainText('Tail piece');
  const from=page.locator('.object-row').nth(2),to=page.locator('.object-row').nth(0);const ids=await page.locator('.object-row').evaluateAll(els=>els.map(e=>e.dataset.id));await from.dragTo(to,{targetPosition:{x:20,y:2}});const after=await page.locator('.object-row').evaluateAll(els=>els.map(e=>e.dataset.id));expect(after[0]).toBe(ids[2]);
  // context menu
- m=await ctm(page);const at=toScreen(m,-40+15,-2);await page.mouse.click(at.x,at.y,{button:'right'});await expect(page.locator('#ctxMenu')).toBeVisible();await expect(page.locator('#ctxMenu button',{hasText:'Group'}).first()).toBeVisible();await page.locator('#ctxMenu button',{hasText:/^Copy\s*Ctrl\+C/}).click();await page.keyboard.press('Control+v');expect(await page.locator('.object-row').count()).toBeGreaterThan(3);
+ m=await ctm(page);const at=toScreen(m,-40+15,-2);await page.mouse.click(at.x,at.y,{button:'right'});await expect(page.locator('#ctxMenu')).toBeVisible();await expect(page.locator('#ctxMenu button',{hasText:'Group'}).first()).toBeVisible();await page.locator('#ctxMenu button',{hasText:/^Copy\s*(Ctrl\+C|⌘C)/}).click();await page.keyboard.press('Control+v');expect(await page.locator('.object-row').count()).toBeGreaterThan(3);
  await page.mouse.click(toScreen(m,70,60).x,toScreen(m,70,60).y,{button:'right'});await expect(page.locator('#ctxMenu button',{hasText:'Select all'})).toBeVisible();await page.keyboard.press('Escape');await expect(page.locator('#ctxMenu')).toHaveCount(0);expect(errors).toEqual([]);
 });
 
@@ -1048,7 +1048,7 @@ test('autosave: an edited design is offered back after a reload; starting fresh 
 test('keyboard shortcut list opens with ? and the listed tool keys really work; the thread plan lists colours in sewing order',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));
  await page.goto('/');page.on('dialog',d=>d.accept());await expect(page.locator('#count')).toContainText('compiled');
- await page.keyboard.press('?');await expect(page.locator('#keysDialog')).toBeVisible();await expect(page.locator('#keysList')).toContainText('Ctrl+G / Ctrl+Shift+G');await page.keyboard.press('Escape');await expect(page.locator('#keysDialog')).toBeHidden();
+ await page.keyboard.press('?');await expect(page.locator('#keysDialog')).toBeVisible();await expect(page.locator('#keysList')).toContainText(/Ctrl\+G \/ Ctrl\+Shift\+G|⌘G \/ ⇧⌘G/);await page.keyboard.press('Escape');await expect(page.locator('#keysDialog')).toBeHidden();
  await page.locator('#helpBtn').click();await expect(page.locator('#keysDialog')).toBeVisible();await page.keyboard.press('Escape');
  for(const [key,id] of [['n','path'],['p','pen'],['l','line'],['g','polygon'],['s','star'],['v','select']]){await page.locator('#art').hover();await page.keyboard.press(key);await expect(page.locator('#'+id)).toHaveClass(/active-tool/);}
  await page.locator('#secPlan summary').click();await expect(page.locator('#planList .plan-row')).toHaveCount(10);await expect(page.locator('#planList .plan-row').first()).toContainText('1.');await expect(page.locator('#planEmpty')).toBeHidden();
@@ -2543,7 +2543,7 @@ test('Ctrl+S saves and is prevented; Ctrl+O and Ctrl+N run Open and New outside 
  await page.keyboard.press('Control+n');expect(dialogs).toHaveLength(1);await expect(page.locator('.object-row')).toHaveCount(6);
  const savedInField=page.waitForEvent('download');await page.keyboard.press('Control+s');await savedInField;
  await page.evaluate(()=>document.getElementById('probe').remove());await page.locator('#art').hover();
- await page.keyboard.press('?');await expect(page.locator('#keysList')).toContainText('Ctrl+S');await expect(page.locator('#keysList')).toContainText('Ctrl+O');await expect(page.locator('#keysList')).toContainText('Ctrl+N');await page.keyboard.press('Escape');
+ await page.keyboard.press('?');await expect(page.locator('#keysList')).toContainText(/Ctrl\+S|⌘S/);await expect(page.locator('#keysList')).toContainText(/Ctrl\+O|⌘O/);await expect(page.locator('#keysList')).toContainText(/Ctrl\+N|⌘N/);await page.keyboard.press('Escape');
  await page.keyboard.press('Control+n');expect(dialogs).toHaveLength(1);await expect(page.locator('.object-row')).toHaveCount(0);// Save marked the design clean, so New asks nothing
  expect(errors).toEqual([]);
 });

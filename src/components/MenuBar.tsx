@@ -9,6 +9,7 @@ import {moveSelection} from '../sewingOrder.js';
 import {toolbarActions} from '../toolbarCommands.js';
 import {hasFilePicker, projectSave, projectSaveAs} from '../projectIO.js';
 import {t} from '../i18n.js';
+import {shortcutLabel} from '../shortcutLabels.js';
 
 // The menu bar's dropdowns. Each item runs the same command as its toolbar button, context-menu row or keyboard shortcut,
 // and is disabled exactly when that command does not apply, using the same flags the toolbar uses. Nothing here is removed
@@ -74,14 +75,14 @@ export function EditMenu() {
  const clip = useSyncExternalStore(clipboardState.subscribe, clipboardState.get);
  const noneSelected = selection.multi.size === 0;
  const rows: Row[] = [
-  {id: 'menuUndo', label: t('Undo'), key: 'Ctrl+Z', disabled: actions.undo, run: toolbarActions.undo},
-  {id: 'menuRedo', label: t('Redo'), key: 'Ctrl+Y', disabled: actions.redo, run: toolbarActions.redo},
+  {id: 'menuUndo', label: t('Undo'), key: shortcutLabel([{mod: true, key: 'Z'}]), disabled: actions.undo, run: toolbarActions.undo},
+  {id: 'menuRedo', label: t('Redo'), key: shortcutLabel([{mod: true, key: 'Y'}]), disabled: actions.redo, run: toolbarActions.redo},
   '-',
-  {id: 'menuCut', label: t('Cut'), key: 'Ctrl+X', disabled: noneSelected, run: () => { if (copySelection()) removeSelected(); }},
-  {id: 'menuCopy', label: t('Copy'), key: 'Ctrl+C', disabled: noneSelected, run: () => void copySelection()},
-  {id: 'menuPaste', label: t('Paste'), key: 'Ctrl+V', disabled: !clip.clipboard, run: pasteClipboard},
+  {id: 'menuCut', label: t('Cut'), key: shortcutLabel([{mod: true, key: 'X'}]), disabled: noneSelected, run: () => { if (copySelection()) removeSelected(); }},
+  {id: 'menuCopy', label: t('Copy'), key: shortcutLabel([{mod: true, key: 'C'}]), disabled: noneSelected, run: () => void copySelection()},
+  {id: 'menuPaste', label: t('Paste'), key: shortcutLabel([{mod: true, key: 'V'}]), disabled: !clip.clipboard, run: pasteClipboard},
   '-',
-  {id: 'menuDuplicate', label: t('Duplicate'), key: 'Ctrl+D', disabled: actions.duplicate, run: toolbarActions.duplicate},
+  {id: 'menuDuplicate', label: t('Duplicate'), key: shortcutLabel([{mod: true, key: 'D'}]), disabled: actions.duplicate, run: toolbarActions.duplicate},
   {id: 'menuDelete', label: t('Delete'), key: 'Del', disabled: actions.remove, run: toolbarActions.remove},
  ];
  return <Dropdown id="editMenu" label={t('Edit')} rows={rows} />;

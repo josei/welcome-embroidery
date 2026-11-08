@@ -1,4 +1,6 @@
 import {layoutState} from '../layoutState.js';
+import {t} from '../i18n.js';
+import {shortcutLabel} from '../shortcutLabels.js';
 import {CanvasTextEditor} from './CanvasTextEditor';
 import {PreviewPanel} from './PreviewPanel';
 import {useSyncExternalStore} from 'react';
@@ -47,6 +49,9 @@ import {gridSnapState} from '../gridSnapState.js';
 import {editModeState} from '../editModeState.js';
 import {deletingGuideState, handModeState, panningState} from '../canvasModeState.js';
 import {setTraceDialogOpen} from '../traceDialogState.js';
+const groupLabel = t('Group ({shortcut})', {shortcut: shortcutLabel([{mod: true, key: 'G'}])});
+const ungroupLabel = t('Ungroup ({shortcut})', {shortcut: shortcutLabel([{mod: true, shift: true, key: 'G'}])});
+
 // The editor layout: the object list, the canvas and the inspector. Rendered by React; ids match the markup it
 // replaced, because the keyboard shortcuts and tests address them.
 export function EditorLayout() {
@@ -115,8 +120,8 @@ export function EditorLayout() {
             <GridControl />
             <AlignButtons />
             <FlipButtons />
-            <ActionButton flag="group" hideWhenDisabled className={"icon-button"} aria-label={"Group (Ctrl+G)"} title={"Group (Ctrl+G)"}
-              data-tooltip={"Group (Ctrl+G)"} id={"group"} onClick={(
+            <ActionButton flag="group" hideWhenDisabled className={"icon-button"} aria-label={groupLabel} title={groupLabel}
+              data-tooltip={groupLabel} id={"group"} onClick={(
               ) => toolbarActions.group()}>
               <svg className={"icon"}>
                 <use href={"#i-group"} />
@@ -124,9 +129,9 @@ export function EditorLayout() {
             </ActionButton>
             <ActionButton flag="ungroup" hideWhenDisabled
               className={"icon-button"}
-              aria-label={"Ungroup (Ctrl+Shift+G)"}
-              title={"Ungroup (Ctrl+Shift+G)"}
-              data-tooltip={"Ungroup (Ctrl+Shift+G)"}
+              aria-label={ungroupLabel}
+              title={ungroupLabel}
+              data-tooltip={ungroupLabel}
               id={"ungroup"}
               onClick={() => toolbarActions.ungroup()}
             >

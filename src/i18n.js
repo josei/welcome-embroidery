@@ -52,16 +52,16 @@ const ES={
 'Drag to orbit · scroll to zoom · double-click to reset':'Arrastra para orbitar · rueda para zoom · doble clic para restablecer',
 'Zoom':'Zoom','Colour 1':'Color 1','Colour 2':'Color 2','Colour 3':'Color 3','Colour 4':'Color 4','Choose at least two colours for a palette.':
   'Elige al menos dos colores para la paleta.','Hand tool: drag to pan':'Herramienta mano: arrastra para mover la vista','Zoom out (−)':'Alejar (−)',
-  'Zoom in (+)':'Acercar (+)','Reset to 100% (Shift+0)':'Restablecer al 100% (Shift+0)','Fit the hoop in view':'Ajustar el bastidor a la vista',
-  'Fit everything (Shift+1)':'Ajustar todo (Shift+1)','All':'Todo',
+  'Zoom in (+)':'Acercar (+)','Reset to 100% ({shortcut})':'Restablecer al 100% ({shortcut})','Fit the hoop in view':'Ajustar el bastidor a la vista',
+  'Fit everything ({shortcut})':'Ajustar todo ({shortcut})','All':'Todo',
 'Canvas tools':'Herramientas del lienzo','Snap to grid':'Ajustar a la cuadrícula','Grid size':'Tamaño de cuadrícula',
 'Grid 0.1 mm':'Cuadrícula 0.1 mm','Grid 0.25 mm':'Cuadrícula 0.25 mm','Grid 0.5 mm':'Cuadrícula 0.5 mm',
 'Grid 1 mm':'Cuadrícula 1 mm','Grid 2 mm':'Cuadrícula 2 mm','Grid 5 mm':'Cuadrícula 5 mm',
 'Grid spacing: the distance Snap to grid snaps to':'Separación de la cuadrícula: la distancia a la que ajusta Ajustar a la cuadrícula',
 'Align left':'Alinear a la izquierda','Align horizontal centers':'Centrar horizontalmente','Align right':'Alinear a la derecha','Align top':'Alinear arriba',
   'Align vertical centers':'Centrar verticalmente','Align bottom':'Alinear abajo','Align centre':'Centrar',
-'Distribute horizontally':'Distribuir horizontalmente','Distribute vertically':'Distribuir verticalmente','Group (Ctrl+G)':'Agrupar (Ctrl+G)',
-  'Ungroup (Ctrl+Shift+G)':'Desagrupar (Ctrl+Shift+G)',
+'Distribute horizontally':'Distribuir horizontalmente','Distribute vertically':'Distribuir verticalmente','Group ({shortcut})':'Agrupar ({shortcut})',
+  'Ungroup ({shortcut})':'Desagrupar ({shortcut})',
 'Subtract the others from the lowest shape':'Restar las demás de la forma inferior','Union of selected shapes':'Unión de las formas seleccionadas',
   'Intersection of selected shapes':'Intersección de las formas seleccionadas',
 'Put the selected lettering on the selected path':'Poner el texto seleccionado sobre el trazado seleccionado','Detach lettering from its path':
@@ -253,8 +253,8 @@ const ES={
   'Sewing tips':'Consejos de bordado','1 issue':'1 aviso','{n} issues':'{n} avisos','1 sewing tip':'1 consejo','{n} sewing tips':'{n} consejos',
   'Third thread (mid-tones)':'Tercer hilo (tonos medios)','Fourth thread (mid-dark)':'Cuarto hilo (tonos medio-oscuros)','Copy style':'Copiar estilo',
   'Paste style':'Pegar estilo','Copy / paste style':'Copiar / pegar estilo','Select one object to copy its style from.':
-  'Selecciona un objeto del que copiar el estilo.','Style copied. Paste it onto other objects with Ctrl+Alt+V.':
-  'Estilo copiado. Pégalo en otros objetos con Ctrl+Alt+V.','Copy a style first (Ctrl+Alt+C).':'Copia primero un estilo (Ctrl+Alt+C).','Keyboard shortcuts (?)':
+  'Selecciona un objeto del que copiar el estilo.','Style copied. Paste it onto other objects with {shortcut}.':
+  'Estilo copiado. Pégalo en otros objetos con {shortcut}.','Copy a style first ({shortcut}).':'Copia primero un estilo ({shortcut}).','Keyboard shortcuts (?)':
   'Atajos de teclado (?)','Keyboard shortcuts':'Atajos de teclado','File':'Archivo','Save':'Guardar','Open':'Abrir','New':'Nuevo','Thread plan':'Plan de hilos',
   'Compile the design to see the thread colours in sewing order.':'Compila el diseño para ver los colores de hilo en orden de bordado.',
   'Download sewing worksheet':'Descargar hoja de bordado','Text (.txt)':'Texto (.txt)','SVG (printable)':'SVG (imprimible)','Sewing worksheet downloaded.':
