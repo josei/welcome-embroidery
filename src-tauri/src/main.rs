@@ -9,8 +9,25 @@ use tauri::{Manager, RunEvent, WebviewUrl, WebviewWindowBuilder};
 
 struct LocalServer(Mutex<Option<Child>>);
 
+/// Preferred port for the bundled server. The WebView origin is
+/// `http://127.0.0.1:<port>` and localStorage (autosave) is per origin, so a
+/// stable port keeps unsaved work restorable across relaunches.
+const PREFERRED_PORT: u16 = 47821;
+
 fn free_port() -> Option<u16> {
     TcpListener::bind("127.0.0.1:0").ok()?.local_addr().ok().map(|a| a.port())
+}
+
+/// Returns `PREFERRED_PORT` when it can be bound, otherwise any free port.
+/// The fallback is only used when the preferred port is taken, so the origin
+/// stays the same on every launch that can get it.
+fn pick_port() -> Option<u16> {
+    if TcpListener::bind(("127.0.0.1", PREFERRED_PORT)).is_ok() {
+        return Some(PREFERRED_PORT);
+    }
+    let port = free_port()?;
+    eprintln!("welcome: port {PREFERRED_PORT} is taken; using {port}, autosave will not carry over from other launches");
+    Some(port)
 }
 
 fn start_server(node: &PathBuf, dir: &PathBuf, data: &PathBuf, port: u16) -> Option<Child> {
@@ -50,7 +67,7 @@ fn main() {
             let node_name = if cfg!(windows) { "node.exe" } else { "node" };
             let bundled_node = dir.join("runtime").join(node_name);
             let node = if bundled_node.exists() { bundled_node } else { PathBuf::from(node_name) };
-            let started = match free_port() {
+            let started = match pick_port() {
                 Some(port) if dir.join("server.js").exists() => start_server(&node, &dir, &data, port).map(|child| (child, port)),
                 _ => None,
             };
