@@ -48,7 +48,10 @@ export function edit(operations, after = () => {}) {
   });
 }
 
-/** Creates the first document, restored to the hoop this browser last saved. */
+/**
+ * Creates the first document, restored to the hoop this browser last saved. The sample is a template, not the user's
+ * work: it starts clean, so New and Open do not ask to discard it until the first edit makes the document dirty.
+ */
 export function initializeDocument() {
-  setDocument({doc: withSavedHoop(initialDocument()), history: [], future: [], dirty: true});
+  setDocument({doc: withSavedHoop(initialDocument()), history: [], future: [], dirty: false});
 }

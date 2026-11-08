@@ -2617,3 +2617,12 @@ test('export is labelled as a machine file, shows its file name, says it does no
  await expect(page.locator('#exportNotice')).toHaveText('Exporting does not save your project. Use Save to keep it as a .welcome file.');
  expect(errors).toEqual([]);
 });
+
+test('the first-visit sample is a template: New skips the discard confirm until it is edited',async({page})=>{
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));const dialogs=[];page.on('dialog',d=>{dialogs.push(d.message());d.dismiss();});
+ await page.goto('/');await expect(page.locator('.object-row')).toHaveCount(5);await expect(page.locator('#unsavedMark')).toHaveCount(0);
+ await page.locator('#new').click();await expect(page.locator('.object-row')).toHaveCount(0);expect(dialogs).toEqual([]);
+ await page.locator('#rect').click();await expect(page.locator('.object-row')).toHaveCount(1);
+ await page.locator('#new').click();expect(dialogs).toEqual(['Discard unsaved changes?']);await expect(page.locator('.object-row')).toHaveCount(1);
+ expect(errors).toEqual([]);
+});
