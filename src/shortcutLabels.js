@@ -52,3 +52,15 @@ function formatPart(part, apple) {
 export function shortcutLabel(parts, apple = isApple) {
   return parts.map(part => formatPart(part, apple)).join('');
 }
+
+/**
+ * A modifier key's name for prose, such as a shortcut sheet description. Apple platforms get the glyph; others get the
+ * word. `shift` is ⇧ and `alt` is ⌥ on Apple platforms.
+ * @param {'shift' | 'alt'} modifier
+ * @param {boolean} [apple] override the detected platform (tests use this)
+ * @returns {string}
+ */
+export function modifierName(modifier, apple = isApple) {
+  if (apple) return modifier === 'shift' ? '⇧' : '⌥';
+  return modifier === 'shift' ? 'Shift' : 'Alt';
+}

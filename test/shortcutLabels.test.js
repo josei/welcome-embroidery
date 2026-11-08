@@ -1,6 +1,6 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
-import {isApplePlatform, shortcutLabel} from '../src/shortcutLabels.js';
+import {isApplePlatform, modifierName, shortcutLabel} from '../src/shortcutLabels.js';
 
 test('navigator.platform decides Apple platforms, with the userAgent only as a fallback', () => {
   assert.equal(isApplePlatform({platform: 'MacIntel'}), true);
@@ -37,4 +37,11 @@ test('Apple platforms use macOS modifier order and glyphs with no separator', ()
 test('a chord with no modifiers is just its key on every platform', () => {
   assert.equal(shortcutLabel(['V'], false), 'V');
   assert.equal(shortcutLabel(['V'], true), 'V');
+});
+
+test('modifier names in prose: glyphs on Apple platforms, words elsewhere', () => {
+  assert.equal(modifierName('shift', true), '⇧');
+  assert.equal(modifierName('alt', true), '⌥');
+  assert.equal(modifierName('shift', false), 'Shift');
+  assert.equal(modifierName('alt', false), 'Alt');
 });

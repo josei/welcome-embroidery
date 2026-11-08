@@ -261,7 +261,7 @@ const ES={
   'Hoja de bordado descargada.','Compile the design first.':'Compila el diseño primero.','Edit':'Editar','Select':'Seleccionar','Pen with curves':
   'Pluma con curvas','Line':'Línea','Polygon':'Polígono','Star':'Estrella','Edit nodes / finish a path':'Editar nodos / terminar un trazado',
   'Cancel, go back to select':'Cancelar, volver a seleccionar','Undo / redo':'Deshacer / rehacer','Copy, cut, paste':'Copiar, cortar, pegar','Group / ungroup':
-  'Agrupar / desagrupar','Nudge (Shift = 5 mm, Alt = 0.1 mm)':'Mover (Shift = 5 mm, Alt = 0.1 mm)','Resize':'Redimensionar','Rotate':'Girar',
+  'Agrupar / desagrupar','Nudge ({shift} = 5 mm, {alt} = 0.1 mm)':'Mover ({shift} = 5 mm, {alt} = 0.1 mm)','Resize':'Redimensionar','Rotate':'Girar',
   'Sew earlier / later':'Bordar antes / después','Sew first / last':'Bordar primero / al final','Fit the hoop':'Ajustar el bastidor','Zoom in / out':
   'Acercar / alejar','This list':'Esta lista','Restore your last design?':'¿Restaurar tu último diseño?','Restore':'Restaurar','Start fresh':'Empezar de cero',
   '"{name}", {n} objects, edited {m} min ago.':'«{name}», {n} objetos, editado hace {m} min.','about {t} to sew':'unos {t} de bordado','Recent':'Recientes',
