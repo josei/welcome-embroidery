@@ -1014,7 +1014,7 @@ test('thread colours: swatch palette, custom colour, recent colours, None for bl
 
 test('unsaved work: Open asks first and cancel keeps the design, undo and recovery copy; Start fresh asks before forgetting it',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));
- const dialogs=[];let answer=true;page.on('dialog',d=>{dialogs.push(d.message());if(answer)d.accept();else d.dismiss();});
+ const dialogs=[];let answer=true;page.on('dialog',d=>{if(d.type()==='beforeunload'){d.accept();return;}dialogs.push(d.message());if(answer)d.accept();else d.dismiss();});
  await page.goto('/');await page.locator('#new').click();await page.locator('#rect').click();await page.locator('#ellipse').click();await expect(page.locator('.object-row')).toHaveCount(2);
  await page.waitForTimeout(1200);const recovery=await page.evaluate(()=>localStorage.getItem('welcome.autosave:'+sessionStorage.getItem('welcome.tabId')));expect(recovery).toBeTruthy();
  dialogs.length=0;answer=false;
@@ -2525,4 +2525,21 @@ test('open elsewhere: a second tab on the same document shows a notice in both, 
  await expect(other.locator('#openElsewhere')).toBeVisible();await expect(page.locator('#openElsewhere')).toBeVisible();
  await other.close();await expect(page.locator('#openElsewhere')).toBeHidden();
  expect(errors).toEqual([]);expect(otherErrors).toEqual([]);
+});
+
+test('unsaved marker and title clear on a .welcome save, and the browser asks before leaving unsaved work',async({page})=>{
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));
+ const leaveDialogs=[];page.on('dialog',d=>{if(d.type()==='beforeunload'){leaveDialogs.push(d.type());d.accept();}else d.accept();});
+ await page.goto('/');await page.waitForTimeout(300);
+ await expect(page.locator('#unsavedMarker')).toBeHidden();await expect(page).toHaveTitle(/^(?!• )/);
+ const rows=await page.locator('.object-row').count();
+ await page.locator('#rect').click();await expect(page.locator('.object-row')).toHaveCount(rows+1);
+ await expect(page.locator('#unsavedMarker')).toBeVisible();await expect(page).toHaveTitle(/^• .+ — Welcome Embroidery$/);
+ const saved=page.waitForEvent('download');await page.locator('#save').click();await saved;
+ await expect(page.locator('#unsavedMarker')).toBeHidden();await expect(page).toHaveTitle(/^(?!• ).+ — Welcome Embroidery$/);
+ await page.reload();await expect(page.locator('#unsavedMarker')).toBeHidden();
+ expect(leaveDialogs).toEqual([]);
+ await page.locator('#rect').click();await expect(page.locator('#unsavedMarker')).toBeVisible();
+ await page.reload();await expect.poll(()=>leaveDialogs.length).toBe(1);
+ expect(errors).toEqual([]);
 });

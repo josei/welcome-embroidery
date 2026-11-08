@@ -1,5 +1,5 @@
 import {stitchRowsState} from '../stitchRowsState.js';
-import {useRef, useSyncExternalStore} from 'react';
+import {useEffect, useRef, useSyncExternalStore} from 'react';
 import {ActionButton} from './ActionButton';
 import {useDraftInput} from './useDraftInput';
 import {documentActions, documentState} from '../documentState.js';
@@ -11,10 +11,20 @@ import {importMachineFile, newProject, openProjectFile, projectSave} from '../pr
 import {toolbarActions} from '../toolbarCommands.js';
 import {t} from '../i18n.js';
 // The project name field: it shows the document name, and a committed change is an edit (see documentActions).
+// Beside it, a dot marks unsaved changes, and the window title carries the same dot.
 function ProjectName() {
- const {doc} = useSyncExternalStore(documentState.subscribe, documentState.get);
- const field = useDraftInput(doc.name ?? '', text => documentActions.rename(text));
- return <input id="name" {...field} />;
+ const {doc, dirty} = useSyncExternalStore(documentState.subscribe, documentState.get);
+ const name = doc.name ?? '';
+ const field = useDraftInput(name, text => documentActions.rename(text));
+ useEffect(() => {
+  document.title = `${dirty ? '• ' : ''}${name} — ${t('Welcome Embroidery')}`;
+ }, [dirty, name]);
+ return (
+  <>
+   <input id="name" {...field} />
+   <span id="unsavedMarker" className="unsaved-marker" role="img" aria-label={t('Unsaved changes')} title={t('Unsaved changes')} hidden={!dirty} />
+  </>
+ );
 }
 // The agent button: it shows whether an AI agent is connected, and opens the Connect an AI agent dialog.
 function AgentPill() {

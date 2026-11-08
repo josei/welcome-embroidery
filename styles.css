@@ -68,6 +68,7 @@ nav .icon-button:first-of-type{margin-left:auto}
 .segmented button[data-view].active{background:#fff;color:var(--teal);font-weight:600;box-shadow:0 1px 2px #1d29251f}
 .edit-tools{display:flex;gap:2px}
 .top #name{min-width:80px;flex:0 1 180px}
+.unsaved-marker:not([hidden]){display:inline-block;flex:none;width:8px;height:8px;margin:0 6px 0 -4px;border-radius:50%;background:var(--teal)}
 .canvas{position:relative;height:calc(100% - 92px)}
 .floating{position:absolute;top:12px;left:50%;transform:translateX(-50%);z-index:5;display:flex;align-items:center;gap:2px;padding:4px 6px;background:#fff;border:1px solid #e3e6e1;border-radius:11px;box-shadow:0 4px 18px #1d292518}
 .floating .icon-button{width:30px;height:30px;min-width:30px}
@@ -207,6 +208,7 @@ body{height:auto;min-height:0;overflow-x:hidden;overflow-y:auto}
 .top .logo{margin-right:0;order:0}
 .top .logo-mark{height:22px}
 .top #name{order:1;flex:1 1 0;min-width:60px;width:auto}
+.top .unsaved-marker{order:1}
 .top .sep,#helpBtn{display:none}
 .top #export{order:2;margin-left:0}
 .segmented{order:4;flex:1 1 100%;display:grid;grid-template-columns:repeat(3,1fr)}

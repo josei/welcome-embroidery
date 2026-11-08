@@ -141,6 +141,18 @@ export function restoreProject(saved) {
 }
 
 /**
+ * Makes the browser ask before this tab is closed or reloaded while the document has unsaved changes. Clean documents
+ * close without a prompt.
+ */
+export function mountLeaveGuard() {
+  window.addEventListener('beforeunload', event => {
+    if (!documentNow().dirty) return;
+    event.preventDefault();
+    event.returnValue = '';
+  });
+}
+
+/**
  * Asks before a change throws away unsaved work: true when the document is clean or the user confirms. Cancel leaves the
  * design, its undo history and the autosave copy untouched.
  * @returns {boolean}

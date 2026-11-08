@@ -50,5 +50,5 @@ export function edit(operations, after = () => {}) {
 
 /** Creates the first document, restored to the hoop this browser last saved. */
 export function initializeDocument() {
-  setDocument({doc: withSavedHoop(initialDocument()), history: [], future: [], dirty: true});
+  setDocument({doc: withSavedHoop(initialDocument()), history: [], future: [], dirty: false});
 }
