@@ -58,12 +58,39 @@ export function exportFileName(format: string): string {
   return `${base}.${format === 'pes6' ? 'pes' : format}`;
 }
 
+/** How long one export may take, from the click to the download, before the dialog reports that it did not finish. */
+export const EXPORT_TIMEOUT_MS = 10_000;
+
 /**
- * Exports the document in the chosen format and closes the dialog on success: DXF, the appliqué and print templates, SVG,
- * or a machine format (with the sewing worksheet beside it when the box is ticked). The dialog stays open on an error.
+ * Exports the document in the chosen format, from the Compile & download button. The dialog stays open on any failure
+ * and says why in its own text (the toast sits beneath the modal dialog, so it is not the place for it). A success closes
+ * the dialog. Every attempt ends, with a file or a named error, within EXPORT_TIMEOUT_MS.
  */
 export async function exportCurrent() {
+  if (exportDialogState.get().busy) return;
+  const job = {abandoned: false};
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  const timeout = new Promise<never>((_, reject) => {
+    timer = setTimeout(() => {
+      job.abandoned = true;
+      reject(Error(`The export did not finish within ${EXPORT_TIMEOUT_MS / 1000} seconds. Try again, or simplify the design.`));
+    }, EXPORT_TIMEOUT_MS);
+  });
+  setExportDialog({busy: true, error: ''});
+  try {
+    await Promise.race([runExport(job), timeout]);
+  } catch (error) {
+    if ((error as Error).name !== 'AbortError') setExportDialog({error: (error as Error).message});
+  } finally {
+    clearTimeout(timer);
+    setExportDialog({busy: false});
+  }
+}
+
+/** One export attempt. Throws on failure; `job.abandoned` is set when the timeout has already reported it. */
+async function runExport(job: {abandoned: boolean}) {
   await wired().ensureFonts().catch(() => {});
+  if (job.abandoned) return;
   // The store types the document loosely; the engine validates it before any export reads it.
   const doc = documentNow().doc as Parameters<typeof exportDxf>[0];
   const format = exportFormatState.get().format;
@@ -77,13 +104,7 @@ export async function exportCurrent() {
     return;
   }
   if (format === 'applique-print') {
-    let svg;
-    try {
-      svg = exportAppliqueTemplates(doc);
-    } catch (error) {
-      wired().toast((error as Error).message);
-      return;
-    }
+    const svg = exportAppliqueTemplates(doc);
     download(svg, exportFileName('applique-print'), 'image/svg+xml');
     setExportDialog({open: false});
     wired().toast('Appliqué templates exported at 1:1. Print at 100% and check the 10 mm bar before cutting fabric.');
@@ -101,33 +122,30 @@ export async function exportCurrent() {
     wired().toast('SVG exported (design only, not a stitch plan).');
     return;
   }
-  try {
-    const revision = documentNow().doc.revision;
-    const result = await wired().request({
-      type: 'export',
-      document: forWorker(documentNow().doc),
-      format,
-      color: selectedObject()?.thread || '#527461',
-    });
-    if (result.plan.revision !== revision || revision !== documentNow().doc.revision) {
-      throw Error('The document changed during export. Export the current revision again.');
-    }
-    wired().setPlan(result.plan);
-    const chosen = exportFormatState.get().format;
-    download(result.bytes, exportFileName(chosen), 'application/octet-stream');
-    const dialog = exportDialogState.get();
-    const withSheet = MACHINE_FORMATS.includes(chosen) && dialog.withWorksheet;
-    if (withSheet) {
-      download(sewingWorksheet(doc, result.plan, dialog.worksheetFormat),
-        `${exportBase()}-worksheet.${dialog.worksheetFormat === 'svg' ? 'svg' : 'txt'}`,
-        dialog.worksheetFormat === 'svg' ? 'image/svg+xml' : 'text/plain');
-    }
-    wired().render();
-    setExportDialog({open: false});
-    wired().toast(t('{fmt} exported from revision {n}.', {fmt: chosen.toUpperCase(), n: result.plan.revision})
-      + (withSheet ? t(' The sewing worksheet is downloaded with it.') : '')
-      + jefWarnings(result.plan as Parameters<typeof jefWarnings>[0], chosen).map(w => ' ' + t(w)).join(''));
-  } catch (error) {
-    if ((error as Error).name !== 'AbortError') wired().toast((error as Error).message);
+  const revision = documentNow().doc.revision;
+  const result = await wired().request({
+    type: 'export',
+    document: forWorker(documentNow().doc),
+    format,
+    color: selectedObject()?.thread || '#527461',
+  });
+  if (job.abandoned) return;
+  if (result.plan.revision !== revision || revision !== documentNow().doc.revision) {
+    throw Error('The document changed during export. Export the current revision again.');
   }
+  wired().setPlan(result.plan);
+  const chosen = exportFormatState.get().format;
+  download(result.bytes, exportFileName(chosen), 'application/octet-stream');
+  const dialog = exportDialogState.get();
+  const withSheet = MACHINE_FORMATS.includes(chosen) && dialog.withWorksheet;
+  if (withSheet) {
+    download(sewingWorksheet(doc, result.plan, dialog.worksheetFormat),
+      `${exportBase()}-worksheet.${dialog.worksheetFormat === 'svg' ? 'svg' : 'txt'}`,
+      dialog.worksheetFormat === 'svg' ? 'image/svg+xml' : 'text/plain');
+  }
+  wired().render();
+  setExportDialog({open: false});
+  wired().toast(t('{fmt} exported from revision {n}.', {fmt: chosen.toUpperCase(), n: result.plan.revision})
+    + (withSheet ? t(' The sewing worksheet is downloaded with it.') : '')
+    + jefWarnings(result.plan as Parameters<typeof jefWarnings>[0], chosen).map(w => ' ' + t(w)).join(''));
 }

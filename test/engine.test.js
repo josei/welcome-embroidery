@@ -23,11 +23,22 @@ test('starter badge compiles deterministically and settings affect stitches',()=
  const noUnderlay=structuredClone(doc);noUnderlay.settings.underlay=false;
  assert.notEqual(compile(noUnderlay).count,base.count);
 });
+test('out-of-hoop designs are refused with the object and overrun for JEF, DST and VP3, and in-hoop ones export',()=>{
+ const rect=(x,y)=>{const d=initialDocument();d.objects=[];applyOperations(d,[{op:'add_shape',id:'r',kind:'rect',x,y,width:100,height:100}]);return d;};
+ const out=rect(-12,-8);
+ for(const format of ['jef','dst','vp3']){
+  assert.throws(()=>encode(compile(out),format,'#527461',out.hoop,out),/Rectangle extends 37\.\d mm past the hoop\. Move it or choose a larger hoop\./,format);
+ }
+ const inside=rect(-50,-50);
+ assert.deepEqual(compile(inside).errors,[]);
+ for(const format of ['jef','dst','vp3'])assert.ok(encode(compile(inside),format,'#527461',inside.hoop,inside).length>100,format);
+});
+
 test('document validation rejects unsupported schemas and out-of-hoop output',()=>{
  assert.throws(()=>compile({schema:'old',objects:[]}),/Invalid Welcome project/);
  const d=initialDocument();d.objects=[{id:'huge',kind:'rect',stitch:'fill',thread:'#112233',x:-70,y:-1,w:140,h:2}];
- assert.match(compile(d).errors[0],/selected 110 mm hoop/);
- assert.throws(()=>encode(compile(d),'jef','#112233'),/selected 110 mm hoop/);
+ assert.match(compile(d).errors[0],/extends \d+(\.\d)? mm past the hoop/);
+ assert.throws(()=>encode(compile(d),'jef','#112233'),/past the hoop/);
 });
 test('JEF and VP3 files are deterministic and carry real format signatures',()=>{
  const p=compile(initialDocument()),jef=encode(p,'jef','#527461'),vp3=encode(p,'vp3','#527461');
@@ -102,7 +113,7 @@ test('groups: group/ungroup ops, duplicates leave groups, validation',()=>{
 
 test('custom rectangular hoops: set_hoop, bounds diagnostics, align to hoop, JEF header from design size',()=>{
  const doc=initialDocument();doc.objects=[];applyOperations(doc,[{op:'set_hoop',width:80,height:50},{op:'set_settings',compensation:0},{op:'add_shape',id:'r',kind:'rect',x:-35,y:-10,width:30,height:20}]);validateDocument(doc);assert.equal(doc.hoopH,50);
- assert.deepEqual(compile(doc).errors,[]);applyOperations(doc,[{op:'transform',id:'r',y:-30}]);assert.match(compile(doc).errors[0],/selected 80 × 50 mm hoop/);
+ assert.deepEqual(compile(doc).errors,[]);applyOperations(doc,[{op:'transform',id:'r',y:-30}]);assert.match(compile(doc).errors[0],/Rectangle extends 5 mm past the hoop\. Move it or choose a larger hoop\./);
  applyOperations(doc,[{op:'transform',id:'r',y:-10},{op:'align',ids:['r'],edge:'bottom',to:'hoop'}]);assert.equal(objectBounds(doc.objects[0])[3],25);assert.deepEqual(compile(doc).errors,[]);
  assert.ok(encode(compile(doc),'jef','#527461',80,doc).length>100);assert.ok(encode(compile(doc),'vp3','#527461',80,doc).length>100);
  applyOperations(doc,[{op:'set_hoop',width:200}]);assert.equal(doc.hoopH,undefined);{const jef=encode(compile(doc),'jef','#527461',200,doc);assert.equal(new DataView(jef.buffer).getUint32(32,true),1,'30 x 20 mm design uses the pyembroidery 50x50 hoop code');}assert.ok(encode(compile(doc),'vp3','#527461',200,doc).length>100);

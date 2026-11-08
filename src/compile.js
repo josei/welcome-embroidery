@@ -6,7 +6,7 @@ import {planPhoto,planContour,sampleRun,sampleLine} from './stitchplan.js';
 import {GLYPHS} from './lettering.js';
 import {geometry,textPrimitives} from './outlines.js';
 import {pathDirs,motifLoops,motifPairLoops,sequinRuns,beadRuns,blingRuns} from './embellishments.js';
-import {hoopSize,hoopLabel} from './hoops.js';
+import {hoopSize} from './hoops.js';
 import {clipLines} from './clipMasks.js';
 import {sameThread} from './threads.js';
 import {closeRing,clipRuns,bartack} from './stitchRuns.js';
@@ -18,6 +18,26 @@ import {distP,railsFromLine,railsFromCenterline,widthAt} from './pathGeometry.js
 // Rounds to one decimal place (a stitch position in mm).
 /** @type {(n: number) => number} */
 const round = n => Math.round(n * 10) / 10;
+
+/**
+ * Whether sewable bounds [x0,y0,x1,y1] reach past the hoop, which is centred on the origin.
+ * @param {number[]} b
+ * @param {{w: number, h: number}} hoop
+ */
+function outsideHoop(b,hoop){return b[0]<-hoop.w/2||b[1]<-hoop.h/2||b[2]>hoop.w/2||b[3]>hoop.h/2;}
+
+/**
+ * The refusal for an object that reaches past the hoop: its name and how far it overruns, rounded up to 0.1 mm. The export
+ * dialog shows it as the reason an export cannot start.
+ * @param {any} o
+ * @param {number[]} b
+ * @param {{w: number, h: number}} hoop
+ */
+function hoopMessage(o,b,hoop){
+  const over=Math.max(-hoop.w/2-b[0],-hoop.h/2-b[1],b[2]-hoop.w/2,b[3]-hoop.h/2);
+  const mm=Math.max(.1,Math.ceil(over*10-1e-6)/10);
+  return `${o.name||o.id} extends ${mm} mm past the hoop. Move it or choose a larger hoop.`;
+}
 
 /**
  * @param {any} doc
@@ -45,7 +65,7 @@ export function compile(doc) {
         {const lx=(x-(sx0+sx1)/2)*sx,ly=(y-(sy0+sy1)/2)*sy;return [cx+lx*c-ly*sn,cy+lx*sn+ly*c];});
         const b=[Math.min(...corners.map(p=>p[0])),Math.min(...corners.map(p=>p[1])),Math.max(...corners.map(p=>p[0])),Math.max(...corners.map(p=>p[1]))];
         overall=[Math.min(overall[0],b[0]),Math.min(overall[1],b[1]),Math.max(overall[2],b[2]),Math.max(overall[3],b[3])];
-        if(b[0]<-hoop.w/2||b[1]<-hoop.h/2||b[2]>hoop.w/2||b[3]>hoop.h/2){const m=`Object ${o.name||o.id} exceeds the selected ${hoopLabel(hoop)} hoop.`;
+        if(outsideHoop(b,hoop)){const m=hoopMessage(o,b,hoop);
         errors.push(m);issues.push({id:o.id,message:m});};records.push({o,stitchLayer:true});complexity+=o.stitches.length;continue;
     }
     const satin=o.stitch==='satin'&&o.kind==='path',rails=satin?railsFromCenterline(o):null,lines=
@@ -54,7 +74,7 @@ export function compile(doc) {
     const maskObj=o.clipId?doc.objects.find((/** @type {any} */ v)=>v.id===o.clipId):null,maskRings=maskObj?geometry(maskObj,0).map(closeRing):null;
     const b=[Math.min(...points.map(p=>p[0])),Math.min(...points.map(p=>p[1])),Math.max(...points.map(p=>p[0])),Math.max(...points.map(p=>p[1]))];
     overall=[Math.min(overall[0],b[0]),Math.min(overall[1],b[1]),Math.max(overall[2],b[2]),Math.max(overall[3],b[3])];
-    if(b[0]<-hoop.w/2||b[1]<-hoop.h/2||b[2]>hoop.w/2||b[3]>hoop.h/2){const m=`Object ${o.name||o.id} exceeds the selected ${hoopLabel(hoop)} hoop.`;
+    if(outsideHoop(b,hoop)){const m=hoopMessage(o,b,hoop);
       errors.push(m);issues.push({id:o.id,message:m});};
     if(o.stitch==='fill'&&o.kind!=='text')complexity+=Math.ceil((b[3]-b[1])/spacing)*points.length;
     const clippedFill=maskRings&&o.stitch==='fill'&&o.kind!=='text'&&(o.kind!=='path'||o.closed),useLines=clippedFill?

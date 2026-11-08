@@ -22,6 +22,8 @@ export function EditorOverlays() {
  const agentOpen = useSyncExternalStore(agentDialogState.subscribe, agentDialogState.get);
  const exportFormat = useSyncExternalStore(exportFormatState.subscribe, exportFormatState.get);
  const exportDialog = useSyncExternalStore(exportDialogState.subscribe, exportDialogState.get);
+ // Why the export cannot run: the design's refusal (such as an object past the hoop) first, else the last export's failure.
+ const exportProblem = exportDialog.refusal || exportDialog.error;
  const {doc} = useSyncExternalStore(documentState.subscribe, documentState.get);
  const fontsOpen = useSyncExternalStore(fontsDialogState.subscribe, fontsDialogState.get);
  const documentReady = Array.isArray(doc.objects) && fontsOpen; // the store starts empty; the lists are worked out when the dialog opens
@@ -183,8 +185,18 @@ export function EditorOverlays() {
             </option>
           </select>
         </label>
-        <button id={"download"} onClick={e => { e.preventDefault(); void exportCurrent(); }}>
-          {"Compile & download"}
+        {exportProblem ? (
+          <p id={"exportError"} role={"alert"} className={"export-error"}>
+            {exportProblem}
+          </p>
+        ) : null}
+        <button
+          id={"download"}
+          disabled={exportDialog.busy || Boolean(exportDialog.refusal)}
+          aria-busy={exportDialog.busy}
+          onClick={e => { e.preventDefault(); void exportCurrent(); }}
+        >
+          {exportDialog.busy ? "Compiling…" : "Compile & download"}
         </button>
         <button>
           {"Cancel"}

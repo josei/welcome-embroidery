@@ -21,7 +21,7 @@ test('stitch-layer transforms, thread replacement, hoop diagnostics and regenera
   assert.deepEqual(layer.stitches,before);assert.equal(layer.source.originalBytesBase64,raw);assert.ok(Object.keys(layer.threadOverrides).length>0);
   const plan=compile(doc);assert.deepEqual(plan.errors,[]);const output=encode(plan,'jef','#527461',doc.hoop,doc),decoded=decodeEmbroidery(output,'jef'),needle=decoded.stitches.filter(s=>s.cmd==='stitch'),planned=plan.stitches.filter(s=>s.cmd==='stitch');
   assert.equal(needle.length,planned.length);assert.deepEqual(needle.map(s=>[s.x,s.y]),planned.map(s=>[s.x,s.y]));
-  applyOperations(doc,[{op:'transform',id:layer.id,x:200}]);assert.match(compile(doc).errors.join(' '),/exceeds the selected 110 mm hoop/);assert.throws(()=>encode(compile(doc),'jef','#527461',doc.hoop,doc),/exceeds the selected 110 mm hoop/);
+  applyOperations(doc,[{op:'transform',id:layer.id,x:200}]);assert.match(compile(doc).errors.join(' '),/past the hoop/);assert.throws(()=>encode(compile(doc),'jef','#527461',doc.hoop,doc),/past the hoop/);
 });
 
 test('same-count edits cannot pass through stale source bytes',()=>{
@@ -67,8 +67,8 @@ test('hoop bounds errors are returned for every editable and imported object kin
     {id:'p',kind:'path',x:200,y:200,w:0,h:0,points:[[200,200],[201,201]],thread:'#527461',stitch:'run'},
     {id:'t',kind:'text',text:'A',font:'welcome-mono/1',x:200,y:210,w:6,h:8,thread:'#527461',stitch:'run'}
   ];
-  for(const object of variants){const doc=initialDocument();doc.objects=[object];assert.match(compile(doc).errors.join(' '),/exceeds the selected 110 mm hoop/,object.kind);}
-  const doc=initialDocument(),machine=importStitchLayer(pinnedMachineFixture('jef').bytes,'jef');doc.objects=[machine];applyOperations(doc,[{op:'transform',id:machine.id,x:200}]);assert.match(compile(doc).errors.join(' '),/exceeds the selected 110 mm hoop/,'stitch_layer');
+  for(const object of variants){const doc=initialDocument();doc.objects=[object];assert.match(compile(doc).errors.join(' '),/past the hoop/,object.kind);}
+  const doc=initialDocument(),machine=importStitchLayer(pinnedMachineFixture('jef').bytes,'jef');doc.objects=[machine];applyOperations(doc,[{op:'transform',id:machine.id,x:200}]);assert.match(compile(doc).errors.join(' '),/past the hoop/,'stitch_layer');
 });
 
 test('bounded maximum-size stitch-layer projects serialize and reopen within the browser limit',()=>{

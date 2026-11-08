@@ -5,6 +5,7 @@ import {documentNow} from './documentState.js';
 import {forWorker} from './appHelpers.js';
 import {setSewingCounts} from './sewingCountsState.js';
 import {setCompileIssue} from './compileIssueState.js';
+import {setExportRefusal} from './exportDialogState.js';
 import {editor} from './editorContext.js';
 
 const worker = new Worker(new URL('./worker.js', import.meta.url), {type: 'module'});
@@ -119,6 +120,7 @@ export async function compileNow(/** @type {boolean | Event} */ manual = false) 
     if (result.plan.revision !== revision || revision !== documentNow().doc.revision) return;
     plan = result.plan;
     lastPlan = plan;
+    setExportRefusal(plan.errors.join(' '));
     setSewingCounts(plan.objectCounts || {});
     compileError = '';
     setCompileIssue(null);

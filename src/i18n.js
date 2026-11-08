@@ -245,7 +245,7 @@ const ES={
   '{l} es una columna de satén de más de 7 mm de ancho; las puntadas largas de satén se enganchan. Usa un relleno o divídela en columnas más estrechas.',
   '{l} is only {n} mm tall; lettering under about 5 mm rarely sews cleanly in a satin or fill font.':
   '{l} mide solo {n} mm de alto; el texto de menos de unos 5 mm rara vez se borda limpio en una fuente de satén o relleno.',
-  'Object {l} exceeds the selected {h} mm hoop.':'El objeto {l} supera el bastidor de {h} mm seleccionado.',
+  '{l} extends {n} mm past the hoop. Move it or choose a larger hoop.':'{l} sobrepasa el bastidor en {n} mm. Muévelo o elige un bastidor más grande.',
   'Object {l} lies outside its clipping mask, so nothing is sewn.':'El objeto {l} queda fuera de su máscara de recorte, así que no se borda nada.',
   'Sewing tips':'Consejos de bordado','1 issue':'1 aviso','{n} issues':'{n} avisos','1 sewing tip':'1 consejo','{n} sewing tips':'{n} consejos',
   'Third thread (mid-tones)':'Tercer hilo (tonos medios)','Fourth thread (mid-dark)':'Cuarto hilo (tonos medio-oscuros)','Copy style':'Copiar estilo',
