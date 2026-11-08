@@ -5,6 +5,7 @@ import {documentNow, setDocument} from './documentState.js';
 import {editModeNow, setEditMode} from './editModeState.js';
 import {selState, setSelection} from './selectionState.js';
 import {clone} from './appHelpers.js';
+import {copyName} from './objectNames.js';
 
 /** The document fields these commands read and change. The engine stores objects as plain records. */
 export interface SelectionObject {
@@ -97,7 +98,6 @@ export function pasteClipboard() {
   const made = (clip.objects as SelectionObject[]).map(o => {
     const copy = clone(o) as SelectionObject;
     copy.id = crypto.randomUUID();
-    copy.name = `${o.name || o.kind} copy`;
     if (o.groupId) {
       if (!remap.has(o.groupId)) remap.set(o.groupId, crypto.randomUUID());
       copy.groupId = remap.get(o.groupId);
@@ -105,7 +105,10 @@ export function pasteClipboard() {
     return copy;
   });
   wired().transact(() => {
+    const taken = objects().map(o => o.name);
     for (const copy of made) {
+      copy.name = copyName(copy.name, copy.kind, taken);
+      taken.push(copy.name);
       const dx = offset, dy = offset;
       copy.x += dx;
       copy.y += dy;

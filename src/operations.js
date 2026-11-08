@@ -10,6 +10,7 @@ import {flipObjects,mapPathPoints,normAngle,objById,objectBounds,refreshPathBoun
 import {hoopSize} from './hoops.js';
 import {refreshAlong,alongPoints,pathSig} from './pathFollow.js';
 import {refreshClips} from './clipMasks.js';
+import {copyName} from './objectNames.js';
 import {booleanShapes,knifeShape,offsetShape,strokeToShape,isClosedShape,appliqueGroup} from './shapeOps.js';
 import {removeSmallHoles,removeSmallIslands} from './cleanup.js';
 import {roundPathCorners,arrayCopies,simplifyPath,splitPath,joinPaths,reorderObject,redworkGroup,replaceThread,sortByColor,nodeFraction} from './editOps.js';
@@ -238,7 +239,7 @@ export function applyOperations(doc,operations) {
     else if(op.op==='duplicate'){const o=doc.objects.find(v=>v.id===op.id);if(!o)throw Error(`Unknown object: ${op.id}`);const copy=structuredClone(o);
       delete copy.groupId;copy.id=op.newId||crypto.randomUUID();if(copy.along)copy.along.points=
       copy.along.points.map(/** @type {(p: number[]) => number[]} */(p)=>{const [x,y]=p;return [x+(op.dx??3),y+(op.dy??3)];});copy.name=
-      op.name||`${o.name} copy`;copy.x+=op.dx??3;copy.y+=op.dy??3;if(copy.kind==='path')mapPathPoints(copy,([x,y])=>[x+(op.dx??3),y+(op.dy??3)]);
+      op.name||copyName(o.name,o.kind,doc.objects.map(v=>v.name));copy.x+=op.dx??3;copy.y+=op.dy??3;if(copy.kind==='path')mapPathPoints(copy,([x,y])=>[x+(op.dx??3),y+(op.dy??3)]);
       doc.objects.push(copy);}
     else throw Error(`Unsupported operation: ${op.op}`);
   }
