@@ -477,5 +477,5 @@ export function createCanvas(/** @type {any} */ api){
     px:editing.px,drawControls:editing.drawControls,showSnap:editing.showSnap,
     snapPt:editing.snapPt,insertNodeAt:editing.insertNodeAt,deleteNode:editing.deleteNode,
     add:tools.add,coord,withGroup:tools.withGroup,setTool:tools.setTool,endPath:tools.endPath,
-    drawPathPreview:tools.drawPathPreview,continueDigitizing:tools.continueDigitizing,markObjectDblclick:tools.markObjectDblclick};
+    drawPathPreview:tools.drawPathPreview,continueDigitizing:tools.continueDigitizing};
 }

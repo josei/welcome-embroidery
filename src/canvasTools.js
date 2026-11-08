@@ -34,9 +34,6 @@ const TOOL_HINTS={
  *  lettering: textFont(), ensureFontLoaded(id), fitHeight(fontId, text).
  */
 export function createCanvasTools(api){
-  /** @type {number} */
-  let objectDblclickAt=-Infinity;
-
   /**
    * The pointer position in mm, from the canvas's own coordinate system.
    * @param {any} e
@@ -64,6 +61,8 @@ export function createCanvasTools(api){
         thread:$('#thread').value,font:api.textFont(),...(f?.kind==='outline'?{stitch:'fill'}:{})}],()=>{
         setSelection({selected: id});setSelection({multi: new Set([id])});
       });
+      // Lettering starts as a placeholder: its text field is focused with the text selected, so typing replaces it.
+      requestAnimationFrame(()=>{const field=$('#letteringText');field?.focus();field?.select();});
       return;
     }
     api.commit([{op:'add_shape',id,kind,name:kind==='ellipse'?'Ellipse':'Rectangle',x:-12,y:-8,width:24,height:16,
@@ -292,11 +291,6 @@ export function createCanvasTools(api){
     if(o?.kind!=='path'){api.toast('Select a path first.');return;}
     continueDigitizing(o);
   };
-  // A double-click on empty canvas adds a rectangle, unless the click that started it hit an object.
-  $('#art').addEventListener('dblclick',(/** @type {any} */ e)=>{
-    if(e.target===$('#art')&&!pathDraftNow().pathMode&&performance.now()-objectDblclickAt>500)add('rect');
-  });
-
   // ---- measure and knife clicks --------------------------------------------------------------------------------
   // The measure tool keeps a first point until the second click replaces it with a fresh first point.
   function measureClick(/** @type {any} */ p){
@@ -316,8 +310,5 @@ export function createCanvasTools(api){
     api.canvas.refresh();
     return true;
   }
-  /** Notes that a double-click landed on an object, so the canvas's empty-area double-click does not add a rectangle. */
-  function markObjectDblclick(){objectDblclickAt=performance.now();}
-
-  return {coord,withGroup,add,setTool,continueDigitizing,endPath,drawPathPreview,pathPress,measureClick,knifeClick,markObjectDblclick};
+  return {coord,withGroup,add,setTool,continueDigitizing,endPath,drawPathPreview,pathPress,measureClick,knifeClick};
 }

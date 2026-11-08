@@ -102,7 +102,6 @@ export function mountCanvas() {
       render();
     },
     dblclick: (/** @type {any} */ object, /** @type {any} */ point) => {
-      canvas.markObjectDblclick();
       if (object.kind === 'path' && editModeNow() && selState().selected === object.id) canvas.insertNodeAt(object, point);
       else enterEdit(object);
     },
