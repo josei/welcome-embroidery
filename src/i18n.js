@@ -37,7 +37,7 @@ const ES={
   '{n} cambios de color','1 trim':'1 corte','{n} trims':'{n} cortes','{m} m thread':'{m} m de hilo',
 'Agent connected':'Agente conectado','Waiting for agent':'Esperando al agente','Agent':'Agente','Waiting':'Esperando','Connected':'Conectado','Export format':
   'Formato de exportación',
-'1 stitch':'1 puntada','{n} stitches':'{n} puntadas',
+'1 stitch':'1 puntada','{n} stitches':'{n} puntadas','not compiled':'sin compilar',
 'Use document value':'Usar el valor del documento',
 'Sets density, underlay, pull compensation and the stabilizer tip for the design. Objects with their own values keep them.':
   'Ajusta la densidad, la base, la compensación de tirón y la estabilización de la tela del diseño. Los objetos con valores propios los mantienen.',

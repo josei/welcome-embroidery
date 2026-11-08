@@ -2756,3 +2756,16 @@ test('a compile failure keeps sewing-order counts and marks the rows it blocks',
  await expect(row.locator('.row-warn')).toHaveCount(0);
  await expect(row.locator('.row-tag')).toHaveText(counted);
 });
+
+test('a first compile failure marks the row as not compiled, not a bare type name',async({page})=>{
+ await page.goto('/');page.on('dialog',d=>d.accept());await page.locator('#new').click();
+ await page.locator('#letter').click();await page.locator('#letteringText').fill('WELC-OME');await page.locator('#letteringText').press('Tab');
+ const row=page.locator('.object-row');await expect(row).toHaveCount(1);
+ await expect(page.locator('#objects .list-warning')).toContainText("Can't compile: The bundled single-line alphabet does not support: -");
+ await expect(row.locator('.row-warn')).toHaveCount(1);
+ await expect(row.locator('.row-tag')).toContainText('not compiled');
+ await page.locator('#letteringText').fill('WELCOME');await page.locator('#letteringText').press('Tab');
+ await expect(page.locator('#objects .list-warning')).toHaveCount(0);
+ await expect(row.locator('.row-warn')).toHaveCount(0);
+ await expect(row.locator('.row-tag')).toContainText('stitches');
+});

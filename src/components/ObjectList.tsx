@@ -102,8 +102,12 @@ function RenameField({name, onDone}: {name: string; onDone: (text: string | null
  );
 }
 
-// The stitch count as the row shows it: nothing until the design compiles.
+// The stitch count as the row shows it. Before any count exists, a row the failed compile names says so instead of showing nothing.
 const stitchesText = (count: number) => (count === 1 ? t('1 stitch') : t('{n} stitches', {n: count.toLocaleString()}));
+const countText = (count: number | undefined, warning: string | undefined) => {
+ if (count !== undefined) return stitchesText(count);
+ return warning ? t('not compiled') : '';
+};
 
 function ObjectRow({o, depth, selected, dropping, renaming, count, warning, onRenameDone}: {
  o: Obj;
@@ -127,7 +131,7 @@ function ObjectRow({o, depth, selected, dropping, renaming, count, warning, onRe
    <span className="row-text">
     {renaming ? <RenameField name={o.name || ''} onDone={onRenameDone} /> : <span className="row-name">{name}</span>}
     <span className="row-tag">
-     {[o.kind === 'stitch_layer' ? 'machine stitches' : o.stitch, count === undefined ? '' : stitchesText(count)].filter(Boolean).join(' · ')}
+     {[o.kind === 'stitch_layer' ? 'machine stitches' : o.stitch, countText(count, warning)].filter(Boolean).join(' · ')}
     </span>
    </span>
    {warning && <span className="row-warn" role="img" aria-label={warning} title={warning}>⚠</span>}
@@ -165,7 +169,7 @@ function GroupRow({groupId, members, open, selectedIds, count, warning}: {
    {icon('i-group')}
    <span className="row-text">
     <span className="row-name">{`Group · ${members.length} objects`}</span>
-    {count !== undefined && <span className="row-tag">{stitchesText(count)}</span>}
+    {countText(count, warning) && <span className="row-tag">{countText(count, warning)}</span>}
    </span>
    {warning && <span className="row-warn" role="img" aria-label={warning} title={warning}>⚠</span>}
    <button type="button" className="row-btn row-eye" aria-label={`${hiddenAll ? 'Show' : 'Hide'} group`}>{icon(hiddenAll ? 'i-eye-off' : 'i-eye')}</button>
