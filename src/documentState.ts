@@ -4,14 +4,20 @@ import {createStore} from './store.js';
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type Doc = Record<string, any>;
 
+/** A snapshot undo or redo returns to, with the label of the action that separates it from the document now (e.g. "delete Rectangle"). */
+export interface HistoryEntry {
+  doc: Doc;
+  label: string;
+}
+
 /**
  * The open project: the current document, the snapshots that undo returns to, the snapshots that redo returns to,
  * and whether the document has changes not yet saved. app.js changes it with setDocument.
  */
 export interface DocumentState {
   doc: Doc;
-  history: Doc[];
-  future: Doc[];
+  history: HistoryEntry[];
+  future: HistoryEntry[];
   dirty: boolean;
 }
 

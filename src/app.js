@@ -23,7 +23,7 @@ import {configureShapePathActions} from './shapePathCommands.js';
 import {configureSelectionToolbarActions} from './selectionToolbarCommands.js';
 import {configureSelectionCommands} from './selectionCommands.js';
 import {configureLayersCommands} from './layersCommands.js';
-import {configureToolbarCommands} from './toolbarCommands.js';
+import {configureToolbarCommands, undoDocument} from './toolbarCommands.js';
 import {configureHoopCommands} from './hoopCommands.js';
 import {configureGrid} from './gridState.js';
 import {configureGridSnap} from './gridSnapState.js';
@@ -42,7 +42,7 @@ editor.render = render;
 initializeDocument();
 configureCompile({ensureFonts: ensureDocFonts, onClear: resetPlayback, onCompiled: resetPlaybackIndex});
 
-configureSelectionCommands({edit, transact, render, toast});
+configureSelectionCommands({edit, transact, render, toast, undo: undoDocument});
 configureLayersCommands({edit});
 configureToolbarCommands({
   edit,

@@ -20,7 +20,8 @@ export function toastDuration(message) {
 
 /**
  * @typedef {'status' | 'error'} ToastKind
- * @typedef {{id: number, kind: ToastKind, text: string, at: number, expiresAt: number | null, remaining: number, holds: number}} ToastEntry
+ * @typedef {{label: string, run: () => void}} ToastAction a button on the toast, e.g. Undo; running it dismisses the toast
+ * @typedef {{id: number, kind: ToastKind, text: string, at: number, expiresAt: number | null, remaining: number, holds: number, action: ToastAction | null}} ToastEntry
  * @typedef {{id: number, kind: ToastKind, text: string, at: number}} ToastLogEntry
  */
 
@@ -45,13 +46,14 @@ export function createToastQueue({visibleLimit = TOAST_VISIBLE_LIMIT, logLimit =
      * @param {string} text
      * @param {ToastKind} kind
      * @param {number} now
+     * @param {ToastAction | null} [action]
      * @returns {number} the toast id
      */
-    push(text, kind, now) {
+    push(text, kind, now, action = null) {
       const id = nextId++;
       const duration = kind === 'error' ? null : toastDuration(text);
       /** @type {ToastEntry} */
-      const entry = {id, kind, text, at: now, expiresAt: duration === null ? null : now + duration, remaining: duration ?? 0, holds: 0};
+      const entry = {id, kind, text, at: now, expiresAt: duration === null ? null : now + duration, remaining: duration ?? 0, holds: 0, action};
       visible = [...visible, entry];
       // Drop the oldest confirmation from view when the stack is full. Errors are never dropped; they are dismissed by hand.
       while (visible.length > visibleLimit) {

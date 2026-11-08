@@ -32,12 +32,14 @@ export interface SelectionObject {
 
 /** What these commands need from the editor. app.js calls configureSelectionCommands before any of them run. */
 export interface SelectionApi {
-  /** Runs one undoable command through the document store. */
-  edit(operations: unknown[], after?: () => void): boolean;
+  /** Runs one undoable command through the document store; the label names the step for Undo and Redo. */
+  edit(operations: unknown[], after?: () => void, coalesceKey?: string, label?: string): boolean;
   /** Runs a change that manages the document itself (paste replaces the whole document). */
   transact(fn: () => void): boolean;
+  /** Steps the document back one undo step, as the Undo button does. */
+  undo(): void;
   render(): void;
-  toast(message: string, kind?: 'status' | 'error'): void;
+  toast(message: string, kind?: 'status' | 'error', action?: {label: string; run: () => void}): void;
 }
 
 let api: SelectionApi | null = null;
@@ -155,11 +157,18 @@ export function selectAll() {
 export function removeSelected() {
   const ids = [...selState().multi];
   if (!ids.length) return;
-  wired().edit(ids.map(id => ({op: 'delete', id})), () => {
+  // One object is named as the sewing-order list names it; several are counted.
+  const names = ids.map(id => objects().find(o => o.id === id)).filter((o): o is SelectionObject => Boolean(o)).map(o => o.name || o.kind);
+  const named = names.length === 1 ? names[0] : null;
+  const label = named === null ? t('delete {n} objects', {n: ids.length}) : t('delete {name}', {name: t(named)});
+  const removed = wired().edit(ids.map(id => ({op: 'delete', id})), () => {
     setSelection({selected: null});
     setSelection({multi: new Set()});
     setSelection({selNode: null});
-  });
+  }, undefined, label);
+  if (!removed) return;
+  const message = named === null ? t('Deleted {n} objects.', {n: ids.length}) : t('Deleted {name}.', {name: t(named)});
+  wired().toast(message, 'status', {label: t('Undo'), run: () => wired().undo()});
 }
 
 /** Selects the shape that clips the selected object, so it can be moved or edited on its own. */

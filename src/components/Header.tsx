@@ -19,6 +19,20 @@ function ProjectName() {
  const field = useDraftInput(doc.name ?? '', text => documentActions.rename(text));
  return <input id="name" {...field} />;
 }
+// Undo and Redo: the name says which action the step takes back (or forward), e.g. "Undo delete Rectangle". With no
+// step on that side, the name says so and the button is disabled (actionState).
+function HistoryButton({undo = false}: {undo?: boolean}) {
+ const {history, future} = useSyncExternalStore(documentState.subscribe, documentState.get);
+ const last = (undo ? history : future).at(-1)?.label;
+ const name = last === undefined ? t(undo ? 'Nothing to undo' : 'Nothing to redo') : t(undo ? 'Undo {action}' : 'Redo {action}', {action: last});
+ return (
+  <ActionButton flag={undo ? 'undo' : 'redo'} className="icon-button" id={undo ? 'undo' : 'redo'} aria-label={name} title={name} data-tooltip={name}
+   onClick={() => (undo ? toolbarActions.undo() : toolbarActions.redo())}>
+   <svg className="icon"><use href={undo ? '#i-undo' : '#i-redo'} /></svg>
+  </ActionButton>
+ );
+}
+
 // The agent button: it shows whether an AI agent is connected, and opens the Connect an AI agent dialog.
 function AgentPill() {
  const agent = useSyncExternalStore(agentLinkState.subscribe, agentLinkState.get);
@@ -114,15 +128,7 @@ export function Header() {
     projectSave(
     )}><svg className="icon"><use href="#i-save"/></svg></button><button className="icon-button" id="helpBtn" aria-label="Keyboard shortcuts (?)"
       title="Keyboard shortcuts (?)" data-tooltip="Keyboard shortcuts (?)"><svg className="icon"><use href="#i-keys"/></svg></button><span
-        className="sep"></span><div className="edit-tools"><ActionButton flag="undo" className="icon-button" id="undo" aria-label="Undo" title="Undo"
-          data-tooltip="Undo" onClick={(
-    ) =>
-    toolbarActions.undo(
-    )}><svg className="icon"><use href="#i-undo"/></svg></ActionButton><ActionButton flag="redo" className="icon-button" id="redo" aria-label="Redo"
-      title="Redo" data-tooltip="Redo" onClick={(
-    ) =>
-    toolbarActions.redo(
-    )}><svg className="icon"><use href="#i-redo"/></svg></ActionButton><ActionButton flag="duplicate" className="icon-button" id="duplicate"
+        className="sep"></span><div className="edit-tools"><HistoryButton undo /><HistoryButton /><ActionButton flag="duplicate" className="icon-button" id="duplicate"
       aria-label="Duplicate selected object" title="Duplicate selected object" data-tooltip="Duplicate" onClick={(
     ) =>
     toolbarActions.duplicate(

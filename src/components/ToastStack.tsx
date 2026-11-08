@@ -49,6 +49,7 @@ export function ToastStack() {
       onBlur={() => toastActions.release(entry.id)}
      >
       <span>{entry.text}</span>
+      {entry.action ? <button type={"button"} className={"toast-action"} onClick={() => { toastActions.dismiss(entry.id); entry.action?.run(); }}>{entry.action.label}</button> : null}
       {error ? <button type={"button"} className={"toast-close"} aria-label={t('Dismiss')} onClick={() => toastActions.dismiss(entry.id)}>{"×"}</button> : null}
      </div>
     );

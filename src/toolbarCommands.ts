@@ -2,6 +2,7 @@
 import {t} from './i18n.js';
 // distribute. Each runs the same edit, selection and history change as the id-wired handlers it replaces.
 import {documentNow, setDocument} from './documentState.js';
+import type {HistoryEntry} from './documentState.js';
 import {selState, setSelection} from './selectionState.js';
 import {alignActions} from './alignState.js';
 import {snapObjState, snapObjActions} from './snapObjState.js';
@@ -68,8 +69,13 @@ export function duplicateSelection() {
 export function undoDocument() {
   const d = documentNow();
   if (!d.history.length) return;
-  const prev = d.history.at(-1) ?? {};
-  setDocument({doc: {...prev, revision: prev.revision + 1}, history: d.history.slice(0, -1), future: [...d.future, clone(d.doc)], dirty: true});
+  const prev = d.history.at(-1) as HistoryEntry;
+  setDocument({
+    doc: {...prev.doc, revision: prev.doc.revision + 1},
+    history: d.history.slice(0, -1),
+    future: [...d.future, {doc: clone(d.doc), label: prev.label}],
+    dirty: true,
+  });
   wired().clearComputed();
   wired().render();
 }
@@ -78,8 +84,13 @@ export function undoDocument() {
 export function redoDocument() {
   const d = documentNow();
   if (!d.future.length) return;
-  const next = d.future.at(-1) ?? {};
-  setDocument({doc: {...next, revision: next.revision + 1}, history: [...d.history, clone(d.doc)], future: d.future.slice(0, -1), dirty: true});
+  const next = d.future.at(-1) as HistoryEntry;
+  setDocument({
+    doc: {...next.doc, revision: next.doc.revision + 1},
+    history: [...d.history, {doc: clone(d.doc), label: next.label}],
+    future: d.future.slice(0, -1),
+    dirty: true,
+  });
   wired().clearComputed();
   wired().render();
 }

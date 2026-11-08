@@ -8,6 +8,7 @@ import {withSavedHoop} from './storedPrefs.js';
 import {viewMode} from './viewMode.js';
 import {clearComputed, compileNow} from './compileService.js';
 import {editor} from './editorContext.js';
+import {t} from './i18n.js';
 
 /**
  * The last live edit (typing that updates the canvas on each keystroke) and the document it left behind. The next live
@@ -19,11 +20,13 @@ let liveEdit = null;
 /**
  * Applies a change as one undo step. A rejected document restores the document and selection, then reports why.
  * A coalesceKey marks a live edit: consecutive edits with the same key share one undo step.
+ * The label names the step for Undo and Redo (already translated, e.g. "delete Rectangle"); a step without one is "change".
  * @param {() => void} fn
  * @param {string} [coalesceKey]
+ * @param {string} [label]
  * @returns {boolean}
  */
-export function transact(fn, coalesceKey) {
+export function transact(fn, coalesceKey, label = t('change')) {
   const before = clone(documentNow().doc), beforeSelected = selState().selected;
   const continuing = coalesceKey !== undefined && liveEdit !== null && liveEdit.key === coalesceKey && liveEdit.doc === documentNow().doc;
   try {
@@ -37,7 +40,7 @@ export function transact(fn, coalesceKey) {
     editor.toast(/** @type {any} */ (error).message, 'error');
     return false;
   }
-  const current = documentNow(), nextHistory = continuing ? current.history : [...current.history, before];
+  const current = documentNow(), nextHistory = continuing ? current.history : [...current.history, {doc: before, label}];
   if (nextHistory.length > 80) nextHistory.shift();
   setDocument({doc: {...current.doc, revision: before.revision + 1}, history: nextHistory, future: [], dirty: true});
   liveEdit = coalesceKey === undefined ? null : {key: coalesceKey, doc: documentNow().doc};
@@ -52,13 +55,14 @@ export function transact(fn, coalesceKey) {
  * @param {any[]} operations
  * @param {() => void} [after]
  * @param {string} [coalesceKey] live edits with the same key share one undo step (see transact)
+ * @param {string} [label] the step's name for Undo and Redo (see transact)
  * @returns {boolean}
  */
-export function edit(operations, after = () => {}, coalesceKey) {
+export function edit(operations, after = () => {}, coalesceKey, label) {
   return transact(() => {
     applyOperations(/** @type {any} */ (documentNow().doc), operations);
     after();
-  }, coalesceKey);
+  }, coalesceKey, label);
 }
 
 /**

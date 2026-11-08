@@ -8,9 +8,10 @@ import {toastActions} from './toastState.js';
  * Shows a message in the toast stack and keeps it in the log. An error stays until the user dismisses it.
  * @param {string} message
  * @param {'status' | 'error'} [kind]
+ * @param {{label: string, run: () => void}} [action] a button on the toast; clicking it runs the action and dismisses the toast
  */
-export function toast(message, kind = 'status') {
-  toastActions.push(message, kind);
+export function toast(message, kind = 'status', action) {
+  toastActions.push(message, kind, action ?? null);
 }
 
 function mountTooltip() {

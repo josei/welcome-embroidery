@@ -16,6 +16,19 @@ test('a longer message stays up longer, and the rule is capped', () => {
   assert.equal(toastDuration('word '.repeat(500)), TOAST_MAX_MS);
 });
 
+test('a toast can carry an action button, and the log keeps only the text', () => {
+  const q = createToastQueue();
+  let ran = 0;
+  const id = q.push('Deleted Rectangle.', 'status', 0, {label: 'Undo', run: () => { ran++; }});
+  assert.equal(q.visible()[0].action.label, 'Undo');
+  q.visible()[0].action.run();
+  assert.equal(ran, 1);
+  assert.equal(q.log()[0].id, id);
+  assert.equal('action' in q.log()[0], false);
+  assert.equal(q.push('Saved.', 'status', 0) > id, true);
+  assert.equal(q.visible()[1].action, null);
+});
+
 test('a confirmation expires after its duration, not before', () => {
   const q = createToastQueue();
   const id = q.push('Saved.', 'status', 1000);

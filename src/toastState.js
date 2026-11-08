@@ -49,10 +49,11 @@ export const toastActions = {
   /**
    * @param {string} text
    * @param {ToastKind} [kind]
+   * @param {import('./toastQueue.js').ToastAction | null} [action] a button on the toast, e.g. Undo
    * @returns {number}
    */
-  push(text, kind = 'status') {
-    const id = queue.push(text, kind, Date.now());
+  push(text, kind = 'status', action = null) {
+    const id = queue.push(text, kind, Date.now(), action);
     emit();
     return id;
   },

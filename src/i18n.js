@@ -389,6 +389,8 @@ const ES={
 '; 1 arc sewn as straight segments':'; 1 arco bordado como segmento recto',
 '; {n} arcs sewn as straight segments':'; {n} arcos bordados como segmentos rectos',
 'Removed 1 unused font.':'Se quitó 1 fuente sin usar.',
+'Deleted {n} objects.':'Eliminados {n} objetos.','Deleted {name}.':'Eliminado {name}.','delete {n} objects':'eliminar {n} objetos','delete {name}':'eliminar {name}',
+'change':'cambio','Undo {action}':'Deshacer {action}','Redo {action}':'Rehacer {action}','Nothing to undo':'No hay nada que deshacer','Nothing to redo':'No hay nada que rehacer',
 'Removed {n} unused fonts.':'Se quitaron {n} fuentes sin usar.',
 };
 /** @type {Array<{re: RegExp, names: string[], out: string}>} */
