@@ -19,6 +19,11 @@ import {fontsDialogState, setFontsDialogOpen} from '../fontsDialogState.js';
 import {removeUnusedFonts} from '../fontsDialogCommands.js';
 import {SettingsDialog} from './SettingsDialog';
 import {ThreadPopover} from './ThreadPopover';
+// Enter on a select only changes its value. Inside a dialog form, Enter would otherwise submit the form and press the
+// default button (Download), so the export format select would start a download as soon as it was chosen.
+function keepEnterOnSelect(e: React.KeyboardEvent<HTMLSelectElement>) {
+ if (e.key === 'Enter') e.preventDefault();
+}
 // The dialogs and overlays that sit above the layout. Rendered by React; ids match the markup it replaced, because tests
 // and the commands address them.
 export function EditorOverlays() {
@@ -142,7 +147,7 @@ export function EditorOverlays() {
         <label htmlFor={"format"}>
           {t("File format")}
         </label>
-        <select id={"format"} value={exportFormat.format} onChange={e => setExportFormat(e.target.value)}>
+        <select id={"format"} value={exportFormat.format} onChange={e => setExportFormat(e.target.value)} onKeyDown={keepEnterOnSelect}>
           {EXPORT_FORMATS.map(f => <option key={f.value} value={f.value}>{f.label}</option>)}
         </select>
         <p id={"exportHint"}>
@@ -172,6 +177,7 @@ export function EditorOverlays() {
             {" "}
             <select
               id={"withWorksheetFormat"}
+              onKeyDown={keepEnterOnSelect}
               value={exportDialog.worksheetFormat}
               onChange={e => setExportDialog({worksheetFormat: e.target.value === 'svg' ? 'svg' : 'text'})}
             >

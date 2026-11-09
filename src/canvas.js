@@ -474,7 +474,7 @@ export function createCanvas(/** @type {any} */ api){
     b.setAttribute('role','menuitem');
     b.disabled=Boolean(it.disabled);
     b.innerHTML=`<span></span><kbd></kbd>`;
-    /** @type {HTMLElement} */(b.firstChild).textContent=it.label;
+    /** @type {HTMLElement} */(b.firstChild).textContent=t(it.label);
     /** @type {HTMLElement} */(b.lastChild).textContent=it.key||'';
     b.onclick=()=>{closeMenu();
     it.run();

@@ -266,6 +266,12 @@ export const ES={
   'Pluma con curvas','Line':'Línea','Polygon':'Polígono','Star':'Estrella','Edit nodes / finish a path':'Editar nodos / terminar un trazado',
   'Cancel, go back to select':'Cancelar, volver a seleccionar','Undo / redo':'Deshacer / rehacer','Copy, cut, paste':'Copiar, cortar, pegar','Group / ungroup':
   'Agrupar / desagrupar','Nudge ({shift} = 5 mm, {alt} = 0.1 mm)':'Mover ({shift} = 5 mm, {alt} = 0.1 mm)','Resize':'Redimensionar','Rotate':'Girar',
+  'Measure':'Medir','Knife: click two or more points along the cut, then Enter':'Cuchillo: haz clic en dos o más puntos del corte y luego Intro',
+  'Remove the last point while drawing a path':'Quitar el último punto mientras dibujas un trazado','Resize from the top-left corner ({shift} = 5 mm steps)':
+  'Redimensionar desde la esquina superior izquierda ({shift} = pasos de 5 mm)','Rotate (1° per press, {shift} = 15°)':'Girar (1° por pulsación, {shift} = 15°)',
+  'Send backward (sew earlier)':'Enviar atrás (bordar antes)','Bring forward (sew later)':'Traer adelante (bordar después)','Send to back (sew first)':
+  'Enviar al fondo (bordar primero)','Bring to front (sew last)':'Traer al frente (bordar al final)','Del / Backspace':'Supr / Retroceso','Backspace':'Retroceso',
+  'Convert to path and edit nodes':'Convertir a trazado y editar nodos','Bring forward':'Traer adelante','Send backward':'Enviar atrás',
   'Sew earlier / later':'Bordar antes / después','Sew first / last':'Bordar primero / al final','Fit the hoop':'Ajustar el bastidor','Zoom in / out':
   'Acercar / alejar','This list':'Esta lista','Restore your last design?':'¿Restaurar tu último diseño?','Restore':'Restaurar','Start fresh':'Empezar de cero',
   '"{name}", {objects}, edited {m} min ago.':'«{name}», {objects}, editado hace {m} min.','about {t} to sew':'unos {t} de bordado','Recent':'Recientes',

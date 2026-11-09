@@ -65,7 +65,7 @@ export function menuItems(_o: unknown, _p: unknown): MenuRow[] {
     ];
   }
   return [
-    {label: one && primary?.kind === 'text' ? 'Edit text' : kindPath ? 'Edit nodes' : 'Edit nodes (convert to path)', key: 'Enter', disabled: !one ||
+    {label: one && primary?.kind === 'text' ? 'Edit text' : kindPath ? 'Edit nodes' : 'Convert to path and edit nodes', key: 'Enter', disabled: !one ||
       primary?.kind === 'stitch_layer', run: () => primary && enterEdit(primary)},
     {label: 'Convert to path', key: shortcutLabel([{mod: true, shift: true, key: 'C'}]), disabled: !picked.some(v => v.kind !== 'path' && v.kind !== 'stitch_layer'), run: () =>
       wired().edit([{op: 'to_path', ids: picked.filter(v => v.kind !== 'path' && v.kind !== 'stitch_layer').map(v => v.id)}])}, '-',
@@ -76,8 +76,8 @@ export function menuItems(_o: unknown, _p: unknown): MenuRow[] {
       {label: 'Delete', key: 'Del', run: removeSelected}, '-',
     {label: 'Group', key: shortcutLabel([{mod: true, key: 'G'}]), disabled: !canGroup, run: groupSelection},
       {label: 'Ungroup', key: shortcutLabel([{mod: true, shift: true, key: 'G'}]), disabled: !grouped, run: ungroupSelection}, '-',
-    {label: 'Sew first (to back)', key: 'Home', run: () => moveSelection('back')}, {label: 'Sew earlier', key: '[', run: () => moveSelection('backward')},
-      {label: 'Sew later', key: ']', run: () => moveSelection('forward')}, {label: 'Sew last (to front)', key: 'End', run: () => moveSelection('front')}, '-',
+    {label: 'Send to back', key: 'Home', run: () => moveSelection('back')}, {label: 'Send backward', key: '[', run: () => moveSelection('backward')},
+      {label: 'Bring forward', key: ']', run: () => moveSelection('forward')}, {label: 'Bring to front', key: 'End', run: () => moveSelection('front')}, '-',
     {label: picked.every(v => v.locked) ? 'Unlock' : 'Lock', run: () =>
       wired().edit(picked.map(v => ({op: 'set_object', id: v.id, locked: !picked.every(w => w.locked)})))},
       {label: 'Hide', run: () => wired().edit(picked.map(v => ({op: 'set_object', id: v.id, visible: false})))}, '-',

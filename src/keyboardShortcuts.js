@@ -18,6 +18,7 @@ import {enterEdit} from './canvasText.js';
 import {copyStyle, pasteStyle} from './styleClipboard.js';
 import {editor} from './editorContext.js';
 import {projectSaveAs} from './projectIO.js';
+import {TOOL_KEYS} from './shortcutTable.js';
 
 /** @param {string} id */
 function press(id) {
@@ -57,9 +58,7 @@ export function mountKeyboard() {
     if (!mod && (e.key === '+' || e.key === '=')) { e.preventDefault(); canvas.zoomAt(1.25); return; }
     if (!mod && (e.key === '-' || e.key === '_') && !pathDraftNow().pathMode) { e.preventDefault(); canvas.zoomAt(1 / 1.25); return; }
     if ((!pathDraftNow().pathMode || pathDraftNow().pathPoints.length === 0) && !mod && !e.altKey && !e.shiftKey) {
-      /** @type {Record<string, string>} */
-      const map = {v: 'select', r: 'rect', o: 'ellipse', l: 'line', g: 'polygon', s: 'star', p: 'pen', n: 'path', t: 'letter', m: 'measure', k: 'knife'};
-      if (map[key]) { e.preventDefault(); press(map[key]); return; }
+      if (TOOL_KEYS[key]) { e.preventDefault(); press(TOOL_KEYS[key]); return; }
     }
     if (toolMode.get() === 'knife' && (e.key === 'Enter' || e.key === 'Escape')) {
       e.preventDefault();

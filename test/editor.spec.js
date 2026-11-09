@@ -3323,3 +3323,13 @@ test('Enter on the focused Thread button opens the colour picker without startin
  await expect(page.locator('#threadPop')).toBeVisible();await expect(page.locator('.path-node')).toHaveCount(0);
  expect(errors).toEqual([]);
 });
+
+test('Enter on the export format select only chooses; Escape closes the export dialog without a download',async({page})=>{
+ await page.goto('/');
+ let downloads=0;page.on('download',()=>{downloads++;});
+ await page.locator('#export').click();await expect(page.locator('#exportDialog')).toBeVisible();
+ await page.locator('#format').selectOption('dst');await page.locator('#format').focus();await page.keyboard.press('Enter');
+ await page.waitForTimeout(600);
+ expect(downloads).toBe(0);await expect(page.locator('#exportDialog')).toBeVisible();await expect(page.locator('#format')).toHaveValue('dst');
+ await page.keyboard.press('Escape');await expect(page.locator('#exportDialog')).toBeHidden();expect(downloads).toBe(0);
+});
