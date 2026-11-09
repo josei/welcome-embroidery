@@ -23,6 +23,25 @@ test('starter badge compiles deterministically and settings affect stitches',()=
  const noUnderlay=structuredClone(doc);noUnderlay.settings.underlay=false;
  assert.notEqual(compile(noUnderlay).count,base.count);
 });
+test('changing the document default row spacing moves inherited objects only; own values and cleared values follow the rule',()=>{
+ const doc=initialDocument();doc.objects=[];
+ applyOperations(doc,[{op:'set_settings',spacing:.4},
+  {op:'add_shape',id:'inherit',kind:'rect',x:0,y:0,width:20,height:20,thread:'#527461'},
+  {op:'add_shape',id:'own',kind:'rect',x:30,y:0,width:20,height:20,thread:'#527461'},
+  {op:'set_object',id:'own',spacing:.4}]);
+ const only=id=>({...doc,objects:doc.objects.filter(o=>o.id===id)});
+ const stitchesOf=d=>compile(d).stitches;
+ const inheritBefore=stitchesOf(only('inherit')), ownBefore=stitchesOf(only('own'));
+ applyOperations(doc,[{op:'set_settings',spacing:.8}]);
+ assert.deepEqual(stitchesOf(only('own')),ownBefore,'object with its own spacing must not change');
+ assert.notDeepEqual(stitchesOf(only('inherit')),inheritBefore,'inherited object must follow the new default');
+ const explicit={...initialDocument(),settings:{...doc.settings,spacing:.8},objects:[{...doc.objects.find(o=>o.id==='inherit'),spacing:undefined}]};
+ assert.deepEqual(stitchesOf(only('inherit')),stitchesOf(explicit));
+ applyOperations(doc,[{op:'set_object',id:'own',spacing:null}]);
+ assert.equal(doc.objects.find(o=>o.id==='own').spacing,undefined,'clearing removes the own value');
+ const ownAtOrigin={...doc,objects:[{...doc.objects.find(o=>o.id==='own'),x:0,y:0}]};
+ assert.deepEqual(stitchesOf(ownAtOrigin),stitchesOf(only('inherit')),'cleared object now inherits the default');
+});
 test('out-of-hoop designs are refused with the object and overrun for JEF, DST and VP3, and in-hoop ones export',()=>{
  const rect=(x,y)=>{const d=initialDocument();d.objects=[];applyOperations(d,[{op:'add_shape',id:'r',kind:'rect',x,y,width:100,height:100}]);return d;};
  const out=rect(-12,-8);

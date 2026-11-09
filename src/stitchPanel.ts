@@ -175,7 +175,7 @@ export function syncStitchPanel() {
   setLayout({secArray: !(n >= 1)});
   setLayout({secOrder: !(n >= 1)});
   setSelectionLabels({hintHidden: n >= 1});
-  setSelectionLabels({stitchTitle: n ? 'Stitching' : 'For new objects'});
+  setSelectionLabels({stitchTitle: n ? 'Stitching' : t('Default for objects without their own value')});
   setLayout({objectHeadingHidden: n === 0});
   setLayout({typeHidden: n === 0 || (n >= 1 && picked.every(v => ['text', 'stitch_layer'].includes(v.kind)))});
   setLayout({threadHidden: n === 0});
@@ -204,6 +204,8 @@ export function syncStitchPanel() {
     setFillValues({
       spacing: String(o.spacing ?? settings.spacing),
       angle: String(o.angle ?? settings.angle),
+      spacingNote: o.spacing === undefined || o.spacing === null ?
+        t('Inherits {value} mm from document', {value: String(settings.spacing)}) : t('Set on this object'),
     });
     setStitchRow('fillReset', o.spacing === undefined && o.angle === undefined && o.stitchLength === undefined &&
       o.stagger === undefined && o.underlayType === undefined && o.underlayInset === undefined &&
@@ -221,7 +223,7 @@ export function syncStitchPanel() {
     });
     setStitchRow('alongRow', !o.along);
   } else {
-    setFillValues({spacing: String(settings.spacing), angle: String(settings.angle)});
+    setFillValues({spacing: String(settings.spacing), angle: String(settings.angle), spacingNote: ''});
     setStitchRow('fillReset', true);
     setStitchRow('alongRow', true);
     setStitchRow('satinRow', true);

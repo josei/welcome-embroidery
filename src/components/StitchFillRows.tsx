@@ -40,6 +40,7 @@ export function StitchFillRows() {
       title="Leave empty for a constant width; a different value tapers the column from the start width to this one" /></label><div
         className="slider-field" hidden={layout.spacingHidden}>
     <label>{layout.spacingLabel}<input id="spacing" {...spacing} type="number" min="0.25" max="1.2" step="0.05" /><span className="field-range">{rangeText(ROW_SPACING_RANGE)}</span></label>
+    {fillValues.spacingNote && <small className="field-note" id="spacingNote">{fillValues.spacingNote}</small>}
     <SliderField
      id="spacingSlider"
      label={layout.spacingLabel}
