@@ -3119,13 +3119,13 @@ test('restore prompt: blank canvas behind it, starter after Start fresh, and plu
  await page.locator('#rect').click();await expect(page.locator('.object-row')).toHaveCount(1);
  await page.locator('#name').fill('Single badge');await page.locator('#name').press('Enter');await page.waitForTimeout(1200);
  await page.reload();await expect(page.locator('#restoreDialog')).toBeVisible();await expect(page.locator('#restoreYes')).toBeFocused();
- await expect(page.locator('#restoreInfo')).toContainText('1 object, edited');await expect(page.locator('#restoreInfo')).not.toContainText('1 objects');
+ await expect(page.locator('#restoreInfo')).toContainText('1 object. Unsaved changes');await expect(page.locator('#restoreInfo')).not.toContainText('1 objects');
  await expect(page.locator('.object-row')).toHaveCount(0);await expect(page.locator('#name')).not.toHaveValue('Botanical badge');
  await page.locator('#restoreNo').click();await page.locator('#discardDiscard').click();await expect(page.locator('#restoreDialog')).toBeHidden();
  await expect(page.locator('.object-row')).toHaveCount(5);await expect(page.locator('#name')).toHaveValue('Botanical badge');
  await newDesign(page);await page.locator('#rect').click();await page.locator('#ellipse').click();await page.locator('#rect').click();await expect(page.locator('.object-row')).toHaveCount(3);
  await page.locator('#name').fill('Trio badge');await page.locator('#name').press('Enter');await page.waitForTimeout(1200);
- await page.reload();await expect(page.locator('#restoreDialog')).toBeVisible();await expect(page.locator('#restoreInfo')).toContainText('3 objects, edited');
+ await page.reload();await expect(page.locator('#restoreDialog')).toBeVisible();await expect(page.locator('#restoreInfo')).toContainText('3 objects. Unsaved changes');
  await page.locator('#restoreYes').click();await expect(page.locator('#restoreDialog')).toBeHidden();await expect(page.locator('.object-row')).toHaveCount(3);await expect(page.locator('#name')).toHaveValue('Trio badge');
  expect(errors).toEqual([]);
 });

@@ -6,6 +6,8 @@ import {documentNow} from './documentState.js';
 import {setRestore, restoreActions} from './restoreState.js';
 import {showBlankBehindRestore, showStarterDesign} from './documentCommands.js';
 import {restoreProject, saveRestoredThenStartFresh} from './projectIO.js';
+import {restorePromptInfo} from './restoreInfo.js';
+import {saveState} from './saveState.js';
 import {openDiscard} from './discardState.js';
 import {clone} from './appHelpers.js';
 import {validateDocument} from './engine.js';
@@ -65,7 +67,8 @@ export function mountAutosave() {
     try {
       const state = documentNow();
       if (state.doc.revision <= 0) return;
-      const text = JSON.stringify({savedAt: Date.now(), clean: !state.dirty, docId: currentDocId(), doc: state.doc});
+      const savedFileName = saveState.get().savedFileName;
+      const text = JSON.stringify({savedAt: Date.now(), clean: !state.dirty, docId: currentDocId(), savedFileName, doc: state.doc});
       if (text.length >= AUTOSAVE_LIMIT) throw new Error('too large');
       localStorage.setItem(ownAutosaveKey(), text);
       skipWarned = false;
@@ -109,22 +112,30 @@ export function mountAutosave() {
   const {key, saved} = offered;
   try {
     validateDocument(clone(saved.doc));
-    if (!saved.clean && saved.doc.revision > 0 && saved.doc.objects.length > 0) {
+    // A copy that matches the saved file is offered only when that file's name is known: restoring it loses nothing, and the
+    // prompt then says which file it matches. Unsaved copies are always offered.
+    const offer = saved.doc.revision > 0 && saved.doc.objects.length > 0 && (!saved.clean || !!saved.savedFileName);
+    if (offer) {
       const ago = Math.max(1, Math.round((Date.now() - saved.savedAt) / 60000));
       const count = saved.doc.objects.length;
-      const objects = count === 1 ? t('1 object') : t('{n} objects', {n: count});
-      setRestore({info: t('"{name}", {objects}, edited {m} min ago.', {name: saved.doc.name, objects, m: ago})});
+      setRestore({info: restorePromptInfo({name: saved.doc.name, objects: count, clean: !!saved.clean, minutes: ago, savedFileName: saved.savedFileName}, t)});
       // The canvas behind the prompt is blank: the starter design only comes back on Start fresh.
       showBlankBehindRestore();
       restoreActions.yes = () => {
         // A copy from another tab is used up once restored; this tab's own copy is rewritten by the next autosave.
         if (key !== ownAutosaveKey()) removeKey(key);
-        restoreProject({...saved.doc, docId: isDocId(saved.docId) ? saved.docId : undefined});
+        restoreProject({...saved.doc, docId: isDocId(saved.docId) ? saved.docId : undefined}, !saved.clean);
         setRestore({open: false});
       };
       restoreActions.no = () => {
         // Start fresh asks in the discard dialog (Save, Discard or Cancel). Cancel brings the restore prompt back.
         setRestore({open: false});
+        // A copy that matches the saved file loses nothing, so Start fresh does not ask.
+        if (saved.clean) {
+          removeKey(key);
+          showStarterDesign();
+          return;
+        }
         openDiscard({
           name: saved.doc.name,
           objects: saved.doc.objects.length,

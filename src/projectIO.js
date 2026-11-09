@@ -322,11 +322,12 @@ export async function openArtifact(id) {
  * Opens an autosaved document as the project, still marked unsaved so the user decides when to save it; a document that
  * fails validation shows its message and leaves the editor as it was.
  * @param {any} saved
+ * @param {boolean} [dirty=true] false when the copy matches the saved file, so it opens as saved
  */
-export function restoreProject(saved) {
+export function restoreProject(saved, dirty = true) {
   try {
     acceptProject(saved);
-    setDocument({dirty: true});
+    setDocument({dirty});
     wired().render();
   } catch (error) {
     wired().toast(/** @type {Error} */ (error).message, 'error');
