@@ -81,3 +81,25 @@ export function edit(operations, after = () => {}, coalesceKey, label) {
 export function initializeDocument() {
   setDocument({doc: withSavedHoop(initialDocument()), history: [], future: [], dirty: false});
 }
+
+/**
+ * Empties the canvas while the restore prompt is open, so neither the starter design nor a stale document shows behind it.
+ * The autosave copy is untouched: a blank design has no edits, so autosave does not write it.
+ */
+export function showBlankBehindRestore() {
+  clearComputed();
+  setSelection({selected: null});
+  setSelection({multi: new Set()});
+  setDocument({doc: withSavedHoop({...initialDocument(), name: 'Untitled design', objects: []}), history: [], future: [], dirty: false});
+  editor.render?.();
+}
+
+/** Loads the starter design after the restore prompt's Start fresh is confirmed (the canvas was blanked while it was open). */
+export function showStarterDesign() {
+  clearComputed();
+  setSelection({selected: null});
+  setSelection({multi: new Set()});
+  initializeDocument();
+  editor.render?.();
+  editor.canvas?.fitHoop();
+}

@@ -3022,6 +3022,25 @@ test('Menus, the shortcut sheet and the export dialog work from the keyboard alo
  expect(errors).toEqual([]);
 });
 
+// While the restore prompt is open the canvas behind it is blank, not the starter design; the starter loads only on Start fresh.
+// The object count uses singular and plural forms.
+test('restore prompt: blank canvas behind it, starter after Start fresh, and plural object counts',async({page})=>{
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));
+ await page.goto('/');page.on('dialog',d=>d.accept());await newDesign(page);
+ await page.locator('#rect').click();await expect(page.locator('.object-row')).toHaveCount(1);
+ await page.locator('#name').fill('Single badge');await page.locator('#name').press('Enter');await page.waitForTimeout(1200);
+ await page.reload();await expect(page.locator('#restoreDialog')).toBeVisible();await expect(page.locator('#restoreYes')).toBeFocused();
+ await expect(page.locator('#restoreInfo')).toContainText('1 object, edited');await expect(page.locator('#restoreInfo')).not.toContainText('1 objects');
+ await expect(page.locator('.object-row')).toHaveCount(0);await expect(page.locator('#name')).not.toHaveValue('Botanical badge');
+ await page.locator('#restoreNo').click();await page.locator('#discardDiscard').click();await expect(page.locator('#restoreDialog')).toBeHidden();
+ await expect(page.locator('.object-row')).toHaveCount(5);await expect(page.locator('#name')).toHaveValue('Botanical badge');
+ await newDesign(page);await page.locator('#rect').click();await page.locator('#ellipse').click();await page.locator('#rect').click();await expect(page.locator('.object-row')).toHaveCount(3);
+ await page.locator('#name').fill('Trio badge');await page.locator('#name').press('Enter');await page.waitForTimeout(1200);
+ await page.reload();await expect(page.locator('#restoreDialog')).toBeVisible();await expect(page.locator('#restoreInfo')).toContainText('3 objects, edited');
+ await page.locator('#restoreYes').click();await expect(page.locator('#restoreDialog')).toBeHidden();await expect(page.locator('.object-row')).toHaveCount(3);await expect(page.locator('#name')).toHaveValue('Trio badge');
+ expect(errors).toEqual([]);
+});
+
 // A discarded design is one undo step: Ctrl+Z brings back what New, Ctrl+N or Open replaced, objects and unsaved marker
 // included. The starter design is clean, so New on it wipes it without a prompt and Undo still restores it.
 test('discarded work comes back on Undo: clean New, New, Ctrl+N and Open',async({page})=>{

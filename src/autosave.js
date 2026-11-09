@@ -4,6 +4,7 @@
 // saved design is not offered again.
 import {documentNow} from './documentState.js';
 import {setRestore, restoreActions} from './restoreState.js';
+import {showBlankBehindRestore, showStarterDesign} from './documentCommands.js';
 import {restoreProject, saveRestoredThenStartFresh} from './projectIO.js';
 import {openDiscard} from './discardState.js';
 import {clone} from './appHelpers.js';
@@ -110,7 +111,11 @@ export function mountAutosave() {
     validateDocument(clone(saved.doc));
     if (!saved.clean && saved.doc.revision > 0 && saved.doc.objects.length > 0) {
       const ago = Math.max(1, Math.round((Date.now() - saved.savedAt) / 60000));
-      setRestore({info: t('"{name}", {n} objects, edited {m} min ago.', {name: saved.doc.name, n: saved.doc.objects.length, m: ago})});
+      const count = saved.doc.objects.length;
+      const objects = count === 1 ? t('1 object') : t('{n} objects', {n: count});
+      setRestore({info: t('"{name}", {objects}, edited {m} min ago.', {name: saved.doc.name, objects, m: ago})});
+      // The canvas behind the prompt is blank: the starter design only comes back on Start fresh.
+      showBlankBehindRestore();
       restoreActions.yes = () => {
         // A copy from another tab is used up once restored; this tab's own copy is rewritten by the next autosave.
         if (key !== ownAutosaveKey()) removeKey(key);
@@ -125,7 +130,10 @@ export function mountAutosave() {
           objects: saved.doc.objects.length,
           minutes: ago,
           save: () => saveRestoredThenStartFresh({...saved.doc, docId: isDocId(saved.docId) ? saved.docId : undefined}),
-          proceed: () => removeKey(key),
+          proceed: () => {
+            removeKey(key);
+            showStarterDesign();
+          },
           cancel: () => setRestore({open: true}),
         });
       };
