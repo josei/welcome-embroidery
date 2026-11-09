@@ -375,9 +375,9 @@ test('element tree: groups appear as collapsible parents, visibility and lock to
  await expect(page.locator('.object-row')).toHaveCount(3);await page.locator('.object-row').nth(0).click();await page.locator('.object-row').nth(1).click({modifiers:['Shift']});await page.keyboard.press('Control+g');
  await expect(page.locator('.group-row')).toHaveCount(1);await expect(page.locator('.group-row')).toContainText('2 objects');await expect(page.locator('.group-row.selected')).toHaveCount(1);
  await page.locator('.group-caret').click();await expect(page.locator('.object-row')).toHaveCount(1);await page.locator('.group-caret').click();await expect(page.locator('.object-row')).toHaveCount(3);
- const row=page.locator('.object-row').nth(2);await row.hover();await row.locator('.row-eye').click();await expect(page.locator('.object-row.is-hidden')).toHaveCount(1);await row.locator('.row-eye').click();await expect(page.locator('.object-row.is-hidden')).toHaveCount(0);
- await page.locator('.object-row').nth(2).hover();await page.locator('.object-row').nth(2).locator('.row-lock').click();await expect(page.locator('.object-row.is-locked')).toHaveCount(1);
- let m=await ctm(page),lockedAt=toScreen(m,-40+60+12,-2);await page.mouse.click(lockedAt.x,lockedAt.y);await expect(page.locator('.object-row.selected')).toHaveCount(0);await page.locator('.object-row').nth(2).locator('.row-lock').click();
+ const row=page.locator('.object-line:has(> .object-row)').nth(2);await row.hover();await row.locator('.row-eye').click();await expect(page.locator('.object-row.is-hidden')).toHaveCount(1);await row.locator('.row-eye').click();await expect(page.locator('.object-row.is-hidden')).toHaveCount(0);
+ await page.locator('.object-line:has(> .object-row)').nth(2).hover();await page.locator('.object-line:has(> .object-row)').nth(2).locator('.row-lock').click();await expect(page.locator('.object-row.is-locked')).toHaveCount(1);
+ let m=await ctm(page),lockedAt=toScreen(m,-40+60+12,-2);await page.mouse.click(lockedAt.x,lockedAt.y);await expect(page.locator('.object-row.selected')).toHaveCount(0);await page.locator('.object-line:has(> .object-row)').nth(2).locator('.row-lock').click();
  await page.locator('.object-row').nth(2).locator('.row-name').dblclick();await page.locator('.row-rename').fill('Tail piece');await page.locator('.row-rename').press('Enter');await expect(page.locator('.object-row').nth(2)).toContainText('Tail piece');
  const from=page.locator('.object-row').nth(2),to=page.locator('.object-row').nth(0);const ids=await page.locator('.object-row').evaluateAll(els=>els.map(e=>e.dataset.id));await from.dragTo(to,{targetPosition:{x:20,y:2}});const after=await page.locator('.object-row').evaluateAll(els=>els.map(e=>e.dataset.id));expect(after[0]).toBe(ids[2]);
  // context menu
@@ -3394,5 +3394,44 @@ test('blank document: export looks disabled, its reason is readable beside it, a
  await page.waitForTimeout(300);
  await expect(page.locator('#exportDialog')).toBeHidden();
  expect(downloads).toBe(0);
+ expect(errors).toEqual([]);
+});
+
+// Sewing-order rows are listbox options: Enter or Space selects, and Hide and Lock are their own buttons, reached with Tab.
+test('sewing order: a row selects from the keyboard, and its Hide and Lock toggle from the keyboard',async({page})=>{
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());await newDesign(page);
+ await page.locator('#rect').click();await page.locator('.object-row').first().locator('.row-name').dblclick();await page.locator('.row-rename').fill('Wildflower');await page.locator('.row-rename').press('Enter');
+ // A second object, so the first (Wildflower) starts unselected: a new object is selected when drawn.
+ await page.locator('#ellipse').click();await expect(page.locator('.object-row')).toHaveCount(2);
+ const row=page.getByRole('option',{name:/^Wildflower/});
+ const focused=async loc=>loc.evaluate(el=>el===document.activeElement);
+ for(let i=0;i<150&&!(await focused(row));i++)await page.keyboard.press('Tab');
+ await expect(row).toBeFocused();
+ await expect(row).toHaveAttribute('aria-selected','false');
+ await page.keyboard.press('Enter');
+ await expect(row).toHaveAttribute('aria-selected','true');
+ await expect(page.locator('#selected')).toContainText('Wildflower');
+ await expect(page.locator('#selHint')).toBeHidden();
+ await page.keyboard.press('Tab');
+ const hide=page.getByRole('button',{name:'Hide Wildflower'});
+ await expect(hide).toBeFocused();
+ await expect(hide).toHaveAttribute('aria-pressed','false');
+ await page.keyboard.press('Enter');
+ await expect(hide).toHaveAttribute('aria-pressed','true');
+ await expect(page.locator('.object-row.is-hidden')).toHaveCount(1);
+ await page.keyboard.press(' ');
+ await expect(hide).toHaveAttribute('aria-pressed','false');
+ await expect(page.locator('.object-row.is-hidden')).toHaveCount(0);
+ await page.keyboard.press('Tab');
+ const lock=page.getByRole('button',{name:'Lock Wildflower'});
+ await expect(lock).toBeFocused();
+ await expect(lock).toHaveAttribute('aria-pressed','false');
+ await page.keyboard.press(' ');
+ await expect(lock).toHaveAttribute('aria-pressed','true');
+ await expect(page.locator('.object-row.is-locked')).toHaveCount(1);
+ // The row keeps its selected state, and its name is the object's, not its controls'.
+ await expect(row).toHaveAttribute('aria-selected','true');
+ await expect(row).toHaveAccessibleName(/^Wildflower/);
+ await expect(row).not.toHaveAccessibleName(/Hide|Lock/);
  expect(errors).toEqual([]);
 });

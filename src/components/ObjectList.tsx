@@ -6,9 +6,9 @@ import {layersActions} from '../layersState.js';
 import {sewingCountsState} from '../sewingCountsState.js';
 import {compileIssueState} from '../compileIssueState.js';
 import {t} from '../i18n.js';
-// The object list in sewing order, rendered by React. Groups collapse, each row has its eye and lock buttons, a click selects,
-// Shift adds to the selection, a double click renames, and rows drag to reorder. Ids and classes match the markup it replaced,
-// because the styles and tests use them.
+// The object list in sewing order, rendered by React. It is a listbox: each row is an option that a click, or Enter or Space,
+// selects (Shift adds to the selection). Hide and Lock are their own buttons beside each row, not inside it. Groups collapse,
+// a double click renames, and rows drag to reorder. Ids and classes match the markup it replaced, because the styles and tests use them.
 interface Obj {
  id: string;
  name?: string;
@@ -109,7 +109,7 @@ const countText = (count: number | undefined, warning: string | undefined) => {
  return warning ? t('not compiled') : '';
 };
 
-function ObjectRow({o, depth, selected, dropping, renaming, count, warning, onRenameDone}: {
+function ObjectRow({o, depth, selected, dropping, renaming, count, warning, onRenameDone, onSelect, onToggleVisible, onToggleLock}: {
  o: Obj;
  depth: number;
  selected: boolean;
@@ -118,31 +118,63 @@ function ObjectRow({o, depth, selected, dropping, renaming, count, warning, onRe
  count: number | undefined;
  warning: string | undefined;
  onRenameDone: (text: string | null) => void;
+ onSelect: (shift: boolean) => void;
+ onToggleVisible: () => void;
+ onToggleLock: () => void;
 }) {
  const name = o.name || o.kind;
  const hidden = o.visible === false, locked = Boolean(o.locked);
  const drop = dropping && (dropping.after ? 'drop-after' : 'drop-before');
  const cls = ['object-row', selected && 'selected', hidden && 'is-hidden', locked && 'is-locked', drop].filter(Boolean).join(' ');
  const stitchIcon = o.kind === 'stitch_layer' ? undefined : STITCH_ICON[o.stitch ?? ''];
+ const label = [name, countText(count, warning)].filter(Boolean).join(' · ');
+ // Hide and Lock are siblings of the row, not descendants, so the row's accessible name is only the object's name and count.
  return (
-  <div className={cls} data-id={o.id} draggable={true} tabIndex={0} role="button" style={{paddingLeft: `${8 + depth * 16}px`}}>
-   <i className="swatch" style={{background: o.thread}} />
-   {stitchIcon && <svg className="icon row-icon" aria-hidden="true"><use href={`#${stitchIcon}`} /></svg>}
-   <span className="row-text">
-    {renaming ? <RenameField name={o.name || ''} onDone={onRenameDone} /> : <span className="row-name">{name}</span>}
-    <span className="row-tag">
-     {[o.kind === 'stitch_layer' ? t('machine stitches') : t(o.stitch), countText(count, warning)].filter(Boolean).join(' · ')}
+  <div className="object-line" role="none">
+   <div
+    className={cls}
+    data-id={o.id}
+    draggable={true}
+    tabIndex={0}
+    role="option"
+    aria-selected={selected}
+    aria-label={label}
+    style={{paddingLeft: `${8 + depth * 16}px`}}
+    onKeyDown={e => {
+     if (e.target !== e.currentTarget) return;
+     if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      onSelect(e.shiftKey);
+     }
+    }}
+   >
+    <i className="swatch" style={{background: o.thread}} />
+    {stitchIcon && <svg className="icon row-icon" aria-hidden="true"><use href={`#${stitchIcon}`} /></svg>}
+    <span className="row-text">
+     {renaming ? <RenameField name={o.name || ''} onDone={onRenameDone} /> : <span className="row-name">{name}</span>}
+     <span className="row-tag">
+      {[o.kind === 'stitch_layer' ? t('machine stitches') : t(o.stitch), countText(count, warning)].filter(Boolean).join(' · ')}
+     </span>
     </span>
-   </span>
-   {warning && <span className="row-warn" role="img" aria-label={warning} title={warning}>⚠</span>}
-   <button type="button" className="row-btn row-eye" aria-label={`${hidden ? 'Show' : 'Hide'} ${name}`} title={hidden ? 'Show' : 'Hide'}>
+    {warning && <span className="row-warn" role="img" aria-label={warning} title={warning}>⚠</span>}
+   </div>
+   <button
+    type="button"
+    className="row-btn row-eye"
+    aria-label={`Hide ${name}`}
+    aria-pressed={hidden}
+    title={`Hide ${name}`}
+    onClick={onToggleVisible}
+   >
     {icon(hidden ? 'i-eye-off' : 'i-eye')}
    </button>
    <button
     type="button"
     className={`row-btn row-lock${locked ? ' on' : ''}`}
-    aria-label={`${locked ? 'Unlock' : 'Lock'} ${name}`}
-    title={locked ? 'Unlock' : 'Lock'}
+    aria-label={`Lock ${name}`}
+    aria-pressed={locked}
+    title={`Lock ${name}`}
+    onClick={onToggleLock}
    >
     {icon(locked ? 'i-lock' : 'i-unlock')}
    </button>
@@ -150,30 +182,54 @@ function ObjectRow({o, depth, selected, dropping, renaming, count, warning, onRe
  );
 }
 
-function GroupRow({groupId, members, open, selectedIds, count, warning}: {
+function GroupRow({groupId, members, open, selectedIds, count, warning, onSelect, onToggleOpen, onToggleVisible, onToggleLock}: {
  groupId: string;
  members: Obj[];
  open: boolean;
  selectedIds: Set<string>;
  count: number | undefined;
  warning: string | undefined;
+ onSelect: (shift: boolean) => void;
+ onToggleOpen: () => void;
+ onToggleVisible: () => void;
+ onToggleLock: () => void;
 }) {
  const all = members.every(m => selectedIds.has(m.id));
  const hiddenAll = members.every(m => m.visible === false);
  const lockedAll = members.every(m => m.locked);
+ const name = `Group · ${members.length} objects`;
+ const label = [name, countText(count, warning)].filter(Boolean).join(' · ');
  return (
-  <div className={`group-row${all ? ' selected' : ''}`} data-group={groupId} tabIndex={0} role="button">
-   <button type="button" className="row-btn group-caret" aria-label={`${open ? 'Collapse' : 'Expand'} group`} aria-expanded={open}>
+  <div className="object-line group-line" role="none">
+   <button type="button" className="row-btn group-caret" aria-label={`${open ? 'Collapse' : 'Expand'} group`} aria-expanded={open} onClick={onToggleOpen}>
     {icon(open ? 'i-chevron' : 'i-chevron-right')}
    </button>
-   {icon('i-group')}
-   <span className="row-text">
-    <span className="row-name">{`Group · ${members.length} objects`}</span>
-    {countText(count, warning) && <span className="row-tag">{countText(count, warning)}</span>}
-   </span>
-   {warning && <span className="row-warn" role="img" aria-label={warning} title={warning}>⚠</span>}
-   <button type="button" className="row-btn row-eye" aria-label={`${hiddenAll ? 'Show' : 'Hide'} group`}>{icon(hiddenAll ? 'i-eye-off' : 'i-eye')}</button>
-   <button type="button" className={`row-btn row-lock${lockedAll ? ' on' : ''}`} aria-label={`${lockedAll ? 'Unlock' : 'Lock'} group`}>
+   <div
+    className={`group-row${all ? ' selected' : ''}`}
+    data-group={groupId}
+    tabIndex={0}
+    role="option"
+    aria-selected={all}
+    aria-label={label}
+    onKeyDown={e => {
+     if (e.target !== e.currentTarget) return;
+     if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      onSelect(e.shiftKey);
+     }
+    }}
+   >
+    {icon('i-group')}
+    <span className="row-text">
+     <span className="row-name">{name}</span>
+     {countText(count, warning) && <span className="row-tag">{countText(count, warning)}</span>}
+    </span>
+    {warning && <span className="row-warn" role="img" aria-label={warning} title={warning}>⚠</span>}
+   </div>
+   <button type="button" className="row-btn row-eye" aria-label={`Hide ${name}`} aria-pressed={hiddenAll} title={`Hide ${name}`} onClick={onToggleVisible}>
+    {icon(hiddenAll ? 'i-eye-off' : 'i-eye')}
+   </button>
+   <button type="button" className={`row-btn row-lock${lockedAll ? ' on' : ''}`} aria-label={`Lock ${name}`} aria-pressed={lockedAll} title={`Lock ${name}`} onClick={onToggleLock}>
     {icon(lockedAll ? 'i-lock' : 'i-unlock')}
    </button>
   </div>
@@ -198,37 +254,47 @@ export function ObjectList() {
   const g = objects.find(o => o.id === id)?.groupId;
   return g ? idsOfGroup(g) : [id];
  };
- // One handler for the whole list: it reads the row or group the click landed on, as the list did before it moved to React.
+ // Selecting a row or group is the same whether a click or the keyboard (Enter or Space) asks for it. Shift adds or removes one.
+ const selectRow = (id: string, shift: boolean) => {
+  if (shift) {
+   const next = new Set(sel.multi);
+   if (next.has(id) && next.size > 1) next.delete(id);
+   else next.add(id);
+   layersActions.select([...next], id);
+  } else {
+   layersActions.select(idsWithGroup(id), id);
+  }
+ };
+ const selectGroup = (groupId: string, shift: boolean) => {
+  const ids = idsOfGroup(groupId);
+  if (shift) layersActions.select([...new Set([...sel.multi, ...ids])], ids.at(-1)!);
+  else layersActions.select(ids, ids.at(-1)!);
+ };
+ // Hide and Lock toggle the given objects: they show or unlock unless every one already is.
+ const toggleVisible = (ids: string[]) => {
+  const hide = !objects.filter(o => ids.includes(o.id)).every(o => o.visible === false);
+  layersActions.setVisible(ids, !hide);
+ };
+ const toggleLocked = (ids: string[]) => {
+  const lock = !objects.filter(o => ids.includes(o.id)).every(o => o.locked);
+  layersActions.setLocked(ids, lock);
+ };
+ const toggleGroupOpen = (groupId: string) => {
+  setCollapsed(c => {
+   const next = new Set(c);
+   if (next.has(groupId)) next.delete(groupId);
+   else next.add(groupId);
+   return next;
+  });
+ };
+ // One handler for the rows and group rows: it reads the row or group the click landed on. Hide, Lock and the group caret are
+ // their own buttons, beside the row, with their own handlers.
  const onClick = (e: MouseEvent<HTMLDivElement>) => {
   const target = e.target as Element;
   const head = target.closest<HTMLElement>('.group-row');
   const row = target.closest<HTMLElement>('.object-row');
-  if (head && target.closest('.group-caret')) {
-   const g = head.dataset.group!;
-   setCollapsed(c => {
-    const next = new Set(c);
-    if (next.has(g)) next.delete(g);
-    else next.add(g);
-    return next;
-   });
-   return;
-  }
-  if (target.closest('.row-eye') && (head || row)) {
-   const ids = head ? idsOfGroup(head.dataset.group!) : [row!.dataset.id!];
-   const hide = !objects.filter(o => ids.includes(o.id)).every(o => o.visible === false);
-   layersActions.setVisible(ids, !hide);
-   return;
-  }
-  if (target.closest('.row-lock') && (head || row)) {
-   const ids = head ? idsOfGroup(head.dataset.group!) : [row!.dataset.id!];
-   const lock = !objects.filter(o => ids.includes(o.id)).every(o => o.locked);
-   layersActions.setLocked(ids, lock);
-   return;
-  }
   if (head) {
-   const ids = idsOfGroup(head.dataset.group!);
-   if (e.shiftKey) layersActions.select([...new Set([...sel.multi, ...ids])], ids.at(-1)!);
-   else layersActions.select(ids, ids.at(-1)!);
+   selectGroup(head.dataset.group!, e.shiftKey);
    return;
   }
   if (!row) return;
@@ -242,14 +308,7 @@ export function ObjectList() {
    }
    lastClick.current = {id, t: now};
   }
-  if (e.shiftKey) {
-   const next = new Set(sel.multi);
-   if (next.has(id) && next.size > 1) next.delete(id);
-   else next.add(id);
-   layersActions.select([...next], id);
-  } else {
-   layersActions.select(idsWithGroup(id), id);
-  }
+  selectRow(id, e.shiftKey);
  };
  const onDragStart = (e: DragEvent<HTMLDivElement>) => {
   const row = (e.target as Element).closest<HTMLElement>('.object-row');
@@ -293,32 +352,43 @@ export function ObjectList() {
   <div id="objects" onClick={onClick} onDragStart={onDragStart} onDragOver={onDragOver} onDragLeave={onDragLeave} onDrop={onDrop} onDragEnd={onDragEnd}>
    {issue && <div className="list-warning" role="status">{`⚠ Can't compile: ${issue.message}`}</div>}
    {objects.length === 0 && <p className="sel-hint empty-hint">{t('No objects yet. Draw a shape or import an image to start.')}</p>}
-   {entriesOf(objects, collapsed).map(entry => entry.kind === 'group' ? (
-    <GroupRow
-     key={`group:${entry.groupId}`}
-     groupId={entry.groupId}
-     members={entry.members}
-     open={entry.open}
-     selectedIds={sel.multi}
-     count={groupCount(entry.members, counts)}
-     warning={groupWarning(entry.members)}
-    />
-   ) : (
-    <ObjectRow
-     key={entry.o.id}
-     o={entry.o}
-     depth={entry.depth}
-     selected={sel.multi.has(entry.o.id)}
-     dropping={drop && drop.id === entry.o.id ? drop : null}
-     renaming={renaming === entry.o.id}
-     count={counts[entry.o.id]}
-     warning={warningFor(entry.o.id)}
-     onRenameDone={text => {
-      setRenaming(null);
-      layersActions.rename(entry.o.id, text);
-     }}
-    />
-   ))}
+   {objects.length > 0 && (
+    <div className="object-rows" role="listbox" aria-label={t('Sewing order')} aria-multiselectable="true">
+     {entriesOf(objects, collapsed).map(entry => entry.kind === 'group' ? (
+      <GroupRow
+       key={`group:${entry.groupId}`}
+       groupId={entry.groupId}
+       members={entry.members}
+       open={entry.open}
+       selectedIds={sel.multi}
+       count={groupCount(entry.members, counts)}
+       warning={groupWarning(entry.members)}
+       onSelect={shift => selectGroup(entry.groupId, shift)}
+       onToggleOpen={() => toggleGroupOpen(entry.groupId)}
+       onToggleVisible={() => toggleVisible(entry.members.map(m => m.id))}
+       onToggleLock={() => toggleLocked(entry.members.map(m => m.id))}
+      />
+     ) : (
+      <ObjectRow
+       key={entry.o.id}
+       o={entry.o}
+       depth={entry.depth}
+       selected={sel.multi.has(entry.o.id)}
+       dropping={drop && drop.id === entry.o.id ? drop : null}
+       renaming={renaming === entry.o.id}
+       count={counts[entry.o.id]}
+       warning={warningFor(entry.o.id)}
+       onRenameDone={text => {
+        setRenaming(null);
+        layersActions.rename(entry.o.id, text);
+       }}
+       onSelect={shift => selectRow(entry.o.id, shift)}
+       onToggleVisible={() => toggleVisible([entry.o.id])}
+       onToggleLock={() => toggleLocked([entry.o.id])}
+      />
+     ))}
+    </div>
+   )}
   </div>
  );
 }
