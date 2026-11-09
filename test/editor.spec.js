@@ -3654,3 +3654,19 @@ test('a selected imported run path reports its W and H in the transform panel',a
  expect(Math.abs(await num('#posX')-(-44))).toBeLessThanOrEqual(0.1);
  expect(Math.abs(await num('#posY')-(-44))).toBeLessThanOrEqual(0.1);
 });
+
+test('a batch row spacing edit on two objects is one undo step named for the batch',async({page})=>{page.on('dialog',d=>d.accept());await page.goto('/');await newDesign(page);
+ await page.locator('#rect').click();await page.locator('#rect').click();
+ const rows=page.locator('.object-row');await expect(rows).toHaveCount(2);
+ const readSpacing=async i=>{await rows.nth(i).click();return page.locator('#spacing').inputValue();};
+ const before=[await readSpacing(0),await readSpacing(1)];
+ await rows.nth(0).click();await rows.nth(1).click({modifiers:['Shift']});
+ await page.locator('#spacing').fill('0.6');await page.locator('#spacing').press('Tab');
+ await expect(page.locator('#undo')).toHaveAttribute('aria-label','Undo batch: row spacing on 2 objects');
+ expect(await readSpacing(0)).toBe('0.6');expect(await readSpacing(1)).toBe('0.6');
+ await page.locator('#undo').click();
+ expect([await readSpacing(0),await readSpacing(1)]).toEqual(before);
+ await expect(page.locator('#redo')).toHaveAttribute('aria-label','Redo batch: row spacing on 2 objects');
+ await page.locator('#redo').click();
+ expect(await readSpacing(0)).toBe('0.6');expect(await readSpacing(1)).toBe('0.6');
+});

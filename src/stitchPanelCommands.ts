@@ -6,6 +6,7 @@ import {underlayActions} from './underlayState.js';
 import {accordionRowsActions} from './accordionRowsState.js';
 import {capRowsActions} from './capRowsState.js';
 import {t} from './i18n.js';
+import {batchEditLabel} from './batchEditLabel.js';
 import {STITCH_LENGTH_RANGE, inFieldRange, outOfRangeMessage} from './fieldRanges.js';
 import type {StitchPanelApi} from './stitchPanel.js';
 
@@ -50,8 +51,10 @@ export function configureStitchPanelActions(next: StitchPanelApi) {
       return false;
     }
     const v = Number(text);
-    if (selState().multi.size) wired().edit(wired().orderedIds().map(id => ({op: 'set_object', id, [field]: v})));
-    else wired().edit([{op: 'set_settings', [field]: v}]);
+    if (selState().multi.size) {
+      const ids = wired().orderedIds();
+      wired().edit(ids.map(id => ({op: 'set_object', id, [field]: v})), undefined, undefined, batchEditLabel(field, ids.length));
+    } else wired().edit([{op: 'set_settings', [field]: v}]);
   };
   stitchPanelActions.resetFill = () => {
     if (!selState().selected) return;

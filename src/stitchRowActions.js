@@ -12,6 +12,7 @@ import {runRowsActions, runRowsState} from './runRowsState.js';
 import {typeRowsActions} from './typeRowsState.js';
 import {raisedRowsActions} from './raisedRowsState.js';
 import {fillValuesActions, fillValuesState} from './fillValuesState.js';
+import {batchEditLabel} from './batchEditLabel.js';
 import {BORDER_WIDTH_RANGE, ROW_SPACING_RANGE, inFieldRange, outOfRangeMessage} from './fieldRanges.js';
 import {pathRowsActions} from './pathRowsState.js';
 import {loopRowsActions} from './loopRowsState.js';
@@ -123,7 +124,9 @@ export function mountRowActions() {
     }
     // A multi-selection (from the list's Shift or Ctrl clicks, or the canvas) gets the value on every selected object.
     const ids = selState().multi.size ? orderedIds() : selState().selected ? [selState().selected] : [];
-    editor.edit(ids.length ? ids.map(id => ({op: 'set_object', id, [field]: Number(text)})) : [{op: 'set_settings', [field]: Number(text)}]);
+    // A batch across several objects is one undo step, named for the field and the count.
+    editor.edit(ids.length ? ids.map(id => ({op: 'set_object', id, [field]: Number(text)})) : [{op: 'set_settings', [field]: Number(text)}],
+      undefined, undefined, batchEditLabel(field, ids.length));
   };
 
   raisedRowsActions.choose = (field, checked) => {

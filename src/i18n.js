@@ -417,6 +417,7 @@ export const ES={
 'Deleted {n} objects.':'Eliminados {n} objetos.','Deleted {name}.':'Eliminado {name}.','delete {n} objects':'eliminar {n} objetos','delete {name}':'eliminar {name}',
 'change':'cambio','move':'mover','nudge':'desplazar','new design':'nuevo diseño','open file':'abrir archivo','import file':'importar archivo','Undo {action}':'Deshacer {action}','Redo {action}':'Rehacer {action}','Nothing to undo':'No hay nada que deshacer','Nothing to redo':'No hay nada que rehacer',
 'Removed {n} unused fonts.':'Se quitaron {n} fuentes sin usar.',
+'batch: {field} on {n} objects':'lote: {field} en {n} objetos','row spacing':'separación de filas','stitch length':'longitud de puntada','angle':'ángulo',
 'Arrow keys':'Teclas de flecha','Copies the text worksheet to the clipboard':'Copia la hoja de texto al portapapeles','Also download the sewing worksheet':'Descargar también la hoja de costura','machine stitches':'puntadas de máquina',
 };
 /** @type {Array<{re: RegExp, names: string[], out: string}>} */

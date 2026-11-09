@@ -32,7 +32,7 @@ import {configureStitchPanelActions} from './stitchPanelCommands.js';
 
 /** What the stitch panel needs from the editor: an undoable edit, the selected ids in order, and a toast. */
 export interface StitchPanelApi {
-  edit(operations: unknown[], after?: () => void): boolean;
+  edit(operations: unknown[], after?: () => void, coalesceKey?: string, label?: string): boolean;
   orderedIds(): string[];
   toast(message: string, kind?: 'status' | 'error'): void;
 }
