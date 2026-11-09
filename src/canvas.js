@@ -270,7 +270,6 @@ export function createCanvas(/** @type {any} */ api){
   const touches=new Map();
   let previewFrame=0;
   /** @type {any} */ let previewPending=null;
-  /** Shows the moving selection's X/Y in the transform panel, at most once per animation frame. */
   function previewMove(/** @type {number[]} */ ids,/** @type {number} */ dx,/** @type {number} */ dy){
     previewPending=[ids,dx,dy];
     if(!previewFrame)previewFrame=requestAnimationFrame(()=>{previewFrame=0;const [i,x,y]=previewPending;previewPending=null;api.previewMove?.(i,x,y);});
@@ -310,8 +309,7 @@ export function createCanvas(/** @type {any} */ api){
     if(o){e.preventDefault();startMove(e,o,p);}else startMarquee(e,p);
   });
   function startMove(/** @type {any} */ e,/** @type {any} */ o,/** @type {any} */ p){
-    // A second press on the same object within the double-click window is a double-click only if it does not drag: the
-    // decision waits for pointer-up (see the move branch there), so a quick press-and-drag still moves the object.
+    // Double-click is decided on pointer-up (see the move branch), so a quick press-and-drag still moves.
     const now=performance.now(),dbl=Boolean(lastClick&&now-lastClick.t<380&&lastClick.id===o.id&&Math.hypot(p[0]-lastClick.p[0],p[1]-lastClick.p[1])*vp.s<8);
     lastClick=dbl?null:{t:now,id:o.id,p};
     const group=tools.withGroup(o.id),cur=new Set(api.ids());
