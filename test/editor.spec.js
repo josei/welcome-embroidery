@@ -218,6 +218,26 @@ test('agent relay: the Agent dialog creates a private link and an MCP client edi
   expect(errors).toEqual([]);await client.close().catch(()=>{});
  }finally{child.kill('SIGTERM');}
 });
+test('agent relay: a failed revoke keeps the owner key and the link, and says so; a retry that succeeds clears both',async({page})=>{
+ const {spawn}=await import('node:child_process');
+ const port=18795,origin=`http://127.0.0.1:${port}`,child=spawn(process.execPath,['server.js'],{env:{...process.env,HOST:'127.0.0.1',PORT:String(port),WELCOME_SESSION_FILE:''},stdio:'ignore'});
+ try{
+  for(let i=0;i<100;i++){try{if((await fetch(origin+'/health')).ok)break;}catch{}await new Promise(r=>setTimeout(r,100));}
+  await page.goto(origin+'/');page.on('dialog',d=>d.accept());await newDesign(page);
+  await page.locator('#settingsBtn').click();await page.locator('#copyEndpoint').click();await expect(page.locator('#agentUrl')).toHaveValue(/\/mcp\/[A-Za-z0-9_-]{32,}$/);
+  const link=await page.locator('#agentUrl').inputValue();
+  const ownerKey=()=>page.evaluate(()=>sessionStorage.getItem('welcome.agentSession'));
+  const before=await ownerKey();expect(before).toContain('ownerKey');
+  await page.route('**/api/session/revoke',route=>route.fulfill({status:500,contentType:'application/json',body:'{"error":"down"}'}));
+  await page.locator('#agentRevoke').click();
+  await expect(page.locator('#agentStatus')).toContainText('Could not revoke the link. It is still active');await expect(page.locator('#agentStatus')).not.toContainText('Link revoked');
+  expect(await ownerKey()).toBe(before);await expect(page.locator('#agentUrl')).toHaveValue(link);await expect(page.locator('#agentRevoke')).toBeEnabled();
+  await page.unroute('**/api/session/revoke');
+  await page.locator('#agentRevoke').click();
+  await expect(page.locator('#agentStatus')).toContainText('Link revoked');await expect(page.locator('#agentUrl')).not.toHaveValue(link);
+  expect(await ownerKey()).not.toBe(before);
+ }finally{child.kill('SIGTERM');}
+});
 
 test('satin column: path stitch type, width control, thick design stroke and compiled zigzag',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());await newDesign(page);
