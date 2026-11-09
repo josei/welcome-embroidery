@@ -64,14 +64,18 @@ function ExportSplit() {
  const {format} = useSyncExternalStore(exportFormatState.subscribe, exportFormatState.get);
  const {doc} = useSyncExternalStore(documentState.subscribe, documentState.get);
  const blank = (doc.objects ?? []).length === 0;
+ // A blank design keeps the button focusable (aria-disabled, not disabled) so keyboard users reach the reason,
+ // which sits outside the teal fill, and activating it does nothing.
  return (
-  <div className="export-split">
-   <button id="export" disabled={blank} title={blank ? EMPTY_EXPORT_REASON : undefined} aria-describedby={blank ? 'exportReason' : undefined} onClick={() => openExportDialog()}>{t('Download {fmt} file', {fmt: exportKind(format)})}</button>
+  <>
    {blank && <span id="exportReason" className="export-reason">{t(EMPTY_EXPORT_REASON)}</span>}
-   <select id="headerFormat" aria-label={t('Export format')} title={t('Export format')} value={format} onChange={e => setExportFormat(e.target.value)}>
-    {EXPORT_FORMATS.map(f => <option key={f.value} value={f.value}>{f.value.toUpperCase()}</option>)}
-   </select>
-  </div>
+   <div className={blank ? 'export-split is-blank' : 'export-split'}>
+    <button id="export" aria-disabled={blank} aria-describedby={blank ? 'exportReason' : undefined} onClick={() => { if (!blank) openExportDialog(); }}>{t('Download {fmt} file', {fmt: exportKind(format)})}</button>
+    <select id="headerFormat" aria-label={t('Export format')} title={t('Export format')} value={format} onChange={e => setExportFormat(e.target.value)}>
+     {EXPORT_FORMATS.map(f => <option key={f.value} value={f.value}>{f.value.toUpperCase()}</option>)}
+    </select>
+   </div>
+  </>
  );
 }
 // The editor header, rendered by React. Ids and attributes match the markup this replaced,

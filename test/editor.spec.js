@@ -2939,8 +2939,7 @@ test('a blank design is neutral: no error, no Unsaved mark, export disabled with
  await expect(page.locator('#count')).not.toHaveClass(/error/);
  await expect(page.locator('#count')).not.toContainText("Can't compile");
  await expect(page.locator('#objects .empty-hint')).toContainText('Draw a shape or import an image to start.');
- await expect(page.locator('#export')).toBeDisabled();
- await expect(page.locator('#export')).toHaveAttribute('title','Add an object to export');
+ await expect(page.locator('#export')).toHaveAttribute('aria-disabled','true');
  await expect(page.locator('#exportReason')).toHaveText('Add an object to export');
  await page.locator('#rect').click();
  await expect(page.locator('#export')).toBeEnabled();
@@ -3353,4 +3352,47 @@ test('Enter on the export format select only chooses; Escape closes the export d
  await page.waitForTimeout(600);
  expect(downloads).toBe(0);await expect(page.locator('#exportDialog')).toBeVisible();await expect(page.locator('#format')).toHaveValue('dst');
  await page.keyboard.press('Escape');await expect(page.locator('#exportDialog')).toBeHidden();expect(downloads).toBe(0);
+});
+
+test('blank document: export looks disabled, its reason is readable beside it, and keyboard users reach it',async({page})=>{
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));
+ let downloads=0;page.on('download',()=>{downloads++;});
+ await page.goto('/');await newDesign(page);
+ await expect(page.locator('#objects .object-row')).toHaveCount(0);
+ const btn=page.locator('#export');
+ await expect(btn).toHaveAttribute('aria-disabled','true');
+ await expect(btn).toHaveAttribute('aria-describedby','exportReason');
+ await expect(page.locator('#exportReason')).toHaveText('Add an object to export');
+ // Tab from the top of the page until focus lands on the export button (aria-disabled keeps it focusable).
+ await page.evaluate(()=>document.activeElement?.blur());
+ let reached=false;
+ for(let i=0;i<80&&!reached;i++){await page.keyboard.press('Tab');reached=await page.evaluate(()=>document.activeElement?.id==='export');}
+ expect(reached).toBe(true);
+ const m=await page.evaluate(()=>{
+  const parse=s=>{const p=s.match(/rgba?\(([^)]+)\)/)[1].split(',').map(parseFloat);return {r:p[0],g:p[1],b:p[2],a:p.length>3?p[3]:1};};
+  const lum=({r,g,b})=>{const c=[r,g,b].map(v=>{v/=255;return v<=0.03928?v/12.92:((v+0.055)/1.055)**2.4;});return 0.2126*c[0]+0.7152*c[1]+0.0722*c[2];};
+  const ratio=(a,b)=>{const x=lum(a),y=lum(b);return (Math.max(x,y)+0.05)/(Math.min(x,y)+0.05);};
+  // Effective background: composite the translucent layers from the element outward over white.
+  const bgOf=el=>{const layers=[];for(let e=el;e;e=e.parentElement){const c=parse(getComputedStyle(e).backgroundColor);if(c.a>0){layers.push(c);if(c.a===1)break;}}let base={r:255,g:255,b:255};for(const c of layers.reverse())base={r:c.r*c.a+base.r*(1-c.a),g:c.g*c.a+base.g*(1-c.a),b:c.b*c.a+base.b*(1-c.a)};return base;};
+  const btn=document.querySelector('#export'),reason=document.querySelector('#exportReason'),split=btn.parentElement;
+  const label=parse(getComputedStyle(btn).color);
+  const rb=reason.getBoundingClientRect(),sb=split.getBoundingClientRect();
+  return {
+   labelRatio:ratio(label,bgOf(btn)),
+   reasonRatio:ratio(parse(getComputedStyle(reason).color),bgOf(reason)),
+   overlapsFill:rb.right>sb.left&&rb.left<sb.right&&rb.bottom>sb.top&&rb.top<sb.bottom,
+   reasonClipped:reason.scrollWidth>reason.clientWidth||rb.width===0,
+   fill:getComputedStyle(split).backgroundColor,
+  };
+ });
+ expect(m.overlapsFill).toBe(false);
+ expect(m.reasonClipped).toBe(false);
+ expect(m.labelRatio).toBeGreaterThanOrEqual(4.5);
+ expect(m.reasonRatio).toBeGreaterThanOrEqual(4.5);
+ // Activating the disabled export does nothing: no dialog, no download.
+ await page.keyboard.press('Enter');
+ await page.waitForTimeout(300);
+ await expect(page.locator('#exportDialog')).toBeHidden();
+ expect(downloads).toBe(0);
+ expect(errors).toEqual([]);
 });
