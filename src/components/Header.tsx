@@ -16,7 +16,8 @@ import {ArrangeMenu, EditMenu, FileMenu} from './MenuBar';
 // The project name field: it shows the document name, and a committed change is an edit (see documentActions).
 function ProjectName() {
  const {doc} = useSyncExternalStore(documentState.subscribe, documentState.get);
- const field = useDraftInput(doc.name ?? '', text => documentActions.rename(text));
+ const shown = t(doc.name ?? '');
+ const field = useDraftInput(shown, text => documentActions.rename(text === shown ? (doc.name ?? '') : text));
  return <input id="name" {...field} />;
 }
 // Undo and Redo: the name says which action the step takes back (or forward), e.g. "Undo delete Rectangle". With no

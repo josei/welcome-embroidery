@@ -131,7 +131,7 @@ function ObjectRow({o, depth, selected, dropping, renaming, count, warning, onRe
    <span className="row-text">
     {renaming ? <RenameField name={o.name || ''} onDone={onRenameDone} /> : <span className="row-name">{name}</span>}
     <span className="row-tag">
-     {[o.kind === 'stitch_layer' ? 'machine stitches' : o.stitch, countText(count, warning)].filter(Boolean).join(' · ')}
+     {[o.kind === 'stitch_layer' ? t('machine stitches') : t(o.stitch), countText(count, warning)].filter(Boolean).join(' · ')}
     </span>
    </span>
    {warning && <span className="row-warn" role="img" aria-label={warning} title={warning}>⚠</span>}

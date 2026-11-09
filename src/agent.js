@@ -1,6 +1,7 @@
 // @ts-check
 // Browser side of the agent relay: owns the session secrets, long-polls for jobs from the server and answers them
 // against the open document. The owner key stays in this tab's sessionStorage; the link token is what agents get.
+import {t} from './i18n.js';
 const KEY='welcome.agentSession';
 /**
  * @param {unknown} body
@@ -53,7 +54,7 @@ export function createAgentBridge({getDocument,applyRemote,addLayerRemote,getRef
     if(response.status===404||response.status===405){
       set(
       {status:'unavailable',message:
-      'This copy of Welcome is a static site without the agent relay. Run the Welcome server or the desktop app to connect an agent.'});return false;}
+      t('This copy of Welcome is a static site without the agent relay. Run the Welcome server or the desktop app to connect an agent.')});return false;}
     const body=await response.json().catch(()=>({}));if(!response.ok){set({status:'error',message:body.error||'Could not create an agent link.'});return false;}
     session={token:body.token,ownerKey:body.ownerKey};try{sessionStorage.setItem(KEY,JSON.stringify(session));}catch{}return true;
   }

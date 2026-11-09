@@ -9,7 +9,7 @@ import {openThreadPopover, closeThreadPopover, threadPopoverState} from './threa
 import {setStitchRow} from './stitchRowsState.js';
 import {nearestStockThread} from './threads.js';
 import {threadPlan, blockSeconds, blockTimeLabel, sewingWorksheet} from './engine.js';
-import {download, safeProjectFilename} from './appHelpers.js';
+import {download, exportStem} from './appHelpers.js';
 import {t} from './i18n.js';
 import {getPlan, getCompileError, compileNow} from './compileService.js';
 import {editor} from './editorContext.js';
@@ -143,7 +143,7 @@ function mountWorksheet() {
         return;
       }
       const format = /** @type {'text'|'svg'} */ (/** @type {HTMLSelectElement} */ (document.getElementById('worksheetFormat')).value);
-      const base = safeProjectFilename(documentNow().doc.name).replace(/\.welcome$/i, '');
+      const base = exportStem(documentNow().doc.name);
       download(sewingWorksheet(/** @type {any} */ (documentNow().doc), current, format), `${base}-worksheet.${format === 'svg' ? 'svg' : 'txt'}`,
         format === 'svg' ? 'image/svg+xml' : 'text/plain');
       editor.toast(t('Sewing worksheet downloaded.'));

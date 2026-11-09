@@ -3,7 +3,7 @@ import {selState} from './selectionState.js';
 import {batchDocuments, batchPlan} from './engine.js';
 import {arrayState} from './arrayState.js';
 import {batchNames, batchState, setBatchFields} from './batchState.js';
-import {download, forWorker, safeProjectFilename} from './appHelpers.js';
+import {download, exportStem, forWorker} from './appHelpers.js';
 import {t} from './i18n.js';
 
 /** What the batch export needs from the editor, supplied by app.js. */
@@ -86,7 +86,7 @@ export async function exportBatch() {
   }
   await wired().ensureFonts().catch(() => {});
   const format = batchState.get().format;
-  const base = safeProjectFilename(documentNow().doc.name).replace(/\.welcome$/i, '');
+  const base = exportStem(documentNow().doc.name);
   // The engine stores objects as plain records; these are the fields this export reads.
   const objects = documentNow().doc.objects as ExportObject[];
   const color = objects.find(o => o.id === selState().selected)?.thread || '#527461';

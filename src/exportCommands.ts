@@ -2,7 +2,7 @@ import {documentNow} from './documentState.js';
 import {selectedObject} from './selectionCommands.js';
 import {exportFormatState} from './exportFormatState.js';
 import {EMPTY_EXPORT_REASON, exportDialogState, setExportDialog} from './exportDialogState.js';
-import {download, forWorker, safeProjectFilename} from './appHelpers.js';
+import {download, exportStem, forWorker} from './appHelpers.js';
 import {exportAppliqueTemplates, exportPrintTemplate, exportSvg, jefWarnings, sewingWorksheet} from './engine.js';
 import {exportDxf} from './dxf.js';
 import {t} from './i18n.js';
@@ -45,7 +45,7 @@ export function openExportDialog() {
 
 /** The file name stem an export is built on: the project name without its .welcome extension. */
 function exportBase(): string {
-  return safeProjectFilename(documentNow().doc.name).replace(/\.welcome$/i, '');
+  return exportStem(documentNow().doc.name);
 }
 
 /** The file name an export of this format downloads as, so the dialog can show it before the download. */

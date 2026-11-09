@@ -79,7 +79,7 @@ export const ES={
   'Remove unused fonts':'Quitar fuentes sin usar','Close':'Cerrar','Satin end inset: start (mm)':'Retracción del inicio del satén (mm)',
   'Satin end inset: end (mm)':'Retracción del final del satén (mm)','Bling fill':'Relleno de piedras','Raised spacing (mm)':
   'Separación del relleno elevado (mm)','Accordion start (mm)':'Inicio del acordeón (mm)','Accordion end (mm)':'Final del acordeón (mm)',
-  'Raised fill (extra tatami underlay)':'Relleno elevado (base de relleno extra)','Custom':'Personalizado','Default':'Por defecto','4×4 in':'4×4 in','5×7 in':
+  'Raised fill (extra tatami underlay)':'Relleno elevado (base de relleno extra)','Custom':'Manual','Default':'Estándar','4×4 in':'4×4 in','5×7 in':
   '5×7 in','6×10 in':'6×10 in','Sequin fill':'Relleno de lentejuelas','Satin end inset (mm)':'Retracción de los extremos del satén (mm)','Redwork outline':
   'Contorno en ida y vuelta','Fabric':'Tela','Stretchy knit':'Punto elástico','Terry towel or fleece':'Toalla de rizo o polar','Fabric stabilizer':
   'Estabilizador de tela','Woven (default)':'Tejido (por defecto)','Knit':'Punto','Towel or fleece':'Toalla o polar','Appliqué templates · 1:1 SVG':
@@ -182,16 +182,17 @@ export const ES={
   'Group objects by thread colour to minimise colour changes':'Agrupa los objetos por color de hilo para minimizar los cambios de color',
 'Document stitch settings':'Ajustes de puntada del documento','Tie-in / tie-off':'Remates de inicio y fin','Trim long jumps':'Cortar saltos largos',
   'Pull compensation (mm)':'Compensación de tirón (mm)',
-'MCP endpoint (private link)':'Punto de conexión MCP (enlace privado)','Copy URL':'Copiar URL','Revoke & make new link':'Revocar y crear un enlace nuevo',
+'MCP endpoint (private link)':'Punto de conexión para agentes (enlace privado)','Copy URL':'Copiar URL','Revoke & make new link':'Revocar y crear un enlace nuevo',
 ['Anyone holding this link can read and edit the design open in this tab, so share it only with your agent. Your design stays in this browser; the server ' +
 'only relays the agent\'s requests while this tab is open. Closing the tab ends the link. In the agent, use']:
   'Cualquiera que tenga este enlace puede leer y editar el diseño abierto en esta pestaña, así que compártelo solo con tu agente. Tu diseño permanece en ' +
   'este navegador; el servidor solo retransmite las peticiones del agente mientras esta pestaña esté abierta. Al cerrar la pestaña, el enlace termina. En el ' +
   'agente, usa ',
 ', for example: “Use the Welcome MCP to draw a leaf badge with BLOOM lettering on the live document, then export JEF.”':
-  ', por ejemplo: «Usa el MCP de Welcome para dibujar una insignia de hoja con el texto BLOOM en el documento en vivo y luego exporta a JEF.»',
+  ', por ejemplo: «Usa Welcome para dibujar una insignia de hoja con el texto BLOOM en el documento en vivo y luego exporta a JEF.»',
 'Not connected.':'No conectado.','Connected. Waiting for an agent to use the link.':'Conectado. Esperando a que un agente use el enlace.','Agent active.':
-  'Agente activo.','Connection problem.':'Problema de conexión.','Agent relay unavailable.':'Relé de agentes no disponible.',
+  'Agente activo.','Connection problem.':'Problema de conexión.','Agent relay unavailable.':'Conexión con agentes no disponible.',
+'This copy of Welcome is a static site without the agent relay. Run the Welcome server or the desktop app to connect an agent.':'Esta copia de Welcome es un sitio estático sin conexión con agentes. Ejecuta el servidor de Welcome o la aplicación de escritorio para conectar un agente.',
 'Choose a font':'Elegir una fuente','Search 195 fonts…':'Buscar entre 195 fuentes…','Search fonts':'Buscar fuentes','Font categories':'Categorías de fuentes',
   'Fonts':'Fuentes','Satin':'Satén','Running':'Recta','Cross stitch':'Punto de cruz','Serif':'Serif','Sans':'Sans','Script':'Manuscrita','Display':'Decorativa',
   'Loaded':'Cargadas','No fonts match.':'Ninguna fuente coincide.',
@@ -219,7 +220,7 @@ export const ES={
   'El texto bordado necesita algo de texto.',
 'Project opened locally.':'Proyecto abierto localmente.','Project name cannot be empty.':'El nombre del proyecto no puede estar vacío.',
   'SVG exported (design only, not a stitch plan).':'SVG exportado (solo el diseño, no un plan de puntadas).','Copied the private MCP link.':
-  'Enlace MCP privado copiado.','Select and copy the link.':'Selecciona y copia el enlace.','This would go over the 100-object limit.':'Esto superaría el límite de 100 objetos.','Select one shape, path or lettering first.':
+  'Enlace privado copiado.','Select and copy the link.':'Selecciona y copia el enlace.','This would go over the 100-object limit.':'Esto superaría el límite de 100 objetos.','Select one shape, path or lettering first.':
   'Selecciona primero una forma, un trazado o un texto.',
 'Discard unsaved changes?':'¿Descartar los cambios sin guardar?',
 '"{name}" has unsaved changes':'"{name}" tiene cambios sin guardar','Discard {objects}, edited {m} min ago?':'¿Descartar {objects}, editado hace {m} min?',
@@ -396,13 +397,17 @@ export const ES={
 'Deleted {n} objects.':'Eliminados {n} objetos.','Deleted {name}.':'Eliminado {name}.','delete {n} objects':'eliminar {n} objetos','delete {name}':'eliminar {name}',
 'change':'cambio','new design':'nuevo diseño','open file':'abrir archivo','import file':'importar archivo','Undo {action}':'Deshacer {action}','Redo {action}':'Rehacer {action}','Nothing to undo':'No hay nada que deshacer','Nothing to redo':'No hay nada que rehacer',
 'Removed {n} unused fonts.':'Se quitaron {n} fuentes sin usar.',
+'Arrow keys':'Teclas de flecha','Copies the text worksheet to the clipboard':'Copia la hoja de texto al portapapeles','Also download the sewing worksheet':'Descargar también la hoja de costura','machine stitches':'puntadas de máquina',
 };
 /** @type {Array<{re: RegExp, names: string[], out: string}>} */
 const rx=[];
 /** @type {Map<string, string>} */
 const exact=new Map();
 for(const [k,v] of Object.entries(ES)){
- if(!k.includes('{')){exact.set(k,v);continue;}
+ // A template key is also kept as an exact key, so a call that passes the whole template (with its {name} placeholders) gets
+ // that translation rather than a shorter key that happens to match the braces.
+ exact.set(k,v);
+ if(!k.includes('{'))continue;
  /** @type {string[]} */
  const names=[];const src=k.replace(/[.*+?^$()|[\]\\]/g,'\\$&').replace(/\{(\w+)\}/g,(_,n)=>{names.push(n);return '(.+?)';});
  rx.push({re:new RegExp(`^${src}$`),names,out:v});

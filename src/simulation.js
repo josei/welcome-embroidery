@@ -77,7 +77,7 @@ export function syncPlaybackControls() {
     spans: cache.spans, colourChanges: cache.changes, trims: cache.trims, metres: cache.metres,
   });
   if (!plan) { setStatus({playback: 'Ready to simulate', needle: ''}); return; }
-  if (ready) { setStatus({playback: `Ready · ${plan.count.toLocaleString()} stitches`, needle: ''}); return; }
+  if (ready) { setStatus({playback: t('Ready · {n} stitches', {n: plan.count.toLocaleString()}), needle: ''}); return; }
   const percent = length ? Math.floor(limit / length * 100) : 0;
   setStatus({
     playback: `${sewn.toLocaleString()} / ${plan.count.toLocaleString()} stitches · ${percent}%`,

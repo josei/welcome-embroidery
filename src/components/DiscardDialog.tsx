@@ -17,7 +17,7 @@ export function DiscardDialog() {
  return (
   <dialog id="discardDialog" ref={ref} aria-labelledby="discardTitle" onCancel={e => { e.preventDefault(); answerDiscard('cancel'); }}>
    <form method="dialog" onSubmit={e => e.preventDefault()}>
-    <h2 id="discardTitle">{t('"{name}" has unsaved changes', {name})}</h2>
+    <h2 id="discardTitle">{t('"{name}" has unsaved changes', {name: t(name)})}</h2>
     <p id="discardInfo" className="dlg-note">{question}</p>
     {notice && <p id="discardNotice" className="dlg-note" role="status">{notice}</p>}
     <div className="agent-actions discard-actions">
