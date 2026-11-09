@@ -3314,6 +3314,27 @@ test('add rectangle and add ellipse select the new shape and say where it went',
  expect(errors).toEqual([]);
 });
 
+test('thread picker returns focus to its button after a pick, Use and Escape; the button has a tooltip',async({page})=>{
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));
+ await page.goto('/');page.on('dialog',d=>d.accept());await newDesign(page);await page.locator('#rect').click();
+ const btn=page.locator('#thread + .thread-btn');
+ await expect(btn).toHaveAttribute('title',"Change this object's thread colour");
+ // Keyboard: open, pick a swatch with Enter, focus returns to the button
+ await btn.focus();await page.keyboard.press('Enter');await expect(page.locator('#threadPop')).toBeVisible();
+ await page.locator('#threadPop .grid button[title="Red"]').focus();await page.keyboard.press('Enter');
+ await expect(page.locator('#threadPop')).toBeHidden();await expect(btn).toBeFocused();await expect(page.locator('#thread')).toHaveValue('#c8281e');
+ // Hex field and Use
+ await btn.press('Enter');await page.locator('#threadPop input[type=text]').fill('#123abc');await page.getByRole('button',{name:'Use',exact:true}).click();
+ await expect(page.locator('#threadPop')).toBeHidden();await expect(btn).toBeFocused();await expect(page.locator('#thread')).toHaveValue('#123abc');
+ // Escape closes without a change and returns focus
+ await btn.press('Enter');await expect(page.locator('#threadPop')).toBeVisible();await page.keyboard.press('Escape');
+ await expect(page.locator('#threadPop')).toBeHidden();await expect(btn).toBeFocused();await expect(page.locator('#thread')).toHaveValue('#123abc');
+ // Swatch names keep title and aria-label
+ await btn.press('Enter');await expect(page.locator('#threadPop .grid button[title="Red"]')).toHaveAttribute('aria-label','Red');
+ await page.keyboard.press('Escape');
+ expect(errors).toEqual([]);
+});
+
 test('Enter on the focused Thread button opens the colour picker without starting node edit',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));
  await page.goto('/');page.on('dialog',d=>d.accept());await newDesign(page);await page.locator('#rect').click();

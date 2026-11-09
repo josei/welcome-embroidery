@@ -16,10 +16,11 @@ export function ThreadSelect(
     <option value="">None</option>
     {options.map(hex => <option key={hex} value={hex}>{threadName(hex)}</option>)}
    </select>
-   <button type="button" className="thread-btn" aria-haspopup="dialog" disabled={disabled} aria-label={`${label}: ${name}`} onClick={e => {
+   <button type="button" className="thread-btn" aria-haspopup="dialog" disabled={disabled} aria-label={`${label}: ${name}`}
+    title={t("Change this object's thread colour")} onClick={e => {
     e.preventDefault();
     if (owner?.id === id) closeThreadPopover();
-    else openThreadPopover({id, value, onPick}, e.currentTarget.getBoundingClientRect());
+    else openThreadPopover({id, value, onPick}, e.currentTarget.getBoundingClientRect(), e.currentTarget);
    }}>
     <span className={value ? 'sw' : 'sw none'} style={value ? {background: value} : undefined} />
     <span className="nm">{name}</span>

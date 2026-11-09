@@ -36,7 +36,7 @@ export function ThreadPopover() {
   const onKey = (e: KeyboardEvent) => {
    if (e.key === 'Escape') {
     e.stopImmediatePropagation();
-    closeThreadPopover();
+    closeThreadPopover(true);
    }
   };
   document.addEventListener('pointerdown', onPointer, true);
@@ -50,7 +50,7 @@ export function ThreadPopover() {
   if (!owner) return;
   if (hex) remember(hex);
   const apply = owner.onPick;
-  closeThreadPopover();
+  closeThreadPopover(true);
   apply(hex);
  };
  const useTyped = () => {

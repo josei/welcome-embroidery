@@ -275,7 +275,7 @@ export const ES={
   'Sew earlier / later':'Bordar antes / después','Sew first / last':'Bordar primero / al final','Fit the hoop':'Ajustar el bastidor','Zoom in / out':
   'Acercar / alejar','This list':'Esta lista','Restore your last design?':'¿Restaurar tu último diseño?','Restore':'Restaurar','Start fresh':'Empezar de cero',
   '"{name}", {objects}, edited {m} min ago.':'«{name}», {objects}, editado hace {m} min.','about {t} to sew':'unos {t} de bordado','Recent':'Recientes',
-  'Use':'Usar','Custom colour':'Color personalizado','Hex colour':'Color hexadecimal','Choose a thread colour':'Elegir un color de hilo','White':'Blanco',
+  'Use':'Usar','Change this object\'s thread colour':'Cambiar el color de hilo de este objeto','Custom colour':'Color personalizado','Hex colour':'Color hexadecimal','Choose a thread colour':'Elegir un color de hilo','White':'Blanco',
   'Ivory':'Marfil','Cream':'Crema','Light grey':'Gris claro','Silver':'Plata','Grey':'Gris','Charcoal':'Carbón','Black':'Negro','Pale pink':'Rosa pálido',
   'Pink':'Rosa','Hot pink':'Fucsia','Red':'Rojo','Cherry':'Cereza','Burgundy':'Burdeos','Rust':'Óxido','Peach':'Melocotón','Orange':'Naranja','Gold':'Oro',
   'Yellow':'Amarillo','Lemon':'Limón','Mustard':'Mostaza','Tan':'Arena','Mint':'Menta','Lime':'Lima','Green':'Verde','Emerald':'Esmeralda','Olive':'Oliva',
