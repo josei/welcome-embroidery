@@ -1,4 +1,5 @@
 import {documentNow} from './documentState.js';
+import {editor} from './editorContext.js';
 import {selState} from './selectionState.js';
 import {setLayout} from './layoutState.js';
 import {angleLayout} from './angleLayout.js';
@@ -482,4 +483,6 @@ export function syncStitchPanel() {
 
   setStitchChoices({typeMixed});
   setStitchPanel(panel);
+  // The thread swatch button is outside React and reads the select after React commits the new value.
+  requestAnimationFrame(() => editor.syncThreads?.());
 }

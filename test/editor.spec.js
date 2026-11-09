@@ -736,6 +736,7 @@ test('mixed selection: type and thread say Mixed when objects differ, and a type
  await expect(page.locator('[role="radiogroup"][aria-label="Stitch type"] button[aria-checked="true"]')).toHaveCount(0);
  await expect(page.locator('#thread')).toHaveValue('');
  await expect(page.locator('#thread option[value=""]')).toHaveAttribute('disabled');
+ await expect(page.locator('#thread').locator('xpath=following-sibling::button[contains(@class,"thread-btn")]').locator('.nm')).toHaveText('Mixed');
  // A type click on the mixed selection changes only the last-clicked object (the path), not the fill.
  await checked('Running stitch').click();
  await rect.click();await expect(checked('Fill')).toHaveAttribute('aria-checked','true');await expect(page.locator('#typeMixedHint')).toHaveCount(0);
@@ -745,6 +746,7 @@ test('mixed selection: type and thread say Mixed when objects differ, and a type
  await path.click();await page.locator('#thread').selectOption('#d9897e');
  await rect.click();await path.click({modifiers:['Shift']});
  await expect(page.locator('#thread')).toHaveValue('#d9897e');
+ await expect(page.locator('#thread').locator('xpath=following-sibling::button[contains(@class,"thread-btn")]').locator('.nm')).toHaveText('Coral');
  await expect(page.locator('#typeMixedHint')).toBeVisible();
  expect(errors).toEqual([]);
 });

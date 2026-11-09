@@ -40,13 +40,16 @@ export function syncThreads() {
     const button = /** @type {HTMLButtonElement | null} */ (select.nextElementSibling);
     if (!button?.classList.contains('thread-btn')) continue;
     const value = select.value, swatch = /** @type {HTMLElement} */ (button.querySelector('.sw'));
+    // An empty value with a disabled "Mixed" option means the selected objects use different threads.
+    const mixed = !value && [...select.options].some(option => option.value === '' && option.disabled);
+    const label = mixed ? t('Mixed') : value ? threadName(value) : t('None');
     swatch.className = value ? 'sw' : 'sw none';
     swatch.style.background = value || '';
     const name = /** @type {HTMLElement} */ (button.querySelector('.nm'));
-    name.textContent = value ? threadName(value) : t('None');
+    name.textContent = label;
     button.disabled = select.disabled;
     button.title = t("Change this object's thread colour");
-    button.setAttribute('aria-label', (select.closest('label')?.firstChild?.textContent || '').trim() + ': ' + (value ? threadName(value) : t('None')));
+    button.setAttribute('aria-label', (select.closest('label')?.firstChild?.textContent || '').trim() + ': ' + label);
   }
 }
 
