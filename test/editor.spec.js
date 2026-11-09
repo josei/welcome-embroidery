@@ -4,6 +4,7 @@ import {pinnedMachineFixture,readMachineFixtures} from './fixture-archive.js';
 import {decodeEmbroidery} from '../src/readers.js';
 import {withPesMetadata} from './pes-with-metadata.js';
 import {initialDocument,importStitchLayer,applyOperations,compile,geometry} from '../src/engine.js';
+import {ES} from '../src/i18n.js';
 
 // New over a design with unsaved objects opens the in-app discard dialog. Scenarios that start over discard it; the tests that
 // check the dialog itself click #new directly.
@@ -3164,4 +3165,23 @@ test('Escape cancels an object or node drag without recording an undo entry',asy
  await expect(page.locator('.path-node.selected-node')).toHaveCount(1);
  await page.locator('#undo').click();await expect(page.locator('.object-row')).toHaveCount(rowsBeforeNodeDrag-1);
  expect(errors).toEqual([]);
+});
+
+// Every visible or hidden label in the editor, read as its own text: the direct text nodes of one element, joined.
+// A label that React splits into several text nodes (for example "Stitch length (" and "mm)") is one label here, so a
+// fragment that never matches its glossary key is caught as the English key it should have been.
+test('Spanish editor shows no English label from the EN table',async({page})=>{
+ await page.goto('/?lang=es');await expect(page.locator('#rect')).toBeVisible();
+ const english=Object.keys(ES).filter(k=>!k.includes('{')&&ES[k]!==k);
+ const leftovers=await page.evaluate(keys=>{
+  const set=new Set(keys),found=new Set(),norm=s=>s.replace(/\s+/g,' ').trim();
+  for(const el of document.body.querySelectorAll('*')){
+   if(['SCRIPT','STYLE','TEXTAREA','CODE'].includes(el.nodeName))continue;
+   const own=norm([...el.childNodes].filter(n=>n.nodeType===3).map(n=>n.nodeValue).join(''));
+   if(set.has(own))found.add(own);
+   for(const a of ['title','aria-label','data-tooltip','placeholder']){const v=norm(el.getAttribute(a)||'');if(set.has(v))found.add(v);}
+  }
+  return [...found].sort();
+ },english);
+ expect(leftovers).toEqual([]);
 });

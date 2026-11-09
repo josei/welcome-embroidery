@@ -35,14 +35,11 @@ export function StitchBlendRows() {
     stitchPanelActions.chooseBlendThread(e.target.value)}>{THREAD_OPTIONS.map(o =>
     <option key={o.value} value={o.value}>{o.label}</option>)}</select></label><div className="tool-grid" id="blendPaletteRow">{panel.blendPalette.map((value,
     k) =>
-    <label key={k}>Colour {k + 1}<select id={'blendPalette' + k} value={value} onChange={e =>
+    <label key={k}>{`Colour ${k + 1}`}<select id={'blendPalette' + k} value={value} onChange={e =>
     stitchPanelActions.chooseBlendPalette(k, e.target.value)}>{paletteOptions(value).map(o =>
     <option key={o.value} value={o.value}>{o.label}</option>)}</select></label>)}</div><div className="tool-grid" id="blendRange"
-      hidden={rows.blendRange}><label id="blendAngleRow">{"Direction ("}
-    {"°)"}<input id="blendAngle" {...angle} type="number" step="5" placeholder="across rows"
-      title="Angle of the blend; empty blends across the rows" /></label><label>{"From ("}
-    {"%)"}<input id="blendStart" {...start} type="number" min="0" max="100" step="5" /></label><label>{"To (%"}
-    {")"}<input id="blendEnd" {...end} type="number" min="0" max="100" step="5" /></label></div></div><label id="methodRow" hidden={rows.methodRow}>Fill
+      hidden={rows.blendRange}><label id="blendAngleRow">{"Direction (°)"}<input id="blendAngle" {...angle} type="number" step="5" placeholder="across rows"
+      title="Angle of the blend; empty blends across the rows" /></label><label>{"From (%)"}<input id="blendStart" {...start} type="number" min="0" max="100" step="5" /></label><label>{"To (%)"}<input id="blendEnd" {...end} type="number" min="0" max="100" step="5" /></label></div></div><label id="methodRow" hidden={rows.methodRow}>Fill
       pattern<IconSelect id="fillMethod" groupLabel="Fill pattern" value={choices.fillMethod} options={FILL_METHODS} onChoose={v =>
     stitchChoiceActions.choose('fillMethod', v)} /></label></>
  );

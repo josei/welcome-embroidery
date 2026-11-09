@@ -30,16 +30,12 @@ export function StitchPathRows() {
     e.target.checked)} title="Smooth curve: rounds the corners of the path" /></label><button id="continueDig" type="button"
       title="Continue digitizing this path">Continue digitizing</button></div><div id="maskRow" className="btn-row" hidden={rows.maskRow}><button
         type="button" id="selectMask" title="Select the shape that clips this object so it can be moved or edited" onClick={(
-    ) => selectClipMask()}>Select mask</button></div><div id="photoBox" hidden={rows.photoBox}><label>{"Photo row spacing ("}
-    {"mm)"}<input id="photoSpacing" {...photoSpacing} type="number" min="0.3" max="2" step="0.1" /></label><label>Photo contrast<input id="photoContrast"
+    ) => selectClipMask()}>Select mask</button></div><div id="photoBox" hidden={rows.photoBox}><label>{"Photo row spacing (mm)"}<input id="photoSpacing" {...photoSpacing} type="number" min="0.3" max="2" step="0.1" /></label><label>Photo contrast<input id="photoContrast"
       {...photoContrast} type="number" min="0.4" max="3" step="0.1" /></label><label>Invert picture <input id="photoInvert" type="checkbox"
         checked={photo.invert} onChange={e =>
-    photoRowsActions.choose('invert', e.target.checked)} /></label><label>{"Second thread ("}
-    {"light tones)"}<ThreadSelect id="photoThread2" label="Second thread (light tones)" value={photo.thread2} onPick={hex =>
-    photoRowsActions.pickThread('thread2', hex)} /></label><label id="photoThread3Row" hidden={rows.photoThread3Row}>{"Third thread ("}
-    {"mid-tones)"}<ThreadSelect id="photoThread3" label="Third thread (mid-tones)" value={photo.thread3} onPick={hex =>
-    photoRowsActions.pickThread('thread3', hex)} /></label><label id="photoThread4Row" hidden={rows.photoThread4Row}>{"Fourth thread ("}
-    {"mid-dark)"}<ThreadSelect id="photoThread4" label="Fourth thread (mid-dark)" value={photo.thread4} onPick={hex =>
+    photoRowsActions.choose('invert', e.target.checked)} /></label><label>{"Second thread (light tones)"}<ThreadSelect id="photoThread2" label="Second thread (light tones)" value={photo.thread2} onPick={hex =>
+    photoRowsActions.pickThread('thread2', hex)} /></label><label id="photoThread3Row" hidden={rows.photoThread3Row}>{"Third thread (mid-tones)"}<ThreadSelect id="photoThread3" label="Third thread (mid-tones)" value={photo.thread3} onPick={hex =>
+    photoRowsActions.pickThread('thread3', hex)} /></label><label id="photoThread4Row" hidden={rows.photoThread4Row}>{"Fourth thread (mid-dark)"}<ThreadSelect id="photoThread4" label="Fourth thread (mid-dark)" value={photo.thread4} onPick={hex =>
     photoRowsActions.pickThread('thread4',
     hex)} /></label></div><div id="pinRow" className="btn-row" hidden={rows.pinRow}><button type="button" id="pinStart" className={pinClass(pin,
     'startAt')} onClick={() =>
@@ -54,7 +50,6 @@ export function StitchPathRows() {
       type="button" id="pinClear" disabled={!canClear} onClick={(
     ) =>
     pinClearActions.clear(
-    )} title="Remove the start and end points">Clear</button></div><label id="fillReset" hidden={rows.fillReset}>{"This object overrides row spacing/"}
-    {"angle"}<button id="fillResetBtn" type="button" onClick={() => stitchPanelActions.resetFill()}>Use defaults</button></label></>
+    )} title="Remove the start and end points">Clear</button></div><label id="fillReset" hidden={rows.fillReset}>{"This object overrides row spacing/angle"}<button id="fillResetBtn" type="button" onClick={() => stitchPanelActions.resetFill()}>Use defaults</button></label></>
  );
 }

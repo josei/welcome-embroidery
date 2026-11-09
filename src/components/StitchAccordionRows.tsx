@@ -12,11 +12,9 @@ export function StitchAccordionRows() {
  const accordionEnd = useDraftInput(acc.accordionEnd, text => accordionRowsActions.commit('accordionEnd', text));
  const crossSize = useDraftInput(acc.crossSize, text => accordionRowsActions.commit('crossSize', text));
  return (
-  <><label id="accordionStartRow" hidden={rows.accordionStartRow}>{"Accordion start ("}
-    {"mm)"}<input id="accordionStart" {...accordionStart} type="number" min="0.25" max="1.2" step="0.05" placeholder="off"
+  <><label id="accordionStartRow" hidden={rows.accordionStartRow}>{"Accordion start (mm)"}<input id="accordionStart" {...accordionStart} type="number" min="0.25" max="1.2" step="0.05" placeholder="off"
       title="Row spacing at the top of the fill, changing linearly to the end spacing. Set both or neither." /></label><label id="accordionEndRow"
-        hidden={rows.accordionEndRow}>{"Accordion end ("}
-    {"mm)"}<input id="accordionEnd" {...accordionEnd} type="number" min="0.25" max="1.2" step="0.05" placeholder="off"
+        hidden={rows.accordionEndRow}>{"Accordion end (mm)"}<input id="accordionEnd" {...accordionEnd} type="number" min="0.25" max="1.2" step="0.05" placeholder="off"
       title="Row spacing at the bottom of the fill (rows pattern only)." /></label><label id="accordionEaseRow" hidden={rows.accordionEaseRow}>Accordion
         curve<select id="accordionEase" value={acc.accordionEase} onChange={e =>
     accordionRowsActions.choose('accordionEase',
@@ -27,7 +25,6 @@ export function StitchAccordionRows() {
             id="guideDraw" className={guide.armed ?
     'armed' : undefined} title="Click points on the canvas for the line the rows follow, then press this button again">{guide.label}</button><button
       type="button" id="guideClear" title="Remove the guide line" disabled={guide.clearDisabled}>Clear guide</button></div><label id="crossRow"
-        hidden={rows.crossRow}>{"Cross size ("}
-    {"mm)"}<input id="crossSize" {...crossSize} type="number" min="1" max="8" step="0.5" /></label></>
+        hidden={rows.crossRow}>{"Cross size (mm)"}<input id="crossSize" {...crossSize} type="number" min="1" max="8" step="0.5" /></label></>
  );
 }
