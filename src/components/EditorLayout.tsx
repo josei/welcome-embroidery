@@ -1,4 +1,5 @@
 import {layoutState} from '../layoutState.js';
+import {selectionLabelsState} from '../selectionLabelsState.js';
 import {t} from '../i18n.js';
 import {shortcutLabel} from '../shortcutLabels.js';
 import {CanvasTextEditor} from './CanvasTextEditor';
@@ -56,6 +57,7 @@ const ungroupLabel = t('Ungroup ({shortcut})', {shortcut: shortcutLabel([{mod: t
 // replaced, because the keyboard shortcuts and tests address them.
 export function EditorLayout() {
  const layout = useSyncExternalStore(layoutState.subscribe, layoutState.get);
+ const selectionLabels = useSyncExternalStore(selectionLabelsState.subscribe, selectionLabelsState.get);
  const view = useSyncExternalStore(viewMode.subscribe, viewMode.get);
  const snapping = useSyncExternalStore(gridSnapState.subscribe, gridSnapState.get);
  const editing = useSyncExternalStore(editModeState.subscribe, editModeState.get);
@@ -234,14 +236,15 @@ export function EditorLayout() {
       <aside className={"panel"}>
         <SelectionHeading />
         <TipCard />
-        <details id={"tipsSettings"} className={"tips-settings"}>
-          <summary>
-            {"Sewing tips to show"}
-          </summary>
-          <div id={"tipsList"} className={"tips-list"}>
-          </div>
-        </details>
         <SelectionHint />
+        {selectionLabels.hintHidden ? null : (
+          <div className={"scope-document"}>
+            <h3 className={"scope-heading"}>
+              {"Document"}
+            </h3>
+            <DocumentSettings />
+          </div>
+        )}
         <SourceInfo />
         <TransformPanel />
         <section id={"secStitch"} data-sec={""} hidden={layout.secStitch}>
@@ -266,7 +269,7 @@ export function EditorLayout() {
           <h3 className={"scope-heading"}>
             {"Document"}
           </h3>
-          <DocumentSettings />
+          {selectionLabels.hintHidden ? <DocumentSettings /> : null}
           <DesignSummary />
           <FabricSection />
         </div>

@@ -476,12 +476,21 @@ test('rotation pivot: Set pivot then click the canvas, and the rotation field tu
 test('sewing tips to show: unticking a category hides its tips from the panel and the count, and the choice is saved in this browser',async({page})=>{
  await page.goto('/');page.on('dialog',d=>d.accept());await newDesign(page);await page.locator('#rect').click();await page.locator('#rect').click();
  await expect(page.locator('#sewTips')).toContainText('is a duplicate');await expect(page.locator('#issuesBtn')).toContainText('1 sewing tip');
- await page.locator('#tipsSettings summary').click();const dup=page.locator('#tipsList label',{hasText:'Duplicate objects'}).locator('input');await expect(dup).toBeChecked();
+ await page.locator('#settingsBtn').click();const dup=page.locator('#tipsList label',{hasText:'Duplicate objects'}).locator('input');await expect(dup).toBeChecked();
  await dup.uncheck();
  await expect(page.locator('#sewTips')).toBeHidden();await expect(page.locator('#issuesBtn')).toBeHidden();
  expect(await page.evaluate(()=>localStorage.getItem('welcome.hiddenTips'))).toBe('["duplicate"]');
  await dup.check();await expect(page.locator('#sewTips')).toContainText('is a duplicate');await expect(page.locator('#issuesBtn')).toContainText('1 sewing tip');
  expect(await page.evaluate(()=>localStorage.getItem('welcome.hiddenTips'))).toBe('[]');
+});
+
+test('inspector with nothing selected has no sewing tips settings and starts with the document stitch settings',async({page})=>{
+ await page.goto('/');page.on('dialog',d=>d.accept());await page.locator('#new').click();
+ await expect(page.locator('#selHint')).toBeVisible();await expect(page.locator('#tipsSettings')).toHaveCount(0);
+expect(await page.locator('#selHint').evaluate(hint=>{const panel=hint.closest('aside');
+  const next=[...panel.querySelectorAll('section,details')].find(el=>!el.closest('[hidden]')&&el.getClientRects().length&&
+   (hint.compareDocumentPosition(el)&Node.DOCUMENT_POSITION_FOLLOWING));
+  return next?.id;})).toBe('secDoc');
 });
 
 test('a PES file with header metadata names its layer after the file and shows the author in the info panel',async({page})=>{

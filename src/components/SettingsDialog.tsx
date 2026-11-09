@@ -23,6 +23,10 @@ export function SettingsDialog() {
       <button type="button" id="langEs" aria-pressed={lang === 'es'} onClick={() => setLanguage('es')}>Español</button>
      </div>
     </fieldset>
+    <fieldset className="settings-group">
+     <legend>{t('Sewing tips to show')}</legend>
+     <div id="tipsList" className="tips-list"></div>
+    </fieldset>
     <fieldset className="settings-group" hidden={rows.copyEndpoint}>
      <legend>{t('AI agent')}</legend>
      <button type="button" id="copyEndpoint" className={[agent.waiting || agent.active ? 'agent-on' : '', agent.active ? 'agent-active' : ''].filter(

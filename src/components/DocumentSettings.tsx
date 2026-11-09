@@ -1,4 +1,4 @@
-import {useSyncExternalStore} from 'react';
+import {useState, useSyncExternalStore} from 'react';
 import {documentState, settingsActions} from '../documentState.js';
 import {useDraftInput} from './useDraftInput';
 import {FABRIC_PROFILES} from '../engine.js';
@@ -28,13 +28,16 @@ export function FabricSection() {
 }
 
 // The document stitch settings panel, rendered by React. Ids match the markup it replaced, because app.js wires them by id.
+// The panel is remounted when the selection changes (it sits in a different place in the inspector then), so its open state is kept here.
+let documentSettingsOpen = false;
 export function DocumentSettings() {
  const {doc} = useSyncExternalStore(documentState.subscribe, documentState.get);
+ const [open, setOpen] = useState(documentSettingsOpen);
  const settings = doc.settings ?? {};
  const trim = useDraftInput(String(settings.trimMm ?? ''), text => settingsActions.set({trimMm: text === '' ? 5 : Number(text)}));
  const comp = useDraftInput(String(settings.compensation ?? ''), text => settingsActions.set({compensation: Number(text)}));
  return (
-  <details id="secDoc" className="doc-settings"><summary>Document stitch settings</summary><label>Tie-in /
+  <details id="secDoc" className="doc-settings" open={open} onToggle={e => {documentSettingsOpen = e.currentTarget.open; setOpen(e.currentTarget.open);}}><summary>Document stitch settings</summary><label>Tie-in /
     tie-off <input id="ties" type="checkbox" checked={Boolean(settings.ties)} onChange={e =>
     settingsActions.set({ties: e.target.checked})} /></label><label>Trim long jumps <input id="trims" type="checkbox" checked={Boolean(
     settings.trims)} onChange={e => settingsActions.set({trims: e.target.checked})} /></label><label>{"Trim jumps from (mm)"}<input id="trimMm" type="number" min="2" max="30" step="0.5" placeholder="5"
