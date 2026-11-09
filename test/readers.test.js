@@ -429,3 +429,24 @@ test('COL and EDR readers reject malformed colour lists',()=>{
   assert.throws(()=>decodeEmbroidery(enc('1\r\n1,1,2,3\r\n'),'col'),/out of order/);
   assert.throws(()=>decodeEmbroidery(Uint8Array.of(1,2,3),'edr'),/multiple of four/);
 });
+
+// pyembroidery-written U01 (test/fixtures/pyembroidery-random1.u01). No pinned digests yet: the header is the independent check. Its record count,
+// bounds and last stitch must agree with the decoded records; the writer truncates some header values, so those may differ by one 0.1 mm unit.
+test('pyembroidery U01 fixture decodes to the header record count, bounds and last stitch',()=>{
+  const u01=new Uint8Array(readFileSync(new URL('./fixtures/pyembroidery-random1.u01', import.meta.url)));
+  const hdr=new DataView(u01.buffer,u01.byteOffset,u01.byteLength);
+  const decoded=decodeEmbroidery(u01,'u01');
+  const records=(u01.length-0x100-3)/3;
+  // This writer stores records + 2 (the end code counted with one more). src/encoders/u01.js stores records + 1, a header difference that does not change any stitch point.
+  assert.equal(hdr.getInt32(0x8c,true),records+2,'header record count as pyembroidery writes it');
+  assert.deepEqual([...u01.subarray(u01.length-3)],[0xF8,0,0],'file ends with the U01 end code');
+  const [minX,negMaxY,maxX,negMinY]=[0,2,4,6].map(o=>hdr.getInt16(0x80+o,true));
+  const near=(a,b)=>Math.abs(a-b)<=1;
+  const b=decoded.bounds.map(v=>Math.round(v*10));
+  assert.ok(near(b[0],minX)&&near(b[1],-negMinY)&&near(b[2],maxX)&&near(b[3],-negMaxY),`bounds ${b} agree with header`);
+  const last=decoded.stitches.filter(s=>s.cmd==='stitch').at(-1);
+  assert.ok(near(Math.round(last.x*10),hdr.getInt16(0x90,true))&&near(Math.round(last.y*10),hdr.getInt16(0x92,true)*-1),'last stitch agrees with header');
+  const counts={};for(const s of decoded.stitches)counts[s.cmd]=(counts[s.cmd]||0)+1;
+  assert.deepEqual(counts,{stitch:30,jump:97,color:10,end:1});
+  assert.equal(decoded.threads.length,11,'one placeholder colour per block');
+});

@@ -1,6 +1,6 @@
 // @ts-check
-// Bounded browser-side stitch readers for 20 machine formats: JEF, VP3, DST, SEW, PEC, PES,
-// EXP, HUS, XXX, DSB, DSZ, TAP, TBF, PCS, SHV, STX, BRO, EMD, KSM and 10O, plus the COL and EDR
+// Bounded browser-side stitch readers for 21 machine formats: JEF, VP3, DST, SEW, PEC, PES,
+// EXP, HUS, XXX, DSB, DSZ, TAP, TBF, PCS, SHV, STX, BRO, EMD, KSM, 10O and U01, plus the COL and EDR
 // thread colour lists (no stitches; they decode to threads only).
 // Each format family lives in its own typed module under ./readers/, sharing byte plumbing and
 // colour tables. This file is the public entry point: the JSDoc types, the charts the encoders
@@ -32,6 +32,7 @@ import {readPcs} from './readers/pcs.js';
 import {readShv} from './readers/shv.js';
 import {readBro, readEmd} from './readers/broEmd.js';
 import {readKsm, readTenO} from './readers/ksm10o.js';
+import {readU01} from './readers/u01.js';
 
 export {PEC_CHART} from './readers/pec.js';
 export {SEW_CHART} from './readers/sew.js';
@@ -60,9 +61,10 @@ export function decodeEmbroidery(input, format) {
   if(format==='emd') return readEmd(bytes);
   if(format==='ksm') return readKsm(bytes);
   if(format==='10o') return readTenO(bytes);
+  if(format==='u01') return readU01(bytes);
   if(format==='col') return readCol(bytes);
   if(format==='edr') return readEdr(bytes);
-  fail('format must be jef, vp3, dst, sew, pec, pes, exp, hus, xxx, dsb, dsz, tap, tbf, pcs, shv, stx, bro, emd, ksm, 10o, col or edr');
+  fail('format must be jef, vp3, dst, sew, pec, pes, exp, hus, xxx, dsb, dsz, tap, tbf, pcs, shv, stx, bro, emd, ksm, 10o, u01, col or edr');
 }
 
 /** @param {number} r @param {number} g @param {number} b @returns {string} */

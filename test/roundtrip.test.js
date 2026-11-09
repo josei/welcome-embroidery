@@ -12,8 +12,7 @@ import {threadPlan} from '../src/sewingTime.js';
 const RED='#527461', ROSE='#d9897e', GOLD='#c9a227';
 const TOL=0.1+1e-6;
 
-// Formats the editor exports. U01 has no reader yet (#299). COL and EDR are colour lists, checked
-// separately below against the plan's colours.
+// Formats the editor exports. COL and EDR are colour lists, checked separately below against the plan's colours.
 // Each entry names the reader used for the decode step.
 const FORMATS=[
   {format:'jef',reader:'jef'},
@@ -26,6 +25,7 @@ const FORMATS=[
   {format:'sew',reader:'sew'},
   {format:'xxx',reader:'xxx'},
   {format:'tbf',reader:'tbf'},
+  {format:'u01',reader:'u01'},
 ];
 
 // Known deviations, tracked by follow-up issues. These formats stay in the suite as todo tests:
@@ -36,6 +36,7 @@ const KNOWN_FAILING={
   sew:'#300: SEW drops zero-length stitches on write',
   xxx:'#300: XXX drops zero-length stitches on write',
   tbf:'#300: TBF drops zero-length stitches on write',
+  u01:'#310: U01 drops zero-length stitches on write (the same encoder skip as EXP, SEW, XXX and TBF)',
 };
 
 const base=()=>{const d=initialDocument();d.objects=[];return d;};
