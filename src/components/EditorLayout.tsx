@@ -204,7 +204,7 @@ export function EditorLayout() {
             </ActionButton>
             <PathNodeButtons />
           </div>
-          <svg id={"art"} viewBox={"-60 -60 120 120"} {...referenceCanvasHandlers}>
+          <svg id={"art"} viewBox={"-60 -60 120 120"} tabIndex={0} role={"application"} aria-label={"Design canvas"} {...referenceCanvasHandlers}>
             <defs>
               <pattern id={"linen"} width={"2.6"} height={"2.6"} patternUnits={"userSpaceOnUse"}>
                 <path d={"M0 0H2.6M0 0V2.6"} stroke={"#a9a397"} strokeOpacity={".11"} strokeWidth={".18"} />

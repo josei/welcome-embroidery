@@ -3471,3 +3471,21 @@ test('Escape or Enter closing the lettering box returns focus to Add lettering, 
 });
 
 test('an open lettering box shows a caption saying Enter or a click outside saves; it is gone after commit',async({page})=>{page.on('dialog',d=>d.accept());const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');await newDesign(page);await page.locator('#letter').click();await expect(page.locator('#canvasText')).toBeFocused();await expect(page.locator('#canvasText')).toHaveAttribute('aria-label','Edit lettering text');const hint=page.locator('#canvasTextHint');await expect(hint).toBeVisible();await expect(hint).toContainText('Enter or clicking outside saves the text. Escape cancels.');await expect(page.locator('#canvasText')).toHaveAttribute('aria-describedby','canvasTextHint');const tb=await page.locator('.canvas .floating').boundingBox();const hb=await hint.boundingBox();expect(hb.y).toBeGreaterThan(tb.y+tb.height);await page.keyboard.type('HI');await page.keyboard.press('Enter');await expect(page.locator('#canvasText')).toHaveCount(0);await expect(hint).toHaveCount(0);await expect(page.locator('.object-row').first()).toContainText('Lettering: HI');expect(errors).toEqual([]);});
+
+test('design canvas is a Tab stop: an object selected by keyboard focus moves with arrow keys, Escape deselects',async({page})=>{
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));page.on('dialog',d=>d.accept());
+ await page.goto('/');await newDesign(page);
+ await page.locator('#rect').click();await expect(page.locator('.object-row.selected')).toHaveCount(1);
+ const pos=async()=>({x:Number(await page.locator('#posX').inputValue()),y:Number(await page.locator('#posY').inputValue())});
+ // Tab from the page reaches the design canvas, which has a role and a name
+ let reached=false;for(let i=0;i<150&&!reached;i++){await page.keyboard.press('Tab');reached=await page.evaluate(()=>document.activeElement?.id==='art');}
+ expect(reached).toBe(true);
+ await expect(page.locator('#art')).toHaveAttribute('role','application');await expect(page.locator('#art')).toHaveAttribute('aria-label','Design canvas');
+ // arrow keys move the selected object by 1 mm; Shift+arrow by the existing 5 mm nudge step
+ const p0=await pos();
+ await page.keyboard.press('ArrowRight');const p1=await pos();expect(p1.x).toBeCloseTo(p0.x+1,1);expect(p1.y).toBeCloseTo(p0.y,1);
+ await page.keyboard.press('Shift+ArrowDown');const p2=await pos();expect(p2.x).toBeCloseTo(p1.x,1);expect(p2.y).toBeCloseTo(p1.y+5,1);
+ // Escape deselects
+ await page.keyboard.press('Escape');await expect(page.locator('.object-row.selected')).toHaveCount(0);
+ expect(errors).toEqual([]);
+});
