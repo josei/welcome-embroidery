@@ -62,7 +62,7 @@ export function exportFileName(format: string): string {
 export const EXPORT_TIMEOUT_MS = 10_000;
 
 /**
- * Exports the document in the chosen format, from the Compile & download button. The dialog stays open on any failure
+ * Exports the document in the chosen format, from the dialog's Download button. The dialog stays open on any failure
  * and says why in its own text (the toast sits beneath the modal dialog, so it is not the place for it). A success closes
  * the dialog. Every attempt ends, with a file or a named error, within EXPORT_TIMEOUT_MS.
  */

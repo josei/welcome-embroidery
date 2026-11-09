@@ -23,6 +23,12 @@ export const EXPORT_FORMATS: {value: string; label: string}[] = [
 
 export const exportFormatState = createStore<{format: string}>({format: 'jef'});
 
+/** The kind of file a format makes, as the export button names it: "JEF" in "Download JEF file". Print and appliqué templates are SVG files. */
+export function exportKind(format: string): string {
+  if (format === 'print' || format === 'applique-print') return 'SVG';
+  return (format === 'pes6' ? 'pes' : format).toUpperCase();
+}
+
 /** Chooses the export format, from the header or the export dialog. */
 export function setExportFormat(format: string) {
   exportFormatState.set({format});

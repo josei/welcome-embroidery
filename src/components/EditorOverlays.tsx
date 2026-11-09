@@ -8,7 +8,8 @@ import {SaveAsDialog} from './SaveAsDialog';
 import {TraceDialog} from './TraceDialog';
 import {agentLinkState} from '../agentLinkState.js';
 import {agentDialogState, copyAgentLink, revokeAgentLink, setAgentDialogOpen} from '../agentDialog.js';
-import {EXPORT_FORMATS, exportFormatState, setExportFormat} from '../exportFormatState.js';
+import {EXPORT_FORMATS, exportFormatState, exportKind, setExportFormat} from '../exportFormatState.js';
+import {t} from '../i18n.js';
 import {exportDialogState, setExportDialog} from '../exportDialogState.js';
 import {exportCurrent, exportFileName, MACHINE_FORMATS} from '../exportCommands.js';
 import {documentState} from '../documentState.js';
@@ -136,11 +137,17 @@ export function EditorOverlays() {
     <dialog id={"exportDialog"} ref={exportElement} onClose={() => setExportDialog({open: false})}>
       <form method={"dialog"}>
         <h2>
-          {"Export machine file"}
+          {t('Download {fmt} file', {fmt: exportKind(exportFormat.format)})}
         </h2>
+        <label htmlFor={"format"}>
+          {t("File format")}
+        </label>
         <select id={"format"} value={exportFormat.format} onChange={e => setExportFormat(e.target.value)}>
           {EXPORT_FORMATS.map(f => <option key={f.value} value={f.value}>{f.label}</option>)}
         </select>
+        <p id={"exportHint"}>
+          {"Check hoop and thread choices for your machine and materials."}
+        </p>
         <p id={"exportFile"}>
           {"Output file: "}
           <code id={"exportFileName"}>
@@ -150,29 +157,33 @@ export function EditorOverlays() {
         <p id={"exportNotice"}>
           {"Exporting does not save your project. Use Save to keep it as a .welcome file."}
         </p>
-        <label id={"worksheetRow"} className={"check-row"} hidden={!MACHINE_FORMATS.includes(exportFormat.format)}>
-          <input
-            type={"checkbox"}
-            id={"withWorksheet"}
-            checked={exportDialog.withWorksheet}
-            onChange={e => setExportDialog({withWorksheet: e.target.checked})}
-          />
-          {" Also download the sewing worksheet"}
-          {" "}
-          <select
-            id={"withWorksheetFormat"}
-            aria-label={"Worksheet format for the download"}
-            value={exportDialog.worksheetFormat}
-            onChange={e => setExportDialog({worksheetFormat: e.target.value === 'svg' ? 'svg' : 'text'})}
-          >
-            <option value={"text"}>
-              {"Text (.txt)"}
-            </option>
-            <option value={"svg"}>
-              {"SVG (printable)"}
-            </option>
-          </select>
-        </label>
+        <div id={"worksheetRow"} className={"check-row"} hidden={!MACHINE_FORMATS.includes(exportFormat.format)}>
+          <label>
+            <input
+              type={"checkbox"}
+              id={"withWorksheet"}
+              checked={exportDialog.withWorksheet}
+              onChange={e => setExportDialog({withWorksheet: e.target.checked})}
+            />
+            {" Also download the sewing worksheet"}
+          </label>
+          <label>
+            {t("Worksheet format")}
+            {" "}
+            <select
+              id={"withWorksheetFormat"}
+              value={exportDialog.worksheetFormat}
+              onChange={e => setExportDialog({worksheetFormat: e.target.value === 'svg' ? 'svg' : 'text'})}
+            >
+              <option value={"text"}>
+                {"Text (.txt)"}
+              </option>
+              <option value={"svg"}>
+                {"SVG (printable)"}
+              </option>
+            </select>
+          </label>
+        </div>
         {exportProblem ? (
           <p id={"exportError"} role={"alert"} className={"export-error"}>
             {exportProblem}
@@ -184,14 +195,11 @@ export function EditorOverlays() {
           aria-busy={exportDialog.busy}
           onClick={e => { e.preventDefault(); void exportCurrent(); }}
         >
-          {exportDialog.busy ? "Compiling…" : "Compile & download"}
+          {exportDialog.busy ? t("Downloading…") : t('Download {fmt} file', {fmt: exportKind(exportFormat.format)})}
         </button>
         <button>
           {"Cancel"}
         </button>
-        <p>
-          {"Check hoop and thread choices for your machine and materials."}
-        </p>
       </form>
     </dialog>
     <MessagesDialog />
