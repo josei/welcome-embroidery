@@ -158,6 +158,7 @@ export const ES={
 'Lettering':'Texto bordado','Offset along path (mm)':'Desplazamiento a lo largo del trazado (mm)','Font':'Fuente','Embroidery font':'Fuente de bordado',
   'Néon blinking (centerline)':'Néon blinking (línea central)','Text':'Texto','Lettering text':'Texto del bordado','Edit lettering text':
   'Editar texto del bordado',
+'Enter or clicking outside saves the text. Escape cancels.':'Enter o clic fuera guarda el texto. Escape cancela.',
 'Font size (mm)':'Tamaño de fuente (mm)','Text style':'Estilo de texto','Bold (adds weight to fills and satin columns)':
   'Negrita (añade grosor a rellenos y columnas de satén)','Bold':'Negrita','Italic (slant)':'Cursiva (inclinación)','Italic':'Cursiva',
 'Letter spacing (mm)':'Espaciado de letras (mm)','Word spacing (mm)':'Espaciado de palabras (mm)','Line height (×)':'Interlineado (×)','Bold (mm)':

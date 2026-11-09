@@ -2,6 +2,7 @@ import {useEffect, useRef, useSyncExternalStore} from 'react';
 import type {FormEvent, KeyboardEvent} from 'react';
 import {interactionState} from '../interactionState.js';
 import {finishCanvasText, liveCanvasText} from '../canvasText.js';
+import {t} from '../i18n.js';
 
 // The lettering text box over the canvas. interactionState.canvasText says which object is being edited and where its
 // screen rectangle is; typing updates the object's text and width, Enter commits as one undo step, Shift+Enter adds a
@@ -36,17 +37,25 @@ export function CanvasTextEditor() {
       document.getElementById('letter')?.focus();
     }
   };
+  // The caption sits at the bottom of the canvas, away from the floating toolbar at the top, and says what each key and a
+  // click outside do while the box is open. It is described by the box, so screen readers announce it too.
   return (
-    <textarea
-      id="canvasText"
-      ref={box}
-      defaultValue={canvasText.original}
-      maxLength={canvasText.maxLength}
-      aria-label="Edit lettering text"
-      style={{left: canvasText.left, top: canvasText.top, width: canvasText.width, height: canvasText.height}}
-      onInput={input}
-      onKeyDown={keyDown}
-      onBlur={e => finish(true, e.currentTarget.value)}
-    />
+    <>
+      <textarea
+        id="canvasText"
+        ref={box}
+        defaultValue={canvasText.original}
+        maxLength={canvasText.maxLength}
+        aria-label="Edit lettering text"
+        aria-describedby="canvasTextHint"
+        style={{left: canvasText.left, top: canvasText.top, width: canvasText.width, height: canvasText.height}}
+        onInput={input}
+        onKeyDown={keyDown}
+        onBlur={e => finish(true, e.currentTarget.value)}
+      />
+      <p id="canvasTextHint" className="canvas-hint canvas-text-hint">
+        {t('Enter or clicking outside saves the text. Escape cancels.')}
+      </p>
+    </>
   );
 }
