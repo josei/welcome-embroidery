@@ -34,9 +34,6 @@ const KNOWN_FAILING={
   sew:'#300: SEW drops zero-length stitches on write',
   xxx:'#300: XXX drops zero-length stitches on write',
   tbf:'#300: TBF drops zero-length stitches on write',
-  pec:'#298: PEC reads back an extra zero-length stitch at each colour change',
-  pes:'#298: PES reads back an extra zero-length stitch at each colour change',
-  pes6:'#298: PES6 reads back an extra zero-length stitch at each colour change',
 };
 
 const base=()=>{const d=initialDocument();d.objects=[];return d;};
