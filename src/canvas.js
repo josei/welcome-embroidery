@@ -268,7 +268,15 @@ export function createCanvas(/** @type {any} */ api){
   const deg=(/** @type {any} */ r)=>r*180/Math.PI;
 
   const touches=new Map();
-  function cancelState(){if(!state)return;restore(state.els||[]);overlay.removeAttribute('transform');state=null;smartLines=[];panningState.set(false);
+  let previewFrame=0;
+  /** @type {any} */ let previewPending=null;
+  /** Shows the moving selection's X/Y in the transform panel, at most once per animation frame. */
+  function previewMove(/** @type {number[]} */ ids,/** @type {number} */ dx,/** @type {number} */ dy){
+    previewPending=[ids,dx,dy];
+    if(!previewFrame)previewFrame=requestAnimationFrame(()=>{previewFrame=0;const [i,x,y]=previewPending;previewPending=null;api.previewMove?.(i,x,y);});
+  }
+  function cancelPreview(){if(previewFrame)cancelAnimationFrame(previewFrame);previewFrame=0;previewPending=null;}
+  function cancelState(){if(!state)return;restore(state.els||[]);if(state.type==='move'){cancelPreview();api.previewMove?.(state.ids,0,0);}overlay.removeAttribute('transform');state=null;smartLines=[];panningState.set(false);
     deletingGuideState.set(false);refresh();}
   function pinchState(){const [a,b]=touches.values(),r=container.getBoundingClientRect(),{w,h}=size(),mx=(a.x+b.x)/2-r.left,my=(a.y+b.y)/2-r.top;
     return {type:'pinch',dist:Math.hypot(a.x-b.x,a.y-b.y)||1,s0:vp.s,wx:vp.cx+(mx-w/2)/vp.s,wy:vp.cy+(my-h/2)/vp.s};}
@@ -302,16 +310,16 @@ export function createCanvas(/** @type {any} */ api){
     if(o){e.preventDefault();startMove(e,o,p);}else startMarquee(e,p);
   });
   function startMove(/** @type {any} */ e,/** @type {any} */ o,/** @type {any} */ p){
-    const now=performance.now();
-    if(lastClick&&now-lastClick.t<380&&lastClick.id===o.id&&Math.hypot(p[0]-lastClick.p[0],p[1]-lastClick.p[1])*vp.s<8){lastClick=null;api.dblclick(o,p);
-      return;}
-    lastClick={t:now,id:o.id,p};
+    // A second press on the same object within the double-click window is a double-click only if it does not drag: the
+    // decision waits for pointer-up (see the move branch there), so a quick press-and-drag still moves the object.
+    const now=performance.now(),dbl=Boolean(lastClick&&now-lastClick.t<380&&lastClick.id===o.id&&Math.hypot(p[0]-lastClick.p[0],p[1]-lastClick.p[1])*vp.s<8);
+    lastClick=dbl?null:{t:now,id:o.id,p};
     const group=tools.withGroup(o.id),cur=new Set(api.ids());
     if(e.shiftKey){const next=new Set(cur);if([...group].every(id=>cur.has(id))&&cur.size>group.size)for(const id of group)next.delete(id);
       else for(const id of group)next.add(id);api.select([...next],[...next].includes(o.id)?o.id:[...next].at(-1));return;}
     const wasSelected=cur.has(o.id);if(!wasSelected)api.select([...group],o.id);
     const ids=api.ids(),f=/** @type {any} */(frame()),box=f?.oriented?objectBounds(api.doc().objects.find((/** @type {any} */ v)=>v.id===ids[0])):f.b;
-    state={type:'move',ids,start:p,box,els:stash(shapeEls(ids)),moved:false,clicked:o,wasSelected,pid:e.pointerId,delta:[0,0]};
+    state={type:'move',ids,start:p,box,els:stash(shapeEls(ids)),moved:false,clicked:o,wasSelected,pid:e.pointerId,delta:[0,0],dbl};
       svg.setPointerCapture?.(e.pointerId);
   }
   function startMarquee(/** @type {any} */ e,/** @type {any} */ p){state=
@@ -384,7 +392,7 @@ export function createCanvas(/** @type {any} */ api){
       dx+=sx;
       dy+=sy;
       }
-      state.delta=[dx,dy];setT(state.els,`translate(${dx} ${dy})`);overlay.setAttribute('transform',`translate(${dx} ${dy})`);
+      state.delta=[dx,dy];previewMove(state.ids,dx,dy);setT(state.els,`translate(${dx} ${dy})`);overlay.setAttribute('transform',`translate(${dx} ${dy})`);
         previewMask(state.els,`translate(${dx} ${dy})`);drawSmart();return;}
     if(state.type==='marquee'||state.type==='nodemarquee'){const [x0,y0]=state.start,
       r=[Math.min(x0,q[0]),Math.min(y0,q[1]),Math.max(x0,q[0]),Math.max(y0,q[1])];state.rect=r;
@@ -426,7 +434,9 @@ export function createCanvas(/** @type {any} */ api){
     else api.commit([{op:'move_guide',index:s.index,pos:s.pos}]);
     return;
     }
-    if(s.type==='move'){restore(s.els);if(s.moved&&Math.hypot(...s.delta)>.02)api.commit([{op:'translate',ids:s.ids,dx:s.delta[0],dy:s.delta[1]}],undefined,t('move'));
+    if(s.type==='move'){restore(s.els);cancelPreview();api.previewMove?.(s.ids,0,0);
+      if(!s.moved&&s.dbl){api.dblclick(s.clicked,s.start);return;}
+      if(s.moved&&Math.hypot(...s.delta)>.02)api.commit([{op:'translate',ids:s.ids,dx:s.delta[0],dy:s.delta[1]}],undefined,t('move'));
       else{if(!s.moved&&api.ids().length>1&&!e.shiftKey&&s.wasSelected){const g=tools.withGroup(s.clicked.id);api.select([...g],s.clicked.id);}else refresh();
       }return;}
     if(s.type==='marquee'){const r=s.rect;if(!r||(r[2]-r[0])*vp.s<4&&(r[3]-r[1])*vp.s<4){if(!s.add)api.select([],null);else refresh();return;}

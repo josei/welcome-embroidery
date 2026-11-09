@@ -396,6 +396,18 @@ test('compiling is automatic: stitches reappear after edits, issues are listed a
  await page.locator('#remove').click();await expect(page.locator('#issuesBtn')).toBeHidden({timeout:8000});expect(errors).toEqual([]);
 });
 
+test('a quick press-and-drag after a click moves the object (no edit mode), and X follows the drag live',async({page})=>{
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());await newDesign(page);
+ await page.locator('#rect').click();const m=await ctm(page);const c=toScreen(m,0,0);await page.mouse.click(c.x,c.y);
+ const x0=Number(await page.locator('#posX').inputValue());
+ await page.mouse.move(c.x,c.y);await page.mouse.down();await page.mouse.move(c.x+60,c.y,{steps:4});
+ await expect.poll(async()=>Number(await page.locator('#posX').inputValue())).toBeGreaterThan(x0);
+ await page.mouse.up();
+ await expect(page.locator('.path-node')).toHaveCount(0);
+ expect(Number(await page.locator('#posX').inputValue())).toBeGreaterThan(x0);
+ expect(errors).toEqual([]);
+});
+
 test('double-click edits: nodes on a rectangle, text focus on lettering, node insert on a path',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());await newDesign(page);
  await page.locator('#rect').click();let m=await ctm(page);const c=toScreen(m,0,0);await page.mouse.dblclick(c.x,c.y);await expect(page.locator('.path-node')).toHaveCount(4);

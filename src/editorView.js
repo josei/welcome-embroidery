@@ -23,6 +23,7 @@ import {measureState} from './measureState.js';
 import {editModeNow, setEditMode} from './editModeState.js';
 import {gridSnapState} from './gridSnapState.js';
 import {gridState} from './gridState.js';
+import {setTransformFields} from './transformState.js';
 import {getPlan, getCompileError, compileNow} from './compileService.js';
 import {renderSimulation} from './simulation.js';
 import {copyStyle, pasteStyle} from './styleClipboard.js';
@@ -100,6 +101,11 @@ export function mountCanvas() {
       setSelection({selNodes: new Set(add ? [...selState().selNodes, ...inside] : inside)});
       setSelection({selNode: inside.at(-1) ?? null});
       render();
+    },
+    previewMove: (/** @type {number[]} */ ids, /** @type {number} */ dx, /** @type {number} */ dy) => {
+      const object = /** @type {any} */ (selectedObject());
+      if (!object || !ids.includes(object.id)) return;
+      setTransformFields({posX: (Number(object.x) + dx).toFixed(1), posY: (Number(object.y) + dy).toFixed(1)});
     },
     dblclick: (/** @type {any} */ object, /** @type {any} */ point) => {
       if (object.kind === 'path' && editModeNow() && selState().selected === object.id) canvas.insertNodeAt(object, point);
