@@ -1,7 +1,7 @@
 import {stitchRowsState} from '../stitchRowsState.js';
 import {useSyncExternalStore} from 'react';
 import {capRowsActions, capRowsState} from '../capRowsState.js';
-import {useDraftInput} from './useDraftInput';
+import {useNumberInput} from './useNumberInput';
 import {IconSelect} from './IconSelect';
 import {SliderField} from './SliderField';
 import {documentState} from '../documentState.js';
@@ -20,9 +20,9 @@ const JOIN_CORNERS = [
 export function StitchCapRows() {
  const rows = useSyncExternalStore(stitchRowsState.subscribe, stitchRowsState.get);
  const cap = useSyncExternalStore(capRowsState.subscribe, capRowsState.get);
- const appliqueWidth = useDraftInput(cap.appliqueWidth, text => capRowsActions.commit('appliqueWidth', text));
- const compensation = useDraftInput(cap.compensation, text => capRowsActions.commit('compensation', text));
- const nodeWidth = useDraftInput(cap.nodeWidth, text => capRowsActions.commit('nodeWidth', text));
+ const appliqueWidth = useNumberInput(cap.appliqueWidth, text => capRowsActions.commit('appliqueWidth', text), {min: 1, max: 8});
+ const compensation = useNumberInput(cap.compensation, text => capRowsActions.commit('compensation', text), {min: 0, max: 2}, {allowEmpty: true});
+ const nodeWidth = useNumberInput(cap.nodeWidth, text => capRowsActions.commit('nodeWidth', text), {min: 0.5, max: 12});
  const {doc} = useSyncExternalStore(documentState.subscribe, documentState.get);
  const choices = useSyncExternalStore(stitchChoicesState.subscribe, stitchChoicesState.get);
  // The slider shows the object's own value, or the document's when the object has none; dragging it sets the object's own.
@@ -32,8 +32,8 @@ export function StitchCapRows() {
     stitchChoiceActions.choose('cap',
     v)} /></label><label id="joinRow" hidden={rows.joinRow}>Corners<IconSelect id="join" groupLabel="Corners" value={choices.join} options={JOIN_CORNERS}
       onChoose={v =>
-    stitchChoiceActions.choose('join', v)} /></label><label id="nodeWidthRow" hidden={rows.nodeWidthRow}>{"Width at selected node (mm)"}<input id="nodeWidth" {...nodeWidth} type="number" min="0.5" max="12" step="0.5"
-      title="Select a node of the satin path in node-edit mode, then set the column width there; the width eases between nodes" /></label><div
+    stitchChoiceActions.choose('join', v)} /></label><label id="nodeWidthRow" hidden={rows.nodeWidthRow}>{"Width at selected node (mm)"}<input id="nodeWidth" {...nodeWidth.inputProps} type="number" min="0.5" max="12" step="0.5"
+      title="Select a node of the satin path in node-edit mode, then set the column width there; the width eases between nodes" />{nodeWidth.note && <span className="clamp-note" role="status">{nodeWidth.note}</span>}</label><div
         id="widthClearRow" className="btn-row" hidden={rows.widthClearRow}><button type="button" id="widthClear" onClick={(
     ) =>
     capRowsActions.clearWidth(
@@ -42,9 +42,9 @@ export function StitchCapRows() {
     capRowsActions.choose('applique',
     e.target.checked)} id="applique" type="checkbox" className="icon-check" data-icon="applique"
       title={"Appliqué: sews a placement line, stops for the fabric, tacks it down, stops to trim, then covers the edge with satin (the area is not " +
-        "filled)"} /></label><label id="appliqueWidthRow" hidden={rows.appliqueWidthRow}>{"Cover width (mm)"}<input id="appliqueWidth" type="number" min="1" max="8" step="0.5" {...appliqueWidth} /></label><div id="compRow" className="slider-field"
-      hidden={rows.compRow}><label>{"Pull compensation (mm)"}<input id="compensation" {...compensation} type="number" min="0" max="2" step="0.05" placeholder="document"
-      title="Overrides the document pull compensation for this object; leave empty to use the document value" /></label><SliderField
+        "filled)"} /></label><label id="appliqueWidthRow" hidden={rows.appliqueWidthRow}>{"Cover width (mm)"}<input id="appliqueWidth" type="number" min="1" max="8" step="0.5" {...appliqueWidth.inputProps} />{appliqueWidth.note && <span className="clamp-note" role="status">{appliqueWidth.note}</span>}</label><div id="compRow" className="slider-field"
+      hidden={rows.compRow}><label>{"Pull compensation (mm)"}<input id="compensation" {...compensation.inputProps} type="number" min="0" max="2" step="0.05" placeholder="document"
+      title="Overrides the document pull compensation for this object; leave empty to use the document value" />{compensation.note && <span className="clamp-note" role="status">{compensation.note}</span>}</label><SliderField
         id="compensationSlider" label="Pull compensation (mm)" min={0} max={2} step={0.05} value={shownComp} onCommit={text =>
     capRowsActions.commit('compensation', text)} /><button type="button" id="compUseDoc" className="link-button" hidden={cap.compensation === ''} onClick={() =>
     capRowsActions.commit('compensation', '')}>Use document value</button></div></>

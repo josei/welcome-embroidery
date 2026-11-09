@@ -195,7 +195,7 @@ test('hoop is editable: custom size resizes the canvas, flags overflow, keeps un
  await page.locator('button[data-view="stitches"]').click();await expect(page.locator('#count')).toContainText('past the hoop');
  await page.locator('#undo').click();await page.locator('#undo').click();await page.locator('#undo').click();await expect(page.locator('#hoopW')).toHaveValue('80');
  await page.locator('#hoopW').fill('140');await page.locator('#hoopW').press('Tab');await page.locator('#hoopH').fill('200');await page.locator('#hoopH').press('Tab');const download=page.waitForEvent('download');await page.locator('#export').click();await pickFormat(page,'vp3');await page.locator('#download').click();await download;
- await page.locator('#hoopW').fill('5');await page.locator('#hoopW').press('Tab');await expect(page.locator('#toast')).toContainText('between 10 and 400');expect(errors).toEqual([]);
+ await page.locator('#hoopW').fill('5');await page.locator('#hoopW').press('Tab');await expect(page.locator('#hoopW')).toHaveValue('10');await expect(page.locator('.hoop-edit .clamp-note')).toContainText('Min 10 mm');expect(errors).toEqual([]);
 });
 
 test('the last hoop size is remembered for new documents and reloads',async({page})=>{
@@ -1915,8 +1915,9 @@ test('batch plan in the Array section says how many copies fit one hoop',async({
  const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());await newDesign(page);
  await page.locator('#rect').click();await page.locator('#secArray summary').click();
  await expect(page.locator('#batchInfo')).toContainText('copies fit one');
- await page.locator('#arrCount').fill('400');await page.locator('#arrCount').press('Tab');
- await expect(page.locator('#batchInfo')).toContainText('400 copies');
+ await page.locator('#arrCount').fill('61');await page.locator('#arrCount').press('Tab');
+ await expect(page.locator('#arrCount')).toHaveValue('60');await expect(page.locator('#arrCount').locator('xpath=..')).toContainText('Max 60');
+ await expect(page.locator('#batchInfo')).toContainText('60 copies');
  expect(errors).toEqual([]);
 });
 
@@ -3275,42 +3276,39 @@ test('a design past the hoop cannot be exported: the dialog names the object and
 });
 
 /** Types an out-of-range value into a fill field: it is marked inline, then reverts on the commit key, and the toast says what was kept. */
-async function expectOutOfRangeRevert(page,{field,bad,keep,range,message,commitKey}){
- const input=page.locator(field),count=await page.locator('#count').textContent();
- await input.fill(bad);
- await expect(input).toHaveAttribute('aria-invalid','true');
- await expect(page.locator(`${field} + .field-range`)).toHaveText(range);
- await input.press(commitKey);
- await expect(input).toHaveValue(keep);
- await expect(input).not.toHaveAttribute('aria-invalid','true');
- await expect(page.locator('#toast')).toContainText(message);
- await expect(page.locator('#toast')).not.toContainText('Invalid Welcome project');
- await expect(page.locator('#count')).toHaveText(count);
-}
-
 async function openRectangle(page){
  page.on('dialog',d=>d.accept());
  await page.goto('/');await page.locator('#rect').click();await page.locator('.object-row').filter({hasText:'Rectangle'}).click();
 }
-
-test('an out-of-range fill stitch length is marked inline, reverts on blur, and the toast names the object and the kept value',async({page})=>{
+async function expectOutOfRangeClamp(page,{field,bad,keep,range,note,commitKey}){
+ const input=page.locator(field);
+ await input.fill(bad);
+ await expect(input).toHaveAttribute('aria-invalid','true');
+ await input.press(commitKey);
+ await expect(input).toHaveValue(keep);
+ await expect(input).not.toHaveAttribute('aria-invalid','true');
+ await expect(input.locator('..').locator('.clamp-note')).toHaveText(note);
+ await expect(input.locator('..').locator('.field-range')).toHaveText(range);
+ await expect(page.locator('#toast')).not.toContainText('Invalid Welcome project');
+}
+test('an out-of-range fill stitch length is clamped to the nearest bound and noted, on blur',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));
  await openRectangle(page);await expect(page.locator('#stitchLength')).toBeVisible();
- await expectOutOfRangeRevert(page,{field:'#stitchLength',bad:'0.1',keep:'3',range:'0.5–7 mm',message:'Stitch length must be 0.5–7 mm. Rectangle keeps 3 mm.',commitKey:'Tab'});
+ await expectOutOfRangeClamp(page,{field:'#stitchLength',bad:'0.1',keep:'0.5',range:'0.5–7 mm',note:'Min 0.5 mm',commitKey:'Tab'});
  expect(errors).toEqual([]);
 });
 
-test('an out-of-range fill row spacing is marked inline, reverts on Enter, and the toast names the object and the kept value',async({page})=>{
+test('an out-of-range fill row spacing is clamped and noted, on Enter',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));
  await openRectangle(page);await expect(page.locator('#spacing')).toBeVisible();
- await expectOutOfRangeRevert(page,{field:'#spacing',bad:'5',keep:'0.4',range:'0.25–1.2 mm',message:'Row spacing must be 0.25–1.2 mm. Rectangle keeps 0.4 mm.',commitKey:'Enter'});
+ await expectOutOfRangeClamp(page,{field:'#spacing',bad:'5',keep:'1.2',range:'0.25–1.2 mm',note:'Max 1.2 mm',commitKey:'Enter'});
  expect(errors).toEqual([]);
 });
 
-test('an out-of-range fill border width is marked inline, reverts on Enter, and the toast names the object and the kept value',async({page})=>{
+test('an out-of-range fill border width is clamped and noted, on Enter',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));
  await openRectangle(page);await page.locator('#border').check();await expect(page.locator('#borderWidth')).toBeVisible();
- await expectOutOfRangeRevert(page,{field:'#borderWidth',bad:'-5',keep:'0',range:'0–12 mm',message:'Border width must be 0–12 mm. Rectangle keeps 0 mm.',commitKey:'Enter'});
+ await expectOutOfRangeClamp(page,{field:'#borderWidth',bad:'-5',keep:'0',range:'0–12 mm',note:'Min 0 mm',commitKey:'Enter'});
  expect(errors).toEqual([]);
 });
 
@@ -4141,4 +4139,51 @@ test('a tool hint ends with its step: closing a polygon and selecting it clears 
  await expect(hints()).toHaveCount(1);await expect(hints()).toContainText('Drag on the canvas to draw a line');
  await page.locator('#select').click();await expect(page.locator('#toast')).not.toContainText('Drag on the canvas to draw a line');await page.mouse.up();
  await page.locator('#polygon').click();await expect(hints()).toHaveCount(1);await expect(hints()).toContainText('Drag from the center');await expect(page.locator('#toast')).not.toContainText('Drag on the canvas');
+});
+
+test('array copies and the shape-path limits clamp to their range with a note, and a blank step restores',async({page})=>{
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));
+ await openRectangle(page);
+ await page.locator('#secArray > summary').click();
+ await expect(page.locator('#arrCount')).toBeVisible();
+ await page.locator('#arrCount').fill('1');await page.locator('#arrCount').press('Tab');
+ await expect(page.locator('#arrCount')).toHaveValue('2');
+ await expect(page.locator('#arrCount').locator('..').locator('.clamp-note')).toContainText('Min 2');
+ const a0=await page.locator('#arrA').inputValue();await page.locator('#arrA').fill('');await page.locator('#arrA').press('Tab');
+ await expect(page.locator('#arrA')).toHaveValue(a0);
+ await page.locator('#secPath > summary').click();
+ await page.locator('#strokeW').fill('0.1');await page.locator('#strokeW').press('Enter');
+ await expect(page.locator('#strokeW')).toHaveValue('0.5');
+ await expect(page.locator('#strokeW').locator('..').locator('.clamp-note')).toContainText('Min 0.5 mm');
+ await expect(page.locator('#toast')).not.toContainText('Invalid Welcome project');
+ expect(errors).toEqual([]);
+});
+
+test('a satin column width of 0.1 clamps to 0.5 with a note',async({page})=>{
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));
+ await page.goto('/');page.on('dialog',d=>d.accept());await page.locator('#new').click();
+ await page.locator('#line').click();const m=await page.evaluate(()=>{const m=document.querySelector('#art').getScreenCTM();return {a:m.a,d:m.d,e:m.e,f:m.f};}),at=(x,y)=>({x:m.a*x+m.e,y:m.d*y+m.f}),a=at(-25,0),b=at(25,0);
+ await page.mouse.move(a.x,a.y);await page.mouse.down();await page.mouse.move(b.x,b.y,{steps:4});await page.mouse.up();
+ await page.locator('#type').selectOption('satin');await expect(page.locator('#satinWidth')).toBeVisible();
+ await page.locator('#satinWidth').fill('0.1');await page.locator('#satinWidth').press('Tab');
+ await expect(page.locator('#satinWidth')).toHaveValue('0.5');
+ await expect(page.locator('#satinWidth').locator('..').locator('.clamp-note')).toContainText('Min 0.5 mm');
+ expect(errors).toEqual([]);
+});
+
+test('numeric fields clamp to their range with a note, restore a blank value, and never store an invalid one',async({page})=>{page.on('dialog',d=>d.accept());
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));
+ await page.goto('/');await page.locator('#new').click();await page.locator('#letter').click();
+ await expect(page.locator('#letteringHeight')).toBeEnabled();await page.locator('#letteringHeight').fill('40');await page.locator('#letteringHeight').press('Enter');
+ await expect(page.locator('#letteringHeight')).toHaveValue('16');await expect(page.locator('#letteringHeight').locator('..').locator('.clamp-note')).toContainText('Max 16 mm');
+ await expect(page.locator('#toast')).not.toContainText('Invalid Welcome project');
+ await page.locator('#rect').click();
+ const x0=await page.locator('#posX').inputValue();await page.locator('#posX').fill('');await page.locator('#posX').press('Tab');
+ await expect(page.locator('#posX')).toHaveValue(x0);
+ await page.locator('#sizeW').fill('0.2');await page.locator('#sizeW').press('Tab');await expect(page.locator('#sizeW')).toHaveValue('0.5');
+ await expect(page.locator('#sizeW').locator('..').locator('.clamp-note')).toContainText('Min 0.5 mm');
+ await page.locator('#type').selectOption('fill');await page.locator('#spacing').fill('0.1');await page.locator('#spacing').press('Tab');await expect(page.locator('#spacing')).toHaveValue('0.25');
+ await page.locator('#spacing').fill('2');await page.locator('#spacing').press('Tab');await expect(page.locator('#spacing')).toHaveValue('1.2');
+ await page.locator('#hoopH').fill('400');await page.locator('#hoopH').press('Tab');await expect(page.locator('#hoopH')).toHaveValue('400');
+ expect(errors).toEqual([]);
 });

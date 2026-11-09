@@ -422,6 +422,8 @@ input[aria-invalid="true"]{border-color:var(--warn)!important;background:var(--w
 }
 
 .field-note{display:block;font-size:var(--fs-caption);line-height:1.4;color:var(--mute-text)}
+/* A clamp note: the value was moved to the nearest bound; it sits beside its field until the next edit. */
+.clamp-note{color:var(--warn);font-size:var(--fs-caption);margin-left:6px;white-space:nowrap}
 /* Reset to default: a small icon button beside a numeric field whose value differs from its shipped default. */
 .field-reset{display:flex;align-items:center;gap:6px}.field-reset>label{flex:1 1 auto;min-width:0}
 .reset-default{flex:none;width:28px;height:28px;padding:0;display:inline-flex;align-items:center;justify-content:center;border:1px solid var(--field-line);border-radius:6px;background:#fff;color:#4f5551;cursor:pointer}
