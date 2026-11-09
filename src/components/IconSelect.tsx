@@ -28,7 +28,7 @@ export function IconSelect({id, groupLabel, value, options, disabled = false, la
    <div className={labelled ?
      'icon-seg labelled' : 'icon-seg'} role="radiogroup" aria-label={groupLabel}>{options.map(o =>
      <button key={o.value} type="button" data-value={o.value} title={o.label} aria-label={o.label} role="radio" aria-checked={value ===
-     o.value} aria-pressed={value === o.value} onClick={e => { e.preventDefault(); if (value !== o.value) onChoose(o.value); }}>{labelled && o.thumb ?
+     o.value} aria-pressed={value === o.value} disabled={disabled || o.disabled} onClick={e => { e.preventDefault(); if (value !== o.value && !o.disabled) onChoose(o.value); }}>{labelled && o.thumb ?
      <StitchThumb kind={o.thumb} /> : <svg className="icon" aria-hidden="true"><use href={`#${o.icon}`} /></svg>}{labelled &&
      <span>{o.label}</span>}</button>)}</div>
   </>

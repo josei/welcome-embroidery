@@ -8,6 +8,7 @@ import {useDraftInput} from './useDraftInput';
 import {IconSelect} from './IconSelect';
 import {stitchChoiceActions, stitchChoicesState} from '../stitchChoicesState.js';
 import {stitchPanelActions, stitchPanelState} from '../stitchPanelState.js';
+import {t} from '../i18n.js';
 // Part of the stitch panel, rendered by React. Ids match the markup it replaced, because app.js wires them by id.
 export function StitchTypeRows() {
  const layout = useSyncExternalStore(layoutState.subscribe, layoutState.get);
@@ -28,7 +29,7 @@ export function StitchTypeRows() {
     {value: 'satin', label: 'Satin column', icon: 'i-satin', thumb: 'satin', disabled: choices.satinOff},
     {value: 'motif', label: 'Motif loops', icon: 'i-cross', thumb: 'motif'}, {value: 'sequin', label: 'Sequins', icon: 'i-ripple', thumb: 'sequin'},
     {value: 'bead', label: 'Beads', icon: 'i-satin', thumb: 'bead'}, {value: 'bling', label: 'Bling', icon: 'i-ripple', thumb: 'bling'}]} onChoose={v =>
-    stitchChoiceActions.choose('type', v)} /></label><label hidden={layout.threadHidden}>Thread<select id="thread" value={panel.threadValue} onChange={e =>
+    stitchChoiceActions.choose('type', v)} />{choices.satinOff && <p id="satinOffHint" className="sel-hint">{t('Satin column needs a path. Convert to path first.')}</p>}</label><label hidden={layout.threadHidden}>Thread<select id="thread" value={panel.threadValue} onChange={e =>
     stitchPanelActions.chooseThread(e.target.value)}>{panel.threadOptions.map(o =>
     <option key={o.value} value={o.value}>{o.label}</option>)}</select></label><label id="satinRow" hidden={rows.satinRow}>{"Satin width (mm)"}<input id="satinWidth" {...satinWidth} type="number" min="0.5" max="12" step="0.5" /></label><label id="motifSpacingRow"
       hidden={rows.motifSpacingRow}>{"Spacing (mm)"}<input id="motifSpacing" {...motifSpacing} type="number" min="1" max="20" step="0.5" /></label>

@@ -3,6 +3,7 @@
 // one document edit. app.js keeps the stores and the transaction layer, so nothing here touches the DOM.
 import {selState} from './selectionState.js';
 import {selectedObject, orderedIds} from './selectionCommands.js';
+import {t} from './i18n.js';
 import {stitchChoiceActions} from './stitchChoicesState.js';
 import {capRowsActions} from './capRowsState.js';
 import {blingRowsActions} from './blingRowsState.js';
@@ -39,6 +40,11 @@ export function mountRowActions() {
       return;
     }
     if (id === 'type') {
+      const sel = selectedObject();
+      if (value === 'satin' && sel && sel.kind !== 'path') {
+        editor.toast(t('Satin column needs a path. Convert to path first.'));
+        return;
+      }
       if (selState().selected) editor.edit([{op: 'set_object', id: selState().selected, stitch: value}]);
     }
   };
