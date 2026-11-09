@@ -3627,3 +3627,16 @@ test('export dialog groups machine formats apart from print and vector outputs',
  await expect(groups.nth(0).locator('option')).toHaveCount(13);
  await expect(groups.nth(1).locator('option')).toHaveText(['SVG · vector design (Inkscape)','Print template · 1:1 SVG (placement sheet)','Appliqué templates · 1:1 SVG','DXF · paths (CAD)']);
 });
+
+test('a selected imported run path reports its W and H in the transform panel',async({page})=>{
+ page.on('dialog',d=>d.accept());await page.goto('/');await newDesign(page);
+ // A stroke-only path with no stroke-width imports as a running stitch. In the 0..100 viewBox it spans x 10..60 and y 10..40,
+ // which the importer scales to 110/100 mm: 55 mm wide, 33 mm tall, its top-left at (-44, -44).
+ await page.locator('#file').setInputFiles({name:'run.svg',mimeType:'image/svg+xml',buffer:Buffer.from('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><path d="M10 10 L60 10 L60 40" stroke="#527461" fill="none"/></svg>')});
+ await page.locator('.object-row').filter({hasText:'Imported path'}).click();
+ const num=async id=>Number(await page.locator(id).inputValue());
+ expect(Math.abs(await num('#sizeW')-55)).toBeLessThanOrEqual(0.1);
+ expect(Math.abs(await num('#sizeH')-33)).toBeLessThanOrEqual(0.1);
+ expect(Math.abs(await num('#posX')-(-44))).toBeLessThanOrEqual(0.1);
+ expect(Math.abs(await num('#posY')-(-44))).toBeLessThanOrEqual(0.1);
+});

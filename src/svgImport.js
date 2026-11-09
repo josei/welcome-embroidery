@@ -2,6 +2,7 @@
 // SVG import: decides whether a filled <path> imports as fill objects (its counters become holes and islands) or stays an
 // outline, and turns the text of a safe SVG file into a document. The engine re-exports the fill rule.
 import {insideRings} from './stitchRuns.js';
+import {refreshPathBounds} from './transforms.js';
 import {parseSvgPath} from './lettering.js';
 import {validateDocument} from './validate.js';
 
@@ -121,9 +122,10 @@ export function importSvg(source){
     if(pointTotal>5000)throw Error('SVG import is limited to 5,000 path points.');
     /** @type {(pts: Pt[], holeList: Pt[][]) => any} */
     const fillAt=(pts,holeList)=>{
-     const xs=pts.map(p=>p[0]),ys=pts.map(p=>p[1]);
-     return {id:crypto.randomUUID(),name:'Imported fill',kind:'path',x:Math.min(...xs),y:Math.min(...ys),w:0,h:0,
+     // refreshPathBounds sets x, y, w and h from the points, so the transform panel shows the real size.
+     const o={id:crypto.randomUUID(),name:'Imported fill',kind:'path',x:0,y:0,w:0,h:0,
       points:pts,thread,closed:true,stitch:'fill',...(holeList.length?{holes:holeList}:{})};
+     refreshPathBounds(/** @type {any} */(o));return o;
     };
     const holeRings=paths.filter((_,i)=>fillRule.depths[i]===1).map(toMm);
     objects.push(fillAt(mm,holeRings));
@@ -134,9 +136,9 @@ export function importSvg(source){
      pointTotal+=points.length;
      if(points.length>1000||pointTotal>5000)throw Error('SVG import is limited to 5,000 path points.');
      const mm=points.map(([x,y])=>/** @type {Pt} */([x*scale+ox,y*scale+oy]));
-     const xs=mm.map(p=>p[0]),ys=mm.map(p=>p[1]);
-     objects.push({id:crypto.randomUUID(),name:'Imported path',kind:'path',x:Math.min(...xs),y:Math.min(...ys),w:0,h:0,
-      points:mm,thread,...(satinStroke?{stitch:'satin',satinWidth:Math.max(.5,Math.min(12,strokeMm))}:{stitch:'run'})});
+     const o={id:crypto.randomUUID(),name:'Imported path',kind:'path',x:0,y:0,w:0,h:0,
+      points:mm,thread,...(satinStroke?{stitch:'satin',satinWidth:Math.max(.5,Math.min(12,strokeMm))}:{stitch:'run'})};
+     refreshPathBounds(/** @type {any} */(o));objects.push(o);
     }
    }
   }
