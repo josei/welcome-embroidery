@@ -12,6 +12,7 @@ import {stitchChoicesState} from './stitchChoicesState.js';
 import {measureState} from './measureState.js';
 import {knifeState} from './knifeState.js';
 import {t} from './i18n.js';
+import {enterEdit} from './canvasText.js';
 
 const NS='http://www.w3.org/2000/svg';
 const $=(/** @type {string} */ s)=>/** @type {any} */(document.querySelector(s));
@@ -60,9 +61,10 @@ export function createCanvasTools(api){
       api.commit([{op:'add_text',id,text:'BLOOM',x:-18,y:18,height:api.fitHeight(api.textFont(),'BLOOM'),
         thread:$('#thread').value,font:api.textFont(),...(f?.kind==='outline'?{stitch:'fill'}:{})}],()=>{
         setSelection({selected: id});setSelection({multi: new Set([id])});
+        // The new object opens in the on-canvas text box with its placeholder selected, so typing replaces it. The box
+        // takes the keystrokes, so letters never reach the tool shortcuts.
+        enterEdit(documentNow().doc.objects.find((/** @type {any} */ o)=>o.id===id));
       });
-      // Lettering starts as a placeholder: its text field is focused with the text selected, so typing replaces it.
-      requestAnimationFrame(()=>{const field=$('#letteringText');field?.focus();field?.select();});
       return;
     }
     api.commit([{op:'add_shape',id,kind,name:kind==='ellipse'?'Ellipse':'Rectangle',x:-12,y:-8,width:24,height:16,
