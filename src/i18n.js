@@ -404,7 +404,7 @@ export const ES={
 '; {n} arcs sewn as straight segments':'; {n} arcos bordados como segmentos rectos',
 'Removed 1 unused font.':'Se quitó 1 fuente sin usar.',
 'Deleted {n} objects.':'Eliminados {n} objetos.','Deleted {name}.':'Eliminado {name}.','delete {n} objects':'eliminar {n} objetos','delete {name}':'eliminar {name}',
-'change':'cambio','new design':'nuevo diseño','open file':'abrir archivo','import file':'importar archivo','Undo {action}':'Deshacer {action}','Redo {action}':'Rehacer {action}','Nothing to undo':'No hay nada que deshacer','Nothing to redo':'No hay nada que rehacer',
+'change':'cambio','move':'mover','nudge':'desplazar','new design':'nuevo diseño','open file':'abrir archivo','import file':'importar archivo','Undo {action}':'Deshacer {action}','Redo {action}':'Rehacer {action}','Nothing to undo':'No hay nada que deshacer','Nothing to redo':'No hay nada que rehacer',
 'Removed {n} unused fonts.':'Se quitaron {n} fuentes sin usar.',
 'Arrow keys':'Teclas de flecha','Copies the text worksheet to the clipboard':'Copia la hoja de texto al portapapeles','Also download the sewing worksheet':'Descargar también la hoja de costura','machine stitches':'puntadas de máquina',
 };

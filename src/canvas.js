@@ -3,6 +3,7 @@
 // resize/rotate handles (oriented for a single rotated shape), smart snapping, marquee selection and the context menu.
 // Document state stays in app.js; this module talks to it through `api`.
 import {geometry,objectBounds,hoopSize} from './engine.js';
+import {t} from './i18n.js';
 import {drawScene} from './canvasScene.js';
 import {wheelZoomFactor,wheelZooms} from './wheelZoom.js';
 import {createCanvasEditing} from './canvasEditing.js';
@@ -425,7 +426,7 @@ export function createCanvas(/** @type {any} */ api){
     else api.commit([{op:'move_guide',index:s.index,pos:s.pos}]);
     return;
     }
-    if(s.type==='move'){restore(s.els);if(s.moved&&Math.hypot(...s.delta)>.02)api.commit([{op:'translate',ids:s.ids,dx:s.delta[0],dy:s.delta[1]}]);
+    if(s.type==='move'){restore(s.els);if(s.moved&&Math.hypot(...s.delta)>.02)api.commit([{op:'translate',ids:s.ids,dx:s.delta[0],dy:s.delta[1]}],undefined,t('move'));
       else{if(!s.moved&&api.ids().length>1&&!e.shiftKey&&s.wasSelected){const g=tools.withGroup(s.clicked.id);api.select([...g],s.clicked.id);}else refresh();
       }return;}
     if(s.type==='marquee'){const r=s.rect;if(!r||(r[2]-r[0])*vp.s<4&&(r[3]-r[1])*vp.s<4){if(!s.add)api.select([],null);else refresh();return;}

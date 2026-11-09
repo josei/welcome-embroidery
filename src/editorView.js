@@ -88,7 +88,7 @@ export function mountCanvas() {
     ensureFontLoaded,
     fitHeight,
     select: selectIds,
-    commit: (/** @type {any[]} */ operations, /** @type {any} */ after) => edit(operations, after),
+    commit: (/** @type {any[]} */ operations, /** @type {any} */ after, /** @type {string} */ label) => edit(operations, after, undefined, label),
     render,
     toast: editor.toast,
     selectNodesIn: (/** @type {any} */ rect, /** @type {any} */ add) => {

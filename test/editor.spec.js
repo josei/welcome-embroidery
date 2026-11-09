@@ -865,6 +865,40 @@ test('fine grid steps: 0.1 and 0.25 mm are offered, and snapping and arrow nudge
  expect(errors).toEqual([]);
 });
 
+test('held arrow run: ten nudges are one undo step named "nudge", Ctrl+Z reverts the run, and a pause starts a new step',async({page})=>{
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));
+ await page.goto('/');page.on('dialog',d=>d.accept());await newDesign(page);
+ await page.locator('#rect').click();await page.locator('#posX').fill('10');await page.locator('#posX').press('Tab');
+ await page.evaluate(()=>document.activeElement?.blur());
+ const x0=Number(await page.locator('#posX').inputValue());
+ for(let i=0;i<10;i++)await page.keyboard.press('ArrowRight');
+ expect(Math.abs(Number(await page.locator('#posX').inputValue())-(x0+10))).toBeLessThan(.01,'ten 1 mm nudges move 10 mm');
+ await expect(page.locator('#undo')).toHaveAttribute('aria-label','Undo nudge');
+ await page.keyboard.press(APPLE_KEYS?'Meta+z':'Control+z');
+ expect(Math.abs(Number(await page.locator('#posX').inputValue())-x0)).toBeLessThan(.01,'one undo reverts the whole run');
+ await expect(page.locator('#undo')).not.toHaveAttribute('aria-label','Undo nudge');
+ await expect(page.locator('#redo')).toHaveAttribute('aria-label','Redo nudge');
+ await page.keyboard.press(APPLE_KEYS?'Meta+Shift+z':'Control+Shift+z');
+ // Redo brings back the ten nudges (x0+10); one more press, a pause, another press: undo drops only the last press.
+ await page.keyboard.press('ArrowRight');await page.waitForTimeout(1100);await page.keyboard.press('ArrowRight');
+ await page.keyboard.press(APPLE_KEYS?'Meta+z':'Control+z');
+ expect(Math.abs(Number(await page.locator('#posX').inputValue())-(x0+11))).toBeLessThan(.01,'a pause of over a second starts a new step');
+ expect(errors).toEqual([]);
+});
+
+test('dragging a selection is one undo step named "move"',async({page})=>{
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));
+ await page.goto('/');page.on('dialog',d=>d.accept());await newDesign(page);
+ await page.locator('#rect').click();const shape=page.locator('#shapes [data-id]').first();
+ const id=await page.locator('.object-row').first().getAttribute('data-id');
+ const x0=await shape.getAttribute('x');
+ const box=await shape.boundingBox();await page.mouse.move(box.x+box.width/2,box.y+box.height/2);await page.mouse.down();await page.mouse.move(box.x+box.width/2+30,box.y+box.height/2+10,{steps:4});await page.mouse.up();
+ expect(await page.locator(`#shapes [data-id="${id}"]`).getAttribute('x')).not.toBe(x0);
+ await expect(page.locator('#undo')).toHaveAttribute('aria-label','Undo move');
+ await page.locator('#undo').click();expect(await page.locator(`#shapes [data-id="${id}"]`).getAttribute('x')).toBe(x0);
+ expect(errors).toEqual([]);
+});
+
 test('trace a thin band of colour: it is sewn as a running outline, and the toast says so',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));
  await page.goto('/');page.on('dialog',d=>d.accept());await newDesign(page);

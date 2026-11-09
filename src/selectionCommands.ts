@@ -7,6 +7,7 @@ import {editModeNow, setEditMode} from './editModeState.js';
 import {selState, setSelection} from './selectionState.js';
 import {clone} from './appHelpers.js';
 import {copyName} from './objectNames.js';
+import {toolMode} from './toolMode.js';
 
 /** The document fields these commands read and change. The engine stores objects as plain records. */
 export interface SelectionObject {
@@ -72,6 +73,7 @@ export function orderedIds(): string[] {
 
 /** Makes ids the selection, with primary (or the last id) as the primary object. Leaves node editing unless the same single object stays selected. */
 export function selectIds(ids: string[], primary?: string | null) {
+  endNudgeRun();
   const prev = selState().selected;
   setSelection({multi: new Set(ids)});
   setSelection({selected: primary ?? ids.at(-1) ?? null});
@@ -130,15 +132,40 @@ export function pasteClipboard() {
   });
 }
 
-/** Moves the selection: the selected path nodes while editing, otherwise whole objects. */
+/** A pause longer than this between two arrow presses starts a new undo step. */
+const NUDGE_PAUSE_MS = 1000;
+
+/** The held-arrow run in progress: its presses share one undo step while the signature (direction, selection, tool) holds. */
+let nudgeRun: {signature: string; key: string; at: number} | null = null;
+let nudgeRunCount = 0;
+
+/** Ends the held-arrow run, so the next nudge starts a new undo step (a selection change calls this). */
+function endNudgeRun() {
+  nudgeRun = null;
+}
+
+/**
+ * The coalesce key for one arrow press. Presses in the same direction, on the same selection and tool, at most a pause
+ * apart, return the run's key so they fold into one undo step; anything else starts a new run with a fresh key.
+ */
+function nudgeCoalesceKey(dx: number, dy: number): string {
+  const s = selState();
+  const signature = [Math.sign(dx), Math.sign(dy), toolMode.get(), [...s.multi].join(','), s.selected, s.selNode, [...s.selNodes].join(','), editModeNow()].join('|');
+  const now = Date.now();
+  if (!nudgeRun || nudgeRun.signature !== signature || now - nudgeRun.at > NUDGE_PAUSE_MS) nudgeRun = {signature, key: `nudge:${++nudgeRunCount}`, at: now};
+  nudgeRun.at = now;
+  return nudgeRun.key;
+}
+
+/** Moves the selection: the selected path nodes while editing, otherwise whole objects. A held-arrow run is one undo step, named "nudge". */
 export function nudge(dx: number, dy: number) {
   const o = selectedObject();
   if (editModeNow() && o?.kind === 'path' && (selState().selNodes.size || selState().selNode !== null)) {
-    wired().edit([{op: 'move_path_points', id: o.id, indexes: selState().selNodes.size ? [...selState().selNodes] : [selState().selNode], dx, dy}]);
+    wired().edit([{op: 'move_path_points', id: o.id, indexes: selState().selNodes.size ? [...selState().selNodes] : [selState().selNode], dx, dy}], undefined, nudgeCoalesceKey(dx, dy), t('nudge'));
     return;
   }
   const ids = orderedIds();
-  if (ids.length) wired().edit([{op: 'translate', ids, dx, dy}]);
+  if (ids.length) wired().edit([{op: 'translate', ids, dx, dy}], undefined, nudgeCoalesceKey(dx, dy), t('nudge'));
 }
 
 /** Selects every visible, unlocked object; while editing a path it selects all of that path's nodes instead. */
