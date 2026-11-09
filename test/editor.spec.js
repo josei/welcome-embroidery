@@ -3716,3 +3716,17 @@ test('dropped files: indicator, SVG opens as an undoable step, pictures and othe
  await page.locator('#undo').click();await expect(page.locator('.object-row')).toHaveCount(1);
  await page.locator('#redo').click();await expect(page.locator('.object-row')).toHaveCount(3);
 });
+
+test('zoom bar Fit hoop shows the whole hoop in the canvas',async({page})=>{
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));page.on('dialog',d=>d.accept());await page.goto('/');await newDesign(page);
+ const btn=page.locator('#zoomFit');await expect(btn).toHaveText('Fit hoop');await expect(btn).toHaveAttribute('title','Fit hoop');
+ // Hoop bounds as the canvas draws them: the ring rectangle, in the same user units as the #art viewBox.
+ const inside=async()=>{const v=await viewBox(page),r=page.locator('#hoopRing');const x=Number(await r.getAttribute('x')),y=Number(await r.getAttribute('y')),w=Number(await r.getAttribute('width')),h=Number(await r.getAttribute('height'));
+  return x>=v[0]&&y>=v[1]&&x+w<=v[0]+v[2]&&y+h<=v[1]+v[3];};
+ await page.locator('#hoopW').fill('260');await page.locator('#hoopW').press('Tab');await page.locator('#hoopH').fill('160');await page.locator('#hoopH').press('Tab');
+ const box=await page.locator('.canvas').boundingBox();await page.mouse.move(box.x+box.width/2,box.y+box.height/2);await page.mouse.wheel(0,-600);
+ await expect.poll(async()=>(await viewBox(page))[2]).toBeLessThan(200);expect(await inside()).toBe(false);
+ await btn.click();expect(await inside()).toBe(true);
+ await page.locator('#zoomAll').click();await btn.click();expect(await inside()).toBe(true);
+ expect(errors).toEqual([]);
+});

@@ -4,10 +4,11 @@ import {handModeState} from '../canvasModeState.js';
 import {t} from '../i18n.js';
 import {shortcutLabel} from '../shortcutLabels.js';
 
-// The zoom bar on the canvas: the percentage and the zoom in, out, 100%, hoop, everything and hand buttons.
+// The zoom bar on the canvas: the percentage and the zoom in, out, 100%, fit hoop, fit everything and hand buttons.
 // The percentage comes from zoomPercent; the buttons call the canvas zoom commands through zoomActions. The hand
 // button's pressed state comes from handModeState, which the canvas also reads to pan on drag.
 const resetLabel = t('Reset to 100% ({shortcut})', {shortcut: shortcutLabel([{shift: true, key: '0'}])});
+const fitHoopLabel = t('Fit hoop');
 const fitAllLabel = t('Fit everything ({shortcut})', {shortcut: shortcutLabel([{shift: true, key: '1'}])});
 export function ZoomBar() {
  const percent = useSyncExternalStore(zoomPercent.subscribe, zoomPercent.get);
@@ -35,8 +36,8 @@ export function ZoomBar() {
     <svg className="icon"><use href="#i-hand"/></svg>
    </button>
    <span className="sep"></span>
-   <button type="button" id="zoomFit" className="zoom-text" title="Fit the hoop in view" onClick={() => zoomActions.fitHoop()}>
-    Hoop
+   <button type="button" id="zoomFit" className="zoom-text" title={fitHoopLabel} onClick={() => zoomActions.fitHoop()}>
+    {fitHoopLabel}
    </button>
    <button type="button" id="zoomAll" className="zoom-text" title={fitAllLabel} onClick={() => zoomActions.fitAll()}>
     All

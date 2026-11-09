@@ -229,7 +229,7 @@ export const ES={
 'Discard {objects}?':'¿Descartar {objects}?','1 unsaved object':'1 objeto sin guardar','{n} unsaved objects':'{n} objetos sin guardar',
 'Discard':'Descartar','Not saved. The design is still open.':'No se ha guardado. El diseño sigue abierto.','Open cancelled.':'Apertura cancelada.','Import cancelled.':'Importación cancelada.','Saved. This document is also open in another tab.':'Guardado. Este documento también está abierto en otra pestaña.','This document is open in another tab. Each tab keeps its own edits and autosave copy.':'Este documento está abierto en otra pestaña. Cada pestaña guarda sus propios cambios y su copia de autoguardado.','Revoke this link? Agents using it lose access immediately.':
   '¿Revocar este enlace? Los agentes que lo usen perderán el acceso de inmediato.',
-'Paste':'Pegar','Select all':'Seleccionar todo','Fit hoop in view':'Ajustar el bastidor a la vista','Fit everything':'Ajustar todo','Edit text':'Editar texto',
+'Paste':'Pegar','Select all':'Seleccionar todo','Fit hoop in view':'Ajustar el bastidor a la vista','Fit hoop':'Ajustar bastidor','Fit everything':'Ajustar todo','Edit text':'Editar texto',
   'Edit nodes':'Editar nodos','Edit nodes (convert to path)':'Editar nodos (convertir a trazado)','Convert to path':'Convertir a trazado','Satin column needs a path. Convert to path first.':'La columna de satén necesita un trazado. Convierte primero a trazado.',
 'Cut':'Cortar','Copy':'Copiar','Group':'Agrupar','Ungroup':'Desagrupar','Sew first (to back)':'Bordar primero (al fondo)','Sew last (to front)':
   'Bordar al final (al frente)','Unlock':'Desbloquear','Lock':'Bloquear','Hide':'Ocultar','Zoom to selection':'Zoom a la selección',
