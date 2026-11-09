@@ -113,8 +113,9 @@ function projectText() {
  * Records a successful save: the unsaved marker clears (unless the design changed while the file was written) and the
  * time is stamped. The autosave copy is marked clean once its delayed write has run, so a reload does not offer it back.
  * @param {number} revision the revision that was written
+ * @param {string} fileName the file the save wrote to, shown in the status text
  */
-function markSaved(revision) {
+function markSaved(revision, fileName) {
   setTimeout(() => {
     try {
       const saved = JSON.parse(localStorage.getItem(ownAutosaveKey()) || 'null');
@@ -125,7 +126,7 @@ function markSaved(revision) {
     } catch {}
   }, 0);
   if (documentNow().doc.revision === revision) setDocument({dirty: false});
-  setSave({savedAt: Date.now()});
+  setSave({savedAt: Date.now(), savedFileName: fileName});
   wired().render();
   if (openElsewhere()) wired().toast(t('Saved. This document is also open in another tab.'));
 }
@@ -143,8 +144,9 @@ export async function projectSave() {
   try {
     if (!hasFilePicker()) {
       const {text, revision, name} = projectText();
-      download(text, safeProjectFilename(name), 'application/json');
-      markSaved(revision);
+      const fileName = safeProjectFilename(name);
+      download(text, fileName, 'application/json');
+      markSaved(revision, fileName);
       return;
     }
     if (!fileHandle) {
@@ -154,7 +156,7 @@ export async function projectSave() {
     }
     const {text, revision} = projectText();
     await writeFile(fileHandle, text);
-    markSaved(revision);
+    markSaved(revision, fileHandle.name);
   } catch (error) {
     reportSaveError(error);
   }
@@ -175,7 +177,7 @@ export async function projectSaveAs() {
     const {text, revision} = projectText();
     await writeFile(handle, text);
     fileHandle = handle;
-    markSaved(revision);
+    markSaved(revision, handle.name);
   } catch (error) {
     reportSaveError(error);
   }
@@ -187,9 +189,10 @@ export async function projectSaveAs() {
  */
 export function saveAsDownload(name) {
   const {text, revision} = projectText();
-  download(text, safeProjectFilename(name), 'application/json');
+  const fileName = safeProjectFilename(name);
+  download(text, fileName, 'application/json');
   setSave({saveAsOpen: false});
-  markSaved(revision);
+  markSaved(revision, fileName);
 }
 
 /**
@@ -284,7 +287,7 @@ export function acceptProject(next, notes = []) {
   const opened = clone(body);
   setDocId(isDocId(docId) ? docId : undefined);
   fileHandle = null;
-  setSave({savedAt: null});
+  setSave({savedAt: null, savedFileName: null});
   wired().clearComputed();
   setSewingCounts({});
   setDocument({doc: opened});
@@ -403,7 +406,7 @@ function startNewDesign() {
   setSewingCounts({});
   setDocId(undefined);
   fileHandle = null;
-  setSave({savedAt: null});
+  setSave({savedAt: null, savedFileName: null});
   setDocument({doc: withSavedHoop({...initialDocument(), name: 'Untitled design', objects: []})});
   setDocument({history: []});
   setDocument({future: []});

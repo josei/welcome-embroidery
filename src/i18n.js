@@ -8,11 +8,10 @@ export const ES={
   'Import JEF, VP3, DST, SEW, PEC, PES, EXP, HUS, XXX, DSB, DSZ, TAP, TBF, PCS, SHV, STX, BRO, EMD, KSM or 10O':
   'Importar JEF, VP3, DST, SEW, PEC, PES, EXP, HUS, XXX, DSB, DSZ, TAP, TBF, PCS, SHV, STX, BRO, EMD, KSM o 10O',
   'Choose a .jef, .vp3, .dst, .sew, .pec, .pes, .exp, .hus, .xxx, .dsb, .dsz, .tap, .tbf, .pcs, .shv, .stx, .bro, .emd, .ksm or .10o file.':
-  'Elige un archivo .jef, .vp3, .dst, .sew, .pec, .pes, .exp, .hus, .xxx, .dsb, .dsz, .tap, .tbf, .pcs, .shv, .stx, .bro, .emd, .ksm o .10o.','Save project':
-  'Guardar proyecto','Settings':'Ajustes',
-'Save As':'Guardar como','Save As…':'Guardar como…','File name':'Nombre del archivo',
+  'Elige un archivo .jef, .vp3, .dst, .sew, .pec, .pes, .exp, .hus, .xxx, .dsb, .dsz, .tap, .tbf, .pcs, .shv, .stx, .bro, .emd, .ksm o .10o.','Settings':'Ajustes',
+'Save As':'Guardar como','File name':'Nombre del archivo',
 'Arrange':'Organizar','Bring to front':'Traer al frente','Send to back':'Enviar al fondo','Subtract':'Restar','Union':'Unión','Intersect':'Intersecar',
-'Saved {time}':'Guardado {time}','Unsaved':'Sin guardar',
+'Saved {time}':'Guardado {time}','Saved {time} to {file}':'Guardado {time} en {file}','Unsaved':'Sin guardar',
 'This design is too large to autosave, so this browser does not keep a copy. Save the project file to keep your work.':'Este diseño es demasiado grande para el autoguardado, así que este navegador no guarda una copia. Guarda el archivo del proyecto para conservar tu trabajo.',
 'Stitch length':'Largo de puntada','Row spacing':'Separación de filas','Border width':'Ancho del borde','The document':'El documento',
 '{field} must be {range}. {object} keeps {kept} mm.':'{field} debe estar entre {range}. {object} mantiene {kept} mm.',

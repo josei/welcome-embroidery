@@ -135,7 +135,7 @@ export function FileMenu() {
  const picker = hasFilePicker();
  const rows: Row[] = [
   {id: 'menuSave', label: t('Save'), hint: picker ? t('Writes to the file you chose') : t('Downloads the project file'), run: () => void projectSave()},
-  {id: 'menuSaveAs', label: t('Save As…'), hint: picker ? t('Choose a new file') : t('Download under a name you type'), run: () => void projectSaveAs()},
+  {id: 'menuSaveAs', label: t('Save As'), hint: picker ? t('Choose a new file') : t('Download under a name you type'), run: () => void projectSaveAs()},
  ];
  return <Dropdown id="fileMenu" label={t('File')} rows={rows} />;
 }

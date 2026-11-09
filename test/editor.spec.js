@@ -3200,3 +3200,25 @@ test('Spanish editor shows no English label from the EN table',async({page})=>{
  },english);
  expect(leftovers).toEqual([]);
 });
+
+test('save: one Save and one Save As, with the same names on the toolbar, File menu and shortcut sheet, and the status names the file',async({page})=>{page.on('dialog',d=>d.accept());
+ await page.goto('/');
+ // Toolbar: the tooltip names the action and its shortcut (Cmd+S on macOS, Ctrl+S elsewhere).
+ await expect(page.locator('#save')).toHaveAttribute('title',/^Save \((Ctrl\+S|Cmd\+S|⌘S)\)$/);
+ await expect(page.locator('#save')).toHaveAttribute('data-tooltip',/^Save \((Ctrl\+S|Cmd\+S|⌘S)\)$/);
+ await expect(page.locator('#save')).not.toHaveAttribute('title',/project/i);
+ // File menu: the same two names.
+ await page.locator('#fileMenu').click();
+ await expect(page.locator('#menuSave > span')).toHaveText('Save');
+ await expect(page.locator('#menuSaveAs > span')).toHaveText('Save As');
+ await page.locator('#fileMenu').click();
+ // Shortcut sheet: the same two names, bound to Save and Save As (Ctrl or ⌘, depending on the platform).
+ await page.locator('#helpBtn').click();
+ await expect(page.locator('#keysList kbd').filter({hasText: /^(Ctrl\+S|⌘S)$/}).locator('xpath=following-sibling::span[1]')).toHaveText('Save');
+ await expect(page.locator('#keysList kbd').filter({hasText: /^(Ctrl\+Shift\+S|⇧⌘S)$/}).locator('xpath=following-sibling::span[1]')).toHaveText('Save As');
+ await page.keyboard.press('Escape');
+ // Saving names the file it wrote to in the status text.
+ const download=page.waitForEvent('download');await page.locator('#fileMenu').click();await page.locator('#menuSave').click();const file=await download;
+ expect(file.suggestedFilename()).toMatch(/\.welcome$/);
+ await expect(page.locator('#savedStatus')).toContainText(file.suggestedFilename());
+});

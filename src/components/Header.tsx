@@ -8,6 +8,7 @@ import {agentLinkState, agentLinkActions} from '../agentLinkState.js';
 import {EXPORT_FORMATS, exportFormatState, exportKind, setExportFormat} from '../exportFormatState.js';
 import {EMPTY_EXPORT_REASON} from '../exportDialogState.js';
 import {openExportDialog} from '../exportCommands.js';
+import {shortcutLabel} from '../shortcutLabels.js';
 import {importMachineFile, newProject, openProjectFile, projectSave} from '../projectIO.js';
 import {saveState} from '../saveState.js';
 import {toolbarActions} from '../toolbarCommands.js';
@@ -46,15 +47,16 @@ function AgentPill() {
   </button>
  );
 }
-// The save feedback: the unsaved marker while the design has changes, then the time of the last save in this tab.
+// The save feedback: the unsaved marker while the design has changes, then the time of the last save in this tab and the
+// file it wrote to.
 function SaveStatus() {
  const {dirty} = useSyncExternalStore(documentState.subscribe, documentState.get);
- const {savedAt} = useSyncExternalStore(saveState.subscribe, saveState.get);
+ const {savedAt, savedFileName} = useSyncExternalStore(saveState.subscribe, saveState.get);
  if (dirty) return <span id="unsavedMark" className="save-status unsaved">{t('Unsaved')}</span>;
  if (savedAt === null) return null;
  const when = new Date(savedAt);
  const time = `${String(when.getHours()).padStart(2, '0')}:${String(when.getMinutes()).padStart(2, '0')}`;
- return <span id="savedStatus" className="save-status" role="status">{t('Saved {time}', {time})}</span>;
+ return <span id="savedStatus" className="save-status" role="status">{savedFileName ? t('Saved {time} to {file}', {time, file: savedFileName}) : t('Saved {time}', {time})}</span>;
 }
 
 // Export: the Export button opens the export dialog, and the format beside it is the same choice the dialog shows.
@@ -75,6 +77,8 @@ function ExportSplit() {
 // The editor header, rendered by React. Ids and attributes match the markup this replaced,
 // because app.js wires its controls by id.
 export function Header() {
+ // The toolbar Save names the action and its shortcut, the same label the File menu and shortcut sheet use.
+ const saveLabel = `${t('Save')} (${shortcutLabel([{mod: true, key: 'S'}])})`;
  const rows = useSyncExternalStore(stitchRowsState.subscribe, stitchRowsState.get);
  const projectFile = useRef<HTMLInputElement>(null);
  const machineFile = useRef<HTMLInputElement>(null);
@@ -123,8 +127,8 @@ export function Header() {
         data-tooltip="Import JEF / VP3…" onClick={(
     ) =>
     machineFile.current?.click(
-    )}><svg className="icon"><use href="#i-import"/></svg></button><button className="icon-button" id="save" aria-label="Save project"
-      title="Save project" data-tooltip="Save project" onClick={(
+    )}><svg className="icon"><use href="#i-import"/></svg></button><button className="icon-button" id="save" aria-label={saveLabel}
+      title={saveLabel} data-tooltip={saveLabel} onClick={(
     ) =>
     projectSave(
     )}><svg className="icon"><use href="#i-save"/></svg></button><button className="icon-button" id="helpBtn" aria-label="Keyboard shortcuts (?)"
