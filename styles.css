@@ -310,3 +310,6 @@ input[aria-invalid="true"]{border-color:var(--warn)!important;background:var(--w
 .export-split.is-blank{background:#5f6f69}.export-split.is-blank #export{cursor:not-allowed}.export-split.is-blank #export:hover{background:transparent}
 
 .canvas-text-hint{z-index:10;color:var(--teal-deep);font-weight:500}
+
+/* The design canvas takes keyboard focus for arrow-key nudges; show the ring only for keyboard focus. */
+#art:focus-visible{outline:2px solid var(--teal);outline-offset:-2px}

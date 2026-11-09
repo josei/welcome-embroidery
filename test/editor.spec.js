@@ -3481,3 +3481,20 @@ test('Ctrl+A and Command+A select all lettering text, on a fresh object and an e
  // Existing object, on-canvas box: double-click opens it, Ctrl+A then typing replaces the text.
  const t=page.locator('#shapes g.shape').first(),tb=await t.boundingBox();await page.mouse.dblclick(tb.x+tb.width/2,tb.y+tb.height/2);await expect(page.locator('#canvasText')).toBeFocused();await page.keyboard.press('Control+a');await page.keyboard.type('Fox');await expect(page.locator('#canvasText')).toHaveValue('Fox');await page.keyboard.press('Escape');
  expect(errors).toEqual([]);});
+test('design canvas is a Tab stop: an object selected by keyboard focus moves with arrow keys, Escape deselects',async({page})=>{
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));page.on('dialog',d=>d.accept());
+ await page.goto('/');await newDesign(page);
+ await page.locator('#rect').click();await expect(page.locator('.object-row.selected')).toHaveCount(1);
+ const pos=async()=>({x:Number(await page.locator('#posX').inputValue()),y:Number(await page.locator('#posY').inputValue())});
+ // Tab from the page reaches the design canvas, which has a role and a name
+ let reached=false;for(let i=0;i<150&&!reached;i++){await page.keyboard.press('Tab');reached=await page.evaluate(()=>document.activeElement?.id==='art');}
+ expect(reached).toBe(true);
+ await expect(page.locator('#art')).toHaveAttribute('role','application');await expect(page.locator('#art')).toHaveAttribute('aria-label','Design canvas');
+ // arrow keys move the selected object by 1 mm; Shift+arrow by the existing 5 mm nudge step
+ const p0=await pos();
+ await page.keyboard.press('ArrowRight');const p1=await pos();expect(p1.x).toBeCloseTo(p0.x+1,1);expect(p1.y).toBeCloseTo(p0.y,1);
+ await page.keyboard.press('Shift+ArrowDown');const p2=await pos();expect(p2.x).toBeCloseTo(p1.x,1);expect(p2.y).toBeCloseTo(p1.y+5,1);
+ // Escape deselects
+ await page.keyboard.press('Escape');await expect(page.locator('.object-row.selected')).toHaveCount(0);
+ expect(errors).toEqual([]);
+});
