@@ -1,9 +1,10 @@
 import {layoutState} from '../layoutState.js';
 import {stitchRowsState} from '../stitchRowsState.js';
 import {useSyncExternalStore} from 'react';
-import type {ChangeEvent} from 'react';
+import type {ChangeEvent, KeyboardEvent} from 'react';
 import {letteringActions, letteringFieldsState} from '../letteringFieldsState.js';
 import {useDraftInput} from './useDraftInput';
+import {selectAllInField} from './selectAllKey';
 import {stitchPanelActions, stitchPanelState} from '../stitchPanelState.js';
 // The lettering panel, rendered by React. Ids match the markup it replaced, because app.js wires them by id.
 // The Fill and Outline choices for outline fonts: the value, its label and its icon.
@@ -15,7 +16,10 @@ export function LetteringPanel() {
  const panel = useSyncExternalStore(stitchPanelState.subscribe, stitchPanelState.get);
  const along = useDraftInput(l.alongOffset, text => letteringActions.commit('alongOffset', text), 'store');
  const draftText = useDraftInput(l.text, v => letteringActions.commit('text', v), 'typed', false);
- const text = {...draftText, onChange: (e: ChangeEvent<HTMLTextAreaElement>) => {
+ const text = {...draftText, onKeyDown: (e: KeyboardEvent<HTMLTextAreaElement>) => {
+  selectAllInField(e);
+  draftText.onKeyDown(e);
+ }, onChange: (e: ChangeEvent<HTMLTextAreaElement>) => {
   draftText.onChange(e);
   letteringActions.preview(e.target.value);
  }};

@@ -3,6 +3,7 @@ import type {FormEvent, KeyboardEvent} from 'react';
 import {interactionState} from '../interactionState.js';
 import {finishCanvasText, liveCanvasText} from '../canvasText.js';
 import {t} from '../i18n.js';
+import {selectAllInField} from './selectAllKey';
 
 // The lettering text box over the canvas. interactionState.canvasText says which object is being edited and where its
 // screen rectangle is; typing updates the object's text and width, Enter commits as one undo step, Shift+Enter adds a
@@ -27,6 +28,7 @@ export function CanvasTextEditor() {
   // BODY. Leaving the box by clicking elsewhere (blur) keeps focus where the user put it.
   const keyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
     e.stopPropagation();
+    selectAllInField(e);
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       finish(true, e.currentTarget.value);
