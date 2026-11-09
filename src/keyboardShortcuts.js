@@ -40,6 +40,8 @@ export function mountKeyboard() {
     if (!(e.ctrlKey || e.metaKey) || e.altKey) return;
     const key = e.key.toLowerCase();
     if (key === 's') { e.preventDefault(); if (e.shiftKey) void projectSaveAs(); else press('save'); return; }
+    // Ctrl+Shift+E opens the export dialog (the same button as the Export button), not while a field has focus.
+    if (key === 'e' && e.shiftKey && !editor.canvas.inField(e)) { e.preventDefault(); press('export'); return; }
     if (e.shiftKey || editor.canvas.inField(e)) return;
     if (key === 'o') { e.preventDefault(); press('open'); }
     else if (key === 'n') { e.preventDefault(); press('new'); }

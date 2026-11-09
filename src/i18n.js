@@ -27,7 +27,9 @@ export const ES={
   'AI agent':'Agente de IA','Connect an AI agent':'Conectar un agente de IA',
 'View':'Vista','Design':'Diseño','Stitches':'Puntadas','Preview':'Vista previa','Undo':'Deshacer','Redo':'Rehacer','Duplicate selected object':
   'Duplicar el objeto seleccionado','Duplicate':'Duplicar','Delete selected object':'Eliminar el objeto seleccionado','Delete':'Eliminar','Export':'Exportar',
-'Objects':'Objetos','Tools':'Herramientas','Select (V)':'Seleccionar (V)','Add rectangle':'Añadir rectángulo','Skip to drawing tools':'Ir a las herramientas de dibujo','Add ellipse':'Añadir elipse','Draw path':
+'Objects':'Objetos','Tools':'Herramientas','Select (V)':'Seleccionar (V)',
+'Select ({shortcut})':'Seleccionar ({shortcut})','Draw path ({shortcut})':'Dibujar trazado ({shortcut})','Measure ({shortcut})':'Medir ({shortcut})','Line ({shortcut}, drag)':'Línea ({shortcut}, arrastrar)','Polygon ({shortcut}, drag from center)':'Polígono ({shortcut}, arrastrar desde el centro)','Star ({shortcut}, drag from center)':'Estrella ({shortcut}, arrastrar desde el centro)','Pen with curves ({shortcut}, drag for handles)':'Pluma con curvas ({shortcut}, arrastrar para tiradores)','Add rectangle ({shortcut})':'Añadir rectángulo ({shortcut})','Add ellipse ({shortcut})':'Añadir elipse ({shortcut})','Add lettering ({shortcut})':'Añadir texto bordado ({shortcut})','Export ({shortcut})':'Exportar ({shortcut})',
+'Add rectangle':'Añadir rectángulo','Skip to drawing tools':'Ir a las herramientas de dibujo','Add ellipse':'Añadir elipse','Draw path':
   'Dibujar trazado','Draw path (N)':'Dibujar trazado (N)','Add lettering':'Añadir texto bordado',
 'Line (L, drag)':'Línea (L, arrastrar)','Polygon (G, drag from center)':'Polígono (G, arrastrar desde el centro)','Star (S, drag from center)':
   'Estrella (S, arrastrar desde el centro)','Pen with curves (P, drag for handles)':'Pluma con curvas (P, arrastrar para tiradores)',
@@ -132,8 +134,8 @@ export const ES={
   'Se reemplazó {thread} en {n} objetos.','Rotate hoop':'Girar el bastidor','Appliqué from a group needs two or more closed shapes.':
   'Aplicado desde un grupo necesita dos formas cerradas o más.','{n} open objects left as they are.':'{n} objetos abiertos se dejan como están.',
   'Thin regions sewn as running outline: {n}.':'Regiones finas cosidas como contorno de punto corrido: {n}.','Cushion':'Cojín','Redwork by colour':
-  'Punto de ida y vuelta por color','Knife (K): click two points to cut the selected closed shape along the line between them':
-  'Cuchillo (K): haz clic en dos puntos para cortar la forma cerrada seleccionada por la línea entre ellos','Select a closed shape to cut.':
+  'Punto de ida y vuelta por color','Knife ({shortcut}): click two points to cut the selected closed shape along the line between them':
+  'Cuchillo ({shortcut}): haz clic en dos puntos para cortar la forma cerrada seleccionada por la línea entre ellos','Select a closed shape to cut.':
   'Selecciona una forma cerrada para cortar.','Knife':'Cuchillo','Appliqué from selection':'Aplicado desde la selección',
   'With two or more closed shapes selected: the bottom-most stays the fabric, and each other shape becomes an appliqué on it':
   'Con dos o más formas cerradas seleccionadas: la más inferior queda como tela y cada una de las demás se convierte en un aplicado sobre ella',

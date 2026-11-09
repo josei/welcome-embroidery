@@ -83,7 +83,7 @@ test('pinned JEF import renders a stitch layer, saves source commands, transform
 
 test('inline icon controls are accessible and rotated stitch-layer preview matches the compile plan',async({page})=>{
  const fixture=pinnedMachineFixture('vp3'),doc=initialDocument(),layer=importStitchLayer(fixture.bytes,'vp3');doc.objects=[layer];applyOperations(doc,[{op:'transform',id:layer.id,rotation:17}]);const firstNeedle=compile(doc).stitches.find(s=>s.cmd==='stitch');
- await page.goto('/');page.on('dialog',dialog=>dialog.accept());await expect(page.getByRole('button',{name:'New design'})).toHaveAttribute('data-tooltip','New design');await expect(page.getByRole('button',{name:'Add ellipse'})).toHaveAttribute('title','Add ellipse');await expect(page.getByRole('button',{name:'Nothing to undo'})).toBeDisabled();
+ await page.goto('/');page.on('dialog',dialog=>dialog.accept());await expect(page.getByRole('button',{name:'New design'})).toHaveAttribute('data-tooltip','New design');await expect(page.getByRole('button',{name:'Add ellipse'})).toHaveAttribute('title','Add ellipse (O)');await expect(page.getByRole('button',{name:'Nothing to undo'})).toBeDisabled();
  await newDesign(page);await page.locator('#machineFile').setInputFiles({name:'rotated.vp3',mimeType:'application/octet-stream',buffer:Buffer.from(fixture.bytes)});await expect(page.locator('#sourceInfo')).toContainText('VP3 stitch layer');await expect(page.locator('.object-row')).toHaveCount(1);await page.locator('#rotation').fill('17');await page.locator('#rotation').press('Tab');await expect(page.locator('#rotation')).toHaveValue('17');
  const importedId=await page.locator('.object-row').last().getAttribute('data-id'),group=page.locator(`#shapes [data-id="${importedId}"]`);expect(await group.count()).toBe(1);expect(await group.getAttribute('transform')).toBeNull();const paths=await group.locator('path').evaluateAll(nodes=>nodes.map(node=>node.getAttribute('d'))),coordinates=paths.flatMap(d=>[...d.matchAll(/[ML](-?(?:\d+\.?\d*|\.\d+))\s+(-?(?:\d+\.?\d*|\.\d+))/g)].map(m=>[Number(m[1]),Number(m[2])]));expect(coordinates.some(([x,y])=>Math.abs(x-firstNeedle.x)<=.06&&Math.abs(y-firstNeedle.y)<=.06)).toBe(true);const saved=page.waitForEvent('download');await page.locator('#save').click();const output=await saved,path='/tmp/welcome-rotated-import.welcome';await output.saveAs(path);const project=JSON.parse(await (await import('node:fs/promises')).readFile(path,'utf8'));expect(project.objects[0].rotation).toBe(17);
 });
@@ -1062,7 +1062,7 @@ test('agent experience on the live document: summaries, render, clear, snapshot 
 
 test('tooltips are drawn on top of the panels, inside the window, above the control when there is room and below at the top edge',async({page})=>{
  await page.goto('/');await expect(page.locator('#tooltip')).toHaveCount(1);
- await page.locator('#rect').hover();await expect(page.locator('#tooltip')).toHaveClass(/show/);await expect(page.locator('#tooltip')).toHaveText('Add rectangle');
+ await page.locator('#rect').hover();await expect(page.locator('#tooltip')).toHaveClass(/show/);await expect(page.locator('#tooltip')).toHaveText('Add rectangle (R)');
  const box=async()=>page.evaluate(()=>{const t=document.querySelector('#tooltip').getBoundingClientRect(),vw=document.documentElement.clientWidth,z=getComputedStyle(document.querySelector('#tooltip')),b=document.querySelector('#rect').getBoundingClientRect();return {l:t.left,r:t.right,t:t.top,b:t.bottom,vw,pos:z.position,zi:Number(z.zIndex),above:t.bottom<=b.top+1,below:t.top>=b.bottom-1};});
  let m=await box();expect(m.pos).toBe('fixed');expect(m.zi).toBeGreaterThan(1000);expect(m.l).toBeGreaterThanOrEqual(0);expect(m.r).toBeLessThanOrEqual(m.vw);
  await page.locator('#select').hover();await expect(page.locator('#tooltip')).toContainText('Select');m=await page.evaluate(()=>{const t=document.querySelector('#tooltip').getBoundingClientRect();return {l:t.left,r:t.right,vw:document.documentElement.clientWidth};});expect(m.l).toBeGreaterThanOrEqual(0);
@@ -2733,6 +2733,7 @@ test('export is labelled as a machine file, shows its file name, says it does no
  await expect(page.locator('#importMachine')).toHaveAttribute('aria-label','Import JEF / VP3…');
  await expect(page.locator('#importMachine')).toHaveAttribute('title','Import JEF / VP3…');
  await expect(page.locator('#importMachine')).toHaveAttribute('data-tooltip','Import JEF / VP3…');
+  await expect(page.locator('#export')).toHaveAttribute('data-tooltip',/^Export \((Ctrl\+Shift\+E|Cmd\+Shift\+E|⇧⌘E)\)$/);
  expect(await page.locator('#importMachine use').getAttribute('href')).not.toBe(await page.locator('#save use').getAttribute('href'));
  await page.locator('#export').click();
  await expect(page.locator('#exportDialog h2')).toHaveText('Export');
@@ -3757,4 +3758,13 @@ test('zoom bar Fit hoop shows the whole hoop in the canvas',async({page})=>{
  await btn.click();expect(await inside()).toBe(true);
  await page.locator('#zoomAll').click();await btn.click();expect(await inside()).toBe(true);
  expect(errors).toEqual([]);
+});
+
+test('Ctrl+Shift+E opens the export dialog, the same as the Export button',async({page})=>{
+ await page.goto('/');
+ await expect(page.locator('#exportDialog')).toBeHidden();
+ await page.keyboard.press('Control+Shift+E');
+ await expect(page.locator('#exportDialog h2')).toHaveText('Export');
+ await page.keyboard.press('Escape');
+ await expect(page.locator('#exportDialog')).toBeHidden();
 });

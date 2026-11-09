@@ -1,7 +1,8 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
-import {SHORTCUT_TABLE, TOOL_KEYS, shortcutSections} from '../src/shortcutTable.js';
+import {readdirSync} from 'node:fs';
+import {SHORTCUT_TABLE, TOOL_KEYS, shortcutFor, shortcutSections} from '../src/shortcutTable.js';
 
 // Every key the keyboard handler compares against, read from its source: `e.key === 'x'`, `key === 'x'`, `e.code === 'Digit1'`.
 const handlerSource = readFileSync(new URL('../src/keyboardShortcuts.js', import.meta.url), 'utf8');
@@ -45,4 +46,33 @@ test('tool keys press the toolbar buttons they name', () => {
   assert.equal(TOOL_KEYS.m, 'measure');
   assert.equal(TOOL_KEYS.k, 'knife');
   assert.equal(TOOL_KEYS.s, 'star');
+});
+
+test('every tool and add button in the table has a tooltip that reads its shortcut from the table', () => {
+  // The components name each button's key with shortcutFor('<id>') in its tooltip; collect those ids from the sources.
+  const componentDir = new URL('../src/components/', import.meta.url);
+  const tooltipIds = new Set(readdirSync(componentDir).filter(f => f.endsWith('.tsx'))
+    .flatMap(f => [...readFileSync(new URL(f, componentDir), 'utf8').matchAll(/shortcutFor\('([^']+)'\)/g)].map(m => m[1])));
+  const buttonIds = SHORTCUT_TABLE.flatMap(entry => [entry.press, entry.button]).filter(Boolean);
+  assert.ok(buttonIds.length >= 10, 'the table names the tool and button rows');
+  const missing = buttonIds.filter(id => !tooltipIds.has(id));
+  assert.deepEqual(missing, [], 'table buttons whose tooltip does not read the table');
+});
+
+test('a tooltip shortcut and the shortcut sheet show the same key', () => {
+  const sheet = new Map(shortcutSections(SHORTCUT_TABLE, false).flatMap(([, rows]) => rows.map(([label, desc]) => [desc, label])));
+  for (const entry of SHORTCUT_TABLE) {
+    const id = entry.press ?? entry.button;
+    if (!id) continue;
+    assert.equal(shortcutFor(id, false), sheet.get(entry.desc), `${id}: tooltip and sheet disagree`);
+  }
+});
+
+test('rectangle, ellipse and lettering show R, O and T; export has a shortcut', () => {
+  assert.equal(shortcutFor('rect', false), 'R');
+  assert.equal(shortcutFor('ellipse', false), 'O');
+  assert.equal(shortcutFor('letter', false), 'T');
+  assert.equal(shortcutFor('export', false), 'Ctrl+Shift+E');
+  assert.equal(shortcutFor('export', true), '⇧⌘E');
+  assert.throws(() => shortcutFor('nope'), /no shortcut/);
 });

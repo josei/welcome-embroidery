@@ -3,8 +3,12 @@ import {useRef, useSyncExternalStore} from 'react';
 import {toolActions, toolMode} from '../toolMode.js';
 import {stitchPanelState} from '../stitchPanelState.js';
 import {shapePathActions} from '../shapePathState.js';
+import {shortcutFor} from '../shortcutTable.js';
+import {t} from '../i18n.js';
 // The shape and path tools panel, rendered by React. Ids match the markup it replaced, because tests and layout address them.
 export function PathPanel() {
+ // The knife's tooltip names the key from the shortcut table.
+ const knifeTip = t('Knife ({shortcut}): click two points to cut the selected closed shape along the line between them', {shortcut: shortcutFor('knife')});
  const layout = useSyncExternalStore(layoutState.subscribe, layoutState.get);
  const tool = useSyncExternalStore(toolMode.subscribe, toolMode.get);
  const panel = useSyncExternalStore(stitchPanelState.subscribe, stitchPanelState.get);
@@ -29,8 +33,7 @@ export function PathPanel() {
         from selection</button><button type="button" id="knife" aria-pressed={tool === 'knife'} className={tool ===
     'knife' ? 'active-tool' : undefined} onClick={() =>
     toolActions.press(
-    'knife')} title="Knife (K): click two points to cut the selected closed shape along the line between them"
-      data-tooltip="Knife (K): click two points to cut the selected closed shape along the line between them">Knife</button><button type="button"
+    'knife')} title={knifeTip} data-tooltip={knifeTip}>Knife</button><button type="button"
         id="redworkGroup" onClick={(
     ) =>
     shapePathActions.redworkGroup(

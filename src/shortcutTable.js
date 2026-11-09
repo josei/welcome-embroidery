@@ -16,6 +16,7 @@ import {shortcutLabel} from './shortcutLabels.js';
  * @property {Part[] | string} label the key as shown
  * @property {string} desc what it does
  * @property {string} [press] for a tool key: the toolbar button id the key presses
+ * @property {string} [button] for a non-tool key: the toolbar button id the key clicks (its tooltip shows this key)
  */
 
 const M = {mod: true};
@@ -26,6 +27,7 @@ export const SHORTCUT_TABLE = [
   {section: 'File', keys: ['s'], label: [{...M, shift: true, key: 'S'}], desc: 'Save As'},
   {section: 'File', keys: ['o'], label: [{...M, key: 'O'}], desc: 'Open'},
   {section: 'File', keys: ['n'], label: [{...M, key: 'N'}], desc: 'New'},
+  {section: 'File', keys: ['e'], label: [{...M, shift: true, key: 'E'}], desc: 'Export', button: 'export'},
 
   {section: 'Tools', keys: ['v'], label: 'V', desc: 'Select', press: 'select'},
   {section: 'Tools', keys: ['r'], label: 'R', desc: 'Rectangle', press: 'rect'},
@@ -67,6 +69,19 @@ export const SHORTCUT_TABLE = [
   {section: 'View', keys: ['+', '=', '-', '_'], label: '+ / −', desc: 'Zoom in / out'},
   {section: 'View', keys: ['?'], label: '?', desc: 'This list'},
 ];
+
+/**
+ * The shortcut for a toolbar button, read from the table: its tooltip and the shortcut sheet both use this value.
+ * Throws for a button with no row, so a tooltip cannot silently lose its key.
+ * @param {string} id the toolbar button id (a tool's `press` or a button's `button`)
+ * @param {boolean} [apple] override the detected platform (tests use this)
+ * @returns {string}
+ */
+export function shortcutFor(id, apple) {
+  const entry = SHORTCUT_TABLE.find(e => e.press === id || e.button === id);
+  if (!entry) throw new Error(`no shortcut in the table for ${id}`);
+  return typeof entry.label === 'string' ? entry.label : shortcutLabel(entry.label, apple);
+}
 
 /** Tool key (lower case) to the toolbar button it presses, built from the table. */
 /** @type {Record<string, string>} */

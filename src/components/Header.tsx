@@ -8,6 +8,7 @@ import {agentLinkState, agentLinkActions} from '../agentLinkState.js';
 import {EMPTY_EXPORT_REASON} from '../exportDialogState.js';
 import {openExportDialog} from '../exportCommands.js';
 import {shortcutLabel} from '../shortcutLabels.js';
+import {shortcutFor} from '../shortcutTable.js';
 import {importMachineFile, newProject, openProjectFile, projectSave} from '../projectIO.js';
 import {saveState} from '../saveState.js';
 import {toolbarActions} from '../toolbarCommands.js';
@@ -61,6 +62,7 @@ function SaveStatus() {
 // Export: the one Export button opens the export dialog, where the format is chosen. Its name never changes with the format.
 function ExportSplit() {
  const {doc} = useSyncExternalStore(documentState.subscribe, documentState.get);
+ const exportTip = t('Export ({shortcut})', {shortcut: shortcutFor('export')});
  const blank = (doc.objects ?? []).length === 0;
  // A blank design keeps the button focusable (aria-disabled, not disabled) so keyboard users reach the reason,
  // which sits outside the teal fill, and activating it does nothing.
@@ -68,7 +70,7 @@ function ExportSplit() {
   <>
    {blank && <span id="exportReason" className="export-reason">{t(EMPTY_EXPORT_REASON)}</span>}
    <div className={blank ? 'export-split is-blank' : 'export-split'}>
-    <button id="export" aria-disabled={blank} aria-describedby={blank ? 'exportReason' : undefined} onClick={() => { if (!blank) openExportDialog(); }}>{t('Export')}</button>
+    <button id="export" aria-disabled={blank} aria-describedby={blank ? 'exportReason' : undefined} title={exportTip} data-tooltip={exportTip} onClick={() => { if (!blank) openExportDialog(); }}>{t('Export')}</button>
    </div>
   </>
  );

@@ -5,6 +5,7 @@ import {designName} from '../designName.js';
 import {documentState} from '../documentState.js';
 import {sewingCountsState} from '../sewingCountsState.js';
 import {shortcutLabel} from '../shortcutLabels.js';
+import {shortcutFor} from '../shortcutTable.js';
 import {CanvasTextEditor} from './CanvasTextEditor';
 import {PreviewPanel} from './PreviewPanel';
 import {useSyncExternalStore} from 'react';
@@ -87,10 +88,10 @@ export function EditorLayout() {
         <div className={canvasClass}>
           <div className={"tool-row tool-rail"} aria-label={"Tools"}>
             <SelectTool />
-            <AddShapeButton kind={"rect"} id={"rect"} label={"Add rectangle"} icon={"rect"} />
-            <AddShapeButton kind={"ellipse"} id={"ellipse"} label={"Add ellipse"} icon={"ellipse"} />
+            <AddShapeButton kind={"rect"} id={"rect"} label={"Add rectangle"} icon={"rect"} tip={t('Add rectangle ({shortcut})', {shortcut: shortcutFor('rect')})} />
+            <AddShapeButton kind={"ellipse"} id={"ellipse"} label={"Add ellipse"} icon={"ellipse"} tip={t('Add ellipse ({shortcut})', {shortcut: shortcutFor('ellipse')})} />
             <PathTool />
-            <AddShapeButton kind={"text"} id={"letter"} label={"Add lettering"} icon={"text"} />
+            <AddShapeButton kind={"text"} id={"letter"} label={"Add lettering"} icon={"text"} tip={t('Add lettering ({shortcut})', {shortcut: shortcutFor('letter')})} />
             <ToolButtons />
             <button
               className={"icon-button"}
