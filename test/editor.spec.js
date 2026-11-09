@@ -2939,6 +2939,16 @@ test('a first compile failure marks the row as not compiled, not a bare type nam
  await expect(row.locator('.row-tag')).toContainText('stitches');
 });
 
+// Starts from New design (a blank document), not the first-load sample: the empty name and empty-state text show first.
+test('design canvas name counts objects and stitches, and reads empty on a new design',async({page})=>{page.on('dialog',d=>d.accept());const errors=[];page.on('pageerror',e=>errors.push(e.message));
+ await page.goto('/');await newDesign(page);
+ await expect(page.locator('#art')).toHaveAttribute('aria-label','Design canvas, empty');
+ await expect(page.locator('#objects .empty-hint')).toContainText('No objects yet. Draw a shape or import an image to start.');
+ await page.locator('#rect').click();await expect(page.locator('.object-row')).toHaveCount(1);
+ await expect(page.locator('#art')).toHaveAttribute('aria-label',/^Design canvas, 1 object, [\d,]+ stitches$/);
+ expect(errors).toEqual([]);
+});
+
 test('a blank design shows the start hint in the sewing order and on the canvas, and both go once an object exists',async({page})=>{page.on('dialog',d=>d.accept());
  await page.goto('/');await newDesign(page);await expect(page.locator('.object-row')).toHaveCount(0);
  const listHint=page.locator('#objects .empty-hint'),canvasHint=page.locator('#canvasHint');
@@ -3489,7 +3499,7 @@ test('design canvas is a Tab stop: an object selected by keyboard focus moves wi
  // Tab from the page reaches the design canvas, which has a role and a name
  let reached=false;for(let i=0;i<150&&!reached;i++){await page.keyboard.press('Tab');reached=await page.evaluate(()=>document.activeElement?.id==='art');}
  expect(reached).toBe(true);
- await expect(page.locator('#art')).toHaveAttribute('role','application');await expect(page.locator('#art')).toHaveAttribute('aria-label','Design canvas');
+ await expect(page.locator('#art')).toHaveAttribute('role','application');await expect(page.locator('#art')).toHaveAttribute('aria-label',/^Design canvas, /);
  // arrow keys move the selected object by 1 mm; Shift+arrow by the existing 5 mm nudge step
  const p0=await pos();
  await page.keyboard.press('ArrowRight');const p1=await pos();expect(p1.x).toBeCloseTo(p0.x+1,1);expect(p1.y).toBeCloseTo(p0.y,1);

@@ -1,6 +1,9 @@
 import {layoutState} from '../layoutState.js';
 import {selectionLabelsState} from '../selectionLabelsState.js';
 import {t} from '../i18n.js';
+import {designName} from '../designName.js';
+import {documentState} from '../documentState.js';
+import {sewingCountsState} from '../sewingCountsState.js';
 import {shortcutLabel} from '../shortcutLabels.js';
 import {CanvasTextEditor} from './CanvasTextEditor';
 import {PreviewPanel} from './PreviewPanel';
@@ -56,6 +59,8 @@ const ungroupLabel = t('Ungroup ({shortcut})', {shortcut: shortcutLabel([{mod: t
 // The editor layout: the object list, the canvas and the inspector. Rendered by React; ids match the markup it
 // replaced, because the keyboard shortcuts and tests address them.
 export function EditorLayout() {
+ const canvasDoc = useSyncExternalStore(documentState.subscribe, documentState.get);
+ const canvasCounts = useSyncExternalStore(sewingCountsState.subscribe, sewingCountsState.get);
  const layout = useSyncExternalStore(layoutState.subscribe, layoutState.get);
  const selectionLabels = useSyncExternalStore(selectionLabelsState.subscribe, selectionLabelsState.get);
  const view = useSyncExternalStore(viewMode.subscribe, viewMode.get);
@@ -204,7 +209,7 @@ export function EditorLayout() {
             </ActionButton>
             <PathNodeButtons />
           </div>
-          <svg id={"art"} viewBox={"-60 -60 120 120"} tabIndex={0} role={"application"} aria-label={"Design canvas"} {...referenceCanvasHandlers}>
+          <svg id={"art"} viewBox={"-60 -60 120 120"} tabIndex={0} role={"application"} aria-label={designName(canvasDoc.doc.objects ?? [], canvasCounts)} {...referenceCanvasHandlers}>
             <defs>
               <pattern id={"linen"} width={"2.6"} height={"2.6"} patternUnits={"userSpaceOnUse"}>
                 <path d={"M0 0H2.6M0 0V2.6"} stroke={"#a9a397"} strokeOpacity={".11"} strokeWidth={".18"} />
