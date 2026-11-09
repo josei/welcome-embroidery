@@ -16,6 +16,10 @@ export interface Layout {
   spacingHidden: boolean;
   spacingLabel: string;
   angleHidden: boolean;
+  /** The angle field is shown but cannot be edited, e.g. when some selected fills do not use rows. */
+  angleDisabled: boolean;
+  /** Why the angle field is disabled, shown under it; empty when it is enabled. */
+  angleNote: string;
   borderHidden: boolean;
   borderThreadHidden: boolean;
   objectHeadingHidden: boolean;
@@ -33,6 +37,8 @@ export const layoutState = createStore<Layout>({
   spacingHidden: false,
   spacingLabel: 'Row spacing (mm)',
   angleHidden: false,
+  angleDisabled: false,
+  angleNote: '',
   borderHidden: false,
   borderThreadHidden: false,
   objectHeadingHidden: true,

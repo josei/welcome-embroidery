@@ -51,6 +51,6 @@ export function StitchFillRows() {
      onCommit={text => fillValuesActions.commit('spacing', text)}
      swatch
     />
-   </div><label hidden={layout.angleHidden}>Angle (°)<input id="angle" {...angle} type="number" min="0" max="180" /></label></>
+   </div><label hidden={layout.angleHidden}>Angle (°)<input id="angle" {...angle} type="number" min="0" max="180" disabled={layout.angleDisabled} /></label>{layout.angleDisabled && layout.angleNote && !layout.angleHidden && <small className="field-note" id="angleNote">{layout.angleNote}</small>}</>
  );
 }

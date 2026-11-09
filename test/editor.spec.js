@@ -709,6 +709,20 @@ test('a fresh page compiles by itself, the 3D preview renders, and the sides fie
  expect(errors).toEqual([]);
 });
 
+test('batch angle: a mixed fill selection keeps Angle visible and disabled, with the count as the reason',async({page})=>{
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));
+ await page.goto('/');page.on('dialog',d=>d.accept());await newDesign(page);
+ await page.locator('#rect').click();await page.locator('#rect').click();await page.locator('#rect').click();
+ const rows=page.locator('.object-row');await expect(rows).toHaveCount(3);
+ await rows.nth(2).click();await page.locator('#fillMethod').selectOption('contour');
+ await rows.nth(0).click();await rows.nth(1).click({modifiers:['Shift']});
+ await expect(page.locator('#angle')).toBeVisible();await expect(page.locator('#angle')).toBeEnabled();await expect(page.locator('#angleNote')).toHaveCount(0);
+ await rows.nth(0).click();await rows.nth(2).click({modifiers:['Shift']});
+ await expect(page.locator('#angle')).toBeVisible();await expect(page.locator('#angle')).toBeDisabled();
+ await expect(page.locator('#angleNote')).toHaveText('Angle applies to row-fill objects; 1 of 3 uses contours');
+ expect(errors).toEqual([]);
+});
+
 test('fill patterns: spiral, meander and guided recompile, and the guide is drawn on the canvas',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));
  await page.goto('/');page.on('dialog',d=>d.accept());await newDesign(page);await page.locator('#rect').click();

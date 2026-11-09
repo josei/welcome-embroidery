@@ -1,6 +1,7 @@
 import {documentNow} from './documentState.js';
 import {selState} from './selectionState.js';
 import {setLayout} from './layoutState.js';
+import {angleLayout} from './angleLayout.js';
 import {setSelectionLabels} from './selectionLabelsState.js';
 import {setInspectorText} from './inspectorTextState.js';
 import {setStitchRow, stitchRowsState} from './stitchRowsState.js';
@@ -164,9 +165,10 @@ export function syncStitchPanel() {
   const n = picked.length;
   const o = selectedObject();
   const kind = o?.kind;
-  const fillable = picked.some(v => v.stitch === 'fill' &&
+  const isFillable = (v: StitchObject) => v.stitch === 'fill' &&
     (v.kind === 'rect' || v.kind === 'ellipse' || (v.kind === 'path' && v.closed) ||
-      (v.kind === 'text' && getFont(v.font)?.kind === 'outline')));
+      (v.kind === 'text' && getFont(v.font)?.kind === 'outline'));
+  const fillable = picked.some(isFillable);
 
   setLayout({secTransform: !(n >= 1)});
   setLayout({secStitch: false});
@@ -187,7 +189,6 @@ export function syncStitchPanel() {
       spacingLabel: lettered && !fillable ? 'Stitch spacing (mm) · lower = denser' : 'Row spacing (mm)',
     });
   }
-  setLayout({angleHidden: !(n === 0 || fillable)});
 
   const panel: Partial<StitchPanelState> = {};
   const src: Partial<StitchObject> = o ?? {};
@@ -443,7 +444,7 @@ export function syncStitchPanel() {
     if (!g) setInteraction({guideDraft: null});
     const armed = Boolean(interactionNow().guideDraft);
     setGuideButtons({clearDisabled: !o?.guide, label: t(armed ? 'Finish guide' : 'Draw guide'), armed});
-    setLayout({angleHidden: !(n === 0 || (fillable && m === 'rows'))});
+    setLayout(angleLayout(n, picked.filter(isFillable).map(v => v.fillMethod), fillable && m === 'rows'));
   }
   setStitchRow('stitchLenRow', !(n === 0 || fillable ||
     (n === 1 && o?.stitch === 'run' && o.kind !== 'text' && o.kind !== 'stitch_layer')));
