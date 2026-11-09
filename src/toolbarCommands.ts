@@ -73,8 +73,8 @@ export function undoDocument() {
   setDocument({
     doc: {...prev.doc, revision: prev.doc.revision + 1},
     history: d.history.slice(0, -1),
-    future: [...d.future, {doc: clone(d.doc), label: prev.label}],
-    dirty: true,
+    future: [...d.future, {doc: clone(d.doc), label: prev.label, dirty: d.dirty}],
+    dirty: prev.dirty ?? true,
   });
   wired().clearComputed();
   wired().render();
@@ -87,9 +87,9 @@ export function redoDocument() {
   const next = d.future.at(-1) as HistoryEntry;
   setDocument({
     doc: {...next.doc, revision: next.doc.revision + 1},
-    history: [...d.history, {doc: clone(d.doc), label: next.label}],
+    history: [...d.history, {doc: clone(d.doc), label: next.label, dirty: d.dirty}],
     future: d.future.slice(0, -1),
-    dirty: true,
+    dirty: next.dirty ?? true,
   });
   wired().clearComputed();
   wired().render();

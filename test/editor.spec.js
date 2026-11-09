@@ -2965,7 +2965,7 @@ test('Spanish: export, DXF and photo stitch toasts are translated and name the f
 
 test('deleting an object confirms with a toast whose Undo restores it; the Undo tooltip names the deletion',async({page})=>{
  page.on('dialog',d=>d.accept());await page.goto('/');await newDesign(page);
- await expect(page.locator('#undo')).toHaveAttribute('aria-label','Nothing to undo');
+ await expect(page.locator('#undo')).toHaveAttribute('aria-label','Undo new design');
  await page.locator('#rect').click();await expect(page.locator('.object-row')).toHaveCount(1);
  const id=await page.locator('.object-row').first().getAttribute('data-id');
  await page.locator('#remove').click();await expect(page.locator('.object-row')).toHaveCount(0);
@@ -3019,5 +3019,43 @@ test('Menus, the shortcut sheet and the export dialog work from the keyboard alo
  await page.locator('#export').focus();await page.keyboard.press('Enter');await expect(page.locator('#exportDialog')).toBeVisible();
  for(let i=0;i<4;i++){await page.keyboard.press('Tab');expect(await page.evaluate(()=>document.getElementById('exportDialog').contains(document.activeElement))).toBe(true);}
  await page.keyboard.press('Escape');await expect(page.locator('#exportDialog')).toBeHidden();await expect(page.locator('#export')).toBeFocused();
+ expect(errors).toEqual([]);
+});
+
+// A discarded design is one undo step: Ctrl+Z brings back what New, Ctrl+N or Open replaced, objects and unsaved marker
+// included. The starter design is clean, so New on it wipes it without a prompt and Undo still restores it.
+test('discarded work comes back on Undo: clean New, New, Ctrl+N and Open',async({page})=>{
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));
+ await page.goto('/');await expect(page.locator('.object-row')).toHaveCount(5);await expect(page.locator('#unsavedMark')).toHaveCount(0);
+ await page.locator('#new').click();await expect(page.locator('#discardDialog')).toBeHidden();await expect(page.locator('.object-row')).toHaveCount(0);
+ await expect(page.locator('#undo')).toHaveAttribute('aria-label','Undo new design');
+ await page.locator('#undo').click();await expect(page.locator('.object-row')).toHaveCount(5);await expect(page.locator('#unsavedMark')).toHaveCount(0);
+ await expect(page.locator('#undo')).toHaveAttribute('aria-label','Nothing to undo');
+ await page.locator('#redo').click();await expect(page.locator('.object-row')).toHaveCount(0);await expect(page.locator('#unsavedMark')).toHaveCount(0);
+ await page.locator('#undo').click();await expect(page.locator('.object-row')).toHaveCount(5);
+ await page.locator('#rect').click();await expect(page.locator('.object-row')).toHaveCount(6);await expect(page.locator('#unsavedMark')).toHaveCount(1);
+ await page.keyboard.press('Control+n');await expect(page.locator('#discardDialog')).toBeVisible();await page.locator('#discardDiscard').click();
+ await expect(page.locator('.object-row')).toHaveCount(0);await expect(page.locator('#unsavedMark')).toHaveCount(0);
+ await expect(page.locator('#undo')).toHaveAttribute('aria-label','Undo new design');
+ await page.keyboard.press('Control+z');await expect(page.locator('.object-row')).toHaveCount(6);await expect(page.locator('#unsavedMark')).toHaveCount(1);
+ await page.locator('#file').setInputFiles({name:'badge.svg',mimeType:'image/svg+xml',buffer:Buffer.from('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect x="10" y="10" width="40" height="30" fill="#527461"/></svg>')});
+ await expect(page.locator('#discardDialog')).toBeVisible();await page.locator('#discardDiscard').click();await expect(page.locator('#discardDialog')).toBeHidden();
+ await expect(page.locator('.object-row')).toHaveCount(1);
+ await expect(page.locator('#undo')).toHaveAttribute('aria-label','Undo open file');
+ await page.locator('#undo').click();await expect(page.locator('.object-row')).toHaveCount(6);await expect(page.locator('#unsavedMark')).toHaveCount(1);
+ expect(errors).toEqual([]);
+});
+
+// The discarded design stays in the autosave slot until the next edit, so a reload still offers it back.
+test('after a discard, a reload offers the discarded design until the next edit',async({page})=>{
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));
+ await page.goto('/');await page.locator('#rect').click();await page.locator('#ellipse').click();await expect(page.locator('.object-row')).toHaveCount(7);
+ await page.locator('#name').fill('Kept badge');await page.locator('#name').press('Enter');await page.waitForTimeout(1000);
+ await page.locator('#new').click();await expect(page.locator('#discardDialog')).toBeVisible();await page.locator('#discardDiscard').click();await expect(page.locator('.object-row')).toHaveCount(0);
+ await page.waitForTimeout(1000);
+ await page.reload();await expect(page.locator('#restoreDialog')).toBeVisible();await expect(page.locator('#restoreInfo')).toContainText('Kept badge');await expect(page.locator('#restoreInfo')).toContainText('7 objects');
+ await page.locator('#restoreNo').click();await page.locator('#discardDiscard').click();await expect(page.locator('#restoreDialog')).toBeHidden();
+ await page.locator('#rect').click();await expect(page.locator('.object-row')).toHaveCount(6);await page.waitForTimeout(1000);
+ await page.reload();await expect(page.locator('#restoreDialog')).toBeVisible();await expect(page.locator('#restoreInfo')).toContainText('6 objects');
  expect(errors).toEqual([]);
 });

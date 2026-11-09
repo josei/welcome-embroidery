@@ -8,6 +8,8 @@ export type Doc = Record<string, any>;
 export interface HistoryEntry {
   doc: Doc;
   label: string;
+  /** The unsaved marker the snapshot had. Undo and redo restore it; a step without one restores as unsaved. */
+  dirty?: boolean;
 }
 
 /**

@@ -331,21 +331,38 @@ export function restoreProject(saved) {
 }
 
 /**
+ * Keeps the design a discard just replaced as one undo step, after the undo steps it already had, so Ctrl+Z restores it with
+ * its objects, order, hoop, name and unsaved marker. An untouched blank design (nothing to lose) leaves no step. The
+ * discarded design also stays in the autosave slot, which is only rewritten by the next edit (see autosave.js).
+ * @param {{doc: any, history: any[], dirty: boolean}} before the design as it was before the discard
+ * @param {string} label what the step is called, e.g. "new design"; Undo shows it as "Undo new design"
+ */
+function keepDiscarded(before, label) {
+  if (!before.dirty && before.doc.objects.length === 0) return;
+  const after = documentNow();
+  const history = [...before.history, {doc: clone(before.doc), label: t(label), dirty: before.dirty}, ...after.history];
+  setDocument({history: history.slice(-80), future: []});
+}
+
+/**
  * Runs `proceed` once the open design may be replaced. A clean design, or one with no objects, is replaced at once. A design
  * with unsaved objects first opens the discard dialog: Save saves it and then proceeds, Discard proceeds, and Cancel leaves
  * the design as it was and shows `cancelNotice`. With `replaceFirst`, proceeding starts a new design before the action.
+ * Once the design is replaced, it stays one undo step labelled `undoLabel` (e.g. "new design"), so Ctrl+Z brings it back.
  * @param {() => void} proceed
- * @param {{cancelNotice?: string, replaceFirst?: boolean}} [options]
+ * @param {{cancelNotice?: string, replaceFirst?: boolean, undoLabel?: string}} [options]
  */
-function guardDiscard(proceed, {cancelNotice = '', replaceFirst = false} = {}) {
+function guardDiscard(proceed, {cancelNotice = '', replaceFirst = false, undoLabel = ''} = {}) {
   const state = documentNow();
   const run = () => {
+    const before = documentNow();
     try {
       if (replaceFirst) startNewDesign();
       proceed();
     } catch (error) {
       wired().toast(/** @type {Error} */ (error).message, 'error');
     }
+    if (undoLabel && documentNow().doc !== before.doc) keepDiscarded(before, undoLabel);
   };
   if (!state.dirty || state.doc.objects.length === 0) {
     run();
@@ -401,7 +418,7 @@ function startNewDesign() {
 /** Starts an empty design, after offering to save or discard unsaved changes. */
 export function newProject() {
   setEditMode(false);
-  guardDiscard(startNewDesign);
+  guardDiscard(startNewDesign, {undoLabel: 'new design'});
 }
 
 /**
@@ -413,7 +430,7 @@ export async function openProjectFile(file) {
   try {
     if (file.size > PROJECT_LIMIT) throw Error('Welcome project files are limited to 32 MiB.');
     const lower = file.name.toLowerCase();
-    const openOptions = {cancelNotice: t('Open cancelled.')};
+    const openOptions = {cancelNotice: t('Open cancelled.'), undoLabel: 'open file'};
     if (lower.endsWith('.svg')) {
       const imported = importSvg(await file.text());
       guardDiscard(() => {
@@ -482,7 +499,7 @@ export async function importMachineFile(file) {
         wired().toast(t('Imported {name} as a {fmt} stitch layer.', {name: file.name, fmt: format.toUpperCase()}));
         wired().compileNow();
       }
-    }, {cancelNotice: t('Import cancelled.'), replaceFirst: true});
+    }, {cancelNotice: t('Import cancelled.'), replaceFirst: true, undoLabel: 'import file'});
   } catch (error) {
     wired().toast(/** @type {Error} */ (error).message, 'error');
   }
