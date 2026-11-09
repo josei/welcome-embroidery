@@ -3489,3 +3489,19 @@ test('design canvas is a Tab stop: an object selected by keyboard focus moves wi
  await page.keyboard.press('Escape');await expect(page.locator('.object-row.selected')).toHaveCount(0);
  expect(errors).toEqual([]);
 });
+
+// Tab from the top of the page reaches the first drawing tool within one stop: the skip link (issue #261). Before it, Tab passed
+// about 28 stops through the object list and the hoop fields. The agreed limit is one stop before the tool.
+test('Tab reaches the first drawing tool within one stop of the top of the page, via the skip link',async({page})=>{const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');
+ const AGREED_MAX_STOPS_BEFORE_TOOL=1;
+ const focusId=()=>page.evaluate(()=>document.activeElement?.id||document.activeElement?.className||'');
+ let stops=0;
+ while(await focusId()!=='select'){
+  if(stops>AGREED_MAX_STOPS_BEFORE_TOOL)break;
+  await page.keyboard.press('Tab');stops++;
+  if(await page.evaluate(()=>document.activeElement?.classList.contains('skip-link')))await page.keyboard.press('Enter');
+ }
+ expect(stops).toBeLessThanOrEqual(AGREED_MAX_STOPS_BEFORE_TOOL);
+ expect(await focusId()).toBe('select');
+ expect(errors).toEqual([]);
+});
