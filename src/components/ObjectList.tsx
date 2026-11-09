@@ -73,7 +73,7 @@ export function ObjectListHead() {
  const n = objects.length, threads = new Set(objects.map(o => o.thread)).size;
  const objectsText = n === 1 ? t('1 object') : t('{n} objects', {n});
  const threadsText = threads === 1 ? t('1 thread') : t('{m} threads', {m: threads});
- return <div className="layers-head"><h3>{t('Sewing order')}</h3><span>{`${objectsText} · ${threadsText}`}</span></div>;
+ return <div className="layers-head"><h3>{t('Layers')}</h3><span>{`${objectsText} · ${threadsText}`}</span></div>;
 }
 
 // The name field of a row being renamed. Enter or leaving the field keeps the text, Escape drops it.
@@ -358,7 +358,7 @@ export function ObjectList() {
    {issue && <div className="list-warning" role="status">{`⚠ Can't compile: ${issue.message}`}</div>}
    {objects.length === 0 && <p className="sel-hint empty-hint">{t('No objects yet. Draw a shape or import an image to start.')}</p>}
    {objects.length > 0 && (
-    <div className="object-rows" role="listbox" aria-label={t('Sewing order')} aria-multiselectable="true">
+    <div className="object-rows" role="listbox" aria-label={t('Layers')} aria-multiselectable="true">
      {entriesOf(objects, collapsed).map(entry => entry.kind === 'group' ? (
       <GroupRow
        key={`group:${entry.groupId}`}

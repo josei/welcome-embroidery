@@ -180,7 +180,7 @@ export const ES={
   'Centro Y (mm)','Total angle (°)':'Ángulo total (°)',
 'Create array':'Crear matriz','Linear and radial use the selected object; along-path needs the motif and the path selected':
   'Lineal y radial usan el objeto seleccionado; a lo largo de un trazado necesita el motivo y el trazado seleccionados',
-'Sewing order':'Orden de bordado','To back':'Al fondo','Sew first':'Bordar primero','Earlier':'Antes','Sew earlier':'Bordar antes','Later':'Después',
+'Layers':'Capas','Sewing order':'Orden de bordado','To back':'Al fondo','Sew first':'Bordar primero','Earlier':'Antes','Sew earlier':'Bordar antes','Later':'Después',
   'Sew later':'Bordar después','To front':'Al frente','Sew last':'Bordar al final','Sort by color':'Ordenar por color',
   'Group objects by thread color to minimize color changes':'Agrupa los objetos por color de hilo para minimizar los cambios de color',
 'Document stitch settings':'Ajustes de puntada del documento','Tie-in / tie-off':'Remates de inicio y fin','Trim long jumps':'Cortar saltos largos',
