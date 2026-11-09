@@ -3547,3 +3547,22 @@ test('a keyboard user Tabs from Add lettering to the lettering object, Enter ope
  await page.keyboard.press('Enter');await expect(page.locator('#canvasText')).toBeFocused();
  expect(errors).toEqual([]);
 });
+
+test('sewing-order list: Shift selects a range, Ctrl or Cmd adds or removes one row, and a batch edit applies to the range',async({page})=>{
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());await newDesign(page);
+ for(let i=0;i<6;i++){await page.locator('#rect').click();await page.locator('#posX').fill(String(-60+i*20));await page.locator('#posX').press('Tab');await page.locator('#posY').fill('-10');await page.locator('#posY').press('Tab');}
+ const rows=page.locator('.object-row'),selected=page.locator('.object-row.selected');
+ await expect(rows).toHaveCount(6);
+ await rows.nth(0).click();await expect(selected).toHaveCount(1);
+ await rows.nth(3).click({modifiers:['Shift']});await expect(selected).toHaveCount(4);
+ for(const i of [0,1,2,3]) await expect(rows.nth(i)).toHaveClass(/selected/);
+ await expect(page.getByText('4 objects selected')).toBeVisible();
+ await rows.nth(1).click({modifiers:['ControlOrMeta']});await expect(selected).toHaveCount(3);await expect(rows.nth(1)).not.toHaveClass(/selected/);
+ await rows.nth(5).click({modifiers:['ControlOrMeta']});await expect(selected).toHaveCount(4);await expect(rows.nth(5)).toHaveClass(/selected/);
+ await expect(page.getByText('4 objects selected')).toBeVisible();
+ // A batch edit on the selection reaches every selected object (the anchor is still row 1, so Shift now runs from it).
+ await rows.nth(0).click();await rows.nth(2).click({modifiers:['Shift']});await expect(selected).toHaveCount(3);
+ const before=await page.locator('#angle').inputValue();await page.locator('#angle').fill('30');await page.locator('#angle').press('Tab');
+ await rows.nth(4).click();await expect(page.locator('#angle')).not.toHaveValue('30');await rows.nth(1).click();await expect(page.locator('#angle')).toHaveValue('30');await rows.nth(2).click({modifiers:['ControlOrMeta']});await rows.nth(0).click({modifiers:['ControlOrMeta']});expect(before).not.toBe('30');
+ expect(errors).toEqual([]);
+});

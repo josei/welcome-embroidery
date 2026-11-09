@@ -115,7 +115,9 @@ export function mountRowActions() {
       editor.toast(outOfRangeMessage('Row spacing', ROW_SPACING_RANGE, fillValuesState.get().spacing));
       return false;
     }
-    editor.edit(selState().selected ? [{op: 'set_object', id: selState().selected, [field]: Number(text)}] : [{op: 'set_settings', [field]: Number(text)}]);
+    // A multi-selection (from the list's Shift or Ctrl clicks, or the canvas) gets the value on every selected object.
+    const ids = selState().multi.size ? orderedIds() : selState().selected ? [selState().selected] : [];
+    editor.edit(ids.length ? ids.map(id => ({op: 'set_object', id, [field]: Number(text)})) : [{op: 'set_settings', [field]: Number(text)}]);
   };
 
   raisedRowsActions.choose = (field, checked) => {

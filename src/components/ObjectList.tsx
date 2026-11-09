@@ -6,8 +6,10 @@ import {layersActions} from '../layersState.js';
 import {sewingCountsState} from '../sewingCountsState.js';
 import {compileIssueState} from '../compileIssueState.js';
 import {t} from '../i18n.js';
+import {selectionChange} from '../objectListSelection.js';
+import type {Click} from '../objectListSelection.js';
 // The object list in sewing order, rendered by React. It is a listbox: each row is an option that a click, or Enter or Space,
-// selects (Shift adds to the selection). Hide and Lock are their own buttons beside each row, not inside it. Groups collapse,
+// selects (Shift selects a range from the anchor, Ctrl or Cmd adds or removes one row). Hide and Lock are their own buttons beside each row, not inside it. Groups collapse,
 // a double click renames, and rows drag to reorder. Ids and classes match the markup it replaced, because the styles and tests use them.
 interface Obj {
  id: string;
@@ -31,6 +33,8 @@ const STITCH_ICON: Record<string, string> = {
 };
 const icon = (name: string) => <svg className="icon" aria-hidden="true"><use href={`#${name}`} /></svg>;
 type Drop = {id: string; after: boolean};
+// How a click or key press selects: Shift is a range, Ctrl or Cmd toggles one row, anything else replaces the selection.
+const clickOf = (e: {shiftKey: boolean; ctrlKey: boolean; metaKey: boolean}): Click => (e.shiftKey ? 'range' : e.ctrlKey || e.metaKey ? 'toggle' : 'plain');
 type Entry = {kind: 'group'; groupId: string; members: Obj[]; open: boolean} | {kind: 'row'; o: Obj; depth: number};
 
 // Groups are listed once, at their first member; the members follow, unless the group is collapsed.
@@ -118,7 +122,7 @@ function ObjectRow({o, depth, selected, dropping, renaming, count, warning, onRe
  count: number | undefined;
  warning: string | undefined;
  onRenameDone: (text: string | null) => void;
- onSelect: (shift: boolean) => void;
+ onSelect: (click: Click) => void;
  onToggleVisible: () => void;
  onToggleLock: () => void;
 }) {
@@ -144,7 +148,7 @@ function ObjectRow({o, depth, selected, dropping, renaming, count, warning, onRe
      if (e.target !== e.currentTarget) return;
      if (e.key === 'Enter' || e.key === ' ') {
       e.preventDefault();
-      onSelect(e.shiftKey);
+      onSelect(clickOf(e));
      }
     }}
    >
@@ -189,7 +193,7 @@ function GroupRow({groupId, members, open, selectedIds, count, warning, onSelect
  selectedIds: Set<string>;
  count: number | undefined;
  warning: string | undefined;
- onSelect: (shift: boolean) => void;
+ onSelect: (click: Click) => void;
  onToggleOpen: () => void;
  onToggleVisible: () => void;
  onToggleLock: () => void;
@@ -215,7 +219,7 @@ function GroupRow({groupId, members, open, selectedIds, count, warning, onSelect
      if (e.target !== e.currentTarget) return;
      if (e.key === 'Enter' || e.key === ' ') {
       e.preventDefault();
-      onSelect(e.shiftKey);
+      onSelect(clickOf(e));
      }
     }}
    >
@@ -254,22 +258,22 @@ export function ObjectList() {
   const g = objects.find(o => o.id === id)?.groupId;
   return g ? idsOfGroup(g) : [id];
  };
- // Selecting a row or group is the same whether a click or the keyboard (Enter or Space) asks for it. Shift adds or removes one.
- const selectRow = (id: string, shift: boolean) => {
-  if (shift) {
-   const next = new Set(sel.multi);
-   if (next.has(id) && next.size > 1) next.delete(id);
-   else next.add(id);
-   layersActions.select([...next], id);
-  } else {
-   layersActions.select(idsWithGroup(id), id);
-  }
+ // The anchor: the row last clicked with a plain or Ctrl/Cmd click. A Shift-click selects from it to the clicked row.
+ const anchor = useRef<string | null>(null);
+ // The rows as the list shows them, each with the ids it selects: a group row and the rows inside it select all the members.
+ const entries = entriesOf(objects, collapsed);
+ const rows = entries.map(entry => (entry.kind === 'group' ? entry.members.map(m => m.id) : idsWithGroup(entry.o.id)));
+ // Selecting a row or group is the same whether a click or the keyboard (Enter or Space) asks for it. The index is the entry's
+ // own, not found by id: an open group's header also lists its members, so an id match would land on the header.
+ const pick = (at: number, click: Click) => {
+  if (at < 0) return;
+  const change = selectionChange(rows, sel.multi, anchor.current, at, click);
+  if (!change) return;
+  anchor.current = change.anchor;
+  layersActions.select(change.ids, change.primary);
  };
- const selectGroup = (groupId: string, shift: boolean) => {
-  const ids = idsOfGroup(groupId);
-  if (shift) layersActions.select([...new Set([...sel.multi, ...ids])], ids.at(-1)!);
-  else layersActions.select(ids, ids.at(-1)!);
- };
+ const selectRow = (id: string, click: Click) => pick(entries.findIndex(e => e.kind === 'row' && e.o.id === id), click);
+ const selectGroup = (groupId: string, click: Click) => pick(entries.findIndex(e => e.kind === 'group' && e.groupId === groupId), click);
  // Hide and Lock toggle the given objects: they show or unlock unless every one already is.
  const toggleVisible = (ids: string[]) => {
   const hide = !objects.filter(o => ids.includes(o.id)).every(o => o.visible === false);
@@ -294,12 +298,13 @@ export function ObjectList() {
   const head = target.closest<HTMLElement>('.group-row');
   const row = target.closest<HTMLElement>('.object-row');
   if (head) {
-   selectGroup(head.dataset.group!, e.shiftKey);
+   selectGroup(head.dataset.group!, clickOf(e));
    return;
   }
   if (!row) return;
   const id = row.dataset.id!;
-  if (!e.shiftKey && target.closest('.row-name')) {
+  const click = clickOf(e);
+  if (click === 'plain' && target.closest('.row-name')) {
    const now = performance.now();
    if (lastClick.current && lastClick.current.id === id && now - lastClick.current.t < 450) {
     lastClick.current = null;
@@ -308,7 +313,7 @@ export function ObjectList() {
    }
    lastClick.current = {id, t: now};
   }
-  selectRow(id, e.shiftKey);
+  selectRow(id, click);
  };
  const onDragStart = (e: DragEvent<HTMLDivElement>) => {
   const row = (e.target as Element).closest<HTMLElement>('.object-row');
@@ -363,7 +368,7 @@ export function ObjectList() {
        selectedIds={sel.multi}
        count={groupCount(entry.members, counts)}
        warning={groupWarning(entry.members)}
-       onSelect={shift => selectGroup(entry.groupId, shift)}
+       onSelect={click => selectGroup(entry.groupId, click)}
        onToggleOpen={() => toggleGroupOpen(entry.groupId)}
        onToggleVisible={() => toggleVisible(entry.members.map(m => m.id))}
        onToggleLock={() => toggleLocked(entry.members.map(m => m.id))}
@@ -382,7 +387,7 @@ export function ObjectList() {
         setRenaming(null);
         layersActions.rename(entry.o.id, text);
        }}
-       onSelect={shift => selectRow(entry.o.id, shift)}
+       onSelect={click => selectRow(entry.o.id, click)}
        onToggleVisible={() => toggleVisible([entry.o.id])}
        onToggleLock={() => toggleLocked([entry.o.id])}
       />
