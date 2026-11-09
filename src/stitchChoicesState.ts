@@ -9,6 +9,8 @@ export interface StitchChoices {
   cap: string;
   join: string;
   type: string;
+  /** The selected objects differ in stitch type; `type` is then '' and no button is active. */
+  typeMixed: boolean;
   runStyle: string;
   typeDisabled: boolean;
   satinOff: boolean;
@@ -20,6 +22,7 @@ export const stitchChoicesState = createStore<StitchChoices>({
   cap: 'butt',
   join: 'round',
   type: 'fill',
+  typeMixed: false,
   runStyle: 'single',
   typeDisabled: false,
   satinOff: false,

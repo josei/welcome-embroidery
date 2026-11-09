@@ -2,6 +2,7 @@ import {documentNow} from './documentState.js';
 import {selState} from './selectionState.js';
 import {setLayout} from './layoutState.js';
 import {angleLayout} from './angleLayout.js';
+import {MIXED_THREAD, mixedStitchTypes, mixedThreads} from './mixedSelection.js';
 import {setSelectionLabels} from './selectionLabelsState.js';
 import {setInspectorText} from './inspectorTextState.js';
 import {setStitchRow, stitchRowsState} from './stitchRowsState.js';
@@ -169,6 +170,7 @@ export function syncStitchPanel() {
     (v.kind === 'rect' || v.kind === 'ellipse' || (v.kind === 'path' && v.closed) ||
       (v.kind === 'text' && getFont(v.font)?.kind === 'outline'));
   const fillable = picked.some(isFillable);
+  const typeMixed = mixedStitchTypes(picked), threadMixed = mixedThreads(picked);
 
   setLayout({secTransform: !(n >= 1)});
   setLayout({secStitch: false});
@@ -197,7 +199,7 @@ export function syncStitchPanel() {
   const underlayable = n === 0 || fillable || satinish;
 
   if (o) {
-    setStitchChoices({type: ['run', 'satin', 'motif', 'sequin', 'bead', 'bling'].includes(o.stitch ?? '') ? o.stitch : 'fill'});
+    setStitchChoices({type: typeMixed ? '' : ['run', 'satin', 'motif', 'sequin', 'bead', 'bling'].includes(o.stitch ?? '') ? o.stitch : 'fill'});
     setStitchRow('satinRow', o.stitch !== 'satin');
     setTypeRows({satinWidth: String(o.satinWidth ?? 3)});
     setStitchChoices({satinOff: o.kind !== 'path'});
@@ -467,16 +469,17 @@ export function syncStitchPanel() {
   panel.pathJoin = !picked.some(v => v.kind === 'path');
 
   if (o) {
-    let options = stitchPanelState.get().threadOptions;
+    let options = stitchPanelState.get().threadOptions.filter(v => v.value !== MIXED_THREAD);
     if (!options.some(v => v.value.toLowerCase() === o.thread.toLowerCase())) {
       options = [...options, {
         value: o.thread,
         label: o.kind === 'stitch_layer' ? 'Imported · replace all' : 'Custom',
       }];
     }
-    panel.threadOptions = options;
-    panel.threadValue = o.thread;
+    panel.threadOptions = threadMixed ? [{value: MIXED_THREAD, label: t('Mixed')}, ...options] : options;
+    panel.threadValue = threadMixed ? MIXED_THREAD : o.thread;
   }
 
+  setStitchChoices({typeMixed});
   setStitchPanel(panel);
 }

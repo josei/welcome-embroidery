@@ -723,6 +723,32 @@ test('batch angle: a mixed fill selection keeps Angle visible and disabled, with
  expect(errors).toEqual([]);
 });
 
+test('mixed selection: type and thread say Mixed when objects differ, and a type click changes only the last-clicked object',async({page})=>{
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));
+ await page.goto('/');page.on('dialog',d=>d.accept());await newDesign(page);
+ await page.locator('#file').setInputFiles({name:'mixed.svg',mimeType:'image/svg+xml',buffer:Buffer.from('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect x="10" y="10" width="40" height="30" fill="#527461"/><path d="M20 70 C30 50 40 90 80 60" stroke="#d9897e" fill="none"/></svg>')});
+ const rows=page.locator('.object-row'),rect=rows.filter({hasText:'Imported rect'}),path=rows.filter({hasText:'Imported path'});
+ await expect(rows).toHaveCount(2);
+ const checked=name=>page.getByRole('radio',{name,exact:true});
+ // A fill and a satin column with different threads: no type button is active, and both controls say Mixed.
+ await rect.click();await path.click({modifiers:['Shift']});
+ await expect(page.locator('#typeMixedHint')).toBeVisible();await expect(page.locator('#typeMixedHint')).toContainText('Mixed');
+ await expect(page.locator('[role="radiogroup"][aria-label="Stitch type"] button[aria-checked="true"]')).toHaveCount(0);
+ await expect(page.locator('#thread')).toHaveValue('');
+ await expect(page.locator('#thread option[value=""]')).toHaveAttribute('disabled');
+ // A type click on the mixed selection changes only the last-clicked object (the path), not the fill.
+ await checked('Running stitch').click();
+ await rect.click();await expect(checked('Fill')).toHaveAttribute('aria-checked','true');await expect(page.locator('#typeMixedHint')).toHaveCount(0);
+ await path.click();await expect(checked('Running stitch')).toHaveAttribute('aria-checked','true');
+ // Same thread on both: the thread shows that colour, and the type stays Mixed while the types differ.
+ await rect.click();await page.locator('#thread').selectOption('#d9897e');
+ await path.click();await page.locator('#thread').selectOption('#d9897e');
+ await rect.click();await path.click({modifiers:['Shift']});
+ await expect(page.locator('#thread')).toHaveValue('#d9897e');
+ await expect(page.locator('#typeMixedHint')).toBeVisible();
+ expect(errors).toEqual([]);
+});
+
 test('fill patterns: spiral, meander and guided recompile, and the guide is drawn on the canvas',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));
  await page.goto('/');page.on('dialog',d=>d.accept());await newDesign(page);await page.locator('#rect').click();

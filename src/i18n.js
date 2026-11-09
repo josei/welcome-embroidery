@@ -231,6 +231,7 @@ export const ES={
   '¿Revocar este enlace? Los agentes que lo usen perderán el acceso de inmediato.',
 'Paste':'Pegar','Select all':'Seleccionar todo','Fit hoop in view':'Ajustar el bastidor a la vista','Fit hoop':'Ajustar bastidor','Fit everything':'Ajustar todo','Edit text':'Editar texto',
   'Edit nodes':'Editar nodos','Edit nodes (convert to path)':'Editar nodos (convertir a trazado)','Convert to path':'Convertir a trazado','Satin column needs a path. Convert to path first.':'La columna de satén necesita un trazado. Convierte primero a trazado.',
+  'Mixed':'Mezclado','Mixed: these objects have different stitch types. Changing type applies to the last-clicked object only.':'Mezclado: estos objetos tienen tipos de puntada distintos. Cambiar el tipo se aplica solo al objeto que clicaste por último.',
 'Cut':'Cortar','Copy':'Copiar','Group':'Agrupar','Ungroup':'Desagrupar','Sew first (to back)':'Bordar primero (al fondo)','Sew last (to front)':
   'Bordar al final (al frente)','Unlock':'Desbloquear','Lock':'Bloquear','Hide':'Ocultar','Zoom to selection':'Zoom a la selección',
 'based on':'basada en','single-line font: spacing, bold and italic apply to bundled outline/stitch fonts; pick a satin or fill font to set the stitch density':
