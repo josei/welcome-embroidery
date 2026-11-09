@@ -2876,6 +2876,25 @@ test('canceling Open or Import leaves a notice; a blank design is replaced witho
 });
 
 test('lettering text applies while typing, without Tab, and survives a canvas click',async({page})=>{page.on('dialog',d=>d.accept());const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');await newDesign(page);await page.locator('#letter').click();await expect(page.locator('#canvasText')).toBeFocused();await page.keyboard.type('HI');await expect(page.locator('#canvasText')).toHaveValue('HI');const width=async()=>(await page.locator('#shapes g.shape').first().boundingBox()).width;const w0=await width();await page.keyboard.type(' WORLD');await expect(page.locator('#canvasText')).toHaveValue('HI WORLD');await expect.poll(width).toBeGreaterThan(w0);const a=await page.locator('#art').boundingBox();await page.mouse.click(a.x+a.width-20,a.y+a.height-20);await expect(page.locator('#canvasText')).toHaveCount(0);await expect(page.locator('.object-row').first()).toContainText('Text: HI WORLD');await expect.poll(width).toBeGreaterThan(w0);expect(await width()).toBeGreaterThan(w0);expect(errors).toEqual([]);});
+test('new lettering lands at the hoop centre, and a second one steps down rather than stacking',async({page})=>{page.on('dialog',d=>d.accept());const errors=[];page.on('pageerror',e=>errors.push(e.message));
+ await page.setViewportSize({width:1600,height:1000});await page.goto('/');await newDesign(page);
+ await page.locator('#letter').click();await page.keyboard.press('Enter');
+ await expect(page.locator('.object-row').filter({hasText:'BLOOM'}).first()).toBeAttached();
+ // The hoop ring is the hoop's size in mm; its on-screen box gives the scale to check the lettering box within 1 mm.
+ const ring=await page.locator('#hoopRing').boundingBox();const mmPerPx=(Number(await page.inputValue('#hoopW')))/ring.width;
+ const hc={x:ring.x+ring.width/2,y:ring.y+ring.height/2};
+ const box=async(i)=>page.evaluate((i)=>{const o=document.querySelectorAll('#art [data-id]')[i];return o?o.getBoundingClientRect().toJSON():null;},i);
+ const first=await box(0);
+ expect(first).not.toBeNull();
+ expect(Math.abs((first.x+first.width/2-hc.x)*mmPerPx)).toBeLessThan(1);
+ expect(Math.abs((first.y+first.height/2-hc.y)*mmPerPx)).toBeLessThan(1);
+ await page.locator('#letter').click();await page.keyboard.press('Enter');
+ await expect(page.locator('.object-row').filter({hasText:'BLOOM'})).toHaveCount(2);
+ const bboxes=await page.evaluate(()=>[...document.querySelectorAll('#art [data-id]')].map(o=>o.getBoundingClientRect().toJSON()));
+ const second=bboxes[bboxes.length-1];
+ expect(Math.abs(second.y-first.y)).toBeGreaterThan(1);
+ expect(errors).toEqual([]);});
+
 test('new lettering opens in place with its placeholder selected; typed letters never reach tool shortcuts',async({page})=>{page.on('dialog',d=>d.accept());const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');await newDesign(page);const before=await page.locator('.object-row').count();await page.locator('#letter').click();await expect(page.locator('#canvasText')).toBeFocused();await expect(page.locator('#selected')).toContainText('BLOOM');await page.keyboard.type('Hello');await expect(page.locator('#canvasText')).toHaveValue('Hello');await expect(page.locator('.object-row')).toHaveCount(before+1);await page.keyboard.press('Enter');await expect(page.locator('#canvasText')).toHaveCount(0);await expect(page.locator('.object-row').first()).toContainText('Text: HELLO');await expect(page.locator('#selected')).toContainText('HELLO');await expect(page.locator('.object-row')).toHaveCount(before+1);expect(errors).toEqual([]);});
 test('placing lettering selects it and focuses its text; empty double-click adds nothing',async({page})=>{page.on('dialog',d=>d.accept());const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');await newDesign(page);await page.locator('#letter').click();await expect(page.locator('#canvasText')).toBeFocused();await expect(page.locator('#letteringText')).toBeEnabled();await page.keyboard.type('HELLO');await page.keyboard.press('Tab');await expect(page.locator('.object-row').first()).toContainText('Text: HELLO');await expect(page.locator('.object-row')).toHaveCount(1);const a=await page.locator('#art').boundingBox();await page.mouse.dblclick(a.x+30,a.y+30);await expect(page.locator('.object-row')).toHaveCount(1);const t=page.locator('#shapes g.shape').first(),tb=await t.boundingBox();await page.mouse.dblclick(tb.x+tb.width/2,tb.y+tb.height/2);await expect(page.locator('#canvasText')).toBeFocused();await page.keyboard.type('X');await page.keyboard.press('Escape');await expect(page.locator('#canvasText')).toHaveCount(0);await expect(page.locator('.object-row').first()).toContainText('HELLO');expect(errors).toEqual([]);});
 
