@@ -3,6 +3,7 @@ import {useSyncExternalStore} from 'react';
 import {toolActions, toolMode} from '../toolMode.js';
 import {gridSnapActions, gridSnapState} from '../gridSnapState.js';
 import {toolbarActions} from '../toolbarCommands.js';
+import {focusStitchType} from '../focusStitchType.js';
 
 function toolClass(current: string, name: string) {
  return current === name ? 'icon-button active-tool' : 'icon-button';
@@ -65,9 +66,12 @@ export function PathTool() {
 // first, so the Select button is the pressed one after the object is placed.
 export function AddShapeButton({kind, id, label, icon}: {kind: 'rect' | 'ellipse' | 'text'; id: string; label: string; icon: string}) {
  return (
-  <button aria-pressed={false} className="icon-button" id={id} aria-label={label} title={label} data-tooltip={label} onClick={() => {
+  <button aria-pressed={false} className="icon-button" id={id} aria-label={label} title={label} data-tooltip={label} onClick={event => {
     toolActions.press('select');
     toolbarActions.addShape(kind);
+    // A keyboard add (detail 0) moves focus to the new shape's Stitch type controls, so the next key works on it. Lettering
+    // keeps focus in place: its own box opens from there (see the lettering test). Deferred until React draws the inspector.
+    if (event.detail === 0 && kind !== 'text') setTimeout(focusStitchType, 0);
   }}>
    <svg className="icon"><use href={`#i-${icon}`}/></svg>
   </button>

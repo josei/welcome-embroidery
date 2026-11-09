@@ -37,7 +37,8 @@ export function ToastStack() {
   };
  }, []);
  return (
-  <div id={"toast"}>
+  // The container is the live region: it stays mounted, so each message added to it is announced (the rows also carry role=status or alert).
+  <div id={"toast"} aria-live={"polite"} aria-atomic={"false"}>
    {visible.map(entry => {
     const error = entry.kind === 'error';
     return (

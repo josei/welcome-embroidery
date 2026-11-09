@@ -19,6 +19,7 @@ import {copyStyle, pasteStyle} from './styleClipboard.js';
 import {editor} from './editorContext.js';
 import {projectSaveAs} from './projectIO.js';
 import {TOOL_KEYS} from './shortcutTable.js';
+import {focusStitchType} from './focusStitchType.js';
 
 /** @param {string} id */
 function press(id) {
@@ -98,6 +99,8 @@ export function mountKeyboard() {
     // Enter on a focused button (menu bar, Thread button, toolbar) is left to that button's native activation;
     // only elsewhere does it start editing the selected object's nodes.
     if (e.key === 'Enter' && selState().multi.size === 1 && !(/** @type {any} */ (e.target))?.closest?.('button, .file-menu')) { e.preventDefault(); enterEdit(selectedObject()); return; }
+    // I moves focus to the selected object's Stitch type control: the keyboard path to its settings, without Tabbing the tool row.
+    if (key === 'i' && !mod && !e.altKey && !e.shiftKey && selState().selected && focusStitchType()) { e.preventDefault(); return; }
     if (e.key === '[') return moveSelection('backward');
     if (e.key === ']') return moveSelection('forward');
     if (e.key === 'Home' && selState().multi.size) { e.preventDefault(); return moveSelection('back'); }

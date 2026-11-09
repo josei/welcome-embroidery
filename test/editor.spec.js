@@ -3556,6 +3556,47 @@ test('a keyboard user Tabs from Add lettering to the lettering object, Enter ope
  expect(errors).toEqual([]);
 });
 
+// Focus after adding a shape from the keyboard (issue #281). Add rectangle is a Tab stop; the first Stitch type control is the
+// first enabled radio in the Stitch type group. Tab stops counted from Add rectangle are measured below; the target in the issue
+// was 8, and the path from the tool row is not that short, so the I shortcut is the documented short path.
+test('keyboard add moves focus to the new shape\'s Stitch type control; I focuses it; the toast is a polite live region',async({page})=>{
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));page.on('dialog',d=>d.accept());
+ await page.goto('/');await newDesign(page);
+ await expect(page.locator('#toast')).toHaveAttribute('aria-live','polite');
+ const stitchFocused=()=>page.evaluate(()=>!!document.activeElement?.closest('#type ~ .icon-seg'));
+ // Count Tab stops from Add rectangle to the first Stitch type control (an object must be selected for those controls to show).
+ await page.locator('#rect').click();await expect(page.locator('.object-row.selected')).toHaveCount(1);
+ await page.locator('#rect').focus();
+ let stops=0;while(!(await stitchFocused())&&stops<60){await page.keyboard.press('Tab');stops++;}
+ expect(await stitchFocused()).toBe(true);
+ console.log(`Tab stops from Add rectangle to Stitch type: ${stops}`);
+ // I focuses the selected object's Stitch type control from anywhere outside a field.
+ await page.locator('.design-canvas, #art').first().focus().catch(()=>{});await page.evaluate(()=>document.activeElement?.blur());
+ await page.keyboard.press('i');expect(await stitchFocused()).toBe(true);
+ await expect(page.locator('#type ~ .icon-seg button[aria-checked=true]')).toBeFocused();
+ // A keyboard add of a rectangle: focus lands on the new shape's Stitch type control and a toast is announced.
+ await page.locator('#rect').focus();await page.keyboard.press('Enter');
+ await expect(page.locator('.object-row')).toHaveCount(2);
+ await expect.poll(stitchFocused).toBe(true);
+ await expect(page.locator('#toast .toast-item').first()).toBeAttached();
+ expect(errors).toEqual([]);
+});
+
+// The format select must receive its arrow keys: the page's own handlers leave them alone. Headless Chromium on macOS does not
+// change the select's value on ArrowDown (the native list popup takes the key, and headless has no popup), so the value is not
+// asserted here; what the page controls is whether the key is cancelled before the select sees it.
+test('the export format select does not cancel its arrow keys',async({page})=>{
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');await newDesign(page);
+ await page.locator('#rect').click();await expect(page.locator('.object-row')).toHaveCount(1);
+ await page.locator('#export').click();await expect(page.locator('#format')).toBeVisible();
+ await page.locator('#format').focus();
+ // Read defaultPrevented on window, the last stop of the bubble path, so every page handler has run by then.
+ await page.evaluate(()=>{window.__fmtPrevented=null;window.addEventListener('keydown',e=>{if(e.key==='ArrowDown')window.__fmtPrevented=e.defaultPrevented;},{once:true});});
+ await page.keyboard.press('ArrowDown');
+ expect(await page.evaluate(()=>window.__fmtPrevented)).toBe(false);
+ expect(errors).toEqual([]);
+});
+
 test('sewing-order list: Shift selects a range, Ctrl or Cmd adds or removes one row, and a batch edit applies to the range',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());await newDesign(page);
  for(let i=0;i<6;i++){await page.locator('#rect').click();await page.locator('#posX').fill(String(-60+i*20));await page.locator('#posX').press('Tab');await page.locator('#posY').fill('-10');await page.locator('#posY').press('Tab');}
