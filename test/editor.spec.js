@@ -3267,3 +3267,13 @@ test('add rectangle and add ellipse select the new shape and say where it went',
  await expect(page.locator('#toast')).toContainText('Ellipse added at hoop centre, 24 × 16 mm');
  expect(errors).toEqual([]);
 });
+
+test('Enter on the focused Thread button opens the colour picker without starting node edit',async({page})=>{
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));
+ await page.goto('/');page.on('dialog',d=>d.accept());await newDesign(page);await page.locator('#rect').click();
+ const btn=page.locator('#thread + .thread-btn');await btn.focus();await page.keyboard.press('Enter');
+ await expect(page.locator('#threadPop')).toBeVisible();await expect(page.locator('.path-node')).toHaveCount(0);
+ await page.keyboard.press('Escape');await btn.focus();await page.keyboard.press('Space');
+ await expect(page.locator('#threadPop')).toBeVisible();await expect(page.locator('.path-node')).toHaveCount(0);
+ expect(errors).toEqual([]);
+});
