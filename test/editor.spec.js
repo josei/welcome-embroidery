@@ -3524,3 +3524,26 @@ test('Tab reaches the first drawing tool within one stop of the top of the page,
  expect(await focusId()).toBe('select');
  expect(errors).toEqual([]);
 });
+
+test('a keyboard user Tabs from Add lettering to the lettering object, Enter opens its text selected, Shift+Tab returns to the object',async({page})=>{
+ page.on('dialog',d=>d.accept());const errors=[];page.on('pageerror',e=>errors.push(e.message));
+ await page.goto('/');await newDesign(page);
+ await page.locator('#letter').click();await page.keyboard.type('FOX');await page.keyboard.press('Enter');
+ await expect(page.locator('#letter')).toBeFocused();await expect(page.locator('.object-row.selected')).toHaveCount(1);
+ // Tab from Add lettering reaches the object's selection handle (the first handle, after the canvas) with a visible focus ring.
+ for(let i=0;i<40;i++){await page.keyboard.press('Tab');if(await page.evaluate(()=>document.activeElement?.classList.contains('sel-handle')))break;}
+ await expect(page.locator('.sel-handle').first()).toBeFocused();
+ expect(await page.evaluate(()=>getComputedStyle(document.activeElement).outlineStyle)).not.toBe('none');
+ // Enter on the focused handle opens the lettering box focused, with its text selected.
+ await page.keyboard.press('Enter');
+ await expect(page.locator('#canvasText')).toBeFocused();await expect(page.locator('#canvasText')).toHaveAttribute('aria-label','Edit lettering text');
+ expect(await page.evaluate(()=>[document.activeElement.selectionStart,document.activeElement.selectionEnd])).toEqual([0,3]);
+ // Shift+Tab from the box commits the text and returns to the same object, not to BODY.
+ await page.keyboard.press('Shift+Tab');
+ await expect(page.locator('#canvasText')).toHaveCount(0);
+ await expect(page.locator('.sel-handle').first()).toBeFocused();
+ await expect(page.locator('.object-row').first()).toContainText('Lettering: FOX');
+ // The object is still selected, so Enter reopens its text again.
+ await page.keyboard.press('Enter');await expect(page.locator('#canvasText')).toBeFocused();
+ expect(errors).toEqual([]);
+});

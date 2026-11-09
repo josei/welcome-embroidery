@@ -37,6 +37,12 @@ export function CanvasTextEditor() {
       e.preventDefault();
       finish(false, e.currentTarget.value);
       document.getElementById('letter')?.focus();
+    } else if (e.key === 'Tab' && e.shiftKey) {
+      // Shift+Tab from the box goes back to the object it edits (its first selection handle, the one Tab reaches
+      // from Add lettering), not to BODY. The text is committed as when the box is left by clicking outside.
+      e.preventDefault();
+      finish(true, e.currentTarget.value);
+      document.querySelector<HTMLElement>('#art .sel-handle')?.focus();
     }
   };
   // The caption sits at the bottom of the canvas, away from the floating toolbar at the top, and says what each key and a
