@@ -26,6 +26,12 @@ function press(id) {
 
 /** Mounts the editor's keyboard handling. */
 export function mountKeyboard() {
+  // A toolbar button clicked with the mouse keeps focus, so a later Enter would go to it instead of starting node edit.
+  // Release focus after mouse clicks only (detail > 0); keyboard activation keeps focus for keyboard users.
+  document.addEventListener('click', e => {
+    const button = /** @type {any} */ (e.target)?.closest?.('button');
+    if (button && e.detail > 0 && !button.closest('.file-menu, .thread-btn')) button.blur();
+  });
   // File shortcuts run the header buttons. Save also works while a text field has focus, as browsers' Save does;
   // Open and New wait until focus is outside fields so they never fire while typing. Ctrl+Shift+S is Save As.
   document.addEventListener('keydown', e => {
@@ -90,9 +96,9 @@ export function mountKeyboard() {
       if (ids.length) editor.edit([{op: 'to_path', ids}]);
       return;
     }
-    // Enter on a menu bar header or item opens or runs that menu, and Enter on a focused Thread button opens its colour picker;
+    // Enter on a focused button (menu bar, Thread button, toolbar) is left to that button's native activation;
     // only elsewhere does it start editing the selected object's nodes.
-    if (e.key === 'Enter' && selState().multi.size === 1 && !(/** @type {any} */ (e.target))?.closest?.('.file-menu, .thread-btn')) { e.preventDefault(); enterEdit(selectedObject()); return; }
+    if (e.key === 'Enter' && selState().multi.size === 1 && !(/** @type {any} */ (e.target))?.closest?.('button, .file-menu')) { e.preventDefault(); enterEdit(selectedObject()); return; }
     if (e.key === '[') return moveSelection('backward');
     if (e.key === ']') return moveSelection('forward');
     if (e.key === 'Home' && selState().multi.size) { e.preventDefault(); return moveSelection('back'); }
