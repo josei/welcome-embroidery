@@ -1203,6 +1203,17 @@ test('autosave: an edited design is offered back after a reload; starting fresh 
  expect(errors).toEqual([]);
 });
 
+test('a hovered tool, the active tool and hover on the active tool look three different ways',async({page})=>{
+ await page.goto('/');await expect(page.locator('#count')).toContainText('compiled');
+ const look=async loc=>loc.evaluate(el=>{const s=getComputedStyle(el);return {bg:s.backgroundColor,shadow:s.boxShadow,color:s.color};});
+ await page.locator('#select').click();await expect(page.locator('#select')).toHaveClass(/active-tool/);
+ await page.locator('#rect').hover();const hovered=await look(page.locator('#rect'));
+ await page.mouse.move(0,0);const active=await look(page.locator('#select'));
+ await page.locator('#select').hover();const hoveredActive=await look(page.locator('#select'));
+ expect(new Set([hovered.bg,active.bg,hoveredActive.bg]).size).toBe(3);
+ expect(active.shadow).not.toBe('none');expect(hovered.shadow).toBe('none');expect(hoveredActive.shadow).not.toBe('none');
+});
+
 test('keyboard shortcut list opens with ? and the listed tool keys really work; the thread plan lists colors in sewing order',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));
  await page.goto('/');page.on('dialog',d=>d.accept());await expect(page.locator('#count')).toContainText('compiled');

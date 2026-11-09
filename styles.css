@@ -47,7 +47,8 @@ nav button[data-view]{padding:7px 13px;color:#66726c}nav button[data-view].activ
 .top #export{display:flex;align-items:center;justify-content:center;min-height:36px}
 .tool-row{display:flex;gap:4px;margin:0 0 10px}
 .tool-row .icon-button{background:#f6f7f5;color:#53635b}
-.tool-row .icon-button:hover,.tool-row .icon-button:focus-visible{background:var(--teal-soft);color:var(--teal)}
+.tool-row .icon-button:hover{background:#eef1ec;color:var(--teal)}
+.tool-row .icon-button:focus-visible{background:var(--teal-soft);color:var(--teal)}
 nav .icon-button{width:36px;height:36px}
 nav .icon-button:first-of-type{margin-left:auto}
 #playbackProgress{font-variant-numeric:tabular-nums;min-width:112px;color:#53635b}
@@ -60,7 +61,9 @@ nav .icon-button:first-of-type{margin-left:auto}
 @media(max-width:1000px){#playbackProgress{min-width:82px}#needlePosition{display:none}.top .icon-button{width:32px;min-width:32px;height:32px}}
 @media(prefers-reduced-motion:reduce){.icon-button[data-tooltip]::after{transition:none}}
 .top .icon-button[data-tooltip]::after{top:calc(100% + 7px);bottom:auto}
-.icon-button.active-tool{background:var(--teal-soft);border-color:var(--field-line);color:var(--teal)}
+.icon-button.active-tool{background:var(--teal-soft);border-color:var(--field-line);color:var(--teal);box-shadow:inset 3px 0 0 var(--teal)}
+/* Hover on the active tool gets its own deeper tint, so it differs from both hover and active; the left bar marks the active tool without relying on colour. */
+.icon-button.active-tool:hover,.tool-row .icon-button.active-tool:hover,.floating .icon-button.active-tool:hover{background:#cde7de;color:var(--teal-deep)}
 
 /* Single top bar: views and edit tools live in the header; the canvas gets the freed height. */
 .top .sep{width:1px;height:20px;background:#e3e6e1;flex:0 0 auto}
