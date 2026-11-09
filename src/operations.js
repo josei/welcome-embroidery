@@ -112,7 +112,7 @@ export function applyOperations(doc,operations) {
     else if(op.op==='remove_small_islands')removeSmallIslands(doc,op.ids,op.maxArea??1);
     else if(op.op==='clear_holes'){const o=doc.objects.find(v=>v.id===op.id);if(!o||o.kind!=='path')throw Error(`Unknown path: ${op.id}`);delete o.holes;}
     else if(op.op==='text_on_path'){const t=doc.objects.find(v=>v.id===op.textId),p=doc.objects.find(v=>v.id===op.pathId);
-      if(!t||t.kind!=='text')throw Error(`Unknown lettering object: ${op.textId}`);
+      if(!t||t.kind!=='text')throw Error(`Unknown text object: ${op.textId}`);
       if(!p||p.kind!=='path')throw Error(`Lettering follows a path object: ${op.pathId}`);
       const pts=alongPoints(p);delete t.rotation;t.along={points:pts,closed:Boolean(p.closed),offset:Number(op.offset)||0,pathId:p.id,sig:pathSig(p)};}
     else if(op.op==='set_along_offset'){const t=doc.objects.find(v=>v.id===op.textId);
@@ -138,7 +138,7 @@ export function applyOperations(doc,operations) {
       if(!(Number.isFinite(op.radius)&&op.radius>0&&op.radius<=200))throw Error('Corner radius must be between 0 and 200 mm.');
       if(o.smooth)throw Error('Turn off Smooth curve before rounding corners.');roundPathCorners(o,op.radius,op.indexes);}
     else if(op.op==='text_off_path'){const t=doc.objects.find(v=>v.id===op.textId);
-      if(!t||t.kind!=='text')throw Error(`Unknown lettering object: ${op.textId}`);delete t.along;}
+      if(!t||t.kind!=='text')throw Error(`Unknown text object: ${op.textId}`);delete t.along;}
     else if(op.op==='move_path_points'){const o=objectById(doc,op.id);
       if(o.kind!=='path'||!Array.isArray(op.indexes)||!op.indexes.length)throw Error('move_path_points needs a path and a list of node indexes.');const dx=
       Number(op.dx),dy=Number(op.dy);if(![dx,dy].every(Number.isFinite))throw Error('Move needs numeric dx and dy.');

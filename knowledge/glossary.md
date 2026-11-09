@@ -25,7 +25,7 @@ One term per concept, one spelling, in both languages. Strings live in the strin
 | Object (any drawn or imported item) | object | objeto | Used in messages when the type does not matter. |
 | Shape | shape | forma | Rectangle, ellipse, star and similar. |
 | Path | path | trazado | Open or closed outline drawn with points. |
-| Stitch layer (imported machine stitches) | stitch layer | capa de puntadas | Inspector format line: "JEF stitch layer". |
+| Stitch layer (imported machine stitches) | stitch layer | capa de puntadas | Used on the object list row, the inspector ("JEF stitch layer" / "JEF capa de puntadas") and in messages. |
 | Thread | thread | hilo | |
 | Thread color | thread color | color de hilo | |
 | Stitch | stitch | puntada | |
@@ -77,6 +77,12 @@ Every term below changed in this build. Spanish changes are in `src/i18n.js`; En
 | Default hoop preset | Default (preset option) / Estándar | 110 × 110 mm (named by size) |
 | Canceled (dialog messages) | cancelled | canceled |
 | Object-type nouns in messages | Select one shape, path or lettering first. | Select one shape, path or text first. |
+| Stitch layer, object list row | machine stitches | stitch layer / puntadas de máquina; capa de puntadas | Was "machine stitches" on the object list only. |
+| Stitch layer, inspector format line | JEF stitch layer (hardcoded English) | {fmt} stitch layer / {fmt} capa de puntadas | Now translated through the string table. |
+| Stitch layer, error message | Imported machine stitches cannot be converted to a path. | Imported stitch layers cannot be converted to a path. | Spanish: no key existed. |
+| Text object, font usage (Organize fonts) | used by N lettering object(s); Fonts used by lettering are kept… / (bundled, not removed): used by {n} text object (hardcoded English) | used by N text object(s); Fonts used by text objects are kept… / (bundled, not removed): used by … (translated) | Lettering is never an object type. |
+| Text object, validation message | …on lettering only. | …on text objects only. | |
+| Text object, error messages | Unknown lettering object; Name drop needs a lettering object | Unknown text object; Name drop needs a text object | English only, no Spanish key existed. |
 | Redwork by color (button) | Redwork by colour / Punto de ida y vuelta por color | Redwork by color / Punto de ida y vuelta por color |
 | Licenses (font notices) | licence / licencia | license / licencia |
 | Text on a path | Put the selected lettering on the selected path; Detach lettering from its path | Put the selected text on the selected path; Detach text from its path |
@@ -109,7 +115,7 @@ Strings changed from British to US spelling: colour→color, centre→center, gr
 | `src/i18n.js` | added keys: Redwork by color, the text-example line |
 | `test/editor.spec.js` | object-row selectors Lettering → Text; toast "Vertical lettering fitted" → "Vertical text fitted" |
 
-Already consistent, checked and left as they are:
+Already consistent, checked and left as they are (with the object-type nouns now aligned across the object list, inspector and status line):
 
 - Spanish "aro", "costura", "hoja de costura", "Consejos de costura", "Fuera del aro": none in `src/i18n.js` now. Batch export uses "bastidor" (`i18n.js` lines for "{perHoop} copias caben en un bastidor"). The worksheet uses "Hoja de bordado" and "Consejos de bordado".
 - "Hoop: Default 110 × 110 mm": no such string. The hoop is named by its size (`hoopLabel` in `src/hoops.js`).
@@ -119,7 +125,8 @@ Already consistent, checked and left as they are:
 
 These spellings are kept on purpose. Each is a code identifier, a file's legal text, or a value that is not a UI string.
 
-- `Lettering`: the tool, panel and section name. Proper name, same in both languages.
+- `Lettering`: the tool, panel and section name. Proper name, same in both languages. It is never used as an object-type noun in UI text.
+- Code comments and identifiers still say "lettering" (for example `lettering object`, `isRegistryFont`, `letteringFonts.ts`, the `lettering` engine type). They are not shown to users and renaming them is out of scope.
 - Code identifiers that use British spelling are not renamed: `colours`, `colourChanges`, `sortByColour`, `colourList`, `centre` and `millimetre` in variable names, `labelled` (the prop and the `.labelled` class), `metres` (the worksheet and playback helper names), `grey` (the `greyscale` names). Renaming them is out of scope and touches the public engine API.
 - Source comments may use British spelling (for example "centre", "millimetre", "colour"). They are not shown to users.
 - CSS keyword `grey` in `styles.css` and the comment "grey samples" in `src/photoCommands.ts` (a traced grey placeholder, not a label).

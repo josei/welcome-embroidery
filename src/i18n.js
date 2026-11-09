@@ -121,8 +121,7 @@ export const ES={
   'Satin columns too narrow or too wide':'Columnas de satén demasiado estrechas o anchas','Small text':'Texto pequeño','by {author}':'de {author}',
   'Teardrop':'Gota','Baguette':'Baguette','Marquise':'Marquesa','Pear':'Pera','Trim jumps from (mm)':'Cortar saltos desde (mm)','Ease in':'Entrada','Ease out':
   'Salida','Stem width (mm)':'Ancho del punto tallo (mm)','Laydown rows (mm)':'Filas de base (mm)','Raised underlay turn (° from the fill)':
-  'Giro del relleno elevado (° desde el relleno)','(bundled, not removed): used by {n} text object':
-  '(incluida, no se quita): usada por {n} objetos de texto','Accordion curve':'Curva del acordeón','Ease in and out':'Entrada y salida suaves',
+  'Giro del relleno elevado (° desde el relleno)','Accordion curve':'Curva del acordeón','Ease in and out':'Entrada y salida suaves',
   'Vertical text needs a bundled or loaded font. Choose one in Font.':'El texto vertical necesita una fuente incluida o cargada. Elige una en Fuente.',
   'Vertical text fitted to the hoop at {h} mm.':'Texto vertical ajustado al bastidor a {h} mm.','Remove small holes':'Quitar agujeros pequeños',
   'Remove small islands':'Quitar islas pequeñas','Island limit (mm²)':'Límite de islas (mm²)','Removed small islands: {n}.':'Islas pequeñas quitadas: {n}.',
@@ -422,7 +421,7 @@ export const ES={
 'change':'cambio','move':'mover','nudge':'desplazar','new design':'nuevo diseño','open file':'abrir archivo','import file':'importar archivo','Undo {action}':'Deshacer {action}','Redo {action}':'Rehacer {action}','Nothing to undo':'No hay nada que deshacer','Nothing to redo':'No hay nada que rehacer',
 'Removed {n} unused fonts.':'Se quitaron {n} fuentes sin usar.',
 'batch: {field} on {n} objects':'lote: {field} en {n} objetos','row spacing':'separación de filas','stitch length':'longitud de puntada','angle':'ángulo',
-'Arrow keys':'Teclas de flecha','Copies the text worksheet to the clipboard':'Copia la hoja de texto al portapapeles','Also download the sewing worksheet':'Descargar también la hoja de bordado','machine stitches':'puntadas de máquina',
+'Arrow keys':'Teclas de flecha','Copies the text worksheet to the clipboard':'Copia la hoja de texto al portapapeles','Also download the sewing worksheet':'Descargar también la hoja de bordado','stitch layer':'capa de puntadas','{fmt} stitch layer':'{fmt} capa de puntadas','used by 1 text object':'usada por 1 objeto de texto','used by {n} text objects':'usada por {n} objetos de texto','(bundled, not removed)':'(incluida, no se quita)','Fonts used by text objects are kept. Removing a font that a text object uses is not offered.':'Las fuentes usadas por objetos de texto se conservan. No se ofrece quitar una fuente que use un objeto de texto.',
 };
 /** @type {Array<{re: RegExp, names: string[], out: string}>} */
 const rx=[];

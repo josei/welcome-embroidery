@@ -74,7 +74,7 @@ test('stitch simulation is visible, scrubbable, replayable, and stops on edits',
 
 test('pinned JEF import renders a stitch layer, saves source commands, transforms with history, and preserves failures',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));const fixture=pinnedMachineFixture('jef'),bytes=Buffer.from(fixture.bytes);await page.goto('/');page.on('dialog',dialog=>dialog.accept());await newDesign(page);await expect(page.locator('.object-row')).toHaveCount(0);await page.locator('#importMachine').click();await page.locator('#machineFile').setInputFiles({name:'sample.jef',mimeType:'application/octet-stream',buffer:bytes});
- await expect(page.locator('.object-row')).toHaveCount(1);const layer=page.locator('.object-row').last();await expect(layer).toContainText('machine stitches');await expect(page.locator('#sourceInfo')).toContainText('201 commands');const id=await layer.getAttribute('data-id');
+ await expect(page.locator('.object-row')).toHaveCount(1);const layer=page.locator('.object-row').last();await expect(layer).toContainText('stitch layer');await expect(page.locator('#sourceInfo')).toContainText('201 commands');const id=await layer.getAttribute('data-id');
  const unchanged=page.waitForEvent('download');await page.locator('#export').click();await pickFormat(page,'jef');await page.locator('#download').click();const originalExport=await unchanged;const originalPath='/tmp/welcome-import-original.jef';await originalExport.saveAs(originalPath);expect(Buffer.compare(await (await import('node:fs/promises')).readFile(originalPath),bytes)).toBe(0);
  const x=Number(await page.locator('#posX').inputValue());await page.locator('#posX').fill(String(x+2));await page.locator('#posX').press('Tab');await page.locator('#rotation').fill('2');await page.locator('#rotation').press('Tab');await page.locator('#thread').selectOption('#d9897e');await expect(page.locator('#saved')).toHaveCount(0);
  await page.locator('#undo').click();await page.locator('#redo').click();await expect(page.locator('.object-row').last()).toHaveAttribute('data-id',id);const saved=page.waitForEvent('download');await page.locator('#save').click();const projectFile=await saved,projectPath='/tmp/welcome-import-project.welcome';await projectFile.saveAs(projectPath);const fs=await import('node:fs/promises'),projectText=await fs.readFile(projectPath,'utf8'),project=JSON.parse(projectText),savedLayer=project.objects.find(o=>o.id===id);expect(savedLayer.kind).toBe('stitch_layer');expect(savedLayer.stitches).toHaveLength(201);expect(savedLayer.source.originalBytesBase64.length).toBeGreaterThan(0);await page.locator('#file').setInputFiles({name:'reopened.welcome',mimeType:'application/json',buffer:Buffer.from(projectText)});await expect(page.locator('#sourceInfo')).toContainText('201 commands');
@@ -214,7 +214,7 @@ test('agent relay: the Agent dialog creates a private link and an MCP client edi
   await page.locator('#undo').click();await expect(page.locator('.object-row')).toHaveCount(0);const stale=await call('document_apply',{documentId:'live',expectedRevision:applied.structuredContent.revision,operations:[{op:'delete',id:'agent-rect'}]});expect(stale.isError).toBe(true);
   const plan=await call('embroidery_compile',{documentId:'live',expectedRevision:(await call('document_inspect',{documentId:'live'})).structuredContent.revision});expect(plan.isError).toBe(true);
   await expect(page.locator('#copyEndpoint')).toHaveClass(/agent-active/);
-  {const bytes=Buffer.from(pinnedMachineFixture('jef').bytes),rev=(await call('document_inspect',{documentId:'live'})).structuredContent.revision,imported=await call('document_import_embroidery',{documentId:'live',expectedRevision:rev,fileName:'agent.jef',format:'jef',dataBase64:bytes.toString('base64')});expect(imported.isError).toBeFalsy();await expect(page.locator('.object-row').last()).toContainText('machine stitches');await expect(page.locator('#sourceInfo')).toContainText('201 commands');}
+  {const bytes=Buffer.from(pinnedMachineFixture('jef').bytes),rev=(await call('document_inspect',{documentId:'live'})).structuredContent.revision,imported=await call('document_import_embroidery',{documentId:'live',expectedRevision:rev,fileName:'agent.jef',format:'jef',dataBase64:bytes.toString('base64')});expect(imported.isError).toBeFalsy();await expect(page.locator('.object-row').last()).toContainText('stitch layer');await expect(page.locator('#sourceInfo')).toContainText('201 commands');}
   await page.locator('#settingsBtn').click();await page.locator('#copyEndpoint').click();await page.locator('#agentRevoke').click();await expect(page.locator('#agentUrl')).not.toHaveValue(link);await expect(page.locator('#agentUrl')).toHaveValue(/\/mcp\/[A-Za-z0-9_-]{32,}$/);
   const dead=await fetch(link,{method:'POST',headers:{'content-type':'application/json',accept:'application/json, text/event-stream'},body:JSON.stringify({jsonrpc:'2.0',id:1,method:'tools/list'})});expect(dead.status).toBe(401);
   expect(errors).toEqual([]);await client.close().catch(()=>{});
@@ -1663,7 +1663,7 @@ test('organize fonts lists a loaded font with its lettering, and removes it only
 test('a PES machine file opens through the machine picker as a stitch layer',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());await newDesign(page);await expect(page.locator('.object-row')).toHaveCount(0);
  await page.locator('#importMachine').click();await page.locator('#machineFile').setInputFiles('test/fixtures/spiralbox-brother-v6.pes');
- await expect(page.locator('.object-row')).toHaveCount(1);const layer=page.locator('.object-row').last();await expect(layer).toContainText('machine stitches');
+ await expect(page.locator('.object-row')).toHaveCount(1);const layer=page.locator('.object-row').last();await expect(layer).toContainText('stitch layer');
  await expect(page.locator('#sourceInfo')).toContainText('PES');await expect(page.locator('#sourceInfo')).toContainText('96 commands');
  expect(errors).toEqual([]);
 });
@@ -1811,7 +1811,7 @@ test('name drop batch exports one file per hoop, and refuses a design with no le
  await expect(page.locator('#toast, .toast, [role="status"]').filter({hasText:'files exported'}).first()).toBeVisible();
  await newDesign(page);await page.locator('#rect').click();
  await page.locator('#batchNames').fill('Ana');await page.locator('#batchExport').click();
- await expect(page.locator('#toast, .toast, [role="status"]').filter({hasText:'lettering'}).first()).toBeVisible();
+ await expect(page.locator('#toast, .toast, [role="status"]').filter({hasText:'text object'}).first()).toBeVisible();
  expect(errors).toEqual([]);
 });
 

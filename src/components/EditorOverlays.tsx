@@ -112,18 +112,18 @@ export function EditorOverlays() {
         <ul id={"fontsList"}>
           {customFonts.map(f =>
             <li key={"c" +
-              f.id}>{`${f.name}: used by ${f.uses.length} lettering object${f.uses.length === 1 ? '' : 's'}` +
+              f.id}>{`${f.name}: ${f.uses.length === 1 ? t('used by 1 text object') : t('used by {n} text objects', {n: f.uses.length})}` +
               `${f.uses.length ? ' (' + f.uses.join(', ') + ')' : ''}`}</li>)}
           {bundledFonts.map(f =>
             <li key={"b" +
-              f.id}>{`${getFont(f.id)?.name || f.id} (bundled, not removed): used by ${f.uses.length} lettering ` +
-              `object${f.uses.length === 1 ? '' : 's'} (${f.uses.join(', ')})`}</li>)}
+              f.id}>{`${getFont(f.id)?.name || f.id} ${t('(bundled, not removed)')}: ${f.uses.length === 1 ? t('used by 1 text object') : t('used by {n} text objects', {n: f.uses.length})} ` +
+              `(${f.uses.join(', ')})`}</li>)}
         </ul>
         <p id={"fontsEmpty"} className={"sel-hint"} hidden={customFonts.length + bundledFonts.length > 0}>
           {"This document has no custom fonts. Load a .ttf from the font picker to add one."}
         </p>
         <p className={"dlg-note"}>
-          {"Fonts used by lettering are kept. Removing a font that lettering uses is not offered."}
+          {t('Fonts used by text objects are kept. Removing a font that a text object uses is not offered.')}
         </p>
         <button type={"button"} id={"removeUnusedFonts"} disabled={!customFontUsage(doc).some(f => !f.uses.length)} onClick={() => removeUnusedFonts()}>
           {"Remove unused fonts"}

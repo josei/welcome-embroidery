@@ -81,7 +81,7 @@ function sourceInfo(o: InspectorObject | undefined): SourceInfo | null {
   if (!o || o.kind !== 'stitch_layer' || !o.source) return null;
   const s = o.source;
   return {
-    format: `${s.format.toUpperCase()} stitch layer`,
+    format: t('{fmt} stitch layer', {fmt: s.format.toUpperCase()}),
     meta: s.metadata
       ? [s.metadata.name, s.metadata.author ? t('by {author}', {author: s.metadata.author}) : '']
           .filter(Boolean)

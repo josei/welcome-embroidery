@@ -85,7 +85,7 @@ return {points:nodes.map(R),handles:hs.map(([i,out])=>({i:R(/** @type {Pt} */(i)
 export function toPathObject(doc,id){
 const o=objById(doc,id),at=doc.objects.indexOf(o);
 if(o.kind==='path')return;
-if(o.kind==='stitch_layer')throw Error('Imported machine stitches cannot be converted to a path.');
+if(o.kind==='stitch_layer')throw Error('Imported stitch layers cannot be converted to a path.');
 const common=
   {thread:o.thread,stitch:o.stitch==='satin'?'fill':o.stitch,...(o.border?{border:true,borderThread:o.borderThread}:{}),...(o.groupId?{groupId:o.groupId}:{}),
   ...(o.visible===false?{visible:false}:{}),...(o.locked?{locked:true}:{})};

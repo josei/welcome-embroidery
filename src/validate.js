@@ -297,7 +297,7 @@ export function validateDocument(doc){
       o.align)))fail(`text ${o.id} has an invalid letter spacing, word spacing, line height, italic, bold or alignment value.`);
       if([...String(o.text)].filter((/** @type {any} */ c)=>c==='\n').length>=6)fail(`text ${o.id} has too many lines (6 maximum).`);
       if(o.vertical!==undefined&&typeof o.vertical!=='boolean')fail(`text ${o.id} vertical must be true or false.`);
-      if(o.nameDrop!==undefined&&(o.kind!=='text'||typeof o.nameDrop!=='boolean'))fail(`object ${o.id} nameDrop must be true or false, on lettering only.`);
+      if(o.nameDrop!==undefined&&(o.kind!=='text'||typeof o.nameDrop!=='boolean'))fail(`object ${o.id} nameDrop must be true or false, on text objects only.`);
       if(o.vertical){if(String(o.text).includes('\n'))fail(`text ${o.id} is vertical, so it can have one line only.`);
       if(o.along)fail(`text ${o.id} is vertical, so it cannot follow a path.`);
       if(!isRegistryFont(o.font))fail(`text ${o.id} is vertical, which needs a bundled or loaded font.`);}}

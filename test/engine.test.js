@@ -207,7 +207,7 @@ test('text on path: glyphs follow an angled line and a circle, move with their t
  const ring=Array.from({length:48},(_,k)=>[+(20*Math.cos(k/48*Math.PI*2)).toFixed(3),+(20*Math.sin(k/48*Math.PI*2)).toFixed(3)]);applyOperations(circle,[{op:'add_path',id:'ring',x:0,y:0,points:ring,closed:true,stitch:'run'},{op:'add_text',id:'tx',text:'WELCOME',x:-20,y:0,height:6},{op:'text_on_path',textId:'tx',pathId:'ring',offset:5}]);validateDocument(circle);
  const rs=geometry(circle.objects.find(o=>o.id==='tx')).flat().map(([x,y])=>Math.hypot(x,y));assert.ok(rs.every(r=>r>19.5&&r<26.5),'closed path: lettering stays in the ring band');
  assert.ok(compile(circle).count>100);assert.ok(encode(compile(circle),'jef','#527461',110,circle).length>200);
- applyOperations(d,[{op:'text_off_path',textId:'t'}]);assert.equal(d.objects[1].along,undefined);assert.throws(()=>applyOperations(d,[{op:'text_on_path',textId:'diag',pathId:'diag'}]),/Unknown lettering/);
+ applyOperations(d,[{op:'text_off_path',textId:'t'}]);assert.equal(d.objects[1].along,undefined);assert.throws(()=>applyOperations(d,[{op:'text_on_path',textId:'diag',pathId:'diag'}]),/Unknown text object/);
  assert.throws(()=>{const bad=structuredClone(circle);bad.objects.find(o=>o.id==='tx').along.points=[[0,0]];validateDocument(bad);},/text-on-path/);
 });
 
@@ -1301,7 +1301,7 @@ test('name drop batch gives each copy the next name in its first lettering, and 
  assert.deepEqual(texts,['Ana','Ben','Carla'],'each of the three copies carries its name, in order');
  for(const d of docs)assert.deepEqual(compile(d).errors,[]);
  const plain=initialDocument();plain.objects=[];applyOperations(plain,[{op:'add_shape',id:'r',kind:'rect',x:0,y:0,width:10,height:10}]);validateDocument(plain);
- assert.throws(()=>batchDocuments(plain,{names:['Ana']}),/lettering/);
+ assert.throws(()=>batchDocuments(plain,{names:['Ana']}),/text object/);
 });
 
 test('satin end inset can differ at each end: a start value moves only the first needle, an end value only the last, and an explicit end value overrides the single value',()=>{
