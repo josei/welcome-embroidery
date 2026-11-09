@@ -26,7 +26,7 @@ export const ES={
   'AI agent':'Agente de IA','Connect an AI agent':'Conectar un agente de IA',
 'View':'Vista','Design':'Diseño','Stitches':'Puntadas','Preview':'Vista previa','Undo':'Deshacer','Redo':'Rehacer','Duplicate selected object':
   'Duplicar el objeto seleccionado','Duplicate':'Duplicar','Delete selected object':'Eliminar el objeto seleccionado','Delete':'Eliminar','Export':'Exportar',
-'Objects':'Objetos','Tools':'Herramientas','Select (V)':'Seleccionar (V)','Add rectangle':'Añadir rectángulo','Add ellipse':'Añadir elipse','Draw path':
+'Objects':'Objetos','Tools':'Herramientas','Select (V)':'Seleccionar (V)','Add rectangle':'Añadir rectángulo','Skip to drawing tools':'Ir a las herramientas de dibujo','Add ellipse':'Añadir elipse','Draw path':
   'Dibujar trazado','Draw path (N)':'Dibujar trazado (N)','Add lettering':'Añadir texto bordado',
 'Line (L, drag)':'Línea (L, arrastrar)','Polygon (G, drag from center)':'Polígono (G, arrastrar desde el centro)','Star (S, drag from center)':
   'Estrella (S, arrastrar desde el centro)','Pen with curves (P, drag for handles)':'Pluma con curvas (P, arrastrar para tiradores)',

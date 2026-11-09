@@ -313,3 +313,7 @@ input[aria-invalid="true"]{border-color:var(--warn)!important;background:var(--w
 
 /* The design canvas takes keyboard focus for arrow-key nudges; show the ring only for keyboard focus. */
 #art:focus-visible{outline:2px solid var(--teal);outline-offset:-2px}
+
+/* Skip link: off-screen until focused, so it adds no visual change to the layout. */
+.skip-link{position:absolute;left:8px;top:8px;z-index:100;padding:8px 12px;background:#fff;color:#284c40;border:2px solid #1c8069;border-radius:6px;font-weight:600;text-decoration:none;transform:translateY(-200%)}
+.skip-link:focus{transform:none}
