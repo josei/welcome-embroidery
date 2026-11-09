@@ -602,7 +602,7 @@ test.describe('language detection',()=>{
  test('Spanish browser gets Spanish UI, including dynamic text, and can switch to English',async({page})=>{
   const errors=[];page.on('pageerror',e=>errors.push(e.message));
   await page.goto('/');
-  await expect(page.locator('#export')).toHaveText('Exportar archivo de máquina');
+  await expect(page.locator('#export')).toHaveText('Descargar archivo JEF');
   await expect(page.locator('html')).toHaveAttribute('lang','es');
   await expect(page.locator('#undo')).toHaveAttribute('aria-label','No hay nada que deshacer');
   await page.locator('#rect').click();
