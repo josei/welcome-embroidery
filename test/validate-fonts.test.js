@@ -6,7 +6,7 @@ const textDoc=(font,height=8)=>{const d=initialDocument();d.objects=[];applyOper
   d.objects[0].font=font;return d;};
 
 test('an unbundled font is named in the validation message, not reported as a size problem',()=>{
-  assert.throws(()=>validateDocument(textDoc('Lobster',8)),/lettering t uses the font “Lobster”, which is not bundled or stored in this project\./);
+  assert.throws(()=>validateDocument(textDoc('Lobster',8)),/Hello uses the font “Lobster”, which is not bundled or stored in this project\./);
   assert.doesNotThrow(()=>validateDocument(textDoc('welcome-mono/1',8)));
 });
 

@@ -13,6 +13,7 @@ import {closeRing,clipRuns,bartack} from './stitchRuns.js';
 import {decodeBase64} from './stitchImport.js';
 import {fillRuns,satinRuns} from './fillStitch.js';
 import {validateDocument} from './validate.js';
+import {hasName,objectLabel} from './objectNames.js';
 import {distP,railsFromLine,railsFromCenterline,widthAt} from './pathGeometry.js';
 
 // Rounds to one decimal place (a stitch position in mm).
@@ -36,7 +37,7 @@ function outsideHoop(b,hoop){return b[0]<-hoop.w/2||b[1]<-hoop.h/2||b[2]>hoop.w/
 function hoopMessage(o,b,hoop){
   const over=Math.max(-hoop.w/2-b[0],-hoop.h/2-b[1],b[2]-hoop.w/2,b[3]-hoop.h/2);
   const mm=Math.max(.1,Math.ceil(over*10-1e-6)/10);
-  return `${o.name||o.id} extends ${mm} mm past the hoop. Move it or choose a larger hoop.`;
+  return `${objectLabel(o)} extends ${mm} mm past the hoop. Move it or choose a larger hoop.`;
 }
 
 /**
@@ -79,7 +80,8 @@ export function compile(doc) {
     if(o.stitch==='fill'&&o.kind!=='text')complexity+=Math.ceil((b[3]-b[1])/spacing)*points.length;
     const clippedFill=maskRings&&o.stitch==='fill'&&o.kind!=='text'&&(o.kind!=='path'||o.closed),useLines=clippedFill?
       clipLines(/** @type {any} */(lines),maskRings):lines;
-    if(clippedFill&&!useLines.length){issues.push({id:o.id,message:`Object ${o.name||o.id} lies outside its clipping mask, so nothing is sewn.`});continue;}
+    if(clippedFill&&!useLines.length){issues.push({id:o.id,message:hasName(o)?`Object ${objectLabel(o)} lies outside its clipping mask, so nothing is sewn.`:
+      'This object lies outside its clipping mask, so nothing is sewn. Move it inside the mask, or release the mask.'});continue;}
     records.push({o,lines:useLines,satin,rails,maskRings,clippedFill});
   }
   if(complexity>2_000_000)throw Error('Design exceeds the safe digitizing complexity limit. Simplify geometry or increase row spacing.');

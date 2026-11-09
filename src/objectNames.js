@@ -18,3 +18,26 @@ export function copyName(name, kind, taken) {
     if (!used.has(candidate)) return candidate;
   }
 }
+
+/**
+ * Whether an object has a name to show. A blank name counts as no name.
+ * @param {{name?: string} | undefined} o
+ * @returns {boolean}
+ */
+export function hasName(o) {
+  return typeof o?.name === 'string' && o.name.trim() !== '';
+}
+
+/**
+ * The label for an object in a message: its name when it has one, otherwise a phrase for what it is. Never its id.
+ * `start` begins a sentence ("This object"); `other` ends one ("another object").
+ * @param {{name?: string, kind?: string} | undefined} o
+ * @param {'start' | 'other'} [form]
+ * @returns {string}
+ */
+export function objectLabel(o, form = 'start') {
+  if (hasName(o)) return /** @type {string} */ (o?.name).trim();
+  const lettering = o?.kind === 'text';
+  if (form === 'other') return lettering ? 'another lettering' : 'another object';
+  return lettering ? 'This lettering' : 'This object';
+}

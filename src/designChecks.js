@@ -6,6 +6,7 @@ import {objectBounds} from './transforms.js';
 import {pathOutline,distP} from './pathGeometry.js';
 import {isRegistryFont,getFont} from './fonts.js';
 import {FABRIC_PROFILES} from './fabrics.js';
+import {objectLabel} from './objectNames.js';
 
 /** @typedef {import('./transforms.js').Obj & {mask?: boolean, photo?: boolean}} Item */
 /** @typedef {{op: string, ids?: string[], id?: string, dx?: number, dy?: number, stitch?: string, satinWidth?: number}} Fix */
@@ -38,7 +39,7 @@ export function designWarnings(doc){
   const w=(o,message,category,fix)=>{out.push({id:o.id,name:o.name||o.kind,message,category,...(fix?{fix}:{})});};
   for(const o of doc.objects){
     if(o.visible===false||o.mask||o.kind==='stitch_layer')continue;/** @type {number[]} */ let b;try{b=objectBounds(o);}catch{continue;}const bw=b[2]-b[0],
-      bh=b[3]-b[1],label=o.name||o.id;
+      bh=b[3]-b[1],label=objectLabel(o);
     if(b[0]<-hoopW/2||b[1]<-hoopH/2||b[2]>hoopW/2||b[3]>hoopH/2){
       // The fix moves the object inside the hoop, when it is no bigger than the hoop.
       const fits=bw<=hoopW&&bh<=hoopH,dx=b[0]<-hoopW/2?-hoopW/2-b[0]:b[2]>hoopW/2?hoopW/2-b[2]:0,dy=b[1]<-hoopH/2?-hoopH/2-b[1]:b[3]>hoopH/2?hoopH/2-b[3]:0;
@@ -46,7 +47,7 @@ export function designWarnings(doc){
     }
     const key=[o.kind,o.stitch,o.thread,Math.round(b[0]),Math.round(b[1]),Math.round(b[2]),Math.round(b[3])].join('|');
       if(seen.has(key))w(o,`${label} is a duplicate of ${seen.get(key)}: it would be sewn twice. Delete one.`,'duplicate',[{op:'delete',id:o.id}]);
-      else seen.set(key,label);
+      else seen.set(key,objectLabel(o,'other'));
     const filled=o.stitch==='fill'&&o.kind!=='text'&&(o.kind!=='path'||o.closed);
     if(filled&&!o.photo){const lines=geometry(o,0).filter(l=>l.length>=4);
       if(lines.length){const area=shapeArea(lines),per=lines.reduce((n,r)=>n+r.reduce((m,p,i)=>i?m+distP(p,r[i-1]):m,0),0),mean=per?2*area/per:0;

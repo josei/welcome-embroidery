@@ -353,9 +353,9 @@ export const ES={
   'Estrella {n}','Drawn path':'Trazado dibujado','Imported rectangle':'Rectángulo importado','Imported ellipse':'Elipse importada','{x} copy':'{x} copia',
 'Botanical badge':'Insignia botánica','Wildflower':'Flor silvestre','Flower center':'Centro de la flor','Stem':'Tallo','Leaf':'Hoja','Untitled design':
   'Diseño sin título','Imported path':'Trazado importado','Imported SVG':'SVG importado','Imported · replace all':'Importado · reemplazar todo',
-'Warning: {w} × {h} mm is beyond the largest JEF hoop code (200 × 200 mm); the file gets hoop code 0 and no hoop-edge distances, and machines may reject it.':
-  'Aviso: {w} × {h} mm supera el mayor código de bastidor JEF (200 × 200 mm); el archivo recibe el código 0 y sin distancias al borde del bastidor, y las ' +
-  'máquinas pueden rechazarlo.',
+'This design is {w} × {h} mm, bigger than a JEF machine can hoop (200 × 200 mm). Make it smaller or export another format.':
+  'Este diseño mide {w} × {h} mm, más grande de lo que una máquina JEF puede bordar (200 × 200 mm). Hazlo más pequeño o exporta otro formato.',
+'This object':'Este objeto','This lettering':'Este texto','another object':'otro objeto','another lettering':'otro texto',
 'Snap to {n} mm grid on.':'Ajuste a la cuadrícula de {n} mm activado.',
   'Loaded {name}. It is stored in this project.':'{name} cargada. Se guarda en este proyecto.','Imported {name} as a {fmt} stitch layer.':
   '{name} importado como capa de puntadas {fmt}.',
@@ -372,9 +372,17 @@ export const ES={
 '{name} — loaded from a file; stored inside this project. Check the licence of the font file before sharing the design.':
   '{name} — cargada desde un archivo; guardada dentro de este proyecto. Revisa la licencia del archivo de fuente antes de compartir el diseño.',
 'x {x} mm · y {y} mm':'x {x} mm · y {y} mm',
-'lettering {id} uses the font “{font}”, which is not bundled or stored in this project.':'el texto {id} usa la fuente “{font}”, que no está incluida ni guardada en este proyecto.',
-'lettering {id} needs text of 1 to {n} characters.':'el texto {id} necesita entre 1 y {n} caracteres.',
-'lettering {id} is {h} mm tall; the size range of {font} is {lo}–{hi} mm.':'el texto {id} mide {h} mm de alto; el rango de tamaño de {font} es de {lo}–{hi} mm.',
+'{l} uses the font “{font}”, which is not bundled or stored in this project.':'{l} usa la fuente “{font}”, que no está incluida ni guardada en este proyecto.',
+'This lettering uses the font “{font}”, which is not bundled or stored in this project. Choose another font.':
+  'Este texto usa la fuente “{font}”, que no está incluida ni guardada en este proyecto. Elige otra fuente.',
+'{l} needs text of 1 to {n} characters.':'{l} necesita entre 1 y {n} caracteres.',
+'This lettering needs text of 1 to {n} characters. Type some text into it, or delete it.':
+  'Este texto necesita entre 1 y {n} caracteres. Escribe algo de texto en él, o bórralo.',
+'{l} is {h} mm tall; the size range of {font} is {lo}–{hi} mm.':'{l} mide {h} mm de alto; el rango de tamaño de {font} es de {lo}–{hi} mm.',
+'This lettering is {h} mm tall; the size range of {font} is {lo}–{hi} mm. Change its height, or choose another font.':
+  'Este texto mide {h} mm de alto; el rango de tamaño de {font} es de {lo}–{hi} mm. Cambia su altura o elige otra fuente.',
+'This object lies outside its clipping mask, so nothing is sewn. Move it inside the mask, or release the mask.':
+  'Este objeto queda fuera de su máscara de recorte, así que no se borda nada. Muévelo dentro de la máscara o quita la máscara.',
 '{name} uses the font {font}, which is not bundled here; it is set in Welcome Mono.':'{name} usa la fuente {font}, que no está incluida aquí; se ha puesto en Welcome Mono.',
 'The reference picture could not be read, so it was left out.':'No se pudo leer la imagen de referencia, así que se ha omitido.',
 'Could not load the font {font}. Choose another font.':'No se pudo cargar la fuente {font}. Elige otra fuente.',

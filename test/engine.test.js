@@ -121,7 +121,7 @@ test('custom rectangular hoops: set_hoop, bounds diagnostics, align to hoop, JEF
 });
 
 test('JEF warns beyond the largest hoop code but does not block',()=>{
- assert.deepEqual(jefWarnings({bounds:[0,0,150,150]},'jef'),[]);assert.match(jefWarnings({bounds:[0,0,210,50]},'jef')[0],/largest JEF hoop code/);assert.deepEqual(jefWarnings({bounds:[0,0,300,300]},'vp3'),[]);
+ assert.deepEqual(jefWarnings({bounds:[0,0,150,150]},'jef'),[]);assert.match(jefWarnings({bounds:[0,0,210,50]},'jef')[0],/bigger than a JEF machine can hoop \(200 × 200 mm\)\. Make it smaller or export another format\./);assert.deepEqual(jefWarnings({bounds:[0,0,300,300]},'vp3'),[]);
 });
 
 test('satin columns: zigzag across rails, honors width and spacing, underlay, bounds and export',()=>{
