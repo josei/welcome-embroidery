@@ -11,6 +11,10 @@ import {ES} from '../src/i18n.js';
 const EXPORT_FORMAT_COUNT=17;
 const pickFormat=async(page,fmt)=>{if(!(await page.locator(`#format option[value="${fmt}"]`).count()))await page.locator('#allFormats').check();await page.locator('#format').selectOption(fmt);};
 const newDesign=async page=>{await page.locator('#new').click();if(await page.locator('#discardDialog[open]').count())await page.locator('#discardDiscard').click();};
+// Moves the second object onto the first, so two shapes added with no drag overlap. Adds now land in separate slots (#280).
+const stackOnFirst=async page=>{const rows=page.locator('.object-row');await rows.nth(0).click();const x=await page.locator('#posX').inputValue(),y=await page.locator('#posY').inputValue();
+ await rows.nth(1).click();await page.locator('#posX').fill(x);await page.locator('#posX').press('Tab');await page.locator('#posY').fill(y);await page.locator('#posY').press('Tab');
+ await rows.nth(0).click();await rows.nth(1).click({modifiers:['Shift']});};
 // The editor labels shortcuts ⌘ ⌥ ⇧ on Apple platforms and Ctrl+ / Alt+ elsewhere. Chromium runs on the host OS here,
 // so the host decides which label each assertion expects.
 const APPLE_KEYS=process.platform==='darwin';
@@ -540,6 +544,7 @@ test('rotation pivot: Set pivot then click the canvas, and the rotation field tu
 
 test('sewing tips to show: unticking a category hides its tips from the panel and the count, and the choice is saved in this browser',async({page})=>{
  await page.goto('/');page.on('dialog',d=>d.accept());await newDesign(page);await page.locator('#rect').click();await page.locator('#rect').click();
+ await stackOnFirst(page);
  await expect(page.locator('#sewTips')).toContainText('is a duplicate');await expect(page.locator('#issuesBtn')).toContainText('1 sewing tip');
  await page.locator('#settingsBtn').click();const dup=page.locator('#tipsList label',{hasText:'Duplicate objects'}).locator('input');await expect(dup).toBeChecked();
  await dup.uncheck();
@@ -701,7 +706,7 @@ test('resizing and rotating a clipping mask previews its cut while dragging',asy
 });
 test('dragging a node of a clipping mask redraws its cut while dragging',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());await newDesign(page);
- await page.locator('#rect').click();await page.locator('#rect').click();await page.keyboard.press('Control+a');await expect(page.locator('#clipBtn')).toBeEnabled();await page.locator('#clipBtn').click();
+ await page.locator('#rect').click();await page.locator('#rect').click();await stackOnFirst(page);await page.keyboard.press('Control+a');await expect(page.locator('#clipBtn')).toBeEnabled();await page.locator('#clipBtn').click();
  await expect(page.locator('#shapes .mask-shape')).toHaveCount(1);const maskId=await page.locator('#shapes .mask-shape').getAttribute('data-id');
  await page.keyboard.press('Escape');const mb=await page.locator('#shapes .mask-shape').boundingBox();await page.mouse.dblclick(mb.x+mb.width/2,mb.y+mb.height/2);await expect(page.locator('.path-node')).toHaveCount(4);
  const cutD=()=>page.evaluate(id=>document.getElementById('clip-'+id)?.firstElementChild?.getAttribute('d')??'',maskId);
@@ -2980,7 +2985,8 @@ test('Edit and Arrange menus run the same commands as their shortcuts and disabl
  expect(await rows.allTextContents()).toEqual(frontFromMenu);
  await page.keyboard.press('Control+z');await expect(rows).toHaveText(before);
  // Union from the menu matches the toolbar's union button; both leave one object.
- await rows.nth(0).click();await rows.nth(1).click({modifiers:['Shift']});
+ // Two shapes added with no drag are apart (#280); stack them so the union has something to merge.
+ await stackOnFirst(page);await rows.nth(0).click();await rows.nth(1).click({modifiers:['Shift']});
  await run('arrangeMenu','menuUnion');await expect(rows).toHaveCount(1);
  const unionFromMenu=await rows.allTextContents();
  await run('editMenu','menuUndo');await expect(rows).toHaveText(before);
@@ -3480,7 +3486,23 @@ test('add rectangle and add ellipse select the new shape and say where it went',
  await expect(page.locator('#selected')).toContainText('Ellipse');
  await expect(page.locator('#selHint')).toBeHidden();
  await expect(page.locator('#thread')).toBeVisible();
- await expect(page.locator('#toast')).toContainText('Ellipse added at hoop center, 24 × 16 mm');
+ await expect(page.locator('#toast')).toContainText('Ellipse added beside the others near hoop center, 24 × 16 mm');
+ expect(errors).toEqual([]);
+});
+
+// Successive adds with no drag (issue #280): each new shape gets its own free slot near the hoop centre, so three adds
+// leave three shapes on screen that do not overlap, and the toast on the second add says it went beside the others.
+test('three adds with no drag leave three shapes that do not overlap',async({page})=>{page.on('dialog',d=>d.accept());const errors=[];page.on('pageerror',e=>errors.push(e.message));
+ await page.goto('/');await newDesign(page);
+ await page.locator('#rect').click();await page.keyboard.press('Escape');
+ await page.locator('#ellipse').click();await page.keyboard.press('Escape');
+ await expect(page.locator('#toast')).toContainText('Ellipse added beside the others near hoop center');
+ await page.locator('#rect').click();await page.keyboard.press('Escape');
+ await expect(page.locator('#toast')).toContainText('Rectangle added beside the others near hoop center');
+ const boxes=await page.locator('#shapes [data-id]').evaluateAll(els=>els.map(el=>{const r=el.getBoundingClientRect();return {x0:r.left,y0:r.top,x1:r.right,y1:r.bottom};}));
+ expect(boxes).toHaveLength(3);
+ for(let i=0;i<3;i++)for(let j=i+1;j<3;j++){const a=boxes[i],b=boxes[j];
+  const overlaps=a.x0<b.x1&&b.x0<a.x1&&a.y0<b.y1&&b.y0<a.y1;expect(overlaps,`shapes ${i} and ${j} overlap`).toBe(false);}
  expect(errors).toEqual([]);
 });
 

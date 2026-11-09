@@ -15,6 +15,8 @@ import {t} from './i18n.js';
 import {enterEdit} from './canvasText.js';
 import {applyOperations} from './operations.js';
 import {objectBounds} from './transforms.js';
+import {hoopSize} from './hoops.js';
+import {newShapeSpot} from './newShapePlacement.js';
 
 const NS='http://www.w3.org/2000/svg';
 const $=(/** @type {string} */ s)=>/** @type {any} */(document.querySelector(s));
@@ -83,14 +85,22 @@ export function createCanvasTools(api){
       return;
     }
     // Selected in both fields, as lettering is: the inspector reads the multi-selection, so the thread and stitch controls show.
-    api.commit([{op:'add_shape',id,kind,name:kind==='ellipse'?'Ellipse':'Rectangle',x:-12,y:-8,width:24,height:16,
+    // Placement: see newShapePlacement.js (issue #280). Successive adds take the next free slot beside the others.
+    const doc=documentNow().doc;
+    const spot=newShapeSpot(doc.objects,hoopSize(doc),24,16);
+    api.commit([{op:'add_shape',id,kind,name:kind==='ellipse'?'Ellipse':'Rectangle',x:spot.x,y:spot.y,width:24,height:16,
       thread:$('#thread').value,stitch:(stitchChoicesState.get().type==='satin'?'fill':stitchChoicesState.get().type)}],()=>{
       setSelection({selected: id});setSelection({multi: new Set([id])});
     });
-    // The hint says where the shape went and its default size, in millimetres.
-    api.toast(kind==='ellipse'
-      ?t('Ellipse added at hoop center, {w} × {h} mm',{w:24,h:16})
-      :t('Rectangle added at hoop center, {w} × {h} mm',{w:24,h:16}));
+    // The hint says where the shape went and its default size, in millimetres, and warns when it sits on another shape.
+    const atCentre=spot.x===-12&&spot.y===-8;
+    const ellipse=kind==='ellipse';
+    const text=spot.overlaps
+      ?(ellipse?t('Ellipse added over another shape at hoop center, {w} × {h} mm',{w:24,h:16}):t('Rectangle added over another shape at hoop center, {w} × {h} mm',{w:24,h:16}))
+      :atCentre
+        ?(ellipse?t('Ellipse added at hoop center, {w} × {h} mm',{w:24,h:16}):t('Rectangle added at hoop center, {w} × {h} mm',{w:24,h:16}))
+        :(ellipse?t('Ellipse added beside the others near hoop center, {w} × {h} mm',{w:24,h:16}):t('Rectangle added beside the others near hoop center, {w} × {h} mm',{w:24,h:16}));
+    api.toast(text);
   }
 
   // The path and pen tools draw their draft over the design: the polyline (or the pen's curve outline), the handles

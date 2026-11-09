@@ -320,7 +320,7 @@ export const ES={
   'Contraste de la foto','Invert picture':'Invertir la imagen','Photo stitch added. Adjust spacing and contrast in the sidebar.':
   'Punto foto añadido. Ajusta la separación y el contraste en la barra lateral.','That picture could not be read.':'No se pudo leer esa imagen.',
   'Rectangle added at hoop center, {w} × {h} mm':'Rectángulo añadido en el centro del bastidor, {w} × {h} mm',
-  'Ellipse added at hoop center, {w} × {h} mm':'Elipse añadida en el centro del bastidor, {w} × {h} mm',
+  'Ellipse added at hoop center, {w} × {h} mm':'Elipse añadida en el centro del bastidor, {w} × {h} mm', 'Rectangle added over another shape at hoop center, {w} × {h} mm':'Rectángulo añadido sobre otra forma en el centro del bastidor, {w} × {h} mm', 'Ellipse added over another shape at hoop center, {w} × {h} mm':'Elipse añadida sobre otra forma en el centro del bastidor, {w} × {h} mm', 'Rectangle added beside the others near hoop center, {w} × {h} mm':'Rectángulo añadido junto a las demás cerca del centro del bastidor, {w} × {h} mm', 'Ellipse added beside the others near hoop center, {w} × {h} mm':'Elipse añadida junto a las demás cerca del centro del bastidor, {w} × {h} mm',
   'Cross size (mm)':'Tamaño de la cruz (mm)','Run style':'Estilo de la recta','Single run':'Recta simple','Bean (triple) run':'Recta triple (bean)',
   'Stitch length variation (%)':'Variación del largo de puntada (%)','Randomises the needle spacing from row to row so the fill shows less pattern (moiré)':
   'Varía al azar el espaciado de agujas entre filas para que el relleno muestre menos patrón (moiré)','Appliqué':'Aplique',
