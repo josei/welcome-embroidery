@@ -1,4 +1,5 @@
 import {createStore} from './store.js';
+import {parseDecimal} from './decimalText.js';
 import {t} from './i18n.js';
 import {documentNow} from './documentState.js';
 import {selState} from './selectionState.js';
@@ -95,8 +96,8 @@ export function createArray() {
       return;
     }
     op = mode === 'linear'
-      ? {op: 'array', id: o.id, mode: 'linear', count, dx: Number(stepX), dy: Number(stepY)}
-      : {op: 'array', id: o.id, mode: 'radial', count, cx: Number(stepX), cy: Number(stepY), angle: Number(angle)};
+      ? {op: 'array', id: o.id, mode: 'linear', count, dx: Number(parseDecimal(stepX)), dy: Number(parseDecimal(stepY))}
+      : {op: 'array', id: o.id, mode: 'radial', count, cx: Number(parseDecimal(stepX)), cy: Number(parseDecimal(stepY)), angle: Number(parseDecimal(angle))};
   }
   wired().edit([op]);
 }

@@ -10,12 +10,13 @@ import {t} from './i18n.js';
  */
 
 /**
- * The number the text holds, or null when the text is empty, incomplete ("-", "1e", "abc") or not finite.
+ * The number the text holds, or null when the text is empty, incomplete ("-", "1e", "abc") or not finite. A comma reads as
+ * the decimal point ("0,5" is 0.5), as decimal fields show it in Spanish.
  * @param {string} text
  * @returns {number | null}
  */
 export function parseNumberText(text) {
-  const s = String(text).trim();
+  const s = String(text).trim().replace(',', '.');
   if (s === '') return null;
   const v = Number(s);
   return Number.isFinite(v) ? v : null;

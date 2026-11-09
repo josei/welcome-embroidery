@@ -1,4 +1,6 @@
 // @ts-check
+import {decimalText, parseDecimal} from './decimalText.js';
+import {lang} from './i18n.js';
 // Stepping for numeric fields, the same on every field. Up and Down move the value by the field's own step attribute;
 // Shift multiplies that step by 10 and Alt by 0.1, as the canvas nudge keys do in spirit. Ctrl and Cmd do nothing here.
 // Dragging across a field's label scrubs its value with the same multipliers. Both clamp to the field's min and max.
@@ -92,6 +94,28 @@ function setFieldText(input, text) {
   input.dispatchEvent(new Event('input', {bubbles: true}));
 }
 
+/**
+ * A numeric field: a type="number" input, or a decimal text field (type="text" inputmode="decimal") that shows its
+ * value through decimalText. Both step and scrub the same way.
+ * @param {EventTarget | null} el
+ * @returns {el is HTMLInputElement}
+ */
+function isNumericField(el) {
+  return el instanceof HTMLInputElement && (el.type === 'number' || el.getAttribute('inputmode') === 'decimal');
+}
+
+/** The number a field shows, read with either separator in a decimal text field. */
+/** @param {HTMLInputElement} input */
+function shownNumber(input) {
+  return Number.parseFloat(input.type === 'number' ? input.value : parseDecimal(input.value));
+}
+
+/** The text to show for a value: a number field keeps the dot form the browser expects, a decimal field follows the UI language. */
+/** @param {HTMLInputElement} input @param {string} value */
+function shownText(input, value) {
+  return input.type === 'number' ? value : decimalText(value, lang);
+}
+
 const PIXELS_PER_STEP = 5;
 const DRAG_THRESHOLD = 3;
 
@@ -99,13 +123,13 @@ const DRAG_THRESHOLD = 3;
 export function mountNumericFields() {
   document.addEventListener('keydown', e => {
     const input = /** @type {EventTarget | null} */ (e.target);
-    if (!(input instanceof HTMLInputElement) || input.type !== 'number') return;
+    if (!isNumericField(input)) return;
     if (e.key !== 'ArrowUp' && e.key !== 'ArrowDown') return;
     e.preventDefault();
     if (e.ctrlKey || e.metaKey) return;
-    const current = Number.parseFloat(input.value);
+    const current = shownNumber(input);
     const next = steppedValue(Number.isFinite(current) ? current : 0, e.key === 'ArrowUp' ? 1 : -1, stepOf(input), e, boundsOf(input));
-    setFieldText(input, String(next));
+    setFieldText(input, shownText(input, String(next)));
   }, true);
 
   // A drag that starts on a field's label scrubs that field. Below the threshold it is an ordinary click on the label,
@@ -114,10 +138,10 @@ export function mountNumericFields() {
     if (e.button !== 0 || !(e.target instanceof Element)) return;
     const label = e.target.closest('label');
     if (!label || e.target.closest('input, select, textarea, button')) return;
-    const input = label.querySelector('input[type="number"]');
+    const input = label.querySelector('input[type="number"], input[inputmode="decimal"]');
     if (!(input instanceof HTMLInputElement) || input.disabled) return;
     const startX = e.clientX;
-    const startValue = Number.parseFloat(input.value);
+    const startValue = shownNumber(input);
     if (!Number.isFinite(startValue)) return;
     let scrubbing = false;
     /** @param {PointerEvent} m */
@@ -130,7 +154,7 @@ export function mountNumericFields() {
         document.body.style.userSelect = 'none';
       }
       m.preventDefault();
-      setFieldText(input, String(scrubValue(startValue, dx, PIXELS_PER_STEP, stepOf(input), m, boundsOf(input))));
+      setFieldText(input, shownText(input, String(scrubValue(startValue, dx, PIXELS_PER_STEP, stepOf(input), m, boundsOf(input)))));
     };
     const up = () => {
       window.removeEventListener('pointermove', move);

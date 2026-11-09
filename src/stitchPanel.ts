@@ -361,7 +361,7 @@ export function syncStitchPanel() {
     setStitchRow('stemWidthRow', !(runPick && o?.runStyle === 'stem'));
     if (o) setRunRows({stemWidth: String(o.stemWidth ?? '')});
     setStitchRow('varianceRow', !(single && fillable && ['rows', 'guided'].includes(method)));
-    if (o) setRunRows({lengthVariance: String(Math.round((o.lengthVariance ?? 0) * 100))});
+    if (o) setRunRows({lengthVariance: String(Math.round((o.lengthVariance ?? 0) * 1000) / 10)});
     setStitchRow('appliqueRow', !(single && fillable));
     setCapRows({applique: Boolean(o?.applique)});
     setStitchRow('appliqueWidthRow', !(single && fillable && o?.applique));
@@ -421,8 +421,8 @@ export function syncStitchPanel() {
       panel.blendPalette = [0, 1, 2, 3].map(k => o.blendPalette?.[k] || '');
       setStitchRow('blendRange', !(o.blendThread || o.blendPalette));
       panel.blendAngle = o.blendAngle === undefined || o.blendAngle === null ? '' : String(o.blendAngle);
-      panel.blendStart = String(Math.round((o.blendStart ?? 0) * 100));
-      panel.blendEnd = String(Math.round((o.blendEnd ?? 1) * 100));
+      panel.blendStart = String(Math.round((o.blendStart ?? 0) * 1000) / 10);
+      panel.blendEnd = String(Math.round((o.blendEnd ?? 1) * 1000) / 10);
     }
     const ordered = [...selState().multi]
       .map(id => objects.find(v => v.id === id))

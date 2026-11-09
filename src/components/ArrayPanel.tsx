@@ -6,6 +6,7 @@ import type {ArrayMode} from '../arrayState.js';
 import {batchState, setBatchFields} from '../batchState.js';
 import {exportBatch, syncBatchInfo} from '../batchExport.js';
 import {useNumberInput} from './useNumberInput';
+import {useDecimalNumber} from './useDecimalInput';
 // The array panel, rendered by React. Ids match the markup it replaced, because tests and the editor look them up by id.
 // The mode, the copies and the steps come from arrayState, and the batch from batchState; the button actions edit the document.
 export function ArrayPanel() {
@@ -18,9 +19,9 @@ export function ArrayPanel() {
  // Copies: 2 to 60, the range the array operation enforces (editOps.js). The steps and the total angle have no declared range,
  // so only a blank is refused.
  const count = useNumberInput(fields.count, text => {setArrayFields({count: text}); syncBatchInfo();}, {min: 2, max: 60}, {unit: ''});
- const stepX = useNumberInput(fields.stepX, text => setArrayFields({stepX: text}));
- const stepY = useNumberInput(fields.stepY, text => setArrayFields({stepY: text}));
- const angle = useNumberInput(fields.angle, text => setArrayFields({angle: text}), undefined, {unit: '°'});
+ const stepX = useDecimalNumber(fields.stepX, text => setArrayFields({stepX: text}));
+ const stepY = useDecimalNumber(fields.stepY, text => setArrayFields({stepY: text}));
+ const angle = useDecimalNumber(fields.angle, text => setArrayFields({angle: text}), undefined, {unit: '°'});
  return (
   <details id="secArray" className="sec-fold" data-sec="" hidden={layout.secArray}><summary>Array</summary>
    <div className="tool-grid">
@@ -54,13 +55,13 @@ export function ArrayPanel() {
      Export batch
     </button>
     <label id="arrALabel" hidden={along}>{radial ? 'Center X (mm)' : 'Step X (mm)'}
-     <input id="arrA" type="number" step="1" {...stepX.inputProps} />{stepX.note && <span className="clamp-note" role="status">{stepX.note}</span>}
+     <input id="arrA" type="text" inputMode="decimal" step="1" {...stepX.inputProps} />{stepX.note && <span className="clamp-note" role="status">{stepX.note}</span>}
     </label>
     <label id="arrBLabel" hidden={along}>{radial ? 'Center Y (mm)' : 'Step Y (mm)'}
-     <input id="arrB" type="number" step="1" {...stepY.inputProps} />{stepY.note && <span className="clamp-note" role="status">{stepY.note}</span>}
+     <input id="arrB" type="text" inputMode="decimal" step="1" {...stepY.inputProps} />{stepY.note && <span className="clamp-note" role="status">{stepY.note}</span>}
     </label>
     <label id="arrAngleRow" hidden={rows.arrAngleRow}>Total angle (°)
-     <input id="arrAngle" type="number" step="15" {...angle.inputProps} />{angle.note && <span className="clamp-note" role="status">{angle.note}</span>}
+     <input id="arrAngle" type="text" inputMode="decimal" step="15" {...angle.inputProps} />{angle.note && <span className="clamp-note" role="status">{angle.note}</span>}
     </label><span></span>
    </div>
    <div className="btn-row">

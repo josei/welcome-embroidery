@@ -1,6 +1,6 @@
 import {layoutState} from '../layoutState.js';
 import {useState, useSyncExternalStore} from 'react';
-import {useNumberInput} from './useNumberInput';
+import {useDecimalNumber} from './useDecimalInput';
 import {toolActions, toolMode} from '../toolMode.js';
 import {stitchPanelState} from '../stitchPanelState.js';
 import {shapePathActions} from '../shapePathState.js';
@@ -20,12 +20,12 @@ export function PathPanel() {
  const [strokeW, setStrokeW] = useState('3');
  const [simpTol, setSimpTol] = useState('0.2');
  const [roundMm, setRoundMm] = useState('2');
- const smallHole = useNumberInput(holeArea, setHoleArea, {min: 0.1, max: 20}, {unit: 'mm²'});
- const smallIsland = useNumberInput(islandArea, setIslandArea, {min: 0.1, max: 20}, {unit: 'mm²'});
- const offsetField = useNumberInput(offsetMm, setOffsetMm);
- const strokeField = useNumberInput(strokeW, setStrokeW, {min: 0.5, max: 40});
- const simpField = useNumberInput(simpTol, setSimpTol, {min: 0.05, max: 10});
- const roundField = useNumberInput(roundMm, setRoundMm, {min: 0.5, max: 200});
+ const smallHole = useDecimalNumber(holeArea, setHoleArea, {min: 0.1, max: 20}, {unit: 'mm²'});
+ const smallIsland = useDecimalNumber(islandArea, setIslandArea, {min: 0.1, max: 20}, {unit: 'mm²'});
+ const offsetField = useDecimalNumber(offsetMm, setOffsetMm);
+ const strokeField = useDecimalNumber(strokeW, setStrokeW, {min: 0.5, max: 40});
+ const simpField = useDecimalNumber(simpTol, setSimpTol, {min: 0.05, max: 10});
+ const roundField = useDecimalNumber(roundMm, setRoundMm, {min: 0.5, max: 200});
  return (
   <details id="secPath" className="sec-fold" data-sec="" hidden={layout.secPath}><summary>Shape &amp;
     path tools</summary><div className="shape-path-tools"><button type="button" id="redworkOutline" onClick={() =>
@@ -50,19 +50,19 @@ export function PathPanel() {
     ) =>
     shapePathActions.removeSmallHoles(holeArea)} title="Drops every hole under the hole limit from the selected closed paths"
       data-tooltip="Drops every hole under the hole limit from the selected closed paths">Remove small holes</button><label>{"Hole limit ("}
-    {"mm²)"}<input id="smallHoleArea" type="number" min="0.1" max="20" step="0.1" {...smallHole.inputProps}
+    {"mm²)"}<input id="smallHoleArea" type="text" inputMode="decimal" min="0.1" max="20" step="0.1" {...smallHole.inputProps}
       title="Holes smaller than this area (0.1-20 mm²) are removed" />{smallHole.note && <span className="clamp-note" role="status">{smallHole.note}</span>}</label><button type="button" id="removeSmallIslands" onClick={(
     ) =>
     shapePathActions.removeSmallIslands(islandArea)} title="Deletes every selected closed shape under the island limit (outline less holes)"
-      data-tooltip="Deletes every selected closed shape under the island limit (outline less holes)">Remove small islands</button><label>{"Island limit (mm²)"}<input id="smallIslandArea" type="number" min="0.1" max="20" step="0.1" {...smallIsland.inputProps}
+      data-tooltip="Deletes every selected closed shape under the island limit (outline less holes)">Remove small islands</button><label>{"Island limit (mm²)"}<input id="smallIslandArea" type="text" inputMode="decimal" min="0.1" max="20" step="0.1" {...smallIsland.inputProps}
       title="Closed shapes smaller than this area (0.1-20 mm², outline less holes) are deleted" />{smallIsland.note && <span className="clamp-note" role="status">{smallIsland.note}</span>}</label></div>
-<div className="tool-grid"><label>{"Offset (mm)"}<input id="offsetMm" type="number" step="0.5" {...offsetField.inputProps} />{offsetField.note && <span className="clamp-note" role="status">{offsetField.note}</span>}</label><button id="offsetBtn" onClick={() =>
+<div className="tool-grid"><label>{"Offset (mm)"}<input id="offsetMm" type="text" inputMode="decimal" step="0.5" {...offsetField.inputProps} />{offsetField.note && <span className="clamp-note" role="status">{offsetField.note}</span>}</label><button id="offsetBtn" onClick={() =>
   shapePathActions.offset(offsetMm)} disabled={panel.pathOffset} title="Grow (positive) or shrink (negative) the selected closed shape">Offset</button>
-<label>{"Stroke width (mm)"}<input id="strokeW" type="number" min="0.5" max="40" step="0.5" {...strokeField.inputProps} />{strokeField.note && <span className="clamp-note" role="status">{strokeField.note}</span>}</label><button id="strokeBtn" onClick={() =>
+<label>{"Stroke width (mm)"}<input id="strokeW" type="text" inputMode="decimal" min="0.5" max="40" step="0.5" {...strokeField.inputProps} />{strokeField.note && <span className="clamp-note" role="status">{strokeField.note}</span>}</label><button id="strokeBtn" onClick={() =>
   shapePathActions.strokeToShape(strokeW)} disabled={panel.pathStroke} title="Turn the selected path into a filled shape of this width">Stroke → shape</button>
-<label>{"Simplify (mm)"}<input id="simpTol" type="number" min="0.05" max="10" step="0.05" {...simpField.inputProps} />{simpField.note && <span className="clamp-note" role="status">{simpField.note}</span>}</label><button id="simpBtn" onClick={() =>
+<label>{"Simplify (mm)"}<input id="simpTol" type="text" inputMode="decimal" min="0.05" max="10" step="0.05" {...simpField.inputProps} />{simpField.note && <span className="clamp-note" role="status">{simpField.note}</span>}</label><button id="simpBtn" onClick={() =>
   shapePathActions.simplify(simpTol)} disabled={panel.pathSimplify} title="Remove nodes that change the path by less than this">Simplify</button></div>
-<div className="tool-grid"><label>{"Round corners (mm)"}<input id="roundMm" type="number" min="0.5" max="200" step="0.5" {...roundField.inputProps} />{roundField.note && <span className="clamp-note" role="status">{roundField.note}</span>}</label><button id="roundBtn" onClick={() =>
+<div className="tool-grid"><label>{"Round corners (mm)"}<input id="roundMm" type="text" inputMode="decimal" min="0.5" max="200" step="0.5" {...roundField.inputProps} />{roundField.note && <span className="clamp-note" role="status">{roundField.note}</span>}</label><button id="roundBtn" onClick={() =>
   shapePathActions.roundCorners(roundMm)} title="Round the corners: rectangles get a corner radius, paths get arcs at their corner nodes (selected nodes only, when some are selected)">Round
     corners</button></div>
 <div className="btn-row"><button id="reverseBtn" onClick={() =>

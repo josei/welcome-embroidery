@@ -4,7 +4,7 @@ import {selectionLabelsState} from '../selectionLabelsState.js';
 import {useSyncExternalStore} from 'react';
 import {SATIN_WIDTH_DEFAULT, typeRowsActions, typeRowsState} from '../typeRowsState.js';
 import {loopRowsActions, loopRowsState} from '../loopRowsState.js';
-import {useNumberInput} from './useNumberInput';
+import {useDecimalNumber} from './useDecimalInput';
 import {SATIN_WIDTH_RANGE} from '../fieldRanges.js';
 import {IconSelect} from './IconSelect';
 import {stitchChoiceActions, stitchChoicesState} from '../stitchChoicesState.js';
@@ -20,10 +20,10 @@ export function StitchTypeRows() {
  const type = useSyncExternalStore(typeRowsState.subscribe, typeRowsState.get);
  const loop = useSyncExternalStore(loopRowsState.subscribe, loopRowsState.get);
  const panel = useSyncExternalStore(stitchPanelState.subscribe, stitchPanelState.get);
- const satinWidth = useNumberInput(type.satinWidth, text => typeRowsActions.commit('satinWidth', text), SATIN_WIDTH_RANGE);
+ const satinWidth = useDecimalNumber(type.satinWidth, text => typeRowsActions.commit('satinWidth', text), SATIN_WIDTH_RANGE);
  const satinWidthDiffers = Number(type.satinWidth) !== SATIN_WIDTH_DEFAULT;
- const motifSpacing = useNumberInput(type.motifSpacing, text => typeRowsActions.commit('motifSpacing', text), {min: 1, max: 20});
- const motifSize = useNumberInput(type.motifSize, text => typeRowsActions.commit('motifSize', text), {min: 0.4, max: 6});
+ const motifSpacing = useDecimalNumber(type.motifSpacing, text => typeRowsActions.commit('motifSpacing', text), {min: 1, max: 20});
+ const motifSize = useDecimalNumber(type.motifSize, text => typeRowsActions.commit('motifSize', text), {min: 0.4, max: 6});
  return (
   <><h4 id="stitchTitle">{labels.stitchTitle}</h4><label className="block" hidden={layout.typeHidden}>Stitch type<IconSelect id="type"
     groupLabel="Stitch type" labelled value={choices.type} disabled={choices.typeDisabled} options={[
@@ -34,10 +34,10 @@ export function StitchTypeRows() {
     {value: 'bead', label: 'Beads', icon: 'i-satin', thumb: 'bead'}, {value: 'bling', label: 'Bling', icon: 'i-ripple', thumb: 'bling'}]} onChoose={v =>
     stitchChoiceActions.choose('type', v)} />{choices.satinOff && <p id="satinOffHint" className="sel-hint">{t('Satin column needs a path. Convert to path first.')}</p>}{choices.typeMixed && <p id="typeMixedHint" className="sel-hint">{mixedTypeNote()}</p>}</label><label hidden={layout.threadHidden}>Thread<select id="thread" value={panel.threadValue} onChange={e =>
     stitchPanelActions.chooseThread(e.target.value)}>{panel.threadOptions.map(o =>
-    <option key={o.value} value={o.value} disabled={o.value === MIXED_THREAD}>{o.label}</option>)}</select></label><div id="satinRow" className="field-reset" hidden={rows.satinRow}><label>{"Satin width (mm)"}<input id="satinWidth" {...satinWidth.inputProps} type="number" min="0.5" max="12" step="0.5" />{satinWidth.note && <span className="clamp-note" role="status">{satinWidth.note}</span>}</label><button id="satinWidthReset" type="button" className="reset-default" hidden={!satinWidthDiffers}
+    <option key={o.value} value={o.value} disabled={o.value === MIXED_THREAD}>{o.label}</option>)}</select></label><div id="satinRow" className="field-reset" hidden={rows.satinRow}><label>{"Satin width (mm)"}<input id="satinWidth" {...satinWidth.inputProps} type="text" inputMode="decimal" min="0.5" max="12" step="0.5" />{satinWidth.note && <span className="clamp-note" role="status">{satinWidth.note}</span>}</label><button id="satinWidthReset" type="button" className="reset-default" hidden={!satinWidthDiffers}
     title={`Reset to default (${SATIN_WIDTH_DEFAULT} mm)`} aria-label={`Reset to default (${SATIN_WIDTH_DEFAULT} mm)`} onClick={() => typeRowsActions.commit('satinWidth', String(SATIN_WIDTH_DEFAULT))}><svg className="icon" aria-hidden="true"><use href="#i-reset" /></svg></button></div><label id="motifSpacingRow"
-      hidden={rows.motifSpacingRow}>{"Spacing (mm)"}<input id="motifSpacing" {...motifSpacing.inputProps} type="number" min="1" max="20" step="0.5" />{motifSpacing.note && <span className="clamp-note" role="status">{motifSpacing.note}</span>}</label>
-    <label id="motifSizeRow" hidden={rows.motifSizeRow}>{"Size (mm)"}<input id="motifSize" {...motifSize.inputProps} type="number" min="0.4" max="6" step="0.2" />{motifSize.note && <span className="clamp-note" role="status">{motifSize.note}</span>}</label><label id="motifShapeRow"
+      hidden={rows.motifSpacingRow}>{"Spacing (mm)"}<input id="motifSpacing" {...motifSpacing.inputProps} type="text" inputMode="decimal" min="1" max="20" step="0.5" />{motifSpacing.note && <span className="clamp-note" role="status">{motifSpacing.note}</span>}</label>
+    <label id="motifSizeRow" hidden={rows.motifSizeRow}>{"Size (mm)"}<input id="motifSize" {...motifSize.inputProps} type="text" inputMode="decimal" min="0.4" max="6" step="0.2" />{motifSize.note && <span className="clamp-note" role="status">{motifSize.note}</span>}</label><label id="motifShapeRow"
       hidden={rows.motifShapeRow}>Loop shape<select id="motifShape" value={loop.motifShape} onChange={e =>
     loopRowsActions.choose('motifShape', e.target.value)}><option value="circle">Circle</option><option value="leaf">{"Leaf (along the path)"}</option></select></label><label id="motifWarpRow" hidden={rows.motifWarpRow}>Loop size warp<select id="motifWarp"
       title="Shrinks the motif loops from one edge of the shape to the other, or from the start of a motif path to its end (approximate depth cue)"

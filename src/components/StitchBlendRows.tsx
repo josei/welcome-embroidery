@@ -3,7 +3,7 @@ import {useSyncExternalStore} from 'react';
 import {IconSelect} from './IconSelect';
 import {stitchChoiceActions, stitchChoicesState} from '../stitchChoicesState.js';
 import {stitchPanelActions, stitchPanelState} from '../stitchPanelState.js';
-import {useNumberInput} from './useNumberInput';
+import {useDecimalNumber} from './useDecimalInput';
 import {t} from '../i18n.js';
 import {threadName} from '../threadPalette.js';
 // Part of the stitch panel, rendered by React. Ids match the markup it replaced, because app.js wires them by id.
@@ -27,9 +27,9 @@ export function StitchBlendRows() {
  const rows = useSyncExternalStore(stitchRowsState.subscribe, stitchRowsState.get);
  const choices = useSyncExternalStore(stitchChoicesState.subscribe, stitchChoicesState.get);
  const panel = useSyncExternalStore(stitchPanelState.subscribe, stitchPanelState.get);
- const angle = useNumberInput(panel.blendAngle, text => stitchPanelActions.commitBlendAngle(text), {min: -360, max: 360}, {allowEmpty: true, unit: '°'});
- const start = useNumberInput(panel.blendStart, text => stitchPanelActions.commitBlendRange('blendStart', text), {min: 0, max: 100}, {unit: '%'});
- const end = useNumberInput(panel.blendEnd, text => stitchPanelActions.commitBlendRange('blendEnd', text), {min: 0, max: 100}, {unit: '%'});
+ const angle = useDecimalNumber(panel.blendAngle, text => stitchPanelActions.commitBlendAngle(text), {min: -360, max: 360}, {allowEmpty: true, unit: '°'});
+ const start = useDecimalNumber(panel.blendStart, text => stitchPanelActions.commitBlendRange('blendStart', text), {min: 0, max: 100}, {unit: '%'});
+ const end = useDecimalNumber(panel.blendEnd, text => stitchPanelActions.commitBlendRange('blendEnd', text), {min: 0, max: 100}, {unit: '%'});
  return (
   <><div id="blendRow" hidden={rows.blendRow}><label>Blend into thread<select id="blendThread" value={panel.blendThread} onChange={e =>
     stitchPanelActions.chooseBlendThread(e.target.value)}>{THREAD_OPTIONS.map(o =>
@@ -38,8 +38,8 @@ export function StitchBlendRows() {
     <label key={k}>{`Color ${k + 1}`}<select id={'blendPalette' + k} value={value} onChange={e =>
     stitchPanelActions.chooseBlendPalette(k, e.target.value)}>{paletteOptions(value).map(o =>
     <option key={o.value} value={o.value}>{o.label}</option>)}</select></label>)}</div><div className="tool-grid" id="blendRange"
-      hidden={rows.blendRange}><label id="blendAngleRow">{"Direction (°)"}<input id="blendAngle" {...angle.inputProps} type="number" step="5" placeholder="across rows"
-      title="Angle of the blend, −360 to 360°; empty blends across the rows" />{angle.note && <span className="clamp-note" role="status">{angle.note}</span>}</label><label>{"From (%)"}<input id="blendStart" {...start.inputProps} type="number" min="0" max="100" step="5" />{start.note && <span className="clamp-note" role="status">{start.note}</span>}</label><label>{"To (%)"}<input id="blendEnd" {...end.inputProps} type="number" min="0" max="100" step="5" />{end.note && <span className="clamp-note" role="status">{end.note}</span>}</label></div></div><label id="methodRow" hidden={rows.methodRow}>Fill
+      hidden={rows.blendRange}><label id="blendAngleRow">{"Direction (°)"}<input id="blendAngle" {...angle.inputProps} type="text" inputMode="decimal" step="5" placeholder="across rows"
+      title="Angle of the blend, −360 to 360°; empty blends across the rows" />{angle.note && <span className="clamp-note" role="status">{angle.note}</span>}</label><label>{"From (%)"}<input id="blendStart" {...start.inputProps} type="text" inputMode="decimal" min="0" max="100" step="5" />{start.note && <span className="clamp-note" role="status">{start.note}</span>}</label><label>{"To (%)"}<input id="blendEnd" {...end.inputProps} type="text" inputMode="decimal" min="0" max="100" step="5" />{end.note && <span className="clamp-note" role="status">{end.note}</span>}</label></div></div><label id="methodRow" hidden={rows.methodRow}>Fill
       pattern<IconSelect id="fillMethod" groupLabel="Fill pattern" value={choices.fillMethod} options={FILL_METHODS} onChoose={v =>
     stitchChoiceActions.choose('fillMethod', v)} /></label></>
  );
