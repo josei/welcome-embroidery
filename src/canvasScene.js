@@ -36,7 +36,7 @@ export function drawScene(){
  setRect('#hoopOuter',hoop.w+8,hoop.h+8,7);
  setRect('#hoopRing',hoop.w,hoop.h,4);
  setRect('#hoopLinen',hoop.w-2.4,hoop.h-2.4,3);
- setHoopFields({hoopW:String(hoop.w),hoopH:String(hoop.h),preset:HOOP_PRESETS.some(p=>p.w===hoop.w&&p.h===hoop.h)?`${hoop.w}x${hoop.h}`:'custom'});
+ setHoopFields({hoopW:String(hoop.w),hoopH:String(hoop.h),preset:HOOP_PRESETS.find(p=>p.w===hoop.w&&p.h===hoop.h)?.key??'custom'});
 
  const g=$('#shapes');
  g.replaceChildren();

@@ -1247,7 +1247,9 @@ test('sequin fill lays sequins on a staggered grid inside a closed shape, far fe
 });
 
 test('hoop presets are the default and the Brother 4x4, 5x7 and 6x10 hoops, each set as the document hoop',()=>{
- assert.deepEqual(HOOP_PRESETS.map(p=>[p.w,p.h]),[[110,110],[100,100],[180,130],[260,160]]);
+ assert.deepEqual(HOOP_PRESETS.map(p=>[p.key,p.w,p.h]),[['110x110',110,110],['4x4in',101.6,101.6],['5x7in',177.8,127],['6x10in',254,152.4]]);
+ // Each inch preset is its label exactly: 1 in = 25.4 mm, so the label and the stored size agree.
+ for(const [key,inches] of [['4x4in',[4,4]],['5x7in',[5,7]],['6x10in',[6,10]]]){const p=HOOP_PRESETS.find(v=>v.key===key);assert.deepEqual([p.w,p.h].sort((a,b)=>a-b),inches.map(v=>Math.round(v*25.4*10)/10).sort((a,b)=>a-b),key+' matches its inch label');}
  for(const p of HOOP_PRESETS){const doc=initialDocument();doc.objects=[];applyOperations(doc,[{op:'set_hoop',width:p.w,height:p.h}]);validateDocument(doc);assert.deepEqual(hoopSize(doc),{w:p.w,h:p.h},p.key+' is stored as the hoop');}
  const doc=initialDocument();doc.objects=[];
  assert.throws(()=>applyOperations(doc,[{op:'set_hoop',width:500,height:160}]),/Hoop width and height/);
