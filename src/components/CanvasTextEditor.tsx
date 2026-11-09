@@ -22,14 +22,18 @@ export function CanvasTextEditor() {
     finishCanvasText(commit, value);
   };
   const input = (e: FormEvent<HTMLTextAreaElement>) => liveCanvasText(canvasText.id, e.currentTarget.value);
+  // Enter and Escape close the box from the keyboard, so focus goes to the Add lettering button rather than being lost to
+  // BODY. Leaving the box by clicking elsewhere (blur) keeps focus where the user put it.
   const keyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
     e.stopPropagation();
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       finish(true, e.currentTarget.value);
+      document.getElementById('letter')?.focus();
     } else if (e.key === 'Escape') {
       e.preventDefault();
       finish(false, e.currentTarget.value);
+      document.getElementById('letter')?.focus();
     }
   };
   return (

@@ -3435,3 +3435,20 @@ test('sewing order: a row selects from the keyboard, and its Hide and Lock toggl
  await expect(row).not.toHaveAccessibleName(/Hide|Lock/);
  expect(errors).toEqual([]);
 });
+
+test('Escape or Enter closing the lettering box returns focus to Add lettering, and Tab moves on from there',async({page})=>{
+ page.on('dialog',d=>d.accept());
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));
+ await page.goto('/');await newDesign(page);
+ const activeId=()=>page.evaluate(()=>document.activeElement?.id||document.activeElement?.tagName);
+ // Escape cancels a new lettering box: focus must not fall back to BODY, and the next Tab continues from Add lettering.
+ await page.locator('#letter').click();await expect(page.locator('#canvasText')).toBeFocused();await page.keyboard.type('ROSES');
+ await page.keyboard.press('Escape');await expect(page.locator('#canvasText')).toHaveCount(0);
+ expect(await activeId()).toBe('letter');expect(await activeId()).not.toBe('BODY');
+ await page.keyboard.press('Tab');await expect(page.locator('#line')).toBeFocused();
+ // Enter commits and returns focus to the same control.
+ await page.locator('#letter').click();await page.keyboard.type('FOX');await page.keyboard.press('Enter');
+ await expect(page.locator('#canvasText')).toHaveCount(0);expect(await activeId()).toBe('letter');
+ await page.keyboard.press('Tab');await expect(page.locator('#line')).toBeFocused();
+ expect(errors).toEqual([]);
+});
