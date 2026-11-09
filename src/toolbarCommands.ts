@@ -48,10 +48,20 @@ export function ungroupSelection() {
   if (ids.length) wired().edit([{op: 'ungroup', ids}]);
 }
 
-/** Duplicates the selection 3 mm down and right, regrouping the copies when every original was in one group. */
+/** The most objects a design can hold; validate.js enforces the same limit on the saved document. */
+const MAX_OBJECTS = 100;
+
+/**
+ * Duplicates the selection 3 mm down and right, regrouping the copies when every original was in one group. If the copies
+ * would take the design past MAX_OBJECTS, nothing is copied and the user gets a message instead of a project-validation error.
+ */
 export function duplicateSelection() {
   const ids = [...selState().multi];
   if (!ids.length) return;
+  if (objects().length + ids.length > MAX_OBJECTS) {
+    wired().toast(t('This would go over the 100-object limit.'));
+    return;
+  }
   const copies = ids.map(id => [id, crypto.randomUUID()] as const);
   const regroup = ids.length > 1
     && new Set(ids.map(id => objects().find(o => o.id === id)?.groupId)).size === 1

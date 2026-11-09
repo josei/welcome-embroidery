@@ -2786,6 +2786,23 @@ test('Edit and Arrange menus run the same commands as their shortcuts and disabl
  expect(errors).toEqual([]);
 });
 
+test('Duplicate at the 100-object cap changes nothing and shows one clear message',async({page})=>{page.on('dialog',d=>d.accept());
+ await page.goto('/');await expect(page.locator('#objects .object-row')).toHaveCount(5);
+ // Five objects selected; each Ctrl+D copies all five, so 5 + 19 x 5 reaches the 100-object cap.
+ await page.locator('#objects .object-row').first().click();await page.keyboard.press('Control+a');
+ for(let i=0;i<19;i++)await page.keyboard.press('Control+d');
+ await expect(page.locator('#objects .object-row')).toHaveCount(100);
+ const rows=page.locator('#objects .object-row');
+ await page.keyboard.press('Control+d');
+ await expect(page.locator('#toast')).toContainText('This would go over the 100-object limit.');
+ await expect(page.locator('#toast')).not.toContainText('Invalid Welcome project');
+ // Repeated presses leave the count alone and never stack identical toasts.
+ for(let i=0;i<3;i++)await page.keyboard.press('Control+d');
+ await expect(rows).toHaveCount(100);
+ await expect(page.locator('#toast')).toHaveCount(1);
+ await expect(page.locator('#toast')).not.toContainText('Invalid Welcome project');
+});
+
 test('with 30 objects every sewing-order row scrolls clear of the hoop footer',async({page})=>{page.on('dialog',d=>d.accept());
  await page.goto('/');await expect(page.locator('#objects .object-row')).toHaveCount(5);
  await page.locator('#objects .object-row').first().click();for(let i=0;i<26;i++)await page.keyboard.press('Control+d');

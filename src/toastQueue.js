@@ -54,7 +54,8 @@ export function createToastQueue({visibleLimit = TOAST_VISIBLE_LIMIT, logLimit =
       const duration = kind === 'error' ? null : toastDuration(text);
       /** @type {ToastEntry} */
       const entry = {id, kind, text, at: now, expiresAt: duration === null ? null : now + duration, remaining: duration ?? 0, holds: 0, action};
-      visible = [...visible, entry];
+      // A repeat of a message already on screen replaces it rather than stacking an identical copy beside it.
+      visible = [...visible.filter(item => item.text !== text || item.kind !== kind), entry];
       // Drop the oldest confirmation from view when the stack is full. Errors are never dropped; they are dismissed by hand.
       while (visible.length > visibleLimit) {
         const oldest = visible.find(item => item.kind === 'status');

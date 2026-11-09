@@ -96,3 +96,16 @@ test('the log keeps the last twenty messages, newest first', () => {
   assert.equal(log.at(-1).text, 'message 6');
   assert.equal(log[0].at, TOAST_LOG_LIMIT + 5);
 });
+
+test('a repeat of a message already on screen replaces it instead of stacking', () => {
+  const q = createToastQueue();
+  const limit = 'This would go over the 100-object limit.';
+  q.push(limit, 'status', 0);
+  q.push(limit, 'status', 100);
+  q.push(limit, 'status', 200);
+  assert.deepEqual(q.visible().map(t => t.text), [limit]);
+  q.push('Saved.', 'status', 300);
+  q.push(limit, 'status', 400);
+  assert.deepEqual(q.visible().map(t => t.text), ['Saved.', limit]);
+  assert.equal(q.log().length, 5, 'every message still reaches the log');
+});

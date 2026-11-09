@@ -219,7 +219,7 @@ const ES={
   'El texto bordado necesita algo de texto.',
 'Project opened locally.':'Proyecto abierto localmente.','Project name cannot be empty.':'El nombre del proyecto no puede estar vacío.',
   'SVG exported (design only, not a stitch plan).':'SVG exportado (solo el diseño, no un plan de puntadas).','Copied the private MCP link.':
-  'Enlace MCP privado copiado.','Select and copy the link.':'Selecciona y copia el enlace.','Select one shape, path or lettering first.':
+  'Enlace MCP privado copiado.','Select and copy the link.':'Selecciona y copia el enlace.','This would go over the 100-object limit.':'Esto superaría el límite de 100 objetos.','Select one shape, path or lettering first.':
   'Selecciona primero una forma, un trazado o un texto.',
 'Discard unsaved changes?':'¿Descartar los cambios sin guardar?',
 '"{name}" has unsaved changes':'"{name}" tiene cambios sin guardar','Discard {objects}, edited {m} min ago?':'¿Descartar {objects}, editado hace {m} min?',
