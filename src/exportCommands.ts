@@ -1,6 +1,6 @@
 import {documentNow} from './documentState.js';
 import {selectedObject} from './selectionCommands.js';
-import {exportFormatState} from './exportFormatState.js';
+import {exportFormatState, exportKind} from './exportFormatState.js';
 import {EMPTY_EXPORT_REASON, exportDialogState, setExportDialog} from './exportDialogState.js';
 import {download, exportStem, forWorker} from './appHelpers.js';
 import {exportAppliqueTemplates, exportPrintTemplate, exportSvg, jefWarnings, sewingWorksheet} from './engine.js';
@@ -146,7 +146,7 @@ async function runExport(job: {abandoned: boolean}) {
   }
   wired().render();
   setExportDialog({open: false});
-  wired().toast(t('{fmt} file downloaded ({file}).', {fmt: chosen.toUpperCase(), file: exportFileName(chosen)})
+  wired().toast(t('{fmt} file downloaded ({file}).', {fmt: exportKind(chosen), file: exportFileName(chosen)})
     + (withSheet ? t(' The sewing worksheet is downloaded with it.') : '')
     + jefWarnings(result.plan as Parameters<typeof jefWarnings>[0], chosen).map(w => ' ' + t(w)).join(''));
 }
