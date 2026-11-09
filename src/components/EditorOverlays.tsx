@@ -8,7 +8,7 @@ import {SaveAsDialog} from './SaveAsDialog';
 import {TraceDialog} from './TraceDialog';
 import {agentLinkState} from '../agentLinkState.js';
 import {agentDialogState, copyAgentLink, revokeAgentLink, setAgentDialogOpen} from '../agentDialog.js';
-import {EXPORT_FORMATS, exportFormatState, exportKind, setExportFormat} from '../exportFormatState.js';
+import {EXPORT_FORMAT_GROUPS, EXPORT_FORMATS, exportFormatState, exportKind, setExportFormat} from '../exportFormatState.js';
 import {t} from '../i18n.js';
 import {exportDialogState, setExportDialog} from '../exportDialogState.js';
 import {exportCurrent, exportFileName, MACHINE_FORMATS} from '../exportCommands.js';
@@ -148,7 +148,11 @@ export function EditorOverlays() {
           {t("File format")}
         </label>
         <select id={"format"} value={exportFormat.format} onChange={e => setExportFormat(e.target.value)} onKeyDown={keepEnterOnSelect}>
-          {EXPORT_FORMATS.map(f => <option key={f.value} value={f.value}>{f.label}</option>)}
+          {EXPORT_FORMAT_GROUPS.map(g => (
+            <optgroup key={g.group} label={t(g.label)}>
+              {EXPORT_FORMATS.filter(f => f.group === g.group).map(f => <option key={f.value} value={f.value}>{f.label}</option>)}
+            </optgroup>
+          ))}
         </select>
         <p id={"exportHint"}>
           {"Check hoop and thread choices for your machine and materials."}

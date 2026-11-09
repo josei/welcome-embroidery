@@ -3574,3 +3574,15 @@ test('sewing-order list: Shift selects a range, Ctrl or Cmd adds or removes one 
  await rows.nth(4).click();await expect(page.locator('#angle')).not.toHaveValue('30');await rows.nth(1).click();await expect(page.locator('#angle')).toHaveValue('30');await rows.nth(2).click({modifiers:['ControlOrMeta']});await rows.nth(0).click({modifiers:['ControlOrMeta']});expect(before).not.toBe('30');
  expect(errors).toEqual([]);
 });
+
+test('export dialog groups machine formats apart from print and vector outputs',async({page})=>{
+ await page.goto('/');
+ await page.locator('#rect').click();
+ await page.locator('#export').click();
+ const groups=page.locator('#format optgroup');
+ await expect(groups).toHaveCount(2);
+ await expect(groups.nth(0)).toHaveAttribute('label','Machine embroidery formats');
+ await expect(groups.nth(1)).toHaveAttribute('label','Print and vector');
+ await expect(groups.nth(0).locator('option')).toHaveCount(13);
+ await expect(groups.nth(1).locator('option')).toHaveText(['SVG · vector design (Inkscape)','Print template · 1:1 SVG (placement sheet)','Appliqué templates · 1:1 SVG','DXF · paths (CAD)']);
+});
