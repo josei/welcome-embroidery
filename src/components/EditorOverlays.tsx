@@ -3,6 +3,7 @@ import {useModalDialog} from './useModalDialog';
 import {KeysDialog} from './KeysDialog';
 import {MessagesDialog} from './ToastStack';
 import {RestoreDialog} from './RestoreDialog';
+import {DiscardDialog} from './DiscardDialog';
 import {SaveAsDialog} from './SaveAsDialog';
 import {TraceDialog} from './TraceDialog';
 import {agentLinkState} from '../agentLinkState.js';
@@ -131,6 +132,7 @@ export function EditorOverlays() {
     <KeysDialog />
     <SettingsDialog />
     <RestoreDialog />
+    <DiscardDialog />
     <SaveAsDialog />
     <ThreadPopover />
     <dialog id={"exportDialog"} ref={exportElement} onClose={() => setExportDialog({open: false})}>

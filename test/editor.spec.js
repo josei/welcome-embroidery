@@ -4,6 +4,10 @@ import {pinnedMachineFixture,readMachineFixtures} from './fixture-archive.js';
 import {decodeEmbroidery} from '../src/readers.js';
 import {withPesMetadata} from './pes-with-metadata.js';
 import {initialDocument,importStitchLayer,applyOperations,compile,geometry} from '../src/engine.js';
+
+// New over a design with unsaved objects opens the in-app discard dialog. Scenarios that start over discard it; the tests that
+// check the dialog itself click #new directly.
+const newDesign=async page=>{await page.locator('#new').click();if(await page.locator('#discardDialog[open]').count())await page.locator('#discardDiscard').click();};
 // The editor labels shortcuts ⌘ ⌥ ⇧ on Apple platforms and Ctrl+ / Alt+ elsewhere. Chromium runs on the host OS here,
 // so the host decides which label each assertion expects.
 const APPLE_KEYS=process.platform==='darwin';
@@ -36,7 +40,7 @@ test('browser design, settings, history, local project and offline compilation/e
  const projectDownload=page.waitForEvent('download');await page.locator('#save').click();const saved=await projectDownload;const projectPath='/tmp/welcome-browser-project.welcome';await saved.saveAs(projectPath);
  const source=JSON.parse(await (await import('node:fs/promises')).readFile(projectPath,'utf8'));expect(source.schema).toBe('welcome/1');expect(source.name).toBe('Garden badge');expect(source.objects.length).toBe(7);
  const artifactId='123e4567-e89b-42d3-a456-426614174000';const linked=await page.context().newPage();await linked.route(`**/artifacts/${artifactId}.welcome`,route=>route.fulfill({status:200,contentType:'application/json',body:JSON.stringify(source)}));await linked.goto(`/?open=${artifactId}`);await expect(linked.locator('#name')).toHaveValue('Garden badge');await expect(linked.locator('.object-row')).toHaveCount(7);await expect(linked.locator('#toast')).toHaveText('Project opened locally.');await linked.close();
- await page.locator('#new').click();await expect(page.locator('.object-row')).toHaveCount(0);
+ await newDesign(page);await expect(page.locator('.object-row')).toHaveCount(0);
  await page.locator('#file').setInputFiles({name:'bad.welcome',mimeType:'application/json',buffer:Buffer.from(JSON.stringify({...source,objects:[{...source.objects[0],kind:'triangle'}]}))});await expect(page.locator('.object-row')).toHaveCount(0);await expect(page.locator('#toast')).toContainText('unsupported kind');
  await page.locator('#file').setInputFiles({name:'reopened.welcome',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(source))});await expect(page.locator('.object-row')).toHaveCount(7);await expect(page.locator('#name')).toHaveValue('Garden badge');
  await page.locator('#rect').click();await expect(page.locator('#saved')).toHaveCount(0);
@@ -44,7 +48,7 @@ test('browser design, settings, history, local project and offline compilation/e
  expect(errors).toEqual([]);
 });
 
-test('bundled embroidery font and bounded SVG import are editable',async({page})=>{page.on('dialog',d=>d.accept());await page.goto('/');await page.locator('#new').click();await page.locator('#letter').click();await page.locator('#font').selectOption('neon-blinking/1');await page.locator('#letteringText').fill('WELCOME 123!');await page.locator('#letteringText').press('Tab');await expect(page.locator('#font')).toHaveValue('neon-blinking/1');await expect(page.locator('#letteringHeight')).toHaveAttribute('min','20');await page.locator('#count').click();await expect(page.locator('#count')).toContainText('stitches');await page.locator('#file').setInputFiles({name:'badge.svg',mimeType:'image/svg+xml',buffer:Buffer.from('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect x="10" y="10" width="40" height="30" fill="#527461"/><ellipse cx="70" cy="80" rx="5" ry="4" fill="#89a377"/><path d="M20 70 C30 50 40 90 80 60" stroke="#d9897e" fill="none"/></svg>')});await expect(page.locator('.object-row')).toHaveCount(3);await page.locator('.object-row').filter({hasText:'Imported path'}).click();await expect(page.locator('.path-node')).toHaveCount(0);await page.keyboard.press('Enter');await expect(page.locator('.path-node').first()).toBeAttached();const node=page.locator('.path-node').last(),nodeBefore=await node.getAttribute('cx'),nodeBox=await node.boundingBox();await page.mouse.move(nodeBox.x+nodeBox.width/2,nodeBox.y+nodeBox.height/2);await page.mouse.down();await page.mouse.move(nodeBox.x+nodeBox.width/2+18,nodeBox.y+nodeBox.height/2+5,{steps:3});await page.mouse.up();const nodeAfter=await page.locator('.path-node').last().getAttribute('cx');expect(nodeAfter).not.toBe(nodeBefore);await page.locator('#undo').click();await expect(page.locator('.path-node').last()).toHaveAttribute('cx',nodeBefore);await page.locator('#redo').click();await expect(page.locator('.path-node').last()).toHaveAttribute('cx',nodeAfter);await page.locator('.object-row').filter({hasText:'Imported ellipse'}).click();await expect(page.locator('#posX')).toHaveValue('16.5');await page.locator('#file').setInputFiles({name:'unsafe.svg',mimeType:'image/svg+xml',buffer:Buffer.from('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><g transform="translate(10 5)"><rect x="0" y="0" width="20" height="20"/></g></svg>')});await expect(page.locator('.object-row')).toHaveCount(3);await expect(page.locator('#toast')).toContainText('attribute transform is unsupported');});
+test('bundled embroidery font and bounded SVG import are editable',async({page})=>{page.on('dialog',d=>d.accept());await page.goto('/');await newDesign(page);await page.locator('#letter').click();await page.locator('#font').selectOption('neon-blinking/1');await page.locator('#letteringText').fill('WELCOME 123!');await page.locator('#letteringText').press('Tab');await expect(page.locator('#font')).toHaveValue('neon-blinking/1');await expect(page.locator('#letteringHeight')).toHaveAttribute('min','20');await page.locator('#count').click();await expect(page.locator('#count')).toContainText('stitches');await page.locator('#file').setInputFiles({name:'badge.svg',mimeType:'image/svg+xml',buffer:Buffer.from('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect x="10" y="10" width="40" height="30" fill="#527461"/><ellipse cx="70" cy="80" rx="5" ry="4" fill="#89a377"/><path d="M20 70 C30 50 40 90 80 60" stroke="#d9897e" fill="none"/></svg>')}); await expect(page.locator('#discardDialog')).toBeVisible();await page.locator('#discardDiscard').click();await expect(page.locator('.object-row')).toHaveCount(3);await page.locator('.object-row').filter({hasText:'Imported path'}).click();await expect(page.locator('.path-node')).toHaveCount(0);await page.keyboard.press('Enter');await expect(page.locator('.path-node').first()).toBeAttached();const node=page.locator('.path-node').last(),nodeBefore=await node.getAttribute('cx'),nodeBox=await node.boundingBox();await page.mouse.move(nodeBox.x+nodeBox.width/2,nodeBox.y+nodeBox.height/2);await page.mouse.down();await page.mouse.move(nodeBox.x+nodeBox.width/2+18,nodeBox.y+nodeBox.height/2+5,{steps:3});await page.mouse.up();const nodeAfter=await page.locator('.path-node').last().getAttribute('cx');expect(nodeAfter).not.toBe(nodeBefore);await page.locator('#undo').click();await expect(page.locator('.path-node').last()).toHaveAttribute('cx',nodeBefore);await page.locator('#redo').click();await expect(page.locator('.path-node').last()).toHaveAttribute('cx',nodeAfter);await page.locator('.object-row').filter({hasText:'Imported ellipse'}).click();await expect(page.locator('#posX')).toHaveValue('16.5');await page.locator('#file').setInputFiles({name:'unsafe.svg',mimeType:'image/svg+xml',buffer:Buffer.from('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><g transform="translate(10 5)"><rect x="0" y="0" width="20" height="20"/></g></svg>')});await expect(page.locator('.object-row')).toHaveCount(3);await expect(page.locator('#toast')).toContainText('attribute transform is unsupported');});
 
 
 test('stitch simulation is visible, scrubbable, replayable, and stops on edits',async({page})=>{
@@ -58,7 +62,7 @@ test('stitch simulation is visible, scrubbable, replayable, and stops on edits',
 });
 
 test('pinned JEF import renders a stitch layer, saves source commands, transforms with history, and preserves failures',async({page})=>{
- const errors=[];page.on('pageerror',e=>errors.push(e.message));const fixture=pinnedMachineFixture('jef'),bytes=Buffer.from(fixture.bytes);await page.goto('/');page.on('dialog',dialog=>dialog.accept());await page.locator('#new').click();await expect(page.locator('.object-row')).toHaveCount(0);await page.locator('#importMachine').click();await page.locator('#machineFile').setInputFiles({name:'sample.jef',mimeType:'application/octet-stream',buffer:bytes});
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));const fixture=pinnedMachineFixture('jef'),bytes=Buffer.from(fixture.bytes);await page.goto('/');page.on('dialog',dialog=>dialog.accept());await newDesign(page);await expect(page.locator('.object-row')).toHaveCount(0);await page.locator('#importMachine').click();await page.locator('#machineFile').setInputFiles({name:'sample.jef',mimeType:'application/octet-stream',buffer:bytes});
  await expect(page.locator('.object-row')).toHaveCount(1);const layer=page.locator('.object-row').last();await expect(layer).toContainText('machine stitches');await expect(page.locator('#sourceInfo')).toContainText('201 commands');const id=await layer.getAttribute('data-id');
  const unchanged=page.waitForEvent('download');await page.locator('#export').click();await page.locator('#format').selectOption('jef');await page.locator('#download').click();const originalExport=await unchanged;const originalPath='/tmp/welcome-import-original.jef';await originalExport.saveAs(originalPath);expect(Buffer.compare(await (await import('node:fs/promises')).readFile(originalPath),bytes)).toBe(0);
  const x=Number(await page.locator('#posX').inputValue());await page.locator('#posX').fill(String(x+2));await page.locator('#posX').press('Tab');await page.locator('#rotation').fill('2');await page.locator('#rotation').press('Tab');await page.locator('#thread').selectOption('#d9897e');await expect(page.locator('#saved')).toHaveCount(0);
@@ -71,7 +75,7 @@ test('pinned JEF import renders a stitch layer, saves source commands, transform
 test('inline icon controls are accessible and rotated stitch-layer preview matches the compile plan',async({page})=>{
  const fixture=pinnedMachineFixture('vp3'),doc=initialDocument(),layer=importStitchLayer(fixture.bytes,'vp3');doc.objects=[layer];applyOperations(doc,[{op:'transform',id:layer.id,rotation:17}]);const firstNeedle=compile(doc).stitches.find(s=>s.cmd==='stitch');
  await page.goto('/');page.on('dialog',dialog=>dialog.accept());await expect(page.getByRole('button',{name:'New design'})).toHaveAttribute('data-tooltip','New design');await expect(page.getByRole('button',{name:'Add ellipse'})).toHaveAttribute('title','Add ellipse');await expect(page.getByRole('button',{name:'Nothing to undo'})).toBeDisabled();
- await page.locator('#new').click();await page.locator('#machineFile').setInputFiles({name:'rotated.vp3',mimeType:'application/octet-stream',buffer:Buffer.from(fixture.bytes)});await expect(page.locator('#sourceInfo')).toContainText('VP3 stitch layer');await expect(page.locator('.object-row')).toHaveCount(1);await page.locator('#rotation').fill('17');await page.locator('#rotation').press('Tab');await expect(page.locator('#rotation')).toHaveValue('17');
+ await newDesign(page);await page.locator('#machineFile').setInputFiles({name:'rotated.vp3',mimeType:'application/octet-stream',buffer:Buffer.from(fixture.bytes)});await expect(page.locator('#sourceInfo')).toContainText('VP3 stitch layer');await expect(page.locator('.object-row')).toHaveCount(1);await page.locator('#rotation').fill('17');await page.locator('#rotation').press('Tab');await expect(page.locator('#rotation')).toHaveValue('17');
  const importedId=await page.locator('.object-row').last().getAttribute('data-id'),group=page.locator(`#shapes [data-id="${importedId}"]`);expect(await group.count()).toBe(1);expect(await group.getAttribute('transform')).toBeNull();const paths=await group.locator('path').evaluateAll(nodes=>nodes.map(node=>node.getAttribute('d'))),coordinates=paths.flatMap(d=>[...d.matchAll(/[ML](-?(?:\d+\.?\d*|\.\d+))\s+(-?(?:\d+\.?\d*|\.\d+))/g)].map(m=>[Number(m[1]),Number(m[2])]));expect(coordinates.some(([x,y])=>Math.abs(x-firstNeedle.x)<=.06&&Math.abs(y-firstNeedle.y)<=.06)).toBe(true);const saved=page.waitForEvent('download');await page.locator('#save').click();const output=await saved,path='/tmp/welcome-rotated-import.welcome';await output.saveAs(path);const project=JSON.parse(await (await import('node:fs/promises')).readFile(path,'utf8'));expect(project.objects[0].rotation).toBe(17);
 });
 
@@ -81,10 +85,10 @@ test('browser reopens a maximum-command saved stitch project below the advertise
 });
 
 test('browser VP3 import round-trips supported files and names unsupported travel before export',async({page})=>{
- const errors=[];page.on('pageerror',e=>errors.push(e.message));page.on('dialog',dialog=>dialog.accept());const supported=pinnedMachineFixture('vp3');await page.goto('/');await page.locator('#new').click();await page.locator('#importMachine').click();await page.locator('#machineFile').setInputFiles({name:'sample.vp3',mimeType:'application/octet-stream',buffer:Buffer.from(supported.bytes)});await expect(page.locator('#sourceInfo')).toContainText('80 commands');
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));page.on('dialog',dialog=>dialog.accept());const supported=pinnedMachineFixture('vp3');await page.goto('/');await newDesign(page);await page.locator('#importMachine').click();await page.locator('#machineFile').setInputFiles({name:'sample.vp3',mimeType:'application/octet-stream',buffer:Buffer.from(supported.bytes)});await expect(page.locator('#sourceInfo')).toContainText('80 commands');
  const original=page.waitForEvent('download');await page.locator('#export').click();await page.locator('#format').selectOption('vp3');await page.locator('#download').click();const rawExport=await original,rawPath='/tmp/welcome-import-original.vp3';await rawExport.saveAs(rawPath);expect(Buffer.compare(await (await import('node:fs/promises')).readFile(rawPath),Buffer.from(supported.bytes))).toBe(0);
  const x=Number(await page.locator('#posX').inputValue());await page.locator('#posX').fill(String(x+1));await page.locator('#posX').press('Tab');const changed=page.waitForEvent('download');await page.locator('#export').click();await page.locator('#download').click();const changedExport=await changed,changedPath='/tmp/welcome-import-edited.vp3';await changedExport.saveAs(changedPath);expect(decodeEmbroidery(new Uint8Array(await (await import('node:fs/promises')).readFile(changedPath)),'vp3').stitches.filter(s=>s.cmd==='stitch')).toHaveLength(60);
- await page.locator('#new').click();const unsupported=[...readMachineFixtures()].find(([name])=>name.endsWith('/random1.vp3'));await page.locator('#importMachine').click();await page.locator('#machineFile').setInputFiles({name:'travel.vp3',mimeType:'application/octet-stream',buffer:Buffer.from(unsupported[1])});await expect(page.locator('#sourceInfo')).toContainText('51 commands');const moved=Number(await page.locator('#posX').inputValue());await page.locator('#posX').fill(String(moved+1));await page.locator('#posX').press('Tab');let downloaded=false;page.on('download',()=>{downloaded=true;});await page.locator('#export').click();await page.locator('#format').selectOption('vp3');await page.locator('#download').click();await expect(page.locator('#exportError')).toContainText('intra-block travel, trim, or stop commands');expect(downloaded).toBe(false);expect(errors).toEqual([]);
+ await newDesign(page);const unsupported=[...readMachineFixtures()].find(([name])=>name.endsWith('/random1.vp3'));await page.locator('#importMachine').click();await page.locator('#machineFile').setInputFiles({name:'travel.vp3',mimeType:'application/octet-stream',buffer:Buffer.from(unsupported[1])});await expect(page.locator('#sourceInfo')).toContainText('51 commands');const moved=Number(await page.locator('#posX').inputValue());await page.locator('#posX').fill(String(moved+1));await page.locator('#posX').press('Tab');let downloaded=false;page.on('download',()=>{downloaded=true;});await page.locator('#export').click();await page.locator('#format').selectOption('vp3');await page.locator('#download').click();await expect(page.locator('#exportError')).toContainText('intra-block travel, trim, or stop commands');expect(downloaded).toBe(false);expect(errors).toEqual([]);
 });
 
 test('opening a project fits the real geometry (rotated stitches, text outlines) in view; later edits never move the view',async({page})=>{page.on('dialog',d=>d.accept());
@@ -101,7 +105,7 @@ test('opening a project fits the real geometry (rotated stitches, text outlines)
 });
 
 test('oversized imported bounds stay visible and block machine export with an explicit hoop diagnostic',async({page})=>{page.on('dialog',d=>d.accept());
- const steps=12,offset=124,source=Buffer.alloc(offset+steps*2+4);source.writeUInt32LE(offset,0);source.writeUInt32LE(1,24);source.writeUInt32LE(steps,28);source.writeUInt32LE(1,116);for(let i=0;i<steps;i++)source[offset+i*2]=127;source[offset+steps*2]=0x80;source[offset+steps*2+1]=0x10;await page.goto('/');await page.locator('#new').click();await page.locator('#machineFile').setInputFiles({name:'oversized.jef',mimeType:'application/octet-stream',buffer:source});await expect(page.locator('#stats')).toContainText('past the hoop');expect(await page.locator('#art').getAttribute('viewBox')).not.toBe('-60 -60 120 120');await page.locator('button[data-view="stitches"]').click();await expect(page.locator('#stitches path')).not.toHaveCount(0);let downloaded=false;page.on('download',()=>{downloaded=true;});await page.locator('#export').click();await page.locator('#format').selectOption('jef');await expect(page.locator('#download')).toBeDisabled();await expect(page.locator('#exportError')).toContainText('past the hoop');expect(downloaded).toBe(false);
+ const steps=12,offset=124,source=Buffer.alloc(offset+steps*2+4);source.writeUInt32LE(offset,0);source.writeUInt32LE(1,24);source.writeUInt32LE(steps,28);source.writeUInt32LE(1,116);for(let i=0;i<steps;i++)source[offset+i*2]=127;source[offset+steps*2]=0x80;source[offset+steps*2+1]=0x10;await page.goto('/');await newDesign(page);await page.locator('#machineFile').setInputFiles({name:'oversized.jef',mimeType:'application/octet-stream',buffer:source});await expect(page.locator('#stats')).toContainText('past the hoop');expect(await page.locator('#art').getAttribute('viewBox')).not.toBe('-60 -60 120 120');await page.locator('button[data-view="stitches"]').click();await expect(page.locator('#stitches path')).not.toHaveCount(0);let downloaded=false;page.on('download',()=>{downloaded=true;});await page.locator('#export').click();await page.locator('#format').selectOption('jef');await expect(page.locator('#download')).toBeDisabled();await expect(page.locator('#exportError')).toContainText('past the hoop');expect(downloaded).toBe(false);
 });
 
 test('worker load failure reports a recoverable editor error instead of leaving requests pending',async({page})=>{
@@ -111,7 +115,7 @@ test('worker load failure reports a recoverable editor error instead of leaving 
 });
 
 test('single top bar and vector editing: polygon, nodes, snap, align, distribute, border and thread preview',async({page})=>{
- const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');await page.locator('#new').click().catch(()=>{});page.on('dialog',d=>d.accept());await page.locator('#new').click();
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');await newDesign(page).catch(()=>{});page.on('dialog',d=>d.accept());await newDesign(page);
  await expect(page.locator('nav')).toHaveCount(0);await expect(page.locator('.canvas-views button[data-view="preview"]')).toBeVisible();await expect(page.locator('header.top #undo')).toBeVisible();
  const m=await page.evaluate(()=>{const m=document.querySelector('#art').getScreenCTM();return {a:m.a,d:m.d,e:m.e,f:m.f};}),at=(mx,my)=>({x:m.a*mx+m.e,y:m.d*my+m.f});
  await page.locator('#snap').click();await expect(page.locator('#snap')).toHaveClass(/active-tool/);
@@ -132,7 +136,7 @@ test('single top bar and vector editing: polygon, nodes, snap, align, distribute
 });
 
 test('Bézier handles: smooth node shows draggable handles that reshape the curve, corner removes them',async({page})=>{
- const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());await page.locator('#new').click();
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());await newDesign(page);
  const m=await page.evaluate(()=>{const m=document.querySelector('#art').getScreenCTM();return {a:m.a,d:m.d,e:m.e,f:m.f};}),at=(x,y)=>({x:m.a*x+m.e,y:m.d*y+m.f});
  await page.locator('#path').click();for(const [x,y] of [[-20,0],[0,0],[20,0]]){const p=at(x,y);await page.mouse.click(p.x,p.y);}await page.keyboard.press('Enter');
  await expect(page.locator('.object-row')).toHaveCount(1);const poly=page.locator('#shapes polyline.shape'),before=await poly.getAttribute('points');
@@ -144,7 +148,7 @@ test('Bézier handles: smooth node shows draggable handles that reshape the curv
 });
 
 test('grouping selects and drags members together; ungroup releases them',async({page})=>{
- const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());await page.locator('#new').click();
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());await newDesign(page);
  await page.locator('#rect').click();await page.locator('#ellipse').click();await page.locator('#rect').click();const rows=page.locator('.object-row');await expect(rows).toHaveCount(3);
  await rows.nth(0).click();await rows.nth(1).click({modifiers:['Shift']});await page.locator('#group').click();
  await rows.nth(2).click();await rows.nth(0).click();await expect(page.locator('.object-row.selected')).toHaveCount(2);
@@ -152,7 +156,7 @@ test('grouping selects and drags members together; ungroup releases them',async(
 });
 
 test('sidebar tools: select, line, polygon, star and pen with curve handles, plus shortcuts',async({page})=>{
- const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());await page.locator('#new').click();
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());await newDesign(page);
  const m=await page.evaluate(()=>{const m=document.querySelector('#art').getScreenCTM();return {a:m.a,d:m.d,e:m.e,f:m.f};}),at=(x,y)=>({x:m.a*x+m.e,y:m.d*y+m.f});
  for(const id of ['select','line','polygon','star','pen','rect','ellipse','path','letter'])await expect(page.locator('#'+id)).toBeVisible();await expect(page.locator('#select')).toHaveClass(/active-tool/);
  await page.locator('#line').click();await expect(page.locator('#line')).toHaveClass(/active-tool/);let a=at(-30,-30),b=at(30,-10);await page.mouse.move(a.x,a.y);await page.mouse.down();await page.mouse.move(b.x,b.y,{steps:4});await page.mouse.up();
@@ -168,7 +172,7 @@ test('sidebar tools: select, line, polygon, star and pen with curve handles, plu
 });
 
 test('hoop is editable: custom size resizes the canvas, flags overflow, keeps undo, and exports within JEF limits',async({page})=>{
- const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());await page.locator('#new').click();
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());await newDesign(page);
  await expect(page.locator('#hoopW')).toHaveValue('110');await expect(page.locator('#hoopH')).toHaveValue('110');
  await page.locator('#rect').click();await page.locator('#hoopW').fill('80');await page.locator('#hoopW').press('Tab');await page.locator('#hoopH').fill('60');await page.locator('#hoopH').press('Tab');
  await expect(page.locator('#hoopRing')).toHaveAttribute('width','80');await expect(page.locator('#hoopRing')).toHaveAttribute('height','60');
@@ -181,7 +185,7 @@ test('hoop is editable: custom size resizes the canvas, flags overflow, keeps un
 
 test('the last hoop size is remembered for new documents and reloads',async({page})=>{
  await page.goto('/');page.on('dialog',d=>d.accept());await page.locator('#hoopW').fill('90');await page.locator('#hoopW').press('Tab');await page.locator('#hoopH').fill('70');await page.locator('#hoopH').press('Tab');
- await page.locator('#new').click();await expect(page.locator('#hoopW')).toHaveValue('90');await page.reload();await expect(page.locator('#hoopW')).toHaveValue('90');await expect(page.locator('#hoopH')).toHaveValue('70');
+ await newDesign(page);await expect(page.locator('#hoopW')).toHaveValue('90');await page.reload();await expect(page.locator('#hoopW')).toHaveValue('90');await expect(page.locator('#hoopH')).toHaveValue('70');
 });
 
 test('agent relay: the Agent dialog creates a private link and an MCP client edits the open document live; revoke locks it out',async({page})=>{
@@ -189,7 +193,7 @@ test('agent relay: the Agent dialog creates a private link and an MCP client edi
  const port=18794,origin=`http://127.0.0.1:${port}`,child=spawn(process.execPath,['server.js'],{env:{...process.env,HOST:'127.0.0.1',PORT:String(port),WELCOME_SESSION_FILE:''},stdio:'ignore'});
  try{
   for(let i=0;i<100;i++){try{if((await fetch(origin+'/health')).ok)break;}catch{}await new Promise(r=>setTimeout(r,100));}
-  const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto(origin+'/');page.on('dialog',d=>d.accept());await page.locator('#new').click();
+  const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto(origin+'/');page.on('dialog',d=>d.accept());await newDesign(page);
   await page.locator('#settingsBtn').click();await page.locator('#copyEndpoint').click();await expect(page.locator('#agentDialog')).toBeVisible();await expect(page.locator('#agentUrl')).toHaveValue(/\/mcp\/[A-Za-z0-9_-]{32,}$/);await expect(page.locator('#agentStatus')).toContainText('Waiting for an agent');
   const link=await page.locator('#agentUrl').inputValue();await page.locator('#agentDialog button:not([type=button])').click();await expect(page.locator('#copyEndpoint')).toHaveClass(/agent-on/);
   const client=new Client({name:'e2e-agent',version:'1'});await client.connect(new StreamableHTTPClientTransport(new URL(link)));
@@ -207,7 +211,7 @@ test('agent relay: the Agent dialog creates a private link and an MCP client edi
 });
 
 test('satin column: path stitch type, width control, thick design stroke and compiled zigzag',async({page})=>{
- const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());await page.locator('#new').click();
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());await newDesign(page);
  await page.locator('#line').click();const m=await page.evaluate(()=>{const m=document.querySelector('#art').getScreenCTM();return {a:m.a,d:m.d,e:m.e,f:m.f};}),at=(x,y)=>({x:m.a*x+m.e,y:m.d*y+m.f}),a=at(-25,0),b=at(25,0);
  await page.mouse.move(a.x,a.y);await page.mouse.down();await page.mouse.move(b.x,b.y,{steps:4});await page.mouse.up();
  await expect(page.locator('#satinRow')).toBeHidden();await page.locator('#type').selectOption('satin');await expect(page.locator('#satinRow')).toBeVisible();await page.locator('#satinWidth').fill('6');await page.locator('#satinWidth').press('Tab');
@@ -218,7 +222,7 @@ test('satin column: path stitch type, width control, thick design stroke and com
 
 test('subtract makes a hole (even-odd render, fewer stitches) and ties add lock stitches',async({page})=>{
  const n=async()=>Number(((await page.locator('#count').textContent())||'').replace(/,/g,'').match(/(\d+) stitches/)?.[1]||0);
- const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());await page.locator('#new').click();
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());await newDesign(page);
  await page.locator('#rect').click();await page.locator('#posX').fill('-20');await page.locator('#posX').press('Tab');await page.locator('#posY').fill('-20');await page.locator('#posY').press('Tab');await page.locator('#sizeW').fill('40');await page.locator('#sizeW').press('Tab');await page.locator('#sizeH').fill('40');await page.locator('#sizeH').press('Tab');
  await page.locator('#ellipse').click();await page.locator('#posX').fill('-8');await page.locator('#posX').press('Tab');await page.locator('#posY').fill('-8');await page.locator('#posY').press('Tab');await page.locator('#sizeW').fill('16');await page.locator('#sizeW').press('Tab');await page.locator('#sizeH').fill('16');await page.locator('#sizeH').press('Tab');
  await expect(page.locator('#subtract')).toBeHidden();await page.locator('.object-row').first().click();await page.locator('.object-row').last().click({modifiers:['Shift']});await expect(page.locator('#subtract')).toBeEnabled();
@@ -239,11 +243,11 @@ test('WebGL thread preview renders stitches, orbits, zooms and resets; fabric sh
 });
 
 test('union merges overlapping shapes; lettering can be put on a path and detached',async({page})=>{
- const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());await page.locator('#new').click();
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());await newDesign(page);
  await page.locator('#rect').click();await page.locator('#ellipse').click();await page.locator('#posX').fill('-4');await page.locator('#posX').press('Tab');
  await page.locator('.object-row').first().click();await page.locator('.object-row').last().click({modifiers:['Shift']});await expect(page.locator('#union')).toBeEnabled();await expect(page.locator('#intersect')).toBeEnabled();
  await page.locator('#union').click();await expect(page.locator('.object-row')).toHaveCount(1);await expect(page.locator('#shapes path.shape, #shapes polyline.shape')).toHaveCount(1);
- await page.locator('#new').click();
+ await newDesign(page);
  await page.locator('#line').click();const m=await page.evaluate(()=>{const m=document.querySelector('#art').getScreenCTM();return {a:m.a,d:m.d,e:m.e,f:m.f};}),at=(x,y)=>({x:m.a*x+m.e,y:m.d*y+m.f}),a=at(-30,10),b=at(30,-10);
  await page.mouse.move(a.x,a.y);await page.mouse.down();await page.mouse.move(b.x,b.y,{steps:4});await page.mouse.up();
  await page.locator('#letter').click();await expect(page.locator('#textOnPath')).toBeHidden();
@@ -260,7 +264,7 @@ test('DST can be exported from the dialog',async({page})=>{
 });
 
 test('Inkscape-style tools: offset, array, sewing order, per-object fill, SVG export and node snapping',async({page})=>{
- const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());await page.locator('#new').click();
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());await newDesign(page);
  const stitches=async()=>Number(((await page.locator('#count').textContent())||'').replace(/,/g,'').match(/(\d+) stitches/)?.[1]||0);
  await page.locator('#rect').click();const rowId=await page.locator('.object-row.selected').getAttribute('data-id');
  await openFolds(page);await page.locator('#offsetMm').fill('3');await page.locator('#offsetBtn').click();await expect(page.locator('#sizeW')).toHaveValue('30.0');await expect(page.locator('#sizeH')).toHaveValue('22.0');
@@ -273,7 +277,7 @@ test('Inkscape-style tools: offset, array, sewing order, per-object fill, SVG ex
  await page.locator('#selectSame').click();expect(await page.locator('.object-row.selected').count()).toBeGreaterThanOrEqual(1);
  await page.keyboard.press('Control+a');await expect(page.locator('.object-row.selected')).toHaveCount(3);
  const download=page.waitForEvent('download');await page.locator('#export').click();await page.locator('#format').selectOption('svg');await page.locator('#download').click();const file=await download;expect(file.suggestedFilename()).toMatch(/\.svg$/);const svg=await (await import('node:fs/promises')).readFile(await file.path(),'utf8');expect(svg).toMatch(/<svg [^>]*viewBox="-55 -55 110 110"/);expect((svg.match(/<path /g)||[]).length).toBe(3);
- await page.locator('#new').click();await page.locator('#snap').click();await page.locator('#line').click();
+ await newDesign(page);await page.locator('#snap').click();await page.locator('#line').click();
  const m=await page.evaluate(()=>{const m=document.querySelector('#art').getScreenCTM();return {a:m.a,d:m.d,e:m.e,f:m.f};}),at=(x,y)=>({x:m.a*x+m.e,y:m.d*y+m.f});
  const a=at(-20,0),b=at(20,0);await page.mouse.move(a.x,a.y);await page.mouse.down();await page.mouse.move(b.x,b.y,{steps:3});await page.mouse.up();
  await page.locator('#line').click();const c=at(20.9,0.8),d=at(30,25);await page.mouse.move(c.x,c.y);await page.mouse.down();await page.mouse.move(d.x,d.y,{steps:3});await page.mouse.up();
@@ -281,7 +285,7 @@ test('Inkscape-style tools: offset, array, sewing order, per-object fill, SVG ex
 });
 
 test('font picker: searchable list with live previews, categories, keyboard, text options and fonts loaded from a file',async({page})=>{
- const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());await page.locator('#new').click();
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());await newDesign(page);
  await page.locator('#letter').click();await page.locator('#letteringText').fill('Fox 123');await page.locator('#letteringText').press('Tab');
  await page.locator('#fontButton').click();await expect(page.locator('#fontPanel')).toBeVisible();await expect(page.locator('.font-row').first()).toBeVisible();expect(await page.locator('.font-row').count()).toBeGreaterThan(150);
  await expect(page.locator('.font-row svg path').first()).toBeAttached({timeout:8000});
@@ -305,7 +309,7 @@ test('font picker: searchable list with live previews, categories, keyboard, tex
  // a font from a local file travels inside the project
  await page.locator('#fontButton').click();await page.locator('#fontFile').setInputFiles('test/fixtures/BebasNeue-Regular.ttf');await expect(page.locator('#toast')).toContainText('Loaded');await expect(page.locator('#font')).toHaveValue(/custom\/BebasNeue-Regular/);
  await expect(page.locator('#fontButtonName')).toHaveText('BebasNeue-Regular');const saved2=page.waitForEvent('download');await page.locator('#save').click();const project2=JSON.parse(await fs.readFile(await (await saved2).path(),'utf8'));expect(Object.keys(project2.customFonts)).toHaveLength(1);expect(project2.objects.at(-1).font).toMatch(/^custom\//);
- await page.locator('#new').click();await page.locator('#file').setInputFiles({name:'font.welcome',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(project2))});await expect(page.locator('.object-row')).toHaveCount(1);await expect(page.locator('#shapes g.shape path').first()).toBeAttached({timeout:8000});expect(errors).toEqual([]);
+ await newDesign(page);await page.locator('#file').setInputFiles({name:'font.welcome',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(project2))});await expect(page.locator('.object-row')).toHaveCount(1);await expect(page.locator('#shapes g.shape path').first()).toBeAttached({timeout:8000});expect(errors).toEqual([]);
 });
 
 const openFolds=page=>page.evaluate(()=>document.querySelectorAll('details.sec-fold').forEach(d=>{d.open=true;}));
@@ -314,7 +318,7 @@ const toScreen=(m,x,y)=>({x:m.a*x+m.e,y:m.d*y+m.f});
 const viewBox=async page=>(await page.locator('#art').getAttribute('viewBox')).split(' ').map(Number);
 
 test('viewport: wheel zooms at the cursor, space-drag and middle-drag pan, fit buttons, and edits never move the view',async({page})=>{
- const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());await page.locator('#new').click();
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());await newDesign(page);
  const v0=await viewBox(page);expect(v0[2]/v0[3]).toBeGreaterThan(1.1);const box=await page.locator('.canvas').boundingBox(),cx=box.x+box.width/2,cy=box.y+box.height/2;
  await page.mouse.move(cx,cy);await page.mouse.wheel(0,-300);await expect.poll(async()=>(await viewBox(page))[2]).toBeLessThan(v0[2]*.8);const v1=await viewBox(page);await expect(page.locator('#zoomPct')).not.toHaveText('100%');
  await page.locator('#zoomOut').click();await page.locator('#zoomOut').click();expect((await viewBox(page))[2]).toBeGreaterThan(v1[2]);
@@ -326,7 +330,7 @@ test('viewport: wheel zooms at the cursor, space-drag and middle-drag pan, fit b
 });
 
 test('selection handles: resize with corner and edge handles, proportional resize, rotate, move, marquee select, nudge',async({page})=>{
- const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());await page.locator('#new').click();
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());await newDesign(page);
  await page.locator('#rect').click();await expect(page.locator('.sel-handle')).toHaveCount(9);const dim=async()=>({w:Number(await page.locator('#sizeW').inputValue()),h:Number(await page.locator('#sizeH').inputValue()),x:Number(await page.locator('#posX').inputValue()),y:Number(await page.locator('#posY').inputValue())});
  const d0=await dim();let m=await ctm(page);
  const drag=async(handle,dx,dy,mods=[])=>{const h=page.locator(`.sel-handle[data-handle="${handle}"]`),b=await h.boundingBox(),sx=b.x+b.width/2,sy=b.y+b.height/2;for(const k of mods)await page.keyboard.down(k);await page.mouse.move(sx,sy);await page.mouse.down();await page.mouse.move(sx+dx,sy+dy,{steps:5});await page.mouse.up();for(const k of mods)await page.keyboard.up(k);};
@@ -348,7 +352,7 @@ test('selection handles: resize with corner and edge handles, proportional resiz
 });
 
 test('vertex editing works on any shape: Enter converts a rectangle and an ellipse to paths, nodes drag, insert, delete, and lettering becomes outlines',async({page})=>{
- const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());await page.locator('#new').click();
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());await newDesign(page);
  await page.locator('#rect').click();await expect(page.locator('.path-node')).toHaveCount(0);await page.keyboard.press('Enter');await expect(page.locator('.path-node')).toHaveCount(4);await expect(page.locator('.object-row').first()).toContainText('fill');
  const node=page.locator('.path-node').nth(2),nb=await node.boundingBox(),before=await node.getAttribute('cx');await page.mouse.move(nb.x+nb.width/2,nb.y+nb.height/2);await page.mouse.down();await page.mouse.move(nb.x+nb.width/2+25,nb.y+nb.height/2+14,{steps:4});await page.mouse.up();expect(await page.locator('.path-node').nth(2).getAttribute('cx')).not.toBe(before);
  await page.keyboard.press('ArrowLeft');await page.keyboard.press('Delete');await expect(page.locator('.path-node')).toHaveCount(3);
@@ -358,14 +362,14 @@ test('vertex editing works on any shape: Enter converts a rectangle and an ellip
 });
 
 test('the sidebar only shows what applies to the selection',async({page})=>{
- await page.goto('/');page.on('dialog',d=>d.accept());await page.locator('#new').click();await expect(page.locator('#selHint')).toBeVisible();for(const id of ['secTransform','secText','secPath','secArray','secOrder'])await expect(page.locator('#'+id)).toBeHidden();
+ await page.goto('/');page.on('dialog',d=>d.accept());await newDesign(page);await expect(page.locator('#selHint')).toBeVisible();for(const id of ['secTransform','secText','secPath','secArray','secOrder'])await expect(page.locator('#'+id)).toBeHidden();
  await page.locator('#rect').click();await expect(page.locator('#secTransform')).toBeVisible();await expect(page.locator('#secText')).toBeHidden();await expect(page.locator('#secPath')).toBeVisible();await expect(page.locator('#selHint')).toBeHidden();
  await page.locator('#letter').click();await expect(page.locator('#secText')).toBeVisible();await expect(page.locator('#secPath')).toBeHidden();await expect(page.locator('#type')).toBeHidden();
  await page.locator('.object-row').first().click();await expect(page.locator('#secText')).toBeHidden();await page.keyboard.press('Control+a');await expect(page.locator('#selected')).toHaveText('2 objects selected');await expect(page.locator('#secText')).toBeHidden();
 });
 
 test('element tree: groups appear as collapsible parents, visibility and lock toggles, rename, drag to reorder, context menu, copy and paste',async({page})=>{
- const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());await page.locator('#new').click();
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());await newDesign(page);
  for(let i=0;i<3;i++){await page.locator('#rect').click();await page.locator('#posX').fill(String(-40+i*30));await page.locator('#posX').press('Tab');await page.locator('#posY').fill('-10');await page.locator('#posY').press('Tab');}
  await expect(page.locator('.object-row')).toHaveCount(3);await page.locator('.object-row').nth(0).click();await page.locator('.object-row').nth(1).click({modifiers:['Shift']});await page.keyboard.press('Control+g');
  await expect(page.locator('.group-row')).toHaveCount(1);await expect(page.locator('.group-row')).toContainText('2 objects');await expect(page.locator('.group-row.selected')).toHaveCount(1);
@@ -392,14 +396,14 @@ test('compiling is automatic: stitches reappear after edits, issues are listed a
 });
 
 test('double-click edits: nodes on a rectangle, text focus on lettering, node insert on a path',async({page})=>{
- const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());await page.locator('#new').click();
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());await newDesign(page);
  await page.locator('#rect').click();let m=await ctm(page);const c=toScreen(m,0,0);await page.mouse.dblclick(c.x,c.y);await expect(page.locator('.path-node')).toHaveCount(4);
  const top=toScreen(m,0,-8);await page.mouse.dblclick(top.x,top.y);await expect(page.locator('.path-node')).toHaveCount(5);await page.keyboard.press('Escape');await page.keyboard.press('Escape');
  await page.locator('#letter').click();const t=page.locator('#shapes g.shape').first(),tb=await t.boundingBox();await page.mouse.dblclick(tb.x+tb.width/2,tb.y+tb.height/2);await expect(page.locator('#canvasText')).toBeFocused();expect(errors).toEqual([]);
 });
 
 test('several nodes at once: box-select, shift-click, drag together, nudge, delete',async({page})=>{
- const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());await page.locator('#new').click();
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());await newDesign(page);
  await page.locator('#star').click();let m=await ctm(page);const c=toScreen(m,0,0),r=toScreen(m,22,0);await page.mouse.move(c.x,c.y);await page.mouse.down();await page.mouse.move(r.x,r.y,{steps:4});await page.mouse.up();
  await page.keyboard.press('Enter');const count=await page.locator('.path-node').count();expect(count).toBe(10);
  const a=toScreen(m,-30,-30),z=toScreen(m,30,-3);await page.mouse.move(a.x,a.y);await page.mouse.down();await page.mouse.move(z.x,z.y,{steps:5});await expect(page.locator('.marquee')).toBeAttached();await page.mouse.up();
@@ -412,7 +416,7 @@ test('several nodes at once: box-select, shift-click, drag together, nudge, dele
 });
 
 test('a rotated rectangle keeps an oriented selection frame and resizes along its own axes',async({page})=>{
- await page.goto('/');page.on('dialog',d=>d.accept());await page.locator('#new').click();await page.locator('#rect').click();await page.locator('#rotation').fill('90');await page.locator('#rotation').press('Tab');
+ await page.goto('/');page.on('dialog',d=>d.accept());await newDesign(page);await page.locator('#rect').click();await page.locator('#rotation').fill('90');await page.locator('#rotation').press('Tab');
  const w0=Number(await page.locator('#sizeW').inputValue()),h0=Number(await page.locator('#sizeH').inputValue());
  // with 90° rotation the local "east" handle sits at the bottom of the screen box
  const handle=page.locator('.sel-handle[data-handle="e"]'),hb=await handle.boundingBox(),m=await ctm(page);
@@ -422,7 +426,7 @@ test('a rotated rectangle keeps an oriented selection frame and resizes along it
 });
 
 test('rulers and guides: drag from a ruler, move and delete a guide, smart snapping to guides and objects, undoable',async({page})=>{
- const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());await page.locator('#new').click();
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());await newDesign(page);
  await expect(page.locator('#rulerTop')).toBeVisible();await expect(page.locator('#rulerLeft')).toBeVisible();let m=await ctm(page);
  const rl=await page.locator('#rulerLeft').boundingBox();const gx=toScreen(m,-20,0);await page.mouse.move(rl.x+9,gx.y);await page.mouse.down();await page.mouse.move(gx.x,gx.y,{steps:5});await expect(page.locator('.guide-preview')).toBeAttached();await page.mouse.up();
  await expect(page.locator('#guides .guide')).toHaveCount(1);expect(Number(await page.locator('#guides .guide').getAttribute('x1'))).toBeCloseTo(-20,0);
@@ -439,7 +443,7 @@ test('rulers and guides: drag from a ruler, move and delete a guide, smart snapp
 });
 
 test('lettering is edited on the canvas: live outlines while typing, Enter commits as one undo step, Escape cancels',async({page})=>{
- const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());await page.locator('#new').click();
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());await newDesign(page);
  await page.locator('#letter').click();const text=page.locator('#shapes g.shape').first();let before=await text.boundingBox();const b=before;
  await page.mouse.dblclick(b.x+b.width/2,b.y+b.height/2);await expect(page.locator('#canvasText')).toBeFocused();await page.keyboard.type('ROSES AND MORE');await expect.poll(async()=>(await text.boundingBox()).width).toBeGreaterThan(before.width*1.6);
  await expect(page.locator('#saved')).toHaveCount(0);await page.keyboard.press('Enter');await expect(page.locator('#canvasText')).toHaveCount(0);await expect(page.locator('.object-row').first()).toContainText('ROSES AND MORE');
@@ -448,14 +452,14 @@ test('lettering is edited on the canvas: live outlines while typing, Enter commi
 });
 
 test('keyboard resize and rotate: Ctrl+Arrows change size, Ctrl+Alt+Left/Right rotate',async({page})=>{
- await page.goto('/');page.on('dialog',d=>d.accept());await page.locator('#new').click();await page.locator('#rect').click();await page.locator('.object-row').first().click();
+ await page.goto('/');page.on('dialog',d=>d.accept());await newDesign(page);await page.locator('#rect').click();await page.locator('.object-row').first().click();
  const w0=Number(await page.locator('#sizeW').inputValue()),h0=Number(await page.locator('#sizeH').inputValue());
  await page.keyboard.press('Control+ArrowRight');expect(Math.abs(Number(await page.locator('#sizeW').inputValue())-(w0+1))).toBeLessThan(.15);await page.keyboard.press('Control+Shift+ArrowDown');expect(Math.abs(Number(await page.locator('#sizeH').inputValue())-(h0+5))).toBeLessThan(.15);
  await page.keyboard.press('Control+Alt+ArrowRight');expect(Number(await page.locator('#rotation').inputValue())).toBe(1);await page.keyboard.press('Control+Alt+Shift+ArrowLeft');expect(Number(await page.locator('#rotation').inputValue())).toBe(-14);
 });
 
 test('rotation pivot: Set pivot then click the canvas, and the rotation field turns the rectangle about that point',async({page})=>{
- await page.goto('/');page.on('dialog',d=>d.accept());await page.locator('#new').click();await page.locator('#rect').click();await page.locator('.object-row').first().click();
+ await page.goto('/');page.on('dialog',d=>d.accept());await newDesign(page);await page.locator('#rect').click();await page.locator('.object-row').first().click();
  await page.locator('#posX').fill('20');await page.locator('#posX').press('Enter');await page.locator('#posY').fill('5');await page.locator('#posY').press('Enter');
  await page.locator('#pivotPick').click();await expect(page.locator('#pivotPick')).toHaveAttribute('aria-pressed','true');await expect(page.locator('#pivotInfo')).toContainText('Click the canvas');
  const box=await page.locator('#art').boundingBox();await page.mouse.click(box.x+box.width*.3,box.y+box.height*.3);
@@ -469,7 +473,7 @@ test('rotation pivot: Set pivot then click the canvas, and the rotation field tu
 });
 
 test('sewing tips to show: unticking a category hides its tips from the panel and the count, and the choice is saved in this browser',async({page})=>{
- await page.goto('/');page.on('dialog',d=>d.accept());await page.locator('#new').click();await page.locator('#rect').click();await page.locator('#rect').click();
+ await page.goto('/');page.on('dialog',d=>d.accept());await newDesign(page);await page.locator('#rect').click();await page.locator('#rect').click();
  await expect(page.locator('#sewTips')).toContainText('is a duplicate');await expect(page.locator('#issuesBtn')).toContainText('1 sewing tip');
  await page.locator('#tipsSettings summary').click();const dup=page.locator('#tipsList label',{hasText:'Duplicate objects'}).locator('input');await expect(dup).toBeChecked();
  await dup.uncheck();
@@ -482,7 +486,7 @@ test('sewing tips to show: unticking a category hides its tips from the panel an
 test('a PES file with header metadata names its layer after the file and shows the author in the info panel',async({page})=>{
  const sample=new Uint8Array(readFileSync(new URL('./fixtures/spiralbox-brother-v6.pes',import.meta.url)));
  const bytes=withPesMetadata(sample,{name:'Spiral box',author:'Jose Ignacio',comments:'Test note'});
- await page.goto('/');page.on('dialog',d=>d.accept());await page.locator('#new').click();
+ await page.goto('/');page.on('dialog',d=>d.accept());await newDesign(page);
  await page.locator('#machineFile').setInputFiles({name:'spiral-box.pes',mimeType:'application/octet-stream',buffer:Buffer.from(bytes)});
  await expect(page.locator('.object-row').first()).toContainText('Spiral box');
  await page.locator('.object-row').first().click();
@@ -491,7 +495,7 @@ test('a PES file with header metadata names its layer after the file and shows t
 
 test('remove small holes drops the holes under 1 mm² from a closed shape and keeps the larger one',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));page.on('dialog',d=>d.accept());
- await page.goto('/');await page.locator('#new').click();
+ await page.goto('/');await newDesign(page);
  const setRect=async(x,y,w,h)=>{await page.locator('#rect').click();await page.locator('#posX').fill(String(x));await page.locator('#posX').press('Enter');await page.locator('#posY').fill(String(y));await page.locator('#posY').press('Enter');await page.locator('#sizeW').fill(String(w));await page.locator('#sizeW').press('Enter');await page.locator('#sizeH').fill(String(h));await page.locator('#sizeH').press('Enter');await page.evaluate(()=>document.activeElement?.blur());};
  await setRect(-20,-15,40,30);await setRect(-10,-3,0.6,0.6);await setRect(5,-2,4,4);
  await page.keyboard.press('Control+a');await page.locator('#subtract').click();
@@ -506,7 +510,7 @@ test('remove small holes drops the holes under 1 mm² from a closed shape and ke
 
 test('remove small islands: the button deletes the selected closed shapes under the island limit, and reports when there are none',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));page.on('dialog',d=>d.accept());
- await page.goto('/');await page.locator('#new').click();
+ await page.goto('/');await newDesign(page);
  const setRect=async(x,y,w,h)=>{await page.locator('#rect').click();await page.locator('#posX').fill(String(x));await page.locator('#posX').press('Enter');await page.locator('#posY').fill(String(y));await page.locator('#posY').press('Enter');await page.locator('#sizeW').fill(String(w));await page.locator('#sizeW').press('Enter');await page.locator('#sizeH').fill(String(h));await page.locator('#sizeH').press('Enter');await page.evaluate(()=>document.activeElement?.blur());};
  await setRect(-20,-15,40,30);await setRect(-40,-15,0.6,0.6);
  await expect(page.locator('.object-row')).toHaveCount(2);
@@ -521,7 +525,7 @@ test('remove small islands: the button deletes the selected closed shapes under 
 
 test('hole limit: with the limit at 20 mm², one press removes both holes of a shape',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));page.on('dialog',d=>d.accept());
- await page.goto('/');await page.locator('#new').click();
+ await page.goto('/');await newDesign(page);
  const setRect=async(x,y,w,h)=>{await page.locator('#rect').click();await page.locator('#posX').fill(String(x));await page.locator('#posX').press('Enter');await page.locator('#posY').fill(String(y));await page.locator('#posY').press('Enter');await page.locator('#sizeW').fill(String(w));await page.locator('#sizeW').press('Enter');await page.locator('#sizeH').fill(String(h));await page.locator('#sizeH').press('Enter');await page.evaluate(()=>document.activeElement?.blur());};
  await setRect(-20,-15,40,30);await setRect(-10,-3,0.6,0.6);await setRect(5,-2,4,4);
  await page.keyboard.press('Control+a');await page.locator('#subtract').click();
@@ -534,7 +538,7 @@ test('hole limit: with the limit at 20 mm², one press removes both holes of a s
 
 test('measure tool snaps to a nearby corner of an object, so a click a few pixels off still measures the corner',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));
- await page.goto('/');page.on('dialog',d=>d.accept());await page.locator('#new').click();
+ await page.goto('/');page.on('dialog',d=>d.accept());await newDesign(page);
  await page.locator('#rect').click();
  await page.locator('#posX').fill('10');await page.locator('#posX').press('Enter');await page.locator('#posY').fill('5');await page.locator('#posY').press('Enter');
  await page.locator('#sizeW').fill('30');await page.locator('#sizeW').press('Enter');await page.locator('#sizeH').fill('20');await page.locator('#sizeH').press('Enter');
@@ -549,7 +553,7 @@ test('measure tool snaps to a nearby corner of an object, so a click a few pixel
 });
 
 test('measure tool: M, then two clicks on the canvas, reads the distance and its parts in mm; Esc clears it',async({page})=>{
- await page.goto('/');page.on('dialog',d=>d.accept());await page.locator('#new').click();
+ await page.goto('/');page.on('dialog',d=>d.accept());await newDesign(page);
  await page.keyboard.press('m');await expect(page.locator('#measure')).toHaveClass(/active-tool/);await expect(page.locator('#measureReadout')).toContainText('click the first point');
  const m=await ctm(page);const a=toScreen(m,0,0),b=toScreen(m,30,40);
  await page.mouse.click(a.x,a.y);await expect(page.locator('#overlay .measure-point')).toHaveCount(1);await expect(page.locator('#measureReadout')).toContainText('click the second point');
@@ -594,13 +598,13 @@ test.describe('English default',()=>{
 });
 
 test('hovering a selected object shows the guides it already lines up with, and they clear when the pointer leaves',async({page})=>{
- const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());await page.locator('#new').click();
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());await newDesign(page);
  await page.locator('#rect').click();const b=await page.locator('#shapes rect.shape').boundingBox();
  await page.mouse.move(b.x+b.width/2,b.y+b.height/2);await expect(page.locator('.smart').first()).toBeAttached();
  await page.mouse.move(5,5);await expect(page.locator('.smart')).toHaveCount(0);expect(errors).toEqual([]);
 });
 test('dragging a clipping mask moves its cut in the clipped objects while dragging',async({page})=>{
- const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());await page.locator('#new').click();
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());await newDesign(page);
  await page.locator('#rect').click();await page.locator('#ellipse').click();await page.keyboard.press('Control+a');await expect(page.locator('#clipBtn')).toBeEnabled();await page.locator('#clipBtn').click();
  await expect(page.locator('#shapes .mask-shape')).toHaveCount(1);const maskId=await page.locator('#shapes .mask-shape').getAttribute('data-id');
  await page.keyboard.press('Escape');const mb=await page.locator('#shapes .mask-shape').boundingBox(),start={x:mb.x+mb.width/2,y:mb.y+mb.height/2};
@@ -610,7 +614,7 @@ test('dragging a clipping mask moves its cut in the clipped objects while draggi
  await expect.poll(clipMove).toBe('');expect(errors).toEqual([]);
 });
 test('resizing and rotating a clipping mask previews its cut while dragging',async({page})=>{
- const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());await page.locator('#new').click();
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());await newDesign(page);
  await page.locator('#rect').click();await page.locator('#ellipse').click();await page.keyboard.press('Control+a');await expect(page.locator('#clipBtn')).toBeEnabled();await page.locator('#clipBtn').click();
  await expect(page.locator('#shapes .mask-shape')).toHaveCount(1);const maskId=await page.locator('#shapes .mask-shape').getAttribute('data-id');
  await page.keyboard.press('Escape');const mb=await page.locator('#shapes .mask-shape').boundingBox();await page.mouse.click(mb.x+mb.width/2,mb.y+mb.height/2);
@@ -621,7 +625,7 @@ test('resizing and rotating a clipping mask previews its cut while dragging',asy
  await expect.poll(clipMove).toContain('rotate');await page.mouse.up();await expect.poll(clipMove).toBe('');expect(errors).toEqual([]);
 });
 test('dragging a node of a clipping mask redraws its cut while dragging',async({page})=>{
- const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());await page.locator('#new').click();
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());await newDesign(page);
  await page.locator('#rect').click();await page.locator('#rect').click();await page.keyboard.press('Control+a');await expect(page.locator('#clipBtn')).toBeEnabled();await page.locator('#clipBtn').click();
  await expect(page.locator('#shapes .mask-shape')).toHaveCount(1);const maskId=await page.locator('#shapes .mask-shape').getAttribute('data-id');
  await page.keyboard.press('Escape');const mb=await page.locator('#shapes .mask-shape').boundingBox();await page.mouse.dblclick(mb.x+mb.width/2,mb.y+mb.height/2);await expect(page.locator('.path-node')).toHaveCount(4);
@@ -631,7 +635,7 @@ test('dragging a node of a clipping mask redraws its cut while dragging',async({
  await expect.poll(cutD).not.toBe(before);await page.mouse.up();await expect(page.locator('#count')).toContainText('stitches');expect(errors).toEqual([]);
 });
 test('dragging a Bézier handle of a clipping mask redraws its cut while dragging',async({page})=>{
- const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());await page.locator('#new').click();
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());await newDesign(page);
  await page.locator('#rect').click();await page.locator('#rect').click();await page.keyboard.press('Control+a');await expect(page.locator('#clipBtn')).toBeEnabled();await page.locator('#clipBtn').click();
  await expect(page.locator('#shapes .mask-shape')).toHaveCount(1);const maskId=await page.locator('#shapes .mask-shape').getAttribute('data-id');
  await page.keyboard.press('Escape');const mb=await page.locator('#shapes .mask-shape').boundingBox();await page.mouse.dblclick(mb.x+mb.width/2,mb.y+mb.height/2);await expect(page.locator('.path-node')).toHaveCount(4);
@@ -644,7 +648,7 @@ test('dragging a Bézier handle of a clipping mask redraws its cut while draggin
 });
 test('start and end points: arm, click the canvas, markers appear, they follow the object and clear',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));
- await page.goto('/');page.on('dialog',d=>d.accept());await page.locator('#new').click();await page.locator('#rect').click();
+ await page.goto('/');page.on('dialog',d=>d.accept());await newDesign(page);await page.locator('#rect').click();
  await expect(page.locator('#pinRow')).toBeVisible();
  const w=await page.locator('#sizeW').inputValue(),h=await page.locator('#sizeH').inputValue(),x=Number(await page.locator('#posX').inputValue()),y=Number(await page.locator('#posY').inputValue());
  const m=await ctm(page);
@@ -677,7 +681,7 @@ test('a fresh page compiles by itself, the 3D preview renders, and the sides fie
 
 test('fill patterns: spiral, meander and guided recompile, and the guide is drawn on the canvas',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));
- await page.goto('/');page.on('dialog',d=>d.accept());await page.locator('#new').click();await page.locator('#rect').click();
+ await page.goto('/');page.on('dialog',d=>d.accept());await newDesign(page);await page.locator('#rect').click();
  await expect(page.locator('#count')).toContainText('compiled');
  for(const m of ['spiral','meander','contour']){await page.locator('#fillMethod').selectOption(m);await expect(page.locator('#count')).toContainText('compiled');await expect(page.locator('#angle')).toBeHidden();}
  await page.locator('#fillMethod').selectOption('guided');await expect(page.locator('#guideRow')).toBeVisible();
@@ -706,7 +710,7 @@ test('playing the simulation keeps the 3D preview visible and draws it progressi
 test('lettering density: stitch spacing is available for lettering and a lower value sews more stitches; the logo is a vector wordmark',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));
  await page.goto('/');page.on('dialog',d=>d.accept());await expect(page.locator('.logo-mark')).toBeVisible();
- await page.locator('#new').click();await page.locator('#letter').click();
+ await newDesign(page);await page.locator('#letter').click();
  await page.locator('#fontButton').click();await page.locator('#fontSearch').fill('emilio 20');await page.locator('.font-row').first().click();
  await expect(page.locator('#spacing')).toBeVisible();await expect(page.locator('#count')).toContainText('stitches');
  const n=async()=>Number(((await page.locator('#count').textContent()).match(/^([\d,]+) stitches/)||[,'0'])[1].replace(/,/g,''));
@@ -717,7 +721,7 @@ test('lettering density: stitch spacing is available for lettering and a lower v
 
 test('vector basics in the sidebar: corner radius, round corners, border width, satin taper, lettering that follows a path',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));
- await page.goto('/');page.on('dialog',d=>d.accept());await page.locator('#new').click();
+ await page.goto('/');page.on('dialog',d=>d.accept());await newDesign(page);
  await page.locator('#rect').click();await expect(page.locator('#radiusRow')).toBeVisible();
  await page.locator('#radius').fill('4');await page.locator('#radius').press('Tab');
  const id=await page.locator('.object-row.selected').getAttribute('data-id');await expect(page.locator(`#shapes [data-id="${id}"]`)).toHaveAttribute('rx','4');
@@ -740,7 +744,7 @@ test('vector basics in the sidebar: corner radius, round corners, border width, 
 
 test('editing tools: object snapping, clipping masks, caps/joins/node widths and colour blend',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));
- await page.goto('/');page.on('dialog',d=>d.accept());await page.locator('#new').click();
+ await page.goto('/');page.on('dialog',d=>d.accept());await newDesign(page);
  const n=async()=>Number(((await page.locator('#count').textContent()).match(/^([\d,]+) stitches/)||[,'0'])[1].replace(/,/g,''));
  // colour blend
  await page.locator('#rect').click();await expect.poll(n).toBeGreaterThan(0);await expect(page.locator('#blendRow')).toBeVisible();await expect(page.locator('#blendRange')).toBeHidden();
@@ -771,7 +775,7 @@ test('editing tools: object snapping, clipping masks, caps/joins/node widths and
 });
 
 test('satin path: the width at a selected node is set from the sidebar, and undo puts it back',async({page})=>{
- const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());await page.locator('#new').click();
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());await newDesign(page);
  const n=async()=>Number(((await page.locator('#count').textContent()).match(/^([\d,]+) stitches/)||[,'0'])[1].replace(/,/g,''));
  const m=await page.evaluate(()=>{const m=document.querySelector('#art').getScreenCTM();return {a:m.a,d:m.d,e:m.e,f:m.f};}),at=(x,y)=>({x:m.a*x+m.e,y:m.d*y+m.f});
  await page.locator('#line').click();const a=at(-25,0),b=at(25,0);
@@ -787,7 +791,7 @@ test('satin path: the width at a selected node is set from the sidebar, and undo
 });
 test('embroidery options in the sidebar: cross stitch, appliqué, bean run, length variation, per-object compensation',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));
- await page.goto('/');page.on('dialog',d=>d.accept());await page.locator('#new').click();
+ await page.goto('/');page.on('dialog',d=>d.accept());await newDesign(page);
  const n=async()=>Number(((await page.locator('#count').textContent()).match(/^([\d,]+) stitches/)||[,'0'])[1].replace(/,/g,''));
  await page.locator('#rect').click();await expect.poll(n).toBeGreaterThan(0);await expect(page.locator('#varianceRow')).toBeVisible();await expect(page.locator('#compRow')).toBeVisible();const rows=await n();
  await page.locator('#lengthVariance').fill('30');await page.locator('#lengthVariance').press('Tab');await expect(page.locator('#count')).toContainText('stitches');
@@ -808,14 +812,14 @@ const pngBytes=(w,h,fn)=>{const raw=Buffer.alloc((w*3+1)*h);for(let y=0;y<h;y++)
  const ihdr=Buffer.alloc(13);ihdr.writeUInt32BE(w,0);ihdr.writeUInt32BE(h,4);ihdr[8]=8;ihdr[9]=2;return Buffer.concat([Buffer.from([137,80,78,71,13,10,26,10]),chunk('IHDR',ihdr),chunk('IDAT',zlib.deflateSync(raw)),chunk('IEND',Buffer.alloc(0))]);};
 test('photo stitch from a picture, ripple centre, blend direction, underpath and select mask',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));
- await page.goto('/');page.on('dialog',d=>d.accept());await page.locator('#new').click();
+ await page.goto('/');page.on('dialog',d=>d.accept());await newDesign(page);
  const n=async()=>Number(((await page.locator('#count').textContent()).match(/^([\d,]+) stitches/)||[,'0'])[1].replace(/,/g,''));
  await page.locator('#photoFile').setInputFiles({name:'ramp.png',mimeType:'image/png',buffer:pngBytes(60,40,(x,y)=>Math.round(255*x/59))});
  await expect(page.locator('.object-row').first()).toContainText('Photo');await expect(page.locator('#photoBox')).toBeVisible();await expect.poll(n).toBeGreaterThan(1500);const dense=await n();
  await page.locator('#photoSpacing').fill('1.4');await page.locator('#photoSpacing').press('Tab');await expect.poll(n).toBeLessThan(dense*.7);
  await page.locator('#photoInvert').check();await expect(page.locator('#count')).toContainText('stitches');
  // ripple + centre marker, blend direction
- await page.locator('#new').click();await page.locator('#ellipse').click();await expect.poll(n).toBeGreaterThan(0);
+ await newDesign(page);await page.locator('#ellipse').click();await expect.poll(n).toBeGreaterThan(0);
  await page.locator('.icon-seg button[data-value=ripple]').click();await expect(page.locator('#pinCenter')).toBeVisible();await expect(page.locator('#count')).toContainText('stitches');
  const x=Number(await page.locator('#posX').inputValue()),y=Number(await page.locator('#posY').inputValue()),m=await ctm(page);await page.locator('#pinCenter').click();const sp=toScreen(m,x+4,y+4);await page.mouse.click(sp.x,sp.y);await expect(page.locator('#controls .pin.center')).toHaveCount(1);
  await page.locator('#blendThread').selectOption('#d9897e');await expect(page.locator('#blendAngle')).toBeVisible();await page.locator('#blendAngle').fill('0');await page.locator('#blendAngle').press('Tab');await expect(page.locator('#count')).toContainText('stitches');
@@ -828,7 +832,7 @@ test('photo stitch from a picture, ripple centre, blend direction, underpath and
 
 test('trace a picture into filled shapes with holes, grouped, one thread colour per region',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));
- await page.goto('/');page.on('dialog',d=>d.accept());await page.locator('#new').click();
+ await page.goto('/');page.on('dialog',d=>d.accept());await newDesign(page);
  await page.locator('#traceBtn').click();await expect(page.locator('#traceDialog')).toBeVisible();await page.locator('#traceGo').click();await expect(page.locator('#traceInfo')).toContainText('Choose a picture');
  const png=pngBytes(80,60,(x,y)=>{if(Math.hypot(x-62,y-20)<9)return [20,40,200];const d=Math.hypot(x-30,y-30);return d<8?[255,255,255]:d<20?[200,30,30]:[255,255,255];});
  await page.locator('#traceFile').setInputFiles({name:'logo.png',mimeType:'image/png',buffer:png});await page.locator('#traceColors').fill('4');await page.locator('#traceGo').click();
@@ -840,7 +844,7 @@ test('trace a picture into filled shapes with holes, grouped, one thread colour 
 
 test('fine grid steps: 0.1 and 0.25 mm are offered, and snapping and arrow nudges use the chosen step',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));
- await page.goto('/');page.on('dialog',d=>d.accept());await page.locator('#new').click();
+ await page.goto('/');page.on('dialog',d=>d.accept());await newDesign(page);
  expect(await page.locator('#grid option').evaluateAll(os=>os.map(o=>o.value))).toEqual(['0.1','0.25','0.5','1','2','5']);
  await page.locator('#rect').click();await page.locator('#posX').fill('0');await page.locator('#posX').press('Tab');
  await page.locator('#grid').selectOption('0.25');await page.locator('#snap').click();await expect(page.locator('#toast')).toContainText('Snap to 0.25 mm grid on.');
@@ -853,7 +857,7 @@ test('fine grid steps: 0.1 and 0.25 mm are offered, and snapping and arrow nudge
 
 test('trace a thin band of colour: it is sewn as a running outline, and the toast says so',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));
- await page.goto('/');page.on('dialog',d=>d.accept());await page.locator('#new').click();
+ await page.goto('/');page.on('dialog',d=>d.accept());await newDesign(page);
  await page.locator('#traceBtn').click();
  const png=pngBytes(200,60,(x,y)=>{if(y>=28&&y<32&&x>=20&&x<180)return [20,40,200];if(Math.hypot(x-40,y-15)<10)return [200,30,30];return [255,255,255];});
  await page.locator('#traceFile').setInputFiles({name:'band.png',mimeType:'image/png',buffer:png});await page.locator('#traceColors').fill('3');await page.locator('#traceGo').click();
@@ -863,7 +867,7 @@ test('trace a thin band of colour: it is sewn as a running outline, and the toas
 
 test('trace line art: strokes become satin and running paths',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));
- await page.goto('/');page.on('dialog',d=>d.accept());await page.locator('#new').click();
+ await page.goto('/');page.on('dialog',d=>d.accept());await newDesign(page);
  await page.locator('#traceBtn').click();await page.locator('#traceMode').selectOption('lines');await expect(page.locator('#traceColorsRow')).toBeHidden();
  const png=pngBytes(100,80,(x,y)=>{const d=Math.hypot(x-30,y-40);return (d>18&&d<22)||(x>=62&&x<=65&&y>=15&&y<=65)||(y>=38&&y<=41&&x>=58&&x<=90)?[10,10,10]:[255,255,255];});
  await page.locator('#traceFile').setInputFiles({name:'lines.png',mimeType:'image/png',buffer:png});await page.locator('#traceGo').click();
@@ -874,7 +878,7 @@ test('trace line art: strokes become satin and running paths',async({page})=>{
 
 test('reference image: load a picture, draw on top of it, adjust, move, hide, remove; it is never sewn',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));
- await page.goto('/');page.on('dialog',d=>d.accept());await page.locator('#new').click();
+ await page.goto('/');page.on('dialog',d=>d.accept());await newDesign(page);
  await expect(page.locator('#refLayer image')).toHaveCount(0);
  await page.locator('#secRef summary').click();await expect(page.locator('#refEmpty')).toBeVisible();
  await page.locator('#refFile').setInputFiles({name:'sketch.png',mimeType:'image/png',buffer:pngBytes(120,80,(x,y)=>(x+y)%20<3?[30,30,30]:[240,230,210])});
@@ -899,7 +903,7 @@ test('agents can see the reference picture: annotated view with grid, hoop and s
  const port=18795,origin=`http://127.0.0.1:${port}`,child=spawn(process.execPath,['server.js'],{env:{...process.env,HOST:'127.0.0.1',PORT:String(port),WELCOME_SESSION_FILE:''},stdio:'ignore'});
  try{
   for(let i=0;i<100;i++){try{if((await fetch(origin+'/health')).ok)break;}catch{}await new Promise(r=>setTimeout(r,100));}
-  const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto(origin+'/');page.on('dialog',d=>d.accept());await page.locator('#new').click();
+  const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto(origin+'/');page.on('dialog',d=>d.accept());await newDesign(page);
   await page.locator('#settingsBtn').click();await page.locator('#copyEndpoint').click();await expect(page.locator('#agentUrl')).toHaveValue(/\/mcp\/[A-Za-z0-9_-]{32,}$/);const link=await page.locator('#agentUrl').inputValue();await page.locator('#agentDialog button:not([type=button])').click();
   const client=new Client({name:'ref-agent',version:'1'});await client.connect(new StreamableHTTPClientTransport(new URL(link)));const call=(name,args)=>client.callTool({name,arguments:args});
   const none=await call('reference_image',{documentId:'live'});expect(none.content[0].text).toContain('no reference picture');
@@ -919,7 +923,7 @@ test('DST files import as stitch layers (a DST written by Welcome comes back)',a
  const {encode,compile:compileDoc,initialDocument:initDoc}=await import('../src/engine.js'),{registerFont}=await import('../src/fonts.js'),fs=await import('node:fs/promises');
  registerFont('ttf/greatvibes',JSON.parse(await fs.readFile(new URL('../fonts/ttf/greatvibes.json',import.meta.url),'utf8')));
  const d=initDoc(),bytes=Buffer.from(encode(compileDoc(d),'dst',undefined,d.hoop,d));
- const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d2=>d2.accept());await page.locator('#new').click();
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d2=>d2.accept());await newDesign(page);
  await page.locator('#machineFile').setInputFiles({name:'badge.dst',mimeType:'application/octet-stream',buffer:bytes});
  await expect(page.locator('.object-row')).toHaveCount(1);await expect(page.locator('#sourceInfo')).toContainText(/DST/i);await expect(page.locator('#count')).toContainText('stitches');
  expect(errors).toEqual([]);
@@ -930,7 +934,7 @@ test('agent experience on the live document: summaries, render, clear, snapshot 
  const port=18796,origin=`http://127.0.0.1:${port}`,child=spawn(process.execPath,['server.js'],{env:{...process.env,HOST:'127.0.0.1',PORT:String(port),WELCOME_SESSION_FILE:''},stdio:'ignore'});
  try{
   for(let i=0;i<100;i++){try{if((await fetch(origin+'/health')).ok)break;}catch{}await new Promise(r=>setTimeout(r,100));}
-  const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto(origin+'/');page.on('dialog',d=>d.accept());await page.locator('#new').click();
+  const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto(origin+'/');page.on('dialog',d=>d.accept());await newDesign(page);
   await page.locator('#settingsBtn').click();await page.locator('#copyEndpoint').click();await expect(page.locator('#agentUrl')).toHaveValue(/\/mcp\/[A-Za-z0-9_-]{32,}$/);const link=await page.locator('#agentUrl').inputValue();await page.locator('#agentDialog button:not([type=button])').click();
   const client=new Client({name:'ux-agent',version:'1'});await client.connect(new StreamableHTTPClientTransport(new URL(link)));const call=(name,args)=>client.callTool({name,arguments:args});
   const list=await call('document_list',{});expect(list.structuredContent.live.documentId).toBe('live');
@@ -963,7 +967,7 @@ test('tooltips are drawn on top of the panels, inside the window, above the cont
 test('3D preview pull view: the estimate is on the fabric, and it changes with the fabric',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());
  const webgl=await page.evaluate(()=>Boolean(document.createElement('canvas').getContext('webgl2')));test.skip(!webgl,'WebGL2 is not available in this browser');
- await page.locator('#new').click();await page.locator('#path').click();const m=await ctm(page);for(const [x,y] of [[-20,-15],[20,-15],[20,15],[-20,15],[-20,-15]]){const s=toScreen(m,x,y);await page.mouse.click(s.x,s.y);}await page.keyboard.press('Enter');
+ await newDesign(page);await page.locator('#path').click();const m=await ctm(page);for(const [x,y] of [[-20,-15],[20,-15],[20,15],[-20,15],[-20,-15]]){const s=toScreen(m,x,y);await page.mouse.click(s.x,s.y);}await page.keyboard.press('Enter');
  await page.locator('#type').selectOption('fill');await page.locator('#secDoc').evaluate(d=>{d.open=true;});
  const peak=async()=>Number(((await page.locator('#pullNote').textContent()).match(/(\d+)%/)||[,'0'])[1]);
  await page.locator('button[data-view="preview"]').click();const canvas=page.locator('#preview3d');await expect(canvas).toBeVisible();
@@ -1006,7 +1010,7 @@ test('3D preview views: close-up and turntable change the camera, the loupe magn
 
 test('thread colours: swatch palette, custom colour, recent colours, None for blends',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));
- await page.goto('/');page.on('dialog',d=>d.accept());await page.locator('#new').click();await page.locator('#rect').click();
+ await page.goto('/');page.on('dialog',d=>d.accept());await newDesign(page);await page.locator('#rect').click();
  const btn=page.locator('#thread + .thread-btn');await expect(btn).toContainText('Forest');await btn.click();await expect(page.locator('#threadPop')).toBeVisible();expect(await page.locator('#threadPop .grid button').count()).toBeGreaterThanOrEqual(48);
  await page.locator('#threadPop .grid button[title="Red"]').click();await expect(page.locator('#threadPop')).toBeHidden();await expect(page.locator('#thread')).toHaveValue('#c8281e');await expect(btn).toContainText('Red');
  const id=await page.locator('.object-row.selected').getAttribute('data-id');await expect(page.locator(`#shapes [data-id="${id}"]`)).toHaveAttribute('fill','#c8281e');
@@ -1020,30 +1024,30 @@ test('thread colours: swatch palette, custom colour, recent colours, None for bl
 
 test('unsaved work: Open asks first and cancel keeps the design, undo and recovery copy; Start fresh asks before forgetting it',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));
- const dialogs=[];let answer=true;page.on('dialog',d=>{dialogs.push(d.message());if(answer)d.accept();else d.dismiss();});
- await page.goto('/');await page.locator('#new').click();await page.locator('#rect').click();await page.locator('#ellipse').click();await expect(page.locator('.object-row')).toHaveCount(2);
+ const dialogs=[];page.on('dialog',d=>{dialogs.push(d.message());d.dismiss();});
+ await page.goto('/');await newDesign(page);await page.locator('#rect').click();await page.locator('#ellipse').click();await expect(page.locator('.object-row')).toHaveCount(2);
  await page.waitForTimeout(1200);const recovery=await page.evaluate(()=>localStorage.getItem('welcome.autosave:'+sessionStorage.getItem('welcome.tabId')));expect(recovery).toBeTruthy();
- dialogs.length=0;answer=false;
  const replacement={...initialDocument(),name:'Replacement',objects:[]};
  await page.locator('#file').setInputFiles({name:'replacement.welcome',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(replacement))});
- await expect.poll(()=>dialogs.length).toBe(1);expect(dialogs[0]).toBe('Discard unsaved changes?');
- await page.waitForTimeout(300);
+ await expect(page.locator('#discardDialog')).toBeVisible();await expect(page.locator('#discardInfo')).toContainText('Discard 2 unsaved objects');
+ await page.locator('#discardCancel').click();await expect(page.locator('#discardDialog')).toBeHidden();await expect(page.locator('#toast')).toContainText('Open cancelled.');
  await expect(page.locator('.object-row')).toHaveCount(2);await expect(page.locator('#name')).not.toHaveValue('Replacement');
  expect(await page.evaluate(()=>localStorage.getItem('welcome.autosave:'+sessionStorage.getItem('welcome.tabId')))).toBe(recovery);
- await page.reload();await expect(page.locator('#restoreDialog')).toBeVisible();dialogs.length=0;
- await page.locator('#restoreNo').click();await expect.poll(()=>dialogs.length).toBe(1);expect(dialogs[0]).toBe('Discard unsaved changes?');
- await expect(page.locator('#restoreDialog')).toBeVisible();
+ await page.reload();await expect(page.locator('#restoreDialog')).toBeVisible();
+ // Start fresh asks in the same dialog; Cancel brings the restore prompt back and keeps the copy.
+ await page.locator('#restoreNo').click();await expect(page.locator('#restoreDialog')).toBeHidden();await expect(page.locator('#discardDialog')).toBeVisible();await expect(page.locator('#discardInfo')).toContainText('Discard 2 unsaved objects');
+ await page.locator('#discardCancel').click();await expect(page.locator('#restoreDialog')).toBeVisible();
  const kept=JSON.parse(await page.evaluate(()=>localStorage.getItem('welcome.autosave:'+sessionStorage.getItem('welcome.tabId'))));expect(kept.clean).toBe(false);expect(kept.doc).toEqual(JSON.parse(recovery).doc);
- expect(errors).toEqual([]);
+ expect(dialogs).toEqual([]);expect(errors).toEqual([]);
 });
 
 test('autosave: an edited design is offered back after a reload; starting fresh forgets it',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));
- await page.goto('/');page.on('dialog',d=>d.accept());await page.locator('#new').click();await page.locator('#rect').click();await page.locator('#ellipse').click();await expect(page.locator('.object-row')).toHaveCount(2);
+ await page.goto('/');page.on('dialog',d=>d.accept());await newDesign(page);await page.locator('#rect').click();await page.locator('#ellipse').click();await expect(page.locator('.object-row')).toHaveCount(2);
  await page.locator('#name').fill('Autosaved badge');await page.locator('#name').press('Enter');await page.waitForTimeout(1200);
  await page.reload();await expect(page.locator('#restoreDialog')).toBeVisible();await expect(page.locator('#restoreInfo')).toContainText('Autosaved badge');await expect(page.locator('#restoreInfo')).toContainText('2 objects');
  await page.locator('#restoreYes').click();await expect(page.locator('#restoreDialog')).toBeHidden();await expect(page.locator('.object-row')).toHaveCount(2);await expect(page.locator('#name')).toHaveValue('Autosaved badge');await expect(page.locator('#saved')).toHaveCount(0);
- await page.reload();await expect(page.locator('#restoreDialog')).toBeVisible();await page.locator('#restoreNo').click();await expect(page.locator('#restoreDialog')).toBeHidden();await expect(page.locator('.object-row')).toHaveCount(5);
+ await page.reload();await expect(page.locator('#restoreDialog')).toBeVisible();await page.locator('#restoreNo').click();await expect(page.locator('#discardDialog')).toBeVisible();await page.locator('#discardDiscard').click();await expect(page.locator('#restoreDialog')).toBeHidden();await expect(page.locator('.object-row')).toHaveCount(5);
  await page.reload();await expect(page.locator('#restoreDialog')).toBeHidden();
  expect(errors).toEqual([]);
 });
@@ -1060,7 +1064,7 @@ test('keyboard shortcut list opens with ? and the listed tool keys really work; 
 
 test('the thread plan downloads a sewing worksheet as text or SVG',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));
- await page.goto('/');page.on('dialog',d=>d.accept());await page.locator('#new').click();
+ await page.goto('/');page.on('dialog',d=>d.accept());await newDesign(page);
  await page.locator('#rect').click();await page.locator('#thread').selectOption('#d9897e');
  await page.locator('#ellipse').click();await page.locator('#thread').selectOption('#527461');
  await page.locator('#secPlan summary').click();await expect(page.locator('#planList .plan-row')).toHaveCount(2);
@@ -1078,7 +1082,7 @@ test('the thread plan downloads a sewing worksheet as text or SVG',async({page})
 
 test('copy and paste style between objects',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));
- await page.goto('/');page.on('dialog',d=>d.accept());await page.locator('#new').click();
+ await page.goto('/');page.on('dialog',d=>d.accept());await newDesign(page);
  await page.locator('#rect').click();const a=await page.locator('.object-row.selected').getAttribute('data-id');
  await page.locator('#thread').selectOption('#d9897e');await page.locator('#border').check();await page.locator('#spacing').fill('0.6');await page.locator('#spacing').press('Tab');await page.locator('#angle').fill('10');await page.locator('#angle').press('Tab');
  await page.locator('#ellipse').click();const b=await page.locator('.object-row.selected').getAttribute('data-id');await page.locator('#thread').selectOption('#527461');await page.locator('#border').uncheck().catch(()=>{});await page.locator('#spacing').fill('0.4');await page.locator('#spacing').press('Tab');await page.locator('#angle').fill('32');await page.locator('#angle').press('Tab');await expect(page.locator('#thread')).toHaveValue('#527461');
@@ -1093,7 +1097,7 @@ test('copy and paste style between objects',async({page})=>{
 
 test('sewing tips appear in the editor: the issues button counts them, the selected object explains its tip',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));
- await page.goto('/');page.on('dialog',d=>d.accept());await page.locator('#new').click();
+ await page.goto('/');page.on('dialog',d=>d.accept());await newDesign(page);
  await expect(page.locator('#issuesBtn')).toBeHidden();
  await page.locator('#ellipse').click();await page.locator('#sizeW').fill('3');await page.locator('#sizeW').press('Tab');await page.locator('#sizeH').fill('3');await page.locator('#sizeH').press('Tab');
  await expect(page.locator('#issuesBtn')).toBeVisible();await expect(page.locator('#issuesBtn')).toContainText('1 sewing tip');
@@ -1111,7 +1115,7 @@ test('no business logic needs the server: design, compile, export JEF/VP3/DST/SV
  const requests=[];page.on('request',r=>{const u=new URL(r.url());requests.push(u.pathname);});
  await page.route(u=>{const p=new URL(u).pathname;return p.startsWith('/api/')||p.startsWith('/mcp')||p.startsWith('/artifacts/');},route=>route.abort());
  const errors=[];page.on('pageerror',e=>errors.push(e.message));
- await page.goto('/');page.on('dialog',d=>d.accept());await page.locator('#new').click();
+ await page.goto('/');page.on('dialog',d=>d.accept());await newDesign(page);
  await page.locator('#rect').click();await page.locator('#ellipse').click();await page.locator('#letter').click();await expect(page.locator('#count')).toContainText('stitches');
  // every export format is generated in the browser and downloaded
  const got={};
@@ -1120,7 +1124,7 @@ test('no business logic needs the server: design, compile, export JEF/VP3/DST/SV
  expect(decodeEmbroidery(new Uint8Array(got.dst),'dst').stitches.length).toBeGreaterThan(300);expect(got.svg.toString()).toContain('<svg');
  // save a project, open it again
  const [save]=await Promise.all([page.waitForEvent('download'),page.locator('#save').click()]);const saved=Buffer.concat(await (async()=>{const out=[];for await(const c of await save.createReadStream())out.push(c);return out;})());expect(JSON.parse(saved.toString()).schema).toBe('welcome/1');
- await page.locator('#new').click();await expect(page.locator('.object-row')).toHaveCount(0);await page.locator('#file').setInputFiles({name:'again.welcome',mimeType:'application/json',buffer:saved});await expect(page.locator('.object-row')).toHaveCount(3);
+ await newDesign(page);await expect(page.locator('.object-row')).toHaveCount(0);await page.locator('#file').setInputFiles({name:'again.welcome',mimeType:'application/json',buffer:saved});await expect(page.locator('.object-row')).toHaveCount(3);
  // tracing, photo stitch, reference picture, import of a machine file
  const png=pngBytes(80,60,(x,y)=>Math.hypot(x-40,y-30)<20?[200,30,30]:[255,255,255]);
  await page.locator('#traceBtn').click();await page.locator('#traceFile').setInputFiles({name:'a.png',mimeType:'image/png',buffer:png});await page.locator('#traceGo').click();await expect(page.locator('#traceDialog')).toBeHidden();
@@ -1133,7 +1137,7 @@ test('no business logic needs the server: design, compile, export JEF/VP3/DST/SV
 });
 
 test('sewing tips are translated in the Spanish interface',async({page})=>{
- await page.goto('/?lang=es');page.on('dialog',d=>d.accept());await page.locator('#new').click();await page.locator('#rect').click();await page.locator('#sizeW').fill('1.5');await page.locator('#sizeW').press('Tab');await page.locator('#sizeH').fill('30');await page.locator('#sizeH').press('Tab');
+ await page.goto('/?lang=es');page.on('dialog',d=>d.accept());await newDesign(page);await page.locator('#rect').click();await page.locator('#sizeW').fill('1.5');await page.locator('#sizeW').press('Tab');await page.locator('#sizeH').fill('30');await page.locator('#sizeH').press('Tab');
  await expect(page.locator('#sewTips')).toContainText('demasiado pequeño para un relleno limpio');await expect(page.locator('#issuesBtn')).toContainText('1 consejo');
 });
 
@@ -1184,7 +1188,7 @@ test('selection handles resize and rotate from the keyboard',async({page})=>{
 });
 
 test('continue digitizing adds points to the same path instead of starting a new object',async({page})=>{
- const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());await page.locator('#new').click();
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());await newDesign(page);
  await page.locator('#path').click();const m=await ctm(page);for(const [x,y] of [[-30,30],[0,25],[30,30]]){const s=toScreen(m,x,y);await page.mouse.click(s.x,s.y);}
  const first=toScreen(m,-30,30);await page.mouse.click(first.x,first.y);
  const rows=page.locator('.object-row');const before=await rows.count();await expect(page.locator('.object-row.selected')).toContainText('fill');
@@ -1193,7 +1197,7 @@ test('continue digitizing adds points to the same path instead of starting a new
 });
 
 test('raised satin adds an underlay under a satin column',async({page})=>{
- const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());await page.locator('#new').click();
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());await newDesign(page);
  await page.locator('#path').click();const m=await ctm(page);for(const [x,y] of [[-20,0],[0,0],[20,0]]){const s=toScreen(m,x,y);await page.mouse.click(s.x,s.y);}await page.keyboard.press('Enter');
  await page.locator('#type').selectOption('satin');await expect(page.locator('#satinRaisedRow')).toBeVisible();
  const count=async()=>Number(((await page.locator('#count').textContent()).match(/^([\d,]+) stitches/)||[,'0'])[1].replace(/,/g,''));
@@ -1202,7 +1206,7 @@ test('raised satin adds an underlay under a satin column',async({page})=>{
 });
 
 test('redwork run sews the path out and back',async({page})=>{
- const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());await page.locator('#new').click();
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());await newDesign(page);
  await page.locator('#path').click();const m=await ctm(page);for(const [x,y] of [[-20,0],[0,0],[20,0]]){const s=toScreen(m,x,y);await page.mouse.click(s.x,s.y);}await page.keyboard.press('Enter');
  await expect(page.locator('#runStyleRow')).toBeVisible();
  const count=async()=>Number(((await page.locator('#count').textContent()).match(/^([\d,]+) stitches/)||[,'0'])[1].replace(/,/g,''));
@@ -1211,7 +1215,7 @@ test('redwork run sews the path out and back',async({page})=>{
 });
 
 test('buttonhole satin adds bar tacks at both ends',async({page})=>{
- const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());await page.locator('#new').click();
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());await newDesign(page);
  await page.locator('#path').click();const m=await ctm(page);for(const [x,y] of [[-15,0],[15,0]]){const s=toScreen(m,x,y);await page.mouse.click(s.x,s.y);}await page.keyboard.press('Enter');
  await page.locator('#type').selectOption('satin');await expect(page.locator('#satinButtonholeRow')).toBeVisible();
  const count=async()=>Number(((await page.locator('#count').textContent()).match(/^([\d,]+) stitches/)||[,'0'])[1].replace(/,/g,''));
@@ -1220,7 +1224,7 @@ test('buttonhole satin adds bar tacks at both ends',async({page})=>{
 });
 
 test('motif loops are a stitch type that loops along the path',async({page})=>{
- const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());await page.locator('#new').click();
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());await newDesign(page);
  await page.locator('#path').click();const m=await ctm(page);for(const [x,y] of [[-20,0],[20,0]]){const s=toScreen(m,x,y);await page.mouse.click(s.x,s.y);}await page.keyboard.press('Enter');
  const count=async()=>Number(((await page.locator('#count').textContent()).match(/^([\d,]+) stitches/)||[,'0'])[1].replace(/,/g,''));
  const run=await count();await page.locator('#type').selectOption('motif');
@@ -1228,7 +1232,7 @@ test('motif loops are a stitch type that loops along the path',async({page})=>{
 });
 
 test('paired motif loops follow the width of the path',async({page})=>{
- const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());await page.locator('#new').click();
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());await newDesign(page);
  await page.locator('#path').click();const m=await ctm(page);for(const [x,y] of [[-20,0],[20,0]]){const s=toScreen(m,x,y);await page.mouse.click(s.x,s.y);}await page.keyboard.press('Enter');
  await page.locator('#type').selectOption('motif');await expect(page.locator('#motifPairRow')).toBeVisible();
  const count=async()=>Number(((await page.locator('#count').textContent()).match(/^([\d,]+) stitches/)||[,'0'])[1].replace(/,/g,''));
@@ -1237,7 +1241,7 @@ test('paired motif loops follow the width of the path',async({page})=>{
 });
 
 test('motif fill fills a closed shape with loops',async({page})=>{
- const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());await page.locator('#new').click();
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());await newDesign(page);
  await page.locator('#path').click();const m=await ctm(page);for(const [x,y] of [[-20,-20],[20,-20],[20,20]]){const s=toScreen(m,x,y);await page.mouse.click(s.x,s.y);}
  const first=toScreen(m,-20,-20);await page.mouse.click(first.x,first.y);
  const count=async()=>Number(((await page.locator('#count').textContent()).match(/^([\d,]+) stitches/)||[,'0'])[1].replace(/,/g,''));
@@ -1246,7 +1250,7 @@ test('motif fill fills a closed shape with loops',async({page})=>{
 });
 
 test('fill pattern buttons include motif loops inside the panel',async({page})=>{
- const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());await page.locator('#new').click();
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());await newDesign(page);
  await page.locator('#path').click();const m=await ctm(page);for(const [x,y] of [[-20,-20],[20,-20],[20,20]]){const s=toScreen(m,x,y);await page.mouse.click(s.x,s.y);}
  const first=toScreen(m,-20,-20);await page.mouse.click(first.x,first.y);
  const motif=page.locator('#fillMethod + .icon-seg button[data-value=motif]');await expect(motif).toBeVisible();
@@ -1256,7 +1260,7 @@ test('fill pattern buttons include motif loops inside the panel',async({page})=>
 });
 
 test('motif spacing can be changed in the panel and sews more loops when smaller',async({page})=>{
- const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());await page.locator('#new').click();
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());await newDesign(page);
  await page.locator('#path').click();const m=await ctm(page);for(const [x,y] of [[-20,0],[20,0]]){const s=toScreen(m,x,y);await page.mouse.click(s.x,s.y);}await page.keyboard.press('Enter');
  await page.locator('#type').selectOption('motif');await expect(page.locator('#motifSpacingRow')).toBeVisible();
  const count=async()=>Number(((await page.locator('#count').textContent()).match(/^([\d,]+) stitches/)||[,'0'])[1].replace(/,/g,''));
@@ -1265,7 +1269,7 @@ test('motif spacing can be changed in the panel and sews more loops when smaller
 });
 
 test('motif fill loops can shrink across the fill in the panel',async({page})=>{
- const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());await page.locator('#new').click();
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());await newDesign(page);
  await page.locator('#path').click();const m=await ctm(page);for(const [x,y] of [[-20,-20],[20,-20],[20,20]]){const s=toScreen(m,x,y);await page.mouse.click(s.x,s.y);}
  const first=toScreen(m,-20,-20);await page.mouse.click(first.x,first.y);
  await page.locator('#fillMethod').selectOption('motif');await expect(page.locator('#motifWarpRow')).toBeVisible();
@@ -1274,7 +1278,7 @@ test('motif fill loops can shrink across the fill in the panel',async({page})=>{
 });
 
 test('sequins are a stitch type that sews fixing loops along the path',async({page})=>{
- const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());await page.locator('#new').click();
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());await newDesign(page);
  await page.locator('#path').click();const m=await ctm(page);for(const [x,y] of [[-20,0],[20,0]]){const s=toScreen(m,x,y);await page.mouse.click(s.x,s.y);}await page.keyboard.press('Enter');
  const count=async()=>Number(((await page.locator('#count').textContent()).match(/^([\d,]+) stitches/)||[,'0'])[1].replace(/,/g,''));
  const run=await count();await page.locator('#type').selectOption('sequin');
@@ -1283,7 +1287,7 @@ test('sequins are a stitch type that sews fixing loops along the path',async({pa
 });
 
 test('beads are a stitch type that sews passes across the path',async({page})=>{
- const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());await page.locator('#new').click();
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());await newDesign(page);
  await page.locator('#path').click();const m=await ctm(page);for(const [x,y] of [[-20,0],[20,0]]){const s=toScreen(m,x,y);await page.mouse.click(s.x,s.y);}await page.keyboard.press('Enter');
  const count=async()=>Number(((await page.locator('#count').textContent()).match(/^([\d,]+) stitches/)||[,'0'])[1].replace(/,/g,''));
  const run=await count();await page.locator('#type').selectOption('bead');
@@ -1291,7 +1295,7 @@ test('beads are a stitch type that sews passes across the path',async({page})=>{
 });
 
 test('bling is a stitch type that sews stones along the path',async({page})=>{
- const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());await page.locator('#new').click();
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());await newDesign(page);
  await page.locator('#path').click();const m=await ctm(page);for(const [x,y] of [[-20,0],[20,0]]){const s=toScreen(m,x,y);await page.mouse.click(s.x,s.y);}await page.keyboard.press('Enter');
  const count=async()=>Number(((await page.locator('#count').textContent()).match(/^([\d,]+) stitches/)||[,'0'])[1].replace(/,/g,''));
  const run=await count();await page.locator('#type').selectOption('bling');
@@ -1299,7 +1303,7 @@ test('bling is a stitch type that sews stones along the path',async({page})=>{
 });
 
 test('bling stone shape switches between round and square stones',async({page})=>{
- const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());await page.locator('#new').click();
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());await newDesign(page);
  await page.locator('#path').click();const m=await ctm(page);for(const [x,y] of [[-20,0],[20,0]]){const s=toScreen(m,x,y);await page.mouse.click(s.x,s.y);}await page.keyboard.press('Enter');
  const count=async()=>Number(((await page.locator('#count').textContent()).match(/^([\d,]+) stitches/)||[,'0'])[1].replace(/,/g,''));
  const run=await count();await page.locator('#type').selectOption('bling');
@@ -1314,7 +1318,7 @@ test('bling stone shape switches between round and square stones',async({page})=
 });
 
 test('teardrop and baguette stones are offered in the stone shape list, and both have the turn setting',async({page})=>{
- const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());await page.locator('#new').click();
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());await newDesign(page);
  await page.locator('#path').click();const m=await ctm(page);for(const [x,y] of [[-20,0],[20,0]]){const s=toScreen(m,x,y);await page.mouse.click(s.x,s.y);}await page.keyboard.press('Enter');
  const count=async()=>Number(((await page.locator('#count').textContent()).match(/^([\d,]+) stitches/)||[,'0'])[1].replace(/,/g,''));
  await page.locator('#type').selectOption('bling');await expect(page.locator('#blingShapeRow')).toBeVisible();
@@ -1325,7 +1329,7 @@ test('teardrop and baguette stones are offered in the stone shape list, and both
 });
 
 test('marquise stones are in the stone shape list, and turn with the path like the baguette',async({page})=>{
- const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());await page.locator('#new').click();
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());await newDesign(page);
  await page.locator('#path').click();const m=await ctm(page);for(const [x,y] of [[-20,0],[20,0]]){const s=toScreen(m,x,y);await page.mouse.click(s.x,s.y);}await page.keyboard.press('Enter');
  await page.locator('#type').selectOption('bling');await expect(page.locator('#blingShapeRow')).toBeVisible();
  await page.locator('#blingShape').selectOption('marquise');await expect(page.locator('#blingShape')).toHaveValue('marquise');await expect(page.locator('#stoneTurnRow')).toBeVisible();
@@ -1333,7 +1337,7 @@ test('marquise stones are in the stone shape list, and turn with the path like t
 });
 
 test('pear stones are in the stone shape list and turn with the path',async({page})=>{
- const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());await page.locator('#new').click();
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());await newDesign(page);
  await page.locator('#path').click();const m=await ctm(page);for(const [x,y] of [[-20,0],[20,0]]){const s=toScreen(m,x,y);await page.mouse.click(s.x,s.y);}await page.keyboard.press('Enter');
  await page.locator('#type').selectOption('bling');await expect(page.locator('#blingShapeRow')).toBeVisible();
  await page.locator('#blingShape').selectOption('pear');await expect(page.locator('#blingShape')).toHaveValue('pear');await expect(page.locator('#stoneTurnRow')).toBeVisible();
@@ -1341,7 +1345,7 @@ test('pear stones are in the stone shape list and turn with the path',async({pag
 });
 
 test('cushion stones are in the stone shape list and turn with the path',async({page})=>{
- const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());await page.locator('#new').click();
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());await newDesign(page);
  await page.locator('#path').click();const m=await ctm(page);for(const [x,y] of [[-20,0],[20,0]]){const s=toScreen(m,x,y);await page.mouse.click(s.x,s.y);}await page.keyboard.press('Enter');
  await page.locator('#type').selectOption('bling');await expect(page.locator('#blingShapeRow')).toBeVisible();
  await page.locator('#blingShape').selectOption('cushion');await expect(page.locator('#blingShape')).toHaveValue('cushion');await expect(page.locator('#stoneTurnRow')).toBeVisible();
@@ -1349,7 +1353,7 @@ test('cushion stones are in the stone shape list and turn with the path',async({
 });
 
 test('twin beads add a second bead either side of the centre line',async({page})=>{
- const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());await page.locator('#new').click();
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());await newDesign(page);
  await page.locator('#path').click();const m=await ctm(page);for(const [x,y] of [[-20,0],[20,0]]){const s=toScreen(m,x,y);await page.mouse.click(s.x,s.y);}await page.keyboard.press('Enter');
  const count=async()=>Number(((await page.locator('#count').textContent()).match(/^([\d,]+) stitches/)||[,'0'])[1].replace(/,/g,''));
  await page.locator('#type').selectOption('bead');await expect(page.locator('#beadTwinRow')).toBeVisible();await expect(page.locator('#beadTwin')).not.toBeChecked();
@@ -1360,7 +1364,7 @@ test('twin beads add a second bead either side of the centre line',async({page})
 });
 
 test('laydown underlay is offered for fills and adds a light fill under them',async({page})=>{
- const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());await page.locator('#new').click();
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());await newDesign(page);
  await page.locator('#path').click();const m=await ctm(page);for(const [x,y] of [[-20,-15],[20,-15],[20,15],[-20,15],[-20,-15]]){const s=toScreen(m,x,y);await page.mouse.click(s.x,s.y);}await page.keyboard.press('Enter');
  const count=async()=>Number(((await page.locator('#count').textContent()).match(/^([\d,]+) stitches/)||[,'0'])[1].replace(/,/g,''));
  await page.locator('#type').selectOption('fill');await expect(page.locator('#underlayType option[value="laydown"]')).toHaveCount(1);
@@ -1370,7 +1374,7 @@ test('laydown underlay is offered for fills and adds a light fill under them',as
 });
 
 test('print template export downloads a 1:1 millimetre placement sheet',async({page})=>{
- const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());await page.locator('#new').click();await page.locator('#rect').click();
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());await newDesign(page);await page.locator('#rect').click();
  const download=page.waitForEvent('download');await page.locator('#export').click();await page.locator('#format').selectOption('print');await page.locator('#download').click();
  const file=await download;expect(file.suggestedFilename()).toMatch(/-template\.svg$/);await file.saveAs('/tmp/welcome-print-template.svg');
  const svg=readFileSync('/tmp/welcome-print-template.svg','utf8');
@@ -1380,7 +1384,7 @@ test('print template export downloads a 1:1 millimetre placement sheet',async({p
 });
 
 test('fabric select sets the document stitch settings and changes the stitch plan',async({page})=>{
- const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());await page.locator('#new').click();
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());await newDesign(page);
  await page.locator('#path').click();const m=await ctm(page);for(const [x,y] of [[-20,-15],[20,-15],[20,15],[-20,15],[-20,-15]]){const s=toScreen(m,x,y);await page.mouse.click(s.x,s.y);}await page.keyboard.press('Enter');
  const count=async()=>Number(((await page.locator('#count').textContent()).match(/^([\d,]+) stitches/)||[,'0'])[1].replace(/,/g,''));
  await page.locator('#type').selectOption('fill');await expect.poll(count).toBeGreaterThan(0);const woven=await count();
@@ -1394,7 +1398,7 @@ test('fabric select sets the document stitch settings and changes the stitch pla
 });
 
 test('redwork outline adds a redwork run that follows a closed shape',async({page})=>{
- const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());await page.locator('#new').click();
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());await newDesign(page);
  await page.locator('#path').click();const m=await ctm(page);for(const [x,y] of [[-20,-15],[20,-15],[20,15],[-20,15],[-20,-15]]){const s=toScreen(m,x,y);await page.mouse.click(s.x,s.y);}await page.keyboard.press('Enter');
  const rows=async()=>page.locator('.object-row').count();const before=await rows();
  await page.locator('details:has(#redworkOutline)').evaluate(d=>{d.open=true;});
@@ -1404,7 +1408,7 @@ test('redwork outline adds a redwork run that follows a closed shape',async({pag
 });
 
 test('satin end inset field shows for satin paths and a typed value is kept',async({page})=>{
- const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());await page.locator('#new').click();
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());await newDesign(page);
  await page.locator('#path').click();const m=await ctm(page);for(const [x,y] of [[-20,0],[20,0]]){const s=toScreen(m,x,y);await page.mouse.click(s.x,s.y);}await page.keyboard.press('Enter');
  await page.locator('#type').selectOption('satin');await expect(page.locator('#endInsetStartRow')).toBeVisible();await expect(page.locator('#endInsetEndRow')).toBeVisible();
  await page.locator('#endInsetStart').fill('1');await page.locator('#endInsetStart').press('Tab');await expect(page.locator('#endInsetStart')).toHaveValue('1');
@@ -1414,7 +1418,7 @@ test('satin end inset field shows for satin paths and a typed value is kept',asy
 });
 
 test('sequin fill is a fill pattern that lays sequins inside a closed shape',async({page})=>{
- const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());await page.locator('#new').click();
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());await newDesign(page);
  await page.locator('#path').click();const m=await ctm(page);for(const [x,y] of [[-20,-15],[20,-15],[20,15],[-20,15],[-20,-15]]){const s=toScreen(m,x,y);await page.mouse.click(s.x,s.y);}await page.keyboard.press('Enter');
  const count=async()=>Number(((await page.locator('#count').textContent()).match(/^([\d,]+) stitches/)||[,'0'])[1].replace(/,/g,''));
  await page.locator('#type').selectOption('fill');await expect(page.locator('#fillMethod option[value="sequin"]')).toHaveCount(1);
@@ -1425,7 +1429,7 @@ test('sequin fill is a fill pattern that lays sequins inside a closed shape',asy
 });
 
 test('hoop preset select sets the hoop, and a typed size moves it to custom',async({page})=>{
- const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());await page.locator('#new').click();
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());await newDesign(page);
  await page.locator('#hoopPreset').selectOption('180x130');await expect(page.locator('#hoopPreset option:checked')).toHaveText('5×7 in');
  await expect(page.locator('#hoopW')).toHaveValue('180');await expect(page.locator('#hoopH')).toHaveValue('130');
  await page.locator('#hoopW').fill('120');await page.locator('#hoopW').press('Tab');
@@ -1434,7 +1438,7 @@ test('hoop preset select sets the hoop, and a typed size moves it to custom',asy
 });
 
 test('raised fill checkbox shows for fills and adds an underlay',async({page})=>{
- const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());await page.locator('#new').click();
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());await newDesign(page);
  await page.locator('#path').click();const m=await ctm(page);for(const [x,y] of [[-20,-15],[20,-15],[20,15],[-20,15],[-20,-15]]){const s=toScreen(m,x,y);await page.mouse.click(s.x,s.y);}await page.keyboard.press('Enter');
  const count=async()=>Number(((await page.locator('#count').textContent()).match(/^([\d,]+) stitches/)||[,'0'])[1].replace(/,/g,''));
  await page.locator('#type').selectOption('fill');await expect(page.locator('#fillRaisedRow')).toBeVisible();await expect(page.locator('#satinRaisedRow')).toBeHidden();
@@ -1445,7 +1449,7 @@ test('raised fill checkbox shows for fills and adds an underlay',async({page})=>
 });
 
 test('accordion spacing fields show for rows fills and a start value gives the end the same value',async({page})=>{
- const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());await page.locator('#new').click();
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());await newDesign(page);
  await page.locator('#path').click();const m=await ctm(page);for(const [x,y] of [[-20,-15],[20,-15],[20,15],[-20,15],[-20,-15]]){const s=toScreen(m,x,y);await page.mouse.click(s.x,s.y);}await page.keyboard.press('Enter');
  const count=async()=>Number(((await page.locator('#count').textContent()).match(/^([\d,]+) stitches/)||[,'0'])[1].replace(/,/g,''));
  await page.locator('#type').selectOption('fill');await expect(page.locator('#accordionStartRow')).toBeVisible();await expect(page.locator('#accordionEndRow')).toBeVisible();
@@ -1459,7 +1463,7 @@ test('accordion spacing fields show for rows fills and a start value gives the e
 });
 
 test('bling fill is a fill pattern that lays stones inside a closed shape, and the stone shape changes it',async({page})=>{
- const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());await page.locator('#new').click();
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());await newDesign(page);
  await page.locator('#path').click();const m=await ctm(page);for(const [x,y] of [[-20,-15],[20,-15],[20,15],[-20,15],[-20,-15]]){const s=toScreen(m,x,y);await page.mouse.click(s.x,s.y);}await page.keyboard.press('Enter');
  const count=async()=>Number(((await page.locator('#count').textContent()).match(/^([\d,]+) stitches/)||[,'0'])[1].replace(/,/g,''));
  await page.locator('#type').selectOption('fill');await expect(page.locator('#fillMethod option[value="bling"]')).toHaveCount(1);
@@ -1480,7 +1484,7 @@ test('a DXF file opens through the file picker and imports its lines and shapes'
 
 test('organize fonts lists the bundled font a lettering uses, marked as not removable',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));page.on('dialog',d=>d.accept());
- await page.goto('/');await page.locator('#new').click();
+ await page.goto('/');await newDesign(page);
  await page.locator('#letter').click();await page.locator('#font').selectOption('inkstitch/allegria20');await page.locator('#letteringText').fill('ANA');await page.locator('#letteringText').press('Tab');
  await page.locator('details#secDoc').evaluate(d=>{d.open=true;});
  await page.locator('#organizeFonts').click();
@@ -1491,7 +1495,7 @@ test('organize fonts lists the bundled font a lettering uses, marked as not remo
 });
 
 test('organize fonts lists a loaded font with its lettering, and removes it only once no lettering uses it',async({page})=>{
- const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());await page.locator('#new').click();
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());await newDesign(page);
  await page.locator('#letter').click();await page.waitForTimeout(300);
  await page.locator('#fontButton').click();await page.locator('#fontFile').setInputFiles('test/fixtures/BebasNeue-Regular.ttf');await expect(page.locator('#toast')).toContainText('Loaded');
  await page.locator('details#secDoc').evaluate(d=>{d.open=true;});
@@ -1506,7 +1510,7 @@ test('organize fonts lists a loaded font with its lettering, and removes it only
 });
 
 test('a PES machine file opens through the machine picker as a stitch layer',async({page})=>{
- const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());await page.locator('#new').click();await expect(page.locator('.object-row')).toHaveCount(0);
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());await newDesign(page);await expect(page.locator('.object-row')).toHaveCount(0);
  await page.locator('#importMachine').click();await page.locator('#machineFile').setInputFiles('test/fixtures/spiralbox-brother-v6.pes');
  await expect(page.locator('.object-row')).toHaveCount(1);const layer=page.locator('.object-row').last();await expect(layer).toContainText('machine stitches');
  await expect(page.locator('#sourceInfo')).toContainText('PES');await expect(page.locator('#sourceInfo')).toContainText('96 commands');
@@ -1525,7 +1529,7 @@ test('name drop checkbox marks a lettering object for the names, and the mark su
 });
 
 test('vertical lettering on the default monospace font: the box is disabled and stays unticked',async({page})=>{
- const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());await page.locator('#new').click();
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());await newDesign(page);
  await page.locator('#letter').click();await page.locator('#letteringText').fill('ANA');await page.locator('#letteringText').press('Tab');
  await page.locator('.object-row').filter({hasText:'Lettering'}).first().click();
  await expect(page.locator('#textVertical')).toBeDisabled();
@@ -1555,7 +1559,7 @@ test('vertical lettering checkbox stacks the letters of a lettering object and c
 });
 
 test('an SVG stroke at least 0.3 mm wide imports as a satin column, and a thinner or unset stroke stays a running stitch',async({page})=>{
- const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());await page.locator('#new').click();
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());await newDesign(page);
  await page.locator('#file').setInputFiles('test/fixtures/strokes.svg');
  await expect(page.locator('.object-row')).toHaveCount(3);
  await expect(page.locator('.object-row').filter({hasText:'satin'})).toHaveCount(1);
@@ -1564,7 +1568,7 @@ test('an SVG stroke at least 0.3 mm wide imports as a satin column, and a thinne
 });
 
 test('a filled SVG square imports as a fill; a counter becomes a hole; two islands keep the outline and say why',async({page})=>{
- const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());await page.locator('#new').click();
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());await newDesign(page);
  await page.locator('#file').setInputFiles('test/fixtures/filled.svg');
  await expect(page.locator('.object-row')).toHaveCount(1);await expect(page.locator('.object-row').filter({hasText:'fill'})).toHaveCount(1);
  await page.locator('#file').setInputFiles('test/fixtures/counter.svg');
@@ -1588,7 +1592,7 @@ test('DXF export downloads the design outlines as a DXF file',async({page})=>{
 });
 
 test('satin pull fields show for satin paths only, and a typed value is kept',async({page})=>{
- const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());await page.locator('#new').click();
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());await newDesign(page);
  await page.locator('#path').click();const m=await ctm(page);for(const [x,y] of [[-20,0],[20,0]]){const s=toScreen(m,x,y);await page.mouse.click(s.x,s.y);}await page.keyboard.press('Enter');
  await page.locator('#type').selectOption('satin');await expect(page.locator('#pullRightRow')).toBeVisible();await expect(page.locator('#pullLeftRow')).toBeVisible();
  await page.locator('#pullRight').fill('1.5');await page.locator('#pullRight').press('Tab');await expect(page.locator('#pullRight')).toHaveValue('1.5');
@@ -1597,7 +1601,7 @@ test('satin pull fields show for satin paths only, and a typed value is kept',as
 });
 
 test('bead shape: dash by default, dot sews a small round bead at each point',async({page})=>{
- const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());await page.locator('#new').click();
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());await newDesign(page);
  await page.locator('#path').click();const m=await ctm(page);for(const [x,y] of [[-20,0],[20,0]]){const s=toScreen(m,x,y);await page.mouse.click(s.x,s.y);}await page.keyboard.press('Enter');
  const count=async()=>Number(((await page.locator('#count').textContent()).match(/^([\d,]+) stitches/)||[,'0'])[1].replace(/,/g,''));
  await page.locator('#type').selectOption('bead');await expect(page.locator('#beadShapeRow')).toBeVisible();await expect(page.locator('#beadShape')).toHaveValue('dash');
@@ -1608,7 +1612,7 @@ test('bead shape: dash by default, dot sews a small round bead at each point',as
 });
 
 test('bling fixing rings: one ring halves the stitches of a stone, two is the default',async({page})=>{
- const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());await page.locator('#new').click();
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());await newDesign(page);
  await page.locator('#path').click();const m=await ctm(page);for(const [x,y] of [[-20,0],[20,0]]){const s=toScreen(m,x,y);await page.mouse.click(s.x,s.y);}await page.keyboard.press('Enter');
  const count=async()=>Number(((await page.locator('#count').textContent()).match(/^([\d,]+) stitches/)||[,'0'])[1].replace(/,/g,''));
  await page.locator('#type').selectOption('bling');await expect(page.locator('#blingRingsRow')).toBeVisible();await expect(page.locator('#blingRings')).toHaveValue('2');
@@ -1617,7 +1621,7 @@ test('bling fixing rings: one ring halves the stitches of a stone, two is the de
 });
 
 test('stone turn checkbox shows for turning stone shapes and is on by default',async({page})=>{
- const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());await page.locator('#new').click();
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());await newDesign(page);
  await page.locator('#path').click();const m=await ctm(page);for(const [x,y] of [[-20,0],[20,0]]){const s=toScreen(m,x,y);await page.mouse.click(s.x,s.y);}await page.keyboard.press('Enter');
  await page.locator('#type').selectOption('bling');await page.locator('#blingShape').selectOption('hexagon');
  await expect(page.locator('#stoneTurnRow')).toBeVisible();await expect(page.locator('#stoneTurn')).toBeChecked();
@@ -1644,14 +1648,14 @@ test('name drop batch exports one file per hoop, and refuses a design with no le
  await page.locator('#batchNames').fill('Ana\nBen\nCarla');await expect(page.locator('#batchInfo')).toContainText('3 copies need');
  const download=page.waitForEvent('download');await page.locator('#batchExport').click();const file=await download;expect(file.suggestedFilename()).toMatch(/-hoop1\.jef$/);
  await expect(page.locator('#toast, .toast, [role="status"]').filter({hasText:'files exported'}).first()).toBeVisible();
- await page.locator('#new').click();await page.locator('#rect').click();
+ await newDesign(page);await page.locator('#rect').click();
  await page.locator('#batchNames').fill('Ana');await page.locator('#batchExport').click();
  await expect(page.locator('#toast, .toast, [role="status"]').filter({hasText:'lettering'}).first()).toBeVisible();
  expect(errors).toEqual([]);
 });
 
 test('batch plan in the Array section says how many copies fit one hoop',async({page})=>{
- const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());await page.locator('#new').click();
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());await newDesign(page);
  await page.locator('#rect').click();await page.locator('#secArray summary').click();
  await expect(page.locator('#batchInfo')).toContainText('copies fit one');
  await page.locator('#arrCount').fill('400');await page.locator('#arrCount').press('Tab');
@@ -1660,7 +1664,7 @@ test('batch plan in the Array section says how many copies fit one hoop',async({
 });
 
 test('batch export downloads one JEF file per hoop',async({page})=>{
- const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());await page.locator('#new').click();
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());await newDesign(page);
  await page.locator('#rect').click();await page.locator('#secArray summary').click();await page.locator('#arrCount').fill('3');await page.locator('#arrCount').press('Tab');
  const download=page.waitForEvent('download');await page.locator('#batchExport').click();
  const file=await download;expect(file.suggestedFilename()).toMatch(/-hoop1\.jef$/);expect(errors).toEqual([]);
@@ -1668,7 +1672,7 @@ test('batch export downloads one JEF file per hoop',async({page})=>{
 
 test('a SEW file imports from the machine picker as a stitch layer',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));page.on('dialog',d=>d.accept());
- const fixture=pinnedMachineFixture('sew');await page.goto('/');await page.locator('#new').click();
+ const fixture=pinnedMachineFixture('sew');await page.goto('/');await newDesign(page);
  await page.locator('#machineFile').setInputFiles({name:'sample.sew',mimeType:'application/octet-stream',buffer:Buffer.from(fixture.bytes)});
  await expect(page.locator('#sourceInfo')).toContainText('SEW stitch layer');await expect(page.locator('.object-row')).toHaveCount(1);
  await expect(page.locator('#sourceInfo')).toContainText('commands');expect(errors).toEqual([]);
@@ -1676,7 +1680,7 @@ test('a SEW file imports from the machine picker as a stitch layer',async({page}
 
 test('a PEC file imports from the machine picker as a stitch layer',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));page.on('dialog',d=>d.accept());
- const fixture=pinnedMachineFixture('pec');await page.goto('/');await page.locator('#new').click();
+ const fixture=pinnedMachineFixture('pec');await page.goto('/');await newDesign(page);
  await page.locator('#machineFile').setInputFiles({name:'sample.pec',mimeType:'application/octet-stream',buffer:Buffer.from(fixture.bytes)});
  await expect(page.locator('#sourceInfo')).toContainText('PEC stitch layer');await expect(page.locator('.object-row')).toHaveCount(1);
  await expect(page.locator('#sourceInfo')).toContainText('commands');expect(errors).toEqual([]);
@@ -1684,7 +1688,7 @@ test('a PEC file imports from the machine picker as a stitch layer',async({page}
 
 test('an EXP file imports from the machine picker as a stitch layer with placeholder colours',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));page.on('dialog',d=>d.accept());
- const fixture=pinnedMachineFixture('exp');await page.goto('/');await page.locator('#new').click();
+ const fixture=pinnedMachineFixture('exp');await page.goto('/');await newDesign(page);
  await page.locator('#machineFile').setInputFiles({name:'sample.exp',mimeType:'application/octet-stream',buffer:Buffer.from(fixture.bytes)});
  await expect(page.locator('#sourceInfo')).toContainText('EXP stitch layer');await expect(page.locator('.object-row')).toHaveCount(1);
  await expect(page.locator('#sourceInfo')).toContainText('commands');expect(errors).toEqual([]);
@@ -1692,7 +1696,7 @@ test('an EXP file imports from the machine picker as a stitch layer with placeho
 
 test('a HUS file imports from the machine picker as a stitch layer with its own thread colours',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));page.on('dialog',d=>d.accept());
- const fixture=pinnedMachineFixture('hus');await page.goto('/');await page.locator('#new').click();
+ const fixture=pinnedMachineFixture('hus');await page.goto('/');await newDesign(page);
  await page.locator('#machineFile').setInputFiles({name:'sample.hus',mimeType:'application/octet-stream',buffer:Buffer.from(fixture.bytes)});
  await expect(page.locator('#sourceInfo')).toContainText('HUS stitch layer');await expect(page.locator('.object-row')).toHaveCount(1);
  await expect(page.locator('#sourceInfo')).toContainText('source threads');expect(errors).toEqual([]);
@@ -1700,7 +1704,7 @@ test('a HUS file imports from the machine picker as a stitch layer with its own 
 
 test('an XXX file imports from the machine picker as a stitch layer',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));page.on('dialog',d=>d.accept());
- const fixture=pinnedMachineFixture('xxx');await page.goto('/');await page.locator('#new').click();
+ const fixture=pinnedMachineFixture('xxx');await page.goto('/');await newDesign(page);
  await page.locator('#machineFile').setInputFiles({name:'sample.xxx',mimeType:'application/octet-stream',buffer:Buffer.from(fixture.bytes)});
  await expect(page.locator('#sourceInfo')).toContainText('XXX stitch layer');await expect(page.locator('.object-row')).toHaveCount(1);
  await expect(page.locator('#sourceInfo')).toContainText('source threads');expect(errors).toEqual([]);
@@ -1708,7 +1712,7 @@ test('an XXX file imports from the machine picker as a stitch layer',async({page
 
 test('a DSB file imports from the machine picker as a stitch layer',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));page.on('dialog',d=>d.accept());
- const fixture=pinnedMachineFixture('dsb');await page.goto('/');await page.locator('#new').click();
+ const fixture=pinnedMachineFixture('dsb');await page.goto('/');await newDesign(page);
  await page.locator('#machineFile').setInputFiles({name:'sample.dsb',mimeType:'application/octet-stream',buffer:Buffer.from(fixture.bytes)});
  await expect(page.locator('#sourceInfo')).toContainText('DSB stitch layer');await expect(page.locator('.object-row')).toHaveCount(1);
  await expect(page.locator('#sourceInfo')).toContainText('source threads');expect(errors).toEqual([]);
@@ -1716,7 +1720,7 @@ test('a DSB file imports from the machine picker as a stitch layer',async({page}
 
 test('a DSZ file imports from the machine picker as a stitch layer',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));page.on('dialog',d=>d.accept());
- const fixture=pinnedMachineFixture('dsz');await page.goto('/');await page.locator('#new').click();
+ const fixture=pinnedMachineFixture('dsz');await page.goto('/');await newDesign(page);
  await page.locator('#machineFile').setInputFiles({name:'sample.dsz',mimeType:'application/octet-stream',buffer:Buffer.from(fixture.bytes)});
  await expect(page.locator('#sourceInfo')).toContainText('DSZ stitch layer');await expect(page.locator('.object-row')).toHaveCount(1);
  await expect(page.locator('#sourceInfo')).toContainText('source threads');expect(errors).toEqual([]);
@@ -1724,7 +1728,7 @@ test('a DSZ file imports from the machine picker as a stitch layer',async({page}
 
 test('a TAP file imports from the machine picker as a stitch layer',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));page.on('dialog',d=>d.accept());
- const fixture=pinnedMachineFixture('tap');await page.goto('/');await page.locator('#new').click();
+ const fixture=pinnedMachineFixture('tap');await page.goto('/');await newDesign(page);
  await page.locator('#machineFile').setInputFiles({name:'sample.tap',mimeType:'application/octet-stream',buffer:Buffer.from(fixture.bytes)});
  await expect(page.locator('#sourceInfo')).toContainText('TAP stitch layer');await expect(page.locator('.object-row')).toHaveCount(1);
  await expect(page.locator('#sourceInfo')).toContainText('source threads');expect(errors).toEqual([]);
@@ -1732,7 +1736,7 @@ test('a TAP file imports from the machine picker as a stitch layer',async({page}
 
 test('a TBF file imports from the machine picker as a stitch layer',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));page.on('dialog',d=>d.accept());
- const fixture=pinnedMachineFixture('tbf');await page.goto('/');await page.locator('#new').click();
+ const fixture=pinnedMachineFixture('tbf');await page.goto('/');await newDesign(page);
  await page.locator('#machineFile').setInputFiles({name:'sample.tbf',mimeType:'application/octet-stream',buffer:Buffer.from(fixture.bytes)});
  await expect(page.locator('#sourceInfo')).toContainText('TBF stitch layer');await expect(page.locator('.object-row')).toHaveCount(1);
  await expect(page.locator('#sourceInfo')).toContainText('source threads');expect(errors).toEqual([]);
@@ -1740,7 +1744,7 @@ test('a TBF file imports from the machine picker as a stitch layer',async({page}
 
 test('a PCS file imports from the machine picker as a stitch layer',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));page.on('dialog',d=>d.accept());
- const fixture=pinnedMachineFixture('pcs');await page.goto('/');await page.locator('#new').click();
+ const fixture=pinnedMachineFixture('pcs');await page.goto('/');await newDesign(page);
  await page.locator('#machineFile').setInputFiles({name:'sample.pcs',mimeType:'application/octet-stream',buffer:Buffer.from(fixture.bytes)});
  await expect(page.locator('#sourceInfo')).toContainText('PCS stitch layer');await expect(page.locator('.object-row')).toHaveCount(1);
  await expect(page.locator('#sourceInfo')).toContainText('source threads');expect(errors).toEqual([]);
@@ -1748,7 +1752,7 @@ test('a PCS file imports from the machine picker as a stitch layer',async({page}
 
 test('an SHV file imports from the machine picker as a stitch layer',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));page.on('dialog',d=>d.accept());
- const fixture=pinnedMachineFixture('shv');await page.goto('/');await page.locator('#new').click();
+ const fixture=pinnedMachineFixture('shv');await page.goto('/');await newDesign(page);
  await page.locator('#machineFile').setInputFiles({name:'sample.shv',mimeType:'application/octet-stream',buffer:Buffer.from(fixture.bytes)});
  await expect(page.locator('#sourceInfo')).toContainText('SHV stitch layer');await expect(page.locator('.object-row')).toHaveCount(1);
  await expect(page.locator('#sourceInfo')).toContainText('source threads');expect(errors).toEqual([]);
@@ -1756,7 +1760,7 @@ test('an SHV file imports from the machine picker as a stitch layer',async({page
 
 test('export with the worksheet box ticked can download the worksheet as SVG instead of text',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));page.on('dialog',d=>d.accept());
- await page.goto('/');await page.locator('#new').click();await page.locator('#rect').click();
+ await page.goto('/');await newDesign(page);await page.locator('#rect').click();
  await page.locator('#export').click();await page.locator('#format').selectOption('dst');
  await page.locator('#withWorksheet').check();await page.locator('#withWorksheetFormat').selectOption('svg');
  const downloads=[];page.on('download',d=>downloads.push(d));
@@ -1770,7 +1774,7 @@ test('export with the worksheet box ticked can download the worksheet as SVG ins
 
 test('export with the worksheet box ticked downloads the machine file and its sewing worksheet, and the box is hidden for SVG',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));page.on('dialog',d=>d.accept());
- await page.goto('/');await page.locator('#new').click();await page.locator('#rect').click();
+ await page.goto('/');await newDesign(page);await page.locator('#rect').click();
  await page.locator('#export').click();await page.locator('#format').selectOption('dst');await expect(page.locator('#worksheetRow')).toBeVisible();
  await page.locator('#withWorksheet').check();
  const downloads=[];page.on('download',d=>downloads.push(d));
@@ -1786,7 +1790,7 @@ test('export with the worksheet box ticked downloads the machine file and its se
 
 test('an STX file imports from the machine picker as a stitch layer',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));page.on('dialog',d=>d.accept());
- const fixture=pinnedMachineFixture('stx');await page.goto('/');await page.locator('#new').click();
+ const fixture=pinnedMachineFixture('stx');await page.goto('/');await newDesign(page);
  await page.locator('#machineFile').setInputFiles({name:'sample.stx',mimeType:'application/octet-stream',buffer:Buffer.from(fixture.bytes)});
  await expect(page.locator('#sourceInfo')).toContainText('STX stitch layer');await expect(page.locator('.object-row')).toHaveCount(1);
  await expect(page.locator('#sourceInfo')).toContainText('commands');expect(errors).toEqual([]);
@@ -1794,7 +1798,7 @@ test('an STX file imports from the machine picker as a stitch layer',async({page
 
 test('a BRO file imports from the machine picker as a stitch layer',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));page.on('dialog',d=>d.accept());
- const fixture=pinnedMachineFixture('bro');await page.goto('/');await page.locator('#new').click();
+ const fixture=pinnedMachineFixture('bro');await page.goto('/');await newDesign(page);
  await page.locator('#machineFile').setInputFiles({name:'sample.bro',mimeType:'application/octet-stream',buffer:Buffer.from(fixture.bytes)});
  await expect(page.locator('#sourceInfo')).toContainText('BRO stitch layer');await expect(page.locator('.object-row')).toHaveCount(1);
  await expect(page.locator('#sourceInfo')).toContainText('commands');expect(errors).toEqual([]);
@@ -1802,7 +1806,7 @@ test('a BRO file imports from the machine picker as a stitch layer',async({page}
 
 test('an EMD file imports from the machine picker as a stitch layer',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));page.on('dialog',d=>d.accept());
- const fixture=pinnedMachineFixture('emd');await page.goto('/');await page.locator('#new').click();
+ const fixture=pinnedMachineFixture('emd');await page.goto('/');await newDesign(page);
  await page.locator('#machineFile').setInputFiles({name:'sample.emd',mimeType:'application/octet-stream',buffer:Buffer.from(fixture.bytes)});
  await expect(page.locator('#sourceInfo')).toContainText('EMD stitch layer');await expect(page.locator('.object-row')).toHaveCount(1);
  await expect(page.locator('#sourceInfo')).toContainText('commands');expect(errors).toEqual([]);
@@ -1810,7 +1814,7 @@ test('an EMD file imports from the machine picker as a stitch layer',async({page
 
 test('a KSM file imports from the machine picker as a stitch layer',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));page.on('dialog',d=>d.accept());
- const fixture=pinnedMachineFixture('ksm');await page.goto('/');await page.locator('#new').click();
+ const fixture=pinnedMachineFixture('ksm');await page.goto('/');await newDesign(page);
  await page.locator('#machineFile').setInputFiles({name:'sample.ksm',mimeType:'application/octet-stream',buffer:Buffer.from(fixture.bytes)});
  await expect(page.locator('#sourceInfo')).toContainText('KSM stitch layer');await expect(page.locator('.object-row')).toHaveCount(1);
  await expect(page.locator('#sourceInfo')).toContainText('commands');expect(errors).toEqual([]);
@@ -1818,7 +1822,7 @@ test('a KSM file imports from the machine picker as a stitch layer',async({page}
 
 test('a 10O file imports from the machine picker as a stitch layer',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));page.on('dialog',d=>d.accept());
- const fixture=pinnedMachineFixture('10o');await page.goto('/');await page.locator('#new').click();
+ const fixture=pinnedMachineFixture('10o');await page.goto('/');await newDesign(page);
  await page.locator('#machineFile').setInputFiles({name:'sample.10o',mimeType:'application/octet-stream',buffer:Buffer.from(fixture.bytes)});
  await expect(page.locator('#sourceInfo')).toContainText('10O stitch layer');await expect(page.locator('.object-row')).toHaveCount(1);
  await expect(page.locator('#sourceInfo')).toContainText('commands');expect(errors).toEqual([]);
@@ -1826,7 +1830,7 @@ test('a 10O file imports from the machine picker as a stitch layer',async({page}
 
 test('redwork by colour: three selected paths become redwork runs and the stitch count grows',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));page.on('dialog',d=>d.accept());
- await page.goto('/');await page.locator('#new').click();const m=await ctm(page);
+ await page.goto('/');await newDesign(page);const m=await ctm(page);
  for(const [thread,y] of [['#d9897e',-20],['#527461',0],['#d9897e',20]]){
   await page.keyboard.press('Escape');await page.evaluate(v=>{const el=document.querySelector('#thread');el.value=v;el.dispatchEvent(new Event('change',{bubbles:true}));},thread);await page.locator('#path').click();
   for(const x of [-30,30]){const s=toScreen(m,x,y);await page.mouse.click(s.x,s.y);}await page.keyboard.press('Enter');
@@ -1841,7 +1845,7 @@ test('redwork by colour: three selected paths become redwork runs and the stitch
 
 test('copy worksheet puts the text worksheet on the clipboard after compiling',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));page.on('dialog',d=>d.accept());
- await page.goto('/');await page.locator('#new').click();await page.locator('#rect').click();
+ await page.goto('/');await newDesign(page);await page.locator('#rect').click();
  await page.context().grantPermissions(['clipboard-read','clipboard-write'],{origin:new URL(page.url()).origin});
  await page.locator('#secPlan summary').click();await page.locator('#worksheetCopy').click();
  await expect(page.locator('#toast')).toContainText('copied to the clipboard');
@@ -1851,7 +1855,7 @@ test('copy worksheet puts the text worksheet on the clipboard after compiling',a
 
 test('my threads: a typed stock list gives each colour block its closest thread in the thread plan',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));page.on('dialog',d=>d.accept());
- await page.goto('/');await page.locator('#new').click();await page.locator('#rect').click();
+ await page.goto('/');await newDesign(page);await page.locator('#rect').click();
  await page.locator('#secPlan summary').click();
  await page.locator('#threadStock').fill('#ff0000\n#00ff00\nnot-a-colour');
  await expect(page.locator('#threadStockInfo')).toContainText('2 threads, 1 lines ignored');
@@ -1862,7 +1866,7 @@ test('my threads: a typed stock list gives each colour block its closest thread 
 
 test('knife: two clicks across a selected rectangle cut it into two objects',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));page.on('dialog',d=>d.accept());
- await page.goto('/');await page.locator('#new').click();await page.locator('#rect').click();await page.locator('.object-row').first().click();
+ await page.goto('/');await newDesign(page);await page.locator('#rect').click();await page.locator('.object-row').first().click();
  await page.locator('#secPath summary').click();await page.locator('#knife').click();
  const m=await ctm(page);const a=toScreen(m,-20,0),b=toScreen(m,20,0);
  await page.mouse.click(a.x,a.y);await expect(page.locator('#overlay .measure-point')).toHaveCount(1);
@@ -1874,7 +1878,7 @@ test('knife: two clicks across a selected rectangle cut it into two objects',asy
 
 test('stem width: the field appears for a stem run, takes 2 mm and keeps it when the object is reselected',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));page.on('dialog',d=>d.accept());
- await page.goto('/');await page.locator('#new').click();await page.locator('#path').click();
+ await page.goto('/');await newDesign(page);await page.locator('#path').click();
  const m=await ctm(page);for(const [x,y] of [[-20,0],[20,0]]){const q=toScreen(m,x,y);await page.mouse.click(q.x,q.y);}await page.keyboard.press('Enter');
  await page.locator('#type').selectOption('run');await page.locator('#runStyle').selectOption('stem');
  await expect(page.locator('#stemWidthRow')).toBeVisible();
@@ -1886,7 +1890,7 @@ test('stem width: the field appears for a stem run, takes 2 mm and keeps it when
 
 test('laydown rows: the field appears for a laydown underlay, takes 6 mm and keeps it when the object is reselected',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));page.on('dialog',d=>d.accept());
- await page.goto('/');await page.locator('#new').click();await page.locator('#rect').click();
+ await page.goto('/');await newDesign(page);await page.locator('#rect').click();
  await page.locator('#underlayType').selectOption('laydown');
  await expect(page.locator('#laydownSpacingRow')).toBeVisible();
  await page.locator('#laydownSpacing').fill('6');await page.locator('#laydownSpacing').press('Enter');
@@ -1897,7 +1901,7 @@ test('laydown rows: the field appears for a laydown underlay, takes 6 mm and kee
 
 test('raised underlay turn: the field appears on a raised fill, takes 0 and keeps it when the object is reselected',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));page.on('dialog',d=>d.accept());
- await page.goto('/');await page.locator('#new').click();await page.locator('#rect').click();
+ await page.goto('/');await newDesign(page);await page.locator('#rect').click();
  await page.locator('#fillRaised').check();
  await expect(page.locator('#raisedAngleRow')).toBeVisible();
  await page.locator('#raisedAngle').fill('0');await page.locator('#raisedAngle').press('Enter');
@@ -1908,7 +1912,7 @@ test('raised underlay turn: the field appears on a raised fill, takes 0 and keep
 
 test('trim jumps from: the length field takes 10 mm and keeps it after reloading the panel',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));page.on('dialog',d=>d.accept());
- await page.goto('/');await page.locator('#new').click();
+ await page.goto('/');await newDesign(page);
  await page.locator('#trims').evaluate(el=>{el.closest('details').open=true;});
  await page.locator('#trims').check();
  await page.locator('#trimMm').fill('10');await page.locator('#trimMm').press('Enter');
@@ -1920,7 +1924,7 @@ test('trim jumps from: the length field takes 10 mm and keeps it after reloading
 
 test('sewing time per thread: the Thread plan row shows each colour block as m:ss',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));page.on('dialog',d=>d.accept());
- await page.goto('/');await page.locator('#new').click();await page.locator('#rect').click();
+ await page.goto('/');await newDesign(page);await page.locator('#rect').click();
  await page.locator('#secPlan summary').click();
  await expect(page.locator('.plan-row .n').first()).toContainText(/\d+:\d{2}$/);
  expect(errors).toEqual([]);
@@ -1928,7 +1932,7 @@ test('sewing time per thread: the Thread plan row shows each colour block as m:s
 
 test('oval stones have a turn setting, and an upright oval keeps it when the object is reselected',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));page.on('dialog',d=>d.accept());
- await page.goto('/');await page.locator('#new').click();await page.locator('#path').click();
+ await page.goto('/');await newDesign(page);await page.locator('#path').click();
  const m=await ctm(page);for(const [x,y] of [[0,-20],[0,20]]){const q=toScreen(m,x,y);await page.mouse.click(q.x,q.y);}await page.keyboard.press('Enter');
  await page.locator('#type').selectOption('bling');await page.locator('#blingShape').selectOption('oval');
  await expect(page.locator('#stoneTurnRow')).toBeVisible();
@@ -1941,7 +1945,7 @@ test('oval stones have a turn setting, and an upright oval keeps it when the obj
 
 test('COL thread list export downloads a .col text file with the colour count first',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));page.on('dialog',d=>d.accept());
- await page.goto('/');await page.locator('#new').click();await page.locator('#rect').click();
+ await page.goto('/');await newDesign(page);await page.locator('#rect').click();
  const download=page.waitForEvent('download');await page.locator('#export').click();await page.locator('#format').selectOption('col');await page.locator('#download').click();
  const file=await download;expect(file.suggestedFilename()).toMatch(/\.col$/);
  const path='/tmp/welcome-thread-list.col';await file.saveAs(path);const text=readFileSync(path,'utf8');
@@ -1951,7 +1955,7 @@ test('COL thread list export downloads a .col text file with the colour count fi
 
 test('EDR thread list export downloads a binary .edr file with four bytes per colour',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));page.on('dialog',d=>d.accept());
- await page.goto('/');await page.locator('#new').click();await page.locator('#rect').click();
+ await page.goto('/');await newDesign(page);await page.locator('#rect').click();
  const download=page.waitForEvent('download');await page.locator('#export').click();await page.locator('#format').selectOption('edr');await page.locator('#download').click();
  const file=await download;expect(file.suggestedFilename()).toMatch(/\.edr$/);
  const path='/tmp/welcome-thread-list.edr';await file.saveAs(path);const bytes=readFileSync(path);
@@ -1961,7 +1965,7 @@ test('EDR thread list export downloads a binary .edr file with four bytes per co
 
 test('accordion profiles: the curve select offers ease in and ease out, and keeps the chosen one when the object is reselected',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));page.on('dialog',d=>d.accept());
- await page.goto('/');await page.locator('#new').click();await page.locator('#rect').click();
+ await page.goto('/');await newDesign(page);await page.locator('#rect').click();
  await page.locator('#accordionStart').fill('0.5');await page.locator('#accordionStart').press('Enter');
  await page.locator('#accordionEnd').fill('1.2');await page.locator('#accordionEnd').press('Enter');
  await expect(page.locator('#accordionEase option')).toHaveCount(4);
@@ -1973,7 +1977,7 @@ test('accordion profiles: the curve select offers ease in and ease out, and keep
 
 test('accordion curve: with accordion spacing set, the curve select appears, takes ease and keeps it when the object is reselected',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));page.on('dialog',d=>d.accept());
- await page.goto('/');await page.locator('#new').click();await page.locator('#rect').click();
+ await page.goto('/');await newDesign(page);await page.locator('#rect').click();
  await page.locator('#accordionStart').fill('0.5');await page.locator('#accordionStart').press('Enter');
  await page.locator('#accordionEnd').fill('1.2');await page.locator('#accordionEnd').press('Enter');
  await expect(page.locator('#accordionEaseRow')).toBeVisible();
@@ -1985,7 +1989,7 @@ test('accordion curve: with accordion spacing set, the curve select appears, tak
 
 test('knife along a polyline: four clicks and Enter cut the shape along the bent line',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));page.on('dialog',d=>d.accept());
- await page.goto('/');await page.locator('#new').click();await page.locator('#rect').click();
+ await page.goto('/');await newDesign(page);await page.locator('#rect').click();
  await page.locator('#posX').fill('-20');await page.locator('#posX').press('Enter');await page.locator('#posY').fill('-15');await page.locator('#posY').press('Enter');
  await page.locator('#sizeW').fill('40');await page.locator('#sizeW').press('Enter');await page.locator('#sizeH').fill('30');await page.locator('#sizeH').press('Enter');
  await page.evaluate(()=>document.activeElement?.blur());
@@ -2000,7 +2004,7 @@ test('knife along a polyline: four clicks and Enter cut the shape along the bent
 
 test('corner radii: a rectangle takes four corner radii in its panel, and a changed corner rounds only that corner',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));page.on('dialog',d=>d.accept());
- await page.goto('/');await page.locator('#new').click();await page.locator('#rect').click();await page.locator('.object-row').first().click();
+ await page.goto('/');await newDesign(page);await page.locator('#rect').click();await page.locator('.object-row').first().click();
  await page.locator('#radiusTR').fill('5');await page.locator('#radiusTR').press('Enter');
  await expect(page.locator('#radiusTR')).toHaveValue('5');await expect(page.locator('#radiusTL')).toHaveValue('0');await expect(page.locator('#radiusBL')).toHaveValue('0');
  await expect(page.locator('.object-row')).toHaveCount(1);
@@ -2009,7 +2013,7 @@ test('corner radii: a rectangle takes four corner radii in its panel, and a chan
 
 test('appliqué from selection skips an open path and says how many it left alone',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));page.on('dialog',d=>d.accept());
- await page.goto('/');await page.locator('#new').click();await page.locator('#rect').click();await page.locator('#rect').click();
+ await page.goto('/');await newDesign(page);await page.locator('#rect').click();await page.locator('#rect').click();
  await page.locator('#path').click();const m=await ctm(page);for(const [x,y] of [[-20,0],[20,0]]){const s=toScreen(m,x,y);await page.mouse.click(s.x,s.y);}await page.keyboard.press('Enter');
  await expect(page.locator('.object-row')).toHaveCount(3);
  await page.locator('.object-row').first().click();await page.evaluate(()=>document.activeElement?.blur());await page.keyboard.press('Control+a');await page.locator('#secPath summary').click();await page.locator('#appliqueGroup').click();
@@ -2020,7 +2024,7 @@ test('appliqué from selection skips an open path and says how many it left alon
 
 test('U01 (Barudan) export downloads a .u01 file with the 256-byte header and the F8 00 00 end',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));
- await page.goto('/');page.on('dialog',d=>d.accept());await page.locator('#new').click();await page.locator('#rect').click();
+ await page.goto('/');page.on('dialog',d=>d.accept());await newDesign(page);await page.locator('#rect').click();
  const download=page.waitForEvent('download');await page.locator('#export').click();await page.locator('#format').selectOption('u01');await page.locator('#download').click();
  const file=await download;expect(file.suggestedFilename()).toMatch(/\.u01$/);
  const path='/tmp/welcome-u01.u01';await file.saveAs(path);const bytes=readFileSync(path);
@@ -2030,7 +2034,7 @@ test('U01 (Barudan) export downloads a .u01 file with the 256-byte header and th
 
 test('replace thread: a Thread plan row picks a colour, and every object in that thread changes',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));page.on('dialog',d=>d.accept());
- await page.goto('/');await page.locator('#new').click();await page.locator('#rect').click();await page.locator('#rect').click();
+ await page.goto('/');await newDesign(page);await page.locator('#rect').click();await page.locator('#rect').click();
  await page.locator('#secPlan summary').click();await expect(page.locator('.plan-row')).toHaveCount(1);
  await page.locator('.plan-replace').first().selectOption({index:3});
  await expect(page.locator('#toast')).toContainText('Replaced #527461 in 2 objects.');
@@ -2040,7 +2044,7 @@ test('replace thread: a Thread plan row picks a colour, and every object in that
 
 test('rotate hoop swaps the hoop width and height in the panel',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));page.on('dialog',d=>d.accept());
- await page.goto('/');await page.locator('#new').click();
+ await page.goto('/');await newDesign(page);
  await page.locator('#hoopW').fill('100');await page.locator('#hoopW').press('Enter');
  await page.locator('#hoopH').fill('160');await page.locator('#hoopH').press('Enter');
  await page.locator('#hoopRotate').click();
@@ -2050,7 +2054,7 @@ test('rotate hoop swaps the hoop width and height in the panel',async({page})=>{
 
 test('TBF (Tajima) export downloads a .tbf file with the ASCII version and the 1A terminal',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));
- await page.goto('/');page.on('dialog',d=>d.accept());await page.locator('#new').click();await page.locator('#rect').click();
+ await page.goto('/');page.on('dialog',d=>d.accept());await newDesign(page);await page.locator('#rect').click();
  const download=page.waitForEvent('download');await page.locator('#export').click();await page.locator('#format').selectOption('tbf');await page.locator('#download').click();
  const file=await download;expect(file.suggestedFilename()).toMatch(/\.tbf$/);
  const path='/tmp/welcome-tbf.tbf';await file.saveAs(path);const bytes=readFileSync(path);
@@ -2060,7 +2064,7 @@ test('TBF (Tajima) export downloads a .tbf file with the ASCII version and the 1
 
 test('XXX (Singer) export downloads a .xxx file whose stored end offset points at the end marker',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));
- await page.goto('/');page.on('dialog',d=>d.accept());await page.locator('#new').click();await page.locator('#rect').click();
+ await page.goto('/');page.on('dialog',d=>d.accept());await newDesign(page);await page.locator('#rect').click();
  const download=page.waitForEvent('download');await page.locator('#export').click();await page.locator('#format').selectOption('xxx');await page.locator('#download').click();
  const file=await download;expect(file.suggestedFilename()).toMatch(/\.xxx$/);
  const path='/tmp/welcome-xxx.xxx';await file.saveAs(path);const bytes=readFileSync(path);
@@ -2070,7 +2074,7 @@ test('XXX (Singer) export downloads a .xxx file whose stored end offset points a
 
 test('appliqué templates: with no appliqué the export says so; after an appliqué it downloads a 1:1 SVG with the piece',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));page.on('dialog',d=>d.accept());
- await page.goto('/');await page.locator('#new').click();await page.locator('#rect').click();
+ await page.goto('/');await newDesign(page);await page.locator('#rect').click();
  await page.locator('#export').click();await page.locator('#format').selectOption('applique-print');await page.locator('#download').click();
  await expect(page.locator('#exportError')).toContainText('No appliqué pieces to print');
  await page.keyboard.press('Escape');await page.locator('#rect').click();await page.locator('.object-row').first().click();await page.evaluate(()=>document.activeElement?.blur());await page.keyboard.press('Control+a');await page.locator('#secPath summary').click();await page.locator('#appliqueGroup').click();
@@ -2084,7 +2088,7 @@ test('appliqué templates: with no appliqué the export says so; after an appliq
 
 test('appliqué from selection: two selected rectangles make the upper one an appliqué',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));page.on('dialog',d=>d.accept());
- await page.goto('/');await page.locator('#new').click();await page.locator('#rect').click();await page.locator('#rect').click();
+ await page.goto('/');await newDesign(page);await page.locator('#rect').click();await page.locator('#rect').click();
  await page.locator('.object-row').first().click();await page.locator('#posX').fill('6');await page.locator('#posX').press('Enter');
  await page.evaluate(()=>document.activeElement?.blur());await page.keyboard.press('Control+a');await page.locator('#secPath summary').click();await page.locator('#appliqueGroup').click();
  await expect(page.locator('.object-row')).toHaveCount(2);
@@ -2098,7 +2102,7 @@ test('appliqué from selection: two selected rectangles make the upper one an ap
 
 test('stem stitch run style is in the run list and can be set on a drawn path',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));page.on('dialog',d=>d.accept());
- await page.goto('/');await page.locator('#new').click();const m=await ctm(page);
+ await page.goto('/');await newDesign(page);const m=await ctm(page);
  await page.locator('#path').click();for(const [x,y] of [[-30,0],[30,0]]){const s=toScreen(m,x,y);await page.mouse.click(s.x,s.y);}await page.keyboard.press('Enter');
  await page.evaluate(()=>{const el=document.querySelector('#runStyle');el.value='stem';el.dispatchEvent(new Event('change',{bubbles:true}));});
  await expect(page.locator('#runStyle')).toHaveValue('stem');await expect(page.locator('#runStyle option[value=stem]')).toHaveCount(1);
@@ -2106,7 +2110,7 @@ test('stem stitch run style is in the run list and can be set on a drawn path',a
 });
 
 test('batch export can write VP3 and DST files instead of JEF',async({page})=>{
- const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());await page.locator('#new').click();
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());await newDesign(page);
  await page.locator('#rect').click();await page.locator('#secArray summary').click();await page.locator('#arrCount').fill('3');await page.locator('#arrCount').press('Tab');
  await page.locator('#batchFormat').selectOption('vp3');
  const vp3=page.waitForEvent('download');await page.locator('#batchExport').click();
@@ -2117,7 +2121,7 @@ test('batch export can write VP3 and DST files instead of JEF',async({page})=>{
 });
 
 test('batch export can write SEW files',async({page})=>{
- const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());await page.locator('#new').click();
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());await newDesign(page);
  await page.locator('#rect').click();await page.locator('#secArray summary').click();await page.locator('#arrCount').fill('3');await page.locator('#arrCount').press('Tab');
  await page.locator('#batchFormat').selectOption('sew');
  const sew=page.waitForEvent('download');await page.locator('#batchExport').click();
@@ -2126,7 +2130,7 @@ test('batch export can write SEW files',async({page})=>{
 
 test('an imported JEF file batch-exports one JEF per hoop',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));page.on('dialog',d=>d.accept());
- const fixture=pinnedMachineFixture('jef');await page.goto('/');await page.locator('#new').click();
+ const fixture=pinnedMachineFixture('jef');await page.goto('/');await newDesign(page);
  await page.locator('#machineFile').setInputFiles({name:'sample.jef',mimeType:'application/octet-stream',buffer:Buffer.from(fixture.bytes)});
  await expect(page.locator('#sourceInfo')).toContainText('JEF stitch layer');
  await page.locator('#secArray summary').click();await page.locator('#arrCount').fill('3');await page.locator('#arrCount').press('Tab');
@@ -2138,28 +2142,28 @@ test('an imported JEF file batch-exports one JEF per hoop',async({page})=>{
 });
 
 test('EXP is an export format and downloads as an .exp file',async({page})=>{
- const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());await page.locator('#new').click();
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());await newDesign(page);
  await page.locator('#rect').click();await page.locator('#export').click();await page.locator('#format').selectOption('exp');
  const download=page.waitForEvent('download');await page.locator('#download').click();
  expect((await download).suggestedFilename()).toMatch(/\.exp$/);expect(errors).toEqual([]);
 });
 
 test('PEC is an export format and downloads as a .pec file',async({page})=>{
- const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());await page.locator('#new').click();
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());await newDesign(page);
  await page.locator('#rect').click();await page.locator('#export').click();await page.locator('#format').selectOption('pec');
  const download=page.waitForEvent('download');await page.locator('#download').click();
  expect((await download).suggestedFilename()).toMatch(/\.pec$/);expect(errors).toEqual([]);
 });
 
 test('PES is an export format and downloads as a .pes file',async({page})=>{
- const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());await page.locator('#new').click();
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());await newDesign(page);
  await page.locator('#rect').click();await page.locator('#export').click();await page.locator('#format').selectOption('pes');
  const download=page.waitForEvent('download');await page.locator('#download').click();
  expect((await download).suggestedFilename()).toMatch(/\.pes$/);expect(errors).toEqual([]);
 });
 
 test('paired motif loops can taper with the end width in the panel',async({page})=>{
- const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());await page.locator('#new').click();
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());await newDesign(page);
  await page.locator('#path').click();const m=await ctm(page);for(const [x,y] of [[-20,0],[20,0]]){const s=toScreen(m,x,y);await page.mouse.click(s.x,s.y);}await page.keyboard.press('Enter');
  await page.locator('#type').selectOption('motif');await page.locator('#motifPair').check();
  await expect(page.locator('#satinEndRow')).toBeVisible();await page.locator('#satinWidthEnd').fill('8');await page.locator('#satinWidthEnd').press('Tab');
@@ -2167,21 +2171,21 @@ test('paired motif loops can taper with the end width in the panel',async({page}
 });
 
 test('PES v6 is an export format and downloads as a .pes file',async({page})=>{
- const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());await page.locator('#new').click();
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());await newDesign(page);
  await page.locator('#rect').click();await page.locator('#export').click();await page.locator('#format').selectOption('pes6');
  const download=page.waitForEvent('download');await page.locator('#download').click();
  expect((await download).suggestedFilename()).toMatch(/\.pes$/);expect(errors).toEqual([]);
 });
 
 test('SEW is an export format and downloads as a .sew file',async({page})=>{
- const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());await page.locator('#new').click();
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());await newDesign(page);
  await page.locator('#rect').click();await page.locator('#export').click();await page.locator('#format').selectOption('sew');
  const download=page.waitForEvent('download');await page.locator('#download').click();
  expect((await download).suggestedFilename()).toMatch(/\.sew$/);expect(errors).toEqual([]);
 });
 
 test('motif loops on a path can shrink along the path in the panel',async({page})=>{
- const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());await page.locator('#new').click();
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());await newDesign(page);
  await page.locator('#path').click();const m=await ctm(page);for(const [x,y] of [[-30,-10],[0,10],[30,-10]]){const s=toScreen(m,x,y);await page.mouse.click(s.x,s.y);}await page.keyboard.press('Enter');
  await page.locator('#type').selectOption('motif');await expect(page.locator('#motifWarpRow')).toBeVisible();
  await expect(page.locator('#motifWarp option[value="x"]')).toHaveAttribute('disabled');await expect(page.locator('#motifWarp option[value="along"]')).not.toHaveAttribute('disabled');
@@ -2190,14 +2194,14 @@ test('motif loops on a path can shrink along the path in the panel',async({page}
 });
 
 test('motif loop shape can be set to leaf in the panel',async({page})=>{
- const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());await page.locator('#new').click();
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());await newDesign(page);
  await page.locator('#path').click();const m=await ctm(page);for(const [x,y] of [[-20,0],[20,0]]){const s=toScreen(m,x,y);await page.mouse.click(s.x,s.y);}await page.keyboard.press('Enter');
  await page.locator('#type').selectOption('motif');await expect(page.locator('#motifShapeRow')).toBeVisible();
  await page.locator('#motifShape').selectOption('leaf');await expect(page.locator('#motifShape')).toHaveValue('leaf');expect(errors).toEqual([]);
 });
 
 test('edge closing can be turned on for a clipped run in the panel',async({page})=>{
- const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());await page.locator('#new').click();
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());await newDesign(page);
  await page.locator('#path').click();const m=await ctm(page);for(const [x,y] of [[-30,0],[30,0]]){const s=toScreen(m,x,y);await page.mouse.click(s.x,s.y);}await page.keyboard.press('Enter');
  await page.locator('#type').selectOption('run');
  await page.locator('#ellipse').click();await page.keyboard.press('Control+a');await expect(page.locator('#clipBtn')).toBeEnabled();await page.locator('#clipBtn').click();
@@ -2239,7 +2243,7 @@ test('snap to other objects is on by default, toggles from the toolbar and is re
 test('stitch type shows labelled cards, and the row spacing slider sets the same value as its field, one undo step',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));
  await page.goto('/');page.on('dialog',d=>d.accept());await expect(page.locator('#count')).toContainText('compiled');
- await page.locator('#new').click();await page.locator('#path').click();const m=await ctm(page);for(const [x,y] of [[-20,-15],[20,-15],[20,15],[-20,15],[-20,-15]]){const s=toScreen(m,x,y);await page.mouse.click(s.x,s.y);}await page.keyboard.press('Enter');
+ await newDesign(page);await page.locator('#path').click();const m=await ctm(page);for(const [x,y] of [[-20,-15],[20,-15],[20,15],[-20,15],[-20,-15]]){const s=toScreen(m,x,y);await page.mouse.click(s.x,s.y);}await page.keyboard.press('Enter');
  await page.locator('#type').selectOption('fill');
  const cards=page.locator('.icon-seg.labelled button');await expect(cards).toHaveCount(7);await expect(cards.first()).toContainText('Fill');
  await expect(page.locator('.icon-seg.labelled button[aria-pressed=true]')).toHaveText('Fill');
@@ -2253,7 +2257,7 @@ test('stitch type shows labelled cards, and the row spacing slider sets the same
 test('sewing order: the heading counts objects and threads, and each row shows its stitch icon',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));
  await page.goto('/');page.on('dialog',d=>d.accept());await expect(page.locator('#count')).toContainText('compiled');
- await page.locator('#new').click();await page.locator('#rect').click();await page.locator('#ellipse').click();
+ await newDesign(page);await page.locator('#rect').click();await page.locator('#ellipse').click();
  await expect(page.locator('.layers-head')).toContainText('2 objects · 1 thread');
  const rows=page.locator('.object-row');await expect(rows).toHaveCount(2);
  for(const row of await rows.all()) await expect(row.locator('.row-icon use')).toHaveAttribute('href','#i-fill');
@@ -2265,7 +2269,7 @@ test('sewing order: the heading counts objects and threads, and each row shows i
 test('simulation bar: the time, stitch count, thread track and summary follow the playback position',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));
  await page.goto('/');page.on('dialog',d=>d.accept());await expect(page.locator('#count')).toContainText('compiled');
- await page.locator('#new').click();await page.locator('#rect').click();await page.locator('#ellipse').click();
+ await newDesign(page);await page.locator('#rect').click();await page.locator('#ellipse').click();
  await page.locator('.object-row').first().click();await page.locator('#thread').selectOption('#d9897e');
  await page.locator('button[data-view="stitches"]').click();
  await expect(page.locator('#playbackSummary')).toContainText('1 colour change');
@@ -2298,7 +2302,7 @@ test('header export: the format beside Export and the dialog share one choice, a
 test('blend colour rows: each colour label and its thread button stay in their own cell, with no overlap',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));
  await page.goto('/');page.on('dialog',d=>d.accept());await expect(page.locator('#count')).toContainText('compiled');
- await page.locator('#new').click();await page.locator('#rect').click();await page.locator('.object-row').first().click();
+ await newDesign(page);await page.locator('#rect').click();await page.locator('.object-row').first().click();
  await expect(page.locator('#blendPaletteRow')).toBeVisible();
  const boxes=await page.locator('#blendPaletteRow > label').evaluateAll(ls=>ls.map(l=>{const r=l.getBoundingClientRect(),b=l.querySelector('.thread-btn').getBoundingClientRect();return {l:r.left,r:r.right,t:r.top,b:r.bottom,bl:b.left,br:b.right,bt:b.top,bb:b.bottom};}));
  expect(boxes.length).toBe(4);
@@ -2329,7 +2333,7 @@ test('canvas views: 2D, Stitches and 3D sit on the canvas, and the 3D pull panel
 test('contextual toolbar: only the actions that apply to the selection show; align needs one object, distribute three',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));
  await page.goto('/');page.on('dialog',d=>d.accept());await expect(page.locator('#count')).toContainText('compiled');
- await page.locator('#new').click();
+ await newDesign(page);
  const align=page.locator('[data-align="left"]'),distribute=page.locator('[data-distribute="horizontal"]'),flip=page.locator('#flipH'),union=page.locator('#union'),group=page.locator('#group'),rows=page.locator('.object-row');
  await expect(page.locator('#snap')).toBeVisible();
  await expect(align).toBeHidden();await expect(flip).toBeHidden();await expect(union).toBeHidden();await expect(group).toBeHidden();
@@ -2362,7 +2366,7 @@ test('tool rail: the tools sit on the canvas beside the rulers, keep working, an
  await expect(page.locator('.layout > aside.panel .tool-row')).toHaveCount(0);
  const box=await rail.boundingBox(),ruler=await page.locator('#rulerLeft').boundingBox(),top=await page.locator('#rulerTop').boundingBox();
  expect(box.x).toBeGreaterThanOrEqual(ruler.x+ruler.width);expect(box.y).toBeGreaterThanOrEqual(top.y+top.height);
- await page.locator('#new').click();await page.locator('#rect').click();await expect(page.locator('.object-row')).toHaveCount(1);
+ await newDesign(page);await page.locator('#rect').click();await expect(page.locator('.object-row')).toHaveCount(1);
  await page.locator('.canvas-views button[data-view="preview"]').click();await expect(rail).toBeHidden();
  await page.locator('.canvas-views button[data-view="design"]').click();await expect(rail).toBeVisible();
  expect(errors).toEqual([]);
@@ -2371,7 +2375,7 @@ test('tool rail: the tools sit on the canvas beside the rulers, keep working, an
 test('sewing-order list: each row shows its stitch count, the counts add up to the design, and each row has a thread spool',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));
  await page.goto('/');page.on('dialog',d=>d.accept());await expect(page.locator('#count')).toContainText('compiled');
- await page.locator('#new').click();await page.locator('#rect').click();await page.locator('#ellipse').click();
+ await newDesign(page);await page.locator('#rect').click();await page.locator('#ellipse').click();
  const rowCounts=async()=>(await page.locator('.object-row .row-tag').allTextContents()).map(t=>Number((t.match(/([\d,]+) stitch/)||[,'NaN'])[1].replace(/,/g,'')));
  const total=async()=>Number((await page.locator('#count').textContent()).match(/([\d,]+) stitches/)[1].replace(/,/g,''));
  await expect.poll(async()=>{const rows=await rowCounts();return rows.length===2&&rows.every(Number.isFinite)&&rows.reduce((a,b)=>a+b,0)===await total();}).toBe(true);
@@ -2382,7 +2386,7 @@ test('sewing-order list: each row shows its stitch count, the counts add up to t
 test('stitch cards show a picture of each stitch, and the density swatch follows the row spacing slider',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));
  await page.goto('/');page.on('dialog',d=>d.accept());await expect(page.locator('#count')).toContainText('compiled');
- await page.locator('#new').click();await page.locator('#rect').click();
+ await newDesign(page);await page.locator('#rect').click();
  await expect(page.locator('.icon-seg.labelled .stitch-thumb')).toHaveCount(7);
  await expect(page.locator('.icon-seg.labelled button').first().locator('.stitch-thumb')).toHaveCount(1);
  const swatch=page.locator('.density-swatch');await expect(swatch).toBeVisible();await expect(swatch).toHaveAttribute('data-spacing','0.4');
@@ -2396,7 +2400,7 @@ test('stitch cards show a picture of each stitch, and the density swatch follows
 test('fill angle handle: dragging it turns the rows as one undo step, the Angle field follows, and the arrow keys nudge it',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));
  await page.goto('/');page.on('dialog',d=>d.accept());await expect(page.locator('#count')).toContainText('compiled');
- await page.locator('#new').click();await page.locator('#rect').click();
+ await newDesign(page);await page.locator('#rect').click();
  const handle=page.locator('[data-handle="angle"]');await expect(handle).toBeVisible();
  await expect(page.locator('#angle')).toHaveValue('32');
  const shape=await page.locator('#shapes [data-id]').first().boundingBox(),hb=await handle.boundingBox();
@@ -2414,7 +2418,7 @@ test('fill angle handle: dragging it turns the rows as one undo step, the Angle 
 test('pull compensation is a slider that shows the document value until the object gets its own, and the fabric choice sits at the bottom of the inspector',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));
  await page.goto('/');page.on('dialog',d=>d.accept());await expect(page.locator('#count')).toContainText('compiled');
- await page.locator('#new').click();await page.locator('#rect').click();
+ await newDesign(page);await page.locator('#rect').click();
  const slider=page.locator('#compensationSlider'),field=page.locator('#compensation'),reset=page.locator('#compUseDoc');
  await expect(slider).toBeVisible();await expect(slider).toHaveValue('0.2');await expect(reset).toBeHidden();
  await slider.focus();await page.keyboard.press('ArrowRight');
@@ -2428,7 +2432,7 @@ test('pull compensation is a slider that shows the document value until the obje
 test('underlay pills: clicking one sets the underlay as one undo step, and the hidden select keeps the same value',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));
  await page.goto('/');page.on('dialog',d=>d.accept());await expect(page.locator('#count')).toContainText('compiled');
- await page.locator('#new').click();await page.locator('#rect').click();
+ await newDesign(page);await page.locator('#rect').click();
  const pill=v=>page.locator(`.pill-group [data-value="${v}"]`);
  await expect(pill('auto')).toHaveAttribute('aria-checked','true');await expect(page.locator('#underlayType')).toHaveValue('auto');
  await expect(pill('none')).toBeVisible();
@@ -2442,7 +2446,7 @@ test('underlay pills: clicking one sets the underlay as one undo step, and the h
 test('sewing tips: Fix tip makes one undo step and clears the tip, and Ignore hides it until the object changes',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));
  await page.goto('/');page.on('dialog',d=>d.accept());await expect(page.locator('#count')).toContainText('compiled');
- await page.locator('#new').click();await page.locator('#rect').click();
+ await newDesign(page);await page.locator('#rect').click();
  await page.locator('#sizeW').fill('1');await page.locator('#sizeW').press('Tab');await page.locator('#sizeH').fill('1');await page.locator('#sizeH').press('Tab');
  const card=page.locator('#sewTips');
  await expect(card).toBeVisible();await expect(card).toContainText('too small for a clean fill');
@@ -2459,7 +2463,7 @@ test('sewing tips: Fix tip makes one undo step and clears the tip, and Ignore hi
 test('timeline: a marker sits at each colour change, in the new thread colour, and clicking one seeks to that change',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));
  await page.goto('/');page.on('dialog',d=>d.accept());await expect(page.locator('#count')).toContainText('compiled');
- await page.locator('#new').click();await page.locator('#rect').click();await page.locator('#ellipse').click();await page.locator('#rect').click();
+ await newDesign(page);await page.locator('#rect').click();await page.locator('#ellipse').click();await page.locator('#rect').click();
  await page.locator('.object-row').nth(1).click();await page.locator('#thread').selectOption('#d9897e');
  await page.locator('.object-row').nth(2).click();await page.locator('#thread').selectOption('#d3ad61');
  await expect(page.locator('#count')).toContainText('compiled');
@@ -2504,7 +2508,7 @@ test('header: export and settings gear sit together at the right edge, the same 
 
 test('autosave: each tab keeps its own recovery copy, and a reload restores only that tab\'s design',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));page.on('dialog',d=>d.accept());
- await page.goto('/');await page.locator('#new').click();await page.locator('#name').fill('Alpha');await page.locator('#name').press('Enter');
+ await page.goto('/');await newDesign(page);await page.locator('#name').fill('Alpha');await page.locator('#name').press('Enter');
  await page.locator('#rect').click();await page.locator('#ellipse').click();await expect(page.locator('.object-row')).toHaveCount(2);
  const other=await page.context().newPage();const otherErrors=[];other.on('pageerror',e=>otherErrors.push(e.message));other.on('dialog',d=>d.accept());
  await other.goto('/');await other.locator('#new').click();await other.locator('#name').fill('Beta');await other.locator('#name').press('Enter');
@@ -2540,14 +2544,15 @@ test('Ctrl+S saves and is prevented; Ctrl+O and Ctrl+N run Open and New outside 
  expect(prevented).toBe(true);expect((await saved).suggestedFilename()).toMatch(/\.welcome$/);
  await page.locator('#rect').click();await expect(page.locator('.object-row')).toHaveCount(6);
  const chooser=page.waitForEvent('filechooser');await page.keyboard.press('Control+o');await chooser;
- await page.keyboard.press('Control+n');await expect(page.locator('.object-row')).toHaveCount(6);expect(dialogs).toEqual(['Discard unsaved changes?']);
+ await page.keyboard.press('Control+n');await expect(page.locator('#discardDialog')).toBeVisible();await expect(page.locator('.object-row')).toHaveCount(6);
+ await page.locator('#discardCancel').click();await expect(page.locator('#discardDialog')).toBeHidden();
  await page.evaluate(()=>document.body.insertAdjacentHTML('beforeend','<input id="probe">'));await page.locator('#probe').focus();
  const chooserInField=page.waitForEvent('filechooser',{timeout:800}).then(()=>true,()=>false);await page.keyboard.press('Control+o');expect(await chooserInField).toBe(false);
- await page.keyboard.press('Control+n');expect(dialogs).toHaveLength(1);await expect(page.locator('.object-row')).toHaveCount(6);
+ await page.keyboard.press('Control+n');await expect(page.locator('#discardDialog')).toBeHidden();await expect(page.locator('.object-row')).toHaveCount(6);expect(dialogs).toEqual([]);
  const savedInField=page.waitForEvent('download');await page.keyboard.press('Control+s');await savedInField;
  await page.evaluate(()=>document.getElementById('probe').remove());await page.locator('#art').hover();
  await page.keyboard.press('?');await expect(page.locator('#keysList')).toContainText(APPLE_KEYS?/⌘S/:/Ctrl\+S/);await expect(page.locator('#keysList')).toContainText(APPLE_KEYS?/⌘O/:/Ctrl\+O/);await expect(page.locator('#keysList')).toContainText(APPLE_KEYS?/⌘N/:/Ctrl\+N/);await page.keyboard.press('Escape');
- await page.keyboard.press('Control+n');expect(dialogs).toHaveLength(1);await expect(page.locator('.object-row')).toHaveCount(0);// Save marked the design clean, so New asks nothing
+ await page.keyboard.press('Control+n');expect(dialogs).toEqual([]);await expect(page.locator('#discardDialog')).toBeHidden();await expect(page.locator('.object-row')).toHaveCount(0);// Save marked the design clean, so New asks nothing
  expect(errors).toEqual([]);
 });
 
@@ -2589,7 +2594,7 @@ test('Save writes the chosen file and later Saves overwrite it, while Save As al
 // Opening a design with an unbundled font or an unreadable reference picture: the design opens, the affected part is
 // repaired or left out, and a toast says what changed.
 test('a design with an unbundled font opens in Welcome Mono and the toast names the font',async({page})=>{page.on('dialog',d=>d.accept());
- await page.goto('/');await page.locator('#new').click();
+ await page.goto('/');await newDesign(page);
  const project=initialDocument();project.name='Unknown font';project.objects=[];applyOperations(project,[{op:'add_text',id:'t',text:'Hello',x:0,y:0,font:'welcome-mono/1',height:8,thread:'#527461'}]);
  project.objects[0].font='Lobster';project.objects[0].h=30;
  await page.locator('#file').setInputFiles({name:'unknown-font.welcome',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(project))});
@@ -2598,7 +2603,7 @@ test('a design with an unbundled font opens in Welcome Mono and the toast names 
 });
 
 test('a reference picture that is not an image is left out and the design opens',async({page})=>{page.on('dialog',d=>d.accept());
- await page.goto('/');await page.locator('#new').click();
+ await page.goto('/');await newDesign(page);
  const project=initialDocument();project.name='Junk picture';project.objects=[];applyOperations(project,[{op:'add_text',id:'t',text:'Hello',x:0,y:0,font:'welcome-mono/1',height:8,thread:'#527461'}]);
  project.reference={data:'data:image/png;base64,'+Buffer.from('this is not a picture').toString('base64'),x:0,y:0,w:50,h:50};
  await page.locator('#file').setInputFiles({name:'junk-picture.welcome',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(project))});
@@ -2621,23 +2626,78 @@ test('export is labelled as a machine file, shows its file name, says it does no
  expect(errors).toEqual([]);
 });
 
-test('the first-visit sample is a template: New skips the discard confirm until it is edited',async({page})=>{
- const errors=[];page.on('pageerror',e=>errors.push(e.message));const dialogs=[];page.on('dialog',d=>{dialogs.push(d.message());d.dismiss();});
+test('the first-visit sample is a template: New skips the discard prompt until it is edited',async({page})=>{
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));
  await page.goto('/');await expect(page.locator('.object-row')).toHaveCount(5);await expect(page.locator('#unsavedMark')).toHaveCount(0);
- await page.locator('#new').click();await expect(page.locator('.object-row')).toHaveCount(0);expect(dialogs).toEqual([]);
+ await page.locator('#new').click();await expect(page.locator('.object-row')).toHaveCount(0);await expect(page.locator('#discardDialog')).toBeHidden();
  await page.locator('#rect').click();await expect(page.locator('.object-row')).toHaveCount(1);
- await page.locator('#new').click();expect(dialogs).toEqual(['Discard unsaved changes?']);await expect(page.locator('.object-row')).toHaveCount(1);
+ await page.locator('#new').click();await expect(page.locator('#discardDialog')).toBeVisible();await expect(page.locator('.object-row')).toHaveCount(1);
  expect(errors).toEqual([]);
 });
 
-test('lettering text applies while typing, without Tab, and survives a canvas click',async({page})=>{page.on('dialog',d=>d.accept());const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');await page.locator('#new').click();await page.locator('#letter').click();await expect(page.locator('#letteringText')).toBeFocused();await page.keyboard.type('HI');await expect(page.locator('.object-row').first()).toContainText('Lettering: HI');await expect(page.locator('#selected')).toContainText('HI');const width=async()=>(await page.locator('#shapes g.shape').first().boundingBox()).width;const w0=await width();await page.keyboard.type(' WORLD');await expect(page.locator('.object-row').first()).toContainText('Lettering: HI WORLD');await expect(page.locator('#selected')).toContainText('HI WORLD');await expect.poll(width).toBeGreaterThan(w0);const a=await page.locator('#art').boundingBox();await page.mouse.click(a.x+a.width-20,a.y+a.height-20);await expect(page.locator('.object-row').first()).toContainText('Lettering: HI WORLD');await expect.poll(width).toBeGreaterThan(w0);expect(await width()).toBeGreaterThan(w0);expect(errors).toEqual([]);});
-test('placing lettering selects it and focuses its text; empty double-click adds nothing',async({page})=>{page.on('dialog',d=>d.accept());const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');await page.locator('#new').click();await page.locator('#letter').click();await expect(page.locator('#letteringText')).toBeFocused();await expect(page.locator('#letteringText')).toBeEnabled();await page.keyboard.type('HELLO');await page.keyboard.press('Tab');await expect(page.locator('.object-row').first()).toContainText('Lettering: HELLO');await expect(page.locator('.object-row')).toHaveCount(1);const a=await page.locator('#art').boundingBox();await page.mouse.dblclick(a.x+30,a.y+30);await expect(page.locator('.object-row')).toHaveCount(1);const t=page.locator('#shapes g.shape').first(),tb=await t.boundingBox();await page.mouse.dblclick(tb.x+tb.width/2,tb.y+tb.height/2);await expect(page.locator('#canvasText')).toBeFocused();await page.keyboard.type('X');await page.keyboard.press('Escape');await expect(page.locator('#canvasText')).toHaveCount(0);await expect(page.locator('.object-row').first()).toContainText('HELLO');expect(errors).toEqual([]);});
+// New asks in the app, never with the browser's confirm. Cancel and Escape keep the design; Discard starts a new one; Save
+// saves it (a download here, as the browser has no file picker) and then starts one. The copy names the design and counts
+// its objects.
+test('New asks in the app: Cancel and Escape keep the design, Discard and Save start a new one',async({page})=>{
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));const dialogs=[];page.on('dialog',d=>{dialogs.push(d.message());d.dismiss();});
+ await page.addInitScript(()=>{window.showSaveFilePicker=undefined;});
+ await page.goto('/');await page.locator('#new').click();await page.locator('#rect').click();await page.locator('#rect').click();await expect(page.locator('.object-row')).toHaveCount(2);
+ const dlg=page.locator('#discardDialog');
+ await page.locator('#new').click();await expect(dlg).toBeVisible();
+ await expect(page.locator('#discardTitle')).toHaveText('"Untitled design" has unsaved changes');
+ await expect(page.locator('#discardInfo')).toHaveText(/^Discard 2 unsaved objects(, edited \d+ min ago)?\?$/);
+ await page.locator('#discardCancel').click();await expect(dlg).toBeHidden();await expect(page.locator('.object-row')).toHaveCount(2);
+ await page.locator('#new').click();await expect(dlg).toBeVisible();await page.keyboard.press('Escape');await expect(dlg).toBeHidden();await expect(page.locator('.object-row')).toHaveCount(2);
+ await page.locator('#new').click();await expect(dlg).toBeVisible();await page.locator('#discardDiscard').click();await expect(dlg).toBeHidden();await expect(page.locator('.object-row')).toHaveCount(0);
+ await page.locator('#rect').click();await expect(page.locator('.object-row')).toHaveCount(1);
+ await page.locator('#new').click();await expect(dlg).toBeVisible();
+ const [download]=await Promise.all([page.waitForEvent('download'),page.locator('#discardSave').click()]);
+ expect(download.suggestedFilename()).toMatch(/\.welcome$/);
+ await expect(dlg).toBeHidden();await expect(page.locator('.object-row')).toHaveCount(0);await expect(page.locator('#unsavedMark')).toHaveCount(0);
+ expect(dialogs).toEqual([]);expect(errors).toEqual([]);
+});
+
+// The discard dialog opens with Save focused, Tab cycles inside it, and Discard is red so it is never the default.
+test('the discard dialog focuses Save, traps Tab and styles Discard as destructive',async({page})=>{
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));
+ await page.goto('/');await page.locator('#new').click();await page.locator('#rect').click();await expect(page.locator('.object-row')).toHaveCount(1);
+ await page.locator('#new').click();const dlg=page.locator('#discardDialog');await expect(dlg).toBeVisible();
+ await expect(page.locator('#discardSave')).toBeFocused();
+ await expect(page.locator('#discardDiscard')).toHaveCSS('background-color','rgb(180, 35, 24)');
+ await page.keyboard.press('Tab');await expect(page.locator('#discardCancel')).toBeFocused();
+ await page.keyboard.press('Shift+Tab');await expect(page.locator('#discardSave')).toBeFocused();
+ await page.keyboard.press('Escape');await expect(dlg).toBeHidden();await expect(page.locator('.object-row')).toHaveCount(1);
+ expect(errors).toEqual([]);
+});
+
+// Open and Import ask in the same dialog when unsaved objects would be replaced. Cancelling leaves a notice; an empty or
+// untouched design is replaced without asking.
+test('cancelling Open or Import leaves a notice; a blank design is replaced without asking',async({page})=>{
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));const dialogs=[];page.on('dialog',d=>{dialogs.push(d.message());d.dismiss();});
+ const svg={name:'shape.svg',mimeType:'image/svg+xml',buffer:Buffer.from('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40"><rect x="5" y="5" width="20" height="20"/></svg>')};
+ const machine={name:'sample.jef',mimeType:'application/octet-stream',buffer:Buffer.from(pinnedMachineFixture('jef').bytes)};
+ await page.goto('/');await page.locator('#new').click();
+ await page.locator('#file').setInputFiles(svg);await expect(page.locator('#discardDialog')).toBeHidden();await expect(page.locator('.object-row')).toHaveCount(1);
+ await page.locator('#rect').click();await expect(page.locator('.object-row')).toHaveCount(2);
+ await page.locator('#file').setInputFiles(svg);await expect(page.locator('#discardDialog')).toBeVisible();
+ await page.locator('#discardCancel').click();await expect(page.locator('#toast')).toContainText('Open cancelled.');await expect(page.locator('.object-row')).toHaveCount(2);
+ await page.locator('#importMachine').click();await page.locator('#machineFile').setInputFiles(machine);await expect(page.locator('#discardDialog')).toBeVisible();
+ await page.locator('#discardCancel').click();await expect(page.locator('#toast')).toContainText('Import cancelled.');await expect(page.locator('.object-row')).toHaveCount(2);
+ await page.locator('#new').click();await page.locator('#discardDiscard').click();await expect(page.locator('.object-row')).toHaveCount(0);
+ await page.locator('#importMachine').click();await page.locator('#machineFile').setInputFiles(machine);await expect(page.locator('.object-row')).toHaveCount(1);
+ await page.locator('#new').click();await expect(page.locator('#discardDialog')).toBeVisible();await page.locator('#discardDiscard').click();await expect(page.locator('.object-row')).toHaveCount(0);
+ await page.locator('#file').setInputFiles(svg);await expect(page.locator('.object-row')).toHaveCount(1);
+ expect(dialogs).toEqual([]);expect(errors).toEqual([]);
+});
+
+test('lettering text applies while typing, without Tab, and survives a canvas click',async({page})=>{page.on('dialog',d=>d.accept());const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');await newDesign(page);await page.locator('#letter').click();await expect(page.locator('#letteringText')).toBeFocused();await page.keyboard.type('HI');await expect(page.locator('.object-row').first()).toContainText('Lettering: HI');await expect(page.locator('#selected')).toContainText('HI');const width=async()=>(await page.locator('#shapes g.shape').first().boundingBox()).width;const w0=await width();await page.keyboard.type(' WORLD');await expect(page.locator('.object-row').first()).toContainText('Lettering: HI WORLD');await expect(page.locator('#selected')).toContainText('HI WORLD');await expect.poll(width).toBeGreaterThan(w0);const a=await page.locator('#art').boundingBox();await page.mouse.click(a.x+a.width-20,a.y+a.height-20);await expect(page.locator('.object-row').first()).toContainText('Lettering: HI WORLD');await expect.poll(width).toBeGreaterThan(w0);expect(await width()).toBeGreaterThan(w0);expect(errors).toEqual([]);});
+test('placing lettering selects it and focuses its text; empty double-click adds nothing',async({page})=>{page.on('dialog',d=>d.accept());const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');await newDesign(page);await page.locator('#letter').click();await expect(page.locator('#letteringText')).toBeFocused();await expect(page.locator('#letteringText')).toBeEnabled();await page.keyboard.type('HELLO');await page.keyboard.press('Tab');await expect(page.locator('.object-row').first()).toContainText('Lettering: HELLO');await expect(page.locator('.object-row')).toHaveCount(1);const a=await page.locator('#art').boundingBox();await page.mouse.dblclick(a.x+30,a.y+30);await expect(page.locator('.object-row')).toHaveCount(1);const t=page.locator('#shapes g.shape').first(),tb=await t.boundingBox();await page.mouse.dblclick(tb.x+tb.width/2,tb.y+tb.height/2);await expect(page.locator('#canvasText')).toBeFocused();await page.keyboard.type('X');await page.keyboard.press('Escape');await expect(page.locator('#canvasText')).toHaveCount(0);await expect(page.locator('.object-row').first()).toContainText('HELLO');expect(errors).toEqual([]);});
 
 // Tool buttons expose their state: the armed tool is aria-pressed="true" and the rest are "false". Each drawing tool
 // returns to Select after one placement, and Add lettering leaves an armed draw tool for Select.
 test('drawing tools report aria-pressed and return to Select after one placement',async({page})=>{page.on('dialog',d=>d.accept());
  const errors=[];page.on('pageerror',e=>errors.push(e.message));
- await page.goto('/');await page.locator('#new').click();
+ await page.goto('/');await newDesign(page);
  const pressed=async id=>(await page.locator(`#${id}`).getAttribute('aria-pressed'));
  const expectOnly=async active=>{for(const id of ['select','line','polygon','star','path','pen','measure']){expect(await pressed(id),id).toBe(id===active?'true':'false');}};
  await expectOnly('select');
@@ -2670,7 +2730,7 @@ test('drawing tools report aria-pressed and return to Select after one placement
  expect(errors).toEqual([]);
 });
 test('Edit and Arrange menus run the same commands as their shortcuts and disable what does not apply',async({page})=>{
- const errors=[];page.on('pageerror',e=>errors.push(e.message));page.on('dialog',d=>d.accept());await page.goto('/');await page.locator('#new').click();
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));page.on('dialog',d=>d.accept());await page.goto('/');await newDesign(page);
  const rows=page.locator('.object-row');
  const run=async(menu,item)=>{await page.locator(`#${menu}`).click();await page.locator(`#${item}`).click();};
  await page.locator('#rect').click();await page.locator('#ellipse').click();await expect(rows).toHaveCount(2);
@@ -2746,7 +2806,7 @@ test('with 30 objects every sewing-order row scrolls clear of the hoop footer',a
 });
 
 test('a compile failure keeps sewing-order counts and marks the rows it blocks',async({page})=>{
- await page.goto('/');page.on('dialog',d=>d.accept());await page.locator('#new').click();
+ await page.goto('/');page.on('dialog',d=>d.accept());await newDesign(page);
  await page.locator('#letter').click();await page.locator('#letteringText').fill('WELCOME');await page.locator('#letteringText').press('Tab');
  const row=page.locator('.object-row');await expect(row).toHaveCount(1);await expect(row.locator('.row-tag')).toContainText('stitches');
  const counted=await row.locator('.row-tag').textContent();
@@ -2761,7 +2821,7 @@ test('a compile failure keeps sewing-order counts and marks the rows it blocks',
 });
 
 test('a first compile failure marks the row as not compiled, not a bare type name',async({page})=>{
- await page.goto('/');page.on('dialog',d=>d.accept());await page.locator('#new').click();
+ await page.goto('/');page.on('dialog',d=>d.accept());await newDesign(page);
  await page.locator('#letter').click();await page.locator('#letteringText').fill('WELC-OME');await page.locator('#letteringText').press('Tab');
  const row=page.locator('.object-row');await expect(row).toHaveCount(1);
  await expect(page.locator('#objects .list-warning')).toContainText("Can't compile: The bundled single-line alphabet does not support: -");
@@ -2774,7 +2834,7 @@ test('a first compile failure marks the row as not compiled, not a bare type nam
 });
 
 test('a blank design shows the start hint in the sewing order and on the canvas, and both go once an object exists',async({page})=>{page.on('dialog',d=>d.accept());
- await page.goto('/');await page.locator('#new').click();await expect(page.locator('.object-row')).toHaveCount(0);
+ await page.goto('/');await newDesign(page);await expect(page.locator('.object-row')).toHaveCount(0);
  const listHint=page.locator('#objects .empty-hint'),canvasHint=page.locator('#canvasHint');
  await expect(listHint).toContainText('Draw a shape or import an image');await expect(listHint).toBeVisible();
  await expect(canvasHint).toContainText('pick a tool on the left');await expect(canvasHint).toBeVisible();
@@ -2784,7 +2844,7 @@ test('a blank design shows the start hint in the sewing order and on the canvas,
 
 test('a blank design is neutral: no error, no Unsaved mark, export disabled with its reason; one object enables export',async({page})=>{
  page.on('dialog',d=>d.accept());const errors=[];page.on('pageerror',e=>errors.push(e.message));
- await page.goto('/');await page.locator('#new').click();
+ await page.goto('/');await newDesign(page);
  await expect(page.locator('#unsavedMark')).toHaveCount(0);
  await expect(page.locator('#objects .list-warning')).toHaveCount(0);
  await expect(page.locator('#count')).not.toHaveClass(/error/);
@@ -2802,7 +2862,7 @@ test('a blank design is neutral: no error, no Unsaved mark, export disabled with
 
 test('a design past the hoop cannot be exported: the dialog names the object and the overrun for JEF, DST and VP3, and it exports once moved in',async({page})=>{
  page.on('dialog',d=>d.accept());let downloaded=false;page.on('download',()=>{downloaded=true;});
- await page.goto('/');await page.locator('#new').click();await page.locator('#rect').click();
+ await page.goto('/');await newDesign(page);await page.locator('#rect').click();
  await page.locator('#sizeW').fill('100');await page.locator('#sizeW').press('Tab');await page.locator('#sizeH').fill('100');await page.locator('#sizeH').press('Tab');
  await page.locator('#posX').fill('-12');await page.locator('#posX').press('Tab');await page.locator('#posY').fill('-8');await page.locator('#posY').press('Tab');
  await page.locator('#export').click();
@@ -2888,7 +2948,7 @@ test('an error toast stays after five seconds, the Messages log keeps both of tw
 
 test('Spanish: export, DXF and photo stitch toasts are translated and name the file, with no English toast text',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));
- await page.goto('/?lang=es');page.on('dialog',d=>d.accept());await page.locator('#new').click();await page.locator('#rect').click();
+ await page.goto('/?lang=es');page.on('dialog',d=>d.accept());await newDesign(page);await page.locator('#rect').click();
  const toast=page.locator('#toast');
  await page.locator('#export').click();await page.locator('#format').selectOption('jef');
  const jef=page.waitForEvent('download');await page.locator('#download').click();await jef;
@@ -2904,7 +2964,7 @@ test('Spanish: export, DXF and photo stitch toasts are translated and name the f
 });
 
 test('deleting an object confirms with a toast whose Undo restores it; the Undo tooltip names the deletion',async({page})=>{
- page.on('dialog',d=>d.accept());await page.goto('/');await page.locator('#new').click();
+ page.on('dialog',d=>d.accept());await page.goto('/');await newDesign(page);
  await expect(page.locator('#undo')).toHaveAttribute('aria-label','Nothing to undo');
  await page.locator('#rect').click();await expect(page.locator('.object-row')).toHaveCount(1);
  const id=await page.locator('.object-row').first().getAttribute('data-id');
@@ -2919,7 +2979,7 @@ test('deleting an object confirms with a toast whose Undo restores it; the Undo 
  await expect(page.locator('#redo')).toHaveAttribute('aria-label','Redo delete Rectangle');
 });
 test('Menus, the shortcut sheet and the export dialog work from the keyboard alone',async({page})=>{
- const errors=[];page.on('pageerror',e=>errors.push(e.message));page.on('dialog',d=>d.accept());await page.goto('/');await page.locator('#new').click();
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));page.on('dialog',d=>d.accept());await page.goto('/');await newDesign(page);
  const rows=page.locator('.object-row');
  await page.locator('#rect').click();await page.locator('#ellipse').click();await expect(rows).toHaveCount(2);
  // Edit: Enter opens it and focuses its first enabled item; Enter on Undo runs it, closes the menu, and focus goes back to Edit.

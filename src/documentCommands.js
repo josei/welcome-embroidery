@@ -17,6 +17,14 @@ import {t} from './i18n.js';
  */
 let liveEdit = null;
 
+/** When the open design last changed through a transaction (0 before any edit this session). The discard prompt reads it. */
+let lastEditAt = 0;
+
+/** @returns {number} the time of the last edit this session, in milliseconds, or 0 when there was none */
+export function lastEditTime() {
+  return lastEditAt;
+}
+
 /**
  * Applies a change as one undo step. A rejected document restores the document and selection, then reports why.
  * A coalesceKey marks a live edit: consecutive edits with the same key share one undo step.
@@ -43,6 +51,7 @@ export function transact(fn, coalesceKey, label = t('change')) {
   const current = documentNow(), nextHistory = continuing ? current.history : [...current.history, {doc: before, label}];
   if (nextHistory.length > 80) nextHistory.shift();
   setDocument({doc: {...current.doc, revision: before.revision + 1}, history: nextHistory, future: [], dirty: true});
+  lastEditAt = Date.now();
   liveEdit = coalesceKey === undefined ? null : {key: coalesceKey, doc: documentNow().doc};
   clearComputed();
   editor.render();

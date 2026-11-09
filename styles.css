@@ -195,6 +195,7 @@ label[hidden],button[hidden],.sel-hint[hidden]{display:none!important}
 #threadPop .custom{display:flex;gap:6px;align-items:center;margin-top:8px}#threadPop .custom input[type=color]{width:34px;height:28px;padding:0;border:1px solid #d8ddd6;border-radius:6px}#threadPop .custom input[type=text]{width:90px}
 #threadPop .none-btn{margin-bottom:6px;font-size:12px}
 #restoreDialog [hidden]{display:none!important}
+#discardDialog{width:380px}#discardDialog .discard-actions{justify-content:flex-end}#discardDialog .danger{color:#fff;background:#b42318;border-color:#b42318}#discardDialog .primary{color:#fff;background:var(--teal);border-color:var(--teal)}#discardDialog [hidden]{display:none!important}
 
 .keys-list{display:grid;grid-template-columns:auto 1fr;gap:5px 14px;font-size:12px;max-height:60vh;overflow:auto}.keys-list kbd{font:600 11px ui-monospace,monospace;background:#f1f3ef;border:1px solid #d8ddd6;border-radius:4px;padding:2px 6px;white-space:nowrap}.keys-list h4{grid-column:1/-1;margin:8px 0 0;font-size:10px;letter-spacing:.07em;text-transform:uppercase;color:#66726c}
 #keysDialog{width:440px}.plan-list{display:grid;gap:4px;font-size:12px}.plan-row{display:flex;align-items:center;gap:8px}.plan-row .sw{width:14px;height:14px;border-radius:50%;border:1px solid #0003;flex:none}.plan-row .n{margin-left:auto;color:#66726c}#planEmpty[hidden]{display:none}

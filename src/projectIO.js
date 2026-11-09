@@ -4,6 +4,7 @@
 // editor commands they need once at start-up.
 import {documentActions, documentNow, setDocument} from './documentState.js';
 import {setSave} from './saveState.js';
+import {lastEditMinutes, openDiscard} from './discardState.js';
 import {setSewingCounts} from './sewingCountsState.js';
 import {selState, setSelection} from './selectionState.js';
 import {setEditMode} from './editModeState.js';
@@ -330,18 +331,57 @@ export function restoreProject(saved) {
 }
 
 /**
- * Asks before a change throws away unsaved work: true when the document is clean or the user confirms. Cancel leaves the
- * design, its undo history and the autosave copy untouched.
- * @returns {boolean}
+ * Runs `proceed` once the open design may be replaced. A clean design, or one with no objects, is replaced at once. A design
+ * with unsaved objects first opens the discard dialog: Save saves it and then proceeds, Discard proceeds, and Cancel leaves
+ * the design as it was and shows `cancelNotice`. With `replaceFirst`, proceeding starts a new design before the action.
+ * @param {() => void} proceed
+ * @param {{cancelNotice?: string, replaceFirst?: boolean}} [options]
  */
-export function confirmDiscard() {
-  return !documentNow().dirty || confirm(t('Discard unsaved changes?'));
+function guardDiscard(proceed, {cancelNotice = '', replaceFirst = false} = {}) {
+  const state = documentNow();
+  const run = () => {
+    try {
+      if (replaceFirst) startNewDesign();
+      proceed();
+    } catch (error) {
+      wired().toast(/** @type {Error} */ (error).message, 'error');
+    }
+  };
+  if (!state.dirty || state.doc.objects.length === 0) {
+    run();
+    return;
+  }
+  openDiscard({
+    name: state.doc.name,
+    objects: state.doc.objects.length,
+    minutes: lastEditMinutes(),
+    save: async () => {
+      await projectSave();
+      return !documentNow().dirty;
+    },
+    proceed: run,
+    cancel: () => {
+      if (cancelNotice) wired().toast(cancelNotice);
+    },
+  });
 }
 
-/** Starts an empty design, after asking before throwing away unsaved changes. */
-export function newProject() {
-  setEditMode(false);
-  if (!confirmDiscard()) return;
+/**
+ * Saves a copy from the restore prompt, then starts a new design. False when the save did not happen; the restored copy
+ * then stays open so the user can save it or leave it.
+ * @param {any} saved the autosaved document
+ * @returns {Promise<boolean>}
+ */
+export async function saveRestoredThenStartFresh(saved) {
+  restoreProject(saved);
+  await projectSave();
+  if (documentNow().dirty) return false;
+  startNewDesign();
+  return true;
+}
+
+/** Starts an empty design now, with no prompt. Callers that might throw away unsaved work use newProject or guardDiscard. */
+function startNewDesign() {
   wired().clearComputed();
   setSewingCounts({});
   setDocId(undefined);
@@ -358,6 +398,12 @@ export function newProject() {
   wired().fitHoop();
 }
 
+/** Starts an empty design, after offering to save or discard unsaved changes. */
+export function newProject() {
+  setEditMode(false);
+  guardDiscard(startNewDesign);
+}
+
 /**
  * Opens the chosen file as the project: SVG, .welcome/.json or ASCII DXF, within the same limits and with the same
  * messages.
@@ -367,26 +413,28 @@ export async function openProjectFile(file) {
   try {
     if (file.size > PROJECT_LIMIT) throw Error('Welcome project files are limited to 32 MiB.');
     const lower = file.name.toLowerCase();
+    const openOptions = {cancelNotice: t('Open cancelled.')};
     if (lower.endsWith('.svg')) {
       const imported = importSvg(await file.text());
-      if (!confirmDiscard()) return;
-      acceptProject(imported.doc);
-      if (imported.notes.length) wired().toast(imported.notes.join(' '));
+      guardDiscard(() => {
+        acceptProject(imported.doc);
+        if (imported.notes.length) wired().toast(imported.notes.join(' '));
+      }, openOptions);
     } else if (lower.endsWith('.welcome') || lower.endsWith('.json')) {
       const next = JSON.parse(await file.text());
       const notes = await repairOpened(next);
-      if (!confirmDiscard()) return;
-      acceptProject(next, notes);
+      guardDiscard(() => acceptProject(next, notes), openOptions);
     } else if (lower.endsWith('.dxf')) {
       const dxf = dxfDocument(await file.text());
-      if (!confirmDiscard()) return;
-      acceptProject(dxf.doc);
-      const skipped = Object.entries(/** @type {Record<string, number>} */ (dxf.skipped)).map(([k, n]) => `${n} ${k}`).join(', ');
-      const paths = dxf.doc.objects.length;
-      const pathsText = paths === 1 ? t('1 path') : t('{n} paths', {n: paths});
-      const skippedText = skipped ? t('; skipped {list}', {list: skipped}) : '';
-      const arcsText = !dxf.bulged ? '' : dxf.bulged === 1 ? t('; 1 arc sewn as straight segments') : t('; {n} arcs sewn as straight segments', {n: dxf.bulged});
-      wired().toast(t('DXF imported: {paths}', {paths: pathsText}) + skippedText + arcsText + '.');
+      guardDiscard(() => {
+        acceptProject(dxf.doc);
+        const skipped = Object.entries(/** @type {Record<string, number>} */ (dxf.skipped)).map(([k, n]) => `${n} ${k}`).join(', ');
+        const paths = dxf.doc.objects.length;
+        const pathsText = paths === 1 ? t('1 path') : t('{n} paths', {n: paths});
+        const skippedText = skipped ? t('; skipped {list}', {list: skipped}) : '';
+        const arcsText = !dxf.bulged ? '' : dxf.bulged === 1 ? t('; 1 arc sewn as straight segments') : t('; {n} arcs sewn as straight segments', {n: dxf.bulged});
+        wired().toast(t('DXF imported: {paths}', {paths: pathsText}) + skippedText + arcsText + '.');
+      }, openOptions);
     } else {
       throw Error('Open a .welcome project, SVG or ASCII DXF here. Use Import JEF / VP3 for machine files.');
     }
@@ -424,15 +472,17 @@ export async function importMachineFile(file) {
       size: file.size,
       originalBytesBase64: result.sourceBytesBase64,
     });
-    if (!confirmDiscard()) return;
-    const committed = wired().transact(() => {
-      setDocument({doc: {...documentNow().doc, objects: [...documentNow().doc.objects, layer]}});
-      setSelection({selected: layer.id});
-    });
-    if (committed) {
-      wired().toast(t('Imported {name} as a {fmt} stitch layer.', {name: file.name, fmt: format.toUpperCase()}));
-      wired().compileNow();
-    }
+    // Import asks first only when unsaved objects are open; Save or Discard then start a new design for the import.
+    guardDiscard(() => {
+      const committed = wired().transact(() => {
+        setDocument({doc: {...documentNow().doc, objects: [...documentNow().doc.objects, layer]}});
+        setSelection({selected: layer.id});
+      });
+      if (committed) {
+        wired().toast(t('Imported {name} as a {fmt} stitch layer.', {name: file.name, fmt: format.toUpperCase()}));
+        wired().compileNow();
+      }
+    }, {cancelNotice: t('Import cancelled.'), replaceFirst: true});
   } catch (error) {
     wired().toast(/** @type {Error} */ (error).message, 'error');
   }

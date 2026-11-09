@@ -4,7 +4,8 @@
 // saved design is not offered again.
 import {documentNow} from './documentState.js';
 import {setRestore, restoreActions} from './restoreState.js';
-import {restoreProject} from './projectIO.js';
+import {restoreProject, saveRestoredThenStartFresh} from './projectIO.js';
+import {openDiscard} from './discardState.js';
 import {clone} from './appHelpers.js';
 import {validateDocument} from './engine.js';
 import {t} from './i18n.js';
@@ -87,9 +88,16 @@ export function mountAutosave() {
         setRestore({open: false});
       };
       restoreActions.no = () => {
-        if (!confirm(t('Discard unsaved changes?'))) return;
-        removeKey(key);
+        // Start fresh asks in the discard dialog (Save, Discard or Cancel). Cancel brings the restore prompt back.
         setRestore({open: false});
+        openDiscard({
+          name: saved.doc.name,
+          objects: saved.doc.objects.length,
+          minutes: ago,
+          save: () => saveRestoredThenStartFresh({...saved.doc, docId: isDocId(saved.docId) ? saved.docId : undefined}),
+          proceed: () => removeKey(key),
+          cancel: () => setRestore({open: true}),
+        });
       };
       queueMicrotask(() => setRestore({open: true}));
     }
