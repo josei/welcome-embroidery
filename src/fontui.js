@@ -33,7 +33,7 @@ export function drawPreview(/** @type {any} */ svg,/** @type {any} */ fid,/** @t
   /** @type {any[]} */
   let shapes=[];
   let size=font?.size||(fid==='neon-blinking/1'?40:8);
-  const sample={kind:'text',x:0,y:0,h:size,font:fid,text:String(text||'Hello').slice(0,18),w:0,stitch:font?.kind==='outline'?'fill':'run'};
+  const sample={kind:'text',x:0,y:0,h:size,font:fid,text:String(text||'Hello').slice(0,24),w:0,stitch:font?.kind==='outline'?'fill':'run'};
   try{
     if(legacy){const t={...sample,text:sample.text.toUpperCase(),w:sample.text.length*size*.72};shapes=geometry(t).map(l=>({t:'r',pts:l}));}
     else{if(!font)return false;shapes=textPrimitives(sample)||[];}
@@ -41,7 +41,7 @@ export function drawPreview(/** @type {any} */ svg,/** @type {any} */ fid,/** @t
   if(!shapes.length)return false;
   const pts=shapes.flatMap(p=>p.t==='r'?p.pts:p.t==='s'?[...p.a,...p.b]:p.rings.flat());if(!pts.length)return false;
   const x0=Math.min(...pts.map(p=>p[0])),x1=Math.max(...pts.map(p=>p[0])),y0=Math.min(...pts.map(p=>p[1])),y1=Math.max(...pts.map(p=>p[1])),pad=size*.06,
-    stroke=Math.max((y1-y0),size*.4)/90;
+    stroke=Math.max((y1-y0),size*.4)/45;
   svg.setAttribute('viewBox',`${x0-pad} ${y0-pad} ${Math.max(1,x1-x0+pad*2)} ${Math.max(1,y1-y0+pad*2)}`);
     svg.setAttribute('preserveAspectRatio','xMinYMid meet');
   const d=(/** @type {any} */ rings,/** @type {any} */ close)=>

@@ -66,6 +66,8 @@ export interface LetteringApi {
   toast(message: string, kind?: 'status' | 'error'): void;
   /** Redraws the editor after a font finishes loading. */
   render(): void;
+  /** Brings the selected text into view when it is cut off or under the floating toolbar. */
+  reveal(): void;
 }
 
 interface FontPicker {
@@ -347,8 +349,9 @@ export function initFontPicker() {
     fileInput: byId('fontFile') as HTMLInputElement,
     getIndex: pickerIndex,
     getCurrent: () => textObj()?.font || newTextFont,
-    getSample: () => (textObj()?.text || 'Hello 123').split('\n')[0].slice(0, 14),
-    getColor: () => textObj()?.thread || '#1d2925',
+    // The start of the text, in the normal field colour: a thread colour can be too pale to read on white.
+    getSample: () => (textObj()?.text || 'Hello 123').split('\n')[0].slice(0, 24),
+    getColor: () => '#1d2925',
     ensureLoaded: ensureFontLoaded,
     onPick: setFont,
     onLoadFile: loadFontFile,
@@ -376,6 +379,7 @@ export function configureLettering(next: LetteringApi) {
     const value = storedLetteringText(o, text);
     if (!value.trim() || value === o.text) return;
     wired().edit([{op: 'set_object', id: o.id, text: value}], undefined, `lettering-text:${o.id}`);
+    wired().reveal();
   };
   letteringActions.commit = (field, text) => {
     if (field === 'alongOffset') {
@@ -393,6 +397,7 @@ export function configureLettering(next: LetteringApi) {
         return false;
       }
       if (value !== o.text) wired().edit([{op: 'set_object', id: o.id, text: value}]);
+      wired().reveal();
       return;
     }
     if (field === 'height') {

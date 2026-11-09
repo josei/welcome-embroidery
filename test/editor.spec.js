@@ -3879,3 +3879,23 @@ test('command palette: opens with its key, filters, runs into Recent, and repeat
  await page.keyboard.press(repeat);await expect(rows).toHaveCount(3);
  expect(errors).toEqual([]);
 });
+
+// Issue #205: a 40-character lettering stays clear of the floating toolbar, its font preview is in the field colour,
+// and the Text box shows the start of the string until it is focused.
+test('long lettering stays clear of the floating toolbar and the Text box shows its start',async({page})=>{page.on('dialog',d=>d.accept());const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');await newDesign(page);await page.locator('#letter').click();
+ const long='ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789ABCDEF';await page.locator('#font').selectOption('inkstitch/allegria20');await page.locator('#letteringText').fill(long);await page.locator('#letteringText').press('Tab');
+ await expect(page.locator('.object-row').first()).toContainText(long.slice(0,24));
+ await page.locator('#letteringText').evaluate(el=>el.blur());
+ const box=page.locator('#letteringText');await expect.poll(()=>box.evaluate(el=>el.scrollTop)).toBe(0);
+ // The text sits inside the canvas and clear of the floating toolbar, or the view has been moved so it is reachable.
+ const shape=await page.locator('#shapes g.shape').first().boundingBox(),bar=await page.locator('.canvas .floating').boundingBox(),art=await page.locator('#art').boundingBox();
+ expect(shape.x>=art.x&&shape.x+shape.width<=art.x+art.width&&shape.y>=art.y&&shape.y+shape.height<=art.y+art.height).toBe(true);
+ const clear=shape.x+shape.width<=bar.x||shape.x>=bar.x+bar.width||shape.y+shape.height<=bar.y||shape.y>=bar.y+bar.height;expect(clear).toBe(true);
+ // The font preview draws in the normal field colour, not the thread colour.
+ const fills=await page.locator('#fontButtonPreview path').evaluateAll(ps=>ps.map(p=>p.getAttribute('fill')==='none'?p.getAttribute('stroke'):p.getAttribute('fill')));expect(fills.length).toBeGreaterThan(0);expect(new Set(fills)).toEqual(new Set(['#1d2925']));
+ // Focused, the caret end is visible (the box scrolls to its end).
+ await box.focus();await expect.poll(()=>box.evaluate(el=>Math.ceil(el.scrollTop+el.clientHeight)>=el.scrollHeight-1)).toBe(true);
+ await page.locator('#letteringText').evaluate(el=>el.blur());await expect.poll(()=>box.evaluate(el=>el.scrollTop)).toBe(0);
+ await page.screenshot({path:process.env.SHOT_205||'test-results/lettering-40-chars.png'});
+ expect(errors).toEqual([]);
+});

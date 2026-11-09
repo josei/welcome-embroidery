@@ -60,7 +60,7 @@ configureArray({edit, toast});
 configureShapePathActions({edit, toast, render});
 configureSelectionToolbarActions({edit});
 configureSewingOrder({edit});
-configureLettering({edit, transact, toast, render});
+configureLettering({edit, transact, toast, render, reveal: () => editor.canvas?.revealSelection()});
 configureFontsDialog({edit, toast});
 configureProjectIO({
   clearComputed: compile.clearComputed,

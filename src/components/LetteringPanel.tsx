@@ -1,7 +1,7 @@
 import {layoutState} from '../layoutState.js';
 import {stitchRowsState} from '../stitchRowsState.js';
-import {useSyncExternalStore} from 'react';
-import type {ChangeEvent, KeyboardEvent} from 'react';
+import {useLayoutEffect, useRef, useSyncExternalStore} from 'react';
+import type {ChangeEvent, FocusEvent, KeyboardEvent} from 'react';
 import {letteringActions, letteringFieldsState} from '../letteringFieldsState.js';
 import {useDraftInput} from './useDraftInput';
 import {selectAllInField} from './selectAllKey';
@@ -19,10 +19,19 @@ export function LetteringPanel() {
  const text = {...draftText, onKeyDown: (e: KeyboardEvent<HTMLTextAreaElement>) => {
   selectAllInField(e);
   draftText.onKeyDown(e);
+ }, onBlur: (e: FocusEvent<HTMLTextAreaElement>) => {
+  draftText.onBlur(e);
+  e.currentTarget.scrollTop = 0;
  }, onChange: (e: ChangeEvent<HTMLTextAreaElement>) => {
   draftText.onChange(e);
   letteringActions.preview(e.target.value);
  }};
+// A long text scrolls to its end while it has focus, which is what keeps the caret visible. Unfocused, it shows the start.
+const textRef = useRef<HTMLTextAreaElement>(null);
+useLayoutEffect(() => {
+ const el = textRef.current;
+ if (el && el !== document.activeElement) el.scrollTop = 0;
+}, [text.value]);
  const height = useDraftInput(l.height, v => letteringActions.commit('height', v));
  const tracking = useDraftInput(l.tracking, v => letteringActions.commit('tracking', v));
  const wordSpacing = useDraftInput(l.wordSpacing, v => letteringActions.commit('wordSpacing', v));
@@ -39,7 +48,7 @@ export function LetteringPanel() {
     id="fontButtonName">Welcome Mono</span><svg className="icon chevron" aria-hidden="true"><use href="#i-chevron"/></svg></button>
 <select id="font" className="sr-only" tabIndex={-1} aria-label="Embroidery font" value={l.fontValue} onChange={e =>
   letteringActions.choose('font', e.target.value)}>{l.fontOptions.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}</select></div>
-<label className="block">Text<textarea id="letteringText" rows={2} maxLength={120} aria-label="Text content" {...text} disabled={l.textOff} /></label>
+<label className="block">Text<textarea id="letteringText" ref={textRef} rows={2} maxLength={120} aria-label="Text content" {...text} disabled={l.textOff} /></label>
 <label>Font size (mm)<input id="letteringHeight" type="number" min={l.heightMin} max={l.heightMax} title={l.heightTitle ||
   undefined} step="0.5" {...height} disabled={l.textOff} /></label>
 <div className="style-row" role="group" aria-label="Text style"><button type="button" id="textBold" className="icon-button" aria-pressed={l.bold}
