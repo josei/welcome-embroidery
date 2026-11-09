@@ -4,6 +4,7 @@ import {readFileSync} from 'node:fs';
 import {inflateRawSync} from 'node:zlib';
 import {createHash} from 'node:crypto';
 import {decodeEmbroidery} from '../src/readers.js';
+import {encodeCol,encodeEdr} from '../src/encoders/colour.js';
 
 const archive = readFileSync(new URL('../fixtures/embroidepy/samples.zip', import.meta.url));
 const oracle = JSON.parse(readFileSync(new URL('../scripts/reader-parity.json', import.meta.url), 'utf8'));
@@ -402,4 +403,29 @@ test('VP3 second block origin resets both axes to zero and preserves no-op moves
     return d.stitches.some((s,i)=>s.cmd==='color'&&d.stitches[i+1]?.cmd==='jump'&&s.x===d.stitches[i+1].x&&s.y===d.stitches[i+1].y);
   });
   assert.ok(hasNoOp,'block-origin move_abs is retained as a no-op jump when position is unchanged');
+});
+
+// COL and EDR thread colour lists: the decoders read what the encoders write.
+test('COL and EDR decode the colour list the encoders write, in order, with RGB intact',()=>{
+  const plan={errors:[],stitches:[
+    {cmd:'stitch',x:0,y:0,thread:'#c9a227'},{cmd:'stitch',x:1,y:1,thread:'#527461'},
+    {cmd:'color',x:1,y:1},{cmd:'stitch',x:2,y:2,thread:'#D9897E'},{cmd:'stitch',x:3,y:3,thread:'#c9a227'},
+  ]};
+  const want=['#c9a227','#527461','#d9897e'];
+  const col=decodeEmbroidery(encodeCol(plan),'col');
+  assert.deepEqual(col.threads.map(t=>t.color),want);
+  assert.deepEqual(col.threads.map(t=>t.index),[0,1,2]);
+  assert.deepEqual(col.stitches,[]);
+  const edr=decodeEmbroidery(encodeEdr(plan),'edr');
+  assert.deepEqual(edr.threads.map(t=>t.color),want);
+  assert.deepEqual(edr.threads.map(t=>t.index),[0,1,2]);
+});
+
+test('COL and EDR readers reject malformed colour lists',()=>{
+  const enc=s=>new TextEncoder().encode(s);
+  assert.throws(()=>decodeEmbroidery(enc('2\r\n0,1,2,3\r\n'),'col'),/does not match/);
+  assert.throws(()=>decodeEmbroidery(enc('1\n0,1,2,3\n'),'col'),/CRLF/);
+  assert.throws(()=>decodeEmbroidery(enc('1\r\n0,1,2,300\r\n'),'col'),/out of range|malformed/);
+  assert.throws(()=>decodeEmbroidery(enc('1\r\n1,1,2,3\r\n'),'col'),/out of order/);
+  assert.throws(()=>decodeEmbroidery(Uint8Array.of(1,2,3),'edr'),/multiple of four/);
 });

@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {compile,encode,initialDocument,validateDocument} from '../src/engine.js';
 import {decodeEmbroidery} from '../src/readers.js';
+import {threadPlan} from '../src/sewingTime.js';
 
 // Encode -> decode round trip for generated designs, in every format the editor exports.
 // Stitch points are compared by LCS alignment at each format's unit (0.1 mm for all of them:
@@ -11,7 +12,8 @@ import {decodeEmbroidery} from '../src/readers.js';
 const RED='#527461', ROSE='#d9897e', GOLD='#c9a227';
 const TOL=0.1+1e-6;
 
-// Formats the editor exports. U01 has no reader yet (#299); COL and EDR have no reader (#301).
+// Formats the editor exports. U01 has no reader yet (#299). COL and EDR are colour lists, checked
+// separately below against the plan's colours.
 // Each entry names the reader used for the decode step.
 const FORMATS=[
   {format:'jef',reader:'jef'},
@@ -88,5 +90,24 @@ for(const [designName] of Object.entries(DESIGNS)){
     };
     if(KNOWN_FAILING[format])test(label,{todo:KNOWN_FAILING[format]},run);
     else test(label,run);
+  }
+}
+
+// COL and EDR carry the plan's colours only: each colour once, in order of first use, as RGB.
+// The expected list is built from the plan's thread blocks, not from the encoder.
+for(const [designName] of Object.entries(DESIGNS)){
+  for(const format of ['col','edr']){
+    test(`${designName} colour list round-trips through ${format}`,()=>{
+      const doc=DESIGNS[designName]();validateDocument(doc);
+      const plan=compile(doc);
+      assert.deepEqual(plan.errors,[],`${designName}: plan has no errors`);
+      const expected=[];
+      for(const b of threadPlan(plan)){const hex=b.thread.toLowerCase();if(!expected.includes(hex))expected.push(hex);}
+      const decoded=decodeEmbroidery(encode(plan,format,RED,doc.hoop,doc),format);
+      const got=decoded.threads.map(t=>t.color);
+      assert.equal(got.length,expected.length,'colour count');
+      assert.deepEqual(got,expected,'colour order and RGB');
+      assert.deepEqual(decoded.threads.map(t=>t.index),expected.map((_,i)=>i),'colour indices');
+    });
   }
 }
