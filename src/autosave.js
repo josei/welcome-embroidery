@@ -10,10 +10,14 @@ import {clone} from './appHelpers.js';
 import {validateDocument} from './engine.js';
 import {t} from './i18n.js';
 import {editor} from './editorContext.js';
+import {toast} from './editorChrome.js';
 import {
   currentDocId, isDocId, LEGACY_AUTOSAVE_KEY, mountSlot, onSlotChange, openElsewhere, orphanedKeys, ownAutosaveKey,
   pruneOrphans, removeKey,
 } from './docSlot.js';
+
+/** Shown once when a large unsaved design is not autosaved. */
+const AUTOSAVE_SKIPPED = 'This design is too large to autosave, so this browser does not keep a copy. Save the project file to keep your work.';
 
 /** @param {string} key @returns {any} */
 function readCopy(key) {
@@ -42,17 +46,35 @@ function copyToOffer() {
   return best;
 }
 
-/** Mounts autosave, the page-hide flush, the open-elsewhere notice and the restore prompt. */
+/** Autosave stops writing above this many characters of JSON; localStorage is about 5 MB per site. */
+export const AUTOSAVE_LIMIT = 4_500_000;
+
+/** Mounts autosave, the page-hide flush, the leave-page prompt, the open-elsewhere notice and the restore prompt. */
 export function mountAutosave() {
   /** @type {any} */
   let timer = null;
   let lastKey = '';
+  // A change has been scheduled but its write has not run yet.
+  let pending = false;
+  // The skip warning was shown for the current run of skipped writes; cleared by the next write that is saved or clean.
+  let skipWarned = false;
   const write = () => {
+    timer = null;
+    pending = false;
     try {
       const state = documentNow();
+      if (state.doc.revision <= 0) return;
       const text = JSON.stringify({savedAt: Date.now(), clean: !state.dirty, docId: currentDocId(), doc: state.doc});
-      if (state.doc.revision > 0 && text.length < 4_500_000) localStorage.setItem(ownAutosaveKey(), text);
-    } catch {}
+      if (text.length >= AUTOSAVE_LIMIT) throw new Error('too large');
+      localStorage.setItem(ownAutosaveKey(), text);
+      skipWarned = false;
+    } catch {
+      // Too large (or the browser refused the write): this design has no autosave copy, so say so once per run of skips.
+      if (documentNow().dirty && !skipWarned) {
+        skipWarned = true;
+        toast(t(AUTOSAVE_SKIPPED), 'error');
+      }
+    }
   };
   const schedule = () => {
     const state = documentNow();
@@ -60,10 +82,18 @@ export function mountAutosave() {
     if (key === lastKey) return;
     lastKey = key;
     clearTimeout(timer);
+    pending = true;
     timer = setTimeout(write, 700);
   };
   /** @type {any} */ (window).__autosaveHook = schedule;
   window.addEventListener('pagehide', write);
+  // Closing, reloading or navigating away with unsaved edits, or with an autosave write still pending, shows the browser's
+  // own leave-page prompt. A clean design with nothing pending leaves without one.
+  window.addEventListener('beforeunload', event => {
+    if (!pending && !documentNow().dirty) return;
+    event.preventDefault();
+    event.returnValue = '';
+  });
   editor.autosave = {schedule};
 
   mountSlot();

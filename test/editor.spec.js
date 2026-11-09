@@ -1024,7 +1024,7 @@ test('thread colours: swatch palette, custom colour, recent colours, None for bl
 
 test('unsaved work: Open asks first and cancel keeps the design, undo and recovery copy; Start fresh asks before forgetting it',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));
- const dialogs=[];page.on('dialog',d=>{dialogs.push(d.message());d.dismiss();});
+ const dialogs=[];page.on('dialog',d=>{if(d.type()==='beforeunload'){d.accept();return;}dialogs.push(d.message());d.dismiss();}); // the reload below asks to leave a dirty design
  await page.goto('/');await newDesign(page);await page.locator('#rect').click();await page.locator('#ellipse').click();await expect(page.locator('.object-row')).toHaveCount(2);
  await page.waitForTimeout(1200);const recovery=await page.evaluate(()=>localStorage.getItem('welcome.autosave:'+sessionStorage.getItem('welcome.tabId')));expect(recovery).toBeTruthy();
  const replacement={...initialDocument(),name:'Replacement',objects:[]};
@@ -3057,5 +3057,35 @@ test('after a discard, a reload offers the discarded design until the next edit'
  await page.locator('#restoreNo').click();await page.locator('#discardDiscard').click();await expect(page.locator('#restoreDialog')).toBeHidden();
  await page.locator('#rect').click();await expect(page.locator('.object-row')).toHaveCount(6);await page.waitForTimeout(1000);
  await page.reload();await expect(page.locator('#restoreDialog')).toBeVisible();await expect(page.locator('#restoreInfo')).toContainText('6 objects');
+ expect(errors).toEqual([]);
+});
+
+// The leave-page prompt is the browser's own dialog, so the test records its type and accepts it.
+test('autosave: a dirty design asks before the page closes; a clean one leaves without a prompt',async({page})=>{
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));
+ const dialogs=[];page.on('dialog',d=>{dialogs.push(d.type());d.accept();});
+ await page.goto('/');await expect(page.locator('.object-row')).toHaveCount(5);
+ await page.waitForTimeout(1200); // the start-up autosave write has run, so the design is clean and nothing is pending
+ await page.reload();await expect(page.locator('.object-row')).toHaveCount(5);
+ expect(dialogs).toEqual([]);
+ await page.locator('#rect').click();await expect(page.locator('.object-row')).toHaveCount(6);
+ await page.reload();
+ expect(dialogs).toEqual(['beforeunload']);
+ expect(errors).toEqual([]);
+});
+
+test('autosave: a design too large to autosave shows one warning, not one per edit',async({page})=>{
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));page.on('dialog',d=>d.accept());
+ const skipped=page.locator('#toast .toast-item',{hasText:'too large to autosave'});
+ await page.goto('/');await newDesign(page);
+ const big={...initialDocument(),name:'Big',objects:[],padding:'x'.repeat(4_600_000)};
+ await page.locator('#file').setInputFiles({name:'big.welcome',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(big))});
+ await expect(page.locator('#name')).toHaveValue('Big');
+ await expect(skipped).toHaveCount(0);
+ await page.locator('#rect').click();await expect(skipped).toHaveCount(1);
+ await expect(skipped).toHaveAttribute('role','alert');
+ await page.locator('#ellipse').click();await page.waitForTimeout(1200);
+ await expect(skipped).toHaveCount(1);
+ expect(await page.evaluate(()=>localStorage.getItem('welcome.autosave:'+sessionStorage.getItem('welcome.tabId')))).toBeNull();
  expect(errors).toEqual([]);
 });
