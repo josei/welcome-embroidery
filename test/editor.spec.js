@@ -3670,3 +3670,49 @@ test('a batch row spacing edit on two objects is one undo step named for the bat
  await page.locator('#redo').click();
  expect(await readSpacing(0)).toBe('0.6');expect(await readSpacing(1)).toBe('0.6');
 });
+
+// Synthetic drops (a DataTransfer with one File, no OS drag): the handler must cancel the browser's default for every file
+// drop, refuse pictures and other types with a message, and never lose unsaved work. Native OS drops are not tested here.
+const dropFile=async(page,name,type,text)=>page.evaluate(([name,type,text])=>{
+ const dt=new DataTransfer();dt.items.add(new File([text],name,{type}));
+ for(const kind of ['dragenter','dragover']){window.dispatchEvent(new DragEvent(kind,{dataTransfer:dt,bubbles:true,cancelable:true}));}
+ const drop=new DragEvent('drop',{dataTransfer:dt,bubbles:true,cancelable:true});
+ const notCancelled=window.dispatchEvent(drop);
+ return {prevented:!notCancelled};
+},[name,type,text]);
+test('dropped files: indicator, SVG opens as an undoable step, pictures and other types are refused, unsaved work survives',async({page})=>{
+ await page.goto('/');await newDesign(page);
+ await page.locator('#rect').click();await expect(page.locator('.object-row')).toHaveCount(1);
+ const svg='<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect x="10" y="10" width="40" height="30" fill="#527461"/><ellipse cx="70" cy="80" rx="5" ry="4" fill="#89a377"/><path d="M20 70 C30 50 40 90 80 60" stroke="#d9897e" fill="none"/></svg>';
+ await page.evaluate(()=>{const dt=new DataTransfer();window.dispatchEvent(new DragEvent('dragenter',{dataTransfer:dt,bubbles:true,cancelable:true}));});
+ await expect(page.locator('#dropIndicator')).toBeHidden(); // a drag with no files shows nothing
+ await page.evaluate(()=>{const dt=new DataTransfer();dt.items.add(new File(['x'],'pic.png',{type:'image/png'}));window.dispatchEvent(new DragEvent('dragenter',{dataTransfer:dt,bubbles:true,cancelable:true}));});
+ await expect(page.locator('#dropIndicator')).toBeVisible();
+ await page.evaluate(()=>{const dt=new DataTransfer();dt.items.add(new File(['x'],'pic.png',{type:'image/png'}));window.dispatchEvent(new DragEvent('dragleave',{dataTransfer:dt,bubbles:true,cancelable:true}));});
+ await expect(page.locator('#dropIndicator')).toBeHidden();
+
+ // A picture is refused: the browser default is cancelled, the document is unchanged, and the toast says where pictures come from.
+ expect((await dropFile(page,'logo.png','image/png','\x89PNG')).prevented).toBe(true);
+ await expect(page.locator('#toast')).toContainText('Drop an SVG, or use Trace for a picture');
+ await expect(page.locator('.object-row')).toHaveCount(1);await expect(page.locator('#discardDialog')).toBeHidden();
+ await expect(page.locator('#toast')).toContainText('Drop an SVG, or use Trace for a picture');
+ expect((await dropFile(page,'logo.jpg','image/jpeg','\xff\xd8')).prevented).toBe(true);
+ await expect(page.locator('.object-row')).toHaveCount(1);
+
+ // Another type names the accepted types and changes nothing.
+ expect((await dropFile(page,'notes.txt','text/plain','hello')).prevented).toBe(true);
+ await expect(page.locator('#toast')).toContainText('Drop an SVG, .welcome, .dxf or JSON file to open it.');
+ await expect(page.locator('.object-row')).toHaveCount(1);
+
+ // An SVG over unsaved work asks first; Cancel keeps the work.
+ await dropFile(page,'badge.svg','image/svg+xml',svg);
+ await expect(page.locator('#discardDialog')).toBeVisible();await page.locator('#discardCancel').click();
+ await expect(page.locator('.object-row')).toHaveCount(1);await expect(page.locator('#toast')).toContainText('Open cancelled.');
+
+ // Discard, then the SVG imports exactly as the File menu import does, and one Undo brings the discarded design back.
+ await dropFile(page,'badge.svg','image/svg+xml',svg);
+ await page.locator('#discardDiscard').click();
+ await expect(page.locator('.object-row')).toHaveCount(3);
+ await page.locator('#undo').click();await expect(page.locator('.object-row')).toHaveCount(1);
+ await page.locator('#redo').click();await expect(page.locator('.object-row')).toHaveCount(3);
+});

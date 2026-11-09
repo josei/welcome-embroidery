@@ -8,6 +8,7 @@ import {resetPlayback, resetPlaybackIndex, stopPlayback, mountSimulation} from '
 import {mountCanvas, render} from './editorView.js';
 import {toast, mountEditorChrome} from './editorChrome.js';
 import {mountKeyboard} from './keyboardShortcuts.js';
+import {mountFileDrop} from './fileDrop.js';
 import {mountPinGuide} from './pinGuideCommands.js';
 import {mountThreadControls} from './threadControls.js';
 import {mountAutosave} from './autosave.js';
@@ -88,6 +89,7 @@ mountAgentBridge();
 mountSimulation();
 mountCanvas();
 mountKeyboard();
+mountFileDrop();
 render();
 const openId = new URL(location.href).searchParams.get('open');
 if (openId) openArtifact(openId).catch(error => toast(error.message, 'error'));

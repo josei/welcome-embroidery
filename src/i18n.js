@@ -8,7 +8,8 @@ export const ES={
   'Import JEF, VP3, DST, SEW, PEC, PES, EXP, HUS, XXX, DSB, DSZ, TAP, TBF, PCS, SHV, STX, BRO, EMD, KSM or 10O':
   'Importar JEF, VP3, DST, SEW, PEC, PES, EXP, HUS, XXX, DSB, DSZ, TAP, TBF, PCS, SHV, STX, BRO, EMD, KSM o 10O',
   'Choose a .jef, .vp3, .dst, .sew, .pec, .pes, .exp, .hus, .xxx, .dsb, .dsz, .tap, .tbf, .pcs, .shv, .stx, .bro, .emd, .ksm or .10o file.':
-  'Elige un archivo .jef, .vp3, .dst, .sew, .pec, .pes, .exp, .hus, .xxx, .dsb, .dsz, .tap, .tbf, .pcs, .shv, .stx, .bro, .emd, .ksm o .10o.','Settings':'Ajustes',
+  'Elige un archivo .jef, .vp3, .dst, .sew, .pec, .pes, .exp, .hus, .xxx, .dsb, .dsz, .tap, .tbf, .pcs, .shv, .stx, .bro, .emd, .ksm o .10o.','Drop an SVG, or use Trace for a picture':'Suelta un SVG, o usa Trazar para una imagen.','Drop an SVG, .welcome, .dxf or JSON file to open it.':'Suelta un archivo SVG, .welcome, .dxf o JSON para abrirlo.','Drop one file at a time.':'Suelta un archivo a la vez.','Drop an SVG file to import it':'Suelta un archivo SVG para importarlo',
+'Settings':'Ajustes',
 'Save As':'Guardar como','File name':'Nombre del archivo',
 'Arrange':'Organizar','Bring to front':'Traer al frente','Send to back':'Enviar al fondo','Subtract':'Restar','Union':'Unión','Intersect':'Intersecar',
 'Saved {time}':'Guardado {time}','Saved {time} to {file}':'Guardado {time} en {file}','Unsaved':'Sin guardar',
