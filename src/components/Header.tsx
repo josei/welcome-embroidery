@@ -5,7 +5,6 @@ import {useDraftInput} from './useDraftInput';
 import {documentActions, documentState} from '../documentState.js';
 import {setSettingsOpen} from '../settingsState.js';
 import {agentLinkState, agentLinkActions} from '../agentLinkState.js';
-import {EXPORT_FORMATS, exportFormatState, exportKind, setExportFormat} from '../exportFormatState.js';
 import {EMPTY_EXPORT_REASON} from '../exportDialogState.js';
 import {openExportDialog} from '../exportCommands.js';
 import {shortcutLabel} from '../shortcutLabels.js';
@@ -59,9 +58,8 @@ function SaveStatus() {
  return <span id="savedStatus" className="save-status" role="status">{savedFileName ? t('Saved {time} to {file}', {time, file: savedFileName}) : t('Saved {time}', {time})}</span>;
 }
 
-// Export: the Export button opens the export dialog, and the format beside it is the same choice the dialog shows.
+// Export: the one Export button opens the export dialog, where the format is chosen. Its name never changes with the format.
 function ExportSplit() {
- const {format} = useSyncExternalStore(exportFormatState.subscribe, exportFormatState.get);
  const {doc} = useSyncExternalStore(documentState.subscribe, documentState.get);
  const blank = (doc.objects ?? []).length === 0;
  // A blank design keeps the button focusable (aria-disabled, not disabled) so keyboard users reach the reason,
@@ -70,10 +68,7 @@ function ExportSplit() {
   <>
    {blank && <span id="exportReason" className="export-reason">{t(EMPTY_EXPORT_REASON)}</span>}
    <div className={blank ? 'export-split is-blank' : 'export-split'}>
-    <button id="export" aria-disabled={blank} aria-describedby={blank ? 'exportReason' : undefined} onClick={() => { if (!blank) openExportDialog(); }}>{t('Download {fmt} file', {fmt: exportKind(format)})}</button>
-    <select id="headerFormat" aria-label={t('Export format')} title={t('Export format')} value={format} onChange={e => setExportFormat(e.target.value)}>
-     {EXPORT_FORMATS.map(f => <option key={f.value} value={f.value}>{f.value.toUpperCase()}</option>)}
-    </select>
+    <button id="export" aria-disabled={blank} aria-describedby={blank ? 'exportReason' : undefined} onClick={() => { if (!blank) openExportDialog(); }}>{t('Export')}</button>
    </div>
   </>
  );

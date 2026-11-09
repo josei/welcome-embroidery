@@ -142,7 +142,7 @@ export function EditorOverlays() {
     <dialog id={"exportDialog"} ref={exportElement} onClose={() => setExportDialog({open: false})}>
       <form method={"dialog"}>
         <h2>
-          {t('Download {fmt} file', {fmt: exportKind(exportFormat.format)})}
+          {t('Export')}
         </h2>
         <label htmlFor={"format"}>
           {t("File format")}

@@ -602,7 +602,7 @@ test.describe('language detection',()=>{
  test('Spanish browser gets Spanish UI, including dynamic text, and can switch to English',async({page})=>{
   const errors=[];page.on('pageerror',e=>errors.push(e.message));
   await page.goto('/');
-  await expect(page.locator('#export')).toHaveText('Descargar archivo JEF');
+  await expect(page.locator('#export')).toHaveText('Exportar');
   await expect(page.locator('html')).toHaveAttribute('lang','es');
   await expect(page.locator('#undo')).toHaveAttribute('aria-label','No hay nada que deshacer');
   await page.locator('#rect').click();
@@ -610,13 +610,13 @@ test.describe('language detection',()=>{
   await expect(page.locator('#stats')).toContainText('puntadas');
   await page.locator('#settingsBtn').click();await expect(page.locator('#settingsDialog')).toBeVisible();await expect(page.locator('#langEs')).toHaveAttribute('aria-pressed','true');await expect(page.locator('#langEn')).toHaveAttribute('aria-pressed','false');
   await page.locator('#langEn').click();
-  await expect(page.locator('#export')).toHaveText('Download JEF file');
+  await expect(page.locator('#export')).toHaveText('Export');
   expect(errors).toEqual([]);
  });
 });
 test.describe('English default',()=>{
  test.use({locale:'fr-FR'});
- test('unsupported locales fall back to English',async({page})=>{await page.goto('/');await expect(page.locator('#export')).toHaveText('Download JEF file');});
+ test('unsupported locales fall back to English',async({page})=>{await page.goto('/');await expect(page.locator('#export')).toHaveText('Export');});
 });
 
 test('hovering a selected object shows the guides it already lines up with, and they clear when the pointer leaves',async({page})=>{
@@ -2351,14 +2351,14 @@ test('simulation bar: the time, stitch count, thread track and summary follow th
  expect(errors).toEqual([]);
 });
 
-test('header export: the format beside Export and the dialog share one choice, and the agent button opens the agent dialog',async({page})=>{
+test('header export: one Export button opens the dialog, which is the only format control, and the agent button opens the agent dialog',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));
  await page.goto('/');page.on('dialog',d=>d.accept());await expect(page.locator('#count')).toContainText('compiled');
- await page.locator('#headerFormat').selectOption('pes');
+ await expect(page.locator('header.top select')).toHaveCount(0);
  await page.locator('#export').click();await expect(page.locator('#exportDialog')).toBeVisible();
- await expect(page.locator('#format')).toHaveValue('pes');
- await page.locator('#format').selectOption('dst');await expect(page.locator('#headerFormat')).toHaveValue('dst');
- await expect(page.locator('#headerFormat')).toHaveCSS('color','rgba(0, 0, 0, 0)');
+ await expect(page.locator('#format')).toHaveValue('jef');
+ await page.locator('#format').selectOption('dst');await expect(page.locator('#exportDialog h2')).toHaveText('Export');
+ await expect(page.locator('#export')).toHaveText('Export');
  await page.keyboard.press('Escape');await expect(page.locator('#exportDialog')).toBeHidden();
  await expect(page.locator('#agentPill')).toContainText('Agent');await expect(page.locator('#agentPill')).toHaveAttribute('title','Connect an AI agent');
  await page.locator('#agentPill').click();await expect(page.locator('#agentDialog')).toBeVisible();
@@ -2679,21 +2679,38 @@ test('a reference picture that is not an image is left out and the design opens'
 test('export is labelled as a machine file, shows its file name, says it does not save, and import differs from save',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));
  await page.goto('/');
- await expect(page.locator('#export')).toHaveText('Download JEF file');
+ await expect(page.locator('#export')).toHaveText('Export');
  await expect(page.locator('#importMachine')).toHaveAttribute('aria-label','Import JEF / VP3…');
  await expect(page.locator('#importMachine')).toHaveAttribute('title','Import JEF / VP3…');
  await expect(page.locator('#importMachine')).toHaveAttribute('data-tooltip','Import JEF / VP3…');
  expect(await page.locator('#importMachine use').getAttribute('href')).not.toBe(await page.locator('#save use').getAttribute('href'));
  await page.locator('#export').click();
- await expect(page.locator('#exportDialog h2')).toHaveText('Download JEF file');
+ await expect(page.locator('#exportDialog h2')).toHaveText('Export');
  await expect(page.locator('#exportDialog label[for="format"]')).toHaveText('File format');
  await expect(page.locator('#exportDialog form > p#exportHint')).toHaveCount(1);
  await expect(page.locator('#exportDialog form > button#download')).toHaveText('Download JEF file');
  await page.locator('#format').selectOption('vp3');
- await expect(page.locator('#exportDialog h2')).toHaveText('Download VP3 file');
+ await expect(page.locator('#exportDialog h2')).toHaveText('Export');
  await expect(page.locator('#download')).toHaveText('Download VP3 file');
  await expect(page.locator('#exportFileName')).toHaveText(/\.vp3$/);
  await expect(page.locator('#exportNotice')).toHaveText('Exporting does not save your project. Use Save to keep it as a .welcome file.');
+ expect(errors).toEqual([]);
+});
+
+test('export has one name: the header button and dialog heading read Export, and the format is named only by the dialog format control',async({page})=>{
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));
+ await page.goto('/');
+ await expect(page.locator('#export')).toHaveAccessibleName('Export');
+ await page.locator('#export').click();
+ await expect(page.locator('#exportDialog')).toBeVisible();
+ await expect(page.locator('#exportDialog h2')).toHaveAccessibleName('Export');
+ const format=page.getByRole('combobox',{name:'File format'});
+ await expect(format).toHaveValue('jef');
+ await format.selectOption('vp3');
+ await expect(format).toHaveValue('vp3');
+ await expect(page.locator('#exportDialog h2')).toHaveAccessibleName('Export');
+ await page.keyboard.press('Escape');await expect(page.locator('#exportDialog')).toBeHidden();
+ await expect(page.locator('#export')).toHaveAccessibleName('Export');
  expect(errors).toEqual([]);
 });
 

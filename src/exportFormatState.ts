@@ -1,6 +1,6 @@
 import {createStore} from './store.js';
 
-/** The export formats, in the order the export dialog lists them. The header's format choice and the dialog's select share one value. */
+/** The export formats, in the order the export dialog lists them. The export dialog's format select is the only format control. */
 export const EXPORT_FORMATS: {value: string; label: string}[] = [
   {value: 'jef', label: 'JEF · Janome'},
   {value: 'vp3', label: 'VP3 · Pfaff'},
@@ -23,7 +23,7 @@ export const EXPORT_FORMATS: {value: string; label: string}[] = [
 
 export const exportFormatState = createStore<{format: string}>({format: 'jef'});
 
-/** The kind of file a format makes, as the export button names it: "JEF" in "Download JEF file". Print and appliqué templates are SVG files. */
+/** The kind of file a format makes, as the dialog's download button names it: "JEF" in "Download JEF file". Print and appliqué templates are SVG files. */
 export function exportKind(format: string): string {
   if (format === 'print' || format === 'applique-print') return 'SVG';
   return (format === 'pes6' ? 'pes' : format).toUpperCase();
