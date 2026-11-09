@@ -8,6 +8,8 @@ import {ES} from '../src/i18n.js';
 
 // New over a design with unsaved objects opens the in-app discard dialog. Scenarios that start over discard it; the tests that
 // check the dialog itself click #new directly.
+const EXPORT_FORMAT_COUNT=17;
+const pickFormat=async(page,fmt)=>{if(!(await page.locator(`#format option[value="${fmt}"]`).count()))await page.locator('#allFormats').check();await page.locator('#format').selectOption(fmt);};
 const newDesign=async page=>{await page.locator('#new').click();if(await page.locator('#discardDialog[open]').count())await page.locator('#discardDiscard').click();};
 // The editor labels shortcuts ⌘ ⌥ ⇧ on Apple platforms and Ctrl+ / Alt+ elsewhere. Chromium runs on the host OS here,
 // so the host decides which label each assertion expects.
@@ -45,7 +47,7 @@ test('browser design, settings, history, local project and offline compilation/e
  await page.locator('#file').setInputFiles({name:'bad.welcome',mimeType:'application/json',buffer:Buffer.from(JSON.stringify({...source,objects:[{...source.objects[0],kind:'triangle'}]}))});await expect(page.locator('.object-row')).toHaveCount(0);await expect(page.locator('#toast')).toContainText('unsupported kind');
  await page.locator('#file').setInputFiles({name:'reopened.welcome',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(source))});await expect(page.locator('.object-row')).toHaveCount(7);await expect(page.locator('#name')).toHaveValue('Garden badge');
  await page.locator('#rect').click();await expect(page.locator('#saved')).toHaveCount(0);
- for(const format of ['jef','vp3']){const download=page.waitForEvent('download');await page.locator('#export').click();await page.locator('#format').selectOption(format);await page.locator('#download').click();const file=await download;await file.saveAs(`/tmp/welcome-browser.${format}`);expect(file.suggestedFilename()).toContain(`.${format}`);await expect(page.locator('#saved')).toHaveCount(0);}
+ for(const format of ['jef','vp3']){const download=page.waitForEvent('download');await page.locator('#export').click();await pickFormat(page,format);await page.locator('#download').click();const file=await download;await file.saveAs(`/tmp/welcome-browser.${format}`);expect(file.suggestedFilename()).toContain(`.${format}`);await expect(page.locator('#saved')).toHaveCount(0);}
  expect(errors).toEqual([]);
 });
 
@@ -73,7 +75,7 @@ test('stitch simulation is visible, scrubbable, replayable, and stops on edits',
 test('pinned JEF import renders a stitch layer, saves source commands, transforms with history, and preserves failures',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));const fixture=pinnedMachineFixture('jef'),bytes=Buffer.from(fixture.bytes);await page.goto('/');page.on('dialog',dialog=>dialog.accept());await newDesign(page);await expect(page.locator('.object-row')).toHaveCount(0);await page.locator('#importMachine').click();await page.locator('#machineFile').setInputFiles({name:'sample.jef',mimeType:'application/octet-stream',buffer:bytes});
  await expect(page.locator('.object-row')).toHaveCount(1);const layer=page.locator('.object-row').last();await expect(layer).toContainText('machine stitches');await expect(page.locator('#sourceInfo')).toContainText('201 commands');const id=await layer.getAttribute('data-id');
- const unchanged=page.waitForEvent('download');await page.locator('#export').click();await page.locator('#format').selectOption('jef');await page.locator('#download').click();const originalExport=await unchanged;const originalPath='/tmp/welcome-import-original.jef';await originalExport.saveAs(originalPath);expect(Buffer.compare(await (await import('node:fs/promises')).readFile(originalPath),bytes)).toBe(0);
+ const unchanged=page.waitForEvent('download');await page.locator('#export').click();await pickFormat(page,'jef');await page.locator('#download').click();const originalExport=await unchanged;const originalPath='/tmp/welcome-import-original.jef';await originalExport.saveAs(originalPath);expect(Buffer.compare(await (await import('node:fs/promises')).readFile(originalPath),bytes)).toBe(0);
  const x=Number(await page.locator('#posX').inputValue());await page.locator('#posX').fill(String(x+2));await page.locator('#posX').press('Tab');await page.locator('#rotation').fill('2');await page.locator('#rotation').press('Tab');await page.locator('#thread').selectOption('#d9897e');await expect(page.locator('#saved')).toHaveCount(0);
  await page.locator('#undo').click();await page.locator('#redo').click();await expect(page.locator('.object-row').last()).toHaveAttribute('data-id',id);const saved=page.waitForEvent('download');await page.locator('#save').click();const projectFile=await saved,projectPath='/tmp/welcome-import-project.welcome';await projectFile.saveAs(projectPath);const fs=await import('node:fs/promises'),projectText=await fs.readFile(projectPath,'utf8'),project=JSON.parse(projectText),savedLayer=project.objects.find(o=>o.id===id);expect(savedLayer.kind).toBe('stitch_layer');expect(savedLayer.stitches).toHaveLength(201);expect(savedLayer.source.originalBytesBase64.length).toBeGreaterThan(0);await page.locator('#file').setInputFiles({name:'reopened.welcome',mimeType:'application/json',buffer:Buffer.from(projectText)});await expect(page.locator('#sourceInfo')).toContainText('201 commands');
  await page.locator('#machineFile').setInputFiles({name:'broken.jef',mimeType:'application/octet-stream',buffer:Buffer.from([1,2,3])});await expect(page.locator('.object-row')).toHaveCount(1);await expect(page.locator('#toast')).toContainText('Invalid embroidery file');expect(errors).toEqual([]);
@@ -95,9 +97,9 @@ test('browser reopens a maximum-command saved stitch project below the advertise
 
 test('browser VP3 import round-trips supported files and names unsupported travel before export',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));page.on('dialog',dialog=>dialog.accept());const supported=pinnedMachineFixture('vp3');await page.goto('/');await newDesign(page);await page.locator('#importMachine').click();await page.locator('#machineFile').setInputFiles({name:'sample.vp3',mimeType:'application/octet-stream',buffer:Buffer.from(supported.bytes)});await expect(page.locator('#sourceInfo')).toContainText('80 commands');
- const original=page.waitForEvent('download');await page.locator('#export').click();await page.locator('#format').selectOption('vp3');await page.locator('#download').click();const rawExport=await original,rawPath='/tmp/welcome-import-original.vp3';await rawExport.saveAs(rawPath);expect(Buffer.compare(await (await import('node:fs/promises')).readFile(rawPath),Buffer.from(supported.bytes))).toBe(0);
+ const original=page.waitForEvent('download');await page.locator('#export').click();await pickFormat(page,'vp3');await page.locator('#download').click();const rawExport=await original,rawPath='/tmp/welcome-import-original.vp3';await rawExport.saveAs(rawPath);expect(Buffer.compare(await (await import('node:fs/promises')).readFile(rawPath),Buffer.from(supported.bytes))).toBe(0);
  const x=Number(await page.locator('#posX').inputValue());await page.locator('#posX').fill(String(x+1));await page.locator('#posX').press('Tab');const changed=page.waitForEvent('download');await page.locator('#export').click();await page.locator('#download').click();const changedExport=await changed,changedPath='/tmp/welcome-import-edited.vp3';await changedExport.saveAs(changedPath);expect(decodeEmbroidery(new Uint8Array(await (await import('node:fs/promises')).readFile(changedPath)),'vp3').stitches.filter(s=>s.cmd==='stitch')).toHaveLength(60);
- await newDesign(page);const unsupported=[...readMachineFixtures()].find(([name])=>name.endsWith('/random1.vp3'));await page.locator('#importMachine').click();await page.locator('#machineFile').setInputFiles({name:'travel.vp3',mimeType:'application/octet-stream',buffer:Buffer.from(unsupported[1])});await expect(page.locator('#sourceInfo')).toContainText('51 commands');const moved=Number(await page.locator('#posX').inputValue());await page.locator('#posX').fill(String(moved+1));await page.locator('#posX').press('Tab');let downloaded=false;page.on('download',()=>{downloaded=true;});await page.locator('#export').click();await page.locator('#format').selectOption('vp3');await page.locator('#download').click();await expect(page.locator('#exportError')).toContainText('intra-block travel, trim, or stop commands');expect(downloaded).toBe(false);expect(errors).toEqual([]);
+ await newDesign(page);const unsupported=[...readMachineFixtures()].find(([name])=>name.endsWith('/random1.vp3'));await page.locator('#importMachine').click();await page.locator('#machineFile').setInputFiles({name:'travel.vp3',mimeType:'application/octet-stream',buffer:Buffer.from(unsupported[1])});await expect(page.locator('#sourceInfo')).toContainText('51 commands');const moved=Number(await page.locator('#posX').inputValue());await page.locator('#posX').fill(String(moved+1));await page.locator('#posX').press('Tab');let downloaded=false;page.on('download',()=>{downloaded=true;});await page.locator('#export').click();await pickFormat(page,'vp3');await page.locator('#download').click();await expect(page.locator('#exportError')).toContainText('intra-block travel, trim, or stop commands');expect(downloaded).toBe(false);expect(errors).toEqual([]);
 });
 
 test('opening a project fits the real geometry (rotated stitches, text outlines) in view; later edits never move the view',async({page})=>{page.on('dialog',d=>d.accept());
@@ -114,13 +116,13 @@ test('opening a project fits the real geometry (rotated stitches, text outlines)
 });
 
 test('oversized imported bounds stay visible and block machine export with an explicit hoop diagnostic',async({page})=>{page.on('dialog',d=>d.accept());
- const steps=12,offset=124,source=Buffer.alloc(offset+steps*2+4);source.writeUInt32LE(offset,0);source.writeUInt32LE(1,24);source.writeUInt32LE(steps,28);source.writeUInt32LE(1,116);for(let i=0;i<steps;i++)source[offset+i*2]=127;source[offset+steps*2]=0x80;source[offset+steps*2+1]=0x10;await page.goto('/');await newDesign(page);await page.locator('#machineFile').setInputFiles({name:'oversized.jef',mimeType:'application/octet-stream',buffer:source});await expect(page.locator('#stats')).toContainText('past the hoop');expect(await page.locator('#art').getAttribute('viewBox')).not.toBe('-60 -60 120 120');await page.locator('button[data-view="stitches"]').click();await expect(page.locator('#stitches path')).not.toHaveCount(0);let downloaded=false;page.on('download',()=>{downloaded=true;});await page.locator('#export').click();await page.locator('#format').selectOption('jef');await expect(page.locator('#download')).toBeDisabled();await expect(page.locator('#exportError')).toContainText('past the hoop');expect(downloaded).toBe(false);
+ const steps=12,offset=124,source=Buffer.alloc(offset+steps*2+4);source.writeUInt32LE(offset,0);source.writeUInt32LE(1,24);source.writeUInt32LE(steps,28);source.writeUInt32LE(1,116);for(let i=0;i<steps;i++)source[offset+i*2]=127;source[offset+steps*2]=0x80;source[offset+steps*2+1]=0x10;await page.goto('/');await newDesign(page);await page.locator('#machineFile').setInputFiles({name:'oversized.jef',mimeType:'application/octet-stream',buffer:source});await expect(page.locator('#stats')).toContainText('past the hoop');expect(await page.locator('#art').getAttribute('viewBox')).not.toBe('-60 -60 120 120');await page.locator('button[data-view="stitches"]').click();await expect(page.locator('#stitches path')).not.toHaveCount(0);let downloaded=false;page.on('download',()=>{downloaded=true;});await page.locator('#export').click();await pickFormat(page,'jef');await expect(page.locator('#download')).toBeDisabled();await expect(page.locator('#exportError')).toContainText('past the hoop');expect(downloaded).toBe(false);
 });
 
 test('worker load failure reports a recoverable editor error instead of leaving requests pending',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));let downloaded=false;page.on('download',()=>{downloaded=true;});await page.route('**/assets/worker-*.js',route=>route.fulfill({status:404,contentType:'text/javascript',body:'not found'}));await page.goto('/');await page.locator('#count').click();await expect(page.locator('#toast')).toContainText('Stitch worker failed to load or run');
  await page.locator('button[data-view="stitches"]').click();await page.locator('#play').click({timeout:3000});await expect(page.locator('#toast')).toContainText('Reload the editor and try again');await page.locator('#machineFile').setInputFiles({name:'failed.jef',mimeType:'application/octet-stream',buffer:Buffer.from(pinnedMachineFixture('jef').bytes)});await expect(page.locator('#toast')).toContainText('Reload the editor and try again');await expect(page.locator('#objects .object-row')).toHaveCount(5);
- await page.locator('#export').click();await page.locator('#format').selectOption('jef');await page.locator('#download').click();await expect(page.locator('#exportError')).toContainText('Reload the editor and try again');await expect(page.locator('#objects .object-row')).toHaveCount(5);expect(downloaded).toBe(false);expect(errors).toEqual([]);
+ await page.locator('#export').click();await pickFormat(page,'jef');await page.locator('#download').click();await expect(page.locator('#exportError')).toContainText('Reload the editor and try again');await expect(page.locator('#objects .object-row')).toHaveCount(5);expect(downloaded).toBe(false);expect(errors).toEqual([]);
 });
 
 test('single top bar and vector editing: polygon, nodes, snap, align, distribute, border and thread preview',async({page})=>{
@@ -188,7 +190,7 @@ test('hoop is editable: custom size resizes the canvas, flags overflow, keeps un
  await page.locator('#hoopW').fill('50');await page.locator('#hoopW').press('Tab');await page.locator('#hoopH').fill('50');await page.locator('#hoopH').press('Tab');await expect(page.locator('#hoopW')).toHaveValue('50');await page.locator('#posX').fill('40');await page.locator('#posX').press('Tab');
  await page.locator('button[data-view="stitches"]').click();await expect(page.locator('#count')).toContainText('past the hoop');
  await page.locator('#undo').click();await page.locator('#undo').click();await page.locator('#undo').click();await expect(page.locator('#hoopW')).toHaveValue('80');
- await page.locator('#hoopW').fill('140');await page.locator('#hoopW').press('Tab');await page.locator('#hoopH').fill('200');await page.locator('#hoopH').press('Tab');const download=page.waitForEvent('download');await page.locator('#export').click();await page.locator('#format').selectOption('vp3');await page.locator('#download').click();await download;
+ await page.locator('#hoopW').fill('140');await page.locator('#hoopW').press('Tab');await page.locator('#hoopH').fill('200');await page.locator('#hoopH').press('Tab');const download=page.waitForEvent('download');await page.locator('#export').click();await pickFormat(page,'vp3');await page.locator('#download').click();await download;
  await page.locator('#hoopW').fill('5');await page.locator('#hoopW').press('Tab');await expect(page.locator('#toast')).toContainText('between 10 and 400');expect(errors).toEqual([]);
 });
 
@@ -287,8 +289,31 @@ test('union merges overlapping shapes; lettering can be put on a path and detach
  await page.locator('#textOffPath').click();await expect(page.locator('#alongRow')).toBeHidden();expect(await page.locator('#shapes g.shape polyline').first().getAttribute('points')).toBe(before);expect(errors).toEqual([]);
 });
 
+test('export dialog offers the chosen machine\'s formats first',async({page})=>{
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));
+ await page.goto('/');await page.locator('#export').click();
+ const formats=async()=>page.locator('#format option').evaluateAll(os=>os.map(o=>o.value));
+ // Not sure is the default: DST, plus the print and vector outputs.
+ await expect(page.locator('#machine')).toHaveValue('unsure');
+ await expect(page.locator('#format')).toHaveValue('dst');
+ expect(await formats()).toEqual(['dst','svg','print','applique-print','dxf']);
+ // Choosing a brand offers its formats and selects its usual one.
+ await page.locator('#machine').selectOption('brother');
+ await expect(page.locator('#format')).toHaveValue('pes6');
+ expect(await formats()).toEqual(['pec','pes','pes6','svg','print','applique-print','dxf']);
+ await page.locator('#machine').selectOption('janome');
+ await expect(page.locator('#format')).toHaveValue('jef');
+ expect(await formats()).toEqual(['jef','sew','svg','print','applique-print','dxf']);
+ // Advanced users can still reach every format.
+ await page.locator('#allFormats').check();
+ expect((await formats()).length).toBe(EXPORT_FORMAT_COUNT);
+ await expect(page.locator('#format option[value="col"]')).toHaveCount(1);
+ await page.locator('#allFormats').uncheck();
+ expect(errors).toEqual([]);
+});
+
 test('DST can be exported from the dialog',async({page})=>{
- await page.goto('/');const download=page.waitForEvent('download');await page.locator('#export').click();await page.locator('#format').selectOption('dst');await page.locator('#download').click();const file=await download;expect(file.suggestedFilename()).toMatch(/\.dst$/);
+ await page.goto('/');const download=page.waitForEvent('download');await page.locator('#export').click();await pickFormat(page,'dst');await page.locator('#download').click();const file=await download;expect(file.suggestedFilename()).toMatch(/\.dst$/);
  const path=await file.path(),bytes=await (await import('node:fs/promises')).readFile(path);expect(bytes.subarray(0,3).toString()).toBe('LA:');expect(bytes[bytes.length-3+2]).toBe(0xF3);
 });
 
@@ -305,7 +330,7 @@ test('Inkscape-style tools: offset, array, sewing order, per-object fill, SVG ex
  await page.locator('.object-row').first().click();await page.locator('#spacing').fill('0.25');await page.locator('#spacing').press('Tab');await expect(page.locator('#fillReset')).toBeVisible();await page.locator('#fillResetBtn').click();await expect(page.locator('#fillReset')).toBeHidden();
  await page.locator('#selectSame').click();expect(await page.locator('.object-row.selected').count()).toBeGreaterThanOrEqual(1);
  await page.keyboard.press('Control+a');await expect(page.locator('.object-row.selected')).toHaveCount(3);
- const download=page.waitForEvent('download');await page.locator('#export').click();await page.locator('#format').selectOption('svg');await page.locator('#download').click();const file=await download;expect(file.suggestedFilename()).toMatch(/\.svg$/);const svg=await (await import('node:fs/promises')).readFile(await file.path(),'utf8');expect(svg).toMatch(/<svg [^>]*viewBox="-55 -55 110 110"/);expect((svg.match(/<path /g)||[]).length).toBe(3);
+ const download=page.waitForEvent('download');await page.locator('#export').click();await pickFormat(page,'svg');await page.locator('#download').click();const file=await download;expect(file.suggestedFilename()).toMatch(/\.svg$/);const svg=await (await import('node:fs/promises')).readFile(await file.path(),'utf8');expect(svg).toMatch(/<svg [^>]*viewBox="-55 -55 110 110"/);expect((svg.match(/<path /g)||[]).length).toBe(3);
  await newDesign(page);await page.locator('#snap').click();await page.locator('#line').click();
  const m=await page.evaluate(()=>{const m=document.querySelector('#art').getScreenCTM();return {a:m.a,d:m.d,e:m.e,f:m.f};}),at=(x,y)=>({x:m.a*x+m.e,y:m.d*y+m.f});
  const a=at(-20,0),b=at(20,0);await page.mouse.move(a.x,a.y);await page.mouse.down();await page.mouse.move(b.x,b.y,{steps:3});await page.mouse.up();
@@ -1245,7 +1270,7 @@ test('no business logic needs the server: design, compile, export JEF/VP3/DST/SV
  await page.locator('#rect').click();await page.locator('#ellipse').click();await page.locator('#letter').click();await expect(page.locator('#count')).toContainText('stitches');
  // every export format is generated in the browser and downloaded
  const got={};
- for(const fmt of ['jef','vp3','dst','svg']){await page.locator('#export').click();await page.locator('#format').selectOption(fmt);const [dl]=await Promise.all([page.waitForEvent('download'),page.locator('#download').click()]);const stream=await dl.createReadStream();const chunks=[];for await(const c of stream)chunks.push(c);got[fmt]=Buffer.concat(chunks);expect(dl.suggestedFilename()).toMatch(new RegExp('\\.'+fmt+'$'));}
+ for(const fmt of ['jef','vp3','dst','svg']){await page.locator('#export').click();await pickFormat(page,fmt);const [dl]=await Promise.all([page.waitForEvent('download'),page.locator('#download').click()]);const stream=await dl.createReadStream();const chunks=[];for await(const c of stream)chunks.push(c);got[fmt]=Buffer.concat(chunks);expect(dl.suggestedFilename()).toMatch(new RegExp('\\.'+fmt+'$'));}
  for(const fmt of ['jef','vp3']){const d=decodeEmbroidery(new Uint8Array(got[fmt]),fmt);expect(d.stitches.filter(s=>s.cmd==='stitch').length).toBeGreaterThan(300);}
  expect(decodeEmbroidery(new Uint8Array(got.dst),'dst').stitches.length).toBeGreaterThan(300);expect(got.svg.toString()).toContain('<svg');
  // save a project, open it again
@@ -1501,7 +1526,7 @@ test('laydown underlay is offered for fills and adds a light fill under them',as
 
 test('print template export downloads a 1:1 millimetre placement sheet',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());await newDesign(page);await page.locator('#rect').click();
- const download=page.waitForEvent('download');await page.locator('#export').click();await page.locator('#format').selectOption('print');await page.locator('#download').click();
+ const download=page.waitForEvent('download');await page.locator('#export').click();await pickFormat(page,'print');await page.locator('#download').click();
  const file=await download;expect(file.suggestedFilename()).toMatch(/-template\.svg$/);await file.saveAs('/tmp/welcome-print-template.svg');
  const svg=readFileSync('/tmp/welcome-print-template.svg','utf8');
  expect(svg).toContain('width="110mm" height="110mm" viewBox="-55 -55 110 110"');expect(svg).toContain('10 mm');
@@ -1709,7 +1734,7 @@ test('a filled SVG square imports as a fill; a counter becomes a hole; two islan
 
 test('DXF export downloads the design outlines as a DXF file',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());
- const download=page.waitForEvent('download');await page.locator('#export').click();await page.locator('#format').selectOption('dxf');await page.locator('#download').click();
+ const download=page.waitForEvent('download');await page.locator('#export').click();await pickFormat(page,'dxf');await page.locator('#download').click();
  const file=await download;expect(file.suggestedFilename()).toMatch(/\.dxf$/);await file.saveAs('/tmp/welcome-export.dxf');
  const text=(await import('node:fs')).readFileSync('/tmp/welcome-export.dxf','utf8');
  expect(text).toContain('LWPOLYLINE');expect(text.trimEnd().endsWith('EOF')).toBe(true);
@@ -1719,7 +1744,7 @@ test('DXF export downloads the design outlines as a DXF file',async({page})=>{
 
 test('PES v6 export names the file PES in the toast, as the button does',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());
- await page.locator('#export').click();await page.locator('#format').selectOption('pes6');
+ await page.locator('#export').click();await pickFormat(page,'pes6');
  await expect(page.locator('#download')).toHaveText('Download PES file');
  const download=page.waitForEvent('download');await page.locator('#download').click();await download;
  await expect(page.locator('#toast')).toContainText('PES file downloaded');
@@ -1897,7 +1922,7 @@ test('an SHV file imports from the machine picker as a stitch layer',async({page
 test('export with the worksheet box ticked can download the worksheet as SVG instead of text',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));page.on('dialog',d=>d.accept());
  await page.goto('/');await newDesign(page);await page.locator('#rect').click();
- await page.locator('#export').click();await page.locator('#format').selectOption('dst');
+ await page.locator('#export').click();await pickFormat(page,'dst');
  await page.locator('#withWorksheet').check();await page.locator('#withWorksheetFormat').selectOption('svg');
  const downloads=[];page.on('download',d=>downloads.push(d));
  await page.locator('#download').click();
@@ -1911,7 +1936,7 @@ test('export with the worksheet box ticked can download the worksheet as SVG ins
 test('export with the worksheet box ticked downloads the machine file and its sewing worksheet, and the box is hidden for SVG',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));page.on('dialog',d=>d.accept());
  await page.goto('/');await newDesign(page);await page.locator('#rect').click();
- await page.locator('#export').click();await page.locator('#format').selectOption('dst');await expect(page.locator('#worksheetRow')).toBeVisible();
+ await page.locator('#export').click();await pickFormat(page,'dst');await expect(page.locator('#worksheetRow')).toBeVisible();
  await page.locator('#withWorksheet').check();
  const downloads=[];page.on('download',d=>downloads.push(d));
  await page.locator('#download').click();
@@ -1920,7 +1945,7 @@ test('export with the worksheet box ticked downloads the machine file and its se
  const fs=await import('node:fs/promises');const sheet=downloads.find(d=>/-worksheet\.txt$/.test(d.suggestedFilename()));
  const text=await fs.readFile(await sheet.path(),'utf8');expect(text).toContain('Sewing worksheet');expect(text).toContain('Threads:');
  await expect(page.locator('#toast')).toContainText('sewing worksheet is downloaded');
- await page.locator('#export').click();await page.locator('#format').selectOption('svg');await expect(page.locator('#worksheetRow')).toBeHidden();
+ await page.locator('#export').click();await pickFormat(page,'svg');await expect(page.locator('#worksheetRow')).toBeHidden();
  expect(errors).toEqual([]);
 });
 
@@ -2082,7 +2107,7 @@ test('oval stones have a turn setting, and an upright oval keeps it when the obj
 test('COL thread list export downloads a .col text file with the colour count first',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));page.on('dialog',d=>d.accept());
  await page.goto('/');await newDesign(page);await page.locator('#rect').click();
- const download=page.waitForEvent('download');await page.locator('#export').click();await page.locator('#format').selectOption('col');await page.locator('#download').click();
+ const download=page.waitForEvent('download');await page.locator('#export').click();await pickFormat(page,'col');await page.locator('#download').click();
  const file=await download;expect(file.suggestedFilename()).toMatch(/\.col$/);
  const path='/tmp/welcome-thread-list.col';await file.saveAs(path);const text=readFileSync(path,'utf8');
  expect(text.startsWith('1\r\n0,')).toBeTruthy();
@@ -2092,7 +2117,7 @@ test('COL thread list export downloads a .col text file with the colour count fi
 test('EDR thread list export downloads a binary .edr file with four bytes per colour',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));page.on('dialog',d=>d.accept());
  await page.goto('/');await newDesign(page);await page.locator('#rect').click();
- const download=page.waitForEvent('download');await page.locator('#export').click();await page.locator('#format').selectOption('edr');await page.locator('#download').click();
+ const download=page.waitForEvent('download');await page.locator('#export').click();await pickFormat(page,'edr');await page.locator('#download').click();
  const file=await download;expect(file.suggestedFilename()).toMatch(/\.edr$/);
  const path='/tmp/welcome-thread-list.edr';await file.saveAs(path);const bytes=readFileSync(path);
  expect(bytes.length%4).toBe(0);expect(bytes.length).toBeGreaterThan(0);
@@ -2161,7 +2186,7 @@ test('appliqué from selection skips an open path and says how many it left alon
 test('U01 (Barudan) export downloads a .u01 file with the 256-byte header and the F8 00 00 end',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));
  await page.goto('/');page.on('dialog',d=>d.accept());await newDesign(page);await page.locator('#rect').click();
- const download=page.waitForEvent('download');await page.locator('#export').click();await page.locator('#format').selectOption('u01');await page.locator('#download').click();
+ const download=page.waitForEvent('download');await page.locator('#export').click();await pickFormat(page,'u01');await page.locator('#download').click();
  const file=await download;expect(file.suggestedFilename()).toMatch(/\.u01$/);
  const path='/tmp/welcome-u01.u01';await file.saveAs(path);const bytes=readFileSync(path);
  expect(bytes.subarray(0,128).every(b=>b===0x30)).toBeTruthy();expect([...bytes.subarray(-3)]).toEqual([0xF8,0,0]);
@@ -2191,7 +2216,7 @@ test('rotate hoop swaps the hoop width and height in the panel',async({page})=>{
 test('TBF (Tajima) export downloads a .tbf file with the ASCII version and the 1A terminal',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));
  await page.goto('/');page.on('dialog',d=>d.accept());await newDesign(page);await page.locator('#rect').click();
- const download=page.waitForEvent('download');await page.locator('#export').click();await page.locator('#format').selectOption('tbf');await page.locator('#download').click();
+ const download=page.waitForEvent('download');await page.locator('#export').click();await pickFormat(page,'tbf');await page.locator('#download').click();
  const file=await download;expect(file.suggestedFilename()).toMatch(/\.tbf$/);
  const path='/tmp/welcome-tbf.tbf';await file.saveAs(path);const bytes=readFileSync(path);
  expect(bytes.subarray(0,4).toString('latin1')).toBe('3.00');expect(bytes[bytes.length-1]).toBe(0x1A);
@@ -2201,7 +2226,7 @@ test('TBF (Tajima) export downloads a .tbf file with the ASCII version and the 1
 test('XXX (Singer) export downloads a .xxx file whose stored end offset points at the end marker',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));
  await page.goto('/');page.on('dialog',d=>d.accept());await newDesign(page);await page.locator('#rect').click();
- const download=page.waitForEvent('download');await page.locator('#export').click();await page.locator('#format').selectOption('xxx');await page.locator('#download').click();
+ const download=page.waitForEvent('download');await page.locator('#export').click();await pickFormat(page,'xxx');await page.locator('#download').click();
  const file=await download;expect(file.suggestedFilename()).toMatch(/\.xxx$/);
  const path='/tmp/welcome-xxx.xxx';await file.saveAs(path);const bytes=readFileSync(path);
  const endAt=bytes.readInt32LE(0xFC);expect(endAt).toBeGreaterThan(0x100);expect([...bytes.subarray(endAt,endAt+4)]).toEqual([0x7F,0x7F,0x02,0x14]);
@@ -2211,11 +2236,11 @@ test('XXX (Singer) export downloads a .xxx file whose stored end offset points a
 test('appliqué templates: with no appliqué the export says so; after an appliqué it downloads a 1:1 SVG with the piece',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));page.on('dialog',d=>d.accept());
  await page.goto('/');await newDesign(page);await page.locator('#rect').click();
- await page.locator('#export').click();await page.locator('#format').selectOption('applique-print');await page.locator('#download').click();
+ await page.locator('#export').click();await pickFormat(page,'applique-print');await page.locator('#download').click();
  await expect(page.locator('#exportError')).toContainText('No appliqué pieces to print');
  await page.keyboard.press('Escape');await page.locator('#rect').click();await page.locator('.object-row').first().click();await page.evaluate(()=>document.activeElement?.blur());await page.keyboard.press('Control+a');await page.locator('#secPath summary').click();await page.locator('#appliqueGroup').click();
  await expect(page.locator('.object-row')).toHaveCount(2);
- const download=page.waitForEvent('download');await page.locator('#export').click();await page.locator('#format').selectOption('applique-print');await page.locator('#download').click();
+ const download=page.waitForEvent('download');await page.locator('#export').click();await pickFormat(page,'applique-print');await page.locator('#download').click();
  const file=await download;expect(file.suggestedFilename()).toMatch(/-applique-templates\.svg$/);
  const path='/tmp/welcome-applique-templates.svg';await file.saveAs(path);
  const svg=readFileSync(path,'utf8');expect(svg).toContain('mm</text>');expect((svg.match(/stroke-linejoin="round"/g)||[]).length).toBe(1);
@@ -2279,21 +2304,21 @@ test('an imported JEF file batch-exports one JEF per hoop',async({page})=>{
 
 test('EXP is an export format and downloads as an .exp file',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());await newDesign(page);
- await page.locator('#rect').click();await page.locator('#export').click();await page.locator('#format').selectOption('exp');
+ await page.locator('#rect').click();await page.locator('#export').click();await pickFormat(page,'exp');
  const download=page.waitForEvent('download');await page.locator('#download').click();
  expect((await download).suggestedFilename()).toMatch(/\.exp$/);expect(errors).toEqual([]);
 });
 
 test('PEC is an export format and downloads as a .pec file',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());await newDesign(page);
- await page.locator('#rect').click();await page.locator('#export').click();await page.locator('#format').selectOption('pec');
+ await page.locator('#rect').click();await page.locator('#export').click();await pickFormat(page,'pec');
  const download=page.waitForEvent('download');await page.locator('#download').click();
  expect((await download).suggestedFilename()).toMatch(/\.pec$/);expect(errors).toEqual([]);
 });
 
 test('PES is an export format and downloads as a .pes file',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());await newDesign(page);
- await page.locator('#rect').click();await page.locator('#export').click();await page.locator('#format').selectOption('pes');
+ await page.locator('#rect').click();await page.locator('#export').click();await pickFormat(page,'pes');
  const download=page.waitForEvent('download');await page.locator('#download').click();
  expect((await download).suggestedFilename()).toMatch(/\.pes$/);expect(errors).toEqual([]);
 });
@@ -2308,14 +2333,14 @@ test('paired motif loops can taper with the end width in the panel',async({page}
 
 test('PES v6 is an export format and downloads as a .pes file',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());await newDesign(page);
- await page.locator('#rect').click();await page.locator('#export').click();await page.locator('#format').selectOption('pes6');
+ await page.locator('#rect').click();await page.locator('#export').click();await pickFormat(page,'pes6');
  const download=page.waitForEvent('download');await page.locator('#download').click();
  expect((await download).suggestedFilename()).toMatch(/\.pes$/);expect(errors).toEqual([]);
 });
 
 test('SEW is an export format and downloads as a .sew file',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());await newDesign(page);
- await page.locator('#rect').click();await page.locator('#export').click();await page.locator('#format').selectOption('sew');
+ await page.locator('#rect').click();await page.locator('#export').click();await pickFormat(page,'sew');
  const download=page.waitForEvent('download');await page.locator('#download').click();
  expect((await download).suggestedFilename()).toMatch(/\.sew$/);expect(errors).toEqual([]);
 });
@@ -2426,8 +2451,8 @@ test('header export: one Export button opens the dialog, which is the only forma
  await page.goto('/');page.on('dialog',d=>d.accept());await expect(page.locator('#count')).toContainText('compiled');
  await expect(page.locator('header.top select')).toHaveCount(0);
  await page.locator('#export').click();await expect(page.locator('#exportDialog')).toBeVisible();
- await expect(page.locator('#format')).toHaveValue('jef');
- await page.locator('#format').selectOption('dst');await expect(page.locator('#exportDialog h2')).toHaveText('Export');
+ await expect(page.locator('#format')).toHaveValue('dst');
+ await pickFormat(page,'dst');await expect(page.locator('#exportDialog h2')).toHaveText('Export');
  await expect(page.locator('#export')).toHaveText('Export');
  await page.keyboard.press('Escape');await expect(page.locator('#exportDialog')).toBeHidden();
  await expect(page.locator('#agentPill')).toContainText('Agent');await expect(page.locator('#agentPill')).toHaveAttribute('title','Connect an AI agent');
@@ -2759,8 +2784,8 @@ test('export is labelled as a machine file, shows its file name, says it does no
  await expect(page.locator('#exportDialog h2')).toHaveText('Export');
  await expect(page.locator('#exportDialog label[for="format"]')).toHaveText('File format');
  await expect(page.locator('#exportDialog form > p#exportHint')).toHaveCount(1);
- await expect(page.locator('#exportDialog form > button#download')).toHaveText('Download JEF file');
- await page.locator('#format').selectOption('vp3');
+ await expect(page.locator('#exportDialog form > button#download')).toHaveText('Download DST file');
+ await pickFormat(page,'vp3');
  await expect(page.locator('#exportDialog h2')).toHaveText('Export');
  await expect(page.locator('#download')).toHaveText('Download VP3 file');
  await expect(page.locator('#exportFileName')).toHaveText(/\.vp3$/);
@@ -2776,7 +2801,8 @@ test('export has one name: the header button and dialog heading read Export, and
  await expect(page.locator('#exportDialog')).toBeVisible();
  await expect(page.locator('#exportDialog h2')).toHaveAccessibleName('Export');
  const format=page.getByRole('combobox',{name:'File format'});
- await expect(format).toHaveValue('jef');
+ await expect(format).toHaveValue('dst');
+ await page.locator('#allFormats').check();
  await format.selectOption('vp3');
  await expect(format).toHaveValue('vp3');
  await expect(page.locator('#exportDialog h2')).toHaveAccessibleName('Export');
@@ -3053,7 +3079,7 @@ test('a design past the hoop cannot be exported: the dialog names the object and
  await page.locator('#posX').fill('-12');await page.locator('#posX').press('Tab');await page.locator('#posY').fill('-8');await page.locator('#posY').press('Tab');
  await page.locator('#export').click();
  for(const format of ['jef','dst','vp3']){
-  await page.locator('#format').selectOption(format);
+  await pickFormat(page,format);
   await expect(page.locator('#download')).toBeDisabled();
   await expect(page.locator('#exportError')).toContainText(/Rectangle extends \d+(\.\d)? mm past the hoop\. Move it or choose a larger hoop\./);
   await expect(page.locator('#exportDialog')).toBeVisible();
@@ -3061,7 +3087,7 @@ test('a design past the hoop cannot be exported: the dialog names the object and
  expect(downloaded).toBe(false);
  await page.locator('#exportDialog').getByRole('button',{name:'Cancel'}).click();
  await page.locator('#posX').fill('-50');await page.locator('#posX').press('Tab');await page.locator('#posY').fill('-50');await page.locator('#posY').press('Tab');
- await page.locator('#export').click();await page.locator('#format').selectOption('dst');
+ await page.locator('#export').click();await pickFormat(page,'dst');
  await expect(page.locator('#download')).toBeEnabled();await expect(page.locator('#exportError')).toBeHidden();
  const download=page.waitForEvent('download');await page.locator('#download').click();await download;
  expect(downloaded).toBe(true);
@@ -3136,10 +3162,10 @@ test('Spanish: export, DXF and photo stitch toasts are translated and name the f
  const errors=[];page.on('pageerror',e=>errors.push(e.message));
  await page.goto('/?lang=es');page.on('dialog',d=>d.accept());await newDesign(page);await page.locator('#rect').click();
  const toast=page.locator('#toast');
- await page.locator('#export').click();await page.locator('#format').selectOption('jef');
+ await page.locator('#export').click();await pickFormat(page,'jef');
  const jef=page.waitForEvent('download');await page.locator('#download').click();await jef;
  await expect(toast).toContainText(/Archivo JEF descargado \(.+\.jef\)\./);
- await page.locator('#export').click();await page.locator('#format').selectOption('dxf');
+ await page.locator('#export').click();await pickFormat(page,'dxf');
  const dxf=page.waitForEvent('download');await page.locator('#download').click();await dxf;
  await expect(toast).toContainText(/Archivo DXF descargado \(.+\.dxf\)\./);
  await page.locator('#photoFile').setInputFiles({name:'ramp.png',mimeType:'image/png',buffer:pngBytes(60,40,(x,y)=>Math.round(255*x/59))});
@@ -3220,7 +3246,7 @@ test('restore: a reloaded design compiles without an edit, and Export works stra
  await expect(page.locator('#count')).toContainText('stitches');
  await expect(page.locator('#count')).not.toContainText('Compiling…');
  await expect(page.locator('#export')).not.toHaveAttribute('aria-disabled','true');
- const download=page.waitForEvent('download');await page.locator('#export').click();await page.locator('#format').selectOption('jef');await page.locator('#download').click();
+ const download=page.waitForEvent('download');await page.locator('#export').click();await pickFormat(page,'jef');await page.locator('#download').click();
  expect((await download).suggestedFilename()).toContain('.jef');
  expect(errors).toEqual([]);
 });
@@ -3463,7 +3489,7 @@ test('Enter on the export format select only chooses; Escape closes the export d
  await page.goto('/');
  let downloads=0;page.on('download',()=>{downloads++;});
  await page.locator('#export').click();await expect(page.locator('#exportDialog')).toBeVisible();
- await page.locator('#format').selectOption('dst');await page.locator('#format').focus();await page.keyboard.press('Enter');
+ await pickFormat(page,'dst');await page.locator('#format').focus();await page.keyboard.press('Enter');
  await page.waitForTimeout(600);
  expect(downloads).toBe(0);await expect(page.locator('#exportDialog')).toBeVisible();await expect(page.locator('#format')).toHaveValue('dst');
  await page.keyboard.press('Escape');await expect(page.locator('#exportDialog')).toBeHidden();expect(downloads).toBe(0);
@@ -3704,6 +3730,7 @@ test('export dialog groups machine formats apart from print and vector outputs',
  await expect(groups).toHaveCount(2);
  await expect(groups.nth(0)).toHaveAttribute('label','Machine embroidery formats');
  await expect(groups.nth(1)).toHaveAttribute('label','Print and vector');
+ await page.locator('#allFormats').check();
  await expect(groups.nth(0).locator('option')).toHaveCount(13);
  await expect(groups.nth(1).locator('option')).toHaveText(['SVG · vector design (Inkscape)','Print template · 1:1 SVG (placement sheet)','Appliqué templates · 1:1 SVG','DXF · paths (CAD)']);
 });

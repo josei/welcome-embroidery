@@ -8,7 +8,7 @@ import {SaveAsDialog} from './SaveAsDialog';
 import {TraceDialog} from './TraceDialog';
 import {agentLinkState} from '../agentLinkState.js';
 import {agentDialogState, copyAgentLink, revokeAgentLink, setAgentDialogOpen} from '../agentDialog.js';
-import {EXPORT_FORMAT_GROUPS, EXPORT_FORMATS, exportFormatState, exportKind, setExportFormat} from '../exportFormatState.js';
+import {EXPORT_FORMAT_GROUPS, EXPORT_FORMATS, MACHINE_BRANDS, exportFormatState, exportKind, formatsForBrand, setExportBrand, setExportFormat, setExportShowAll} from '../exportFormatState.js';
 import {t} from '../i18n.js';
 import {exportDialogState, setExportDialog} from '../exportDialogState.js';
 import {exportCurrent, exportFileName, MACHINE_FORMATS} from '../exportCommands.js';
@@ -31,6 +31,7 @@ export function EditorOverlays() {
  const agentOpen = useSyncExternalStore(agentDialogState.subscribe, agentDialogState.get);
  const exportFormat = useSyncExternalStore(exportFormatState.subscribe, exportFormatState.get);
  const exportDialog = useSyncExternalStore(exportDialogState.subscribe, exportDialogState.get);
+ const machineFormats = formatsForBrand(exportFormat.brand);
  // Why the export cannot run: the design's refusal (such as an object past the hoop) first, else the last export's failure.
  const exportProblem = exportDialog.refusal || exportDialog.error;
  const {doc} = useSyncExternalStore(documentState.subscribe, documentState.get);
@@ -144,16 +145,27 @@ export function EditorOverlays() {
         <h2>
           {t('Export')}
         </h2>
+        <label htmlFor={"machine"}>
+          {t("Your machine")}
+        </label>
+        <select id={"machine"} value={exportFormat.brand} onChange={e => setExportBrand(e.target.value)} onKeyDown={keepEnterOnSelect}>
+          {MACHINE_BRANDS.map(b => <option key={b.value} value={b.value}>{t(b.label)}</option>)}
+        </select>
         <label htmlFor={"format"}>
           {t("File format")}
         </label>
         <select id={"format"} value={exportFormat.format} onChange={e => setExportFormat(e.target.value)} onKeyDown={keepEnterOnSelect}>
           {EXPORT_FORMAT_GROUPS.map(g => (
             <optgroup key={g.group} label={t(g.label)}>
-              {EXPORT_FORMATS.filter(f => f.group === g.group).map(f => <option key={f.value} value={f.value}>{f.label}</option>)}
+              {EXPORT_FORMATS.filter(f => f.group === g.group && (f.group === 'print' || exportFormat.showAll || machineFormats.includes(f.value)))
+                .map(f => <option key={f.value} value={f.value}>{f.label}</option>)}
             </optgroup>
           ))}
         </select>
+        <label className={"check-row"}>
+          <input type={"checkbox"} id={"allFormats"} checked={exportFormat.showAll} onChange={e => setExportShowAll(e.target.checked)} />
+          {" " + t("Show every format")}
+        </label>
         <p id={"exportHint"}>
           {"Check hoop and thread choices for your machine and materials."}
         </p>

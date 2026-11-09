@@ -27,7 +27,37 @@ export const EXPORT_FORMAT_GROUPS: {group: 'machine' | 'print'; label: string}[]
   {group: 'print', label: 'Print and vector'},
 ];
 
-export const exportFormatState = createStore<{format: string}>({format: 'jef'});
+/**
+ * The machine brands the export dialog asks about first. Each lists the stitch formats that brand's machines read; the
+ * dialog offers only those (plus the print and vector outputs). `unsure` is the fallback and offers DST, the format most
+ * machines accept. `format` is the default for the brand, so choosing a brand selects its usual file.
+ */
+export const MACHINE_BRANDS: {value: string; label: string; formats: string[]; format: string}[] = [
+  {value: 'janome', label: 'Janome / Elna', formats: ['jef', 'sew'], format: 'jef'},
+  {value: 'pfaff', label: 'Pfaff', formats: ['vp3'], format: 'vp3'},
+  {value: 'brother', label: 'Brother / Babylock', formats: ['pec', 'pes', 'pes6'], format: 'pes6'},
+  {value: 'melco', label: 'Melco (EXP)', formats: ['exp'], format: 'exp'},
+  {value: 'tajima', label: 'Tajima', formats: ['dst', 'tbf'], format: 'dst'},
+  {value: 'barudan', label: 'Barudan', formats: ['u01'], format: 'u01'},
+  {value: 'singer', label: 'Singer', formats: ['xxx'], format: 'xxx'},
+  {value: 'unsure', label: 'Other / not sure', formats: ['dst'], format: 'dst'},
+];
+
+/** The brand used when the dialog opens: not sure, so DST. */
+export const DEFAULT_MACHINE_BRAND = 'unsure';
+
+/** The formats the dialog offers for a brand. Unknown brands fall back to the not-sure list. */
+export function formatsForBrand(brand: string): string[] {
+  return (MACHINE_BRANDS.find(b => b.value === brand) ?? MACHINE_BRANDS[MACHINE_BRANDS.length - 1]).formats;
+}
+
+/**
+ * `brand` is the machine the user owns; `format` is the file to export; `showAll` lists every format regardless of brand,
+ * so advanced users can still reach any of them.
+ */
+export const exportFormatState = createStore<{brand: string; format: string; showAll: boolean}>({
+  brand: DEFAULT_MACHINE_BRAND, format: 'dst', showAll: false,
+});
 
 /** The kind of file a format makes, as the dialog's download button names it: "JEF" in "Download JEF file". Print and appliqué templates are SVG files. */
 export function exportKind(format: string): string {
@@ -37,5 +67,16 @@ export function exportKind(format: string): string {
 
 /** Chooses the export format, from the header or the export dialog. */
 export function setExportFormat(format: string) {
-  exportFormatState.set({format});
+  exportFormatState.set({...exportFormatState.get(), format});
+}
+
+/** Chooses the machine brand, and selects that brand's usual format. */
+export function setExportBrand(brand: string) {
+  const info = MACHINE_BRANDS.find(b => b.value === brand) ?? MACHINE_BRANDS[MACHINE_BRANDS.length - 1];
+  exportFormatState.set({...exportFormatState.get(), brand: info.value, format: info.format});
+}
+
+/** Shows every format in the dialog, or only the chosen brand's. */
+export function setExportShowAll(showAll: boolean) {
+  exportFormatState.set({...exportFormatState.get(), showAll});
 }
