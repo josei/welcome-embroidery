@@ -175,6 +175,15 @@ export function createCanvasEditing(api){
     else api.render();
   }
 
+  // Escape during a node drag: forget the drag without committing. The node and its path are drawn from the document,
+  // so a re-render puts them back where the drag started and no undo entry is recorded.
+  function cancelNodeDrag(){
+    if(!interactionNow().nodeDrag)return false;
+    setInteraction({nodeDrag: null});
+    api.render();
+    return true;
+  }
+
   // ---- node insertion and deletion -----------------------------------------------------------------------------
   // Double-clicking a path inserts a node at the nearest point of its outline and selects it.
   function insertNodeAt(/** @type {any} */ o,/** @type {any} */ point){
@@ -208,5 +217,5 @@ export function createCanvasEditing(api){
   nodeActions.corner=()=>{const o=selectedObject(),i=selState().selNode;
     if(o?.kind==='path'&&i!==null&&o.handles?.[i])api.commit([{op:'set_path_node_type',id:o.id,index:i,type:'corner'}]);};
 
-  return {px,snapv,drawControls,showSnap,snapPt,insertNodeAt,deleteNode,pointerMove,finishDrag};
+  return {px,snapv,drawControls,showSnap,snapPt,insertNodeAt,deleteNode,pointerMove,finishDrag,cancelNodeDrag};
 }

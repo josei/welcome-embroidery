@@ -441,6 +441,14 @@ export function createCanvas(/** @type {any} */ api){
     if(s.type==='resize'){restore(s.els);if(!s.anchor||(Math.abs(s.sx-1)<1e-4&&Math.abs(s.sy-1)<1e-4)){refresh();return;}commitResize(s);}
   });
   window.addEventListener('pointercancel',e=>{touches.delete(e.pointerId);if(state?.type==='pinch'){state=null;panningState.set(false);return;}cancelState();});
+  // Escape during an object move, rotate or resize (or a node drag) cancels that drag and nothing else: it is stopped in
+  // the capture phase so the shortcut handler does not also clear the selection or switch tools. A press that never moved
+  // is not a drag, so Escape there keeps its usual meaning.
+  window.addEventListener('keydown',(/** @type {any} */ e)=>{
+    if(e.key!=='Escape')return;
+    if(state&&(state.type==='rotate'||state.type==='resize'||(state.type==='move'&&state.moved))){e.stopImmediatePropagation();cancelState();return;}
+    if(editing.cancelNodeDrag()){e.stopImmediatePropagation();}
+  },true);
 
   // ---- context menu ------------------------------------------------------------------------------------------
   function closeMenu(){menu?.remove();menu=null;}

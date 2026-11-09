@@ -3108,3 +3108,43 @@ test('autosave: a design too large to autosave shows one warning, not one per ed
  expect(await page.evaluate(()=>localStorage.getItem('welcome.autosave:'+sessionStorage.getItem('welcome.tabId')))).toBeNull();
  expect(errors).toEqual([]);
 });
+
+test('Escape cancels an object or node drag without recording an undo entry',async({page})=>{page.on('dialog',d=>d.accept());
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));
+ await page.goto('/');await newDesign(page);
+ // Object drag: Escape mid-drag puts the rectangle back, keeps the selection, and the release commits nothing.
+ await page.locator('#rect').click();await expect(page.locator('.object-row')).toHaveCount(1);
+ const id=await page.locator('.object-row.selected').getAttribute('data-id'),shape=page.locator(`#shapes [data-id="${id}"]`);
+ const x0=await shape.getAttribute('x'),b=await shape.boundingBox(),sx=b.x+b.width/2,sy=b.y+b.height/2;
+ await page.mouse.move(sx,sy);await page.mouse.down();await page.mouse.move(sx+60,sy+30,{steps:4});
+ await expect(page.locator('#shapes [data-id="'+id+'"]')).toHaveAttribute('transform',/translate/);
+ await page.keyboard.press('Escape');
+ await expect(page.locator('.object-row.selected')).toHaveCount(1);
+ await page.mouse.up();
+ await expect(page.locator(`#shapes [data-id="${id}"]`)).toHaveAttribute('x',x0);
+ await expect(page.locator(`#shapes [data-id="${id}"]`)).not.toHaveAttribute('transform',/translate/);
+ // With no drag in progress, Escape clears the selection as before.
+ await page.keyboard.press('Escape');await expect(page.locator('.object-row.selected')).toHaveCount(0);
+ // The last undo entry is still the rectangle's creation, not the cancelled drag.
+ await page.locator('#undo').click();await expect(page.locator('.object-row')).toHaveCount(0);
+ await page.locator('#redo').click();await expect(page.locator('.object-row')).toHaveCount(1);
+ await page.locator('#undo').click();await expect(page.locator('.object-row')).toHaveCount(0);
+
+ // Node drag: an imported path, edited with Enter, is dragged by one node and cancelled with Escape.
+ await page.locator('#file').setInputFiles({name:'escape.svg',mimeType:'image/svg+xml',buffer:Buffer.from('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><path d="M20 20 L80 20 L50 70 Z" fill="#527461"/></svg>')});
+ if(await page.locator('#discardDialog[open]').count())await page.locator('#discardDiscard').click();
+ await expect(page.locator('.object-row')).toHaveCount(1);await page.locator('.object-row').first().click();await expect(page.locator('.path-node')).toHaveCount(0);
+ await page.keyboard.press('Enter');await expect(page.locator('.path-node').first()).toBeAttached();
+ const rowsBeforeNodeDrag=await page.locator('.object-row').count();
+ const node=page.locator('.path-node').last(),cx0=await node.getAttribute('cx'),cy0=await node.getAttribute('cy'),nb=await node.boundingBox();
+ const nx=nb.x+nb.width/2,ny=nb.y+nb.height/2;
+ await page.mouse.move(nx,ny);await page.mouse.down();await page.mouse.move(nx+30,ny+15,{steps:4});
+ await page.keyboard.press('Escape');
+ await page.mouse.up();
+ await expect(page.locator('.path-node').last()).toHaveAttribute('cx',cx0);
+ await expect(page.locator('.path-node').last()).toHaveAttribute('cy',cy0);
+ // The Escape only cancelled the drag, so the node stays selected; the undo entry is the import, not a move.
+ await expect(page.locator('.path-node.selected-node')).toHaveCount(1);
+ await page.locator('#undo').click();await expect(page.locator('.object-row')).toHaveCount(rowsBeforeNodeDrag-1);
+ expect(errors).toEqual([]);
+});
