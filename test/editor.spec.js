@@ -3208,6 +3208,23 @@ test('Menus, the shortcut sheet and the export dialog work from the keyboard alo
  expect(errors).toEqual([]);
 });
 
+// Reload and accept the restore without any edit: the status compiles on its own and Export is enabled and downloads JEF.
+test('restore: a reloaded design compiles without an edit, and Export works straight after restore',async({page})=>{
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));
+ await page.goto('/');page.on('dialog',d=>d.accept());await newDesign(page);
+ await page.locator('#rect').click();await expect(page.locator('.object-row')).toHaveCount(1);
+ await page.waitForTimeout(1200);
+ await page.reload();await expect(page.locator('#restoreDialog')).toBeVisible();
+ await page.locator('#restoreYes').click();await expect(page.locator('#restoreDialog')).toBeHidden();
+ await expect(page.locator('.object-row')).toHaveCount(1);
+ await expect(page.locator('#count')).toContainText('stitches');
+ await expect(page.locator('#count')).not.toContainText('Compiling…');
+ await expect(page.locator('#export')).not.toHaveAttribute('aria-disabled','true');
+ const download=page.waitForEvent('download');await page.locator('#export').click();await page.locator('#format').selectOption('jef');await page.locator('#download').click();
+ expect((await download).suggestedFilename()).toContain('.jef');
+ expect(errors).toEqual([]);
+});
+
 // While the restore prompt is open the canvas behind it is blank, not the starter design; the starter loads only on Start fresh.
 // The object count uses singular and plural forms.
 test('restore prompt: blank canvas behind it, starter after Start fresh, and plural object counts',async({page})=>{

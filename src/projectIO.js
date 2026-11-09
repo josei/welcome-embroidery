@@ -288,9 +288,10 @@ export function acceptProject(next, notes = []) {
   setDocId(isDocId(docId) ? docId : undefined);
   fileHandle = null;
   setSave({savedAt: null, savedFileName: null});
-  wired().clearComputed();
   setSewingCounts({});
   setDocument({doc: opened});
+  // After the document is replaced: scheduleCompile skips a blank design, so clearing first left the restored one never compiled.
+  wired().clearComputed();
   setDocument({history: []});
   setDocument({future: []});
   setSelection({selected: documentNow().doc.objects[0]?.id || null});
