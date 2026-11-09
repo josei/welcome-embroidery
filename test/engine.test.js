@@ -211,7 +211,7 @@ test('text on path: glyphs follow an angled line and a circle, move with their t
  assert.throws(()=>{const bad=structuredClone(circle);bad.objects.find(o=>o.id==='tx').along.points=[[0,0]];validateDocument(bad);},/text-on-path/);
 });
 
-test('DST export: header, balanced-ternary records, trims, colour changes and end decode back to the plan',()=>{
+test('DST export: header, balanced-ternary records, trims, color changes and end decode back to the plan',()=>{
  const d={schema:'welcome/1',name:'Dst test',revision:0,hoop:110,settings:{spacing:.4,angle:0,underlay:false,compensation:0,trims:true},objects:[]};
  applyOperations(d,[{op:'add_path',id:'a',x:0,y:0,points:[[-30,0],[-10,0]],thread:'#527461'},{op:'add_path',id:'b',x:0,y:0,points:[[20,10],[40,10]],thread:'#d9897e'},{op:'add_path',id:'c',x:0,y:0,points:[[-40,-30],[-20,-10]],stitch:'satin',satinWidth:12,thread:'#d3ad61'}]);
  const plan=compile(d),bytes=encode(plan,'dst','#527461',110,d);assert.equal(bytes.length%3,512%3);const head=Buffer.from(bytes.subarray(0,512)).toString('latin1');
@@ -238,7 +238,7 @@ test('offset grows and shrinks closed shapes; stroke_to_shape outlines a path',(
  assert.throws(()=>applyOperations(blank(),[{op:'offset',id:'nope',distance:1}]),/Unknown object/);
 });
 
-test('arrays: linear, radial and along-path copies keep geometry and rotate about the right centre',()=>{
+test('arrays: linear, radial and along-path copies keep geometry and rotate about the right center',()=>{
  let d=blank();applyOperations(d,[{op:'add_shape',id:'s',kind:'rect',x:0,y:0,width:10,height:4},{op:'array',id:'s',mode:'linear',count:4,dx:15,dy:5}]);validateDocument(d);assert.equal(d.objects.length,4);assert.deepEqual(d.objects.map(o=>[o.x,o.y]),[[0,0],[15,5],[30,10],[45,15]]);assert.ok(d.objects.every((o,i)=>i===0||o.id!==d.objects[0].id));
  d=blank();applyOperations(d,[{op:'add_shape',id:'s',kind:'rect',x:18,y:-2,width:4,height:4},{op:'array',id:'s',mode:'radial',count:4,cx:0,cy:0}]);validateDocument(d);assert.equal(d.objects.length,4);
  const centers=d.objects.map(o=>{const b=objectBounds(o);return [(b[0]+b[2])/2,(b[1]+b[3])/2];});assert.ok(centers.every(c=>Math.abs(Math.hypot(c[0],c[1])-20)<.01),'all copies stay on the radius-20 circle');
@@ -265,13 +265,13 @@ test('sewing order and per-object fill settings',()=>{
  let d=blank();applyOperations(d,[{op:'add_shape',id:'a',kind:'rect',x:0,y:0,width:5,height:5,thread:'#d9897e'},{op:'add_shape',id:'b',kind:'rect',x:10,y:0,width:5,height:5,thread:'#527461'},{op:'add_shape',id:'c',kind:'rect',x:20,y:0,width:5,height:5,thread:'#d9897e'},{op:'add_shape',id:'e',kind:'rect',x:30,y:0,width:5,height:5,thread:'#527461'}]);
  const ids=()=>d.objects.map(o=>o.id).join('');applyOperations(d,[{op:'reorder',id:'a',to:'front'}]);assert.equal(ids(),'bcea');applyOperations(d,[{op:'reorder',id:'a',to:'backward'}]);assert.equal(ids(),'bcae');applyOperations(d,[{op:'reorder',id:'e',to:'back'},{op:'reorder',id:'b',to:'forward'}]);assert.equal(ids(),'ecba');assert.throws(()=>applyOperations(d,[{op:'reorder',id:'a',to:'sideways'}]),/Unknown reorder/);assert.equal(ids(),'ecba','a failed reorder keeps the order');
  d=blank();applyOperations(d,[{op:'add_shape',id:'a',kind:'rect',x:0,y:0,width:5,height:5,thread:'#d9897e'},{op:'add_shape',id:'b',kind:'rect',x:10,y:0,width:5,height:5,thread:'#527461'},{op:'add_shape',id:'c',kind:'rect',x:20,y:0,width:5,height:5,thread:'#d9897e'}]);
- const before=compile(d).stitches.filter(s=>s.cmd==='color').length;applyOperations(d,[{op:'sort_by_color'}]);assert.equal(d.objects.map(o=>o.id).join(''),'acb');assert.ok(compile(d).stitches.filter(s=>s.cmd==='color').length<before,'fewer colour changes after sorting');
+ const before=compile(d).stitches.filter(s=>s.cmd==='color').length;applyOperations(d,[{op:'sort_by_color'}]);assert.equal(d.objects.map(o=>o.id).join(''),'acb');assert.ok(compile(d).stitches.filter(s=>s.cmd==='color').length<before,'fewer color changes after sorting');
  const f=blank();applyOperations(f,[{op:'add_shape',id:'r',kind:'rect',x:0,y:0,width:20,height:20}]);const base=compile(f),tight=structuredClone(f);applyOperations(tight,[{op:'set_object',id:'r',spacing:.25}]);validateDocument(tight);assert.ok(compile(tight).count>base.count*1.4,'per-object row spacing');
  const ang=structuredClone(f);applyOperations(ang,[{op:'set_object',id:'r',angle:90}]);const rows=compile(ang).stitches.filter(s=>s.cmd==='stitch');assert.ok(rows.slice(1,20).filter((p,i)=>Math.abs(p.x-rows[i].x)<.01).length>10,'a 90° fill runs along the y axis');
  applyOperations(ang,[{op:'set_object',id:'r',angle:null,spacing:null}]);assert.equal(ang.objects[0].angle,undefined);assert.throws(()=>{const bad=structuredClone(f);bad.objects[0].spacing=5;validateDocument(bad);},/row spacing/);
 });
 
-test('SVG export: millimetre viewBox, holes, satin strokes, lettering and stitch layers',()=>{
+test('SVG export: millimeter viewBox, holes, satin strokes, lettering and stitch layers',()=>{
  const d=blank();d.hoop=100;d.hoopH=60;applyOperations(d,[{op:'add_shape',id:'r',kind:'rect',x:-20,y:-20,width:40,height:40,thread:'#d9897e'},{op:'add_shape',id:'c',kind:'ellipse',x:-5,y:-5,width:10,height:10},{op:'subtract',targetId:'r',cutterId:'c'},{op:'add_path',id:'s',name:'Stem & leaf',x:0,y:0,points:[[0,10],[5,25]],stitch:'satin',satinWidth:4,thread:'#527461'},{op:'add_text',id:'t',text:'HI',x:-10,y:30,height:8}]);
  const svg=exportSvg(d);assert.match(svg,/width="100mm" height="60mm" viewBox="-50 -30 100 60"/);assert.match(svg,/fill-rule="evenodd"/);assert.equal((svg.match(/Z/g)||[]).length,2,'outer ring and hole are both closed');assert.match(svg,/stroke-width="4" stroke-linecap="butt"/);assert.match(svg,/<title>Stem &amp; leaf<\/title>/);assert.ok((svg.match(/<path /g)||[]).length===3);
  const layer=importStitchLayer(pinnedMachineFixture('jef').bytes,'jef',{fileName:'x.jef'});const e=blank();e.objects=[layer];assert.match(exportSvg(e),/<g><title>.*<\/title><path d="M/);
@@ -287,9 +287,9 @@ const FONT_ROOT=new URL('..',import.meta.url).pathname;
 loadBundledFonts(FONT_ROOT);
 const textDoc=(font,extra={})=>{const d=blank();d.hoop=250;applyOperations(d,[{op:'add_text',id:'t',text:extra.text??'Hello',x:-40,y:0,font,thread:'#527461',...extra}]);return d;};
 
-test('bundled fonts: 117 Ink/Stitch conversions and 78 TrueType outlines are registered with licences and sane metrics',()=>{
+test('bundled fonts: 117 Ink/Stitch conversions and 78 TrueType outlines are registered with licenses and sane metrics',()=>{
  const ink=[...registry.keys()].filter(k=>k.startsWith('inkstitch/')),ttf=[...registry.keys()].filter(k=>k.startsWith('ttf/'));assert.equal(ink.length,117);assert.equal(ttf.length,78);
- for(const [k,f] of registry){assert.ok(f.name&&f.license,`${k} has a name and licence`);assert.ok(!/NC|ND/.test(f.license.replace(/\bSIL\b/,'')),`${k} licence ${f.license} permits commercial use and derivatives`);assert.ok(f.unitsPerEm>0&&f.glyphs['A']||f.glyphs['a']||f.glyphs['1']||Object.keys(f.glyphs).length>10,`${k} has glyphs`);assert.ok(f.size>0&&f.minScale<f.maxScale);}
+ for(const [k,f] of registry){assert.ok(f.name&&f.license,`${k} has a name and license`);assert.ok(!/NC|ND/.test(f.license.replace(/\bSIL\b/,'')),`${k} license ${f.license} permits commercial use and derivatives`);assert.ok(f.unitsPerEm>0&&f.glyphs['A']||f.glyphs['a']||f.glyphs['1']||Object.keys(f.glyphs).length>10,`${k} has glyphs`);assert.ok(f.size>0&&f.minScale<f.maxScale);}
  assert.ok(registry.get('inkstitch/emilio_20').glyphs['A'].p.some(p=>p[0]==='s'),'Emilio 20 is satin');assert.ok(registry.get('inkstitch/neon_blinking').glyphs['A'].p.every(p=>p[0]==='r'),'Néon blinking is running stitch');assert.equal(registry.get('ttf/lato').kind,'outline');
 });
 
@@ -329,13 +329,13 @@ test('TrueType parser: Lato outlines convert to filled rings with holes, and cus
  const gone=structuredClone(d);delete gone.customFonts;assert.throws(()=>validateDocument(gone),/font/);assert.throws(()=>{const bad=structuredClone(d);bad.customFonts.mylato.glyphs=null;validateDocument(bad);},/custom font/);
 });
 
-test('rotation about a pivot: each centre moves about the point, rotating about its own centre keeps it, and transform takes a pivot key',()=>{
+test('rotation about a pivot: each center moves about the point, rotating about its own center keeps it, and transform takes a pivot key',()=>{
  const mk=()=>{const d=blank();d.hoop=250;return d;},centre=o=>{const b=objectBounds(o);return [(b[0]+b[2])/2,(b[1]+b[3])/2];},near=(p,q)=>assert.ok(Math.abs(p[0]-q[0])<.01&&Math.abs(p[1]-q[1])<.01,`${p} != ${q}`);
  let d=mk();applyOperations(d,[{op:'add_shape',id:'a',kind:'rect',x:9,y:-1,width:2,height:2},{op:'add_shape',id:'b',kind:'rect',x:-1,y:9,width:2,height:2},{op:'rotate',ids:['a','b'],angle:90,cx:0,cy:0}]);
  near(centre(d.objects[0]),[0,10]);near(centre(d.objects[1]),[-10,0]);assert.equal(d.objects[0].rotation,90,'each object turns by the angle');
  d=mk();applyOperations(d,[{op:'add_shape',id:'a',kind:'rect',x:9,y:-1,width:2,height:2},{op:'rotate',ids:['a'],angle:45,cx:10,cy:0}]);near(centre(d.objects[0]),[10,0]);
  d=mk();applyOperations(d,[{op:'add_shape',id:'a',kind:'rect',x:9,y:-1,width:2,height:2},{op:'transform',id:'a',rotation:90,pivot:{x:0,y:0}}]);validateDocument(d);near(centre(d.objects[0]),[0,10]);assert.equal(d.objects[0].rotation,90);
- applyOperations(d,[{op:'transform',id:'a',rotation:180,pivot:{x:0,y:0}}]);near(centre(d.objects[0]),[-10,0]);assert.equal(d.objects[0].rotation,180,'the pivot key turns by the change in rotation, not to an absolute centre');
+ applyOperations(d,[{op:'transform',id:'a',rotation:180,pivot:{x:0,y:0}}]);near(centre(d.objects[0]),[-10,0]);assert.equal(d.objects[0].rotation,180,'the pivot key turns by the change in rotation, not to an absolute center');
  applyOperations(d,[{op:'transform',id:'a',rotation:-180}]);assert.equal(d.objects[0].rotation,-180,'without a pivot the rotation is set as before');
 });
 
@@ -361,7 +361,7 @@ test('measure tool helper: distance and signed parts between two points',()=>{
 test('direct manipulation ops: scale, rotate about a pivot, flip, translate, to_path and lock/hide',()=>{
  const mk=()=>{const d=blank();d.hoop=250;return d;};
  let d=mk();applyOperations(d,[{op:'add_shape',id:'r',kind:'rect',x:10,y:10,width:20,height:10},{op:'scale',ids:['r'],sx:2,sy:3,ox:10,oy:10}]);validateDocument(d);assert.deepEqual([d.objects[0].x,d.objects[0].y,d.objects[0].w,d.objects[0].h],[10,10,40,30],'scale about the top-left corner');
- applyOperations(d,[{op:'scale',ids:['r'],sx:.5,sy:.5,ox:30,oy:25}]);assert.deepEqual([d.objects[0].x,d.objects[0].y,d.objects[0].w,d.objects[0].h],[20,17.5,20,15],'scale about the centre');
+ applyOperations(d,[{op:'scale',ids:['r'],sx:.5,sy:.5,ox:30,oy:25}]);assert.deepEqual([d.objects[0].x,d.objects[0].y,d.objects[0].w,d.objects[0].h],[20,17.5,20,15],'scale about the center');
  d=mk();applyOperations(d,[{op:'add_shape',id:'r',kind:'rect',x:0,y:0,width:20,height:10},{op:'transform',id:'r',rotation:90},{op:'scale',ids:['r'],sx:2,sy:1,ox:10,oy:5}]);validateDocument(d);assert.equal(d.objects[0].kind,'path','a rotated rectangle becomes a path for non-uniform scaling');const b=objectBounds(d.objects[0]);assert.ok(Math.abs((b[2]-b[0])-20)<.01&&Math.abs((b[3]-b[1])-20)<.01,'its 10x20 rotated footprint is stretched to 20x20');
  d=mk();applyOperations(d,[{op:'add_path',id:'p',x:0,y:0,points:[[0,0],[10,0],[10,10]],closed:true,stitch:'fill'},{op:'scale',ids:['p'],sx:3,sy:3,ox:0,oy:0}]);assert.deepEqual(d.objects[0].points,[[0,0],[30,0],[30,30]]);
  d=mk();applyOperations(d,[{op:'add_text',id:'t',text:'AB',x:0,y:20,height:8},{op:'scale',ids:['t'],sx:1.5,sy:1.5,ox:0,oy:0}]);validateDocument(d);assert.ok(Math.abs(d.objects[0].h-12)<.01&&Math.abs(d.objects[0].y-30)<.01,'text size and baseline scale');
@@ -567,11 +567,11 @@ test('clipping masks: fills, satin, lettering and borders are sewn only inside t
  const out=blank();applyOperations(out,[{op:'add_shape',id:'a',kind:'rect',x:-30,y:-30,width:5,height:5},{op:'add_shape',id:'b',kind:'rect',x:20,y:20,width:5,height:5},{op:'add_shape',id:'z',kind:'rect',x:0,y:0,width:5,height:5},{op:'clip',ids:['a'],maskId:'b'}]);const op=compile(out);assert.ok(op.issues.some(i=>/outside its clipping mask/.test(i.message)),'an object entirely outside its mask is reported');
 });
 
-test('colour blend fill: two threads share the rows, the second thread takes over from one end to the other',()=>{
+test('color blend fill: two threads share the rows, the second thread takes over from one end to the other',()=>{
  const d=blank();d.settings.underlay=false;applyOperations(d,[{op:'add_shape',id:'a',kind:'rect',x:0,y:0,width:30,height:20,thread:'#527461'},{op:'set_object',id:'a',angle:0,blendThread:'#d9897e'}]);validateDocument(d);
  const p=compile(d),A=p.stitches.filter(s=>s.cmd==='stitch'&&s.thread==='#527461'),B=p.stitches.filter(s=>s.cmd==='stitch'&&s.thread==='#d9897e');assert.deepEqual(p.errors,[]);assert.ok(A.length>100&&B.length>100,'both threads are sewn');
  const meanY=a=>a.reduce((n,s)=>n+s.y,0)/a.length;assert.ok(meanY(B)>meanY(A)+3,'the second thread is concentrated at the far end');
- const rows=new Set(A.map(s=>Math.round(s.y*10))),rowsB=new Set(B.map(s=>Math.round(s.y*10)));assert.ok([...rows].every(r=>!rowsB.has(r)),'no row is sewn in both colours');assert.ok(p.stitches.filter(s=>s.cmd==='color').length>=1);
+ const rows=new Set(A.map(s=>Math.round(s.y*10))),rowsB=new Set(B.map(s=>Math.round(s.y*10)));assert.ok([...rows].every(r=>!rowsB.has(r)),'no row is sewn in both colors');assert.ok(p.stitches.filter(s=>s.cmd==='color').length>=1);
  let max=0;const n=p.stitches.filter(s=>s.cmd==='stitch');for(let i=1;i<n.length;i++)if(n[i].thread===n[i-1].thread)max=Math.max(max,Math.hypot(n[i].x-n[i-1].x,n[i].y-n[i-1].y));assert.ok(max<12.2);
  applyOperations(d,[{op:'set_object',id:'a',blendStart:.5,blendEnd:.5}]);const half=compile(d);assert.ok(half.stitches.filter(s=>s.cmd==='stitch'&&s.thread==='#d9897e').every(s=>s.y>9.4),'a hard edge at 50%');
  assert.throws(()=>{const e=blank();applyOperations(e,[{op:'add_shape',id:'r',kind:'rect',x:0,y:0,width:5,height:5,stitch:'run'}]);e.objects[0].blendThread='#d9897e';validateDocument(e);},/blend/);
@@ -596,13 +596,13 @@ test('embroidery options: bean run, stitch length for runs, length variance, per
  assert.ok(cn.filter(s=>Math.abs((s.x/2.5)%1)<.02&&Math.abs((s.y/2.5)%1)<.02).length>cn.length*.85,'needles sit on the cell grid');
  // appliqué
  d=base();applyOperations(d,[{op:'add_shape',id:'a',kind:'ellipse',x:0,y:0,width:30,height:20},{op:'set_object',id:'a',applique:true,appliqueWidth:2.5,borderThread:'#d9897e'}]);validateDocument(d);
- const ap=compile(d);assert.deepEqual(ap.errors,[]);const ev=ap.stitches.filter(s=>s.cmd==='stop'||s.cmd==='color');assert.ok(ap.stitches.filter(s=>s.cmd==='stop').length>=1&&ev.length===2,`placement, stop, tack-down, colour change, cover: ${ev.map(e=>e.cmd)}`);
+ const ap=compile(d);assert.deepEqual(ap.errors,[]);const ev=ap.stitches.filter(s=>s.cmd==='stop'||s.cmd==='color');assert.ok(ap.stitches.filter(s=>s.cmd==='stop').length>=1&&ev.length===2,`placement, stop, tack-down, color change, cover: ${ev.map(e=>e.cmd)}`);
  const an=ap.stitches.filter(s=>s.cmd==='stitch'),inside=an.filter(s=>((s.x-15)/13.8)**2+((s.y-10)/8.8)**2<.6);assert.ok(inside.length<an.length*.15,'the area is not filled');assert.ok(an.length>200);
  for(const f of ['jef','vp3','dst'])assert.ok(encode(ap,f,undefined,110,d).length>100,`${f} export of an appliqué`);
  assert.throws(()=>{const e=base();applyOperations(e,[{op:'add_shape',id:'r',kind:'rect',x:0,y:0,width:5,height:5,stitch:'run'}]);e.objects[0].applique=true;validateDocument(e);},/appliqué/);
 });
 
-test('colour blend on contour and spiral fills keeps the whole shape',()=>{
+test('color blend on contour and spiral fills keeps the whole shape',()=>{
  for(const fillMethod of ['contour','spiral']){
   const d=blank();d.settings.underlay=false;
   applyOperations(d,[{op:'add_shape',id:'a',kind:'rect',x:-30,y:-15,width:60,height:30,thread:'#527461'},{op:'set_object',id:'a',angle:0,fillMethod}]);
@@ -619,12 +619,12 @@ test('a blend palette fades through its threads in order across the fill',()=>{
  const mean=c=>{const a=p.stitches.filter(s=>s.cmd==='stitch'&&s.thread===c);return a.length?a.reduce((n,s)=>n+s.x,0)/a.length:NaN;};
  const m=cols.map(mean);
  assert.ok(m.every(Number.isFinite),'all three palette threads sewn');
- assert.ok(m[0]<m[1]&&m[1]<m[2],'colours run in palette order across the shape');
+ assert.ok(m[0]<m[1]&&m[1]<m[2],'colors run in palette order across the shape');
  assert.throws(()=>{d.objects[0].blendThread='#d9897e';validateDocument(d);},/not both/);
  assert.throws(()=>{d.objects[0].blendThread=undefined;d.objects[0].blendPalette=['#527461'];validateDocument(d);},/blendPalette/);
 });
 
-test('colour blend in any direction and for other patterns; underpath keeps shapes in few runs',()=>{
+test('color blend in any direction and for other patterns; underpath keeps shapes in few runs',()=>{
  const d=blank();d.settings.underlay=false;
  applyOperations(d,[{op:'add_shape',id:'a',kind:'rect',x:0,y:0,width:40,height:20,thread:'#527461'},{op:'set_object',id:'a',angle:0,blendThread:'#d9897e',blendAngle:0}]);validateDocument(d);
  let p=compile(d);const A=p.stitches.filter(s=>s.cmd==='stitch'&&s.thread==='#527461'),B=p.stitches.filter(s=>s.cmd==='stitch'&&s.thread==='#d9897e'),mx=a=>a.reduce((n,s)=>n+s.x,0)/a.length;
@@ -637,7 +637,7 @@ test('colour blend in any direction and for other patterns; underpath keeps shap
  assert.ok(jumps(true)<=jumps(false)&&jumps(true)<=1);d.objects[0].blendAngle=0;assert.throws(()=>{d.objects[0].underpath='yes';validateDocument(d);},/underpath/);
 });
 
-test('ripple fill: scaled copies of the outline towards a centre, clipped to the shape',()=>{
+test('ripple fill: scaled copies of the outline towards a center, clipped to the shape',()=>{
  const d=blank();d.settings.underlay=false;applyOperations(d,[{op:'add_shape',id:'a',kind:'ellipse',x:0,y:0,width:40,height:24},{op:'set_object',id:'a',fillMethod:'ripple'}]);validateDocument(d);
  let p=compile(d);assert.deepEqual(p.errors,[]);let n=p.stitches.filter(s=>s.cmd==='stitch');assert.ok(n.length>300);assert.ok(n.every(s=>((s.x-20)/20.2)**2+((s.y-12)/12.2)**2<=1.01),'inside the ellipse');assert.ok(p.stitches.filter(s=>s.cmd==='jump').length<=1);
  applyOperations(d,[{op:'set_object',id:'a',rippleCenter:[0,.5]}]);p=compile(d);n=p.stitches.filter(s=>s.cmd==='stitch');assert.ok(n.every(s=>((s.x-20)/20.2)**2+((s.y-12)/12.2)**2<=1.01),'still inside with an off-centre target');
@@ -646,7 +646,7 @@ test('ripple fill: scaled copies of the outline towards a centre, clipped to the
  const e=blank();applyOperations(e,[{op:'add_path',id:'u',x:0,y:0,points:[[0,0],[10,0],[10,15],[20,15],[20,0],[30,0],[30,25],[0,25]],closed:true,stitch:'fill'},{op:'set_object',id:'u',fillMethod:'ripple'}]);const q=compile(e);assert.deepEqual(q.errors,[]);assert.ok(q.stitches.filter(s=>s.cmd==='stitch').every(s=>!(s.x>10.1&&s.x<19.9&&s.y<14.9)),'nothing sewn in the notch');
 });
 
-test('photo stitch: a grey picture becomes rows of zigzags that are wider where the picture is dark',()=>{
+test('photo stitch: a gray picture becomes rows of zigzags that are wider where the picture is dark',()=>{
  const pw=40,ph=20,gray=Buffer.alloc(pw*ph);for(let y=0;y<ph;y++)for(let x=0;x<pw;x++)gray[y*pw+x]=x<pw/2?20:235;   // dark left half, light right half
  const d=blank();d.settings.underlay=false;applyOperations(d,[{op:'add_shape',id:'p',kind:'rect',x:0,y:0,width:40,height:20},{op:'set_object',id:'p',photo:{pw,ph,data:gray.toString('base64'),spacing:.8}}]);validateDocument(d);
  const p=compile(d);assert.deepEqual(p.errors,[]);const n=p.stitches.filter(s=>s.cmd==='stitch');assert.ok(n.length>800&&p.stitches.filter(s=>s.cmd==='jump').length<=1,'the dark half is one continuous line');assert.equal(n.filter(s=>s.x>22).length,0,'nothing is sewn where the picture is white');
@@ -685,18 +685,18 @@ test('reference image: set, move, hide, clear and validate; it never affects the
  applyOperations(d,[{op:'set_reference',data:png,x:-30,y:-20,w:60,h:40,opacity:.5,name:'sketch.png'}]);validateDocument(d);assert.equal(d.reference.w,60);
  assert.equal(compile(d).count,before,'the reference is not sewn');
  applyOperations(d,[{op:'set_reference',opacity:.8,visible:false,locked:true}]);validateDocument(d);assert.equal(d.reference.data,png,'moving keeps the picture');assert.equal(d.reference.visible,false);
- assert.throws(()=>{d.reference.opacity=2;validateDocument(d);},/opacity/);d.reference.opacity=.5;assert.throws(()=>{d.reference.data='data:text/html;base64,AAAA';validateDocument(d);},/reference image/);d.reference.data=png;assert.throws(()=>{d.reference.w=0;validateDocument(d);},/millimetres/);d.reference.w=60;
+ assert.throws(()=>{d.reference.opacity=2;validateDocument(d);},/opacity/);d.reference.opacity=.5;assert.throws(()=>{d.reference.data='data:text/html;base64,AAAA';validateDocument(d);},/reference image/);d.reference.data=png;assert.throws(()=>{d.reference.w=0;validateDocument(d);},/millimeters/);d.reference.w=60;
  applyOperations(d,[{op:'clear_reference'}]);assert.equal(d.reference,undefined);validateDocument(d);
 });
 
-test('DST import: exported DST files come back as stitch layers with the same geometry, trims and colour blocks',async()=>{
+test('DST import: exported DST files come back as stitch layers with the same geometry, trims and color blocks',async()=>{
  const {decodeEmbroidery}=await import('../src/readers.js');
  const d=initialDocument(),plan=compile(d),bytes=encode(plan,'dst',undefined,d.hoop,d),layer=importStitchLayer(bytes,'dst',{fileName:'x.dst'});
  const sew=plan.stitches.filter(s=>s.cmd==='stitch'),got=layer.stitches.filter(s=>s.cmd==='stitch');assert.equal(got.length,sew.length);
  let worst=0;sew.forEach((s,i)=>{worst=Math.max(worst,Math.hypot(s.x-got[i].x,s.y-got[i].y));});assert.ok(worst<=.06,`positions within rounding (${worst} mm)`);
- assert.equal(layer.stitches.filter(s=>s.cmd==='color').length,plan.stitches.filter(s=>s.cmd==='color').length,'colour changes survive');
+ assert.equal(layer.stitches.filter(s=>s.cmd==='color').length,plan.stitches.filter(s=>s.cmd==='color').length,'color changes survive');
  assert.equal(layer.stitches.filter(s=>s.cmd==='trim').length,plan.stitches.filter(s=>s.cmd==='trim').length,'trims survive');
- assert.equal(layer.threads.length,plan.colors.length>0?layer.threads.length:1);assert.ok(layer.source.warnings.some(w=>/no thread colours/.test(w)));
+ assert.equal(layer.threads.length,plan.colors.length>0?layer.threads.length:1);assert.ok(layer.source.warnings.some(w=>/no thread colors/.test(w)));
  const doc=blank();doc.objects.push(layer);validateDocument(doc);assert.ok(compile(doc).count>=sew.length,'the layer compiles as part of a design');
  assert.throws(()=>decodeEmbroidery(new Uint8Array(600),'dst'),/header/);assert.throws(()=>decodeEmbroidery(new Uint8Array(10),'dst'),/too short/);
  // round trip through every writer: DST -> layer -> DST gives the same needles
@@ -719,7 +719,7 @@ test('three-tone photo stitch: light, mid-tone and main threads are sewn in that
  const p=compile(d);assert.deepEqual(p.errors,[]);const seq=p.stitches.filter(s=>s.cmd==='stitch').map(s=>s.thread),f=c=>seq.indexOf(c),l=c=>seq.lastIndexOf(c);
  assert.ok(f('#d3ad61')>=0&&f('#d9897e')>=0&&f('#527461')>=0,'all three threads are used');assert.ok(l('#d3ad61')<f('#d9897e')&&l('#d9897e')<f('#527461'),'light, then mid, then dark');
  const mx=c=>{const a=p.stitches.filter(s=>s.cmd==='stitch'&&s.thread===c);return a.reduce((n,s)=>n+s.x,0)/a.length;};assert.ok(mx('#527461')>mx('#d9897e'),'dark detail sits further toward the dark side than the mid-tones');assert.ok(Math.abs(mx('#d9897e'))<8,'the mid-tone thread concentrates around the middle of the ramp');
- assert.equal(p.stitches.filter(s=>s.cmd==='color').length,2,'two colour changes');
+ assert.equal(p.stitches.filter(s=>s.cmd==='color').length,2,'two color changes');
  assert.throws(()=>{d.objects[0].photo={pw,ph,data:gray.toString('base64'),thread3:'#d9897e'};validateDocument(d);},/third thread/);
 });
 
@@ -743,7 +743,7 @@ test('continue digitizing extends a closed path in place, opens it, and closes i
  validateDocument(doc);assert.ok(compile(doc).count>0);
 });
 
-test('raised satin adds a centre run and zigzag underlay under the same column',()=>{
+test('raised satin adds a center run and zigzag underlay under the same column',()=>{
  const doc=initialDocument();doc.objects=[];doc.settings.underlay=false;
  applyOperations(doc,[{op:'add_path',id:'s',x:0,y:0,points:[[-20,0],[0,0],[20,0]],stitch:'satin',satinWidth:4}]);
  const flat=compile(doc).count;
@@ -850,7 +850,7 @@ test('motif spacing and size change how many loops are sewn',()=>{
  applyOperations(doc,[{op:'set_object',id:'m',motifSize:9}]);assert.throws(()=>validateDocument(doc),/motif spacing or size/);
 });
 
-test('sequins sew a centre stitch with a fixing loop every few mm',()=>{
+test('sequins sew a center stitch with a fixing loop every few mm',()=>{
  const doc=initialDocument();doc.objects=[];
  applyOperations(doc,[{op:'add_path',id:'s',x:0,y:0,points:[[-20,0],[20,0]]},{op:'set_object',id:'s',stitch:'sequin'}]);
  validateDocument(doc);
@@ -867,7 +867,7 @@ test('beads sew one short pass across the path at each point',()=>{
  assert.ok(plan.count>=10&&plan.count<=30,'each bead is sewn once ('+plan.count+' stitches)');
 });
 
-test('bling sews a stone with a centre stitch and two fixing rings',()=>{
+test('bling sews a stone with a center stitch and two fixing rings',()=>{
  const doc=initialDocument();doc.objects=[];
  applyOperations(doc,[{op:'add_path',id:'g',x:0,y:0,points:[[-20,0],[20,0]]},{op:'set_object',id:'g',stitch:'bling'}]);
  validateDocument(doc);
@@ -907,10 +907,10 @@ test('svg fill rule: one closed filled subpath becomes a fill; counters, open or
  assert.deepEqual(svgPathFill('#d9897e','#2f5d4a',square),{fill:false,note:null,holes:0,islands:0,depths:[]},'a stroked path keeps its stroke import');
 });
 
-test('my threads: a colour maps to the nearest listed thread, an empty list maps to nothing, and invalid lines are counted',()=>{
+test('my threads: a color maps to the nearest listed thread, an empty list maps to nothing, and invalid lines are counted',()=>{
  assert.deepEqual(nearestStockThread('#ff0000',['#0000ff','#fe0101','#00ff00']),{hex:'#fe0101',index:2,distance:3});
  assert.equal(nearestStockThread('#ff0000',[]),null,'an empty stock maps to nothing');
- assert.deepEqual(parseThreadStock('#abc\n#112233\nzzz\n#112233, #ABCDEF'),{colours:['#112233','#abcdef'],invalid:2},'valid hex colours once each, and the rest counted');
+ assert.deepEqual(parseThreadStock('#abc\n#112233\nzzz\n#112233, #ABCDEF'),{colours:['#112233','#abcdef'],invalid:2},'valid hex colors once each, and the rest counted');
 });
 
 test('stem run: stitches alternate to each side of the path, half a stem width away, and both ends sit on the path',()=>{
@@ -978,7 +978,7 @@ test('knife: a line across a closed shape gives two closed pieces; a line that m
  assert.throws(()=>applyOperations(doc,[{op:'knife',id:'p',a:[-5,5],b:[25,5]}]),/Knife cuts a closed shape/);
 });
 
-test('redwork by colour: selected paths become redwork runs, grouped by thread so each thread sews as one block',()=>{
+test('redwork by color: selected paths become redwork runs, grouped by thread so each thread sews as one block',()=>{
  const doc=initialDocument();doc.objects=[];
  applyOperations(doc,[{op:'add_path',id:'a1',x:0,y:0,points:[[-30,-20],[30,-20]],thread:'#ff0000'},{op:'add_path',id:'b1',x:0,y:0,points:[[-30,0],[30,0]],thread:'#0000ff'},{op:'add_path',id:'a2',x:0,y:0,points:[[-30,20],[30,20]],thread:'#ff0000'}]);
  applyOperations(doc,[{op:'redwork_group',ids:['a1','b1','a2']}]);
@@ -995,7 +995,7 @@ test('pear stones compile and validate, and differ from marquise stones',()=>{
  assert.notDeepEqual(compile(pear).stitches,compile(marquise).stitches,'the round end gives different stitches from the pointed end');
 });
 
-test('cushion stones are six millimetres across the path, turn with it, and differ from square stones',()=>{
+test('cushion stones are six millimeters across the path, turn with it, and differ from square stones',()=>{
  const sewn=(points,shape)=>{const doc=initialDocument();doc.objects=[];applyOperations(doc,[{op:'add_path',id:'g',x:0,y:0,points},{op:'set_object',id:'g',stitch:'bling',motifSize:6,blingShape:shape,stoneTurn:true}]);validateDocument(doc);const plan=compile(doc);assert.deepEqual(plan.errors,[]);return plan;};
  const width=(b)=>b[2]-b[0],height=(b)=>b[3]-b[1];
  const flat=sewn([[-20,0],[20,0]],'cushion'),square=sewn([[-20,0],[20,0]],'square');
@@ -1086,7 +1086,7 @@ test('twin sequins sew two sequins side by side across the path, and only accept
  assert.throws(()=>validateDocument(doc),/sequinTwin/);
 });
 
-test('heart bling stones are six millimetres across the path, turn with it, and sew their own stitch count',()=>{
+test('heart bling stones are six millimeters across the path, turn with it, and sew their own stitch count',()=>{
  const sewn=(points,shape)=>{const doc=initialDocument();doc.objects=[];applyOperations(doc,[{op:'add_path',id:'g',x:0,y:0,points},{op:'set_object',id:'g',stitch:'bling',motifSize:6,blingShape:shape}]);validateDocument(doc);const plan=compile(doc);assert.deepEqual(plan.errors,[]);return plan;};
  const width=(b)=>b[2]-b[0],height=(b)=>b[3]-b[1];
  const flat=sewn([[-20,0],[20,0]],'heart'),round=sewn([[-20,0],[20,0]],'round');
@@ -1119,7 +1119,7 @@ test('dot beads are small round beads the size of the bead length; dash beads st
  assert.throws(()=>validateDocument(doc),/bead shape/);
 });
 
-test('twin beads sit one either side of the centre line, side by side across the path, and only accept true or false',()=>{
+test('twin beads sit one either side of the center line, side by side across the path, and only accept true or false',()=>{
  const sewn=(extra)=>{const doc=initialDocument();doc.objects=[];applyOperations(doc,[{op:'add_path',id:'b',x:0,y:0,points:[[-20,0],[20,0]]},{op:'set_object',id:'b',stitch:'bead',motifSize:2,...extra}]);validateDocument(doc);const plan=compile(doc);assert.deepEqual(plan.errors,[]);return plan;};
  const height=(b)=>b[3]-b[1];
  const single=sewn({beadShape:'dot'}),twin=sewn({beadShape:'dot',beadTwin:true});
@@ -1158,11 +1158,11 @@ test('laydown underlay sews a light fill at wide rows under a fill, stays inside
  assert.throws(()=>validateDocument(doc),/laydown underlay/);
 });
 
-test('print template is a 1:1 millimetre sheet the size of the hoop, with the design outline inside it and a 10 mm scale bar',()=>{
+test('print template is a 1:1 millimeter sheet the size of the hoop, with the design outline inside it and a 10 mm scale bar',()=>{
  const doc=initialDocument();doc.objects=[];doc.hoop=100;doc.hoopH=80;
  applyOperations(doc,[{op:'add_shape',id:'r',kind:'rect',x:-10,y:-5,width:20,height:10}]);
  const svg=exportPrintTemplate(doc);
- assert.match(svg,/width="100mm" height="80mm" viewBox="-50 -40 100 80"/,'the sheet is the hoop in millimetres, centred on the origin');
+ assert.match(svg,/width="100mm" height="80mm" viewBox="-50 -40 100 80"/,'the sheet is the hoop in millimeters, centered on the origin');
  // Design outlines are the green paths; every point must sit inside the hoop (|x| <= 50, |y| <= 40).
  const design=[...svg.matchAll(/<path d="([^"]+)" fill="none" stroke="#2f5d4a"/g)].map(m=>m[1]);
  assert.equal(design.length,1,'one design outline for the one shape');
@@ -1338,14 +1338,14 @@ test('a document can hold up to 16 custom fonts, and a 17th is refused',()=>{
  assert.throws(()=>validateDocument(tooMany),/at most 16 fonts/);
 });
 
-test('vertical lettering stacks one letter under another, centred on its x position, and refuses multi-line, path and legacy-font use',()=>{
+test('vertical lettering stacks one letter under another, centered on its x position, and refuses multi-line, path and legacy-font use',()=>{
  const extent=(b)=>({w:b[2]-b[0],h:b[3]-b[1]});
  const stitched=(extra)=>{const d=textDoc('ttf/lato',{text:'ABC',height:10,...extra});validateDocument(d);const p=compile(d);assert.deepEqual(p.errors,[]);return p;};
  const across=stitched({}),down=stitched({vertical:true});
  assert.ok(extent(down.bounds).h>extent(across.bounds).h*1.5,'a vertical word is much taller than the same word across ('+extent(down.bounds).h+' vs '+extent(across.bounds).h+')');
  assert.ok(extent(down.bounds).w<extent(across.bounds).w/2,'and much narrower (one letter wide)');
  // textDoc places its lettering at x = -40, so the column's middle should be there.
- assert.ok(Math.abs((down.bounds[0]+down.bounds[2])/2+40)<1,'the column is centred on the lettering x position (its middle is at x = -40, the lettering position)');
+ assert.ok(Math.abs((down.bounds[0]+down.bounds[2])/2+40)<1,'the column is centered on the lettering x position (its middle is at x = -40, the lettering position)');
  assert.throws(()=>{const d=textDoc('ttf/lato',{text:'A\nB',vertical:true});validateDocument(d);},/one line/);
  assert.throws(()=>{const d=textDoc('ttf/lato',{text:'AB'});applyOperations(d,[{op:'add_path',id:'p',x:0,y:0,points:[[-20,0],[20,0]]},{op:'text_on_path',textId:'t',pathId:'p'}]);d.objects.find(o=>o.id==='t').vertical=true;validateDocument(d);},/cannot follow a path/);
  assert.throws(()=>{const d=textDoc('welcome-mono/1',{text:'AB',vertical:true});validateDocument(d);},/bundled or loaded font/);
@@ -1451,19 +1451,19 @@ test('PES v6 export has its own signature, a thread table and the PEC block it p
  assert.equal(String.fromCharCode(...bytes.slice(pec,pec+3)),'LA:');
 });
 
-test('SEW export has a colour header, zero padding to 0x1D78 and decodes back to the planned path',async()=>{
+test('SEW export has a color header, zero padding to 0x1D78 and decodes back to the planned path',async()=>{
  const {encodeSew}=await import('../src/engine.js');
  const doc=initialDocument();doc.objects=[];
  applyOperations(doc,[{op:'add_shape',id:'a',kind:'rect',x:-30,y:-20,width:24,height:14,thread:'#527461',stitch:'fill'},{op:'add_path',id:'b',x:0,y:0,points:[[-30,10],[0,10],[30,10]],thread:'#d9897e',stitch:'run'}]);
  const plan=compile(doc),bytes=encodeSew(plan);
  const count=bytes[0]|(bytes[1]<<8),indices=[...Array(count)].map((_,k)=>bytes[2+2*k]|(bytes[3+2*k]<<8));
- assert.equal(count,2,'one colour change gives two colour blocks');
+ assert.equal(count,2,'one color change gives two color blocks');
  assert.notEqual(indices[0],indices[1]);assert.ok(indices.every(i=>i>=0&&i<79),'indices point into the 79-entry Janome thread set');
  assert.ok(bytes.length>0x1D78);assert.ok(bytes.slice(2+2*count,0x1D78).every(b=>b===0),'header padding is zero');
  assert.deepEqual([...bytes.slice(-4)],[0x80,0,0,0],'the stream ends with the end record');
  let x=0,y=0,i=0x1D78,colours=0;const decoded=[];
  while(i+1<bytes.length){if(bytes[i]!==0x80){x+=(bytes[i]<<24)>>24;y-=(bytes[i+1]<<24)>>24;decoded.push([x,y]);i+=2;continue;}const control=bytes[i+1];const dx=(bytes[i+2]<<24)>>24,dy=(bytes[i+3]<<24)>>24;i+=4;if(control&1){colours++;continue;}if(control===0x04){x+=dx;y-=dy;decoded.push([x,y]);continue;}break;}
- assert.equal(colours,count-1,'colour change records match the header');
+ assert.equal(colours,count-1,'color change records match the header');
  const planned=plan.stitches.filter(s=>['stitch','jump','color'].includes(s.cmd)).map(s=>[Math.round(s.x*10),Math.round(s.y*10)]).filter((p,k,a)=>k===0||p[0]!==a[k-1][0]||p[1]!==a[k-1][1]);
  let next=0;for(const [px,py] of decoded)if(next<planned.length&&planned[next][0]===px&&planned[next][1]===py)next++;
  assert.equal(next,planned.length,'every planned point appears in order (long moves may add intermediate jump records)');
@@ -1510,7 +1510,7 @@ test('the browser benchmark fixture (100 filled squares) compiles to the pinned 
  assert.equal(compile(squares(34)).count,145700);
 });
 
-test('U01 export: a 256-byte header, 3-byte records, a colour change is a needle record, a trim is a trim record, a long move splits, and the file ends F8 00 00',()=>{
+test('U01 export: a 256-byte header, 3-byte records, a color change is a needle record, a trim is a trim record, a long move splits, and the file ends F8 00 00',()=>{
  const d=blank();applyOperations(d,[{op:'add_shape',id:'a',kind:'rect',x:-30,y:-20,width:24,height:14,thread:'#527461',stitch:'fill'},{op:'add_shape',id:'c',kind:'ellipse',x:30,y:-20,width:18,height:12,thread:'#2471a3',stitch:'fill'}]);
  const plan=compile(d),bytes=encode(plan,'u01','#527461',110,d);
  assert.ok(bytes.slice(0,128).every(b=>b===0x30),'the first 128 bytes are ASCII 0');
@@ -1519,7 +1519,7 @@ test('U01 export: a 256-byte header, 3-byte records, a colour change is a needle
  const view=new DataView(bytes.buffer,bytes.byteOffset,bytes.byteLength);
  assert.equal(view.getInt32(140,true),n+1,'the header counts the records plus one');
  const cmds=[];for(let i=0;i<n;i++)cmds.push(bytes[256+i*3]&0x1F);
- assert.equal(cmds.filter(c=>c>=0x09&&c<=0x17).length,plan.stitches.filter(s=>s.cmd==='color').length,'one needle change per colour change');
+ assert.equal(cmds.filter(c=>c>=0x09&&c<=0x17).length,plan.stitches.filter(s=>s.cmd==='color').length,'one needle change per color change');
  assert.equal(cmds.filter(c=>c===0x07).length,plan.stitches.filter(s=>s.cmd==='trim').length,'one trim record per planned trim');
  // A jump of 30 mm is 300 units: three records of at most 127 units, 127, 127 and 46, all positive in x and y (control 0x41).
  const jump={errors:[],stitches:[{cmd:'jump',x:0,y:0,thread:'#000000'},{cmd:'jump',x:30,y:0,thread:'#000000'}]};
@@ -1529,7 +1529,7 @@ test('U01 export: a 256-byte header, 3-byte records, a colour change is a needle
  assert.equal(j[262],0x41);assert.equal(j[263],0);assert.equal(j[264],46,'the last record is the remaining 4.6 mm');
 });
 
-test('XXX export: a 252-byte header and the stitches from 0x100, a jump of 30 mm is three pieces of at most 12.3 mm, a colour change is 7F 08 00 00, and the file ends with the end marker and the thread table',()=>{
+test('XXX export: a 252-byte header and the stitches from 0x100, a jump of 30 mm is three pieces of at most 12.3 mm, a color change is 7F 08 00 00, and the file ends with the end marker and the thread table',()=>{
  const jump={errors:[],stitches:[{cmd:'jump',x:0,y:0,thread:'#000000'},{cmd:'jump',x:30,y:0,thread:'#000000'}]};
  const j=encode(jump,'xxx','#000000',110,null),view=new DataView(j.buffer,j.byteOffset,j.byteLength);
  assert.deepEqual([...j.slice(0x100,0x100+12)],[0x7F,0x01,123,0,0x7F,0x01,123,0,0x7F,0x01,54,0],'the 300-unit jump is cut into 123, 123 and 54');
@@ -1540,11 +1540,11 @@ test('XXX export: a 252-byte header and the stitches from 0x100, a jump of 30 mm
  const d=blank();applyOperations(d,[{op:'add_shape',id:'a',kind:'rect',x:-30,y:-20,width:24,height:14,thread:'#527461',stitch:'fill'},{op:'add_shape',id:'c',kind:'ellipse',x:30,y:-20,width:18,height:12,thread:'#2471a3',stitch:'fill'}]);
  const plan=compile(d),bytes=encode(plan,'xxx','#527461',110,d),endAt=new DataView(bytes.buffer,bytes.byteOffset,bytes.byteLength).getInt32(0xFC,true);
  let changes=0;for(let i=0x100;i+3<endAt;i++)if(bytes[i]===0x7F&&bytes[i+1]===0x08&&bytes[i+2]===0&&bytes[i+3]===0)changes++;
- assert.equal(changes,plan.stitches.filter(s=>s.cmd==='color').length,'one colour change record per colour change');
+ assert.equal(changes,plan.stitches.filter(s=>s.cmd==='color').length,'one color change record per color change');
  assert.equal(bytes.length,endAt+4+2+2*4+(21-2)*4+6,'the thread table holds the two blocks, then 21 slots');
 });
 
-test('TBF export: a 0x600-byte ASCII header with the needle order and thread table, records from 0x600, a jump of 30 mm is three pieces, a colour change is a needle record with a jump after it, and the file ends 8F 1A',()=>{
+test('TBF export: a 0x600-byte ASCII header with the needle order and thread table, records from 0x600, a jump of 30 mm is three pieces, a color change is a needle record with a jump after it, and the file ends 8F 1A',()=>{
  const jump={errors:[],stitches:[{cmd:'jump',x:0,y:0,thread:'#000000'},{cmd:'jump',x:30,y:0,thread:'#000000'}]};
  const j=encode(jump,'tbf','#000000',110,null);
  assert.equal(String.fromCharCode(...j.slice(0,4)),'3.00','the header starts with the version');
@@ -1553,15 +1553,15 @@ test('TBF export: a 0x600-byte ASCII header with the needle order and thread tab
  assert.deepEqual([...j.slice(0x609,0x60D)],[0,0,0x8F,0x1A],'the END record, then the terminal 1A');
  const d=blank();applyOperations(d,[{op:'add_shape',id:'a',kind:'rect',x:-30,y:-20,width:24,height:14,thread:'#527461',stitch:'fill'},{op:'add_shape',id:'c',kind:'ellipse',x:30,y:-20,width:18,height:12,thread:'#2471a3',stitch:'fill'}]);
  const plan=compile(d),bytes=encode(plan,'tbf','#527461',110,d);
- assert.equal(bytes[0x10A],1,'the first colour change uses needle 1 in the order table');
- assert.equal(bytes[0x10A+1],0,'the design has one colour change, so the next entry is unused');
+ assert.equal(bytes[0x10A],1,'the first color change uses needle 1 in the order table');
+ assert.equal(bytes[0x10A+1],0,'the design has one color change, so the next entry is unused');
  assert.deepEqual([...bytes.slice(0x20E,0x20E+5)],[0x45,0x52,0x74,0x61,0x20],'the first thread is 0x45, its RGB and a space');
  assert.equal(bytes[0x20E+5],0x45,'the second thread entry follows');
  assert.equal((bytes.length-0x600-1)%3,0,'records are 3 bytes after the 0x600 header, then the terminal 1A');
  assert.equal(bytes[bytes.length-1],0x1A);
  assert.equal(bytes[bytes.length-2],0x8F,'the END record (dx, dy, 8F) is the last record before the terminal 1A');
  let changes=0;for(let i=0x600;i+2<bytes.length;i+=3)if(bytes[i+2]===0x81)changes++;
- assert.equal(changes,plan.stitches.filter(s=>s.cmd==='color').length,'one needle record per colour change');
+ assert.equal(changes,plan.stitches.filter(s=>s.cmd==='color').length,'one needle record per color change');
 });
 
 test('rotate hoop swaps the width and height, keeps the design where it is, and rotating again restores the hoop',()=>{
@@ -1655,12 +1655,12 @@ test('trim jumps from a set length: a 7 mm jump is trimmed at the default 5 mm b
  const d=blank();assert.throws(()=>{applyOperations(d,[{op:'set_settings',trimMm:50}]);validateDocument(d);},/trim length/);
 });
 
-test('sewing time per thread: 600 stitches a minute, 8 s per trim in the block, 20 s for the colour change into it',()=>{
+test('sewing time per thread: 600 stitches a minute, 8 s per trim in the block, 20 s for the color change into it',()=>{
  assert.equal(blockTimeLabel(blockSeconds({stitches:600,trims:0,changed:false})),'1:00','600 stitches are one minute');
  assert.equal(blockTimeLabel(blockSeconds({stitches:300,trims:2,changed:true})),'1:06','30 s of stitches, 16 s of trims and the 20 s change');
  const d=blank();applyOperations(d,[{op:'add_shape',id:'a',kind:'rect',x:-30,y:-20,width:24,height:14,thread:'#527461',stitch:'fill'},{op:'add_shape',id:'c',kind:'ellipse',x:30,y:-20,width:18,height:12,thread:'#2471a3',stitch:'fill'}]);
  const blocks=threadPlan(compile(d));
- assert.equal(blocks.length,2);assert.equal(blocks[0].changed,false,'the first block has no change into it');assert.equal(blocks[1].changed,true,'the second block follows a colour change');
+ assert.equal(blocks.length,2);assert.equal(blocks[0].changed,false,'the first block has no change into it');assert.equal(blocks[1].changed,true,'the second block follows a color change');
  assert.ok(blocks.every(b=>blockSeconds(b)>0),'every block takes time');
 });
 
@@ -1674,12 +1674,12 @@ test('oval, heart and teardrop stones turn with the path by default, and can be 
  assert.notEqual(Math.round(width(sewn('oval',{stoneTurn:false}))*10),Math.round(width(sewn('oval',{}))*10),'an upright oval is a different width across a vertical path');
 });
 
-test('COL thread list: the colours in order of first use, each once, as a CRLF text file',()=>{
+test('COL thread list: the colors in order of first use, each once, as a CRLF text file',()=>{
  const d=blank();applyOperations(d,[{op:'add_shape',id:'a',kind:'rect',x:-30,y:-20,width:24,height:14,thread:'#C0392B',stitch:'fill'},{op:'add_shape',id:'b',kind:'rect',x:0,y:0,width:20,height:10,thread:'#2471a3',stitch:'fill'},{op:'add_shape',id:'c',kind:'rect',x:30,y:0,width:6,height:6,thread:'#C0392B',stitch:'fill'}]);
  assert.equal(new TextDecoder().decode(encode(compile(d),'col','#527461',110,d)),'2\r\n0,192,57,43\r\n1,36,113,163\r\n');
 });
 
-test('EDR thread list: the same colours in the same order as COL, four bytes each (red, green, blue, pad)',()=>{
+test('EDR thread list: the same colors in the same order as COL, four bytes each (red, green, blue, pad)',()=>{
  const d=blank();applyOperations(d,[{op:'add_shape',id:'a',kind:'rect',x:-30,y:-20,width:24,height:14,thread:'#C0392B',stitch:'fill'},{op:'add_shape',id:'b',kind:'rect',x:0,y:0,width:20,height:10,thread:'#2471a3',stitch:'fill'},{op:'add_shape',id:'c',kind:'rect',x:30,y:0,width:6,height:6,thread:'#C0392B',stitch:'fill'}]);
  assert.deepEqual([...encode(compile(d),'edr','#527461',110,d)],[192,57,43,0,36,113,163,0]);
 });
@@ -1718,7 +1718,7 @@ test('print template: a check line that measures 100 mm on a 110 mm hoop, and th
 
 test('organize fonts lists bundled fonts used by lettering, read-only, and leaves custom fonts to customFontUsage',()=>{
  const d=blank();applyOperations(d,[{op:'add_text',id:'t1',text:'ANA',x:0,y:0,height:8,font:'inkstitch/allegria20',name:'Name one'},{op:'add_text',id:'t2',text:'BEN',x:0,y:10,height:8,font:'inkstitch/allegria20'},{op:'add_text',id:'t3',text:'CAT',x:0,y:20,height:8,font:'inkstitch/abecedaire'}]);
- assert.deepEqual(bundledFontUsage(d),[{id:'inkstitch/allegria20',uses:['Lettering: ANA','Lettering: BEN']},{id:'inkstitch/abecedaire',uses:['Lettering: CAT']}],'two bundled fonts, with the lettering that uses each');
+ assert.deepEqual(bundledFontUsage(d),[{id:'inkstitch/allegria20',uses:['Text: ANA','Text: BEN']},{id:'inkstitch/abecedaire',uses:['Text: CAT']}],'two bundled fonts, with the lettering that uses each');
  assert.deepEqual(customFontUsage(d),[],'no custom fonts are listed here');
 });
 
@@ -1744,7 +1744,7 @@ test('stem width: the default is 1.2 mm across, a wider stem spreads its stitche
  assert.throws(()=>{const d=blank();applyOperations(d,[{op:'add_path',id:'s',x:0,y:0,points:[[-20,0],[20,0]]},{op:'set_object',id:'s',stitch:'run',runStyle:'stem',stemWidth:9}]);validateDocument(d);},/stem width/);
 });
 
-test('PES v6 export: each thread carries its colour hex as the description, in thread order',()=>{
+test('PES v6 export: each thread carries its color hex as the description, in thread order',()=>{
  const d=blank();applyOperations(d,[{op:'add_shape',id:'a',kind:'rect',x:-30,y:-20,width:24,height:14,thread:'#C0392B',stitch:'fill'},{op:'add_shape',id:'b',kind:'rect',x:0,y:0,width:20,height:10,thread:'#2471a3',stitch:'fill'}]);
  const bytes=encode(compile(d),'pes6','#527461',110,d),text=String.fromCharCode(...bytes);
  assert.ok(text.includes('\x07#c0392b'),'the first thread description is #c0392b, with its length byte');
@@ -1763,7 +1763,7 @@ test('simulation bar: thread spans are the thread blocks as command ranges, and 
  assert.ok(Math.abs(sewingSecondsUpTo(plan,plan.stitches.length)-sewingSeconds(plan))<1e-9,'the end matches the total');
 });
 
-test('replace thread: every object in that colour takes the new one, without case, and the thread plan merges the blocks',()=>{
+test('replace thread: every object in that color takes the new one, without case, and the thread plan merges the blocks',()=>{
  const d=blank();applyOperations(d,[{op:'add_shape',id:'a',kind:'rect',x:-30,y:-10,width:10,height:10,thread:'#527461',stitch:'fill'},{op:'add_shape',id:'b',kind:'ellipse',x:0,y:-10,width:10,height:10,thread:'#D9897E',stitch:'fill'},{op:'add_shape',id:'c',kind:'rect',x:20,y:-10,width:10,height:10,thread:'#527461',stitch:'fill'}]);
  validateDocument(d);
  assert.equal(threadPlan(compile(d)).length,3,'three blocks: green, pink, green');

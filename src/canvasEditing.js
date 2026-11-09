@@ -38,7 +38,7 @@ export function createCanvasEditing(api){
       for(const [key,cls] of /** @type {Array<[string, string]>} */([['startAt','start'],['endAt','end'],['rippleCenter','center']])){
         const f=o[key];if(!f)continue;const c=node('circle');c.setAttribute('class','pin '+cls);
         c.setAttribute('cx',b[0]+f[0]*(b[2]-b[0]));c.setAttribute('cy',b[1]+f[1]*(b[3]-b[1]));c.setAttribute('r',px(5));
-        const t=node('title');t.textContent=key==='startAt'?'Start point':key==='endAt'?'End point':'Ripple centre';
+        const t=node('title');t.textContent=key==='startAt'?'Start point':key==='endAt'?'End point':'Ripple center';
         c.append(t);controls.append(c);}}
     }
     if(!api.isEditing()||selectedPath?.kind!=='path'||selState().multi.size!==1)return;

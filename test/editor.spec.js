@@ -859,7 +859,7 @@ test('vector basics in the sidebar: corner radius, round corners, border width, 
  expect(errors).toEqual([]);
 });
 
-test('editing tools: object snapping, clipping masks, caps/joins/node widths and colour blend',async({page})=>{
+test('editing tools: object snapping, clipping masks, caps/joins/node widths and color blend',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));
  await page.goto('/');page.on('dialog',d=>d.accept());await newDesign(page);
  const n=async()=>Number(((await page.locator('#count').textContent()).match(/^([\d,]+) stitches/)||[,'0'])[1].replace(/,/g,''));
@@ -871,7 +871,7 @@ test('editing tools: object snapping, clipping masks, caps/joins/node widths and
  // colour palette: threads chosen in order, a lone colour is refused
  await page.locator('#blendPalette0').selectOption('#527461');await page.locator('#blendPalette1').selectOption('#d9897e');await expect(page.locator('#blendRange')).toBeVisible();await expect(page.locator('#blendThread')).toHaveValue('');
  const pid=await page.locator('.object-row.selected').getAttribute('data-id');await expect(page.locator(`#shapes [data-id="${pid}"]`)).toHaveAttribute('fill',new RegExp('^url\\(#blend-'));
- await page.locator('#blendPalette1').selectOption('');await expect(page.locator('#toast')).toContainText('colour');await expect(page.locator('#blendPalette0')).toHaveValue('#527461');
+ await page.locator('#blendPalette1').selectOption('');await expect(page.locator('#toast')).toContainText('color');await expect(page.locator('#blendPalette0')).toHaveValue('#527461');
  await page.locator('#blendThread').selectOption('#d3ad61');await expect(page.locator('#blendPalette0')).toHaveValue('');await expect(page.locator('#blendRange')).toBeVisible();
  await page.locator('#blendThread').selectOption('');await expect(page.locator('#blendRange')).toBeHidden();
  // snapping: a path point near the rectangle's corner lands exactly on it
@@ -927,7 +927,7 @@ const pngBytes=(w,h,fn)=>{const raw=Buffer.alloc((w*3+1)*h);for(let y=0;y<h;y++)
  const crcTable=[...Array(256)].map((_,n)=>{let c=n;for(let k=0;k<8;k++)c=c&1?0xedb88320^(c>>>1):c>>>1;return c>>>0;}),crc=b=>{let c=0xffffffff;for(const x of b)c=crcTable[(c^x)&255]^(c>>>8);return (c^0xffffffff)>>>0;};
  const chunk=(t,d)=>{const len=Buffer.alloc(4);len.writeUInt32BE(d.length);const td=Buffer.concat([Buffer.from(t),d]),c=Buffer.alloc(4);c.writeUInt32BE(crc(td));return Buffer.concat([len,td,c]);};
  const ihdr=Buffer.alloc(13);ihdr.writeUInt32BE(w,0);ihdr.writeUInt32BE(h,4);ihdr[8]=8;ihdr[9]=2;return Buffer.concat([Buffer.from([137,80,78,71,13,10,26,10]),chunk('IHDR',ihdr),chunk('IDAT',zlib.deflateSync(raw)),chunk('IEND',Buffer.alloc(0))]);};
-test('photo stitch from a picture, ripple centre, blend direction, underpath and select mask',async({page})=>{
+test('photo stitch from a picture, ripple center, blend direction, underpath and select mask',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));
  await page.goto('/');page.on('dialog',d=>d.accept());await newDesign(page);
  const n=async()=>Number(((await page.locator('#count').textContent()).match(/^([\d,]+) stitches/)||[,'0'])[1].replace(/,/g,''));
@@ -947,7 +947,7 @@ test('photo stitch from a picture, ripple centre, blend direction, underpath and
  expect(errors).toEqual([]);
 });
 
-test('trace a picture into filled shapes with holes, grouped, one thread colour per region',async({page})=>{
+test('trace a picture into filled shapes with holes, grouped, one thread color per region',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));
  await page.goto('/');page.on('dialog',d=>d.accept());await newDesign(page);
  await page.locator('#traceBtn').click();await expect(page.locator('#traceDialog')).toBeVisible();await page.locator('#traceGo').click();await expect(page.locator('#traceInfo')).toContainText('Choose a picture');
@@ -1006,7 +1006,7 @@ test('dragging a selection is one undo step named "move"',async({page})=>{
  expect(errors).toEqual([]);
 });
 
-test('trace a thin band of colour: it is sewn as a running outline, and the toast says so',async({page})=>{
+test('trace a thin band of color: it is sewn as a running outline, and the toast says so',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));
  await page.goto('/');page.on('dialog',d=>d.accept());await newDesign(page);
  await page.locator('#traceBtn').click();
@@ -1159,7 +1159,7 @@ test('3D preview views: close-up and turntable change the camera, the loupe magn
  expect(errors).toEqual([]);
 });
 
-test('thread colours: swatch palette, custom colour, recent colours, None for blends',async({page})=>{
+test('thread colors: swatch palette, custom color, recent colors, None for blends',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));
  await page.goto('/');page.on('dialog',d=>d.accept());await newDesign(page);await page.locator('#rect').click();
  const btn=page.locator('#thread + .thread-btn');await expect(btn).toContainText('Forest');await btn.click();await expect(page.locator('#threadPop')).toBeVisible();expect(await page.locator('#threadPop .grid button').count()).toBeGreaterThanOrEqual(48);
@@ -1181,7 +1181,7 @@ test('unsaved work: Open asks first and cancel keeps the design, undo and recove
  const replacement={...initialDocument(),name:'Replacement',objects:[]};
  await page.locator('#file').setInputFiles({name:'replacement.welcome',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(replacement))});
  await expect(page.locator('#discardDialog')).toBeVisible();await expect(page.locator('#discardInfo')).toContainText('Discard 2 unsaved objects');
- await page.locator('#discardCancel').click();await expect(page.locator('#discardDialog')).toBeHidden();await expect(page.locator('#toast')).toContainText('Open cancelled.');
+ await page.locator('#discardCancel').click();await expect(page.locator('#discardDialog')).toBeHidden();await expect(page.locator('#toast')).toContainText('Open canceled.');
  await expect(page.locator('.object-row')).toHaveCount(2);await expect(page.locator('#name')).not.toHaveValue('Replacement');
  expect(await page.evaluate(()=>localStorage.getItem('welcome.autosave:'+sessionStorage.getItem('welcome.tabId')))).toBe(recovery);
  await page.reload();await expect(page.locator('#restoreDialog')).toBeVisible();
@@ -1203,7 +1203,7 @@ test('autosave: an edited design is offered back after a reload; starting fresh 
  expect(errors).toEqual([]);
 });
 
-test('keyboard shortcut list opens with ? and the listed tool keys really work; the thread plan lists colours in sewing order',async({page})=>{
+test('keyboard shortcut list opens with ? and the listed tool keys really work; the thread plan lists colors in sewing order',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));
  await page.goto('/');page.on('dialog',d=>d.accept());await expect(page.locator('#count')).toContainText('compiled');
  await page.keyboard.press('?');await expect(page.locator('#keysDialog')).toBeVisible();await expect(page.locator('#keysList')).toContainText(APPLE_KEYS?/⌘G \/ ⇧⌘G/:/Ctrl\+G \/ Ctrl\+Shift\+G/);await page.keyboard.press('Escape');await expect(page.locator('#keysDialog')).toBeHidden();
@@ -1503,7 +1503,7 @@ test('cushion stones are in the stone shape list and turn with the path',async({
  expect(errors).toEqual([]);
 });
 
-test('twin beads add a second bead either side of the centre line',async({page})=>{
+test('twin beads add a second bead either side of the center line',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());await newDesign(page);
  await page.locator('#path').click();const m=await ctm(page);for(const [x,y] of [[-20,0],[20,0]]){const s=toScreen(m,x,y);await page.mouse.click(s.x,s.y);}await page.keyboard.press('Enter');
  const count=async()=>Number(((await page.locator('#count').textContent()).match(/^([\d,]+) stitches/)||[,'0'])[1].replace(/,/g,''));
@@ -1524,7 +1524,7 @@ test('laydown underlay is offered for fills and adds a light fill under them',as
  expect(errors).toEqual([]);
 });
 
-test('print template export downloads a 1:1 millimetre placement sheet',async({page})=>{
+test('print template export downloads a 1:1 millimeter placement sheet',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());await newDesign(page);await page.locator('#rect').click();
  const download=page.waitForEvent('download');await page.locator('#export').click();await pickFormat(page,'print');await page.locator('#download').click();
  const file=await download;expect(file.suggestedFilename()).toMatch(/-template\.svg$/);await file.saveAs('/tmp/welcome-print-template.svg');
@@ -1639,7 +1639,7 @@ test('organize fonts lists the bundled font a lettering uses, marked as not remo
  await page.locator('#letter').click();await page.locator('#font').selectOption('inkstitch/allegria20');await page.locator('#letteringText').fill('ANA');await page.locator('#letteringText').press('Tab');
  await page.locator('details#secDoc').evaluate(d=>{d.open=true;});
  await page.locator('#organizeFonts').click();
- await expect(page.locator('#fontsList')).toContainText('Allegria 20 (bundled, not removed): used by 1 lettering object');
+ await expect(page.locator('#fontsList')).toContainText('Allegria 20 (bundled, not removed): used by 1 text object');
  await expect(page.locator('#fontsEmpty')).toBeHidden();
  await page.keyboard.press('Escape');
  expect(errors).toEqual([]);
@@ -1650,11 +1650,11 @@ test('organize fonts lists a loaded font with its lettering, and removes it only
  await page.locator('#letter').click();await page.waitForTimeout(300);
  await page.locator('#fontButton').click();await page.locator('#fontFile').setInputFiles('test/fixtures/BebasNeue-Regular.ttf');await expect(page.locator('#toast')).toContainText('Loaded');
  await page.locator('details#secDoc').evaluate(d=>{d.open=true;});
- await page.locator('#organizeFonts').click();await expect(page.locator('#fontsList')).toContainText('BebasNeue-Regular: used by 1 lettering object');
+ await page.locator('#organizeFonts').click();await expect(page.locator('#fontsList')).toContainText('BebasNeue-Regular: used by 1 text object');
  await expect(page.locator('#removeUnusedFonts')).toBeDisabled();
  await page.keyboard.press('Escape');
  await page.locator('.object-row').first().click();await page.keyboard.press('Delete');
- await page.locator('#organizeFonts').click();await expect(page.locator('#fontsList')).toContainText('used by 0 lettering objects');
+ await page.locator('#organizeFonts').click();await expect(page.locator('#fontsList')).toContainText('used by 0 text objects');
  await page.locator('#removeUnusedFonts').click();await expect(page.locator('#toast')).toContainText('Removed 1 unused font');
  await expect(page.locator('#fontsEmpty')).toBeVisible();
  expect(errors).toEqual([]);
@@ -1670,11 +1670,11 @@ test('a PES machine file opens through the machine picker as a stitch layer',asy
 
 test('name drop checkbox marks a lettering object for the names, and the mark survives reselecting it',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());
- await page.locator('.object-row').filter({hasText:'Lettering'}).first().click();
+ await page.locator('.object-row').filter({hasText:'Text'}).first().click();
  await expect(page.locator('#textNameDrop')).not.toBeChecked();
  await page.locator('#textNameDrop').check();await expect(page.locator('#textNameDrop')).toBeChecked();
- await page.locator('.object-row').filter({hasText:'Lettering'}).first().click();await page.locator('.object-row').first().click();
- await page.locator('.object-row').filter({hasText:'Lettering'}).first().click();
+ await page.locator('.object-row').filter({hasText:'Text'}).first().click();await page.locator('.object-row').first().click();
+ await page.locator('.object-row').filter({hasText:'Text'}).first().click();
  await expect(page.locator('#textNameDrop')).toBeChecked();
  expect(errors).toEqual([]);
 });
@@ -1682,7 +1682,7 @@ test('name drop checkbox marks a lettering object for the names, and the mark su
 test('vertical lettering on the default monospace font: the box is disabled and stays unticked',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());await newDesign(page);
  await page.locator('#letter').click();await page.locator('#letteringText').fill('ANA');await page.locator('#letteringText').press('Tab');
- await page.locator('.object-row').filter({hasText:'Lettering'}).first().click();
+ await page.locator('.object-row').filter({hasText:'Text'}).first().click();
  await expect(page.locator('#textVertical')).toBeDisabled();
  await expect(page.locator('#textVertical')).not.toBeChecked();
  expect(errors).toEqual([]);
@@ -1690,11 +1690,11 @@ test('vertical lettering on the default monospace font: the box is disabled and 
 
 test('vertical lettering that is taller than the hoop is scaled down to fit when the box is ticked',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());
- await page.locator('.object-row').filter({hasText:'Lettering'}).first().click();
+ await page.locator('.object-row').filter({hasText:'Text'}).first().click();
  await page.locator('#letteringHeight').fill('30');await page.locator('#letteringHeight').press('Enter');
  await page.locator('#textVertical').check();
- await expect(page.locator('#toast')).toContainText('Vertical lettering fitted to the hoop');
- const letters=Number(await page.locator('#letteringHeight').inputValue());expect(letters).toBeLessThan(30);expect(letters).toBeGreaterThan(5);await expect(page.locator('#toast')).toContainText('Vertical lettering fitted to the hoop at');
+ await expect(page.locator('#toast')).toContainText('Vertical text fitted to the hoop');
+ const letters=Number(await page.locator('#letteringHeight').inputValue());expect(letters).toBeLessThan(30);expect(letters).toBeGreaterThan(5);await expect(page.locator('#toast')).toContainText('Vertical text fitted to the hoop at');
  await expect(page.locator('body')).not.toContainText('past the hoop');
  expect(errors).toEqual([]);
 });
@@ -1702,7 +1702,7 @@ test('vertical lettering that is taller than the hoop is scaled down to fit when
 test('vertical lettering checkbox stacks the letters of a lettering object and changes its stitches',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());
  const count=async()=>Number(((await page.locator('#count').textContent()).match(/^([\d,]+) stitches/)||[,'0'])[1].replace(/,/g,''));
- await page.locator('.object-row').filter({hasText:'Lettering'}).first().click();
+ await page.locator('.object-row').filter({hasText:'Text'}).first().click();
  await expect(page.locator('#textVertical')).not.toBeChecked();await expect.poll(count).toBeGreaterThan(0);const across=await count();
  await page.locator('#textVertical').check();
  await expect(page.locator('#textVertical')).toBeChecked();await expect.poll(count).not.toBe(across);
@@ -1847,7 +1847,7 @@ test('a PEC file imports from the machine picker as a stitch layer',async({page}
  await expect(page.locator('#sourceInfo')).toContainText('commands');expect(errors).toEqual([]);
 });
 
-test('an EXP file imports from the machine picker as a stitch layer with placeholder colours',async({page})=>{
+test('an EXP file imports from the machine picker as a stitch layer with placeholder colors',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));page.on('dialog',d=>d.accept());
  const fixture=pinnedMachineFixture('exp');await page.goto('/');await newDesign(page);
  await page.locator('#machineFile').setInputFiles({name:'sample.exp',mimeType:'application/octet-stream',buffer:Buffer.from(fixture.bytes)});
@@ -1855,7 +1855,7 @@ test('an EXP file imports from the machine picker as a stitch layer with placeho
  await expect(page.locator('#sourceInfo')).toContainText('commands');expect(errors).toEqual([]);
 });
 
-test('a HUS file imports from the machine picker as a stitch layer with its own thread colours',async({page})=>{
+test('a HUS file imports from the machine picker as a stitch layer with its own thread colors',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));page.on('dialog',d=>d.accept());
  const fixture=pinnedMachineFixture('hus');await page.goto('/');await newDesign(page);
  await page.locator('#machineFile').setInputFiles({name:'sample.hus',mimeType:'application/octet-stream',buffer:Buffer.from(fixture.bytes)});
@@ -1989,7 +1989,7 @@ test('a 10O file imports from the machine picker as a stitch layer',async({page}
  await expect(page.locator('#sourceInfo')).toContainText('commands');expect(errors).toEqual([]);
 });
 
-test('redwork by colour: three selected paths become redwork runs and the stitch count grows',async({page})=>{
+test('redwork by color: three selected paths become redwork runs and the stitch count grows',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));page.on('dialog',d=>d.accept());
  await page.goto('/');await newDesign(page);const m=await ctm(page);
  for(const [thread,y] of [['#d9897e',-20],['#527461',0],['#d9897e',20]]){
@@ -2014,7 +2014,7 @@ test('copy worksheet puts the text worksheet on the clipboard after compiling',a
  expect(errors).toEqual([]);
 });
 
-test('my threads: a typed stock list gives each colour block its closest thread in the thread plan',async({page})=>{
+test('my threads: a typed stock list gives each color block its closest thread in the thread plan',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));page.on('dialog',d=>d.accept());
  await page.goto('/');await newDesign(page);await page.locator('#rect').click();
  await page.locator('#secPlan summary').click();
@@ -2083,7 +2083,7 @@ test('trim jumps from: the length field takes 10 mm and keeps it after reloading
  expect(errors).toEqual([]);
 });
 
-test('sewing time per thread: the Thread plan row shows each colour block as m:ss',async({page})=>{
+test('sewing time per thread: the Thread plan row shows each color block as m:ss',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));page.on('dialog',d=>d.accept());
  await page.goto('/');await newDesign(page);await page.locator('#rect').click();
  await page.locator('#secPlan summary').click();
@@ -2104,7 +2104,7 @@ test('oval stones have a turn setting, and an upright oval keeps it when the obj
  expect(errors).toEqual([]);
 });
 
-test('COL thread list export downloads a .col text file with the colour count first',async({page})=>{
+test('COL thread list export downloads a .col text file with the color count first',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));page.on('dialog',d=>d.accept());
  await page.goto('/');await newDesign(page);await page.locator('#rect').click();
  const download=page.waitForEvent('download');await page.locator('#export').click();await pickFormat(page,'col');await page.locator('#download').click();
@@ -2114,7 +2114,7 @@ test('COL thread list export downloads a .col text file with the colour count fi
  expect(errors).toEqual([]);
 });
 
-test('EDR thread list export downloads a binary .edr file with four bytes per colour',async({page})=>{
+test('EDR thread list export downloads a binary .edr file with four bytes per color',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));page.on('dialog',d=>d.accept());
  await page.goto('/');await newDesign(page);await page.locator('#rect').click();
  const download=page.waitForEvent('download');await page.locator('#export').click();await pickFormat(page,'edr');await page.locator('#download').click();
@@ -2193,7 +2193,7 @@ test('U01 (Barudan) export downloads a .u01 file with the 256-byte header and th
  expect(errors).toEqual([]);
 });
 
-test('replace thread: a Thread plan row picks a colour, and every object in that thread changes',async({page})=>{
+test('replace thread: a Thread plan row picks a color, and every object in that thread changes',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));page.on('dialog',d=>d.accept());
  await page.goto('/');await newDesign(page);await page.locator('#rect').click();await page.locator('#rect').click();
  await page.locator('#secPlan summary').click();await expect(page.locator('.plan-row')).toHaveCount(1);
@@ -2433,7 +2433,7 @@ test('simulation bar: the time, stitch count, thread track and summary follow th
  await newDesign(page);await page.locator('#rect').click();await page.locator('#ellipse').click();
  await page.locator('.object-row').first().click();await page.locator('#thread').selectOption('#d9897e');
  await page.locator('button[data-view="stitches"]').click();
- await expect(page.locator('#playbackSummary')).toContainText('1 colour change');
+ await expect(page.locator('#playbackSummary')).toContainText('1 color change');
  await expect(page.locator('#playbackSummary')).toContainText('m thread');
  await expect(page.locator('.playback-spans span')).toHaveCount(2);
  const total=await page.locator('#playbackTime').textContent();
@@ -2460,7 +2460,7 @@ test('header export: one Export button opens the dialog, which is the only forma
  expect(errors).toEqual([]);
 });
 
-test('blend colour rows: each colour label and its thread button stay in their own cell, with no overlap',async({page})=>{
+test('blend color rows: each color label and its thread button stay in their own cell, with no overlap',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));
  await page.goto('/');page.on('dialog',d=>d.accept());await expect(page.locator('#count')).toContainText('compiled');
  await newDesign(page);await page.locator('#rect').click();await page.locator('.object-row').first().click();
@@ -2473,7 +2473,7 @@ test('blend colour rows: each colour label and its thread button stay in their o
  for(let i=0;i<boxes.length;i++)for(let j=i+1;j<boxes.length;j++){
   const a=boxes[i],b=boxes[j];
   const overlap=a.l<b.r&&b.l<a.r&&a.t<b.b&&b.t<a.b;
-  expect(overlap,`colour cells ${i+1} and ${j+1} overlap`).toBe(false);
+  expect(overlap,`color cells ${i+1} and ${j+1} overlap`).toBe(false);
  }
  expect(errors).toEqual([]);
 });
@@ -2621,7 +2621,7 @@ test('sewing tips: Fix tip makes one undo step and clears the tip, and Ignore hi
  expect(errors).toEqual([]);
 });
 
-test('timeline: a marker sits at each colour change, in the new thread colour, and clicking one seeks to that change',async({page})=>{
+test('timeline: a marker sits at each color change, in the new thread color, and clicking one seeks to that change',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));
  await page.goto('/');page.on('dialog',d=>d.accept());await expect(page.locator('#count')).toContainText('compiled');
  await newDesign(page);await page.locator('#rect').click();await page.locator('#ellipse').click();await page.locator('#rect').click();
@@ -2632,8 +2632,8 @@ test('timeline: a marker sits at each colour change, in the new thread colour, a
  const blocks=page.locator('.playback-spans span'),markers=page.locator('.timeline-marker');
  await expect(blocks).toHaveCount(3);
  await expect(markers).toHaveCount(2);
- await expect(page.locator('#playbackSummary')).toContainText('2 colour changes');
- await expect(markers.nth(1)).toHaveAttribute('title',/Colour change to .* at \d+:\d\d/);
+ await expect(page.locator('#playbackSummary')).toContainText('2 color changes');
+ await expect(markers.nth(1)).toHaveAttribute('title',/Color change to .* at \d+:\d\d/);
  const second=await markers.nth(1).getAttribute('data-index');
  await markers.nth(1).click();
  await expect(page.locator('#seek')).toHaveValue(String(second));
@@ -2857,7 +2857,7 @@ test('the discard dialog focuses Save, traps Tab and styles Discard as destructi
 
 // Open and Import ask in the same dialog when unsaved objects would be replaced. Cancelling leaves a notice; an empty or
 // untouched design is replaced without asking.
-test('cancelling Open or Import leaves a notice; a blank design is replaced without asking',async({page})=>{
+test('canceling Open or Import leaves a notice; a blank design is replaced without asking',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));const dialogs=[];page.on('dialog',d=>{dialogs.push(d.message());d.dismiss();});
  const svg={name:'shape.svg',mimeType:'image/svg+xml',buffer:Buffer.from('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40"><rect x="5" y="5" width="20" height="20"/></svg>')};
  const machine={name:'sample.jef',mimeType:'application/octet-stream',buffer:Buffer.from(pinnedMachineFixture('jef').bytes)};
@@ -2865,9 +2865,9 @@ test('cancelling Open or Import leaves a notice; a blank design is replaced with
  await page.locator('#file').setInputFiles(svg);await expect(page.locator('#discardDialog')).toBeHidden();await expect(page.locator('.object-row')).toHaveCount(1);
  await page.locator('#rect').click();await expect(page.locator('.object-row')).toHaveCount(2);
  await page.locator('#file').setInputFiles(svg);await expect(page.locator('#discardDialog')).toBeVisible();
- await page.locator('#discardCancel').click();await expect(page.locator('#toast')).toContainText('Open cancelled.');await expect(page.locator('.object-row')).toHaveCount(2);
+ await page.locator('#discardCancel').click();await expect(page.locator('#toast')).toContainText('Open canceled.');await expect(page.locator('.object-row')).toHaveCount(2);
  await page.locator('#importMachine').click();await page.locator('#machineFile').setInputFiles(machine);await expect(page.locator('#discardDialog')).toBeVisible();
- await page.locator('#discardCancel').click();await expect(page.locator('#toast')).toContainText('Import cancelled.');await expect(page.locator('.object-row')).toHaveCount(2);
+ await page.locator('#discardCancel').click();await expect(page.locator('#toast')).toContainText('Import canceled.');await expect(page.locator('.object-row')).toHaveCount(2);
  await page.locator('#new').click();await page.locator('#discardDiscard').click();await expect(page.locator('.object-row')).toHaveCount(0);
  await page.locator('#importMachine').click();await page.locator('#machineFile').setInputFiles(machine);await expect(page.locator('.object-row')).toHaveCount(1);
  await page.locator('#new').click();await expect(page.locator('#discardDialog')).toBeVisible();await page.locator('#discardDiscard').click();await expect(page.locator('.object-row')).toHaveCount(0);
@@ -2875,9 +2875,9 @@ test('cancelling Open or Import leaves a notice; a blank design is replaced with
  expect(dialogs).toEqual([]);expect(errors).toEqual([]);
 });
 
-test('lettering text applies while typing, without Tab, and survives a canvas click',async({page})=>{page.on('dialog',d=>d.accept());const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');await newDesign(page);await page.locator('#letter').click();await expect(page.locator('#canvasText')).toBeFocused();await page.keyboard.type('HI');await expect(page.locator('#canvasText')).toHaveValue('HI');const width=async()=>(await page.locator('#shapes g.shape').first().boundingBox()).width;const w0=await width();await page.keyboard.type(' WORLD');await expect(page.locator('#canvasText')).toHaveValue('HI WORLD');await expect.poll(width).toBeGreaterThan(w0);const a=await page.locator('#art').boundingBox();await page.mouse.click(a.x+a.width-20,a.y+a.height-20);await expect(page.locator('#canvasText')).toHaveCount(0);await expect(page.locator('.object-row').first()).toContainText('Lettering: HI WORLD');await expect.poll(width).toBeGreaterThan(w0);expect(await width()).toBeGreaterThan(w0);expect(errors).toEqual([]);});
-test('new lettering opens in place with its placeholder selected; typed letters never reach tool shortcuts',async({page})=>{page.on('dialog',d=>d.accept());const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');await newDesign(page);const before=await page.locator('.object-row').count();await page.locator('#letter').click();await expect(page.locator('#canvasText')).toBeFocused();await expect(page.locator('#selected')).toContainText('BLOOM');await page.keyboard.type('Hello');await expect(page.locator('#canvasText')).toHaveValue('Hello');await expect(page.locator('.object-row')).toHaveCount(before+1);await page.keyboard.press('Enter');await expect(page.locator('#canvasText')).toHaveCount(0);await expect(page.locator('.object-row').first()).toContainText('Lettering: HELLO');await expect(page.locator('#selected')).toContainText('HELLO');await expect(page.locator('.object-row')).toHaveCount(before+1);expect(errors).toEqual([]);});
-test('placing lettering selects it and focuses its text; empty double-click adds nothing',async({page})=>{page.on('dialog',d=>d.accept());const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');await newDesign(page);await page.locator('#letter').click();await expect(page.locator('#canvasText')).toBeFocused();await expect(page.locator('#letteringText')).toBeEnabled();await page.keyboard.type('HELLO');await page.keyboard.press('Tab');await expect(page.locator('.object-row').first()).toContainText('Lettering: HELLO');await expect(page.locator('.object-row')).toHaveCount(1);const a=await page.locator('#art').boundingBox();await page.mouse.dblclick(a.x+30,a.y+30);await expect(page.locator('.object-row')).toHaveCount(1);const t=page.locator('#shapes g.shape').first(),tb=await t.boundingBox();await page.mouse.dblclick(tb.x+tb.width/2,tb.y+tb.height/2);await expect(page.locator('#canvasText')).toBeFocused();await page.keyboard.type('X');await page.keyboard.press('Escape');await expect(page.locator('#canvasText')).toHaveCount(0);await expect(page.locator('.object-row').first()).toContainText('HELLO');expect(errors).toEqual([]);});
+test('lettering text applies while typing, without Tab, and survives a canvas click',async({page})=>{page.on('dialog',d=>d.accept());const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');await newDesign(page);await page.locator('#letter').click();await expect(page.locator('#canvasText')).toBeFocused();await page.keyboard.type('HI');await expect(page.locator('#canvasText')).toHaveValue('HI');const width=async()=>(await page.locator('#shapes g.shape').first().boundingBox()).width;const w0=await width();await page.keyboard.type(' WORLD');await expect(page.locator('#canvasText')).toHaveValue('HI WORLD');await expect.poll(width).toBeGreaterThan(w0);const a=await page.locator('#art').boundingBox();await page.mouse.click(a.x+a.width-20,a.y+a.height-20);await expect(page.locator('#canvasText')).toHaveCount(0);await expect(page.locator('.object-row').first()).toContainText('Text: HI WORLD');await expect.poll(width).toBeGreaterThan(w0);expect(await width()).toBeGreaterThan(w0);expect(errors).toEqual([]);});
+test('new lettering opens in place with its placeholder selected; typed letters never reach tool shortcuts',async({page})=>{page.on('dialog',d=>d.accept());const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');await newDesign(page);const before=await page.locator('.object-row').count();await page.locator('#letter').click();await expect(page.locator('#canvasText')).toBeFocused();await expect(page.locator('#selected')).toContainText('BLOOM');await page.keyboard.type('Hello');await expect(page.locator('#canvasText')).toHaveValue('Hello');await expect(page.locator('.object-row')).toHaveCount(before+1);await page.keyboard.press('Enter');await expect(page.locator('#canvasText')).toHaveCount(0);await expect(page.locator('.object-row').first()).toContainText('Text: HELLO');await expect(page.locator('#selected')).toContainText('HELLO');await expect(page.locator('.object-row')).toHaveCount(before+1);expect(errors).toEqual([]);});
+test('placing lettering selects it and focuses its text; empty double-click adds nothing',async({page})=>{page.on('dialog',d=>d.accept());const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');await newDesign(page);await page.locator('#letter').click();await expect(page.locator('#canvasText')).toBeFocused();await expect(page.locator('#letteringText')).toBeEnabled();await page.keyboard.type('HELLO');await page.keyboard.press('Tab');await expect(page.locator('.object-row').first()).toContainText('Text: HELLO');await expect(page.locator('.object-row')).toHaveCount(1);const a=await page.locator('#art').boundingBox();await page.mouse.dblclick(a.x+30,a.y+30);await expect(page.locator('.object-row')).toHaveCount(1);const t=page.locator('#shapes g.shape').first(),tb=await t.boundingBox();await page.mouse.dblclick(tb.x+tb.width/2,tb.y+tb.height/2);await expect(page.locator('#canvasText')).toBeFocused();await page.keyboard.type('X');await page.keyboard.press('Escape');await expect(page.locator('#canvasText')).toHaveCount(0);await expect(page.locator('.object-row').first()).toContainText('HELLO');expect(errors).toEqual([]);});
 
 // Tool buttons expose their state: the armed tool is aria-pressed="true" and the rest are "false". Each drawing tool
 // returns to Select after one placement, and Add lettering leaves an armed draw tool for Select.
@@ -2962,7 +2962,7 @@ test('Edit and Arrange menus run the same commands as their shortcuts and disabl
  await page.keyboard.press('Control+v');await expect(rows).toHaveCount(4);
  // Flip from the menu matches the toolbar's flip button. Lettering cannot be flipped, so it is converted to a path first.
  await page.locator('#letter').click();await page.keyboard.press('Tab');await expect(rows).toHaveCount(5);
- await rows.filter({hasText:'Lettering'}).click();await page.keyboard.press('Control+Shift+c');
+ await rows.filter({hasText:'Text'}).click();await page.keyboard.press('Control+Shift+c');
  const selectedRow=()=>page.locator('.object-row').evaluateAll(els=>els.findIndex(e=>e.classList.contains('selected')));
  const at=await selectedRow();await rows.nth(at).click();const shapesBefore=await page.locator('#shapes').innerHTML();
  await run('arrangeMenu','menuFlipH');const flippedFromMenu=await page.locator('#shapes').innerHTML();
@@ -3421,15 +3421,15 @@ test('save: one Save and one Save As, with the same names on the toolbar, File m
 
 // Clicking the centre of outline lettering selects it, including the open counter of an O or A (the click is inside the
 // glyph, not on its stroke). Each glyph is placed alone so the centre of the object is the centre of that glyph.
-test('clicking the centre of an outline glyph selects the lettering, counter included',async({page})=>{page.on('dialog',d=>d.accept());const errors=[];page.on('pageerror',e=>errors.push(e.message));
+test('clicking the center of an outline glyph selects the lettering, counter included',async({page})=>{page.on('dialog',d=>d.accept());const errors=[];page.on('pageerror',e=>errors.push(e.message));
  await page.goto('/');await newDesign(page);
  for(const glyph of ['O','A']){
   await page.locator('#letter').click();await page.locator('#font').selectOption('ttf/anton');await page.keyboard.type(glyph);await page.keyboard.press('Tab');
-  await expect(page.locator('.object-row').first()).toContainText(`Lettering: ${glyph}`);
+  await expect(page.locator('.object-row').first()).toContainText(`Text: ${glyph}`);
   await page.keyboard.press('Escape');await page.mouse.click(5,5);await expect(page.locator('#selected')).toContainText('Select an object');
   const g=await page.locator('#shapes > g.shape').first().boundingBox();
   await page.mouse.click(g.x+g.width/2,g.y+g.height/2);
-  await expect(page.locator('#selected'),glyph).toContainText(`Lettering: ${glyph}`);
+  await expect(page.locator('#selected'),glyph).toContainText(`Text: ${glyph}`);
   await page.keyboard.press('Escape');await page.mouse.click(5,5);
   await page.locator('.object-row').first().click();await page.keyboard.press('Delete');
   await expect(page.locator('.object-row')).toHaveCount(0);
@@ -3445,12 +3445,12 @@ test('add rectangle and add ellipse select the new shape and say where it went',
  await expect(page.locator('#selected')).toContainText('Rectangle');
  await expect(page.locator('#selHint')).toBeHidden();
  await expect(page.locator('#thread')).toBeVisible();
- await expect(page.locator('#toast')).toContainText('Rectangle added at hoop centre, 24 × 16 mm');
+ await expect(page.locator('#toast')).toContainText('Rectangle added at hoop center, 24 × 16 mm');
  await page.keyboard.press('Escape');await page.locator('#ellipse').click();
  await expect(page.locator('#selected')).toContainText('Ellipse');
  await expect(page.locator('#selHint')).toBeHidden();
  await expect(page.locator('#thread')).toBeVisible();
- await expect(page.locator('#toast')).toContainText('Ellipse added at hoop centre, 24 × 16 mm');
+ await expect(page.locator('#toast')).toContainText('Ellipse added at hoop center, 24 × 16 mm');
  expect(errors).toEqual([]);
 });
 
@@ -3458,7 +3458,7 @@ test('thread picker returns focus to its button after a pick, Use and Escape; th
  const errors=[];page.on('pageerror',e=>errors.push(e.message));
  await page.goto('/');page.on('dialog',d=>d.accept());await newDesign(page);await page.locator('#rect').click();
  const btn=page.locator('#thread + .thread-btn');
- await expect(btn).toHaveAttribute('title',"Change this object's thread colour");
+ await expect(btn).toHaveAttribute('title',"Change this object's thread color");
  // Keyboard: open, pick a swatch with Enter, focus returns to the button
  await btn.focus();await page.keyboard.press('Enter');await expect(page.locator('#threadPop')).toBeVisible();
  await page.locator('#threadPop .grid button[title="Red"]').focus();await page.keyboard.press('Enter');
@@ -3475,7 +3475,7 @@ test('thread picker returns focus to its button after a pick, Use and Escape; th
  expect(errors).toEqual([]);
 });
 
-test('Enter on the focused Thread button opens the colour picker without starting node edit',async({page})=>{
+test('Enter on the focused Thread button opens the color picker without starting node edit',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));
  await page.goto('/');page.on('dialog',d=>d.accept());await newDesign(page);await page.locator('#rect').click();
  const btn=page.locator('#thread + .thread-btn');await btn.focus();await page.keyboard.press('Enter');
@@ -3594,14 +3594,14 @@ test('Escape or Enter closing the lettering box returns focus to Add lettering, 
  expect(errors).toEqual([]);
 });
 
-test('an open lettering box shows a caption saying Enter or a click outside saves; it is gone after commit',async({page})=>{page.on('dialog',d=>d.accept());const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');await newDesign(page);await page.locator('#letter').click();await expect(page.locator('#canvasText')).toBeFocused();await expect(page.locator('#canvasText')).toHaveAttribute('aria-label','Edit lettering text');const hint=page.locator('#canvasTextHint');await expect(hint).toBeVisible();await expect(hint).toContainText('Enter or clicking outside saves the text. Escape cancels.');await expect(page.locator('#canvasText')).toHaveAttribute('aria-describedby','canvasTextHint');const tb=await page.locator('.canvas .floating').boundingBox();const hb=await hint.boundingBox();expect(hb.y).toBeGreaterThan(tb.y+tb.height);await page.keyboard.type('HI');await page.keyboard.press('Enter');await expect(page.locator('#canvasText')).toHaveCount(0);await expect(hint).toHaveCount(0);await expect(page.locator('.object-row').first()).toContainText('Lettering: HI');expect(errors).toEqual([]);});
+test('an open lettering box shows a caption saying Enter or a click outside saves; it is gone after commit',async({page})=>{page.on('dialog',d=>d.accept());const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');await newDesign(page);await page.locator('#letter').click();await expect(page.locator('#canvasText')).toBeFocused();await expect(page.locator('#canvasText')).toHaveAttribute('aria-label','Edit text content');const hint=page.locator('#canvasTextHint');await expect(hint).toBeVisible();await expect(hint).toContainText('Enter or clicking outside saves the text. Escape cancels.');await expect(page.locator('#canvasText')).toHaveAttribute('aria-describedby','canvasTextHint');const tb=await page.locator('.canvas .floating').boundingBox();const hb=await hint.boundingBox();expect(hb.y).toBeGreaterThan(tb.y+tb.height);await page.keyboard.type('HI');await page.keyboard.press('Enter');await expect(page.locator('#canvasText')).toHaveCount(0);await expect(hint).toHaveCount(0);await expect(page.locator('.object-row').first()).toContainText('Text: HI');expect(errors).toEqual([]);});
 
 test('Ctrl+A and Command+A select all lettering text, on a fresh object and an existing one',async({page})=>{page.on('dialog',d=>d.accept());const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');await newDesign(page);
  // Fresh object: the on-canvas box opens with the placeholder; Ctrl+A then typing replaces it.
- await page.locator('#letter').click();await expect(page.locator('#canvasText')).toBeFocused();await page.keyboard.press('Control+a');await page.keyboard.type('Hi');await expect(page.locator('#canvasText')).toHaveValue('Hi');await page.keyboard.press('Enter');await expect(page.locator('.object-row').first()).toContainText('Lettering: HI');
+ await page.locator('#letter').click();await expect(page.locator('#canvasText')).toBeFocused();await page.keyboard.press('Control+a');await page.keyboard.type('Hi');await expect(page.locator('#canvasText')).toHaveValue('Hi');await page.keyboard.press('Enter');await expect(page.locator('.object-row').first()).toContainText('Text: HI');
  // Existing object, panel field: Ctrl+A then typing replaces the text; Command+A does the same.
- await page.locator('#letteringText').focus();await page.keyboard.press('Control+a');await page.keyboard.type('Yo');await expect(page.locator('#letteringText')).toHaveValue('Yo');await page.keyboard.press('Tab');await expect(page.locator('.object-row').first()).toContainText('Lettering: YO');
- await page.locator('#letteringText').focus();await page.keyboard.press('Meta+a');await page.keyboard.type('Ok');await expect(page.locator('#letteringText')).toHaveValue('Ok');await page.keyboard.press('Tab');await expect(page.locator('.object-row').first()).toContainText('Lettering: OK');
+ await page.locator('#letteringText').focus();await page.keyboard.press('Control+a');await page.keyboard.type('Yo');await expect(page.locator('#letteringText')).toHaveValue('Yo');await page.keyboard.press('Tab');await expect(page.locator('.object-row').first()).toContainText('Text: YO');
+ await page.locator('#letteringText').focus();await page.keyboard.press('Meta+a');await page.keyboard.type('Ok');await expect(page.locator('#letteringText')).toHaveValue('Ok');await page.keyboard.press('Tab');await expect(page.locator('.object-row').first()).toContainText('Text: OK');
  // Existing object, on-canvas box: double-click opens it, Ctrl+A then typing replaces the text.
  const t=page.locator('#shapes g.shape').first(),tb=await t.boundingBox();await page.mouse.dblclick(tb.x+tb.width/2,tb.y+tb.height/2);await expect(page.locator('#canvasText')).toBeFocused();await page.keyboard.press('Control+a');await page.keyboard.type('Fox');await expect(page.locator('#canvasText')).toHaveValue('Fox');await page.keyboard.press('Escape');
  expect(errors).toEqual([]);});
@@ -3650,13 +3650,13 @@ test('a keyboard user Tabs from Add lettering to the lettering object, Enter ope
  expect(await page.evaluate(()=>getComputedStyle(document.activeElement).outlineStyle)).not.toBe('none');
  // Enter on the focused handle opens the lettering box focused, with its text selected.
  await page.keyboard.press('Enter');
- await expect(page.locator('#canvasText')).toBeFocused();await expect(page.locator('#canvasText')).toHaveAttribute('aria-label','Edit lettering text');
+ await expect(page.locator('#canvasText')).toBeFocused();await expect(page.locator('#canvasText')).toHaveAttribute('aria-label','Edit text content');
  expect(await page.evaluate(()=>[document.activeElement.selectionStart,document.activeElement.selectionEnd])).toEqual([0,3]);
  // Shift+Tab from the box commits the text and returns to the same object, not to BODY.
  await page.keyboard.press('Shift+Tab');
  await expect(page.locator('#canvasText')).toHaveCount(0);
  await expect(page.locator('.sel-handle').first()).toBeFocused();
- await expect(page.locator('.object-row').first()).toContainText('Lettering: FOX');
+ await expect(page.locator('.object-row').first()).toContainText('Text: FOX');
  // The object is still selected, so Enter reopens its text again.
  await page.keyboard.press('Enter');await expect(page.locator('#canvasText')).toBeFocused();
  expect(errors).toEqual([]);
@@ -3800,7 +3800,7 @@ test('dropped files: indicator, SVG opens as an undoable step, pictures and othe
  // An SVG over unsaved work asks first; Cancel keeps the work.
  await dropFile(page,'badge.svg','image/svg+xml',svg);
  await expect(page.locator('#discardDialog')).toBeVisible();await page.locator('#discardCancel').click();
- await expect(page.locator('.object-row')).toHaveCount(1);await expect(page.locator('#toast')).toContainText('Open cancelled.');
+ await expect(page.locator('.object-row')).toHaveCount(1);await expect(page.locator('#toast')).toContainText('Open canceled.');
 
  // Discard, then the SVG imports exactly as the File menu import does, and one Undo brings the discarded design back.
  await dropFile(page,'badge.svg','image/svg+xml',svg);

@@ -59,7 +59,7 @@ export function designWarnings(doc){
         o,`${label} is a small fill (${bw.toFixed(1)}×${bh.toFixed(1)} mm): it will sew, but the rows are very short and can look dense or rough. A ` +
         `satin stitch or a slightly larger shape usually sews cleaner.`,
         'fill');
-      else if(mean<1.4)w(o,`${label} is mostly narrower than 1.4 mm, so a fill will skip or look thin. Use a satin column along its centre line.`,'fill');}}
+      else if(mean<1.4)w(o,`${label} is mostly narrower than 1.4 mm, so a fill will skip or look thin. Use a satin column along its center line.`,'fill');}}
     if(o.kind==='path'&&!filled){const len=pathOutline(/** @type {import('./pathGeometry.js').PathLike} */(o)).reduce((n,p,i,a)=>i?n+distP(p,a[i-1]):0,0);
       if(len<2)w(o,`${label} is only ${len.toFixed(1)} mm long; stitches this short are skipped or bunch up.`,'short');
       if(o.stitch==='satin'){const wd=Math.max(Number(o.satinWidth)||3,Number(o.satinWidthEnd)||0);
@@ -68,7 +68,7 @@ export function designWarnings(doc){
         'satin',[{op:'set_object',id:o.id,satinWidth:1.5}]);
         if(wd>7)w(o,`${label} is a satin column wider than 7 mm; long satin stitches snag. Use a fill, or split it into narrower columns.`,'satin');}}
     if(o.kind==='text'&&Number(o.h)<5&&isRegistryFont(o.font)&&getFont(o.font)?.kind!=='line')w(
-      o,`${label} is only ${Number(o.h).toFixed(1)} mm tall; lettering under about 5 mm rarely sews cleanly in a satin or fill font.`,'lettering');
+      o,`${label} is only ${Number(o.h).toFixed(1)} mm tall; text under about 5 mm rarely sews cleanly in a satin or fill font.`,'lettering');
   }
   const fabric=doc.settings?.fabric,profile=fabric&&fabric!=='woven'?FABRIC_PROFILES[fabric]:null,first=profile&&
     doc.objects.find(o=>o.visible!==false&&!o.mask&&o.kind!=='stitch_layer');
@@ -79,7 +79,7 @@ export function designWarnings(doc){
 // The sewing tip categories, in the order the Tips settings list shows them. Each warning from designWarnings carries one of these ids.
 /** @type {Array<{id: string, label: string}>} */
 export const TIP_CATEGORIES=[{id:'hoop',label:'Outside the hoop'},{id:'duplicate',label:'Duplicate objects'},{id:'fill',label:'Small or thin fills'},
-  {id:'short',label:'Very short paths'},{id:'satin',label:'Satin columns too narrow or too wide'},{id:'lettering',label:'Small lettering'},
+  {id:'short',label:'Very short paths'},{id:'satin',label:'Satin columns too narrow or too wide'},{id:'lettering',label:'Small text'},
   {id:'fabric',label:'Fabric stabilizer'}];
 // Drops the tips whose category is hidden. A hidden id that is not a category matches nothing, so it is ignored.
 /**

@@ -79,7 +79,7 @@ export function EditorOverlays() {
           <code>
             {"documentId: \"live\""}
           </code>
-          {", for example: “Use the Welcome MCP to draw a leaf badge with BLOOM lettering on the live document, then export JEF.”"}
+          {", for example: “Use the Welcome MCP to draw a leaf badge with BLOOM text on the live document, then export JEF.”"}
         </p>
         <button>
           {"Close"}
@@ -99,7 +99,7 @@ export function EditorOverlays() {
         </button>
         <input id={"fontFile"} type={"file"} accept={".ttf,font/ttf,application/x-font-ttf"} hidden={true} />
         <span>
-          {"Fonts shown with your text · OFL / CC-BY-SA licences listed per font"}
+          {"Fonts shown with your text · OFL / CC-BY-SA licenses listed per font"}
         </span>
       </div>
     </div>

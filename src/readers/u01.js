@@ -27,7 +27,7 @@ export function readU01(bytes) {
     else if (cmd === 0x01) push(stitches, x, y, 'jump', block);
     else if (cmd === 0x07) push(stitches, x, y, 'trim', block);
     else if (cmd === 0x08) push(stitches, x, y, 'stop', block);
-    else if (cmd >= 0x09 && cmd <= 0x17) { block++; if (block >= MAX_THREADS) fail('too many colour changes'); push(stitches, x, y, 'color', block); }
+    else if (cmd >= 0x09 && cmd <= 0x17) { block++; if (block >= MAX_THREADS) fail('too many color changes'); push(stitches, x, y, 'color', block); }
     else fail(`unknown U01 command 0x${cmd.toString(16)}`);
   }
   push(stitches, x, y, 'end', block);

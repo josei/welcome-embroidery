@@ -35,7 +35,7 @@ export function StitchBlendRows() {
     stitchPanelActions.chooseBlendThread(e.target.value)}>{THREAD_OPTIONS.map(o =>
     <option key={o.value} value={o.value}>{o.label}</option>)}</select></label><div className="tool-grid" id="blendPaletteRow">{panel.blendPalette.map((value,
     k) =>
-    <label key={k}>{`Colour ${k + 1}`}<select id={'blendPalette' + k} value={value} onChange={e =>
+    <label key={k}>{`Color ${k + 1}`}<select id={'blendPalette' + k} value={value} onChange={e =>
     stitchPanelActions.chooseBlendPalette(k, e.target.value)}>{paletteOptions(value).map(o =>
     <option key={o.value} value={o.value}>{o.label}</option>)}</select></label>)}</div><div className="tool-grid" id="blendRange"
       hidden={rows.blendRange}><label id="blendAngleRow">{"Direction (°)"}<input id="blendAngle" {...angle} type="number" step="5" placeholder="across rows"

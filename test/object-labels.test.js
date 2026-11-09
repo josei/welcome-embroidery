@@ -10,16 +10,16 @@ const textDoc=(name)=>{const d=initialDocument();d.objects=[];applyOperations(d,
 test('objectLabel uses the name when there is one and never the id', () => {
   assert.equal(objectLabel({id:'o_12',name:' Logo '}),'Logo');
   assert.equal(objectLabel({id:'o_12',name:'  ',kind:'rect'}),'This object');
-  assert.equal(objectLabel({id:'o_12',kind:'text'}),'This lettering');
+  assert.equal(objectLabel({id:'o_12',kind:'text'}),'This text');
   assert.equal(objectLabel({id:'o_12',kind:'rect'},'other'),'another object');
-  assert.equal(objectLabel({id:'o_12',kind:'text'},'other'),'another lettering');
+  assert.equal(objectLabel({id:'o_12',kind:'text'},'other'),'another text');
 });
 
 test('lettering messages name the object, or fall back without its id', () => {
   assert.throws(()=>validateDocument(textDoc('Monograma')),/^Error: Invalid Welcome project: Monograma uses the font “Lobster”/);
-  assert.throws(()=>validateDocument(textDoc()),/This lettering uses the font “Lobster”, which is not bundled or stored in this project\. Choose another font\./);
+  assert.throws(()=>validateDocument(textDoc()),/This text uses the font “Lobster”, which is not bundled or stored in this project\. Choose another font\./);
   const d=textDoc();d.objects[0].font='welcome-mono/1';d.objects[0].text='';
-  assert.throws(()=>validateDocument(d),/This lettering needs text of 1 to 24 characters\. Type some text into it, or delete it\./);
+  assert.throws(()=>validateDocument(d),/This text needs text of 1 to 24 characters\. Type some text into it, or delete it\./);
 });
 
 test('the clipping and hoop messages avoid the id when the object has no name', () => {

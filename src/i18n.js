@@ -28,9 +28,9 @@ export const ES={
 'View':'Vista','Design':'Diseño','Stitches':'Puntadas','Preview':'Vista previa','Undo':'Deshacer','Redo':'Rehacer','Duplicate selected object':
   'Duplicar el objeto seleccionado','Duplicate':'Duplicar','Delete selected object':'Eliminar el objeto seleccionado','Delete':'Eliminar','Export':'Exportar',
 'Objects':'Objetos','Tools':'Herramientas','Select (V)':'Seleccionar (V)',
-'Select ({shortcut})':'Seleccionar ({shortcut})','Draw path ({shortcut})':'Dibujar trazado ({shortcut})','Measure ({shortcut})':'Medir ({shortcut})','Line ({shortcut}, drag)':'Línea ({shortcut}, arrastrar)','Polygon ({shortcut}, drag from center)':'Polígono ({shortcut}, arrastrar desde el centro)','Star ({shortcut}, drag from center)':'Estrella ({shortcut}, arrastrar desde el centro)','Pen with curves ({shortcut}, drag for handles)':'Pluma con curvas ({shortcut}, arrastrar para tiradores)','Add rectangle ({shortcut})':'Añadir rectángulo ({shortcut})','Add ellipse ({shortcut})':'Añadir elipse ({shortcut})','Add lettering ({shortcut})':'Añadir texto bordado ({shortcut})','Export ({shortcut})':'Exportar ({shortcut})',
+'Select ({shortcut})':'Seleccionar ({shortcut})','Draw path ({shortcut})':'Dibujar trazado ({shortcut})','Measure ({shortcut})':'Medir ({shortcut})','Line ({shortcut}, drag)':'Línea ({shortcut}, arrastrar)','Polygon ({shortcut}, drag from center)':'Polígono ({shortcut}, arrastrar desde el centro)','Star ({shortcut}, drag from center)':'Estrella ({shortcut}, arrastrar desde el centro)','Pen with curves ({shortcut}, drag for handles)':'Pluma con curvas ({shortcut}, arrastrar para tiradores)','Add rectangle ({shortcut})':'Añadir rectángulo ({shortcut})','Add ellipse ({shortcut})':'Añadir elipse ({shortcut})','Add lettering ({shortcut})':'Añadir Lettering ({shortcut})','Export ({shortcut})':'Exportar ({shortcut})',
 'Add rectangle':'Añadir rectángulo','Skip to drawing tools':'Ir a las herramientas de dibujo','Add ellipse':'Añadir elipse','Draw path':
-  'Dibujar trazado','Draw path (N)':'Dibujar trazado (N)','Add lettering':'Añadir texto bordado',
+  'Dibujar trazado','Draw path (N)':'Dibujar trazado (N)','Add lettering':'Añadir Lettering',
 'Line (L, drag)':'Línea (L, arrastrar)','Polygon (G, drag from center)':'Polígono (G, arrastrar desde el centro)','Star (S, drag from center)':
   'Estrella (S, arrastrar desde el centro)','Pen with curves (P, drag for handles)':'Pluma con curvas (P, arrastrar para tiradores)',
 'Sides / star points':'Lados / puntas de estrella','Hoop':'Bastidor','Hoop width (mm)':'Ancho del bastidor (mm)','Hoop height (mm)':'Alto del bastidor (mm)',
@@ -39,7 +39,7 @@ export const ES={
   'Vista previa 3D del hilo. Arrastra para orbitar, rueda para zoom, doble clic para restablecer.','Front ¾':'Frontal ¾','Close-up':'Primer plano','Turntable':
   'Giro','Loupe 8×':'Lupa 8×','3D view':'Vista 3D',
 'Design canvas':'Lienzo de diseño','empty':'vacío','1 object':'1 objeto','{n} objects':'{n} objetos','1 thread':'1 hilo','{m} threads':'{m} hilos',
-'Stitch {n} of {m}':'Puntada {n} de {m}','{n} of {m} stitches':'{n} de {m} puntadas','1 colour change':'1 cambio de color','{n} colour changes':
+'Stitch {n} of {m}':'Puntada {n} de {m}','{n} of {m} stitches':'{n} de {m} puntadas','1 color change':'1 cambio de color','{n} color changes':
   '{n} cambios de color','1 trim':'1 corte','{n} trims':'{n} cortes','{m} m thread':'{m} m de hilo',
 'Agent connected':'Agente conectado','Waiting for agent':'Esperando al agente','Agent':'Agente','Waiting':'Esperando','Connected':'Conectado','Export format':
   'Formato de exportación',
@@ -50,10 +50,10 @@ export const ES={
 'Sets density, underlay, pull compensation and the stabilizer tip for the design. Objects with their own values keep them.':
   'Ajusta la densidad, la base, la compensación de tirón y la estabilización de la tela del diseño. Los objetos con valores propios los mantienen.',
 'Fix tip':'Corregir','Ignore':'Ignorar',
-'Colour change to {n} at {time}':'Cambio de color a {n} a los {time}',
+'Color change to {n} at {time}':'Cambio de color a {n} a los {time}',
 'Grid spacing: {n} mm. Click to change.':'Separación de la cuadrícula: {n} mm. Haz clic para cambiarla.',
 'Drag to orbit · scroll to zoom · double-click to reset':'Arrastra para orbitar · rueda para zoom · doble clic para restablecer',
-'Zoom':'Zoom','Colour 1':'Color 1','Colour 2':'Color 2','Colour 3':'Color 3','Colour 4':'Color 4','Choose at least two colours for a palette.':
+'Zoom':'Zoom','Color 1':'Color 1','Color 2':'Color 2','Color 3':'Color 3','Color 4':'Color 4','Choose at least two colors for a palette.':
   'Elige al menos dos colores para la paleta.','Hand tool: drag to pan':'Herramienta mano: arrastra para mover la vista','Zoom out (−)':'Alejar (−)',
   'Zoom in (+)':'Acercar (+)','Reset to 100% ({shortcut})':'Restablecer al 100% ({shortcut})','Fit the hoop in view':'Ajustar el bastidor a la vista',
   'Fit everything ({shortcut})':'Ajustar todo ({shortcut})','All':'Todo',
@@ -62,26 +62,26 @@ export const ES={
 'Grid 1 mm':'Cuadrícula 1 mm','Grid 2 mm':'Cuadrícula 2 mm','Grid 5 mm':'Cuadrícula 5 mm',
 'Grid spacing: the distance Snap to grid snaps to':'Separación de la cuadrícula: la distancia a la que ajusta Ajustar a la cuadrícula',
 'Align left':'Alinear a la izquierda','Align horizontal centers':'Centrar horizontalmente','Align right':'Alinear a la derecha','Align top':'Alinear arriba',
-  'Align vertical centers':'Centrar verticalmente','Align bottom':'Alinear abajo','Align centre':'Centrar',
+  'Align vertical centers':'Centrar verticalmente','Align bottom':'Alinear abajo','Align center':'Centrar',
 'Distribute horizontally':'Distribuir horizontalmente','Distribute vertically':'Distribuir verticalmente','Group ({shortcut})':'Agrupar ({shortcut})',
   'Ungroup ({shortcut})':'Desagrupar ({shortcut})',
 'Subtract the others from the lowest shape':'Restar las demás de la forma inferior','Union of selected shapes':'Unión de las formas seleccionadas',
   'Intersection of selected shapes':'Intersección de las formas seleccionadas',
-'Put the selected lettering on the selected path':'Poner el texto seleccionado sobre el trazado seleccionado','Detach lettering from its path':
+'Put the selected text on the selected path':'Poner el texto seleccionado sobre el trazado seleccionado','Detach text from its path':
   'Separar el texto de su trazado','Flip horizontally':'Voltear horizontalmente','Flip vertically':'Voltear verticalmente',
 'Edit nodes (Enter) — converts rectangles and ellipses to paths':'Editar nodos (Enter) — convierte rectángulos y elipses en trazados',
   'Paired loops across the width (uses Satin width)':'Bucles en pareja a lo ancho (usa el ancho de satén)','Spacing (mm)':'Separación (mm)',
   '{perHoop} copies fit one {hoop} mm hoop ({cols} × {rows}). {copies} copies need {hoops} hoop(s).':
-  '{perHoop} copias caben en un aro de {hoop} mm ({cols} × {rows}). {copies} copias necesitan {hoops} aro(s).','{n} {fmt} files exported, one per hoop.':
-  '{n} archivos {fmt} exportados, uno por aro.','Export batch':'Exportar lote','Batch format':'Formato del lote','The design does not fit in one hoop.':
-  'El diseño no cabe en un solo aro.','Close edges at the mask (back-stitch at cut ends)':'Cerrar bordes en la máscara (pespunte en los cortes)','Loop shape':
+  '{perHoop} copias caben en un bastidor de {hoop} mm ({cols} × {rows}). {copies} copias necesitan {hoops} bastidor(es).','{n} {fmt} files exported, one per hoop.':
+  '{n} archivos {fmt} exportados, uno por bastidor.','Export batch':'Exportar lote','Batch format':'Formato del lote','The design does not fit in one hoop.':
+  'El diseño no cabe en un solo bastidor.','Close edges at the mask (back-stitch at cut ends)':'Cerrar bordes en la máscara (pespunte en los cortes)','Loop shape':
   'Forma del bucle','Stone shape':'Forma de la piedra','Oval':'Óvalo','Twin sequins (two side by side across the path)':
   'Lentejuelas gemelas (dos juntas a lo ancho del trazado)','Turn stones with the path':'Girar las piedras con el trazado','Heart':'Corazón',
   'DXF · paths (CAD)':'DXF · trazados (CAD)','Vertical (one letter under another)':'Vertical (una letra debajo de otra)','Organize fonts':'Organizar fuentes',
   'Remove unused fonts':'Quitar fuentes sin usar','Close':'Cerrar','Satin end inset: start (mm)':'Retracción del inicio del satén (mm)',
   'Satin end inset: end (mm)':'Retracción del final del satén (mm)','Bling fill':'Relleno de piedras','Raised spacing (mm)':
   'Separación del relleno elevado (mm)','Accordion start (mm)':'Inicio del acordeón (mm)','Accordion end (mm)':'Final del acordeón (mm)',
-  'Raised fill (extra tatami underlay)':'Relleno elevado (base de relleno extra)','Custom':'Manual','Default':'Estándar','4×4 in':'4×4 in','5×7 in':
+  'Raised fill (extra tatami underlay)':'Relleno elevado (base de relleno extra)','Custom':'Manual','4×4 in':'4×4 in','5×7 in':
   '5×7 in','6×10 in':'6×10 in','Sequin fill':'Relleno de lentejuelas','Satin end inset (mm)':'Retracción de los extremos del satén (mm)','Redwork outline':
   'Contorno en ida y vuelta','Fabric':'Tela','Stretchy knit':'Punto elástico','Terry towel or fleece':'Toalla de rizo o polar','Fabric stabilizer':
   'Estabilizador de tela','Woven (default)':'Tejido (por defecto)','Knit':'Punto','Towel or fleece':'Toalla o polar','Appliqué templates · 1:1 SVG':
@@ -109,31 +109,31 @@ export const ES={
   'Aguja al inicio','Compiling…':'Compilando…','Nothing to sew yet':'Aún no hay nada que bordar','No generated stitches.':'No hay puntadas generadas.',
 'Select an object':'Selecciona un objeto','Nothing selected. Click an object, drag a box around several, or pick a tool on the left.':
   'Nada seleccionado. Haz clic en un objeto, arrastra un recuadro alrededor de varios o elige una herramienta a la izquierda.',
-'Transform · mm':'Transformar · mm','Set pivot':'Fijar pivote','Use centre':'Usar el centro','Choose the point the rotation field turns the selection around':
+'Transform · mm':'Transformar · mm','Set pivot':'Fijar pivote','Use center':'Usar el centro','Choose the point the rotation field turns the selection around':
   'Elige el punto alrededor del cual el campo de rotación gira la selección','Click the canvas to set the pivot.':'Haz clic en el lienzo para fijar el pivote.',
   'Pivot at {x}, {y} mm':'Pivote en {x}, {y} mm','Measure (M)':'Medir (M)','Stem stitch (braid)':'Punto tallo (trenza)','Corner radii (mm)':
-  'Radios de esquina (mm)','Also download the sewing worksheet (text)':'Descargar también la hoja de costura (texto)',
-  ' The sewing worksheet is downloaded with it.':' La hoja de costura se descarga con él.','Measure: click the first point':
+  'Radios de esquina (mm)','Also download the sewing worksheet (text)':'Descargar también la hoja de bordado (texto)',
+  ' The sewing worksheet is downloaded with it.':' La hoja de bordado se descarga con él.','Measure: click the first point':
   'Medir: haz clic en el primer punto','Measure: click the second point':'Medir: haz clic en el segundo punto','Distance {d} mm · dx {dx} mm · dy {dy} mm':
   'Distancia {d} mm · dx {dx} mm · dy {dy} mm','Click two points to measure the distance. Esc leaves the tool.':
-  'Haz clic en dos puntos para medir la distancia. Esc sale de la herramienta.','Sewing tips to show':'Consejos de costura a mostrar','Outside the hoop':
-  'Fuera del aro','Duplicate objects':'Objetos duplicados','Small or thin fills':'Rellenos pequeños o finos','Very short paths':'Trazados muy cortos',
-  'Satin columns too narrow or too wide':'Columnas de satén demasiado estrechas o anchas','Small lettering':'Letra pequeña','by {author}':'de {author}',
+  'Haz clic en dos puntos para medir la distancia. Esc sale de la herramienta.','Sewing tips to show':'Consejos de bordado a mostrar','Outside the hoop':
+  'Fuera del bastidor','Duplicate objects':'Objetos duplicados','Small or thin fills':'Rellenos pequeños o finos','Very short paths':'Trazados muy cortos',
+  'Satin columns too narrow or too wide':'Columnas de satén demasiado estrechas o anchas','Small text':'Texto pequeño','by {author}':'de {author}',
   'Teardrop':'Gota','Baguette':'Baguette','Marquise':'Marquesa','Pear':'Pera','Trim jumps from (mm)':'Cortar saltos desde (mm)','Ease in':'Entrada','Ease out':
   'Salida','Stem width (mm)':'Ancho del punto tallo (mm)','Laydown rows (mm)':'Filas de base (mm)','Raised underlay turn (° from the fill)':
-  'Giro del relleno elevado (° desde el relleno)','(bundled, not removed): used by {n} lettering object':
+  'Giro del relleno elevado (° desde el relleno)','(bundled, not removed): used by {n} text object':
   '(incluida, no se quita): usada por {n} objetos de texto','Accordion curve':'Curva del acordeón','Ease in and out':'Entrada y salida suaves',
-  'Vertical lettering needs a bundled or loaded font. Choose one in Font.':'El texto vertical necesita una fuente incluida o cargada. Elige una en Fuente.',
-  'Vertical lettering fitted to the hoop at {h} mm.':'Letras verticales ajustadas al bastidor a {h} mm.','Remove small holes':'Quitar agujeros pequeños',
+  'Vertical text needs a bundled or loaded font. Choose one in Font.':'El texto vertical necesita una fuente incluida o cargada. Elige una en Fuente.',
+  'Vertical text fitted to the hoop at {h} mm.':'Texto vertical ajustado al bastidor a {h} mm.','Remove small holes':'Quitar agujeros pequeños',
   'Remove small islands':'Quitar islas pequeñas','Island limit (mm²)':'Límite de islas (mm²)','Removed small islands: {n}.':'Islas pequeñas quitadas: {n}.',
   'The island limit must be 0.1 to 20 mm².':'El límite de islas debe estar entre 0.1 y 20 mm².','No islands under {a} mm² in the selection.':
   'No hay islas por debajo de {a} mm² en la selección.','Removed small holes: {n}.':'Agujeros pequeños quitados: {n}.',
   'No holes under {a} mm² in the selection.':'No hay agujeros de menos de {a} mm² en la selección.','The hole limit must be 0.1 to 20 mm².':
-  'El límite de agujeros debe estar entre 0.1 y 20 mm².','Name drop: this lettering takes each name':'Sustitución por nombres: este texto toma cada nombre',
+  'El límite de agujeros debe estar entre 0.1 y 20 mm².','Name drop: this text takes each name':'Sustitución por nombres: este texto toma cada nombre',
   'Replace with…':'Reemplazar por…','Replace this thread everywhere':'Reemplazar este hilo en todo el diseño','Replaced {thread} in {n} objects.':
   'Se reemplazó {thread} en {n} objetos.','Rotate hoop':'Girar el bastidor','Appliqué from a group needs two or more closed shapes.':
   'Aplicado desde un grupo necesita dos formas cerradas o más.','{n} open objects left as they are.':'{n} objetos abiertos se dejan como están.',
-  'Thin regions sewn as running outline: {n}.':'Regiones finas cosidas como contorno de punto corrido: {n}.','Cushion':'Cojín','Redwork by colour':
+  'Thin regions sewn as running outline: {n}.':'Regiones finas cosidas como contorno de punto corrido: {n}.','Cushion':'Cojín','Redwork by color':
   'Punto de ida y vuelta por color','Knife ({shortcut}): click two points to cut the selected closed shape along the line between them':
   'Cuchillo ({shortcut}): haz clic en dos puntos para cortar la forma cerrada seleccionada por la línea entre ellos','Select a closed shape to cut.':
   'Selecciona una forma cerrada para cortar.','Knife':'Cuchillo','Appliqué from selection':'Aplicado desde la selección',
@@ -144,7 +144,7 @@ export const ES={
   'A filled path with several subpaths imports as an outline: its counters would otherwise fill in.':
   'Una ruta rellena con varios subtrazados se importa como contorno: sus contraformas se rellenarían.',
   'A filled path that is not closed imports as an outline.':'Una ruta rellena que no está cerrada se importa como contorno.',
-  'My threads (one hex colour per line)':'Mis hilos (un color hex por línea)','Closest of your threads':'Más cercano de tus hilos',
+  'My threads (one hex color per line)':'Mis hilos (un color hex por línea)','Closest of your threads':'Más cercano de tus hilos',
   '{n} threads, {m} lines ignored':'{n} hilos, {m} líneas ignoradas','Worksheet copied to the clipboard.':'Hoja copiada al portapapeles.',
   'The browser did not allow copying. Use Download instead.':'El navegador no permitió copiar. Usa Descargar.','Rotation (°)':'Rotación (°)','Stitching':
   'Puntadas','Default for objects without their own value':'Predeterminado para objetos sin valor propio',
@@ -155,13 +155,13 @@ export const ES={
 'Needle stagger':'Desfase de agujas','Off':'Desactivado','2 phases':'2 fases','4 phases':'4 fases','8 phases':'8 fases','Underlay':'Base (underlay)',
   'Inset (mm)':'Margen interior (mm)',
 'Auto (by size)':'Auto (según tamaño)','None':'Ninguna','Edge walk':'Recorrido del borde','Tatami (90°)':'Tatami (90°)','Edge walk + tatami':
-  'Recorrido del borde + tatami','Auto (by width)':'Auto (según ancho)','Centre run':'Línea central','Zigzag':'Zigzag','Centre + zigzag':'Centro + zigzag',
+  'Recorrido del borde + tatami','Auto (by width)':'Auto (según ancho)','Center run':'Línea central','Zigzag':'Zigzag','Center + zigzag':'Centro + zigzag',
   'Edge walk + zigzag':'Recorrido del borde + zigzag',
 'Border':'Borde','Border thread':'Hilo del borde','Closed shape':'Forma cerrada','Smooth curve':'Curva suave','This object overrides row spacing/angle':
   'Este objeto sustituye la separación/ángulo de filas','Use defaults':'Usar valores por defecto',
-'Lettering':'Texto bordado','Offset along path (mm)':'Desplazamiento a lo largo del trazado (mm)','Font':'Fuente','Embroidery font':'Fuente de bordado',
-  'Néon blinking (centerline)':'Néon blinking (línea central)','Text':'Texto','Lettering text':'Texto del bordado','Edit lettering text':
-  'Editar texto del bordado',
+'Lettering':'Lettering','Offset along path (mm)':'Desplazamiento a lo largo del trazado (mm)','Font':'Fuente','Embroidery font':'Fuente de bordado',
+  'Néon blinking (centerline)':'Néon blinking (línea central)','Text':'Texto','Text content':'Contenido del texto','Edit text content':
+  'Editar contenido del texto',
 'Enter or clicking outside saves the text. Escape cancels.':'Enter o clic fuera guarda el texto. Escape cancela.',
 'Font size (mm)':'Tamaño de fuente (mm)','Text style':'Estilo de texto','Bold (adds weight to fills and satin columns)':
   'Negrita (añade grosor a rellenos y columnas de satén)','Bold':'Negrita','Italic (slant)':'Cursiva (inclinación)','Italic':'Cursiva',
@@ -175,15 +175,15 @@ export const ES={
 'Reverse':'Invertir','Reverse the path direction':'Invierte la dirección del trazado','Split at node':'Dividir en el nodo',
   'Split the selected path at the selected node':'Divide el trazado seleccionado en el nodo seleccionado','Join':'Unir',
   'Join the selected open paths end to end':'Une los trazados abiertos seleccionados extremo con extremo',
-'Select same thread':'Seleccionar el mismo hilo','Select every object with this thread colour':'Selecciona todos los objetos con este color de hilo',
+'Select same thread':'Seleccionar el mismo hilo','Select every object with this thread color':'Selecciona todos los objetos con este color de hilo',
 'Array':'Matriz','Mode':'Modo','Linear':'Lineal','Radial (around a point)':'Radial (alrededor de un punto)','Along a path':'A lo largo de un trazado',
-  'Copies (incl. original)':'Copias (incl. original)','Step X (mm)':'Paso X (mm)','Step Y (mm)':'Paso Y (mm)','Centre X (mm)':'Centro X (mm)','Centre Y (mm)':
+  'Copies (incl. original)':'Copias (incl. original)','Step X (mm)':'Paso X (mm)','Step Y (mm)':'Paso Y (mm)','Center X (mm)':'Centro X (mm)','Center Y (mm)':
   'Centro Y (mm)','Total angle (°)':'Ángulo total (°)',
 'Create array':'Crear matriz','Linear and radial use the selected object; along-path needs the motif and the path selected':
   'Lineal y radial usan el objeto seleccionado; a lo largo de un trazado necesita el motivo y el trazado seleccionados',
 'Sewing order':'Orden de bordado','To back':'Al fondo','Sew first':'Bordar primero','Earlier':'Antes','Sew earlier':'Bordar antes','Later':'Después',
-  'Sew later':'Bordar después','To front':'Al frente','Sew last':'Bordar al final','Sort by colour':'Ordenar por color',
-  'Group objects by thread colour to minimise colour changes':'Agrupa los objetos por color de hilo para minimizar los cambios de color',
+  'Sew later':'Bordar después','To front':'Al frente','Sew last':'Bordar al final','Sort by color':'Ordenar por color',
+  'Group objects by thread color to minimize color changes':'Agrupa los objetos por color de hilo para minimizar los cambios de color',
 'Document stitch settings':'Ajustes de puntada del documento','Tie-in / tie-off':'Remates de inicio y fin','Trim long jumps':'Cortar saltos largos',
   'Pull compensation (mm)':'Compensación de tirón (mm)',
 'MCP endpoint (private link)':'Punto de conexión para agentes (enlace privado)','Copy URL':'Copiar URL','Revoke & make new link':'Revocar y crear un enlace nuevo',
@@ -192,7 +192,7 @@ export const ES={
   'Cualquiera que tenga este enlace puede leer y editar el diseño abierto en esta pestaña, así que compártelo solo con tu agente. Tu diseño permanece en ' +
   'este navegador; el servidor solo retransmite las peticiones del agente mientras esta pestaña esté abierta. Al cerrar la pestaña, el enlace termina. En el ' +
   'agente, usa ',
-', for example: “Use the Welcome MCP to draw a leaf badge with BLOOM lettering on the live document, then export JEF.”':
+', for example: “Use the Welcome MCP to draw a leaf badge with BLOOM text on the live document, then export JEF.”':
   ', por ejemplo: «Usa Welcome para dibujar una insignia de hoja con el texto BLOOM en el documento en vivo y luego exporta a JEF.»',
 'Not connected.':'No conectado.','Connected. Waiting for an agent to use the link.':'Conectado. Esperando a que un agente use el enlace.','Agent active.':
   'Agente activo.','Connection problem.':'Problema de conexión.','Agent relay unavailable.':'Conexión con agentes no disponible.',
@@ -200,7 +200,7 @@ export const ES={
 'Choose a font':'Elegir una fuente','Search 195 fonts…':'Buscar entre 195 fuentes…','Search fonts':'Buscar fuentes','Font categories':'Categorías de fuentes',
   'Fonts':'Fuentes','Satin':'Satén','Running':'Recta','Cross stitch':'Punto de cruz','Serif':'Serif','Sans':'Sans','Script':'Manuscrita','Display':'Decorativa',
   'Loaded':'Cargadas','No fonts match.':'Ninguna fuente coincide.',
-'Load a TrueType file…':'Cargar un archivo TrueType…','Fonts shown with your text · OFL / CC-BY-SA licences listed per font':
+'Load a TrueType file…':'Cargar un archivo TrueType…','Fonts shown with your text · OFL / CC-BY-SA licenses listed per font':
   'Fuentes mostradas con tu texto · licencias OFL / CC-BY-SA indicadas por fuente',
 'Export embroidery':'Exportar bordado','Download {fmt} file':'Descargar archivo {fmt}','Downloading…':'Descargando…','File format':'Formato de archivo','Your machine':'Tu máquina','Show every format':'Mostrar todos los formatos','Other / not sure':'Otra / no estoy seguro','Machine embroidery formats':'Formatos de bordado para máquina','Print and vector':'Impresión y vectorial','Worksheet format':'Formato de la hoja','Import JEF / VP3…':'Importar JEF / VP3…','Output file:':'Archivo de salida:','Exporting does not save your project. Use Save to keep it as a .welcome file.':'Exportar no guarda tu proyecto. Usa Guardar para conservarlo como archivo .welcome.','JEF · Janome':'JEF · Janome','VP3 · Pfaff':'VP3 · Pfaff','DST · Tajima (widely supported)':
   'DST · Tajima (muy compatible)','SVG · vector design (Inkscape)':'SVG · diseño vectorial (Inkscape)','Cancel':
@@ -220,16 +220,16 @@ export const ES={
 'Select a node that has a following segment, or double-click the path.':'Selecciona un nodo que tenga un segmento siguiente, o haz doble clic en el trazado.',
   'Snap off.':'Ajuste desactivado.','Select a path and one of its nodes first.':'Selecciona primero un trazado y uno de sus nodos.',
 'Select two or more open paths to join.':'Selecciona dos o más trazados abiertos para unir.','Select the motif and the path to follow (two objects).':
-  'Selecciona el motivo y el trazado a seguir (dos objetos).','Select an object to repeat.':'Selecciona un objeto para repetir.','Lettering needs some text.':
-  'El texto bordado necesita algo de texto.',
+  'Selecciona el motivo y el trazado a seguir (dos objetos).','Select an object to repeat.':'Selecciona un objeto para repetir.','A text object needs some text.':
+  'Un objeto de texto necesita algo de texto.',
 'Project opened locally.':'Proyecto abierto localmente.','Project name cannot be empty.':'El nombre del proyecto no puede estar vacío.',
   'SVG exported (design only, not a stitch plan).':'SVG exportado (solo el diseño, no un plan de puntadas).','Copied the private MCP link.':
-  'Enlace privado copiado.','Select and copy the link.':'Selecciona y copia el enlace.','This would go over the 100-object limit.':'Esto superaría el límite de 100 objetos.','Select one shape, path or lettering first.':
+  'Enlace privado copiado.','Select and copy the link.':'Selecciona y copia el enlace.','This would go over the 100-object limit.':'Esto superaría el límite de 100 objetos.','Select one shape, path or text first.':
   'Selecciona primero una forma, un trazado o un texto.',
 'Discard unsaved changes?':'¿Descartar los cambios sin guardar?',
 '"{name}" has unsaved changes':'"{name}" tiene cambios sin guardar','Discard {objects}, edited {m} min ago?':'¿Descartar {objects}, editado hace {m} min?',
 'Discard {objects}?':'¿Descartar {objects}?','1 unsaved object':'1 objeto sin guardar','{n} unsaved objects':'{n} objetos sin guardar',
-'Discard':'Descartar','Not saved. The design is still open.':'No se ha guardado. El diseño sigue abierto.','Open cancelled.':'Apertura cancelada.','Import cancelled.':'Importación cancelada.','Saved. This document is also open in another tab.':'Guardado. Este documento también está abierto en otra pestaña.','This document is open in another tab. Each tab keeps its own edits and autosave copy.':'Este documento está abierto en otra pestaña. Cada pestaña guarda sus propios cambios y su copia de autoguardado.','Revoke this link? Agents using it lose access immediately.':
+'Discard':'Descartar','Not saved. The design is still open.':'No se ha guardado. El diseño sigue abierto.','Open canceled.':'Apertura cancelada.','Import canceled.':'Importación cancelada.','Saved. This document is also open in another tab.':'Guardado. Este documento también está abierto en otra pestaña.','This document is open in another tab. Each tab keeps its own edits and autosave copy.':'Este documento está abierto en otra pestaña. Cada pestaña guarda sus propios cambios y su copia de autoguardado.','Revoke this link? Agents using it lose access immediately.':
   '¿Revocar este enlace? Los agentes que lo usen perderán el acceso de inmediato.',
 'Paste':'Pegar','Select all':'Seleccionar todo','Fit hoop in view':'Ajustar el bastidor a la vista','Fit hoop':'Ajustar bastidor','Fit everything':'Ajustar todo','Edit text':'Editar texto',
   'Edit nodes':'Editar nodos','Edit nodes (convert to path)':'Editar nodos (convertir a trazado)','Convert to path':'Convertir a trazado','Satin column needs a path. Convert to path first.':'La columna de satén necesita un trazado. Convierte primero a trazado.',
@@ -249,14 +249,14 @@ export const ES={
   'sews cleaner.']:
   '{l} es un relleno pequeño ({w}×{h} mm): se bordará, pero las filas son muy cortas y pueden verse densas o ásperas. Un satén o una forma algo mayor suele ' +
   'bordarse mejor.',
-  '{l} is mostly narrower than 1.4 mm, so a fill will skip or look thin. Use a satin column along its centre line.':
+  '{l} is mostly narrower than 1.4 mm, so a fill will skip or look thin. Use a satin column along its center line.':
   '{l} es casi todo más estrecho que 1,4 mm, así que el relleno se omitirá o quedará fino. Usa una columna de satén a lo largo de su línea central.',
   '{l} is only {n} mm long; stitches this short are skipped or bunch up.':'{l} mide solo {n} mm de largo; las puntadas tan cortas se omiten o se apelmazan.',
   '{l} is a satin column under 1 mm wide, which is hard to sew cleanly. Use a running stitch, or widen it to at least 1.5 mm.':
   '{l} es una columna de satén de menos de 1 mm de ancho, difícil de bordar limpiamente. Usa una puntada recta o ensánchala a al menos 1,5 mm.',
   '{l} is a satin column wider than 7 mm; long satin stitches snag. Use a fill, or split it into narrower columns.':
   '{l} es una columna de satén de más de 7 mm de ancho; las puntadas largas de satén se enganchan. Usa un relleno o divídela en columnas más estrechas.',
-  '{l} is only {n} mm tall; lettering under about 5 mm rarely sews cleanly in a satin or fill font.':
+  '{l} is only {n} mm tall; text under about 5 mm rarely sews cleanly in a satin or fill font.':
   '{l} mide solo {n} mm de alto; el texto de menos de unos 5 mm rara vez se borda limpio en una fuente de satén o relleno.',
   '{l} extends {n} mm past the hoop. Move it or choose a larger hoop.':'{l} sobrepasa el bastidor en {n} mm. Muévelo o elige un bastidor más grande.',
   'Object {l} lies outside its clipping mask, so nothing is sewn.':'El objeto {l} queda fuera de su máscara de recorte, así que no se borda nada.',
@@ -266,7 +266,7 @@ export const ES={
   'Selecciona un objeto del que copiar el estilo.','Style copied. Paste it onto other objects with {shortcut}.':
   'Estilo copiado. Pégalo en otros objetos con {shortcut}.','Copy a style first ({shortcut}).':'Copia primero un estilo ({shortcut}).','Keyboard shortcuts (?)':
   'Atajos de teclado (?)','Keyboard shortcuts':'Atajos de teclado','File':'Archivo','Save':'Guardar','Open':'Abrir','New':'Nuevo','Thread plan':'Plan de hilos',
-  'Compile the design to see the thread colours in sewing order.':'Compila el diseño para ver los colores de hilo en orden de bordado.',
+  'Compile the design to see the thread colors in sewing order.':'Compila el diseño para ver los colores de hilo en orden de bordado.',
   'Download sewing worksheet':'Descargar hoja de bordado','Text (.txt)':'Texto (.txt)','SVG (printable)':'SVG (imprimible)','Sewing worksheet downloaded.':
   'Hoja de bordado descargada.','Compile the design first.':'Compila el diseño primero.','Edit':'Editar','Select':'Seleccionar','Pen with curves':
   'Pluma con curvas','Line':'Línea','Polygon':'Polígono','Star':'Estrella','Edit nodes / finish a path':'Editar nodos / terminar un trazado',
@@ -284,8 +284,8 @@ export const ES={
   '"{name}", {objects}. Matches saved file.':'"{name}", {objects}. Coincide con el archivo guardado.',
   '"{name}", {objects}. Unsaved changes, {m} min ago. Saved file: "{file}".':'"{name}", {objects}. Cambios sin guardar, hace {m} min. Archivo guardado: "{file}".',
   '"{name}", {objects}. Unsaved changes, {m} min ago.':'"{name}", {objects}. Cambios sin guardar, hace {m} min.','about {t} to sew':'unos {t} de bordado','Recent':'Recientes',
-  'Use':'Usar','Change this object\'s thread colour':'Cambiar el color de hilo de este objeto','Custom colour':'Color personalizado','Hex colour':'Color hexadecimal','Choose a thread colour':'Elegir un color de hilo','White':'Blanco',
-  'Ivory':'Marfil','Cream':'Crema','Light grey':'Gris claro','Silver':'Plata','Grey':'Gris','Charcoal':'Carbón','Black':'Negro','Pale pink':'Rosa pálido',
+  'Use':'Usar','Change this object\'s thread color':'Cambiar el color de hilo de este objeto','Custom color':'Color personalizado','Hex color':'Color hexadecimal','Choose a thread color':'Elegir un color de hilo','White':'Blanco',
+  'Ivory':'Marfil','Cream':'Crema','Light gray':'Gris claro','Silver':'Plata','Gray':'Gris','Charcoal':'Carbón','Black':'Negro','Pale pink':'Rosa pálido',
   'Pink':'Rosa','Hot pink':'Fucsia','Red':'Rojo','Cherry':'Cereza','Burgundy':'Burdeos','Rust':'Óxido','Peach':'Melocotón','Orange':'Naranja','Gold':'Oro',
   'Yellow':'Amarillo','Lemon':'Limón','Mustard':'Mostaza','Tan':'Arena','Mint':'Menta','Lime':'Lima','Green':'Verde','Emerald':'Esmeralda','Olive':'Oliva',
   'Dark green':'Verde oscuro','Baby blue':'Celeste','Sky':'Cielo','Turquoise':'Turquesa','Teal':'Verde azulado','Blue':'Azul','Royal':'Azul rey','Navy':
@@ -298,20 +298,20 @@ export const ES={
   'Drag the picture on the canvas to position it':'Arrastra la imagen en el lienzo para colocarla','That picture is too large to keep in the project.':
   'Esa imagen es demasiado grande para guardarla en el proyecto.','Reference picture loaded. Draw on top of it; it is not sewn.':
   'Imagen de referencia cargada. Dibuja encima; no se borda.','Drag on the canvas to move the picture. Press the button again to go back to drawing.':
-  'Arrastra en el lienzo para mover la imagen. Pulsa de nuevo el botón para volver a dibujar.','Colour regions (filled shapes)':
+  'Arrastra en el lienzo para mover la imagen. Pulsa de nuevo el botón para volver a dibujar.','Color regions (filled shapes)':
   'Regiones de color (formas rellenas)','Line art (strokes)':'Dibujo lineal (trazos)','Nothing to trace: no dark strokes were found.':
   'Nada que vectorizar: no se encontraron trazos oscuros.','Traced {n} strokes.':'Se vectorizaron {n} trazos.','Trace a picture into filled shapes':
   'Vectorizar una imagen en formas rellenas','Trace a picture':'Vectorizar una imagen',
-  'Turns a logo, drawing or clip art into filled shapes, one per colour region. For photographs use the photo stitch tool instead.':
+  'Turns a logo, drawing or clip art into filled shapes, one per color region. For photographs use the photo stitch tool instead.':
   'Convierte un logotipo, dibujo o clip art en formas rellenas, una por región de color. Para fotografías usa la herramienta de punto foto.','Picture':'Imagen',
-  'Colours':'Colores','Detail':'Detalle','Fine':'Fino','Normal':'Normal','Smooth':'Suave','Width (mm)':'Ancho (mm)','Skip the background colour':
+  'Colors':'Colores','Detail':'Detalle','Fine':'Fino','Normal':'Normal','Smooth':'Suave','Width (mm)':'Ancho (mm)','Skip the background color':
   'Omitir el color de fondo','Trace':'Vectorizar','Choose a picture first.':'Elige primero una imagen.','Tracing…':'Vectorizando…',
-  'Nothing to trace: only the background colour was found.':'Nada que vectorizar: solo se encontró el color de fondo.',
-  'The document would exceed 100 objects; trace with fewer colours or delete some objects first.':
-  'El documento superaría los 100 objetos; vectoriza con menos colores o elimina objetos antes.','Traced {n} shapes in {c} colours.':
+  'Nothing to trace: only the background color was found.':'Nada que vectorizar: solo se encontró el color de fondo.',
+  'The document would exceed 100 objects; trace with fewer colors or delete some objects first.':
+  'El documento superaría los 100 objetos; vectoriza con menos colores o elimina objetos antes.','Traced {n} shapes in {c} colors.':
   'Se vectorizaron {n} formas en {c} colores.','{n} small regions were left out.':'Se omitieron {n} regiones pequeñas.','Second thread (light tones)':
-  'Segundo hilo (tonos claros)','Ripple':'Ondas','Ripple centre':'Centro de las ondas','Click the canvas to choose the point the ripple shrinks towards':
-  'Haz clic en el lienzo para elegir el punto hacia el que se encogen las ondas','Click the canvas to place the ripple centre.':
+  'Segundo hilo (tonos claros)','Ripple':'Ondas','Ripple center':'Centro de las ondas','Click the canvas to choose the point the ripple shrinks towards':
+  'Haz clic en el lienzo para elegir el punto hacia el que se encogen las ondas','Click the canvas to place the ripple center.':
   'Haz clic en el lienzo para colocar el centro de las ondas.','Direction (°)':'Dirección (°)','Angle of the blend; empty blends across the rows':
   'Ángulo del degradado; vacío degrada a través de las filas','Underpath travel':'Desplazamiento bajo las filas',
   'Hide longer travel stitches under rows that are sewn later instead of jumping':
@@ -320,8 +320,8 @@ export const ES={
   'Photo stitch from a picture':'Punto foto a partir de una imagen','Photo row spacing (mm)':'Separación de filas de la foto (mm)','Photo contrast':
   'Contraste de la foto','Invert picture':'Invertir la imagen','Photo stitch added. Adjust spacing and contrast in the sidebar.':
   'Punto foto añadido. Ajusta la separación y el contraste en la barra lateral.','That picture could not be read.':'No se pudo leer esa imagen.',
-  'Rectangle added at hoop centre, {w} × {h} mm':'Rectángulo añadido en el centro del bastidor, {w} × {h} mm',
-  'Ellipse added at hoop centre, {w} × {h} mm':'Elipse añadida en el centro del bastidor, {w} × {h} mm',
+  'Rectangle added at hoop center, {w} × {h} mm':'Rectángulo añadido en el centro del bastidor, {w} × {h} mm',
+  'Ellipse added at hoop center, {w} × {h} mm':'Elipse añadida en el centro del bastidor, {w} × {h} mm',
   'Cross size (mm)':'Tamaño de la cruz (mm)','Run style':'Estilo de la recta','Single run':'Recta simple','Bean (triple) run':'Recta triple (bean)',
   'Stitch length variation (%)':'Variación del largo de puntada (%)','Randomises the needle spacing from row to row so the fill shows less pattern (moiré)':
   'Varía al azar el espaciado de agujas entre filas para que el relleno muestre menos patrón (moiré)','Appliqué':'Aplique',
@@ -331,7 +331,7 @@ export const ES={
   'Sustituye la compensación del documento para este objeto; déjalo vacío para usar la del documento',
   'Clip: use the top selected shape as a mask for the other selected objects':
   'Recortar: usa la forma superior seleccionada como máscara de los demás objetos seleccionados','Release the clipping mask':'Liberar la máscara de recorte',
-  'Snap to other objects (nodes, midpoints, edges, centres)':'Ajustar a otros objetos (nodos, puntos medios, bordes, centros)','Snap to other objects':
+  'Snap to other objects (nodes, midpoints, edges, centers)':'Ajustar a otros objetos (nodos, puntos medios, bordes, centros)','Snap to other objects':
   'Ajustar a otros objetos','Snapping to other objects on.':'Ajuste a otros objetos activado.','Snapping to other objects off.':
   'Ajuste a otros objetos desactivado.','Line ends':'Extremos de línea','Flat ends':'Extremos planos','Round ends':'Extremos redondos','Square ends':
   'Extremos cuadrados','Corners':'Esquinas','Rounded corners':'Esquinas redondeadas','Sharp (mitered) corners':'Esquinas en punta (inglete)','Bevelled corners':
@@ -342,7 +342,7 @@ export const ES={
   'Blend into thread':'Degradar hacia el hilo','From (%)':'Desde (%)','To (%)':'Hasta (%)','Corner radius (mm)':'Radio de esquina (mm)','End width (mm)':
   'Ancho final (mm)','Leave empty for a constant width; a different value tapers the column from the start width to this one':
   'Déjalo vacío para un ancho constante; un valor distinto estrecha la columna del ancho inicial a este','Follow path':'Seguir trazado',
-  'Make the lettering follow a path; it stays attached when the path is edited':'Hace que el texto siga un trazado; sigue unido cuando se edita el trazado',
+  'Make the text follow a path; it stays attached when the path is edited':'Hace que el texto siga un trazado; sigue unido cuando se edita el trazado',
   'Not on a path':'Sin trazado','Custom path':'Trazado propio','Border width (mm)':'Ancho del borde (mm)',
   '0 sews a plain running outline; more makes a satin border of that width':'0 borda un contorno de puntada recta; más crea un borde de satén de ese ancho',
   'Round corners (mm)':'Redondear esquinas (mm)','Round corners':'Redondear esquinas',
@@ -371,7 +371,7 @@ export const ES={
   'Diseño sin título','Imported path':'Trazado importado','Imported SVG':'SVG importado','Imported · replace all':'Importado · reemplazar todo',
 'This design is {w} × {h} mm, bigger than a JEF machine can hoop (200 × 200 mm). Make it smaller or export another format.':
   'Este diseño mide {w} × {h} mm, más grande de lo que una máquina JEF puede bordar (200 × 200 mm). Hazlo más pequeño o exporta otro formato.',
-'This object':'Este objeto','This lettering':'Este texto','another object':'otro objeto','another lettering':'otro texto',
+'This object':'Este objeto','This text':'Este texto','another object':'otro objeto','another text':'otro texto',
 'Snap to {n} mm grid on.':'Ajuste a la cuadrícula de {n} mm activado.',
   'Loaded {name}. It is stored in this project.':'{name} cargada. Se guarda en este proyecto.','Imported {name} as a {fmt} stitch layer.':
   '{name} importado como capa de puntadas {fmt}.',
@@ -384,18 +384,18 @@ export const ES={
   'compilado','⚠ Can\'t compile: {e}':'⚠ No se puede compilar: {e}',
 '{n} stitches · {m} m estimated thread · {c} thread colors':'{n} puntadas · {m} m de hilo estimado · {c} colores de hilo',
   '{n} stitches · {m} m estimated thread · {c} thread colors · {x}':'{n} puntadas · {m} m de hilo estimado · {c} colores de hilo · {x}',
-'{lo}–{hi} mm for this font':'{lo}–{hi} mm para esta fuente','Lettering: {t}':'Texto: {t}',
-'{name} — loaded from a file; stored inside this project. Check the licence of the font file before sharing the design.':
+'{lo}–{hi} mm for this font':'{lo}–{hi} mm para esta fuente','Text: {t}':'Texto: {t}',
+'{name} — loaded from a file; stored inside this project. Check the license of the font file before sharing the design.':
   '{name} — cargada desde un archivo; guardada dentro de este proyecto. Revisa la licencia del archivo de fuente antes de compartir el diseño.',
 'x {x} mm · y {y} mm':'x {x} mm · y {y} mm',
 '{l} uses the font “{font}”, which is not bundled or stored in this project.':'{l} usa la fuente “{font}”, que no está incluida ni guardada en este proyecto.',
-'This lettering uses the font “{font}”, which is not bundled or stored in this project. Choose another font.':
+'This text uses the font “{font}”, which is not bundled or stored in this project. Choose another font.':
   'Este texto usa la fuente “{font}”, que no está incluida ni guardada en este proyecto. Elige otra fuente.',
 '{l} needs text of 1 to {n} characters.':'{l} necesita entre 1 y {n} caracteres.',
-'This lettering needs text of 1 to {n} characters. Type some text into it, or delete it.':
+'This text needs text of 1 to {n} characters. Type some text into it, or delete it.':
   'Este texto necesita entre 1 y {n} caracteres. Escribe algo de texto en él, o bórralo.',
 '{l} is {h} mm tall; the size range of {font} is {lo}–{hi} mm.':'{l} mide {h} mm de alto; el rango de tamaño de {font} es de {lo}–{hi} mm.',
-'This lettering is {h} mm tall; the size range of {font} is {lo}–{hi} mm. Change its height, or choose another font.':
+'This text is {h} mm tall; the size range of {font} is {lo}–{hi} mm. Change its height, or choose another font.':
   'Este texto mide {h} mm de alto; el rango de tamaño de {font} es de {lo}–{hi} mm. Cambia su altura o elige otra fuente.',
 'This object lies outside its clipping mask, so nothing is sewn. Move it inside the mask, or release the mask.':
   'Este objeto queda fuera de su máscara de recorte, así que no se borda nada. Muévelo dentro de la máscara o quita la máscara.',
@@ -422,7 +422,7 @@ export const ES={
 'change':'cambio','move':'mover','nudge':'desplazar','new design':'nuevo diseño','open file':'abrir archivo','import file':'importar archivo','Undo {action}':'Deshacer {action}','Redo {action}':'Rehacer {action}','Nothing to undo':'No hay nada que deshacer','Nothing to redo':'No hay nada que rehacer',
 'Removed {n} unused fonts.':'Se quitaron {n} fuentes sin usar.',
 'batch: {field} on {n} objects':'lote: {field} en {n} objetos','row spacing':'separación de filas','stitch length':'longitud de puntada','angle':'ángulo',
-'Arrow keys':'Teclas de flecha','Copies the text worksheet to the clipboard':'Copia la hoja de texto al portapapeles','Also download the sewing worksheet':'Descargar también la hoja de costura','machine stitches':'puntadas de máquina',
+'Arrow keys':'Teclas de flecha','Copies the text worksheet to the clipboard':'Copia la hoja de texto al portapapeles','Also download the sewing worksheet':'Descargar también la hoja de bordado','machine stitches':'puntadas de máquina',
 };
 /** @type {Array<{re: RegExp, names: string[], out: string}>} */
 const rx=[];

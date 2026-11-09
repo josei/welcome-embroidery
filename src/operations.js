@@ -46,7 +46,7 @@ export function applyOperations(doc,operations) {
       Object.fromEntries([...TEXT_OPTION_KEYS,'stitchLength','stagger','underlayType','underlayInset','underlaySpacing','angle','spacing'].filter(k=>op[k]!==
       undefined).map(k=>[k,op[k]]));
       doc.objects.push(
-      {id:op.id||crypto.randomUUID(),name:`Lettering: ${String(op.text).split('\n')[0]}`,kind:'text',text:op.text,x:op.x,y:op.y,w:op.width||
+      {id:op.id||crypto.randomUUID(),name:`Text: ${String(op.text).split('\n')[0]}`,kind:'text',text:op.text,x:op.x,y:op.y,w:op.width||
       measureText(op.text,op.font||'welcome-mono/1',h,opts),h,thread:op.thread||'#527461',stitch:op.stitch||(rf?.kind==='outline'?'fill':'run'),font:op.font||
       'welcome-mono/1',...opts});}
     else if(op.op==='clear'){doc.objects=[];}
@@ -74,7 +74,7 @@ export function applyOperations(doc,operations) {
       undefined){if(op[k]===null)delete o[k];else o[k]=op[k];if(op.radius!==undefined&&op.radii===undefined)delete o.radii;}
       if(o.kind==='text'&&(['text','font',...TEXT_OPTION_KEYS].some(k=>op[k]!==undefined))){const f=isRegistryFont(o.font)?getFont(o.font):null;
         if(f&&op.font!==undefined&&op.h===undefined&&!(o.h>=f.size*f.minScale&&o.h<=f.size*f.maxScale))o.h=f.size;o.w=
-        measureText(o.text,o.font||'welcome-mono/1',o.h,o);if(op.text!==undefined&&typeof op.text==='string')o.name=`Lettering: ${op.text.split('\n')[0]}`;}if(
+        measureText(o.text,o.font||'welcome-mono/1',o.h,o);if(op.text!==undefined&&typeof op.text==='string')o.name=`Text: ${op.text.split('\n')[0]}`;}if(
         o.kind==='stitch_layer'&&op.thread!==undefined)o.threadOverrides=
         Object.fromEntries(o.threads.map((/** @type {any} */ _,/** @type {any} */ i)=>[i,op.thread]));}
     else if(op.op==='set_path_point'){const o=doc.objects.find(v=>v.id===op.id);

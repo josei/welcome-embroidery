@@ -46,7 +46,7 @@ export function StitchPathRows() {
     'endAt')} title="Click the canvas to choose where this object finishes sewing">End point</button><button type="button" id="pinCenter" className={pinClass(
     pin, 'rippleCenter')} onClick={() =>
     pinActions.press(
-    'rippleCenter')} title="Click the canvas to choose the point the ripple shrinks towards" hidden={rows.pinCenter}>Ripple centre</button><button
+    'rippleCenter')} title="Click the canvas to choose the point the ripple shrinks towards" hidden={rows.pinCenter}>Ripple center</button><button
       type="button" id="pinClear" disabled={!canClear} onClick={(
     ) =>
     pinClearActions.clear(

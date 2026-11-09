@@ -109,7 +109,7 @@ export function redoDocument() {
 export function editSelectedNodes() {
   const o = selectedObject();
   if (o && selState().multi.size === 1) enterEdit(o);
-  else wired().toast(t('Select one shape, path or lettering first.'));
+  else wired().toast(t('Select one shape, path or text first.'));
 }
 
 /** The toolbar buttons and the context menu call these; the ids stay because keyboard shortcuts and tests address them. */

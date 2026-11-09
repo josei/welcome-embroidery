@@ -77,14 +77,14 @@ export function readCol(bytes) {
   const lines = text.split('\r\n');
   if (lines.pop() !== '') fail('COL must end with a CRLF');
   const count = Number(lines[0]);
-  if (!/^\d+$/.test(lines[0] ?? '') || count > MAX_THREADS) fail('COL colour count is invalid');
-  if (lines.length !== count + 1) fail('COL colour count does not match the number of entries');
+  if (!/^\d+$/.test(lines[0] ?? '') || count > MAX_THREADS) fail('COL color count is invalid');
+  if (lines.length !== count + 1) fail('COL color count does not match the number of entries');
   /** @type {Thread[]} */ const threads = [];
   lines.slice(1).forEach((line, i) => {
     const m = /^(\d+),(\d{1,3}),(\d{1,3}),(\d{1,3})$/.exec(line);
     if (!m || Number(m[1]) !== i) fail('COL entry is malformed or out of order');
     const [r, g, b] = [Number(m[2]), Number(m[3]), Number(m[4])];
-    if (r > 255 || g > 255 || b > 255) fail('COL colour component out of range');
+    if (r > 255 || g > 255 || b > 255) fail('COL color component out of range');
     threads.push({index: i, color: rgbHex(r, g, b), brand: '', catalogNumber: null, name: null});
   });
   return {stitches: [], threads, bounds: [0, 0, 0, 0], warnings: []};
@@ -94,7 +94,7 @@ export function readCol(bytes) {
 export function readEdr(bytes) {
   if (bytes.byteLength % 4) fail('EDR length is not a multiple of four bytes');
   const count = bytes.byteLength / 4;
-  if (count > MAX_THREADS) fail('EDR colour count is too large');
+  if (count > MAX_THREADS) fail('EDR color count is too large');
   /** @type {Thread[]} */ const threads = [];
   for (let i = 0; i < count; i++) {
     const [r, g, b] = [bytes[i * 4], bytes[i * 4 + 1], bytes[i * 4 + 2]];

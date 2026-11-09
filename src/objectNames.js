@@ -38,6 +38,6 @@ export function hasName(o) {
 export function objectLabel(o, form = 'start') {
   if (hasName(o)) return /** @type {string} */ (o?.name).trim();
   const lettering = o?.kind === 'text';
-  if (form === 'other') return lettering ? 'another lettering' : 'another object';
-  return lettering ? 'This lettering' : 'This object';
+  if (form === 'other') return lettering ? 'another text' : 'another object';
+  return lettering ? 'This text' : 'This object';
 }

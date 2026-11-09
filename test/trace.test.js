@@ -33,10 +33,10 @@ test('traced regions become valid filled paths with holes that compile',()=>{
  const r=traceImage(img,w,h,{colors:4}),{ops,ids,size}=traceOps(r,{widthMm:60});assert.equal(ids.length,2);assert.ok(Math.abs(size[0]-60)<1e-9);
  const d=blank();applyOperations(d,ops);validateDocument(d);assert.equal(d.objects.length,2);assert.ok(d.objects.some(o=>o.holes?.length===1));assert.ok(d.objects[0].groupId&&d.objects[0].groupId===d.objects[1].groupId);
  const p=compile(d);assert.deepEqual(p.errors,[]);assert.ok(p.count>500);assert.ok(p.stitches.filter(s=>s.cmd==='stitch').every(s=>Math.abs(s.x)<=30.5&&Math.abs(s.y)<=23));
- assert.equal(new Set(p.stitches.filter(s=>s.cmd==='stitch').map(s=>s.thread)).size,2,'two thread colours');
+ assert.equal(new Set(p.stitches.filter(s=>s.cmd==='stitch').map(s=>s.thread)).size,2,'two thread colors');
 });
 
-test('thin elongated colour regions are sewn as running outlines; compact and wide ones stay fills',()=>{
+test('thin elongated color regions are sewn as running outlines; compact and wide ones stay fills',()=>{
  const rect=(x0,y0,x1,y1)=>[[x0,y0],[x1,y0],[x1,y1],[x0,y1]];
  const disc=Array.from({length:40},(_,k)=>[50+10*Math.cos(k/40*Math.PI*2),60+10*Math.sin(k/40*Math.PI*2)]);
  const result={width:100,height:100,regions:[{color:'#ff0000',area:80,rings:[rect(5,5,45,6)]},{color:'#00ff00',area:900,rings:[rect(60,20,90,50)]},{color:'#0000ff',area:314,rings:[disc]}]};

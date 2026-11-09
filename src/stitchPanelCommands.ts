@@ -100,7 +100,7 @@ export function configureStitchPanelActions(next: StitchPanelApi) {
     setStitchPanel({blendPalette: palette});
     const cols = palette.filter(Boolean);
     if (cols.length === 1) {
-      wired().toast(t('Choose at least two colours for a palette.'));
+      wired().toast(t('Choose at least two colors for a palette.'));
       return;
     }
     wired().edit([{

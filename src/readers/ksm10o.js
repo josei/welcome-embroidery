@@ -33,7 +33,7 @@ export function readKsm(bytes) {
     }
     if (ctrl >= 0x17 && ctrl <= 0x19) { trimmed = false; continue; }
     if (ctrl >= 0x0B && ctrl <= 0x12) {
-      block++; if (block >= MAX_THREADS) fail('too many colour changes');
+      block++; if (block >= MAX_THREADS) fail('too many color changes');
       push(stitches, x, y, 'color', block);
       trimmed = true;
       continue;
@@ -63,7 +63,7 @@ export function readTenO(bytes) {
     if ((ctrl & 0x1F) === 0) { x += dx; y += dy; push(stitches, x, y, 'stitch', block); continue; }
     if ((ctrl & 0x1F) === 0x10) { x += dx; y += dy; push(stitches, x, y, 'jump', block); continue; }
     if (ctrl === 0x8A) continue;
-    if (ctrl === 0x85) { block++; if (block >= MAX_THREADS) fail('too many colour changes'); push(stitches, x, y, 'color', block); continue; }
+    if (ctrl === 0x85) { block++; if (block >= MAX_THREADS) fail('too many color changes'); push(stitches, x, y, 'color', block); continue; }
     if (ctrl === 0x82) { push(stitches, x, y, 'stop', block); continue; }
     if (ctrl === 0x81) { push(stitches, x, y, 'trim', block); continue; }
     break;

@@ -64,7 +64,7 @@ export async function tracePicture(file: File, options: TraceOptions): Promise<T
     const lines = traceLines(pixels, w, h, {minLength: Math.max(5, w / 70), detail: options.detail >= 1 ? 1.4 : .8});
     if (!lines.paths.length) return {info: t('Nothing to trace: no dark strokes were found.'), done: false};
     if (doc.objects.length + lines.paths.length > 100) {
-      return {info: t('The document would exceed 100 objects; trace with fewer colours or delete some objects first.'), done: false};
+      return {info: t('The document would exceed 100 objects; trace with fewer colors or delete some objects first.'), done: false};
     }
     // The trace module's JSDoc infers maxHeightMm as null; it reads a number there at run time.
     const traced = traceLineOps(lines, {widthMm, maxHeightMm: hoop.h - 6} as unknown as Parameters<typeof traceLineOps>[1]);
@@ -82,17 +82,17 @@ export async function tracePicture(file: File, options: TraceOptions): Promise<T
     background: options.background ? 'auto' : 'none',
     minArea: Math.max(6, w * h / 30000),
   });
-  if (!regions.regions.length) return {info: t('Nothing to trace: only the background colour was found.'), done: false};
+  if (!regions.regions.length) return {info: t('Nothing to trace: only the background color was found.'), done: false};
   const traced = traceOps(regions, {widthMm, maxHeightMm: hoop.h - 6} as unknown as Parameters<typeof traceOps>[1]);
   if (doc.objects.length + traced.ids.length > 100) {
-    return {info: t('The document would exceed 100 objects; trace with fewer colours or delete some objects first.'), done: false};
+    return {info: t('The document would exceed 100 objects; trace with fewer colors or delete some objects first.'), done: false};
   }
   wired().edit(traced.ops, () => {
     setSelection({multi: new Set(traced.ids)});
     setSelection({selected: traced.ids[0]});
   });
   const colours = new Set(regions.regions.map((region: {color: string}) => region.color)).size;
-  wired().toast(t('Traced {n} shapes in {c} colours.', {n: traced.ids.length, c: colours})
+  wired().toast(t('Traced {n} shapes in {c} colors.', {n: traced.ids.length, c: colours})
     + (regions.dropped ? ' ' + t('{n} small regions were left out.', {n: regions.dropped}) : '')
     + (traced.running ? ' ' + t('Thin regions sewn as running outline: {n}.', {n: traced.running}) : ''));
   return {info: '', done: true};

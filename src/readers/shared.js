@@ -82,10 +82,10 @@ export const dstPalette = ['#1f2937','#c0392b','#2471a3','#229954','#d4ac0d','#8
 
 export const HUS_THREADS = [
   ["#000000","Black","026"], ["#0000e7","Blue","005"], ["#00c600","Green","002"], ["#ff0000","Red","014"], ["#840084","Purple","008"],
-  ["#ffff00","Yellow","020"], ["#848484","Grey","024"], ["#8484e7","Light Blue","006"], ["#00ff84","Light Green","003"], ["#ff7b31","Orange","017"],
+  ["#ffff00","Yellow","020"], ["#848484","Gray","024"], ["#8484e7","Light Blue","006"], ["#00ff84","Light Green","003"], ["#ff7b31","Orange","017"],
   ["#ff8ca5","Pink","011"], ["#845200","Brown","028"], ["#ffffff","White","022"], ["#000084","Dark Blue","004"], ["#008400","Dark Green","001"],
   ["#7b0000","Dark Red","013"], ["#ff6384","Light Red","015"], ["#522952","Dark Purple","007"], ["#ff00ff","Light Purple","009"],
-  ["#ffde00","Dark Yellow","019"], ["#ffff9c","Light Yellow","021"], ["#525252","Dark Grey","025"], ["#d6d6d6","Light Grey","023"],
+  ["#ffde00","Dark Yellow","019"], ["#ffff9c","Light Yellow","021"], ["#525252","Dark Gray","025"], ["#d6d6d6","Light Gray","023"],
   ["#ff5208","Dark Orange","016"], ["#ff9c5a","Light Orange","018"], ["#ff52b5","Dark Pink","010"], ["#ffc6de","Light Pink","012"],
   ["#523100","Dark Brown","027"], ["#b5a584","Light Brown","029"],
 ];
@@ -101,8 +101,8 @@ export const SHV_THREADS = [
 /** @param {Stitch[]} stitches @param {number} block @param {string} brand @returns {Decoded} */
 export function blockResult(stitches, block, brand) {
   /** @type {Thread[]} */ const threads = [];
-  for (let i = 0; i <= block; i++) threads.push({index: i, color: '#527461', brand, catalogNumber: null, name: `Colour ${i + 1}`});
-  return result(stitches, threads, block ? [`${brand} files carry no thread colours: placeholder colours were assigned.`] : []);
+  for (let i = 0; i <= block; i++) threads.push({index: i, color: '#527461', brand, catalogNumber: null, name: `Color ${i + 1}`});
+  return result(stitches, threads, block ? [`${brand} files carry no thread colors: placeholder colors were assigned.`] : []);
 }
 
 // pyembroidery's EmbPattern.interpolate_trims on a list of absolute {x, y, cmd} stitches, edited in place: a run of jumps after stitching gets a

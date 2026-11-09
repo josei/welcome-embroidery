@@ -17,7 +17,7 @@ export function readShv(bytes) {
   /** @type {number[][]} */ const colourList = [];
   const u8 = () => (p < bytes.length ? bytes[p++] : null);
   const u32be = () => {
-    if (p + 4 > bytes.length) fail('SHV colour table is truncated');
+    if (p + 4 > bytes.length) fail('SHV color table is truncated');
     const v = (bytes[p] << 24 | bytes[p + 1] << 16 | bytes[p + 2] << 8 | bytes[p + 3]) >>> 0;
     p += 4; return v;
   };
@@ -39,7 +39,7 @@ export function readShv(bytes) {
   /** @type {number[]} */ const perColour = [];
   for (let i = 0; i < colourCount; i++) {
     perColour.push(u32be());
-    if (p >= bytes.length) fail('SHV colour table is truncated');
+    if (p >= bytes.length) fail('SHV color table is truncated');
     const code = bytes[p++];
     colourList.push(SHV_THREADS[code % SHV_THREADS.length]);
     p += 9;
@@ -53,7 +53,7 @@ export function readShv(bytes) {
     const b0 = u8(), b1 = u8();
     if (b0 === null || b1 === null) break;
     if (sinceStop >= maxStitches) {
-      block++; if (block >= MAX_THREADS) fail('too many colour changes');
+      block++; if (block >= MAX_THREADS) fail('too many color changes');
       push(stitches, x, y, 'color', block);
       sinceStop = 0;
       current++;
@@ -79,12 +79,12 @@ export function readShv(bytes) {
   /** @type {Thread[]} */ const threads = [];
   /** @type {string[]} */ const warnings = [];
   if (colourList.length < block + 1) warnings.push(colourList.length
-    ? 'SHV file has fewer colours than colour changes: placeholder colours were assigned.'
-    : 'SHV file has no colour table: placeholder colours were assigned.');
+    ? 'SHV file has fewer colors than color changes: placeholder colors were assigned.'
+    : 'SHV file has no color table: placeholder colors were assigned.');
   for (let i = 0; i <= Math.max(colourList.length - 1, block); i++) {
     const rgb = i < colourList.length ? colourList[i] : null;
     const color = rgb ? '#' + rgb.map(v => v.toString(16).padStart(2, '0')).join('') : '#527461';
-    threads.push({index: i, color, brand: 'SHV', catalogNumber: null, name: `Colour ${i + 1}`});
+    threads.push({index: i, color, brand: 'SHV', catalogNumber: null, name: `Color ${i + 1}`});
   }
   const decoded = result(stitches, threads, warnings);
   if (name) decoded.metadata = {name: name.slice(0, 240)};

@@ -74,8 +74,8 @@ export function createCanvasTools(api){
     });
     // The hint says where the shape went and its default size, in millimetres.
     api.toast(kind==='ellipse'
-      ?t('Ellipse added at hoop centre, {w} × {h} mm',{w:24,h:16})
-      :t('Rectangle added at hoop centre, {w} × {h} mm',{w:24,h:16}));
+      ?t('Ellipse added at hoop center, {w} × {h} mm',{w:24,h:16})
+      :t('Rectangle added at hoop center, {w} × {h} mm',{w:24,h:16}));
   }
 
   // The path and pen tools draw their draft over the design: the polyline (or the pen's curve outline), the handles

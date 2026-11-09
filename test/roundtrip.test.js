@@ -45,7 +45,7 @@ const base=()=>{const d=initialDocument();d.objects=[];return d;};
 const DESIGNS={
   'path monogram':()=>{const d=base();d.objects=[{id:'m1',name:'M',kind:'path',closed:false,smooth:false,x:0,y:0,w:0,h:0,points:[[-20,-20],[-20,20],[0,0],[20,-20],[20,20]],thread:RED,stitch:'run'}];return d;},
   'fill plus satin':()=>{const d=base();d.objects=[{id:'f',name:'F',kind:'rect',x:-30,y:-15,w:25,h:30,thread:RED,stitch:'fill'},{id:'s',name:'S',kind:'path',closed:false,x:0,y:0,w:0,h:0,points:[[5,-15],[35,15]],thread:ROSE,stitch:'satin'}];return d;},
-  'two fills, run, colour change and trims':()=>{const d=base();d.objects=[{id:'a',name:'A',kind:'rect',x:-40,y:-20,w:20,h:20,thread:RED,stitch:'fill'},{id:'b',name:'B',kind:'rect',x:20,y:-20,w:20,h:20,thread:ROSE,stitch:'fill'},{id:'c',name:'C',kind:'path',closed:false,x:0,y:0,w:0,h:0,points:[[-40,30],[40,30]],thread:GOLD,stitch:'run'}];return d;},
+  'two fills, run, color change and trims':()=>{const d=base();d.objects=[{id:'a',name:'A',kind:'rect',x:-40,y:-20,w:20,h:20,thread:RED,stitch:'fill'},{id:'b',name:'B',kind:'rect',x:20,y:-20,w:20,h:20,thread:ROSE,stitch:'fill'},{id:'c',name:'C',kind:'path',closed:false,x:0,y:0,w:0,h:0,points:[[-40,30],[40,30]],thread:GOLD,stitch:'run'}];return d;},
   'fill plus run at the hoop edge':()=>{const d=base();d.objects=[{id:'e',name:'E',kind:'rect',x:-52,y:-52,w:104,h:8,thread:RED,stitch:'fill'},{id:'g',name:'G',kind:'path',closed:false,x:0,y:0,w:0,h:0,points:[[50,50],[54,54]],thread:ROSE,stitch:'run'}];return d;},
 };
 
@@ -84,7 +84,7 @@ for(const [designName] of Object.entries(DESIGNS)){
       assert.equal(m.missing,0,`${m.missing} planned stitch(es) missing after decode`);
       assert.equal(m.extra,0,`${m.extra} extra stitch(es) after decode`);
       assert.ok(m.maxDev<=TOL,`max deviation ${m.maxDev} mm exceeds ${TOL}`);
-      assert.equal(count(decoded,'color'),count(plan,'color'),'colour-change count');
+      assert.equal(count(decoded,'color'),count(plan,'color'),'color-change count');
       // Readers add their own leading move and trims around jumps, so the decoded move count can
       // exceed the plan's; it must never be lower (a lost jump or trim would change where the thread goes).
       assert.ok(count(decoded,'jump')+count(decoded,'trim')>=count(plan,'jump'),'no planned jump lost');
@@ -98,7 +98,7 @@ for(const [designName] of Object.entries(DESIGNS)){
 // The expected list is built from the plan's thread blocks, not from the encoder.
 for(const [designName] of Object.entries(DESIGNS)){
   for(const format of ['col','edr']){
-    test(`${designName} colour list round-trips through ${format}`,()=>{
+    test(`${designName} color list round-trips through ${format}`,()=>{
       const doc=DESIGNS[designName]();validateDocument(doc);
       const plan=compile(doc);
       assert.deepEqual(plan.errors,[],`${designName}: plan has no errors`);
@@ -106,9 +106,9 @@ for(const [designName] of Object.entries(DESIGNS)){
       for(const b of threadPlan(plan)){const hex=b.thread.toLowerCase();if(!expected.includes(hex))expected.push(hex);}
       const decoded=decodeEmbroidery(encode(plan,format,RED,doc.hoop,doc),format);
       const got=decoded.threads.map(t=>t.color);
-      assert.equal(got.length,expected.length,'colour count');
-      assert.deepEqual(got,expected,'colour order and RGB');
-      assert.deepEqual(decoded.threads.map(t=>t.index),expected.map((_,i)=>i),'colour indices');
+      assert.equal(got.length,expected.length,'color count');
+      assert.deepEqual(got,expected,'color order and RGB');
+      assert.deepEqual(decoded.threads.map(t=>t.index),expected.map((_,i)=>i),'color indices');
     });
   }
 }

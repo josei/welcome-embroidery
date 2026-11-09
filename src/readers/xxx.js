@@ -34,7 +34,7 @@ export function readXxx(bytes) {
       if (dx !== 0 || dy !== 0) { x += dx; y += dy; push(stitches, x, y, 'jump', block); }
     }
     else if (b2 === 0x08 || (b2 >= 0x0A && b2 <= 0x17)) {
-      block++; if (block >= MAX_THREADS) fail('too many colour changes');
+      block++; if (block >= MAX_THREADS) fail('too many color changes');
       push(stitches, x, y, 'color', block);
     }
     else if (b2 === 0x7F || b2 === 0x18) break;
@@ -50,8 +50,8 @@ export function readXxx(bytes) {
   // A colour block with no entry in the colour table gets a placeholder colour, and the file is reported as having one.
   /** @type {string[]} */ const warnings = [];
   if (threads.length < block + 1) warnings.push(threads.length
-    ? 'XXX file has fewer colours than colour changes: placeholder colours were assigned.'
-    : 'XXX file has no colour table: placeholder colours were assigned.');
-  for (let i = threads.length; i <= block; i++) threads.push({index: i, color: '#527461', brand: 'XXX', catalogNumber: null, name: `Colour ${i + 1}`});
+    ? 'XXX file has fewer colors than color changes: placeholder colors were assigned.'
+    : 'XXX file has no color table: placeholder colors were assigned.');
+  for (let i = threads.length; i <= block; i++) threads.push({index: i, color: '#527461', brand: 'XXX', catalogNumber: null, name: `Color ${i + 1}`});
   return result(stitches, threads, warnings);
 }

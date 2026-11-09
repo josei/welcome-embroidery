@@ -8,9 +8,9 @@ export function HoopFields() {
  const height = useDraftInput(hoop.hoopH, text => hoopActions.commit('hoopH', text));
  return (
   <div className="footer hoop-edit"><span>Hoop</span><select id="hoopPreset" aria-label="Hoop preset"
-    title="Hoop presets: the default, and Brother 4×4, 5×7 and 6×10 embroidery hoops" value={hoop.preset} onChange={e =>
+    title="Hoop presets: 110 × 110 mm, and Brother 4×4, 5×7 and 6×10 embroidery hoops" value={hoop.preset} onChange={e =>
     hoopActions.preset(
-    e.target.value)}><option value="custom">Custom</option><option value="110x110">Default</option><option value="4x4in">4×4 in</option><option
+    e.target.value)}><option value="custom">Custom</option><option value="110x110">110 × 110 mm</option><option value="4x4in">4×4 in</option><option
       value="5x7in">5×7 in</option><option value="6x10in">6×10 in</option></select><input id="hoopW" type="number" min="10" max="400" step="1"
         aria-label="Hoop width (mm)" {...width} /><span>×</span><input id="hoopH" type="number" min="10" max="400" step="1"
           aria-label="Hoop height (mm)" {...height} /><span>mm</span><button id="hoopRotate" type="button"

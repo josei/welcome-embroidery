@@ -31,7 +31,7 @@ export function LetteringPanel() {
  const italicDeg = useDraftInput(l.italicDeg, v => letteringActions.commit('italicDeg', v));
  return (
   <section id="secText" data-sec="" hidden={layout.secText}><h4>Lettering</h4><label id="followRow">Follow path<select id="followPath"
-    title="Make the lettering follow a path; it stays attached when the path is edited" value={panel.followPathValue} onChange={e =>
+    title="Make the text follow a path; it stays attached when the path is edited" value={panel.followPathValue} onChange={e =>
     stitchPanelActions.chooseFollowPath(e.target.value)}>{panel.followPathOptions.map(o =>
     <option key={o.value} value={o.value}>{o.label}</option>)}</select></label><label id="alongRow" hidden={rows.alongRow}>{"Offset along path (mm)"}<input id="alongOffset" type="number" step="0.5" {...along} /></label>
 <div className="font-field"><span className="font-label">Font</span><button id="fontButton" type="button" className="font-button" aria-haspopup="dialog"
@@ -39,7 +39,7 @@ export function LetteringPanel() {
     id="fontButtonName">Welcome Mono</span><svg className="icon chevron" aria-hidden="true"><use href="#i-chevron"/></svg></button>
 <select id="font" className="sr-only" tabIndex={-1} aria-label="Embroidery font" value={l.fontValue} onChange={e =>
   letteringActions.choose('font', e.target.value)}>{l.fontOptions.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}</select></div>
-<label className="block">Text<textarea id="letteringText" rows={2} maxLength={120} aria-label="Lettering text" {...text} disabled={l.textOff} /></label>
+<label className="block">Text<textarea id="letteringText" rows={2} maxLength={120} aria-label="Text content" {...text} disabled={l.textOff} /></label>
 <label>Font size (mm)<input id="letteringHeight" type="number" min={l.heightMin} max={l.heightMax} title={l.heightTitle ||
   undefined} step="0.5" {...height} disabled={l.textOff} /></label>
 <div className="style-row" role="group" aria-label="Text style"><button type="button" id="textBold" className="icon-button" aria-pressed={l.bold}
@@ -55,7 +55,7 @@ export function LetteringPanel() {
     className="icon-button" data-align-text="center" aria-pressed={l.align ===
   'center'} disabled={l.styleOff} onClick={() =>
   letteringActions.press('align',
-  'center')} title="Align centre" aria-label="Align centre"><svg className="icon"><use href="#i-al-hcenter"/></svg></button><button type="button"
+  'center')} title="Align center" aria-label="Align center"><svg className="icon"><use href="#i-al-hcenter"/></svg></button><button type="button"
     id="alignRight" className="icon-button" data-align-text="right" aria-pressed={l.align ===
   'right'} disabled={l.styleOff} onClick={() =>
   letteringActions.press('align', 'right')} title="Align right" aria-label="Align right"><svg className="icon"><use href="#i-al-right"/></svg></button></div>
@@ -63,7 +63,7 @@ export function LetteringPanel() {
   <label>{"Line height (×)"}<input id="lineHeight" type="number" min="0.5" max="3" step="0.05" {...lineHeight} disabled={l.styleOff} /></label><label style={{gridColumn:
     '1 / -1'}}>{"Vertical (one letter under another)"}<input id="textVertical" type="checkbox" className="icon-check" checked={l.vertical} disabled={l.styleOff} onChange={e =>
   letteringActions.choose('vertical',
-  e.target.checked)} /></label><label style={{gridColumn: '1 / -1'}}>Name drop: this lettering takes each name<input id="textNameDrop" type="checkbox"
+  e.target.checked)} /></label><label style={{gridColumn: '1 / -1'}}>Name drop: this text takes each name<input id="textNameDrop" type="checkbox"
     className="icon-check" checked={l.nameDrop} onChange={e =>
   letteringActions.choose('nameDrop', e.target.checked)} /></label><span></span><label>{"Bold (mm)"}<input id="boldMm" type="number" min="0" max="3" step="0.1" {...boldMm} disabled={l.styleOff} /></label><span></span><label>{"Italic (°)"}<input id="italicDeg" type="number" min="0" max="35" step="1" {...italicDeg} disabled={l.styleOff} /></label><span></span></div>
 <label id="textStitchRow" hidden={rows.textStitchRow}>Outline fonts sew as<select id="textStitch" className="sr-only" tabIndex={-1} value={l.stitch}

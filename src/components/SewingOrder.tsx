@@ -12,8 +12,8 @@ export function SewingOrder() {
     <button id="ordBackward" title="Sew earlier" onClick={() => moveSelection('backward')}>Earlier</button>
     <button id="ordForward" title="Sew later" onClick={() => moveSelection('forward')}>Later</button>
     <button id="ordFront" title="Sew last" onClick={() => moveSelection('front')}>To front</button>
-    <button id="ordSort" title="Group objects by thread colour to minimise colour changes" onClick={() => sortByColour()}>
-     Sort by colour
+    <button id="ordSort" title="Group objects by thread color to minimize color changes" onClick={() => sortByColour()}>
+     Sort by color
     </button>
    </div>
   </details>

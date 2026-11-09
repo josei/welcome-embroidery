@@ -7,7 +7,7 @@ import {initialDocument,applyOperations} from '../src/engine.js';
 const fixture=readFileSync(new URL('../fixtures/dxf/simple.dxf',import.meta.url),'utf8');
 const ascii=(body)=>['0','SECTION','2','ENTITIES',...body,'0','ENDSEC','0','EOF'].join('\n')+'\n';
 
-test('a LINE and a closed LWPOLYLINE become two paths with the right points, flipped to y-down and centred on the hoop',()=>{
+test('a LINE and a closed LWPOLYLINE become two paths with the right points, flipped to y-down and centered on the hoop',()=>{
  const {doc,skipped}=dxfDocument(fixture);
  assert.equal(doc.objects.length,3);
  const [line,shape,circle]=doc.objects;
@@ -20,7 +20,7 @@ test('a LINE and a closed LWPOLYLINE become two paths with the right points, fli
  // The CIRCLE is centred at (5,5) with radius 2 in DXF; the box of all points is 0..20 by 0..30, so its centre sits at (10,15) and the circle's centre lands at (-5,10) after the flip.
  assert.equal(circle.closed,true,'a circle is a closed path');assert.equal(circle.points.length,64,'a circle is 64 points');
  const cx=circle.points.reduce((a,p)=>a+p[0],0)/64,cy=circle.points.reduce((a,p)=>a+p[1],0)/64;
- assert.ok(Math.abs(cx+5)<0.01&&Math.abs(cy-10)<0.01,'the circle centre is (-5, 10) mm');
+ assert.ok(Math.abs(cx+5)<0.01&&Math.abs(cy-10)<0.01,'the circle center is (-5, 10) mm');
  assert.ok(Math.abs(circle.w-4)<0.05&&Math.abs(circle.h-4)<0.05,'its box is 4 mm across (radius 2)');
 });
 

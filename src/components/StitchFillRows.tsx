@@ -35,7 +35,7 @@ export function StitchFillRows() {
       title="Angle of the raised underlay from the fill angle; 90 is across the fill, the default" /></label><label id="satinRaisedRow"
         hidden={rows.satinRaisedRow}>{"Raised satin (thick underlay)"}<input id="satinRaised" type="checkbox" className="icon-check" checked={raised.satinRaised} onChange={e =>
     raisedRowsActions.choose('satinRaised',
-    e.target.checked)} title="Raised satin: adds a centre run and a zigzag underlay under the satin so the column stands up" /></label><label
+    e.target.checked)} title="Raised satin: adds a center run and a zigzag underlay under the satin so the column stands up" /></label><label
       id="satinEndRow" hidden={rows.satinEndRow}>{"End width (mm)"}<input id="satinWidthEnd" {...satinWidthEnd} type="number" min="0.5" max="12" step="0.5" placeholder="same"
       title="Leave empty for a constant width; a different value tapers the column from the start width to this one" /></label><div
         className="slider-field" hidden={layout.spacingHidden}>

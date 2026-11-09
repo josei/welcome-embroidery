@@ -39,7 +39,7 @@ export function PathPanel() {
     shapePathActions.redworkGroup(
     )} title="Makes each selected path a redwork run, out and back, and groups them by thread so each thread sews as one block"
       data-tooltip="Makes each selected path a redwork run, out and back, and groups them by thread so each thread sews as one block">Redwork by
-        colour</button><button type="button" id="removeSmallHoles" onClick={(
+        color</button><button type="button" id="removeSmallHoles" onClick={(
     ) =>
     shapePathActions.removeSmallHoles(smallHoleAreaRef.current?.value ??
     '')} title="Drops every hole under the hole limit from the selected closed paths"
@@ -69,7 +69,7 @@ export function PathPanel() {
   shapePathActions.split(
   )} disabled={panel.pathSplit} title="Split the selected path at the selected node">Split at node</button><button id="joinBtn" onClick={() =>
   shapePathActions.join()} disabled={panel.pathJoin} title="Join the selected open paths end to end">Join</button><button id="selectSame" onClick={() =>
-  shapePathActions.selectSameThread()} title="Select every object with this thread colour">Select same thread</button></div>
+  shapePathActions.selectSameThread()} title="Select every object with this thread color">Select same thread</button></div>
 </details>
  );
 }

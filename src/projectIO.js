@@ -435,7 +435,7 @@ export async function openProjectFile(file) {
   try {
     if (file.size > PROJECT_LIMIT) throw Error('Welcome project files are limited to 32 MiB.');
     const lower = file.name.toLowerCase();
-    const openOptions = {cancelNotice: t('Open cancelled.'), undoLabel: 'open file'};
+    const openOptions = {cancelNotice: t('Open canceled.'), undoLabel: 'open file'};
     if (lower.endsWith('.svg')) {
       const imported = importSvg(await file.text());
       guardDiscard(() => {
@@ -504,7 +504,7 @@ export async function importMachineFile(file) {
         wired().toast(t('Imported {name} as a {fmt} stitch layer.', {name: file.name, fmt: format.toUpperCase()}));
         wired().compileNow();
       }
-    }, {cancelNotice: t('Import cancelled.'), replaceFirst: true, undoLabel: 'import file'});
+    }, {cancelNotice: t('Import canceled.'), replaceFirst: true, undoLabel: 'import file'});
   } catch (error) {
     wired().toast(/** @type {Error} */ (error).message, 'error');
   }

@@ -113,6 +113,6 @@ export function readPec(bytes) {
   threads.forEach((t, i) => { t.index = i; });
   let block = 0;
   for (const s of stitches) { if (s.cmd === 'color') s.thread = ++block; else s.thread = block; }
-  if (block >= threads.length) fail('more colour changes than colours');
+  if (block >= threads.length) fail('more color changes than colors');
   return result(stitches, threads);
 }

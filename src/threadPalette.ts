@@ -2,7 +2,7 @@ import {t} from './i18n.js';
 // The thread colours the picker offers, with the names shown for them, and the recently used ones.
 // The React thread picker and the thread selects read these; app.js no longer keeps its own copy.
 export const THREAD_PALETTE: Array<[string, string]>
-  = [['White','#ffffff'],['Ivory','#f3ead7'],['Cream','#efe0b9'],['Light grey','#c9cccf'],['Silver','#a4a8ae'],['Grey','#7a7f87'],['Charcoal','#3f4349'],[
+  = [['White','#ffffff'],['Ivory','#f3ead7'],['Cream','#efe0b9'],['Light gray','#c9cccf'],['Silver','#a4a8ae'],['Gray','#7a7f87'],['Charcoal','#3f4349'],[
   'Black','#111111'],
  ['Pale pink','#f6cbd4'],['Pink','#ec8fa7'],['Hot pink','#d9467f'],['Coral','#d9897e'],['Red','#c8281e'],['Cherry','#9c1b25'],['Burgundy','#6a1a2a'],['Rust',
    '#a8452b'],

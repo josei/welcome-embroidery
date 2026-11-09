@@ -76,7 +76,7 @@ const nodes=/** @type {Pt[]} */([[cx+rx,cy],[cx,cy+ry],[cx-rx,cy],[cx,cy-ry]]),
   hs=[[[cx+rx,cy-ry*k],[cx+rx,cy+ry*k]],[[cx+rx*k,cy+ry],[cx-rx*k,cy+ry]],[[cx-rx,cy+ry*k],[cx-rx,cy-ry*k]],[[cx-rx*k,cy-ry],[cx+rx*k,cy-ry]]];
 return {points:nodes.map(R),handles:hs.map(([i,out])=>({i:R(/** @type {Pt} */(i)),o:R(/** @type {Pt} */(out))}))};
 }
-// Convert a rectangle, ellipse or lettering into editable path(s). Rotation is baked into the points; the first result keeps the object's id.
+// Convert a rectangle, ellipse or text into editable path(s). Rotation is baked into the points; the first result keeps the object's id.
 /**
  * @param {Doc} doc
  * @param {string} id
@@ -105,7 +105,7 @@ return;
 // lettering -> one path per stitch primitive, grouped
 let prims;
 if(o.kind==='text'&&isRegistryFont(o.font)){prims=textPrimitives(/** @type {import('./outlines.js').Lettering} */(o));
-if(!prims)throw Error('Load the font before converting this lettering.');
+if(!prims)throw Error('Load the font before converting this text.');
 }
 else prims=geometry(o).map(pts=>/** @type {import('./textlayout.js').Prim} */({t:'r',pts}));
 /** @type {(r: Pt[]) => Pt[]} */
@@ -133,10 +133,10 @@ if(band.length>=3)made.push({kind:'path',points:limited(band,1000),closed:true,.
 else if(pr.pts.length>=2)made.push(
   {kind:'path',points:limitedOpen(pr.pts.map(([x,y])=>/** @type {Pt} */([+x.toFixed(3),+y.toFixed(3)]))),closed:false,...common,stitch:'run'});
 }
-if(!made.length)throw Error('This lettering has no outlines to convert.');
+if(!made.length)throw Error('This text has no outlines to convert.');
 if(doc.objects.length-1+made.length>100)throw Error(`Converting would create ${made.length} objects and exceed the 100-object limit; shorten the text first.`);
 made.forEach((m,i)=>
-  {m.id=i?crypto.randomUUID():o.id;m.name=`${(o.name||'Lettering').replace(/^Lettering: /,'')} ${i+1}`;m.w=0;m.h=0;m.x=0;m.y=0;
+  {m.id=i?crypto.randomUUID():o.id;m.name=`${(o.name||'Text').replace(/^(Text|Lettering): /,'')} ${i+1}`;m.w=0;m.h=0;m.x=0;m.y=0;
   if(made.length>1&&!m.groupId)m.groupId=gid;refreshPathBounds(/** @type {Obj} */(m));});
 doc.objects.splice(at,1,.../** @type {Obj[]} */(made));
 }
@@ -233,7 +233,7 @@ export function flipObjects(doc,ids,axis,pivotRaw){
 if(axis!=='horizontal'&&axis!=='vertical')throw Error('Flip axis must be horizontal or vertical.');
 const objs=ids.map(id=>objById(doc,id));
 for(const o of objs)if(o.kind==='text'||o.kind==='stitch_layer')throw Error(
-  'Lettering and imported stitches cannot be flipped; convert lettering to paths first.');
+  'Text and imported stitch layers cannot be flipped; convert text to paths first.');
 const bs=objs.map(objectBounds),pivot=
   pivotRaw??(axis==='horizontal'?(Math.min(...bs.map(b=>b[0]))+Math.max(...bs.map(b=>b[2])))/2:(Math.min(...bs.map(b=>b[1]))+Math.max(...bs.map(b=>b[3])))/2);
 /** @type {(p: Pt) => Pt} */

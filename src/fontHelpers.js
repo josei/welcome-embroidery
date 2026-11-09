@@ -22,7 +22,7 @@ export function bundledFontUsage(doc){
   /** @type {Map<string, string[]>} */
   const m=new Map();
     for(const o of doc.objects){if(o.kind!=='text'||!isRegistryFont(o.font)||o.font.startsWith('custom/'))continue;let uses=m.get(o.font);
-    if(!uses){uses=[];m.set(o.font,uses);}uses.push(o.name||'Lettering');}return [...m].map(([id,uses])=>({id,uses}));}
+    if(!uses){uses=[];m.set(o.font,uses);}uses.push(o.name||'Text');}return [...m].map(([id,uses])=>({id,uses}));}
 // Organize fonts: each custom font in the document, with the lettering objects that use it.
 /**
  * @param {Doc} doc
@@ -32,7 +32,7 @@ export function customFontUsage(doc){
   return Object.entries(doc.customFonts||
   {}).map(([id,f])=>(
   {id,name:f.name||id,
-  uses:/** @type {Array<Record<string, any>>} */(doc.objects).filter(o=>o.kind==='text'&&o.font===`custom/${id}`).map(o=>o.name||'Lettering')}));}
+  uses:/** @type {Array<Record<string, any>>} */(doc.objects).filter(o=>o.kind==='text'&&o.font===`custom/${id}`).map(o=>o.name||'Text')}));}
 /**
  * @param {string} text
  * @param {string} [font]

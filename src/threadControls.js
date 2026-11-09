@@ -48,7 +48,7 @@ export function syncThreads() {
     const name = /** @type {HTMLElement} */ (button.querySelector('.nm'));
     name.textContent = label;
     button.disabled = select.disabled;
-    button.title = t("Change this object's thread colour");
+    button.title = t("Change this object's thread color");
     button.setAttribute('aria-label', (select.closest('label')?.firstChild?.textContent || '').trim() + ': ' + label);
   }
 }
@@ -116,7 +116,7 @@ function mountThreadSwatches() {
     button.className = 'thread-btn';
     button.setAttribute('aria-haspopup', 'dialog');
     button.innerHTML = '<span class="sw"></span><span class="nm"></span>';
-    button.title = t("Change this object's thread colour");
+    button.title = t("Change this object's thread color");
     button.onclick = event => {
       event.preventDefault();
       if (threadPopoverState.get().owner?.id === select.id) closeThreadPopover();

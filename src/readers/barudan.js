@@ -24,7 +24,7 @@ export function readDsb(bytes) {
     if (ctrl === 0xF8) break;
     if (ctrl === 0xE7) { push(stitches, x, y, 'trim', block); continue; }
     if (ctrl === 0xE8) { push(stitches, x, y, 'stop', block); continue; }
-    if (ctrl >= 0xE9 && ctrl < 0xF8) { block++; if (block >= MAX_THREADS) fail('too many colour changes'); push(stitches, x, y, 'color', block); continue; }
+    if (ctrl >= 0xE9 && ctrl < 0xF8) { block++; if (block >= MAX_THREADS) fail('too many color changes'); push(stitches, x, y, 'color', block); continue; }
     break;
   }
   push(stitches, x, y, 'end', block);
@@ -47,7 +47,7 @@ export function readDsz(bytes) {
     if ((ctrl & 0x1F) === 1) { x += dx; y += dy; push(stitches, x, y, 'jump', block); continue; }
     if (ctrl === 0x82) { push(stitches, x, y, 'stop', block); continue; }
     if (ctrl === 0x9B) { push(stitches, x, y, 'trim', block); continue; }
-    if (ctrl >= 0x83 && ctrl <= 0x9A) { block++; if (block >= MAX_THREADS) fail('too many colour changes'); push(stitches, x, y, 'color', block); continue; }
+    if (ctrl >= 0x83 && ctrl <= 0x9A) { block++; if (block >= MAX_THREADS) fail('too many color changes'); push(stitches, x, y, 'color', block); continue; }
     break;
   }
   push(stitches, x, y, 'end', block);

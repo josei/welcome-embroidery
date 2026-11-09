@@ -17,7 +17,7 @@ export function sewingWorksheet(doc,plan,format='text'){
   const blocks=threadPlan(plan),total=blocks.reduce((n,b)=>n+b.stitches,0),totalMm=blocks.reduce((n,b)=>n+b.mm,0),time=sewingLabel(sewingSeconds(plan)),name=
     doc.name||'Untitled',hoop=hoopLabel(hoopSize(doc)),fmt=/** @type {(n: number) => string} */(n=>n.toLocaleString('en-US')),
     metres=/** @type {(mm: number) => string} */(mm=>(mm/1000).toFixed(2));
-  const note=`Estimate: about ${time} (600 stitches a minute, 20 s per colour change or stop, 8 s per trim).`;
+  const note=`Estimate: about ${time} (600 stitches a minute, 20 s per color change or stop, 8 s per trim).`;
   if(format==='text'){const rows=
     blocks.map((b,
     i)=>`${String(i+1).padStart(3)}  ${b.thread.padEnd(9)}  ${fmt(b.stitches).padStart(10)}  ${metres(b.mm).padStart(8)}  ` +

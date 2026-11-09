@@ -34,7 +34,7 @@ export function TransformPanel() {
     )} title="Choose the point the rotation field turns the selection around">Set pivot</button><button type="button" id="pivotReset" hidden={!pivot} onClick={(
     ) =>
     pivotActions.reset(
-    )}>Use centre</button><span id="pivotInfo" className="sel-hint" role="status">{info}</span></div><div id="radiusRow"
+    )}>Use center</button><span id="pivotInfo" className="sel-hint" role="status">{info}</span></div><div id="radiusRow"
       hidden={rows.radiusRow}><label>{"Corner radius (mm)"}<input id="radius" {...radius} type="number" min="0" max="500" step="0.5" /></label><div className="corner-radii" role="group"
       aria-label="Corner radii (mm)"><label>TL<input id="radiusTL" {...radiusTL} type="number" min="0" max="500" step="0.5" /></label><label>TR<input
         id="radiusTR" {...radiusTR} type="number" min="0" max="500" step="0.5" /></label><label>BR<input id="radiusBR" {...radiusBR} type="number"

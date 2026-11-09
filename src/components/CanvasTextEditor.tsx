@@ -54,7 +54,7 @@ export function CanvasTextEditor() {
         ref={box}
         defaultValue={canvasText.original}
         maxLength={canvasText.maxLength}
-        aria-label="Edit lettering text"
+        aria-label="Edit text content"
         aria-describedby="canvasTextHint"
         style={{left: canvasText.left, top: canvasText.top, width: canvasText.width, height: canvasText.height}}
         onInput={input}

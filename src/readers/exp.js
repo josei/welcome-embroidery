@@ -26,7 +26,7 @@ export function readExp(bytes, label = 'EXP') {
     if (b === 0x04) { x += dx; y += dy; push(stitches, x, y, 'jump', block); continue; }
     if (b === 0x01) {
       push(stitches, x, y, 'color', ++block);
-      if (block >= MAX_THREADS) fail('too many colour changes');
+      if (block >= MAX_THREADS) fail('too many color changes');
       if (dx !== 0 || dy !== 0) { x += dx; y += dy; push(stitches, x, y, 'jump', block); }
       continue;
     }
@@ -35,9 +35,9 @@ export function readExp(bytes, label = 'EXP') {
   push(stitches, x, y, 'end', block);
   /** @type {Thread[]} */ const threads = [];
   for (let i = 0; i <= block; i++) {
-    threads.push({index: i, color: dstPalette[i % dstPalette.length], brand: label, catalogNumber: null, name: `Colour ${i + 1}`});
+    threads.push({index: i, color: dstPalette[i % dstPalette.length], brand: label, catalogNumber: null, name: `Color ${i + 1}`});
   }
-  return result(stitches, threads, [`${label} files carry no thread colours: placeholder colours were assigned.`]);
+  return result(stitches, threads, [`${label} files carry no thread colors: placeholder colors were assigned.`]);
 }
 
 // STX, read as pyembroidery 1.5.1 does (StxReader): a 'STX' file whose stitch stream starts at the offset in the 32-bit field at 0x14; the stream

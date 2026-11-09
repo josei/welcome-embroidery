@@ -15,14 +15,14 @@ export function StitchBlingRows() {
             hidden={rows.sequinTwinRow}>{"Twin sequins (two side by side across the path)"}<input id="sequinTwin" checked={b.sequinTwin} onChange={e =>
     blingRowsActions.choose('sequinTwin',
     e.target.checked)} type="checkbox" className="icon-check"
-      title="Two sequins side by side across the path, one either side of the centre line, each a sequin wide" /></label><label id="stoneTurnRow"
+      title="Two sequins side by side across the path, one either side of the center line, each a sequin wide" /></label><label id="stoneTurnRow"
         hidden={rows.stoneTurnRow}>Turn stones with the path<input id="stoneTurn" checked={b.stoneTurn} onChange={e =>
     blingRowsActions.choose('stoneTurn',
     e.target.checked)} type="checkbox" className="icon-check"
       title={"Square, hexagon and star stones rotate to follow the path, as oval stones do; off keeps them in the same position on every " +
         "path"} /></label><label id="blingRingsRow" hidden={rows.blingRingsRow}>Fixing rings<select id="blingRings" value={b.blingRings} onChange={e =>
     blingRowsActions.choose('blingRings',
-    e.target.value)} title="Bling stones sew a centre stitch and fixing rings: two rings is the default, one ring is a lighter stone"><option
+    e.target.value)} title="Bling stones sew a center stitch and fixing rings: two rings is the default, one ring is a lighter stone"><option
       value="2">Two rings</option><option value="1">One ring</option></select></label><label id="beadShapeRow" hidden={rows.beadShapeRow}>Bead
         shape<select id="beadShape" value={b.beadShape} onChange={e =>
     blingRowsActions.choose('beadShape',
@@ -30,10 +30,10 @@ export function StitchBlingRows() {
       value="dash">Dash</option><option value="dot">Dot</option></select></label><label id="beadTwinRow" hidden={rows.beadTwinRow}>{"Twin beads (two side by side across the path)"}<input id="beadTwin" checked={b.beadTwin} onChange={e =>
     blingRowsActions.choose('beadTwin',
     e.target.checked)} type="checkbox" className="icon-check"
-      title="Two beads side by side across the path, one either side of the centre line, each a bead length wide" /></label><label id="motifPairRow"
+      title="Two beads side by side across the path, one either side of the center line, each a bead length wide" /></label><label id="motifPairRow"
         hidden={rows.motifPairRow}>{"Paired loops across the width (uses Satin width)"}<input id="motifPair" checked={b.motifPair} onChange={e =>
     blingRowsActions.choose('motifPair',
     e.target.checked)} type="checkbox" className="icon-check"
-      title="Paired motif loops: one loop on each side of the centre line, at the satin width" /></label></>
+      title="Paired motif loops: one loop on each side of the center line, at the satin width" /></label></>
  );
 }

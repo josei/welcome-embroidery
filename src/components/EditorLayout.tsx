@@ -174,9 +174,9 @@ export function EditorLayout() {
             </ActionButton>
             <ActionButton flag="textOnPath" hideWhenDisabled
               className={"icon-button tb-start"}
-              aria-label={"Put the selected lettering on the selected path"}
-              title={"Put the selected lettering on the selected path"}
-              data-tooltip={"Put the selected lettering on the selected path"}
+              aria-label={"Put the selected text on the selected path"}
+              title={"Put the selected text on the selected path"}
+              data-tooltip={"Put the selected text on the selected path"}
               id={"textOnPath"}
               onClick={() => selectionToolbarActions.textOnPath()}
             >
@@ -186,9 +186,9 @@ export function EditorLayout() {
             </ActionButton>
             <ActionButton flag="textOffPath" hideWhenDisabled
               className={"icon-button"}
-              aria-label={"Detach lettering from its path"}
-              title={"Detach lettering from its path"}
-              data-tooltip={"Detach lettering from its path"}
+              aria-label={"Detach text from its path"}
+              title={"Detach text from its path"}
+              data-tooltip={"Detach text from its path"}
               id={"textOffPath"}
               onClick={() => selectionToolbarActions.textOffPath()}
             >

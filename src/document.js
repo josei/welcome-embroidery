@@ -45,7 +45,7 @@ export function initialDocument() {
       x:-27.35,y:-7.72,w:20.35,h:12.72,
       thread:'#527461',stitch:'fill',fillMethod:'contour',border:true,borderThread:'#38503f'},
     // Cursive wordmark in a bundled script font (filled, not a mono running line), so the lettering reads as sewn calligraphy.
-    {id:'letters',name:'Lettering',kind:'text',text:'Bloom',x:-13.45,y:33,w:26.9,h:11,thread:'#527461',stitch:'fill',fillMethod:'rows',font:'ttf/greatvibes'}
+    {id:'letters',name:'Text',kind:'text',text:'Bloom',x:-13.45,y:33,w:26.9,h:11,thread:'#527461',stitch:'fill',fillMethod:'rows',font:'ttf/greatvibes'}
   ]};
 }
 

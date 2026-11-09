@@ -2,7 +2,7 @@ import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import {createToastQueue, toastDuration, TOAST_MAX_MS, TOAST_MIN_MS, TOAST_LOG_LIMIT} from '../src/toastQueue.js';
 
-const trace = 'Traced 19 shapes from the picture, one per colour region, with the stitch settings of your last trace run here';
+const trace = 'Traced 19 shapes from the picture, one per color region, with the stitch settings of your last trace run here';
 const appliqué = 'Appliqué: check the 10 mm bar before cutting fabric, then pin the fabric and sew the satin edge';
 
 test('a short confirmation still gets the four second minimum', () => {

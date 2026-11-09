@@ -193,7 +193,7 @@ export function syncTextInspector(o: TextObject | null) {
     fontInfoHidden: !(entry || custom),
     fontInfoText: custom
       ? `${custom.name} — loaded from a file; stored inside this project. ` +
-        `${custom.license || 'Check the licence of the font file before sharing the design.'}`
+        `${custom.license || 'Check the license of the font file before sharing the design.'}`
       : entry
         ? `${entry.name} — ${entry.license || ''}` +
           `${entry.original && entry.original !== entry.name ? ` · ${t('based on')} ${entry.original}` : ''}` +
@@ -235,7 +235,7 @@ export async function setFont(fid: string) {
 }
 
 /**
- * Vertical lettering fits the hoop: a column taller than 90% of the hoop height is scaled down by its height ratio, with
+ * Vertical text fits the hoop: a column taller than 90% of the hoop height is scaled down by its height ratio, with
  * the width kept in proportion (the same transform the lettering height field uses).
  */
 export function fitVerticalToHoop(id: string) {
@@ -251,7 +251,7 @@ export function fitVerticalToHoop(id: string) {
     const o2 = (documentNow().doc.objects as TextObject[]).find(v => v.id === id)!;
     const b2 = objectBounds(o2), cx = (b2[0] + b2[2]) / 2, cy = (b2[1] + b2[3]) / 2;
     wired().edit([{op: 'transform', id, x: o2.x - cx, y: o2.y - cy}]);
-    wired().toast(t('Vertical lettering fitted to the hoop at {h} mm.', {h: height}));
+    wired().toast(t('Vertical text fitted to the hoop at {h} mm.', {h: height}));
   }
 }
 
@@ -267,7 +267,7 @@ export async function loadFontFile(file: File) {
     const font = ttfToFont(bytes, {
       id,
       name: file.name.replace(/\.[^.]+$/, ''),
-      license: 'Loaded from a local file — check its licence',
+      license: 'Loaded from a local file — check its license',
       keywords: ['truetype', 'outline', 'custom'],
     });
     if (Object.keys(font.glyphs).length < 10) throw Error('That font has too few Latin glyphs.');
@@ -388,7 +388,7 @@ export function configureLettering(next: LetteringApi) {
     if (field === 'text') {
       const value = storedLetteringText(o, text);
       if (!value.trim()) {
-        wired().toast(t('Lettering needs some text.'), 'error');
+        wired().toast(t('A text object needs some text.'), 'error');
         syncTextInspector(o);
         return false;
       }
@@ -420,7 +420,7 @@ export function configureLettering(next: LetteringApi) {
     if (!o) return;
     if (field === 'vertical') {
       if (value && !isRegistryFont(o.font)) {
-        wired().toast(t('Vertical lettering needs a bundled or loaded font. Choose one in Font.'), 'error');
+        wired().toast(t('Vertical text needs a bundled or loaded font. Choose one in Font.'), 'error');
         return false;
       }
       if (wired().edit([{op: 'set_object', id: o.id, vertical: Boolean(value)}]) && value) fitVerticalToHoop(o.id);

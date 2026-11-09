@@ -61,7 +61,7 @@ export function parseDxf(/** @type {any} */ source){
         if(closed&&pts.length>2&&Math.abs(pts[0][0]-pts[pts.length-1][0])<1e-9&&Math.abs(pts[0][1]-pts[pts.length-1][1])<1e-9)pts=pts.slice(0,-1);
       paths.push({points:pts,closed:closed&&pts.length>2});continue;}
     if(e.type==='CIRCLE'){const c=numbers(e.codes,10,20)[0],r=Number((e.codes.find(x=>x[0]===40)||[0,'NaN'])[1]);
-      if(!c||![...c,r].every(Number.isFinite))throw Error('CIRCLE needs a finite centre and radius.');
+      if(!c||![...c,r].every(Number.isFinite))throw Error('CIRCLE needs a finite center and radius.');
       if(r<=0){skipped.CIRCLE=(skipped.CIRCLE||0)+1;continue;}const N=64,pts=
       Array.from({length:N},(_,k)=>{const t=k/N*Math.PI*2;return /** @type {[number, number]} */([c[0]+r*Math.cos(t),c[1]+r*Math.sin(t)]);});
       paths.push({points:pts,closed:true});continue;}
@@ -85,7 +85,7 @@ export function dxfDocument(/** @type {any} */ source){
   return {doc,skipped,bulged};
 }
 
-// Export: each visible object's outline in millimetres, y flipped to DXF's y-up. Two-point open lines become LINE entities; other outlines become LWPOLYLINE
+// Export: each visible object's outline in millimeters, y flipped to DXF's y-up. Two-point open lines become LINE entities; other outlines become LWPOLYLINE
 // entities, closed when the outline is a closed shape. Stitch layers have no outline, so they are counted as skipped.
 /**
  * @param {any} doc the editor's untyped document

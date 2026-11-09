@@ -249,10 +249,10 @@ export function syncStitchPanel() {
   const satinTypes: Array<[string, string]> = [
     ['auto', 'Auto (by width)'],
     ['none', 'None'],
-    ['center', 'Centre run'],
+    ['center', 'Center run'],
     ['contour', 'Edge walk'],
     ['zigzag', 'Zigzag'],
-    ['center+zigzag', 'Centre + zigzag'],
+    ['center+zigzag', 'Center + zigzag'],
     ['contour+zigzag', 'Edge walk + zigzag'],
   ];
   const types = satinish && !fillable ? satinTypes : fillTypes;
