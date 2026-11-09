@@ -1,30 +1,24 @@
 // @ts-check
 // Global keyboard shortcuts: undo/redo, view fitting and zoom, tool keys, knife and pen commits, clipboard, grouping,
-// ordering, nudging and transforms, node deletion and Escape, plus the shortcuts dialog and style paste.
-import {documentNow} from './documentState.js';
+// ordering, nudging and transforms, node deletion and Escape, plus the shortcuts dialog and style paste. Commands the
+// palette lists run through runCommand (commandRegistry.ts), so a shortcut counts as a run in Recent.
 import {selState, setSelection} from './selectionState.js';
-import {selectAll, copySelection, pasteClipboard, removeSelected, nudge, orderedIds, selectedObject} from './selectionCommands.js';
-import {moveSelection} from './sewingOrder.js';
+import {nudge, orderedIds, selectedObject} from './selectionCommands.js';
+import {documentNow} from './documentState.js';
+import {runCommand} from './commandRegistry.js';
+import {setPaletteOpen} from './commandPaletteState.js';
 import {knifeState} from './knifeState.js';
 import {pathDraftNow, setPathDraft} from './pathDraftState.js';
 import {toolMode} from './toolMode.js';
 import {editModeNow, setEditMode} from './editModeState.js';
 import {gridSnapState} from './gridSnapState.js';
 import {gridState} from './gridState.js';
-import {shortcutsState, setShortcutsOpen} from './shortcutsState.js';
+import {shortcutsState} from './shortcutsState.js';
 import {objectBounds} from './engine.js';
 import {t} from './i18n.js';
-import {enterEdit} from './canvasText.js';
-import {copyStyle, pasteStyle} from './styleClipboard.js';
 import {editor} from './editorContext.js';
-import {projectSaveAs} from './projectIO.js';
 import {TOOL_KEYS} from './shortcutTable.js';
 import {focusStitchType} from './focusStitchType.js';
-
-/** @param {string} id */
-function press(id) {
-  /** @type {HTMLElement | null} */ (document.getElementById(id))?.click();
-}
 
 /** Mounts the editor's keyboard handling. */
 export function mountKeyboard() {
@@ -39,29 +33,31 @@ export function mountKeyboard() {
   document.addEventListener('keydown', e => {
     if (!(e.ctrlKey || e.metaKey) || e.altKey) return;
     const key = e.key.toLowerCase();
-    if (key === 's') { e.preventDefault(); if (e.shiftKey) void projectSaveAs(); else press('save'); return; }
+    if (key === 'k' && !e.shiftKey) { e.preventDefault(); setPaletteOpen(true); return; }
+    if (key === 's') { e.preventDefault(); runCommand(e.shiftKey ? 'saveAs' : 'save'); return; }
     // Ctrl+Shift+E opens the export dialog (the same button as the Export button), not while a field has focus.
-    if (key === 'e' && e.shiftKey && !editor.canvas.inField(e)) { e.preventDefault(); press('export'); return; }
+    if (key === 'e' && e.shiftKey && !editor.canvas.inField(e)) { e.preventDefault(); runCommand('export'); return; }
     if (e.shiftKey || editor.canvas.inField(e)) return;
-    if (key === 'o') { e.preventDefault(); press('open'); }
-    else if (key === 'n') { e.preventDefault(); press('new'); }
+    if (key === 'o') { e.preventDefault(); runCommand('open'); }
+    else if (key === 'n') { e.preventDefault(); runCommand('new'); }
   });
 
   document.addEventListener('keydown', e => {
     const canvas = editor.canvas;
     if (canvas.inField(e)) return;
     const mod = e.ctrlKey || e.metaKey, key = e.key.toLowerCase();
-    if (mod && key === 'z') { e.preventDefault(); press(e.shiftKey ? 'redo' : 'undo'); return; }
-    if (mod && key === 'y') { e.preventDefault(); press('redo'); return; }
+    if (mod && key === 'z') { e.preventDefault(); runCommand(e.shiftKey ? 'redo' : 'undo'); return; }
+    if (mod && !e.shiftKey && key === 'y') { e.preventDefault(); runCommand('redo'); return; }
+    if (mod && e.shiftKey && key === 'y') { e.preventDefault(); runCommand('repeatLast'); return; }
     if (e.shiftKey && !mod && (e.code === 'Digit1' || e.code === 'Digit2' || e.code === 'Digit0')) {
       e.preventDefault();
-      e.code === 'Digit1' ? canvas.fitAll() : e.code === 'Digit2' ? canvas.fitSelection() : canvas.zoomTo100();
+      runCommand(e.code === 'Digit1' ? 'fitAll' : e.code === 'Digit2' ? 'fitSelection' : 'zoom100');
       return;
     }
-    if (!mod && (e.key === '+' || e.key === '=')) { e.preventDefault(); canvas.zoomAt(1.25); return; }
-    if (!mod && (e.key === '-' || e.key === '_') && !pathDraftNow().pathMode) { e.preventDefault(); canvas.zoomAt(1 / 1.25); return; }
+    if (!mod && (e.key === '+' || e.key === '=')) { e.preventDefault(); runCommand('zoomIn'); return; }
+    if (!mod && (e.key === '-' || e.key === '_') && !pathDraftNow().pathMode) { e.preventDefault(); runCommand('zoomOut'); return; }
     if ((!pathDraftNow().pathMode || pathDraftNow().pathPoints.length === 0) && !mod && !e.altKey && !e.shiftKey) {
-      if (TOOL_KEYS[key]) { e.preventDefault(); press(TOOL_KEYS[key]); return; }
+      if (TOOL_KEYS[key]) { e.preventDefault(); runCommand(`tool:${TOOL_KEYS[key]}`); return; }
     }
     if (toolMode.get() === 'knife' && (e.key === 'Enter' || e.key === 'Escape')) {
       e.preventDefault();
@@ -83,30 +79,21 @@ export function mountKeyboard() {
       }
       return;
     }
-    if (mod && key === 'a') { e.preventDefault(); selectAll(); return; }
-    if (mod && !e.altKey && key === 'c' && !e.shiftKey) { e.preventDefault(); copySelection(); return; }
-    if (mod && !e.altKey && key === 'x') { e.preventDefault(); if (copySelection()) removeSelected(); return; }
-    if (mod && !e.altKey && key === 'v') { e.preventDefault(); pasteClipboard(); return; }
-    if (mod && key === 'd') { e.preventDefault(); press('duplicate'); return; }
-    if (mod && key === 'g') { e.preventDefault(); press(e.shiftKey ? 'ungroup' : 'group'); return; }
-    if (mod && e.shiftKey && key === 'c') {
-      e.preventDefault();
-      const ids = orderedIds().filter(id => {
-        const object = documentNow().doc.objects.find((/** @type {any} */ v) => v.id === id);
-        return object?.kind !== 'path' && object?.kind !== 'stitch_layer';
-      });
-      if (ids.length) editor.edit([{op: 'to_path', ids}]);
-      return;
-    }
+    if (mod && key === 'a') { e.preventDefault(); runCommand('selectAll'); return; }
+    if (mod && !e.altKey && key === 'c' && !e.shiftKey) { e.preventDefault(); runCommand('copy'); return; }
+    if (mod && !e.altKey && key === 'x') { e.preventDefault(); runCommand('cut'); return; }
+    if (mod && !e.altKey && key === 'v') { e.preventDefault(); runCommand('paste'); return; }
+    if (mod && key === 'd') { e.preventDefault(); runCommand('duplicate'); return; }
+    if (mod && key === 'g') { e.preventDefault(); runCommand(e.shiftKey ? 'ungroup' : 'group'); return; }
+    if (mod && e.shiftKey && key === 'c') { e.preventDefault(); runCommand('convertToPath'); return; }
     // Enter on a focused button (menu bar, Thread button, toolbar) is left to that button's native activation;
     // only elsewhere does it start editing the selected object's nodes.
-    if (e.key === 'Enter' && selState().multi.size === 1 && !(/** @type {any} */ (e.target))?.closest?.('button, .file-menu')) { e.preventDefault(); enterEdit(selectedObject()); return; }
-    // I moves focus to the selected object's Stitch type control: the keyboard path to its settings, without Tabbing the tool row.
+    if (e.key === 'Enter' && selState().multi.size === 1 && !(/** @type {any} */ (e.target))?.closest?.('button, .file-menu')) { e.preventDefault(); runCommand('editNodes'); return; }
     if (key === 'i' && !mod && !e.altKey && !e.shiftKey && selState().selected && focusStitchType()) { e.preventDefault(); return; }
-    if (e.key === '[') return moveSelection('backward');
-    if (e.key === ']') return moveSelection('forward');
-    if (e.key === 'Home' && selState().multi.size) { e.preventDefault(); return moveSelection('back'); }
-    if (e.key === 'End' && selState().multi.size) { e.preventDefault(); return moveSelection('front'); }
+    if (e.key === '[') return void runCommand('sendBackward');
+    if (e.key === ']') return void runCommand('bringForward');
+    if (e.key === 'Home' && selState().multi.size) { e.preventDefault(); return void runCommand('sendToBack'); }
+    if (e.key === 'End' && selState().multi.size) { e.preventDefault(); return void runCommand('bringToFront'); }
     if (e.key.startsWith('Arrow') && selState().multi.size && mod && !editModeNow()) {
       e.preventDefault();
       const ids = orderedIds();
@@ -136,7 +123,7 @@ export function mountKeyboard() {
     }
     if ((e.key === 'Delete' || e.key === 'Backspace') && selState().selected) {
       e.preventDefault();
-      if (editModeNow() && selState().selNode !== null) canvas.deleteNode(); else removeSelected();
+      if (editModeNow() && selState().selNode !== null) canvas.deleteNode(); else runCommand('delete');
       return;
     }
     if (e.key === 'Escape') {
@@ -149,13 +136,13 @@ export function mountKeyboard() {
   document.addEventListener('keydown', e => {
     if (e.key === '?' && !e.ctrlKey && !e.metaKey && !editor.canvas.inField(e) && !shortcutsState.get()) {
       e.preventDefault();
-      setShortcutsOpen(true);
+      runCommand('shortcutSheet');
     }
   });
 
   document.addEventListener('keydown', e => {
     if (editor.canvas.inField(e)) return;
-    if ((e.ctrlKey || e.metaKey) && e.altKey && e.key.toLowerCase() === 'c') { e.preventDefault(); copyStyle(); }
-    else if ((e.ctrlKey || e.metaKey) && e.altKey && e.key.toLowerCase() === 'v') { e.preventDefault(); pasteStyle(); }
+    if ((e.ctrlKey || e.metaKey) && e.altKey && e.key.toLowerCase() === 'c') { e.preventDefault(); runCommand('copyStyle'); }
+    else if ((e.ctrlKey || e.metaKey) && e.altKey && e.key.toLowerCase() === 'v') { e.preventDefault(); runCommand('pasteStyle'); }
   });
 }

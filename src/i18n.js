@@ -422,6 +422,9 @@ export const ES={
 'Removed {n} unused fonts.':'Se quitaron {n} fuentes sin usar.',
 'batch: {field} on {n} objects':'lote: {field} en {n} objetos','row spacing':'separación de filas','stitch length':'longitud de puntada','angle':'ángulo',
 'Arrow keys':'Teclas de flecha','Copies the text worksheet to the clipboard':'Copia la hoja de texto al portapapeles','Also download the sewing worksheet':'Descargar también la hoja de bordado','stitch layer':'capa de puntadas','{fmt} stitch layer':'{fmt} capa de puntadas','used by 1 text object':'usada por 1 objeto de texto','used by {n} text objects':'usada por {n} objetos de texto','(bundled, not removed)':'(incluida, no se quita)','Fonts used by text objects are kept. Removing a font that a text object uses is not offered.':'Las fuentes usadas por objetos de texto se conservan. No se ofrece quitar una fuente que use un objeto de texto.',
+'Command palette':'Paleta de comandos','Repeat last action':'Repetir la última acción','Type a command':'Escribe un comando','Matching commands':'Comandos coincidentes','All commands':'Todos los comandos','Commands':'Comandos','No command matches.':'Ningún comando coincide.',
+'No previous action to repeat.':'No hay ninguna acción anterior que repetir.','Nothing to repeat: {command} does not apply to the current selection.':'Nada que repetir: {command} no se aplica a la selección actual.','Select tool':'Herramienta de selección','Rectangle tool':'Herramienta rectángulo','Ellipse tool':'Herramienta elipse','Lettering tool':'Herramienta de texto','Draw path tool':'Herramienta de trazado','Pen with curves tool':'Herramienta pluma con curvas',
+'Line tool':'Herramienta línea','Polygon tool':'Herramienta polígono','Star tool':'Herramienta estrella','Measure tool':'Herramienta medir','Knife tool':'Herramienta cuchillo','Zoom to 100%':'Ampliar al 100 %','Zoom in':'Acercar','Zoom out':'Alejar'
 };
 /** @type {Array<{re: RegExp, names: string[], out: string}>} */
 const rx=[];

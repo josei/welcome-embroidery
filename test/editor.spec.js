@@ -1206,7 +1206,7 @@ test('autosave: an edited design is offered back after a reload; starting fresh 
 test('keyboard shortcut list opens with ? and the listed tool keys really work; the thread plan lists colors in sewing order',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));
  await page.goto('/');page.on('dialog',d=>d.accept());await expect(page.locator('#count')).toContainText('compiled');
- await page.keyboard.press('?');await expect(page.locator('#keysDialog')).toBeVisible();await expect(page.locator('#keysList')).toContainText(APPLE_KEYS?/⌘G \/ ⇧⌘G/:/Ctrl\+G \/ Ctrl\+Shift\+G/);await page.keyboard.press('Escape');await expect(page.locator('#keysDialog')).toBeHidden();
+ await page.keyboard.press('?');await expect(page.locator('#keysDialog')).toBeVisible();await expect(page.locator('#keysList')).toContainText(APPLE_KEYS?/⌘G/:/Ctrl\+G/);await expect(page.locator('#keysList')).toContainText(APPLE_KEYS?/⇧⌘G/:/Ctrl\+Shift\+G/);await page.keyboard.press('Escape');await expect(page.locator('#keysDialog')).toBeHidden();
  await page.locator('#helpBtn').click();await expect(page.locator('#keysDialog')).toBeVisible();await page.keyboard.press('Escape');
  for(const [key,id] of [['n','path'],['p','pen'],['l','line'],['g','polygon'],['s','star'],['v','select']]){await page.locator('#art').hover();await page.keyboard.press(key);await expect(page.locator('#'+id)).toHaveClass(/active-tool/);}
  await page.locator('#secPlan summary').click();await expect(page.locator('#planList .plan-row')).toHaveCount(10);await expect(page.locator('#planList .plan-row').first()).toContainText('1.');await expect(page.locator('#planEmpty')).toBeHidden();
@@ -3831,4 +3831,32 @@ test('Ctrl+Shift+E opens the export dialog, the same as the Export button',async
  await expect(page.locator('#exportDialog h2')).toHaveText('Export');
  await page.keyboard.press('Escape');
  await expect(page.locator('#exportDialog')).toBeHidden();
+});
+// The command palette: ⌘K opens it, the list filters as you type, a run from it lands in Recent, and repeat-last-action re-runs
+// the last undoable edit (and says so when there is none). Disabled commands stay listed, greyed out.
+test('command palette: opens with its key, filters, runs into Recent, and repeat-last-action repeats the last edit',async({page})=>{
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));page.on('dialog',d=>d.accept());await page.goto('/');await newDesign(page);
+ const rows=page.locator('.object-row'), palette=page.locator('#commandPalette'), items=page.locator('#commandPalette .palette-row');
+ const open=APPLE_KEYS?'Meta+k':'Control+k', repeat=APPLE_KEYS?'Meta+Shift+y':'Control+Shift+y';
+ // Nothing has run yet, so repeat-last-action says so instead of doing nothing silently.
+ await page.keyboard.press(repeat);await expect(page.locator('#toast')).toContainText('No previous action to repeat.');
+ await page.locator('#rect').click();await expect(rows).toHaveCount(1);
+ // Copy needs a selection: with nothing selected it is listed but disabled.
+ await page.keyboard.press('Escape');await page.keyboard.press(open);await expect(palette).toBeVisible();await expect(page.locator('#paletteInput')).toBeFocused();
+ await expect(page.locator('#commandPalette .palette-heading').first()).toHaveText('All commands');
+ await page.keyboard.type('copy');await expect(items).toHaveCount(2);await expect(items.first()).toHaveText(/^Copy/);await expect(items.first()).toHaveClass(/is-disabled/);
+ await page.keyboard.press('Enter');await expect(palette).toBeVisible();
+ // Filtering ignores case and matches anywhere in the label.
+ await page.locator('#paletteInput').fill('TO FRONT');await expect(items.first()).toContainText('Bring to front');
+ await page.keyboard.press('Escape');await expect(palette).toBeHidden();
+ // Select the rectangle again; Duplicate then runs from the palette and becomes the Recent entry at the top.
+ await rows.nth(0).click();await page.keyboard.press(open);await page.keyboard.type('duplicate');await page.keyboard.press('Enter');await expect(palette).toBeHidden();
+ await expect(rows).toHaveCount(2);
+ await page.keyboard.press(open);await expect(page.locator('#commandPalette .palette-heading').first()).toHaveText('Recent');
+ await expect(items.first()).toContainText('Duplicate');
+ await page.keyboard.press('Escape');
+ await expect.poll(()=>page.evaluate(()=>document.activeElement?.id)).not.toBe('paletteInput');
+ // Repeat-last-action re-runs Duplicate (the last undoable edit) and keeps it as the remembered command.
+ await page.keyboard.press(repeat);await expect(rows).toHaveCount(3);
+ expect(errors).toEqual([]);
 });

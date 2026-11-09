@@ -1,6 +1,7 @@
 import {useRef, useSyncExternalStore} from 'react';
 import {useModalDialog} from './useModalDialog';
 import {KeysDialog} from './KeysDialog';
+import {CommandPalette} from './CommandPalette';
 import {MessagesDialog} from './ToastStack';
 import {RestoreDialog} from './RestoreDialog';
 import {DiscardDialog} from './DiscardDialog';
@@ -135,6 +136,7 @@ export function EditorOverlays() {
     </dialog>
     <TraceDialog />
     <KeysDialog />
+    <CommandPalette />
     <SettingsDialog />
     <RestoreDialog />
     <DiscardDialog />
