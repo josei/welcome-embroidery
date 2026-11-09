@@ -305,6 +305,8 @@ export const ES={
   'Photo stitch from a picture':'Punto foto a partir de una imagen','Photo row spacing (mm)':'Separación de filas de la foto (mm)','Photo contrast':
   'Contraste de la foto','Invert picture':'Invertir la imagen','Photo stitch added. Adjust spacing and contrast in the sidebar.':
   'Punto foto añadido. Ajusta la separación y el contraste en la barra lateral.','That picture could not be read.':'No se pudo leer esa imagen.',
+  'Rectangle added at hoop centre, {w} × {h} mm':'Rectángulo añadido en el centro del bastidor, {w} × {h} mm',
+  'Ellipse added at hoop centre, {w} × {h} mm':'Elipse añadida en el centro del bastidor, {w} × {h} mm',
   'Cross size (mm)':'Tamaño de la cruz (mm)','Run style':'Estilo de la recta','Single run':'Recta simple','Bean (triple) run':'Recta triple (bean)',
   'Stitch length variation (%)':'Variación del largo de puntada (%)','Randomises the needle spacing from row to row so the fill shows less pattern (moiré)':
   'Varía al azar el espaciado de agujas entre filas para que el relleno muestre menos patrón (moiré)','Appliqué':'Aplique',

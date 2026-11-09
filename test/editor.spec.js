@@ -3232,3 +3232,38 @@ test('save: one Save and one Save As, with the same names on the toolbar, File m
  expect(file.suggestedFilename()).toMatch(/\.welcome$/);
  await expect(page.locator('#savedStatus')).toContainText(file.suggestedFilename());
 });
+
+// Clicking the centre of outline lettering selects it, including the open counter of an O or A (the click is inside the
+// glyph, not on its stroke). Each glyph is placed alone so the centre of the object is the centre of that glyph.
+test('clicking the centre of an outline glyph selects the lettering, counter included',async({page})=>{page.on('dialog',d=>d.accept());const errors=[];page.on('pageerror',e=>errors.push(e.message));
+ await page.goto('/');await newDesign(page);
+ for(const glyph of ['O','A']){
+  await page.locator('#letter').click();await page.locator('#font').selectOption('ttf/anton');await page.keyboard.type(glyph);await page.keyboard.press('Tab');
+  await expect(page.locator('.object-row').first()).toContainText(`Lettering: ${glyph}`);
+  await page.keyboard.press('Escape');await page.mouse.click(5,5);await expect(page.locator('#selected')).toContainText('Select an object');
+  const g=await page.locator('#shapes > g.shape').first().boundingBox();
+  await page.mouse.click(g.x+g.width/2,g.y+g.height/2);
+  await expect(page.locator('#selected'),glyph).toContainText(`Lettering: ${glyph}`);
+  await page.keyboard.press('Escape');await page.mouse.click(5,5);
+  await page.locator('.object-row').first().click();await page.keyboard.press('Delete');
+  await expect(page.locator('.object-row')).toHaveCount(0);
+ }
+ expect(errors).toEqual([]);
+});
+
+// Add rectangle and Add ellipse select the new shape, so the inspector shows its thread and stitch controls, and the hint
+// names the hoop-centre placement with the default 24 × 16 mm size.
+test('add rectangle and add ellipse select the new shape and say where it went',async({page})=>{page.on('dialog',d=>d.accept());const errors=[];page.on('pageerror',e=>errors.push(e.message));
+ await page.goto('/');await newDesign(page);
+ await page.locator('#rect').click();
+ await expect(page.locator('#selected')).toContainText('Rectangle');
+ await expect(page.locator('#selHint')).toBeHidden();
+ await expect(page.locator('#thread')).toBeVisible();
+ await expect(page.locator('#toast')).toContainText('Rectangle added at hoop centre, 24 × 16 mm');
+ await page.keyboard.press('Escape');await page.locator('#ellipse').click();
+ await expect(page.locator('#selected')).toContainText('Ellipse');
+ await expect(page.locator('#selHint')).toBeHidden();
+ await expect(page.locator('#thread')).toBeVisible();
+ await expect(page.locator('#toast')).toContainText('Ellipse added at hoop centre, 24 × 16 mm');
+ expect(errors).toEqual([]);
+});
