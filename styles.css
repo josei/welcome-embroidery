@@ -351,7 +351,6 @@ input[aria-invalid="true"]{border-color:var(--warn)!important;background:var(--w
 .palette-row kbd{font:600 11px ui-monospace,monospace;background:#f1f3ef;border:1px solid #d8ddd6;border-radius:4px;padding:2px 6px;white-space:nowrap}
 .palette-empty{padding:12px 9px;color:#66726c}
 
-<<<<<<< HEAD
 /* Status bar (#207): the bar's items each stay on one line. The simulation bar takes a full row so its track keeps its width, and the
    status items wrap to the row below as whole items. Coordinates, counts and the progress text sit in fixed-width slots, so their width
    does not change as the values change; text that is too long is cut off with an ellipsis, not wrapped. */
@@ -368,7 +367,6 @@ input[aria-invalid="true"]{border-color:var(--warn)!important;background:var(--w
 .playback-summary{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
 .timeline-marker{width:8px;height:8px;margin-left:-4px;border-width:1.5px}
 .layout main>footer{flex-wrap:wrap;align-content:center;row-gap:6px;padding-top:6px;padding-bottom:6px}
-=======
 /* Issue #208: from 601px to 1100px the top bar stays on one row (the title shrinks first, the controls stay whole; the blank-design reason is kept for screen readers only), and the
    object list heading lines up with the 10px padding of the object list below it. Below 601px the bar still wraps. */
 @media (min-width:601px) and (max-width:1100px){
@@ -392,4 +390,3 @@ input[aria-invalid="true"]{border-color:var(--warn)!important;background:var(--w
 .top .export-reason{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;margin:0}
 .layout>aside.panel:first-child>.layers-head{padding:0 10px}
 }
->>>>>>> edd31ca (Keep the top bar on one row at 760px and align the object list heading)
