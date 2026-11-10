@@ -20,6 +20,19 @@ An open-source, userless embroidery editor that runs as a static web app, a self
 - **Preview:** design view, stitch view with simulation, and a WebGL thread preview.
 - **MCP:** a private, revocable link per browser tab lets an agent edit the open document live (`documentId: "live"`) or work on server-side documents.
 
+## First design
+
+1. **Draw or open a design.** Start from scratch, open a `.welcome` project, or import a machine file or SVG.
+2. **Save your project.** Exporting does not save your project. Use **File → Save** (or Save As) to keep it as a `.welcome` file, and open that file later to keep editing. Autosave keeps a copy in this browser only, so save the file if you want to keep the design.
+3. **Export for your machine.** Open **Export embroidery** and pick your machine brand in **Your machine**: Janome and Elna use JEF, Pfaff uses VP3, Brother and Babylock use PES (v6), Tajima uses DST, and Melco, Barudan and Singer use EXP, U01 and XXX. The picker sets the file format for you. If your machine is not listed, choose **Other / not sure**, which uses DST, the most widely supported format. To choose a format yourself, use **Show every format**.
+4. **Check the sewing tips.** The editor lists sewing tips about your design. To hide a category of tips, open **Settings** and untick it under **Sewing tips to show**.
+
+## Node version
+
+The project is built and run with Node 22, as set in the `Dockerfile` (`node:22-alpine`). `package.json` does not declare an `engines` range. Use Node 22 with `npm ci` and `npm start`.
+
+The project was tested on Node 22: CI runs `npm ci` and the Pages tests on Node 22 (`.github/workflows/pages.yml`).
+
 ## Run
 
 ```sh
