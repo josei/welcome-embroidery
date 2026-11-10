@@ -83,7 +83,7 @@ export function createCanvasTools(api){
         setSelection({selected: id});setSelection({multi: new Set([id])});
         // The new object opens in the on-canvas text box with its placeholder selected, so typing replaces it. The box
         // takes the keystrokes, so letters never reach the tool shortcuts.
-        enterEdit(documentNow().doc.objects.find((/** @type {any} */ o)=>o.id===id));
+        enterEdit(documentNow().doc.objects.find((/** @type {any} */ o)=>o.id===id),true);
       });
       return;
     }

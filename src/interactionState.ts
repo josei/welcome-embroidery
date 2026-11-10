@@ -36,6 +36,8 @@ export interface RefDrag {
 export interface CanvasTextEdit {
   id: string;
   original: string;
+  /** True for a box opened on a lettering object just placed: a blank or cancelled box removes it. */
+  fresh: boolean;
   maxLength: number;
   left: number;
   top: number;

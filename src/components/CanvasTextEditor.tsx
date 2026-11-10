@@ -14,8 +14,32 @@ export function CanvasTextEditor() {
   const finished = useRef(false);
   useEffect(() => {
     finished.current = false;
-    box.current?.focus();
-    box.current?.select();
+    const focusAndSelect = () => {
+      box.current?.focus();
+      box.current?.select();
+    };
+    focusAndSelect();
+    // A box placed by a canvas click opens under the pointer, so the release of that click lands on the textarea and
+    // moves the caret to the end of the placeholder. Two cases, both covered so the result does not depend on how
+    // fast React commits: a release that already happened before this effect ran is handled by the zero-delay timer,
+    // and a release still to come is handled by the listener. Only a release within a second of opening counts, so a
+    // later click in the box still places the caret where the user clicks.
+    // Each re-select applies only while the box still holds its original text, so a late one can never select over
+    // characters the user has already typed.
+    const original = canvasText?.original ?? null;
+    const reselect = () => {
+      if (box.current && box.current.value === original) focusAndSelect();
+    };
+    const opened = performance.now();
+    const timer = window.setTimeout(reselect, 0);
+    const onRelease = () => {
+      if (performance.now() - opened < 1000) window.setTimeout(reselect, 0);
+    };
+    window.addEventListener('pointerup', onRelease, {once: true, capture: true});
+    return () => {
+      window.clearTimeout(timer);
+      window.removeEventListener('pointerup', onRelease, {capture: true});
+    };
   }, [canvasText]);
   if (!canvasText) return null;
   const finish = (commit: boolean, value: string) => {

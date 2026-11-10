@@ -52,7 +52,7 @@ function savedText(font: string | undefined, value: string): string {
 }
 
 /** Opens the text box over the object: its screen rectangle, its text, and the character limit of its font. */
-export function startCanvasText(o: EditableObject) {
+export function startCanvasText(o: EditableObject, fresh = false) {
   if (interactionNow().canvasText) return;
   const b = objectBounds(o);
   const [x0, y0] = wired().toScreen(b[0], b[1]);
@@ -61,6 +61,7 @@ export function startCanvasText(o: EditableObject) {
     canvasText: {
       id: o.id,
       original: o.text ?? '',
+      fresh,
       maxLength: isRegistryFont(o.font) ? 120 : 24,
       left: Math.max(26, x0 - 8),
       top: Math.max(26, y0 - 10),
@@ -90,6 +91,11 @@ export function finishCanvasText(commit: boolean, value: string) {
   const objects: EditableObject[] = documentNow().doc.objects;
   const o = objects.find(v => v.id === state.id);
   if (!o) return;
+  // A box just placed that is cancelled or left blank is removed, so no stray "Text" object is left to export.
+  if (state.fresh && (!commit || !savedText(o.font, value).trim())) {
+    wired().edit([{op: 'delete', id: state.id}], () => setSelection({multi: new Set<string>()}));
+    return;
+  }
   o.text = state.original;
   o.w = measureText(state.original, o.font || 'welcome-mono/1', o.h, o);
   const text = savedText(o.font, value);
@@ -98,11 +104,11 @@ export function finishCanvasText(commit: boolean, value: string) {
 }
 
 /** Enter on an object: lettering opens its text box, a path edits nodes, and any other shape becomes a path first. */
-export function enterEdit(o: EditableObject | undefined) {
+export function enterEdit(o: EditableObject | undefined, fresh = false) {
   if (!o || o.kind === 'stitch_layer') return;
   if (o.kind === 'text') {
     wired().selectIds([o.id], o.id);
-    startCanvasText(o);
+    startCanvasText(o, fresh);
     return;
   }
   if (o.kind === 'path') {
