@@ -5,18 +5,13 @@ import {documentNow, setDocument} from './documentState.js';
 import {setSelection} from './selectionState.js';
 import {clone, forWorker} from './appHelpers.js';
 import {applyOperations, validateDocument} from './engine.js';
-import {createAgentBridge} from './agent.js';
+import {agentStatusText, createAgentBridge} from './agent.js';
 import {configureAgentDialog} from './agentDialog.js';
 import {referenceForAgent} from './referencePicture.js';
 import {setAgentLink} from './agentLinkState.js';
 import {t} from './i18n.js';
 import {transact} from './documentCommands.js';
 import {editor} from './editorContext.js';
-
-/** @type {Record<string, string>} */
-const AGENT_TEXTS =
-  {idle: 'Not connected.', waiting: 'Connected. Waiting for an agent to use the link.', active: 'Agent active.', error: 'Connection problem.', unavailable:
-  'Agent relay unavailable.'};
 
 /** Mounts the bridge and resumes any saved session. */
 export function mountAgentBridge() {
@@ -84,9 +79,7 @@ export function mountAgentBridge() {
     addLayerRemote,
     onChange: state => {
       setAgentLink({
-        statusText: (`${t(AGENT_TEXTS[state.status] || '')}` +
-        `${state.status === 'active' ? ` ${t(state.agentCalls === 1 ? '1 request so far.' : `${state.agentCalls} requests so far.`)}` : ''} ` +
-        `${state.message || ''}`).trim(),
+        statusText: agentStatusText(state),
         url: state.mcpUrl || '',
         ready: Boolean(state.mcpUrl),
         waiting: state.status === 'waiting' || state.status === 'active',

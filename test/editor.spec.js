@@ -240,7 +240,7 @@ test('agent relay: a failed revoke keeps the owner key and the link, and says so
   expect(await ownerKey()).toBe(before);await expect(page.locator('#agentUrl')).toHaveValue(link);await expect(page.locator('#agentRevoke')).toBeEnabled();
   await page.unroute('**/api/session/revoke');
   await page.locator('#agentRevoke').click();
-  await expect(page.locator('#agentStatus')).toContainText('Link revoked');await expect(page.locator('#agentUrl')).not.toHaveValue(link);
+  await expect(page.locator('#agentStatus')).toContainText('Link revoked');await expect(page.locator('#agentStatus')).not.toContainText('Connected.');await expect(page.locator('#agentUrl')).not.toHaveValue(link);
   expect(await ownerKey()).not.toBe(before);
  }finally{child.kill('SIGTERM');}
 });

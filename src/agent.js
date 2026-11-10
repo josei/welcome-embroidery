@@ -3,6 +3,20 @@
 // against the open document. The owner key stays in this tab's sessionStorage; the link token is what agents get.
 import {t} from './i18n.js';
 const KEY='welcome.agentSession';
+/** @type {Record<string, string>} */
+const STATUS_TEXT={idle:'Not connected.',waiting:'Connected. Waiting for an agent to use the link.',active:'Agent active.',error:'Connection problem.',unavailable:'Agent relay unavailable.'};
+
+/**
+ * The Agent dialog's status line. A message (a revoke result, an error, a lost connection) is the whole line, so it is not
+ * prefixed by the connection status; otherwise the status text is shown, with the request count while an agent is active.
+ * @param {AgentState} state
+ * @returns {string}
+ */
+export function agentStatusText(state){
+  if(state.message)return state.message;
+  const count=state.status==='active'?` ${t(state.agentCalls===1?'1 request so far.':`${state.agentCalls} requests so far.`)}`:'';
+  return `${t(STATUS_TEXT[state.status]||'')}${count}`.trim();
+}
 /**
  * @param {unknown} body
  * @param {AbortSignal} [signal]
