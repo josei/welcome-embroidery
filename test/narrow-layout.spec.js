@@ -47,6 +47,10 @@ test('the top bar stays on one row at 760px and the title gives way first',async
  // The title is the element that gives way, and it shows an ellipsis rather than clipping the text.
  const title=await page.locator('header.top #name').evaluate(e=>getComputedStyle(e).textOverflow);
  expect(title,'title text-overflow').toBe('ellipsis');
+ // The shown title (drawn while the field is not focused) ends in an ellipsis: its text is clipped, not cut mid-word.
+ const shownTitle=await page.locator('header.top .name-field').evaluate(e=>{const a=getComputedStyle(e,'::after');return {content:a.content,overflow:a.textOverflow,clipped:a.overflow==='hidden'};});
+ expect(shownTitle.overflow,'shown title ellipsis').toBe('ellipsis');
+ expect(shownTitle.content,'shown title carries the name').toContain('A very long embroidery');
  const titleBox=await page.locator('header.top #name').boundingBox();
  expect(titleBox.width,'title keeps a usable width').toBeGreaterThanOrEqual(60);
  expect(await page.locator('header.top #name').evaluate(e=>e.scrollWidth>e.clientWidth),'long title is truncated').toBe(true);

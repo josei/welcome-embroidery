@@ -19,7 +19,8 @@ function ProjectName() {
  const {doc} = useSyncExternalStore(documentState.subscribe, documentState.get);
  const shown = t(doc.name ?? '');
  const field = useDraftInput(shown, text => documentActions.rename(text === shown ? (doc.name ?? '') : text));
- return <input id="name" {...field} />;
+ // The wrapper carries the shown name for the narrow-width ellipsis (styles.css): an input cannot show one itself.
+ return <span className="name-field" data-shown={shown}><input id="name" {...field} /></span>;
 }
 // Undo and Redo: the name says which action the step takes back (or forward), e.g. "Undo delete Rectangle". With no
 // step on that side, the name says so and the button is disabled (actionState).

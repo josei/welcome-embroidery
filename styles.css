@@ -73,6 +73,7 @@ nav .icon-button:first-of-type{margin-left:auto}
 .segmented button[data-view].active{background:#fff;color:var(--teal);font-weight:600;box-shadow:0 1px 2px #1d29251f}
 .edit-tools{display:flex;gap:2px}
 .top #name{min-width:80px;flex:0 1 180px}
+.top .name-field{display:contents}
 .canvas{position:relative;height:calc(100% - 92px)}
 .floating{position:absolute;top:12px;left:50%;transform:translateX(-50%);z-index:5;display:flex;align-items:center;gap:2px;padding:4px 6px;background:#fff;border:1px solid var(--field-line);border-radius:11px;box-shadow:0 4px 18px #1d292518}
 .floating .icon-button{width:30px;height:30px;min-width:30px}
@@ -374,7 +375,13 @@ input[aria-invalid="true"]{border-color:var(--warn)!important;background:var(--w
 .top{flex-wrap:nowrap;gap:4px;padding:0 6px}
 .top .logo-mark{height:18px}
 .top .icon-button{width:30px;min-width:30px;height:30px}
-.top #name{flex:1 1 0;min-width:64px;overflow:hidden;text-overflow:ellipsis}
+.top .name-field{display:flex;position:relative;flex:1 1 0;min-width:64px}
+.top #name{flex:1 1 0;min-width:0;width:100%;overflow:hidden;text-overflow:ellipsis}
+/* While the title is not focused, its text is drawn by the wrapper, which can show an ellipsis (an input cannot). The input keeps
+   the value, focus and editing; its own text is transparent until it is focused. */
+.top .name-field:not(:focus-within) #name{color:transparent}
+.top .name-field::after{content:attr(data-shown);position:absolute;top:50%;left:0;right:0;transform:translateY(-50%);padding:0 8px;font-family:inherit;font-size:14px;font-weight:600;line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;pointer-events:none}
+.top .name-field:focus-within::after{display:none}
 .top #savedStatus{min-width:0;overflow:hidden;text-overflow:ellipsis}
 /* The unsaved marker keeps its word for screen readers, and shows as an amber dot here, so the title keeps its width. */
 .top .save-status.unsaved{flex:none;width:8px;height:8px;border-radius:50%;background:#8a5a00;color:transparent;font-size:0;overflow:hidden}
