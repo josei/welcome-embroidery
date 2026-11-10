@@ -107,6 +107,9 @@ nav .icon-button:first-of-type{margin-left:auto}
  .layout>aside.panel:first-child>.footer.hoop-edit{position:static;flex:0 0 auto;width:auto;margin:10px 0 0;padding-top:10px;border-top:1px solid #e3e6e1}
 }
 #hoopRotate{font-size:var(--fs-caption);padding:3px 8px;min-height:24px;border:1px solid var(--field-line);border-radius:6px;background:#fff;color:#4d5a54}
+/* W/H each stay on one line with their unit; the pair wraps as a unit, and Rotate wraps after it, never between a label and its input. */
+.hoop-dims{display:flex;align-items:center;gap:6px}
+.hoop-dim{display:inline-flex;align-items:center;gap:4px;white-space:nowrap}
 
 .icon-button.agent-on{color:var(--teal)}.icon-button.agent-on::before{content:'';position:absolute;top:5px;right:5px;width:7px;height:7px;border-radius:50%;background:#89a377;border:1.5px solid #fff}.icon-button.agent-active::before{background:var(--teal);animation:pulse 1.2s ease-in-out infinite}@keyframes pulse{50%{transform:scale(1.35)}}
 #agentDialog{width:480px}.agent-field{display:grid;gap:6px;font-size:var(--fs-body);color:#66726c}#agentUrl{width:100%;border:1px solid var(--field-line);border-radius:6px;padding:8px;font:var(--fs-caption) ui-monospace,monospace;background:#f6f7f5}.agent-actions{display:flex;gap:8px}.agent-help{font-size:var(--fs-caption);line-height:1.5}#agentStatus{margin:0;font-weight:var(--fw-emphasis);color:var(--teal)}@media(prefers-reduced-motion:reduce){.icon-button.agent-active::before{animation:none}}

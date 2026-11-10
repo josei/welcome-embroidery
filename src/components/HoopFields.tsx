@@ -7,13 +7,16 @@ export function HoopFields() {
  const width = useDraftInput(hoop.hoopW, text => hoopActions.commit('hoopW', text));
  const height = useDraftInput(hoop.hoopH, text => hoopActions.commit('hoopH', text));
  return (
+  // Each dimension keeps its label, input and unit together (.hoop-dim); the two dimensions wrap as one .hoop-dims group, so the
+  // Rotate button drops to its own line before any unit or label is split from its input.
   <div className="footer hoop-edit"><span>Hoop</span><select id="hoopPreset" aria-label="Hoop preset"
     title="Hoop presets: 110 × 110 mm, and Brother 4×4, 5×7 and 6×10 embroidery hoops" value={hoop.preset} onChange={e =>
     hoopActions.preset(
     e.target.value)}><option value="custom">Custom</option><option value="110x110">110 × 110 mm</option><option value="4x4in">4×4 in</option><option
-      value="5x7in">5×7 in</option><option value="6x10in">6×10 in</option></select><input id="hoopW" type="number" min="10" max="400" step="1"
-        aria-label="Hoop width (mm)" {...width} /><span>×</span><input id="hoopH" type="number" min="10" max="400" step="1"
-          aria-label="Hoop height (mm)" {...height} /><span>mm</span><button id="hoopRotate" type="button"
+      value="5x7in">5×7 in</option><option value="6x10in">6×10 in</option></select>
+    <div className="hoop-dims"><span className="hoop-dim"><span aria-hidden="true">W</span><input id="hoopW" type="number" min="10" max="400" step="1"
+        aria-label="Hoop width (mm)" {...width} /><span>mm</span></span><span className="hoop-dim"><span aria-hidden="true">H</span><input id="hoopH" type="number" min="10" max="400" step="1"
+          aria-label="Hoop height (mm)" {...height} /><span>mm</span></span></div><button id="hoopRotate" type="button"
             title="Swap the hoop's width and height; the design stays where it is" onClick={(
     ) => hoopActions.rotate()}>Rotate hoop</button></div>
  );
