@@ -18,7 +18,7 @@ import {objectBounds} from './transforms.js';
  * @returns {Doc}
  */
 export function initialDocument() {
-  return {schema:'welcome/1',name:'Botanical badge',revision:0,hoop:110,settings:{spacing:.4,angle:32,underlay:true,compensation:.2},objects:[
+  return {schema:'welcome/1',name:'Untitled design',revision:0,hoop:110,settings:{spacing:.4,angle:32,underlay:true,compensation:.2},objects:[
     // Six-petal blossom: a smooth Bézier rosette (not a flat ellipse) filled with tatami rows blended across a
     // three-colour palette (coral -> peach -> gold) for thread-painted shading, finished with a crisp satin-like border.
     {id:'flower',name:'Wildflower',kind:'path',closed:true,smooth:true,
