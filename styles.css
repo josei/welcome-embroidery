@@ -388,5 +388,8 @@ input[aria-invalid="true"]{border-color:var(--warn)!important;background:var(--w
 .top .export-split #export{padding:0 10px}
 /* The blank-design reason is still read by screen readers (Export points at it), but it cannot take a row of its own here. */
 .top .export-reason{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;margin:0}
+/* The New design and Import buttons keep their name and tooltip, but their visible words would push the bar past 760px, so they show as icons here. */
+.top .icon-button.labelled{width:30px;min-width:30px;padding:0;justify-content:center}
+.top .icon-label{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;margin:0}
 .layout>aside.panel:first-child>.layers-head{padding:0 10px}
 }
