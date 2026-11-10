@@ -12,3 +12,11 @@ export function batchEditLabel(field: string, count: number): string | undefined
   if (count < 2 || !(field in BATCH_FIELD_NAMES)) return undefined;
   return t('batch: {field} on {n} objects', {field: t(BATCH_FIELD_NAMES[field as keyof typeof BATCH_FIELD_NAMES]), n: count});
 }
+
+/**
+ * The undo label for a document setting changed with nothing selected, e.g. "row spacing" (Undo shows it as
+ * "Undo row spacing"). Returns undefined for a field without a name, so it keeps the default label.
+ */
+export function settingEditLabel(field: string): string | undefined {
+  return field in BATCH_FIELD_NAMES ? t(BATCH_FIELD_NAMES[field as keyof typeof BATCH_FIELD_NAMES]) : undefined;
+}

@@ -1013,6 +1013,22 @@ test('held arrow run: ten nudges are one undo step named "nudge", Ctrl+Z reverts
  expect(errors).toEqual([]);
 });
 
+test('sewing-order reorder, document row spacing and hoop width name their undo step',async({page})=>{
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));
+ await page.goto('/');page.on('dialog',d=>d.accept());await newDesign(page);
+ await page.locator('#rect').click();await page.locator('#rect').click();await expect(page.locator('.object-row')).toHaveCount(2);
+ await openFolds(page);await page.locator('.object-row').first().click();await page.locator('#ordFront').click();
+ await expect(page.locator('#undo')).toHaveAttribute('aria-label','Undo reorder');
+ await page.evaluate(()=>document.activeElement?.blur());
+ await page.locator('#hoopW').fill('80');await page.locator('#hoopW').press('Tab');
+ await expect(page.locator('#undo')).toHaveAttribute('aria-label','Undo hoop width');
+ await page.evaluate(()=>document.activeElement?.blur());
+ await page.keyboard.press('Escape');
+ await page.locator('#spacing').fill('0.5');await page.locator('#spacing').press('Tab');
+ await expect(page.locator('#undo')).toHaveAttribute('aria-label','Undo row spacing');
+ expect(errors).toEqual([]);
+});
+
 test('dragging a selection is one undo step named "move"',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));
  await page.goto('/');page.on('dialog',d=>d.accept());await newDesign(page);

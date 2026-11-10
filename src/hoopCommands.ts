@@ -3,11 +3,12 @@
 import {documentNow} from './documentState.js';
 import {hoopActions, setHoopFields} from './hoopState.js';
 import {HOOP_PRESETS, hoopSize} from './engine.js';
+import {t} from './i18n.js';
 
 /** What the hoop row needs from the editor. */
 export interface HoopApi {
   /** Runs one undoable command through the document store. */
-  edit(operations: unknown[], after?: () => void): boolean;
+  edit(operations: unknown[], after?: () => void, coalesceKey?: string, label?: string): boolean;
   /** Fits the canvas to the hoop after a change. */
   fitHoop(): void;
 }
@@ -20,7 +21,7 @@ function wired(): HoopApi {
 }
 
 function setHoop(width: number, height: number) {
-  if (!wired().edit([{op: 'set_hoop', width, height}])) return;
+  if (!wired().edit([{op: 'set_hoop', width, height}], undefined, undefined, t('hoop width'))) return;
   try {
     localStorage.setItem('welcome.hoop', JSON.stringify(hoopSize(documentNow().doc)));
   } catch {
