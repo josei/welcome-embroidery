@@ -145,7 +145,7 @@ label[hidden],button[hidden],.sel-hint[hidden]{display:none!important}
 
 #count.error{color:var(--warn)}.issues-btn{border:1px solid var(--warn-line);background:var(--warn-soft);color:var(--warn);font-size:11px;padding:3px 9px;border-radius:99px;cursor:pointer}#stitches.stale{opacity:.35;transition:opacity .15s}
 
-.tool-grid label{min-width:0}.tool-grid input,.tool-grid select{width:80px!important}.tool-grid{grid-template-columns:minmax(0,1fr) auto}#arrBLabel{grid-column:1}#arrALabel{grid-column:1}
+.tool-grid label{min-width:0}.tool-grid input,.tool-grid select{width:112px!important}.tool-grid{grid-template-columns:minmax(0,1fr) auto}#arrBLabel{grid-column:1}#arrALabel{grid-column:1}
 
 /* rulers, guides, smart guides, on-canvas text editor */
 #rulerTop,#rulerLeft{position:absolute;z-index:4;display:block;cursor:crosshair;touch-action:none}#rulerTop{top:0;left:0;height:18px}#rulerLeft{top:0;left:0;width:18px}.ruler-corner{position:absolute;z-index:5;left:0;top:0;width:18px;height:18px;background:#fbfbf9;border-right:1px solid #dfe3dd;border-bottom:1px solid #dfe3dd}
@@ -255,7 +255,7 @@ dialog,#agentDialog,#keysDialog{width:calc(100vw - 24px);max-width:calc(100vw - 
 input:not([type=checkbox]):not([type=range]),select,textarea,.panel textarea{font-size:16px}
 }
 
-.icon-seg.labelled{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+.icon-seg.labelled{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}
 .icon-seg.labelled button{width:auto;height:auto;padding:9px 4px 7px;display:flex;flex-direction:column;align-items:center;gap:5px;border:1px solid var(--field-line);border-radius:10px;background:#fff;font-size:11px;font-weight:500;color:#3c423e}
 .icon-seg.labelled button[aria-pressed=true]{padding:8px 3px 6px;border:2px solid var(--teal);background:var(--teal-soft);color:var(--teal-deep);font-weight:600}
 .slider-field{margin:-4px 0 10px}.slider-field label{margin:0 0 6px}.slider-field input[type=range]{width:100%;margin:0;accent-color:var(--teal)}
@@ -288,6 +288,12 @@ input:not([type=checkbox]):not([type=range]),select,textarea,.panel textarea{fon
 .group-row .row-text{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}.group-row .row-text .row-name{flex:none}
 
 .icon-seg.labelled .stitch-thumb{width:40px;height:24px;display:block;color:#4f5551}.icon-seg.labelled button[aria-pressed=true] .stitch-thumb{color:var(--teal)}
+/* Inspector rows: one label column and one field column, so every field starts at the same left edge and has the same width. Labels wrap inside their column and never push the field. */
+.panel label:not(.block):not(#blendPaletteRow>label){display:grid;grid-template-columns:minmax(0,1fr) 112px;align-items:center;column-gap:8px}
+.panel label:not(.block)>input:not([type=checkbox]),.panel label:not(.block)>select{grid-column:2;width:100%;min-width:0}
+.panel label:not(.block)>input[type=checkbox]{grid-column:2;justify-self:start;margin:0}
+.panel label:not(.block)>.field-range{grid-column:2;justify-self:start;margin:0}
+
 .density-row{display:flex;align-items:center;gap:10px}.density-row input[type=range]{flex:1;min-width:0}.density-swatch{width:44px;height:44px;flex:none;border:1px solid var(--field-line);border-radius:6px;background-color:#f6f5f1;background-image:repeating-linear-gradient(0deg,var(--teal) 0 1px,transparent 1px var(--pitch))}
 
 .sel-angle{fill:#fff;stroke:#dba944;stroke-width:1.6;vector-effect:non-scaling-stroke;pointer-events:all;cursor:grab}.sel-angle-line{stroke:#dba944;stroke-dasharray:3 2;vector-effect:non-scaling-stroke;pointer-events:none}
