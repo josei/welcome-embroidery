@@ -223,6 +223,18 @@ test('DST export: header, balanced-ternary records, trims, color changes and end
  const expected=plan.stitches.filter(s=>s.cmd==='stitch').map(s=>[Math.round(s.x*10),Math.round(s.y*10)]);assert.deepEqual(needles,expected,'every needle position survives DST encoding');
  assert.ok(maxRec<=121&&maxRec>=100,`largest record ${maxRec} stays within the DST limit (12 mm satin spans use most of it)`);
 });
+test('the stitch count the layer panel shows for lettering matches the stitch records in the DST file',async()=>{
+ // Layer counts are per object from the same compiled plan the export writes, so they must agree with the file's stitch records.
+ const {decodeEmbroidery}=await import('../src/readers.js');
+ const d=initialDocument();d.objects=[];applyOperations(d,[{op:'add_text',id:'t',text:'WE',x:0,y:0}]);
+ const plan=compile(d),layerCount=plan.objectCounts.t;
+ assert.equal(layerCount,26,'WE at default settings is 26 needle stitches');
+ const decoded=decodeEmbroidery(encode(plan,'dst',undefined,d.hoop,d),'dst');
+ assert.equal(decoded.stitches.filter(s=>s.cmd==='stitch').length,layerCount,'DST stitch records equal the layer count');
+ // The placeholder text is a different plan: its count must not be mistaken for WE's.
+ const placeholder=initialDocument();placeholder.objects=[];applyOperations(placeholder,[{op:'add_text',id:'t',text:'Text',x:0,y:0}]);
+ assert.equal(compile(placeholder).objectCounts.t,39);
+});
 
 const blank=()=>({schema:'welcome/1',name:'I',revision:0,hoop:110,settings:{spacing:.4,angle:0,underlay:false,compensation:0},objects:[]});
 const polyArea=pts=>{let a=0;for(let i=0;i<pts.length;i++){const p=pts[i],q=pts[(i+1)%pts.length];a+=p[0]*q[1]-q[0]*p[1];}return Math.abs(a/2);};
