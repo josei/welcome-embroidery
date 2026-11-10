@@ -1713,13 +1713,11 @@ test('each lettering style control toggles and shows its state: B, I, Vertical a
  await page.locator('#textNameDrop').uncheck();await expect(page.locator('#textNameDrop')).not.toBeChecked();
  await expect(page.locator('#textNameDrop').locator('xpath=ancestor::label')).toContainText('Off');
  await expect(page.locator('#textVertical')).toHaveAttribute('role','switch');
- const vDisabled=await page.locator('#textVertical').isDisabled();
- if(!vDisabled){
-  await page.locator('#textVertical').check();await expect(page.locator('#textVertical')).toBeChecked();
-  await expect(page.locator('#textVertical').locator('xpath=ancestor::label')).toContainText('On');
-  await page.locator('#textVertical').uncheck();await expect(page.locator('#textVertical')).not.toBeChecked();
-  await expect(page.locator('#textVertical').locator('xpath=ancestor::label')).toContainText('Off');
- }
+ await expect(page.locator('#textVertical')).toBeEnabled();
+ await page.locator('#textVertical').check();await expect(page.locator('#textVertical')).toBeChecked();
+ await expect(page.locator('#textVertical').locator('xpath=ancestor::label')).toContainText('On');
+ await page.locator('#textVertical').uncheck();await expect(page.locator('#textVertical')).not.toBeChecked();
+ await expect(page.locator('#textVertical').locator('xpath=ancestor::label')).toContainText('Off');
  expect(errors).toEqual([]);
 });
 
