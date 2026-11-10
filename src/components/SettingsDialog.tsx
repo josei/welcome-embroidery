@@ -29,6 +29,7 @@ export function SettingsDialog() {
     </fieldset>
     <fieldset className="settings-group" hidden={rows.copyEndpoint}>
      <legend>{t('AI agent')}</legend>
+     <p id="agentState" className="agent-state" role="status">{agent.active ? t('Agent connected') : agent.waiting ? t('Waiting for agent') : t('Not connected')}</p>
      <button type="button" id="copyEndpoint" className={[agent.waiting || agent.active ? 'agent-on' : '', agent.active ? 'agent-active' : ''].filter(
        Boolean).join(' ') || undefined} onClick={() => agentLinkActions.open()}>{t('Connect an AI agent')}</button>
     </fieldset>

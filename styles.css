@@ -44,6 +44,7 @@ nav button[data-view]{padding:7px 13px;color:#66726c}nav button[data-view].activ
 .icon-button[data-tooltip]::after{content:attr(data-tooltip);position:absolute;z-index:20;left:50%;bottom:calc(100% + 7px);transform:translate(-50%,3px);padding:5px 8px;border-radius:6px;background:#1d2925;color:#fff;font:500 11px/1.2 Inter,ui-sans-serif,system-ui,sans-serif;white-space:nowrap;opacity:0;pointer-events:none;transition:opacity .12s,transform .12s}
 .icon-button[data-tooltip]:hover::after,.icon-button[data-tooltip]:focus-visible::after{opacity:1;transform:translate(-50%,0)}
 .top .icon-button{width:36px;height:36px}
+.top .icon-button.labelled{width:auto;min-width:36px;display:inline-flex;align-items:center;gap:6px;padding:0 10px}.icon-label{font-size:12px;font-weight:500;white-space:nowrap}.agent-state{margin:0 0 10px;font-size:12px;color:#66726c}
 .top #export{display:flex;align-items:center;justify-content:center;min-height:36px}
 .tool-row{display:flex;gap:4px;margin:0 0 10px}
 .tool-row .icon-button{background:#f6f7f5;color:#53635b}

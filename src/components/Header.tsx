@@ -4,7 +4,7 @@ import {ActionButton} from './ActionButton';
 import {useDraftInput} from './useDraftInput';
 import {documentActions, documentState} from '../documentState.js';
 import {setSettingsOpen} from '../settingsState.js';
-import {agentLinkState, agentLinkActions} from '../agentLinkState.js';
+import {agentLinkState, type AgentLink} from '../agentLinkState.js';
 import {EMPTY_EXPORT_REASON} from '../exportDialogState.js';
 import {openExportDialog} from '../exportCommands.js';
 import {shortcutLabel} from '../shortcutLabels.js';
@@ -35,18 +35,6 @@ function HistoryButton({undo = false}: {undo?: boolean}) {
  );
 }
 
-// The agent button: it shows whether an AI agent is connected, and opens the Connect an AI agent dialog.
-function AgentPill() {
- const agent = useSyncExternalStore(agentLinkState.subscribe, agentLinkState.get);
- // The visible label is one word; the full status stays in the tooltip.
- const label = agent.active ? t('Connected') : agent.waiting ? t('Waiting') : t('Agent');
- const hint = agent.active ? t('Agent connected') : agent.waiting ? t('Waiting for agent') : t('Connect an AI agent');
- return (
-  <button type="button" id="agentPill" className={agent.active ? 'agent-pill on' : 'agent-pill'} title={hint} onClick={() => agentLinkActions.open()}>
-   <span className="agent-dot" aria-hidden="true" />{label}
-  </button>
- );
-}
 // The save feedback: the unsaved marker while the design has changes, then the time of the last save in this tab and the
 // file it wrote to.
 function SaveStatus() {
@@ -75,12 +63,21 @@ function ExportSplit() {
   </>
  );
 }
+// The agent connection shows on the Settings button, which opens the dialog where the agent link lives: a dot while an
+// agent is waiting or active, and the tooltip says which.
+function settingsButtonClass(agent: AgentLink) {
+ return ['icon-button', agent.waiting || agent.active ? 'agent-on' : '', agent.active ? 'agent-active' : ''].filter(Boolean).join(' ');
+}
+function settingsTip(agent: AgentLink) {
+ return agent.active ? t('Settings: agent connected') : agent.waiting ? t('Settings: waiting for agent') : t('Settings');
+}
 // The editor header, rendered by React. Ids and attributes match the markup this replaced,
 // because app.js wires its controls by id.
 export function Header() {
  // The toolbar Save names the action and its shortcut, the same label the File menu and shortcut sheet use.
  const saveLabel = `${t('Save')} (${shortcutLabel([{mod: true, key: 'S'}])})`;
  const rows = useSyncExternalStore(stitchRowsState.subscribe, stitchRowsState.get);
+ const agent = useSyncExternalStore(agentLinkState.subscribe, agentLinkState.get);
  const projectFile = useRef<HTMLInputElement>(null);
  const machineFile = useRef<HTMLInputElement>(null);
  return (
@@ -115,20 +112,20 @@ export function Header() {
         "-67L3485 -116L3499 -142L3504 -178L3497 -211L3488 -220L3476 -223L3462 -219L3403 -163L3368 -137L3327 -115L3285 -100L3247 -95L3205 -100L3174 -115L3162 " +
         "-127L3152 -141L3243 -171L3308 -209L3344 -249L3360 -282L3369 -338L3363 -381L3356 -400L3347 -417L3319 -444L3302 -454L3263 -465L3220 -465L3179 " +
         "-457L3142 -442L3093 -405L3066 -373L3036 -319L3020 -265L3016 -227ZM3136 -219L3140 -267L3152 -307L3175 -344L3206 -365L3240 -365L3253 -356L3260 " +
-        "-343L3261 -308L3244 -276L3229 -261L3198 -241L3159 -225Z"}/></svg></a><FileMenu /><EditMenu /><ArrangeMenu /><ProjectName /><SaveStatus /><button className="icon-button" id="new"
+        "-343L3261 -308L3244 -276L3229 -261L3198 -241L3159 -225Z"}/></svg></a><FileMenu /><EditMenu /><ArrangeMenu /><ProjectName /><SaveStatus /><button className="icon-button labelled" id="new"
           aria-label="New design" title="New design" data-tooltip="New design" onClick={(
     ) =>
     newProject(
-    )}><svg className="icon"><use href="#i-new"/></svg></button><button className="icon-button" id="open" aria-label="Open project or SVG"
+    )}><svg className="icon"><use href="#i-new"/></svg><span className="icon-label">{t('New design')}</span></button><button className="icon-button" id="open" aria-label="Open project or SVG"
       title="Open project or SVG" data-tooltip="Open project or SVG" onClick={(
     ) =>
     projectFile.current?.click(
-    )}><svg className="icon"><use href="#i-open"/></svg></button><button className="icon-button" id="importMachine"
+    )}><svg className="icon"><use href="#i-open"/></svg></button><button className="icon-button labelled" id="importMachine"
       aria-label="Import JEF / VP3…" title="Import JEF / VP3…"
         data-tooltip="Import JEF / VP3…" onClick={(
     ) =>
     machineFile.current?.click(
-    )}><svg className="icon"><use href="#i-import"/></svg></button><button className="icon-button" id="save" aria-label={saveLabel}
+    )}><svg className="icon"><use href="#i-import"/></svg><span className="icon-label">{t('Import')}</span></button><button className="icon-button" id="save" aria-label={saveLabel}
       title={saveLabel} data-tooltip={saveLabel} onClick={(
     ) =>
     projectSave(
@@ -142,8 +139,8 @@ export function Header() {
       aria-label="Delete selected object" title="Delete selected object" data-tooltip="Delete" onClick={(
     ) =>
     toolbarActions.remove(
-    )}><svg className="icon"><use href="#i-delete"/></svg></ActionButton></div><AgentPill /><ExportSplit /><button type="button" className="icon-button"
-      id="settingsBtn" aria-label="Settings" title="Settings" data-tooltip="Settings" onClick={(
+    )}><svg className="icon"><use href="#i-delete"/></svg></ActionButton></div><ExportSplit /><button type="button" className={settingsButtonClass(agent)}
+      id="settingsBtn" aria-label="Settings" title={settingsTip(agent)} data-tooltip="Settings" onClick={(
     ) =>
     setSettingsOpen(
     true)}><svg className="icon"><use href="#i-gear"/></svg></button><input id="file" ref={projectFile} type="file"

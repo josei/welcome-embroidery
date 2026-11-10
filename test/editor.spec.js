@@ -1061,6 +1061,7 @@ test('agents can see the reference picture: annotated view with grid, hoop and s
   for(let i=0;i<100;i++){try{if((await fetch(origin+'/health')).ok)break;}catch{}await new Promise(r=>setTimeout(r,100));}
   const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto(origin+'/');page.on('dialog',d=>d.accept());await newDesign(page);
   await page.locator('#settingsBtn').click();await page.locator('#copyEndpoint').click();await expect(page.locator('#agentUrl')).toHaveValue(/\/mcp\/[A-Za-z0-9_-]{32,}$/);const link=await page.locator('#agentUrl').inputValue();await page.locator('#agentDialog button:not([type=button])').click();
+  await expect(page.locator('#agentState')).toHaveText('Waiting for agent');await expect(page.locator('#settingsBtn')).toHaveClass(/agent-on/);
   const client=new Client({name:'ref-agent',version:'1'});await client.connect(new StreamableHTTPClientTransport(new URL(link)));const call=(name,args)=>client.callTool({name,arguments:args});
   const none=await call('reference_image',{documentId:'live'});expect(none.content[0].text).toContain('no reference picture');
   await page.locator('#secRef summary').click();await page.locator('#refFile').setInputFiles({name:'sketch.png',mimeType:'image/png',buffer:pngBytes(120,80,(x,y)=>(x+y)%20<3?[30,30,30]:[240,230,210])});await expect(page.locator('#refLayer image')).toHaveCount(1);
@@ -2471,8 +2472,9 @@ test('header export: one Export button opens the dialog, which is the only forma
  await pickFormat(page,'dst');await expect(page.locator('#exportDialog h2')).toHaveText('Export');
  await expect(page.locator('#export')).toHaveText('Export');
  await page.keyboard.press('Escape');await expect(page.locator('#exportDialog')).toBeHidden();
- await expect(page.locator('#agentPill')).toContainText('Agent');await expect(page.locator('#agentPill')).toHaveAttribute('title','Connect an AI agent');
- await page.locator('#agentPill').click();await expect(page.locator('#agentDialog')).toBeVisible();
+ await expect(page.locator('#agentPill')).toHaveCount(0);
+ await page.locator('#settingsBtn').click();await expect(page.locator('#settingsDialog')).toBeVisible();
+ await expect(page.locator('#copyEndpoint')).toBeHidden();
  expect(errors).toEqual([]);
 });
 
@@ -2807,6 +2809,18 @@ test('a reference picture that is not an image is left out and the design opens'
  await page.locator('#file').setInputFiles({name:'junk-picture.welcome',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(project))});
  await expect(page.locator('.object-row')).toHaveCount(1);await expect(page.locator('#name')).toHaveValue('Junk picture');
  await expect(page.locator('#toast')).toContainText('could not be read');
+});
+test('header controls have accessible names: New design and Import are labelled, and the agent status lives in Settings',async({page})=>{
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));
+ await page.goto('/');await expect(page.locator('#count')).toContainText('compiled');
+ await expect(page.getByRole('button',{name:'New design',exact:true})).toHaveText(/New design/);
+ await expect(page.getByRole('button',{name:'Import JEF / VP3…'})).toHaveText(/Import/);
+ await expect(page.getByRole('button',{name:'Settings',exact:true})).toBeVisible();
+ await expect(page.locator('header.top #agentPill')).toHaveCount(0);
+ await page.getByRole('button',{name:'Settings',exact:true}).click();
+ await expect(page.locator('#settingsDialog')).toBeVisible();
+ await expect(page.locator('#copyEndpoint')).toBeHidden();
+ expect(errors).toEqual([]);
 });
 test('export is labelled as a machine file, shows its file name, says it does not save, and import differs from save',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));
