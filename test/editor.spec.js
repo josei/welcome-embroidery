@@ -1696,6 +1696,33 @@ test('name drop checkbox marks a lettering object for the names, and the mark su
  expect(errors).toEqual([]);
 });
 
+test('each lettering style control toggles and shows its state: B, I, Vertical and Name drop',async({page})=>{
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());
+ await page.locator('.object-row').filter({hasText:'Text'}).first().click();
+ const pressed=async id=>(await page.locator(id).getAttribute('aria-pressed'))==='true';
+ // B and I are on/off buttons: each click flips the setting and aria-pressed follows it.
+ const b0=await pressed('#textBold');await page.locator('#textBold').click();await expect.poll(()=>pressed('#textBold')).toBe(!b0);
+ await page.locator('#textBold').click();await expect.poll(()=>pressed('#textBold')).toBe(b0);
+ const i0=await pressed('#textItalic');await page.locator('#textItalic').click();await expect.poll(()=>pressed('#textItalic')).toBe(!i0);
+ await page.locator('#textItalic').click();await expect.poll(()=>pressed('#textItalic')).toBe(i0);
+ // Vertical and Name drop are switches: the checked state and the visible On/Off label both follow the click.
+ await expect(page.locator('#textNameDrop')).toHaveAttribute('role','switch');
+ await expect(page.locator('#textNameDrop').locator('xpath=ancestor::label')).toContainText('Off');
+ await page.locator('#textNameDrop').check();await expect(page.locator('#textNameDrop')).toBeChecked();
+ await expect(page.locator('#textNameDrop').locator('xpath=ancestor::label')).toContainText('On');
+ await page.locator('#textNameDrop').uncheck();await expect(page.locator('#textNameDrop')).not.toBeChecked();
+ await expect(page.locator('#textNameDrop').locator('xpath=ancestor::label')).toContainText('Off');
+ await expect(page.locator('#textVertical')).toHaveAttribute('role','switch');
+ const vDisabled=await page.locator('#textVertical').isDisabled();
+ if(!vDisabled){
+  await page.locator('#textVertical').check();await expect(page.locator('#textVertical')).toBeChecked();
+  await expect(page.locator('#textVertical').locator('xpath=ancestor::label')).toContainText('On');
+  await page.locator('#textVertical').uncheck();await expect(page.locator('#textVertical')).not.toBeChecked();
+  await expect(page.locator('#textVertical').locator('xpath=ancestor::label')).toContainText('Off');
+ }
+ expect(errors).toEqual([]);
+});
+
 test('vertical lettering on the default monospace font: the box is disabled and stays unticked',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());await newDesign(page);
  await page.locator('#letter').click();await page.locator('#letteringText').fill('ANA');await page.locator('#letteringText').press('Tab');

@@ -169,6 +169,14 @@ label[hidden],button[hidden],.sel-hint[hidden]{display:none!important}
 .icon-check{appearance:none;-webkit-appearance:none;position:relative;width:34px!important;height:30px;padding:0!important;border:1px solid var(--field-line);border-radius:6px;background:#fff;cursor:pointer;flex:none}
 .icon-check::before{content:"";position:absolute;inset:4px 7px;background:#6a756f;-webkit-mask:var(--ic) center/contain no-repeat;mask:var(--ic) center/contain no-repeat}
 .icon-check:checked{background:#e3f1ec;border-color:var(--teal)}.icon-check:checked::before{background:var(--teal)}.icon-check:hover{border-color:#7b9a89}.icon-check:focus-visible{outline:2px solid var(--teal);outline-offset:1px}
+.switch-row{display:flex;align-items:center;justify-content:space-between;gap:10px;cursor:pointer}
+.switch-control{display:inline-flex;align-items:center;gap:6px;flex:none}
+.switch-input{appearance:none;-webkit-appearance:none;position:relative;width:30px;height:16px;margin:0;border-radius:8px;background:#c9d0cb;cursor:pointer;transition:background .15s}
+.switch-input::before{content:"";position:absolute;top:2px;left:2px;width:12px;height:12px;border-radius:50%;background:#fff;box-shadow:0 1px 2px #0003;transition:transform .15s}
+.switch-input:checked{background:var(--teal)}.switch-input:checked::before{transform:translateX(14px)}
+.switch-input:hover{filter:brightness(.95)}.switch-input:focus-visible{outline:2px solid var(--teal);outline-offset:2px}
+.switch-input:disabled{opacity:.45;cursor:default}
+.switch-state{min-width:20px;font-size:11px;color:#5c625e}.switch-row:has(.switch-input:checked) .switch-state{color:var(--teal-deep);font-weight:600}
 .icon-check[data-icon="border"]{--ic:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22black%22 stroke-width=%221.8%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22%3E%3Crect x=%224%22 y=%224%22 width=%2216%22 height=%2216%22 rx=%222%22/%3E%3Crect x=%228%22 y=%228%22 width=%228%22 height=%228%22 fill=%22black%22/%3E%3C/svg%3E")}
 .icon-check[data-icon="closed"]{--ic:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22black%22 stroke-width=%221.8%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22%3E%3Cpath d=%22M5 19 9 5l11 6-4 8z%22/%3E%3C/svg%3E")}
 .icon-check[data-icon="smooth"]{--ic:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22black%22 stroke-width=%221.8%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22%3E%3Cpath d=%22M3 17C7 5 11 21 15 11c1.5-3.5 3.5-3 6-3%22/%3E%3C/svg%3E")}
