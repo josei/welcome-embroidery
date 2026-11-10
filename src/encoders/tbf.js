@@ -28,7 +28,7 @@ export function encodeTbf(plan,name='Welcome'){
   const move=(nx,ny,cmd)=>
     {let dx=nx-x,dy=ny-y;
     while(Math.abs(dx)>127||Math.abs(dy)>127){const sx=Math.max(-127,Math.min(127,dx)),sy=Math.max(-127,Math.min(127,dy));rec(sx,sy,cmd);dx-=sx;dy-=sy;}if(dx||
-    dy)rec(dx,dy,cmd);};
+    dy||cmd===0x80)rec(dx,dy,cmd);};
   for(const p of plan.stitches){if(p.cmd==='end')continue;const nx=Math.round(p.x*10),ny=Math.round(p.y*10);
     if(p.cmd==='stitch')move(nx,ny,0x80);
     else if(p.cmd==='jump')move(nx,ny,0x90);

@@ -32,10 +32,6 @@ const FORMATS=[
 // the test runs and reports, and the suite stays green. Once the deviation is fixed, remove the
 // entry so the test becomes a hard requirement.
 const KNOWN_FAILING={
-  exp:'#300: EXP drops zero-length stitches on write',
-  sew:'#300: SEW drops zero-length stitches on write',
-  xxx:'#300: XXX drops zero-length stitches on write',
-  tbf:'#300: TBF drops zero-length stitches on write',
   u01:'#310: U01 drops zero-length stitches on write (the same encoder skip as EXP, SEW, XXX and TBF)',
 };
 

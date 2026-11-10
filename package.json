@@ -6,6 +6,7 @@
   "license": "MIT",
   "scripts": {
     "start": "npm run build && node server.js",
+    "test": "npm run test:engine",
     "test:engine": "npm run build && node --test test/*.test.js",
     "test:mcp": "node scripts/test-mcp.mjs",
     "test:server": "npm run build && node scripts/test-server-page.mjs",

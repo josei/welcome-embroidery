@@ -12,6 +12,8 @@ export function encodeExp(plan){
   /** @type {(nx: number, ny: number, jump: boolean) => void} */
   const move=(nx,ny,jump)=>
     {let dx=nx-x,dy=ny-y;
+    // A zero-length stitch is kept as a 00 00 stitch record (the format has no other way to say it), so the count matches the plan.
+    if(!jump&&dx===0&&dy===0){out.push(0,0);return;}
     while(dx!==0||dy!==0){const sx=Math.max(-127,Math.min(127,dx)),sy=Math.max(-127,Math.min(127,dy));if(jump)out.push(0x80,0x04);out.push(sx&0xff,(-sy)&0xff);
     dx-=sx;dy-=sy;x+=sx;y+=sy;}};
   for(const p of plan.stitches){const nx=Math.round(p.x*10),ny=Math.round(p.y*10);if(p.cmd==='end')continue;
