@@ -1882,3 +1882,17 @@ test('JEF and DST export bytes are unchanged for a fixed design (regression for 
  // DST carries the document name in its label, so this hash moved when the starter design stopped being named after the sample (#308).
 assert.equal(sha('dst'),'aaf5eb8621d645ab60030da5b258e4e385d176eea5913c8ffa1094a1c0aa9ab5');
 });
+
+test('sewing tip size messages state the limit they check',async()=>{
+ const {designWarnings}=await import('../src/engine.js');
+ const blankDoc=()=>({schema:'welcome/1',name:'I',revision:0,hoop:110,settings:{spacing:.4,angle:0,underlay:false,compensation:0},objects:[]});
+ const tipFor=(id,w,h)=>{const d=blankDoc();applyOperations(d,[{op:'add_shape',id,kind:'rect',x:0,y:0,width:w,height:h}]);return designWarnings(d).find(x=>x.category==='fill');};
+ // Area under 6 mm² with both sides over 2 mm: the area advice, not the side advice.
+ const area=tipFor('a',2.5,2.2);assert.ok(area);assert.match(area.message,/6 mm²/);assert.match(area.message,/5\.5 mm²/);assert.doesNotMatch(area.message,/at least about 2 mm across/);
+ // A side at 2 mm: the side wording stays.
+ const side=tipFor('s',2,2);assert.ok(side);assert.match(side.message,/at least about 2 mm across/);
+ // Just under 4.5 mm is cut, not rounded up to 4.5.
+ const small=tipFor('f',4.49,10);assert.ok(small);assert.match(small.message,/small fill \(4\.49×10 mm\)/);assert.doesNotMatch(small.message,/4\.5/);
+ // 3×3 keeps the small-fill tip.
+ const three=tipFor('t',3,3);assert.ok(three);assert.match(three.message,/small fill \(3×3 mm\)/);
+});

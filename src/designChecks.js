@@ -13,6 +13,10 @@ import {objectLabel,hasName} from './objectNames.js';
 /** @typedef {{id: string, name: string, message: string, category: string, fix?: Fix[]}} Warning */
 /** @typedef {{objects: Item[], hoop: number, hoopH?: number, settings?: {fabric?: string}}} Design */
 
+// A length in mm for a message, cut (not rounded) to two decimals so a value just under a threshold never reads as the threshold: 4.49 shows as 4.49, not 4.5.
+/** @type {(v: number) => string} */
+const mm=v=>String(Math.floor(v*100+1e-9)/100);
+
 /**
  * The area of one closed ring (shoelace formula).
  * @type {(r: Array<[number, number]>) => number}
@@ -58,12 +62,17 @@ export function designWarnings(doc){
     const filled=o.stitch==='fill'&&o.kind!=='text'&&(o.kind!=='path'||o.closed);
     if(filled&&!o.photo){const lines=geometry(o,0).filter(l=>l.length>=4);
       if(lines.length){const area=shapeArea(lines),per=lines.reduce((n,r)=>n+r.reduce((m,p,i)=>i?m+distP(p,r[i-1]):m,0),0),mean=per?2*area/per:0;
-      if(Math.min(bw,bh)<2||area<6)w(
-        o,`${label} is ${bw.toFixed(1)}×${bh.toFixed(1)} mm, too small for a clean fill. Make it at least about 2 mm across, or use a satin column ` +
+      // The too-small tip names the limit it checks: a side at or under 2 mm reads as the side advice, otherwise the 6 mm² area limit is the one broken.
+      if(Math.min(bw,bh)<=2)w(
+        o,`${label} is ${mm(bw)}×${mm(bh)} mm, too small for a clean fill. Make it at least about 2 mm across, or use a satin column ` +
+        `or running stitch.`,
+        'fill',[{op:'set_object',id:o.id,stitch:'run'}]);
+      else if(area<6)w(
+        o,`${label} is ${mm(bw)}×${mm(bh)} mm (${mm(area)} mm²), too small for a clean fill: a fill needs at least 6 mm². Make it larger, or use a satin column ` +
         `or running stitch.`,
         'fill',[{op:'set_object',id:o.id,stitch:'run'}]);
       else if(Math.min(bw,bh)<4.5||area<25)w(
-        o,`${label} is a small fill (${bw.toFixed(1)}×${bh.toFixed(1)} mm): it will sew, but the rows are very short and can look dense or rough. A ` +
+        o,`${label} is a small fill (${mm(bw)}×${mm(bh)} mm): it will sew, but the rows are very short and can look dense or rough. A ` +
         `satin stitch or a slightly larger shape usually sews cleaner.`,
         'fill');
       else if(mean<1.4)w(o,`${label} is mostly narrower than 1.4 mm, so a fill will skip or look thin. Use a satin column along its center line.`,'fill');}}
