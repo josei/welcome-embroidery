@@ -4025,3 +4025,19 @@ test('inspector: stitch types lay out 4 + 3 and every field starts on one left e
  const xywh=await page.locator('.panel .xywh input').evaluateAll(ins=>ins.map(i=>{const p=i.closest('.panel').getBoundingClientRect();const r=i.getBoundingClientRect();return {right:Math.round(r.right),panelRight:Math.round(p.right)};}));
  expect(xywh.length).toBeGreaterThanOrEqual(4);for(const x of xywh) expect(x.right,JSON.stringify(xywh)).toBeLessThanOrEqual(x.panelRight);
 });
+
+test('new lettering stays selected after a stray canvas click, and typing goes to its text field; a later click deselects it',async({page})=>{page.on('dialog',d=>d.accept());const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');await newDesign(page);await page.locator('#letter').click();await expect(page.locator('#canvasText')).toBeFocused();await expect(page.locator('#selected')).toContainText('Text: Text');const a=await page.locator('#art').boundingBox();await page.mouse.click(a.x+a.width*0.2,a.y+a.height/2);await expect(page.locator('#canvasText')).toHaveCount(0);await expect(page.locator('#selected')).toContainText('Text: TEXT');await expect(page.locator('#letteringText')).toBeFocused();await page.keyboard.type('WE');await expect(page.locator('#letteringText')).toHaveValue('WE');await expect(page.locator('.object-row').first()).toContainText('Text: WE');await page.mouse.click(a.x+a.width*0.2,a.y+a.height/2);await expect(page.locator('#selected')).not.toContainText('Text: WE');expect(errors).toEqual([]);});
+
+test('a tool hint ends with its step: closing a polygon and selecting it clears the path hint, and switching tool mid-draw clears the line hint',async({page})=>{
+ page.on('dialog',d=>d.accept());await page.goto('/');await newDesign(page);
+ const m=await page.evaluate(()=>{const m=document.querySelector('#art').getScreenCTM();return {a:m.a,d:m.d,e:m.e,f:m.f};}),at=(x,y)=>({x:m.a*x+m.e,y:m.d*y+m.f});
+ const hints=()=>page.locator('#toast .toast-item');
+ await page.locator('#path').click();await expect(hints()).toHaveCount(1);await expect(hints()).toContainText('Click to add points');
+ for(const [x,y] of [[-20,-20],[20,-20],[20,20],[-20,-20]]){const p=at(x,y);await page.mouse.click(p.x,p.y);}
+ await expect(page.locator('.object-row').last()).toContainText('Polygon');await expect(page.locator('#toast')).not.toContainText('Click to add points');
+ await page.locator('.object-row').last().click();await expect(page.locator('#toast')).not.toContainText('Click to add points');
+ await page.locator('#line').click();const a=at(-30,30),b=at(30,30);await page.mouse.move(a.x,a.y);await page.mouse.down();await page.mouse.move(b.x,b.y,{steps:3});
+ await expect(hints()).toHaveCount(1);await expect(hints()).toContainText('Drag on the canvas to draw a line');
+ await page.locator('#select').click();await expect(page.locator('#toast')).not.toContainText('Drag on the canvas to draw a line');await page.mouse.up();
+ await page.locator('#polygon').click();await expect(hints()).toHaveCount(1);await expect(hints()).toContainText('Drag from the center');await expect(page.locator('#toast')).not.toContainText('Drag on the canvas');
+});

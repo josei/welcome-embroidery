@@ -50,13 +50,16 @@ export const toastActions = {
    * @param {string} text
    * @param {ToastKind} [kind]
    * @param {import('./toastQueue.js').ToastAction | null} [action] a button on the toast, e.g. Undo
+   * @param {boolean} [hint] a tool hint, which replaces any other tool hint on screen
    * @returns {number}
    */
-  push(text, kind = 'status', action = null) {
-    const id = queue.push(text, kind, Date.now(), action);
+  push(text, kind = 'status', action = null, hint = false) {
+    const id = queue.push(text, kind, Date.now(), action, hint);
     emit();
     return id;
   },
+  /** Removes the tool hint on screen, e.g. when its step has ended. */
+  clearHints() { queue.clearHints(); emit(); },
   /** @param {number} id */
   hold(id) { queue.pause(id, Date.now()); emit(); },
   /** @param {number} id */

@@ -21,7 +21,7 @@ export function toastDuration(message) {
 /**
  * @typedef {'status' | 'error'} ToastKind
  * @typedef {{label: string, run: () => void}} ToastAction a button on the toast, e.g. Undo; running it dismisses the toast
- * @typedef {{id: number, kind: ToastKind, text: string, at: number, expiresAt: number | null, remaining: number, holds: number, action: ToastAction | null}} ToastEntry
+ * @typedef {{id: number, kind: ToastKind, text: string, at: number, expiresAt: number | null, remaining: number, holds: number, action: ToastAction | null, hint: boolean}} ToastEntry
  * @typedef {{id: number, kind: ToastKind, text: string, at: number}} ToastLogEntry
  */
 
@@ -47,15 +47,16 @@ export function createToastQueue({visibleLimit = TOAST_VISIBLE_LIMIT, logLimit =
      * @param {ToastKind} kind
      * @param {number} now
      * @param {ToastAction | null} [action]
+     * @param {boolean} [hint] a tool hint: at most one is on screen, so this replaces any hint already showing
      * @returns {number} the toast id
      */
-    push(text, kind, now, action = null) {
+    push(text, kind, now, action = null, hint = false) {
       const id = nextId++;
       const duration = kind === 'error' ? null : toastDuration(text);
       /** @type {ToastEntry} */
-      const entry = {id, kind, text, at: now, expiresAt: duration === null ? null : now + duration, remaining: duration ?? 0, holds: 0, action};
+      const entry = {id, kind, text, at: now, expiresAt: duration === null ? null : now + duration, remaining: duration ?? 0, holds: 0, action, hint};
       // A repeat of a message already on screen replaces it rather than stacking an identical copy beside it.
-      visible = [...visible.filter(item => item.text !== text || item.kind !== kind), entry];
+      visible = [...visible.filter(item => (item.text !== text || item.kind !== kind) && !(hint && item.hint)), entry];
       // Drop the oldest confirmation from view when the stack is full. Errors are never dropped; they are dismissed by hand.
       while (visible.length > visibleLimit) {
         const oldest = visible.find(item => item.kind === 'status');
@@ -83,6 +84,11 @@ export function createToastQueue({visibleLimit = TOAST_VISIBLE_LIMIT, logLimit =
       if (!entry || entry.kind === 'error' || entry.holds === 0) return;
       entry.holds--;
       if (entry.holds === 0) entry.expiresAt = now + entry.remaining;
+    },
+
+    /** Removes the tool hint on screen, if any. The log keeps it. */
+    clearHints() {
+      visible = visible.filter(entry => !entry.hint);
     },
 
     /** @param {number} id */

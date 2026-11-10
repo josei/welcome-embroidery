@@ -29,6 +29,7 @@ import {renderSimulation} from './simulation.js';
 import {copyStyle, pasteStyle} from './styleClipboard.js';
 import {edit} from './documentCommands.js';
 import {editor} from './editorContext.js';
+import {toolHint, clearToolHints} from './editorChrome.js';
 
 /** Draws everything that depends on the document or the plan. */
 export function render() {
@@ -92,6 +93,8 @@ export function mountCanvas() {
     commit: (/** @type {any[]} */ operations, /** @type {any} */ after, /** @type {string} */ label) => edit(operations, after, undefined, label),
     render,
     toast: editor.toast,
+    hint: toolHint,
+    clearHints: clearToolHints,
     selectNodesIn: (/** @type {any} */ rect, /** @type {any} */ add) => {
       const object = /** @type {any} */ (selectedObject());
       if (object?.kind !== 'path') return;
