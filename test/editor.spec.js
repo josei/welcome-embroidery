@@ -2535,6 +2535,8 @@ test('unsaved marker and title clear on a .welcome save, and the browser asks be
  const rows=await page.locator('.object-row').count();
  await page.locator('#rect').click();await expect(page.locator('.object-row')).toHaveCount(rows+1);
  await expect(page.locator('#unsavedMarker')).toBeVisible();await expect(page).toHaveTitle(/^• .+ — Welcome Embroidery$/);
+ const markerBox=await page.locator('#unsavedMarker').boundingBox(),nameBox=await page.locator('#name').boundingBox();
+ expect(nameBox.x-(markerBox.x+markerBox.width)).toBeLessThanOrEqual(10);expect(nameBox.x-(markerBox.x+markerBox.width)).toBeGreaterThanOrEqual(0);
  const saved=page.waitForEvent('download');await page.locator('#save').click();await saved;
  await expect(page.locator('#unsavedMarker')).toBeHidden();await expect(page).toHaveTitle(/^(?!• ).+ — Welcome Embroidery$/);
  await page.reload();await expect(page.locator('#unsavedMarker')).toBeHidden();

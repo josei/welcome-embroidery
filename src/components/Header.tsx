@@ -21,8 +21,8 @@ function ProjectName() {
  }, [dirty, name]);
  return (
   <>
-   <input id="name" {...field} />
    <span id="unsavedMarker" className="unsaved-marker" role="img" aria-label={t('Unsaved changes')} title={t('Unsaved changes')} hidden={!dirty} />
+   <input id="name" {...field} />
   </>
  );
 }
