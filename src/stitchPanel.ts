@@ -8,7 +8,7 @@ import {setSelectionLabels} from './selectionLabelsState.js';
 import {setInspectorText} from './inspectorTextState.js';
 import {setStitchRow, stitchRowsState} from './stitchRowsState.js';
 import {setStitchChoices} from './stitchChoicesState.js';
-import {setTypeRows} from './typeRowsState.js';
+import {SATIN_WIDTH_DEFAULT, setTypeRows} from './typeRowsState.js';
 import {setFillValues} from './fillValuesState.js';
 import {setPathRows} from './pathRowsState.js';
 import {setRunRows} from './runRowsState.js';
@@ -202,7 +202,7 @@ export function syncStitchPanel() {
   if (o) {
     setStitchChoices({type: typeMixed ? '' : ['run', 'satin', 'motif', 'sequin', 'bead', 'bling'].includes(o.stitch ?? '') ? o.stitch : 'fill'});
     setStitchRow('satinRow', o.stitch !== 'satin');
-    setTypeRows({satinWidth: String(o.satinWidth ?? 3)});
+    setTypeRows({satinWidth: String(o.satinWidth ?? SATIN_WIDTH_DEFAULT)});
     setStitchChoices({satinOff: o.kind !== 'path'});
     setStitchChoices({typeDisabled: o.kind === 'stitch_layer'});
     setFillValues({

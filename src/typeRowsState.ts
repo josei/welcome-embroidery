@@ -10,8 +10,11 @@ export interface TypeRows {
   motifSize: string;
 }
 
+/** The satin width a column ships with, in mm: what an object without its own satin width sews, and what Reset to default restores. */
+export const SATIN_WIDTH_DEFAULT = 3;
+
 export const typeRowsState = createStore<TypeRows>({
-  satinWidth: '3',
+  satinWidth: String(SATIN_WIDTH_DEFAULT),
   motifSpacing: '4',
   motifSize: '1.6',
 });

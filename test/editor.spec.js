@@ -255,6 +255,21 @@ test('satin column: path stitch type, width control, thick design stroke and com
  await page.locator('#rect').click();expect(await page.locator('#type option[value=satin]').evaluate(o=>o.disabled)).toBe(true);await expect(page.locator('#type ~ .icon-seg button[data-value=satin]')).toBeDisabled();await expect(page.locator('#satinOffHint')).toContainText('Convert to path first');await page.locator('#type ~ .icon-seg button[data-value=satin]').click({force:true});await expect(page.locator('#type ~ .icon-seg button[data-value=fill]')).toHaveAttribute('aria-pressed','true');await expect(page.locator('#toast')).not.toContainText('Invalid Welcome project');await expect(page.locator('#toast')).not.toContainText(/[0-9a-f]{8}-[0-9a-f]{4}/);expect(errors).toEqual([]);
 });
 
+test('satin width reset: shown off default, one click restores 3 mm as one undo step, keyboard reachable',async({page})=>{
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());await newDesign(page);
+ await page.locator('#line').click();const m=await page.evaluate(()=>{const m=document.querySelector('#art').getScreenCTM();return {a:m.a,d:m.d,e:m.e,f:m.f};}),at=(x,y)=>({x:m.a*x+m.e,y:m.d*y+m.f}),a=at(-25,0),b=at(25,0);
+ await page.mouse.move(a.x,a.y);await page.mouse.down();await page.mouse.move(b.x,b.y,{steps:4});await page.mouse.up();
+ await page.locator('#type').selectOption('satin');await expect(page.locator('#satinRow')).toBeVisible();
+ const reset=page.locator('#satinWidthReset');await expect(reset).toBeHidden();
+ await page.locator('#satinWidth').fill('6');await page.locator('#satinWidth').press('Enter');
+ await expect(reset).toBeVisible();await expect(reset).toHaveAccessibleName('Reset to default (3 mm)');await expect(reset).toHaveAttribute('title','Reset to default (3 mm)');
+ await reset.focus();await page.keyboard.press('Enter');
+ await expect(page.locator('#satinWidth')).toHaveValue('3');await expect(reset).toBeHidden();
+ expect(await page.locator('#shapes polyline.shape').evaluate(el=>getComputedStyle(el).strokeWidth)).toBe('3px');
+ await page.locator('#undo').click();await expect(page.locator('#satinWidth')).toHaveValue('6');await expect(reset).toBeVisible();
+ expect(errors).toEqual([]);
+});
+
 test('subtract makes a hole (even-odd render, fewer stitches) and ties add lock stitches',async({page})=>{
  const n=async()=>Number(((await page.locator('#count').textContent())||'').replace(/,/g,'').match(/(\d+) stitches/)?.[1]||0);
  const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());await newDesign(page);

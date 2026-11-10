@@ -2,7 +2,7 @@ import {layoutState} from '../layoutState.js';
 import {stitchRowsState} from '../stitchRowsState.js';
 import {selectionLabelsState} from '../selectionLabelsState.js';
 import {useSyncExternalStore} from 'react';
-import {typeRowsActions, typeRowsState} from '../typeRowsState.js';
+import {SATIN_WIDTH_DEFAULT, typeRowsActions, typeRowsState} from '../typeRowsState.js';
 import {loopRowsActions, loopRowsState} from '../loopRowsState.js';
 import {useDraftInput} from './useDraftInput';
 import {IconSelect} from './IconSelect';
@@ -20,6 +20,7 @@ export function StitchTypeRows() {
  const loop = useSyncExternalStore(loopRowsState.subscribe, loopRowsState.get);
  const panel = useSyncExternalStore(stitchPanelState.subscribe, stitchPanelState.get);
  const satinWidth = useDraftInput(type.satinWidth, text => typeRowsActions.commit('satinWidth', text));
+ const satinWidthDiffers = Number(type.satinWidth) !== SATIN_WIDTH_DEFAULT;
  const motifSpacing = useDraftInput(type.motifSpacing, text => typeRowsActions.commit('motifSpacing', text));
  const motifSize = useDraftInput(type.motifSize, text => typeRowsActions.commit('motifSize', text));
  return (
@@ -32,7 +33,8 @@ export function StitchTypeRows() {
     {value: 'bead', label: 'Beads', icon: 'i-satin', thumb: 'bead'}, {value: 'bling', label: 'Bling', icon: 'i-ripple', thumb: 'bling'}]} onChoose={v =>
     stitchChoiceActions.choose('type', v)} />{choices.satinOff && <p id="satinOffHint" className="sel-hint">{t('Satin column needs a path. Convert to path first.')}</p>}{choices.typeMixed && <p id="typeMixedHint" className="sel-hint">{mixedTypeNote()}</p>}</label><label hidden={layout.threadHidden}>Thread<select id="thread" value={panel.threadValue} onChange={e =>
     stitchPanelActions.chooseThread(e.target.value)}>{panel.threadOptions.map(o =>
-    <option key={o.value} value={o.value} disabled={o.value === MIXED_THREAD}>{o.label}</option>)}</select></label><label id="satinRow" hidden={rows.satinRow}>{"Satin width (mm)"}<input id="satinWidth" {...satinWidth} type="number" min="0.5" max="12" step="0.5" /></label><label id="motifSpacingRow"
+    <option key={o.value} value={o.value} disabled={o.value === MIXED_THREAD}>{o.label}</option>)}</select></label><div id="satinRow" className="field-reset" hidden={rows.satinRow}><label>{"Satin width (mm)"}<input id="satinWidth" {...satinWidth} type="number" min="0.5" max="12" step="0.5" /></label><button id="satinWidthReset" type="button" className="reset-default" hidden={!satinWidthDiffers}
+    title={`Reset to default (${SATIN_WIDTH_DEFAULT} mm)`} aria-label={`Reset to default (${SATIN_WIDTH_DEFAULT} mm)`} onClick={() => typeRowsActions.commit('satinWidth', String(SATIN_WIDTH_DEFAULT))}><svg className="icon" aria-hidden="true"><use href="#i-reset" /></svg></button></div><label id="motifSpacingRow"
       hidden={rows.motifSpacingRow}>{"Spacing (mm)"}<input id="motifSpacing" {...motifSpacing} type="number" min="1" max="20" step="0.5" /></label>
     <label id="motifSizeRow" hidden={rows.motifSizeRow}>{"Size (mm)"}<input id="motifSize" {...motifSize} type="number" min="0.4" max="6" step="0.2" /></label><label id="motifShapeRow"
       hidden={rows.motifShapeRow}>Loop shape<select id="motifShape" value={loop.motifShape} onChange={e =>
