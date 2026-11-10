@@ -36,7 +36,6 @@ const KNOWN_FAILING={
   sew:'#300: SEW drops zero-length stitches on write',
   xxx:'#300: XXX drops zero-length stitches on write',
   tbf:'#300: TBF drops zero-length stitches on write',
-  u01:'#310: U01 drops zero-length stitches on write (the same encoder skip as EXP, SEW, XXX and TBF)',
 };
 
 const base=()=>{const d=initialDocument();d.objects=[];return d;};

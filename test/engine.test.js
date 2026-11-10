@@ -1517,7 +1517,8 @@ test('U01 export: a 256-byte header, 3-byte records, a color change is a needle 
  const n=(bytes.length-256-3)/3;assert.ok(Number.isInteger(n),'the body is 3-byte records after the 256-byte header and the end record');
  assert.deepEqual([...bytes.slice(-3)],[0xF8,0,0],'the file ends F8 00 00');
  const view=new DataView(bytes.buffer,bytes.byteOffset,bytes.byteLength);
- assert.equal(view.getInt32(140,true),n+1,'the header counts the records plus one');
+ // pyembroidery writes records + 2 (test/readers.test.js checks its fixture); the encoder matches it, so the decision is recorded by this check.
+assert.equal(view.getInt32(140,true),n+2,'the header counts the records plus two, as pyembroidery writes it');
  const cmds=[];for(let i=0;i<n;i++)cmds.push(bytes[256+i*3]&0x1F);
  assert.equal(cmds.filter(c=>c>=0x09&&c<=0x17).length,plan.stitches.filter(s=>s.cmd==='color').length,'one needle change per color change');
  assert.equal(cmds.filter(c=>c===0x07).length,plan.stitches.filter(s=>s.cmd==='trim').length,'one trim record per planned trim');

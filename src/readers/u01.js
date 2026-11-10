@@ -5,7 +5,7 @@
 /** @typedef {import('../readers.js').Decoded} Decoded */
 import {MAX_THREADS, blockResult, fail, push} from './shared.js';
 
-// Header: 0x80 ASCII '0's, then int16 bounds (min x, -max y, max x, -min y), a zero int32, the record count + 1 as int32 and the last stitch as
+// Header: 0x80 ASCII '0's, then int16 bounds (min x, -max y, max x, -min y), a zero int32, the record count + 2 as int32 and the last stitch as
 // int16 (x, -y), padded to 0x100. The header is only checked for size here; the stitches come from the records. Control byte: the low five bits
 // are the command (0x00 stitch, 0x01 jump, 0x07 trim, 0x08 stop, 0x09 to 0x17 needle change to needle 1 to 15); 0x40 set means dy is positive and
 // 0x20 set means dx is negative. Each record moves the pen first, then the command applies at the new position, as the encoder writes trims,

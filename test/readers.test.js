@@ -437,7 +437,7 @@ test('pyembroidery U01 fixture decodes to the header record count, bounds and la
   const hdr=new DataView(u01.buffer,u01.byteOffset,u01.byteLength);
   const decoded=decodeEmbroidery(u01,'u01');
   const records=(u01.length-0x100-3)/3;
-  // This writer stores records + 2 (the end code counted with one more). src/encoders/u01.js stores records + 1, a header difference that does not change any stitch point.
+  // This writer stores records + 2. src/encoders/u01.js writes the same convention, checked in test/engine.test.js.
   assert.equal(hdr.getInt32(0x8c,true),records+2,'header record count as pyembroidery writes it');
   assert.deepEqual([...u01.subarray(u01.length-3)],[0xF8,0,0],'file ends with the U01 end code');
   const [minX,negMaxY,maxX,negMinY]=[0,2,4,6].map(o=>hdr.getInt16(0x80+o,true));
