@@ -1,4 +1,5 @@
 import {layoutState} from '../layoutState.js';
+import {inspectorOpenState} from '../inspectorOpenState.js';
 import {selectionLabelsState} from '../selectionLabelsState.js';
 import {t} from '../i18n.js';
 import {designName} from '../designName.js';
@@ -63,6 +64,7 @@ export function EditorLayout() {
  const canvasDoc = useSyncExternalStore(documentState.subscribe, documentState.get);
  const canvasCounts = useSyncExternalStore(sewingCountsState.subscribe, sewingCountsState.get);
  const layout = useSyncExternalStore(layoutState.subscribe, layoutState.get);
+ const inspectorOpen = useSyncExternalStore(inspectorOpenState.subscribe, inspectorOpenState.get);
  const selectionLabels = useSyncExternalStore(selectionLabelsState.subscribe, selectionLabelsState.get);
  const view = useSyncExternalStore(viewMode.subscribe, viewMode.get);
  const snapping = useSyncExternalStore(gridSnapState.subscribe, gridSnapState.get);
@@ -239,7 +241,7 @@ export function EditorLayout() {
           <StatusRun />
         </footer>
       </main>
-      <aside className={"panel"}>
+      <aside className={inspectorOpen ? "panel" : "panel inspector-collapsed"} id={"inspector"}>
         <SelectionHeading />
         <TipCard />
         <SelectionHint />

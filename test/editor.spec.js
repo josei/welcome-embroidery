@@ -3953,3 +3953,19 @@ test('long lettering stays clear of the floating toolbar and the Text box shows 
  await page.screenshot({path:process.env.SHOT_205||'test-results/lettering-40-chars.png'});
  expect(errors).toEqual([]);
 });
+
+// At 1024 px the inspector sits below the canvas. The Properties button in the object list opens it (scrolled into view) and folds
+// it away again; folding must not move the canvas or the object list, and the page goes back to where it was.
+test('1024 px: Properties opens and folds the inspector without moving the canvas or the object list',async({page})=>{
+ await page.setViewportSize({width:1024,height:680});await page.goto('/');
+ await page.locator('.object-row').first().click();
+ const toggle=page.locator('.inspector-toggle');await expect(toggle).toHaveAttribute('aria-expanded','true');
+ const geo=()=>page.evaluate(()=>['.canvas','#objects'].map(s=>Math.round(document.querySelector(s).getBoundingClientRect().y)));
+ const before=await geo();
+ await toggle.click();await expect(toggle).toHaveAttribute('aria-expanded','false');await expect(page.locator('#type')).toBeHidden();
+ expect(await geo()).toEqual(before);
+ await toggle.click();await expect(toggle).toHaveAttribute('aria-expanded','true');await expect(page.locator('#type')).toBeVisible();
+ await expect.poll(()=>page.evaluate(()=>Math.round(document.querySelector('#type').getBoundingClientRect().bottom))).toBeLessThanOrEqual(680);
+ await toggle.click();await expect(toggle).toHaveAttribute('aria-expanded','false');
+ expect(await geo()).toEqual(before);
+});

@@ -5,6 +5,7 @@ import {selectionState} from '../selectionState.js';
 import {layersActions} from '../layersState.js';
 import {sewingCountsState} from '../sewingCountsState.js';
 import {compileIssueState} from '../compileIssueState.js';
+import {inspectorOpenState, toggleInspectorOpen} from '../inspectorOpenState.js';
 import {t} from '../i18n.js';
 import {selectionChange} from '../objectListSelection.js';
 import type {Click} from '../objectListSelection.js';
@@ -68,12 +69,34 @@ function useObjects(): Obj[] {
 }
 
 // The heading: the object count and the thread count, as the sewing order panel shows them.
+// The page scroll before the inspector was opened from the Properties button, restored when it is folded again.
+let scrollBeforeOpen: number | null = null;
 export function ObjectListHead() {
  const objects = useObjects();
  const n = objects.length, threads = new Set(objects.map(o => o.thread)).size;
  const objectsText = n === 1 ? t('1 object') : t('{n} objects', {n});
  const threadsText = threads === 1 ? t('1 thread') : t('{m} threads', {m: threads});
- return <div className="layers-head"><h3>{t('Layers')}</h3><span>{`${objectsText} · ${threadsText}`}</span></div>;
+ const open = useSyncExternalStore(inspectorOpenState.subscribe, inspectorOpenState.get);
+ // At the stacked widths the inspector sits below the canvas, so this button is the way up to it; it folds it away again.
+ // Opening scrolls the inspector into view, since it starts below the fold.
+ const toggle = () => {
+  const opening = !inspectorOpenState.get();
+  if (opening) scrollBeforeOpen = window.scrollY;
+  toggleInspectorOpen();
+  // Folding it away puts the page back where it was, so the header is not left scrolled out of view.
+  requestAnimationFrame(() => {
+   if (opening) document.getElementById('inspector')?.scrollIntoView({block: 'start'});
+   else if (scrollBeforeOpen !== null) window.scrollTo({top: scrollBeforeOpen});
+   scrollBeforeOpen = null;
+  });
+ };
+ return (
+  <div className="layers-head">
+   <h3>{t('Layers')}</h3>
+   <span>{`${objectsText} · ${threadsText}`}</span>
+   <button type="button" className="inspector-toggle" aria-expanded={open} aria-controls="inspector" onClick={toggle}>{t('Properties')}</button>
+  </div>
+ );
 }
 
 // The name field of a row being renamed. Enter or leaving the field keeps the text, Escape drops it.
