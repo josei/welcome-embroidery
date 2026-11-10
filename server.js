@@ -15,6 +15,10 @@ import {initialDocument,compile,encode,applyOperations,validateDocument,importSt
 import {renderStitches,renderDesign} from './server-render.js';
 
 // Settings come from WELCOME_* environment variables.
+// WELCOME_TRUST_PROXY=1: read the client address from cf-connecting-ip / x-forwarded-for.
+//   Turn it on only when every request reaches this process through a tunnel or proxy that sets those
+//   headers (e.g. Cloudflare Tunnel). Off by default: the headers are client-supplied, so with it on a client
+//   can rotate them and get a fresh per-IP link cap every time.
 const env=name=>process.env[`WELCOME_${name}`];
 const root=path.dirname(fileURLToPath(import.meta.url)),distRoot=path.join(root,'dist'),dataDir=env('DATA_DIR')||path.join(root,'var'),anonymousDocs=new Map(),relay=createRelay({storePath:env('SESSION_FILE')===''?null:(env('SESSION_FILE')||path.join(dataDir,'sessions.json'))}),anonymousAllowed=env('ANONYMOUS_MCP')==='1',artifacts=path.join(dataDir,'artifacts'),mime={'.html':'text/html; charset=utf-8','.css':'text/css; charset=utf-8','.js':'text/javascript; charset=utf-8','.json':'application/json; charset=utf-8','.svg':'image/svg+xml','.png':'image/png','.woff2':'font/woff2'};
 await fs.mkdir(artifacts,{recursive:true});
@@ -134,7 +138,8 @@ const HELP={"overview": "Welcome designs embroidery as objects (shapes, paths, l
 async function bodyJson(req,limit=8_000_000){let raw='';for await(const c of req){raw+=c;if(raw.length>limit)throw Error(`Request body exceeds ${Math.round(limit/1e6)} MB.`);}return raw?JSON.parse(raw):undefined;}
 const sendJson=(res,status,body)=>{res.writeHead(status,{'content-type':'application/json','cache-control':'no-store'});res.end(JSON.stringify(body));};
 async function mcpRequest(req,res,ctx){const mcp=serverForRequest(ctx),transport=new StreamableHTTPServerTransport({sessionIdGenerator:undefined,enableJsonResponse:true});await mcp.connect(transport);const body=await bodyJson(req);await transport.handleRequest(req,res,body);setTimeout(()=>{transport.close().catch(()=>{});mcp.close().catch(()=>{});},0);}
-const clientIp=req=>String(req.headers['cf-connecting-ip']||req.headers['x-forwarded-for']||req.socket.remoteAddress||'unknown').split(',')[0].trim();
+const trustProxy=env('TRUST_PROXY')==='1';
+const clientIp=req=>(trustProxy?String(req.headers['cf-connecting-ip']||req.headers['x-forwarded-for']||req.socket.remoteAddress||'unknown'):String(req.socket.remoteAddress||'unknown')).split(',')[0].trim();
 const server=http.createServer(async(req,res)=>{try{
  const bindHost=String(process.env.HOST||'127.0.0.1').toLowerCase(),rawHost=String(req.headers.host||'').toLowerCase(),requestHost=rawHost.startsWith('[')?rawHost.slice(1,rawHost.indexOf(']')):rawHost.split(':')[0];if(['127.0.0.1','localhost','::1'].includes(bindHost)&&rawHost&&!['127.0.0.1','localhost','::1'].includes(requestHost)){res.writeHead(403);res.end('Invalid Host header');return;}
  const url=new URL(req.url,'http://localhost');
