@@ -14,7 +14,7 @@ import {
   removeReference,
   toggleReferenceMove,
 } from '../referencePicture.js';
-import {useDraftInput} from './useDraftInput';
+import {useNumberInput} from './useNumberInput';
 // The reference image panel, rendered by React. Ids match the markup it replaced; the picture itself is ReferenceLayer.
 export function ReferencePicture() {
   const {doc} = useSyncExternalStore(documentState.subscribe, documentState.get);
@@ -22,10 +22,10 @@ export function ReferencePicture() {
   const interaction = useSyncExternalStore(interactionState.subscribe, interactionState.get);
   const file = useRef<HTMLInputElement>(null);
   const ref = doc.reference;
-  const refX = useDraftInput(fields.refX, (text: string) => commitReferenceField('refX', text));
-  const refY = useDraftInput(fields.refY, (text: string) => commitReferenceField('refY', text));
-  const refW = useDraftInput(fields.refW, (text: string) => commitReferenceField('refW', text));
-  const refH = useDraftInput(fields.refH, (text: string) => commitReferenceField('refH', text));
+  const refX = useNumberInput(fields.refX, (text: string) => commitReferenceField('refX', text), {min: -2000, max: 2000});
+  const refY = useNumberInput(fields.refY, (text: string) => commitReferenceField('refY', text), {min: -2000, max: 2000});
+  const refW = useNumberInput(fields.refW, (text: string) => commitReferenceField('refW', text), {min: 1, max: 4000});
+  const refH = useNumberInput(fields.refH, (text: string) => commitReferenceField('refH', text), {min: 1, max: 4000});
   const pickFile = (e: ChangeEvent<HTMLInputElement>) => {
     const chosen = e.target.files?.[0];
     e.target.value = '';
@@ -72,10 +72,10 @@ export function ReferencePicture() {
           <input id="refLocked" type="checkbox" checked={fields.refLocked} onChange={e => chooseReference('refLocked', e.target.checked)} />
         </label>
         <div className="xywh">
-          <label>X<input id="refX" type="number" step="0.5" {...refX} /></label>
-          <label>Y<input id="refY" type="number" step="0.5" {...refY} /></label>
-          <label>W<input id="refW" type="number" min="1" step="0.5" {...refW} /></label>
-          <label>H<input id="refH" type="number" min="1" step="0.5" {...refH} /></label>
+          <label>X<input id="refX" type="number" step="0.5" {...refX.inputProps} />{refX.note && <span className="clamp-note" role="status">{refX.note}</span>}</label>
+          <label>Y<input id="refY" type="number" step="0.5" {...refY.inputProps} />{refY.note && <span className="clamp-note" role="status">{refY.note}</span>}</label>
+          <label>W<input id="refW" type="number" min="1" step="0.5" {...refW.inputProps} />{refW.note && <span className="clamp-note" role="status">{refW.note}</span>}</label>
+          <label>H<input id="refH" type="number" min="1" step="0.5" {...refH.inputProps} />{refH.note && <span className="clamp-note" role="status">{refH.note}</span>}</label>
         </div>
         <div className="btn-row">
           <button type="button" id="refFit" onClick={() => fitReference()}>Fit to hoop</button>

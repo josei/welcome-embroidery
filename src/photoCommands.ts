@@ -32,9 +32,7 @@ const PHOTO_THREAD_KEYS = ['thread2', 'thread3', 'thread4'] as const;
 /** Wires the photo rows and the picture import, once. */
 export function configurePhotoCommands(next: PhotoApi) {
   api = next;
-  photoRowsActions.commit = (field, text) => setPhoto({
-    [field]: field === 'spacing' ? Math.max(.3, Math.min(2, Number(text) || .7)) : Math.max(.4, Math.min(3, Number(text) || 1.4)),
-  });
+  photoRowsActions.commit = (field, text) => setPhoto({[field]: Number(text)}); // the field clamps to its range before this runs
   photoRowsActions.choose = (field, checked) => setPhoto({invert: checked});
   photoRowsActions.pickThread = (key, hex) => {
     const object = selectedObject();

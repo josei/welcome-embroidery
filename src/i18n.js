@@ -15,7 +15,7 @@ export const ES={
 'Autosaved in this browser':'Autoguardado en este navegador','Saved {time}':'Guardado {time}','Saved {time} to {file}':'Guardado {time} en {file}','Unsaved':'Sin guardar','Unsaved changes':'Cambios sin guardar',
 'This design is too large to autosave, so this browser does not keep a copy. Save the project file to keep your work.':'Este diseño es demasiado grande para el autoguardado, así que este navegador no guarda una copia. Guarda el archivo del proyecto para conservar tu trabajo.',
 'Stitch length':'Largo de puntada','Row spacing':'Separación de filas','Border width':'Ancho del borde','The document':'El documento',
-'{field} must be {range}. {object} keeps {kept} mm.':'{field} debe estar entre {range}. {object} mantiene {kept} mm.',
+'Max {n}':'Máx. {n}','Min {n}':'Mín. {n}',
 'Writes to the file you chose':'Escribe en el archivo que elegiste','Downloads the project file':'Descarga el archivo del proyecto',
 'Choose a new file':'Elegir un archivo nuevo','Download under a name you type':'Descargar con el nombre que escribas',
 'This browser downloads the project file. The name below is the file name.':'Este navegador descarga el archivo del proyecto. El nombre de abajo es el nombre del archivo.',

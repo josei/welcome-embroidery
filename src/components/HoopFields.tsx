@@ -1,11 +1,12 @@
 import {useSyncExternalStore} from 'react';
 import {hoopActions, hoopState} from '../hoopState.js';
-import {useDraftInput} from './useDraftInput';
+import {useNumberInput} from './useNumberInput';
+import {HOOP_SIDE_RANGE} from '../fieldRanges.js';
 // The hoop row under the objects list, rendered by React. Ids and labels match the markup it replaced, because app.js wires them by id.
 export function HoopFields() {
  const hoop = useSyncExternalStore(hoopState.subscribe, hoopState.get);
- const width = useDraftInput(hoop.hoopW, text => hoopActions.commit('hoopW', text));
- const height = useDraftInput(hoop.hoopH, text => hoopActions.commit('hoopH', text));
+ const width = useNumberInput(hoop.hoopW, text => hoopActions.commit('hoopW', text), HOOP_SIDE_RANGE);
+ const height = useNumberInput(hoop.hoopH, text => hoopActions.commit('hoopH', text), HOOP_SIDE_RANGE);
  return (
   // Each dimension keeps its label, input and unit together (.hoop-dim); the two dimensions wrap as one .hoop-dims group, so the
   // Rotate button drops to its own line before any unit or label is split from its input.
@@ -15,8 +16,8 @@ export function HoopFields() {
     e.target.value)}><option value="custom">Custom</option><option value="110x110">110 × 110 mm</option><option value="4x4in">4×4 in</option><option
       value="5x7in">5×7 in</option><option value="6x10in">6×10 in</option></select>
     <div className="hoop-dims"><span className="hoop-dim"><span aria-hidden="true">W</span><input id="hoopW" type="number" min="10" max="400" step="1"
-        aria-label="Hoop width (mm)" {...width} /><span>mm</span></span><span className="hoop-dim"><span aria-hidden="true">H</span><input id="hoopH" type="number" min="10" max="400" step="1"
-          aria-label="Hoop height (mm)" {...height} /><span>mm</span></span></div><button id="hoopRotate" type="button"
+        aria-label="Hoop width (mm)" {...width.inputProps} />{width.note && <span className="clamp-note" role="status">{width.note}</span>}<span>mm</span></span><span className="hoop-dim"><span aria-hidden="true">H</span><input id="hoopH" type="number" min="10" max="400" step="1"
+          aria-label="Hoop height (mm)" {...height.inputProps} />{height.note && <span className="clamp-note" role="status">{height.note}</span>}<span>mm</span></span></div><button id="hoopRotate" type="button"
             title="Swap the hoop's width and height; the design stays where it is" onClick={(
     ) => hoopActions.rotate()}>Rotate hoop</button></div>
  );

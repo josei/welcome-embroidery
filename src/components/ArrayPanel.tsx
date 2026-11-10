@@ -5,6 +5,7 @@ import {arrayState, createArray, setArrayFields, setArrayMode} from '../arraySta
 import type {ArrayMode} from '../arrayState.js';
 import {batchState, setBatchFields} from '../batchState.js';
 import {exportBatch, syncBatchInfo} from '../batchExport.js';
+import {useNumberInput} from './useNumberInput';
 // The array panel, rendered by React. Ids match the markup it replaced, because tests and the editor look them up by id.
 // The mode, the copies and the steps come from arrayState, and the batch from batchState; the button actions edit the document.
 export function ArrayPanel() {
@@ -14,6 +15,12 @@ export function ArrayPanel() {
  const batch = useSyncExternalStore(batchState.subscribe, batchState.get);
  const radial = fields.mode === 'radial';
  const along = fields.mode === 'along';
+ // Copies: 2 to 60, the range the array operation enforces (editOps.js). The steps and the total angle have no declared range,
+ // so only a blank is refused.
+ const count = useNumberInput(fields.count, text => {setArrayFields({count: text}); syncBatchInfo();}, {min: 2, max: 60}, {unit: ''});
+ const stepX = useNumberInput(fields.stepX, text => setArrayFields({stepX: text}));
+ const stepY = useNumberInput(fields.stepY, text => setArrayFields({stepY: text}));
+ const angle = useNumberInput(fields.angle, text => setArrayFields({angle: text}), undefined, {unit: '°'});
  return (
   <details id="secArray" className="sec-fold" data-sec="" hidden={layout.secArray}><summary>Array</summary>
    <div className="tool-grid">
@@ -22,8 +29,7 @@ export function ArrayPanel() {
      <option value="radial">Radial (around a point)</option>
      <option value="along">Along a path</option>
     </select></label><span></span>
-    <label>Copies (incl. original)<input id="arrCount" type="number" min="2" max="60" value={fields.count}
-     onChange={e => {setArrayFields({count: e.target.value}); syncBatchInfo();}} /></label><span></span>
+    <label>Copies (incl. original)<input id="arrCount" type="number" min="2" max="60" {...count.inputProps} />{count.note && <span className="clamp-note" role="status">{count.note}</span>}</label><span></span>
     <label>Batch format<select id="batchFormat" value={batch.format}
      onChange={e => setBatchFields({format: e.target.value})}>
      <option value="jef">JEF</option>
@@ -48,13 +54,13 @@ export function ArrayPanel() {
      Export batch
     </button>
     <label id="arrALabel" hidden={along}>{radial ? 'Center X (mm)' : 'Step X (mm)'}
-     <input id="arrA" type="number" step="1" value={fields.stepX} onChange={e => setArrayFields({stepX: e.target.value})} />
+     <input id="arrA" type="number" step="1" {...stepX.inputProps} />{stepX.note && <span className="clamp-note" role="status">{stepX.note}</span>}
     </label>
     <label id="arrBLabel" hidden={along}>{radial ? 'Center Y (mm)' : 'Step Y (mm)'}
-     <input id="arrB" type="number" step="1" value={fields.stepY} onChange={e => setArrayFields({stepY: e.target.value})} />
+     <input id="arrB" type="number" step="1" {...stepY.inputProps} />{stepY.note && <span className="clamp-note" role="status">{stepY.note}</span>}
     </label>
     <label id="arrAngleRow" hidden={rows.arrAngleRow}>Total angle (°)
-     <input id="arrAngle" type="number" step="15" value={fields.angle} onChange={e => setArrayFields({angle: e.target.value})} />
+     <input id="arrAngle" type="number" step="15" {...angle.inputProps} />{angle.note && <span className="clamp-note" role="status">{angle.note}</span>}
     </label><span></span>
    </div>
    <div className="btn-row">

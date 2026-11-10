@@ -1,5 +1,6 @@
 import {useEffect, useRef, useState, useSyncExternalStore} from 'react';
 import {useModalDialog} from './useModalDialog';
+import {useNumberInput} from './useNumberInput';
 import {setTraceDialogOpen, traceDialogState} from '../traceDialogState.js';
 import {tracePicture} from '../traceCommands.js';
 import {t} from '../i18n.js';
@@ -11,9 +12,11 @@ export function TraceDialog() {
  const [info, setInfo] = useState('');
  const dialog = useRef<HTMLDialogElement>(null);
  const file = useRef<HTMLInputElement>(null);
- const colors = useRef<HTMLInputElement>(null);
+ const [colorsText, setColorsText] = useState('6');
+ const colorsField = useNumberInput(colorsText, setColorsText, {min: 2, max: 16}, {unit: ''});
  const detail = useRef<HTMLSelectElement>(null);
- const width = useRef<HTMLInputElement>(null);
+ const [widthText, setWidthText] = useState('60');
+ const widthField = useNumberInput(widthText, setWidthText, {min: 10, max: 200});
  const background = useRef<HTMLInputElement>(null);
  useModalDialog(dialog, open);
  useEffect(() => {
@@ -29,9 +32,9 @@ export function TraceDialog() {
   try {
    const result = await tracePicture(picture, {
     mode,
-    colors: Number(colors.current?.value) || 6,
+    colors: Number(colorsText),
     detail: Number(detail.current?.value) || .5,
-    widthMm: Number(width.current?.value) || 60,
+    widthMm: Number(widthText),
     background: Boolean(background.current?.checked),
    });
    setInfo(result.info);
@@ -43,7 +46,7 @@ export function TraceDialog() {
  const lines = mode === 'lines';
  return (
   <dialog id="traceDialog" ref={dialog} onClose={() => setTraceDialogOpen(false)}>
-   <form method="dialog">
+   <form method="dialog" noValidate>
     <h2>{"Trace a picture"}</h2>
     <p className="dlg-note">
      {"Turns a logo, drawing or clip art into filled shapes, one per color region. For photographs use the photo stitch tool instead."}
@@ -53,13 +56,13 @@ export function TraceDialog() {
      <option value="regions">{"Color regions (filled shapes)"}</option>
      <option value="lines">{"Line art (strokes)"}</option>
     </select></label>
-    <label id="traceColorsRow" hidden={lines}>{"Colors"}<input id="traceColors" ref={colors} type="number" min="2" max="16" defaultValue="6" /></label>
+    <label id="traceColorsRow" hidden={lines}>{"Colors"}<input id="traceColors" type="number" min="2" max="16" {...colorsField.inputProps} />{colorsField.note && <span className="clamp-note" role="status">{colorsField.note}</span>}</label>
     <label>{"Detail"}<select id="traceDetail" ref={detail} defaultValue="0.5">
      <option value="0.3">{"Fine"}</option>
      <option value="0.5">{"Normal"}</option>
      <option value="1.2">{"Smooth"}</option>
     </select></label>
-    <label>{"Width (mm)"}<input id="traceWidth" ref={width} type="number" min="10" max="200" step="1" defaultValue="60" /></label>
+    <label>{"Width (mm)"}<input id="traceWidth" type="number" min="10" max="200" step="1" {...widthField.inputProps} />{widthField.note && <span className="clamp-note" role="status">{widthField.note}</span>}</label>
     <label id="traceBgRow" hidden={lines}>{"Skip the background color "}<input id="traceBg" ref={background} type="checkbox" defaultChecked={true} /></label>
     <p id="traceInfo" role="status">{info}</p>
     <div className="agent-actions">

@@ -4,7 +4,7 @@ import {pinActions, pinClearActions, pinClearState, pinState} from '../pinState.
 import {pathRowsActions, pathRowsState} from '../pathRowsState.js';
 import {selectClipMask} from '../selectionCommands.js';
 import {photoRowsActions, photoRowsState} from '../photoRowsState.js';
-import {useDraftInput} from './useDraftInput';
+import {useNumberInput} from './useNumberInput';
 import {ThreadSelect} from './ThreadSelect';
 import {stitchPanelActions} from '../stitchPanelState.js';
 // Part of the stitch panel, rendered by React. Ids match the markup it replaced, because app.js wires them by id.
@@ -18,8 +18,8 @@ export function StitchPathRows() {
  const canClear = useSyncExternalStore(pinClearState.subscribe, pinClearState.get);
  const path = useSyncExternalStore(pathRowsState.subscribe, pathRowsState.get);
  const photo = useSyncExternalStore(photoRowsState.subscribe, photoRowsState.get);
- const photoSpacing = useDraftInput(photo.spacing, text => photoRowsActions.commit('spacing', text));
- const photoContrast = useDraftInput(photo.contrast, text => photoRowsActions.commit('contrast', text));
+ const photoSpacing = useNumberInput(photo.spacing, text => photoRowsActions.commit('spacing', text), {min: 0.3, max: 2});
+ const photoContrast = useNumberInput(photo.contrast, text => photoRowsActions.commit('contrast', text), {min: 0.4, max: 3});
  return (
   <><div id="pathProps" hidden={rows.pathProps}><label>Closed shape <input id="pathClosed" type="checkbox" className="icon-check" data-icon="closed"
     checked={path.closed} disabled={path.disabled} onChange={e =>
@@ -30,8 +30,8 @@ export function StitchPathRows() {
     e.target.checked)} title="Smooth curve: rounds the corners of the path" /></label><button id="continueDig" type="button"
       title="Continue digitizing this path">Continue digitizing</button></div><div id="maskRow" className="btn-row" hidden={rows.maskRow}><button
         type="button" id="selectMask" title="Select the shape that clips this object so it can be moved or edited" onClick={(
-    ) => selectClipMask()}>Select mask</button></div><div id="photoBox" hidden={rows.photoBox}><label>{"Photo row spacing (mm)"}<input id="photoSpacing" {...photoSpacing} type="number" min="0.3" max="2" step="0.1" /></label><label>Photo contrast<input id="photoContrast"
-      {...photoContrast} type="number" min="0.4" max="3" step="0.1" /></label><label>Invert picture <input id="photoInvert" type="checkbox"
+    ) => selectClipMask()}>Select mask</button></div><div id="photoBox" hidden={rows.photoBox}><label>{"Photo row spacing (mm)"}<input id="photoSpacing" {...photoSpacing.inputProps} type="number" min="0.3" max="2" step="0.1" />{photoSpacing.note && <span className="clamp-note" role="status">{photoSpacing.note}</span>}</label><label>Photo contrast<input id="photoContrast"
+      {...photoContrast.inputProps} type="number" min="0.4" max="3" step="0.1" />{photoContrast.note && <span className="clamp-note" role="status">{photoContrast.note}</span>}</label><label>Invert picture <input id="photoInvert" type="checkbox"
         checked={photo.invert} onChange={e =>
     photoRowsActions.choose('invert', e.target.checked)} /></label><label>{"Second thread (light tones)"}<ThreadSelect id="photoThread2" label="Second thread (light tones)" value={photo.thread2} onPick={hex =>
     photoRowsActions.pickThread('thread2', hex)} /></label><label id="photoThread3Row" hidden={rows.photoThread3Row}>{"Third thread (mid-tones)"}<ThreadSelect id="photoThread3" label="Third thread (mid-tones)" value={photo.thread3} onPick={hex =>
