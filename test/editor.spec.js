@@ -4017,11 +4017,11 @@ test('inspector: stitch types lay out 4 + 3 and every field starts on one left e
  const buttons=await page.locator('.icon-seg.labelled button').evaluateAll(els=>els.map(e=>Math.round(e.getBoundingClientRect().top)));
  expect(buttons).toHaveLength(7);expect(new Set(buttons.slice(0,4)).size).toBe(1);expect(new Set(buttons.slice(4)).size).toBe(1);expect(new Set(buttons).size).toBe(2);
  // Single-value fields in the stitch and fill rows: a label, then one input or select. Sub-grids (position, corners, colours) keep their own layout, and the wide thread and pattern pickers (over 200 px) are not single-value fields.
- const fields=await page.locator('.panel label:not(.block)').evaluateAll(ls=>ls.filter(l=>!l.closest('.xywh,.corner-radii,.underlay-details,#blendRange,#blendPaletteRow')&&!/^Color /.test(l.textContent.trim())&&!l.hidden&&!l.closest('[hidden]')).map(l=>l.querySelector(':scope>input:not([type=checkbox]),:scope>select')).filter(f=>f&&f.offsetParent&&f.getBoundingClientRect().width<=200).map(f=>{const r=f.getBoundingClientRect();return {left:Math.round(r.left),width:Math.round(r.width),label:f.closest('label').textContent.trim().slice(0,30)};}));
+ const fields=await page.locator('.panel label:not(.block)').evaluateAll(ls=>ls.filter(l=>!l.closest('.corner-radii,.underlay-details,#blendRange,#blendPaletteRow')&&!/^Color /.test(l.textContent.trim())&&!l.hidden&&!l.closest('[hidden]')).map(l=>l.querySelector(':scope>input:not([type=checkbox]),:scope>select')).filter(f=>f&&f.offsetParent&&f.getBoundingClientRect().width<=200).map(f=>{const r=f.getBoundingClientRect();return {left:Math.round(r.left),width:Math.round(r.width),label:f.closest('label').textContent.trim().slice(0,30)};}));
  expect(fields.length).toBeGreaterThan(5);
  expect(new Set(fields.map(f=>f.left)).size,JSON.stringify(fields)).toBe(1);
  expect(new Set(fields.map(f=>f.width)).size,JSON.stringify(fields)).toBe(1);
- // Position X/Y/W/H keeps its own two-column grid, but each box must stay inside the panel at 1440 px.
+ // Position X/Y/W/H stacks one field per row on the shared field column; each box must stay inside the panel at 1440 px.
  const xywh=await page.locator('.panel .xywh input').evaluateAll(ins=>ins.map(i=>{const p=i.closest('.panel').getBoundingClientRect();const r=i.getBoundingClientRect();return {right:Math.round(r.right),panelRight:Math.round(p.right)};}));
  expect(xywh.length).toBeGreaterThanOrEqual(4);for(const x of xywh) expect(x.right,JSON.stringify(xywh)).toBeLessThanOrEqual(x.panelRight);
 });
