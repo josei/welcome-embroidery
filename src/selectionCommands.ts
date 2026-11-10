@@ -1,10 +1,13 @@
 // The selection commands shared by the toolbar, the context menu and the keyboard: what is selected, selecting,
+import {t} from './i18n.js';
 // copying, pasting, nudging, selecting everything and deleting. The canvas calls the same helpers through app.js.
 import {clipboardNow, setClipboard} from './clipboardState.js';
 import {documentNow, setDocument} from './documentState.js';
 import {editModeNow, setEditMode} from './editModeState.js';
 import {selState, setSelection} from './selectionState.js';
 import {clone} from './appHelpers.js';
+import {copyName} from './objectNames.js';
+import {toolMode} from './toolMode.js';
 
 /** The document fields these commands read and change. The engine stores objects as plain records. */
 export interface SelectionObject {
@@ -30,12 +33,14 @@ export interface SelectionObject {
 
 /** What these commands need from the editor. app.js calls configureSelectionCommands before any of them run. */
 export interface SelectionApi {
-  /** Runs one undoable command through the document store. */
-  edit(operations: unknown[], after?: () => void): boolean;
+  /** Runs one undoable command through the document store; the label names the step for Undo and Redo. */
+  edit(operations: unknown[], after?: () => void, coalesceKey?: string, label?: string): boolean;
   /** Runs a change that manages the document itself (paste replaces the whole document). */
   transact(fn: () => void): boolean;
+  /** Steps the document back one undo step, as the Undo button does. */
+  undo(): void;
   render(): void;
-  toast(message: string): void;
+  toast(message: string, kind?: 'status' | 'error', action?: {label: string; run: () => void}): void;
 }
 
 let api: SelectionApi | null = null;
@@ -68,6 +73,7 @@ export function orderedIds(): string[] {
 
 /** Makes ids the selection, with primary (or the last id) as the primary object. Leaves node editing unless the same single object stays selected. */
 export function selectIds(ids: string[], primary?: string | null) {
+  endNudgeRun();
   const prev = selState().selected;
   setSelection({multi: new Set(ids)});
   setSelection({selected: primary ?? ids.at(-1) ?? null});
@@ -82,7 +88,7 @@ export function copySelection(): boolean {
   const ids = new Set(orderedIds());
   if (!ids.size) return false;
   setClipboard({clipboard: {objects: objects().filter(o => ids.has(o.id)).map(o => clone(o) as SelectionObject), pastes: 0}});
-  wired().toast(`Copied ${ids.size} object${ids.size === 1 ? '' : 's'}.`);
+  wired().toast(ids.size === 1 ? t('Copied 1 object.') : t('Copied {n} objects.', {n: ids.size}));
   return true;
 }
 
@@ -97,7 +103,6 @@ export function pasteClipboard() {
   const made = (clip.objects as SelectionObject[]).map(o => {
     const copy = clone(o) as SelectionObject;
     copy.id = crypto.randomUUID();
-    copy.name = `${o.name || o.kind} copy`;
     if (o.groupId) {
       if (!remap.has(o.groupId)) remap.set(o.groupId, crypto.randomUUID());
       copy.groupId = remap.get(o.groupId);
@@ -105,7 +110,10 @@ export function pasteClipboard() {
     return copy;
   });
   wired().transact(() => {
+    const taken = objects().map(o => o.name);
     for (const copy of made) {
+      copy.name = copyName(copy.name, copy.kind, taken);
+      taken.push(copy.name);
       const dx = offset, dy = offset;
       copy.x += dx;
       copy.y += dy;
@@ -124,15 +132,40 @@ export function pasteClipboard() {
   });
 }
 
-/** Moves the selection: the selected path nodes while editing, otherwise whole objects. */
+/** A pause longer than this between two arrow presses starts a new undo step. */
+const NUDGE_PAUSE_MS = 1000;
+
+/** The held-arrow run in progress: its presses share one undo step while the signature (direction, selection, tool) holds. */
+let nudgeRun: {signature: string; key: string; at: number} | null = null;
+let nudgeRunCount = 0;
+
+/** Ends the held-arrow run, so the next nudge starts a new undo step (a selection change calls this). */
+function endNudgeRun() {
+  nudgeRun = null;
+}
+
+/**
+ * The coalesce key for one arrow press. Presses in the same direction, on the same selection and tool, at most a pause
+ * apart, return the run's key so they fold into one undo step; anything else starts a new run with a fresh key.
+ */
+function nudgeCoalesceKey(dx: number, dy: number): string {
+  const s = selState();
+  const signature = [Math.sign(dx), Math.sign(dy), toolMode.get(), [...s.multi].join(','), s.selected, s.selNode, [...s.selNodes].join(','), editModeNow()].join('|');
+  const now = Date.now();
+  if (!nudgeRun || nudgeRun.signature !== signature || now - nudgeRun.at > NUDGE_PAUSE_MS) nudgeRun = {signature, key: `nudge:${++nudgeRunCount}`, at: now};
+  nudgeRun.at = now;
+  return nudgeRun.key;
+}
+
+/** Moves the selection: the selected path nodes while editing, otherwise whole objects. A held-arrow run is one undo step, named "nudge". */
 export function nudge(dx: number, dy: number) {
   const o = selectedObject();
   if (editModeNow() && o?.kind === 'path' && (selState().selNodes.size || selState().selNode !== null)) {
-    wired().edit([{op: 'move_path_points', id: o.id, indexes: selState().selNodes.size ? [...selState().selNodes] : [selState().selNode], dx, dy}]);
+    wired().edit([{op: 'move_path_points', id: o.id, indexes: selState().selNodes.size ? [...selState().selNodes] : [selState().selNode], dx, dy}], undefined, nudgeCoalesceKey(dx, dy), t('nudge'));
     return;
   }
   const ids = orderedIds();
-  if (ids.length) wired().edit([{op: 'translate', ids, dx, dy}]);
+  if (ids.length) wired().edit([{op: 'translate', ids, dx, dy}], undefined, nudgeCoalesceKey(dx, dy), t('nudge'));
 }
 
 /** Selects every visible, unlocked object; while editing a path it selects all of that path's nodes instead. */
@@ -151,11 +184,18 @@ export function selectAll() {
 export function removeSelected() {
   const ids = [...selState().multi];
   if (!ids.length) return;
-  wired().edit(ids.map(id => ({op: 'delete', id})), () => {
+  // One object is named as the sewing-order list names it; several are counted.
+  const names = ids.map(id => objects().find(o => o.id === id)).filter((o): o is SelectionObject => Boolean(o)).map(o => o.name || o.kind);
+  const named = names.length === 1 ? names[0] : null;
+  const label = named === null ? t('delete {n} objects', {n: ids.length}) : t('delete {name}', {name: t(named)});
+  const removed = wired().edit(ids.map(id => ({op: 'delete', id})), () => {
     setSelection({selected: null});
     setSelection({multi: new Set()});
     setSelection({selNode: null});
-  });
+  }, undefined, label);
+  if (!removed) return;
+  const message = named === null ? t('Deleted {n} objects.', {n: ids.length}) : t('Deleted {name}.', {name: t(named)});
+  wired().toast(message, 'status', {label: t('Undo'), run: () => wired().undo()});
 }
 
 /** Selects the shape that clips the selected object, so it can be moved or edited on its own. */

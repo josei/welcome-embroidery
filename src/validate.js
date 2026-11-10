@@ -4,6 +4,21 @@
 import {getFont,isRegistryFont} from './fonts.js';
 import {FABRIC_PRESETS} from './fabrics.js';
 import {MAX_TEXT_CHARS} from './textlayout.js';
+import {t} from './i18n.js';
+import {hasName,objectLabel} from './objectNames.js';
+
+/**
+ * The name and the height range, in millimetres, that lettering in this font may have.
+ * @param {unknown} font
+ * @returns {{name: string, lo: number, hi: number}}
+ */
+function textSizeRange(font){
+  if(font==='neon-blinking/1')return {name:'Néon blinking',lo:20,hi:60};
+  if(isRegistryFont(font)){const f=getFont(/** @type {string} */ (font));
+    if(f)return {name:f.name||String(font),lo:f.size*f.minScale,hi:f.size*f.maxScale};
+    return {name:String(font),lo:2,hi:200};}
+  return {name:'Welcome Mono',lo:4,hi:16};
+}
 
 // A reference (background) picture for tracing by hand: shown under the shapes in the editor, never sewn.
 /**
@@ -15,7 +30,7 @@ function validateReference(r,fail){if(r===undefined)return;const num=(/** @type 
   Number.isFinite(v)&&v>=lo&&v<=hi;
   if(!r||typeof r!=='object'||typeof r.data!=='string'||!/^data:image\/(png|jpeg|webp|gif);base64,[A-Za-z0-9+/]+={0,2}$/.test(r.data)||r.data.length>
     1_500_000)fail('the reference image must be a PNG, JPEG, WebP or GIF data URL under 1.5 MB.');
-  if(!num(r.x,-2000,2000)||!num(r.y,-2000,2000)||!num(r.w,1,4000)||!num(r.h,1,4000))fail('the reference image needs a position and a size in millimetres.');
+  if(!num(r.x,-2000,2000)||!num(r.y,-2000,2000)||!num(r.w,1,4000)||!num(r.h,1,4000))fail('the reference image needs a position and a size in millimeters.');
   if(r.opacity!==undefined&&!num(r.opacity,.05,1))fail('the reference image opacity must be between 0.05 and 1.');
   for(const k of ['visible','locked'])if(r[k]!==undefined&&typeof r[k]!=='boolean')fail(`the reference image ${k} flag must be true or false.`);
   if(r.name!==undefined&&(typeof r.name!=='string'||r.name.length>200))fail('the reference image name is too long.');}
@@ -77,11 +92,11 @@ export function validateDocument(doc){
       'boolean')fail(`object ${o.id} has an invalid clipping mask link.`);
     if(o.blendThread!==undefined&&
       !(color.test(o.blendThread)&&o.stitch==='fill'&&o.kind!=='text'&&o.kind!==
-      'stitch_layer'))fail(`object ${o.id} can only blend a second thread colour into fills.`);
+      'stitch_layer'))fail(`object ${o.id} can only blend a second thread color into fills.`);
     if(o.blendPalette!==undefined&&o.blendPalette!==null){
       if(
       !(Array.isArray(o.blendPalette)&&o.blendPalette.length>=2&&o.blendPalette.length<=5&&o.blendPalette.every((/** @type {any} */ c)=>color.test(c))&&
-      o.stitch==='fill'&&o.kind!=='text'&&o.kind!=='stitch_layer'))fail(`object ${o.id} blendPalette must be 2–5 thread colours for a fill.`);
+      o.stitch==='fill'&&o.kind!=='text'&&o.kind!=='stitch_layer'))fail(`object ${o.id} blendPalette must be 2–5 thread colors for a fill.`);
       if(o.blendThread)fail(`object ${o.id} uses either blendThread or blendPalette, not both.`);}
     if(o.blendAngle!==undefined&&
       !(Number.isFinite(o.blendAngle)&&o.blendAngle>=-360&&o.blendAngle<=360))fail(`object ${o.id} blendAngle must be −360 to 360 degrees.`);
@@ -109,7 +124,7 @@ export function validateDocument(doc){
       undefined&&(o.kind!=='text'||!o.along||typeof o.along!=='object'||typeof o.along.closed!=='boolean'||!Number.isFinite(o.along.offset)||
       !Array.isArray(o.along.points)||o.along.points.length<2||o.along.points.length>1500||
       o.along.points.some((/** @type {any} */ p)=>!Array.isArray(p)||p.length!==2||
-      !p.every((/** @type {any} */ v)=>Number.isFinite(v)&&Math.abs(v)<=1000))))fail(`lettering ${o.id} has an invalid text-on-path attachment.`);
+      !p.every((/** @type {any} */ v)=>Number.isFinite(v)&&Math.abs(v)<=1000))))fail(`text ${o.id} has an invalid text-on-path attachment.`);
     {const inRange=(/** @type {any} */ v,/** @type {number} */ lo,/** @type {number} */ hi)=>v===undefined||(Number.isFinite(v)&&v>=lo&&v<=hi),
       types=['none','auto','contour','fill','laydown','contour+fill','center','zigzag','center+zigzag','contour+zigzag','center+contour',
       'center+contour+zigzag'];
@@ -147,7 +162,7 @@ export function validateDocument(doc){
       if(o.photo!==undefined){const ph=o.photo;
         if(!(o.kind==='rect'&&o.stitch==='fill')||!ph||typeof ph!=='object'||!Number.isInteger(ph.pw)||!Number.isInteger(ph.ph)||ph.pw<2||ph.ph<2||ph.pw>320||
         ph.ph>320||typeof ph.data!=='string'||!/^[A-Za-z0-9+/]+={0,2}$/.test(ph.data)||Math.floor(ph.data.length*3/4)<ph.pw*ph.ph-2||ph.data.length>
-        140000)fail(`object ${o.id} has an invalid photo (a rectangle with a grey picture of up to 320 × 320 samples).`);
+        140000)fail(`object ${o.id} has an invalid photo (a rectangle with a gray picture of up to 320 × 320 samples).`);
         if(ph.thread2!==undefined&&!color.test(ph.thread2)||ph.thread3!==
           undefined&&(!color.test(ph.thread3)||ph.thread2===
           undefined))fail(`object ${o.id} has an invalid photo second or third thread (a third thread needs a second).`);
@@ -261,28 +276,31 @@ export function validateDocument(doc){
         Object.entries(o.threadOverrides).some(([i,v])=>!/^\d+$/.test(i)||Number(i)>=o.threads.length||
         !color.test(v)))fail(`stitch layer ${o.id} has invalid thread replacements.`);
     }
-    if(o.kind===
-      'text'&&(typeof o.text!=='string'||!o.text.trim()||[...o.text].length>(isRegistryFont(o.font)?MAX_TEXT_CHARS:24)||
-      !Number.isFinite(o.h)||(
-      isRegistryFont(o.font)?(()=>{const f=getFont(o.font);return f?o.h<f.size*f.minScale-1e-6||o.h>f.size*f.maxScale+1e-6:o.h<2||o.h>200;})():(o.font===
-      'neon-blinking/1')?(o.h<20||o.h>60):(o.h<4||o.h>
-      16))))fail(`lettering ${o.id} has unsupported text or size (Welcome Mono 4–16 mm; Néon blinking 20–60 mm; other fonts follow their own size range).`);
+    if(o.kind==='text'){
+      const usable=['welcome-mono/1','neon-blinking/1',undefined].includes(o.font)||
+        (isRegistryFont(o.font)&&(!o.font.startsWith('custom/')||!!doc.customFonts?.[o.font.slice(7)]));
+      if(!usable)fail(hasName(o)?t('{l} uses the font “{font}”, which is not bundled or stored in this project.',{l:objectLabel(o),font:String(o.font)}):
+        t('This text uses the font “{font}”, which is not bundled or stored in this project. Choose another font.',{font:String(o.font)}));
+      const range=textSizeRange(o.font);
+      if(typeof o.text!=='string'||!o.text.trim()||[...o.text].length>(isRegistryFont(o.font)?MAX_TEXT_CHARS:24))
+        fail(hasName(o)?t('{l} needs text of 1 to {n} characters.',{l:objectLabel(o),n:String(isRegistryFont(o.font)?MAX_TEXT_CHARS:24)}):
+          t('This text needs text of 1 to {n} characters. Type some text into it, or delete it.',{n:String(isRegistryFont(o.font)?MAX_TEXT_CHARS:24)}));
+      if(!Number.isFinite(o.h)||o.h<range.lo-1e-6||o.h>range.hi+1e-6)
+        fail(hasName(o)?t('{l} is {h} mm tall; the size range of {font} is {lo}–{hi} mm.',{l:objectLabel(o),h:String(o.h),font:range.name,lo:String(range.lo),hi:String(range.hi)}):
+          t('This text is {h} mm tall; the size range of {font} is {lo}–{hi} mm. Change its height, or choose another font.',{h:String(o.h),font:range.name,lo:String(range.lo),hi:String(range.hi)}));
+    }
     if(o.kind==='text'){const num=(/** @type {any} */ v,/** @type {number} */ lo,/** @type {number} */ hi)=>v===
       undefined||(Number.isFinite(v)&&v>=lo&&v<=hi);
       if(!num(o.tracking,-10,30)||!num(o.wordSpacing,-10,50)||!num(o.lineHeight,.5,3)||!num(o.italic,0,35)||
       !num(o.bold,0,3)||(o.align!==undefined&&
       !['left','center','right'].includes(
-      o.align)))fail(`lettering ${o.id} has an invalid letter spacing, word spacing, line height, italic, bold or alignment value.`);
-      if([...String(o.text)].filter((/** @type {any} */ c)=>c==='\n').length>=6)fail(`lettering ${o.id} has too many lines (6 maximum).`);
-      if(o.vertical!==undefined&&typeof o.vertical!=='boolean')fail(`lettering ${o.id} vertical must be true or false.`);
-      if(o.nameDrop!==undefined&&(o.kind!=='text'||typeof o.nameDrop!=='boolean'))fail(`object ${o.id} nameDrop must be true or false, on lettering only.`);
-      if(o.vertical){if(String(o.text).includes('\n'))fail(`lettering ${o.id} is vertical, so it can have one line only.`);
-      if(o.along)fail(`lettering ${o.id} is vertical, so it cannot follow a path.`);
-      if(!isRegistryFont(o.font))fail(`lettering ${o.id} is vertical, which needs a bundled or loaded font.`);}}
-    if(o.kind==='text'&&!['welcome-mono/1','neon-blinking/1',undefined].includes(o.font)&&
-      !(
-      isRegistryFont(o.font)&&(!o.font.startsWith('custom/')||
-      doc.customFonts?.[o.font.slice(7)])))fail(`lettering ${o.id} selects an unsupported or missing font.`);
+      o.align)))fail(`text ${o.id} has an invalid letter spacing, word spacing, line height, italic, bold or alignment value.`);
+      if([...String(o.text)].filter((/** @type {any} */ c)=>c==='\n').length>=6)fail(`text ${o.id} has too many lines (6 maximum).`);
+      if(o.vertical!==undefined&&typeof o.vertical!=='boolean')fail(`text ${o.id} vertical must be true or false.`);
+      if(o.nameDrop!==undefined&&(o.kind!=='text'||typeof o.nameDrop!=='boolean'))fail(`object ${o.id} nameDrop must be true or false, on text objects only.`);
+      if(o.vertical){if(String(o.text).includes('\n'))fail(`text ${o.id} is vertical, so it can have one line only.`);
+      if(o.along)fail(`text ${o.id} is vertical, so it cannot follow a path.`);
+      if(!isRegistryFont(o.font))fail(`text ${o.id} is vertical, which needs a bundled or loaded font.`);}}
   }
   if(pointCount>5000)fail('total path point count exceeds 5,000.');
   return doc;

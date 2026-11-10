@@ -129,8 +129,8 @@ export function readHus(bytes) {
   /** @type {(o: number) => number} */ const u16 = o => bytes[o] | bytes[o + 1] << 8;
   const stitchCount = u32(4), colours = u32(8);
   const cmdOffset = u32(20), xOffset = u32(24), yOffset = u32(28);
-  if (colours < 1 || colours > MAX_THREADS) husFail('has an invalid colour count');
-  if (42 + 2 * colours > bytes.length) husFail('colour chart is truncated');
+  if (colours < 1 || colours > MAX_THREADS) husFail('has an invalid color count');
+  if (42 + 2 * colours > bytes.length) husFail('color chart is truncated');
   if (!(cmdOffset <= xOffset && xOffset <= yOffset && yOffset <= bytes.length)) husFail('stream offsets are out of order');
   /** @type {Thread[]} */ const threads = [];
   for (let i = 0; i < colours; i++) {
@@ -149,7 +149,7 @@ export function readHus(bytes) {
     const dx = s8(xs[i]), dy = -s8(ys[i]);
     if (cmd[i] === 0x80) { x += dx; y += dy; push(stitches, x, y, 'stitch', block); }
     else if (cmd[i] === 0x81) { x += dx; y += dy; push(stitches, x, y, 'jump', block); }
-    else if (cmd[i] === 0x84) { x += dx; y += dy; block++; if (block >= MAX_THREADS) husFail('too many colour changes'); push(stitches, x, y, 'color', block); }
+    else if (cmd[i] === 0x84) { x += dx; y += dy; block++; if (block >= MAX_THREADS) husFail('too many color changes'); push(stitches, x, y, 'color', block); }
     else if (cmd[i] === 0x88) { if (dx !== 0 || dy !== 0) { x += dx; y += dy; push(stitches, x, y, 'jump', block); } push(stitches, x, y, 'trim', block); }
     else break;
   }

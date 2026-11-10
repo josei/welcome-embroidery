@@ -36,7 +36,7 @@ export function ThreadPopover() {
   const onKey = (e: KeyboardEvent) => {
    if (e.key === 'Escape') {
     e.stopImmediatePropagation();
-    closeThreadPopover();
+    closeThreadPopover(true);
    }
   };
   document.addEventListener('pointerdown', onPointer, true);
@@ -50,7 +50,7 @@ export function ThreadPopover() {
   if (!owner) return;
   if (hex) remember(hex);
   const apply = owner.onPick;
-  closeThreadPopover();
+  closeThreadPopover(true);
   apply(hex);
  };
  const useTyped = () => {
@@ -59,7 +59,7 @@ export function ThreadPopover() {
  };
  const recent = owner ? recents() : [];
  return (
-  <div id="threadPop" ref={ref} role="dialog" aria-label={t('Choose a thread colour')} hidden={!owner} style={{left: place.left, top: place.top}}>
+  <div id="threadPop" ref={ref} role="dialog" aria-label={t('Choose a thread color')} hidden={!owner} style={{left: place.left, top: place.top}}>
    {owner && (
     <>
      <button type="button" className="none-btn" onClick={() => pick('')}>{t('None')}</button>
@@ -77,8 +77,8 @@ export function ThreadPopover() {
       </>
      )}
      <div className="custom">
-      <input type="color" value={colour} aria-label={t('Custom colour')} onChange={e => { setColour(e.target.value); setHexText(e.target.value); }} />
-      <input type="text" value={hexText} placeholder="#rrggbb" maxLength={7} aria-label={t('Hex colour')} onChange={e =>
+      <input type="color" value={colour} aria-label={t('Custom color')} onChange={e => { setColour(e.target.value); setHexText(e.target.value); }} />
+      <input type="text" value={hexText} placeholder="#rrggbb" maxLength={7} aria-label={t('Hex color')} onChange={e =>
         setHexText(e.target.value)} onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); useTyped(); } }} />
       <button type="button" onClick={useTyped}>{t('Use')}</button>
      </div>

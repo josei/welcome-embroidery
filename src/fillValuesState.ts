@@ -7,11 +7,14 @@ import {createStore} from './store.js';
 export interface FillValues {
   spacing: string;
   angle: string;
+  /** Under the row spacing field: whether the selected object has its own value or inherits the document default. */
+  spacingNote: string;
 }
 
 export const fillValuesState = createStore<FillValues>({
   spacing: '0.4',
   angle: '32',
+  spacingNote: '',
 });
 
 /** Changes some of the fill values. */
@@ -20,6 +23,6 @@ export function setFillValues(patch: Partial<FillValues>) {
 }
 
 /** The fill rows call commit(field, text) when a value is committed. app.js edits the selected object, or the document. */
-export const fillValuesActions: {commit: (field: keyof FillValues, text: string) => void} = {
+export const fillValuesActions: {commit: (field: keyof FillValues, text: string) => boolean | void} = {
   commit() {},
 };

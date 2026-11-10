@@ -2,6 +2,7 @@
 // Small helpers the editor shell uses: copying a document, escaping text for markup, saving a file, naming an export,
 // formatting sewing time and keying a sewing tip. They read no editor state, so the shell and its tests share them.
 import {sewingSeconds} from './sewingTime.js';
+import {t} from './i18n.js';
 
 /**
  * @param {any} v
@@ -30,7 +31,19 @@ export function download(bytes,name,type){const a=document.createElement('a');a.
  * @returns {string}
  */
 export function safeProjectFilename(name){
-  return `${String(name||'Untitled').replace(/\.welcome$/i,'').replace(/[^a-z0-9 _-]/gi,'_').trim()||'Untitled'}.welcome`;}
+  const stem=String(name||'').replace(/\.welcome$/i,'').replace(/[\/\\:*?"<>|\u0000-\u001F\u007F]/g,'_').trim();
+  // Windows reserves these device names, with or without an extension, so the base name gets a trailing `_`.
+  const safe=/^(CON|PRN|AUX|NUL|COM[1-9]|LPT[1-9])(?=\.|$)/i.test(stem)?stem.replace(/^([^.]*)/,'$1_'):stem;
+  return `${safe||'Untitled design'}.welcome`;}
+
+/**
+ * The name an export file gets: the document name without `.welcome`, with the default name translated.
+ * @param {string|null|undefined} name
+ * @returns {string}
+ */
+export function exportStem(name){
+  const stem=safeProjectFilename(name).replace(/\.welcome$/i,'');
+  return stem==='Untitled design'?t(stem):stem;}
 
 /**
  * @param {any} p the plan's sewing span, as sewingSeconds reads it

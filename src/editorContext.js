@@ -5,8 +5,8 @@
  * @typedef {{
  *   canvas: any,
  *   render: () => void,
- *   toast: (message: string) => void,
- *   edit: (operations: any[], after?: () => void) => boolean,
+ *   toast: (message: string, kind?: 'status' | 'error') => void,
+ *   edit: (operations: any[], after?: () => void, coalesceKey?: string, label?: string) => boolean,
  *   transact: (fn: () => void) => boolean,
  *   compile: any,
  *   autosave: {schedule: () => void} | null,

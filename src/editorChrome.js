@@ -1,15 +1,32 @@
 // @ts-check
-// Editor chrome that lives outside React: the toast, the shared tooltip, the fold persistence for the settings
+// Editor chrome that lives outside React: the toast entry point, the shared tooltip, the fold persistence for the settings
 // sections, and the shortcuts button. app.js mounts it once after the React tree exists.
 import {setShortcutsOpen} from './shortcutsState.js';
+import {toastActions} from './toastState.js';
+import {selectionState, selState} from './selectionState.js';
 
-/** @param {string} message */
-export function toast(message) {
-  const root = /** @type {HTMLElement | null} */ (document.getElementById('toast'));
-  if (!root) return;
-  root.textContent = message;
-  root.classList.add('show');
-  setTimeout(() => root.classList.remove('show'), 2600);
+/**
+ * Shows a message in the toast stack and keeps it in the log. An error stays until the user dismisses it.
+ * @param {string} message
+ * @param {'status' | 'error'} [kind]
+ * @param {{label: string, run: () => void}} [action] a button on the toast; clicking it runs the action and dismisses the toast
+ */
+export function toast(message, kind = 'status', action) {
+  toastActions.push(message, kind, action ?? null);
+}
+
+/**
+ * Shows the hint for the tool in use. It replaces any tool hint already on screen, and clears when its step ends
+ * (see clearToolHints and the selection watch in mountEditorChrome).
+ * @param {string} message
+ */
+export function toolHint(message) {
+  toastActions.push(message, 'status', null, true);
+}
+
+/** Removes the tool hint on screen: the step it described has ended. */
+export function clearToolHints() {
+  toastActions.clearHints();
 }
 
 function mountTooltip() {
@@ -64,8 +81,14 @@ function mountFolds() {
   }
 }
 
-/** Mounts the toast target, tooltip, persisted folds and the shortcuts button. */
+/** Mounts the tooltip, persisted folds and the shortcuts button. */
 export function mountEditorChrome() {
+  // A tool hint describes the selection it was shown for, so a change of selected object ends it.
+  let selected = selState().selected;
+  selectionState.subscribe(() => {
+    const next = selState().selected;
+    if (next !== selected) { selected = next; clearToolHints(); }
+  });
   mountTooltip();
   mountFolds();
   const help = /** @type {HTMLElement | null} */ (document.getElementById('helpBtn'));

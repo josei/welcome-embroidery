@@ -27,17 +27,15 @@ export function TransformPanel() {
  return (
   <section id="secTransform" data-sec="" hidden={layout.secTransform}><h4>Transform · mm</h4><div className="xywh"><label>X<input id="posX" type="number"
     step="0.1" {...posX} /></label><label>Y<input id="posY" type="number" step="0.1" {...posY} /></label><label>W<input id="sizeW" type="number" min="0.5"
-      step="0.1" {...sizeW} /></label><label>H<input id="sizeH" type="number" min="0.5" step="0.1" {...sizeH} /></label></div><label>{"Rotation ("}
-    {"°)"}<input id="rotation" type="number" step="1" {...rotation} /></label><div className="pivot-row"><button type="button" id="pivotPick"
+      step="0.1" {...sizeW} /></label><label>H<input id="sizeH" type="number" min="0.5" step="0.1" {...sizeH} /></label></div><label>{"Rotation (°)"}<input id="rotation" type="number" step="1" {...rotation} /></label><div className="pivot-row"><button type="button" id="pivotPick"
       aria-pressed={picking} onClick={(
     ) =>
     pivotActions.togglePick(
     )} title="Choose the point the rotation field turns the selection around">Set pivot</button><button type="button" id="pivotReset" hidden={!pivot} onClick={(
     ) =>
     pivotActions.reset(
-    )}>Use centre</button><span id="pivotInfo" className="sel-hint" role="status">{info}</span></div><div id="radiusRow"
-      hidden={rows.radiusRow}><label>{"Corner radius ("}
-    {"mm)"}<input id="radius" {...radius} type="number" min="0" max="500" step="0.5" /></label><div className="corner-radii" role="group"
+    )}>Use center</button><span id="pivotInfo" className="sel-hint" role="status">{info}</span></div><div id="radiusRow"
+      hidden={rows.radiusRow}><label>{"Corner radius (mm)"}<input id="radius" {...radius} type="number" min="0" max="500" step="0.5" /></label><div className="corner-radii" role="group"
       aria-label="Corner radii (mm)"><label>TL<input id="radiusTL" {...radiusTL} type="number" min="0" max="500" step="0.5" /></label><label>TR<input
         id="radiusTR" {...radiusTR} type="number" min="0" max="500" step="0.5" /></label><label>BR<input id="radiusBR" {...radiusBR} type="number"
           min="0" max="500" step="0.5" /></label><label>BL<input id="radiusBL" {...radiusBL} type="number" min="0" max="500"

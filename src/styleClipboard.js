@@ -6,6 +6,7 @@ import {setClipboard, clipboardNow} from './clipboardState.js';
 import {selState} from './selectionState.js';
 import {selectedObject} from './selectionCommands.js';
 import {t} from './i18n.js';
+import {shortcutLabel} from './shortcutLabels.js';
 import {editor} from './editorContext.js';
 
 const STYLE_KEYS = ['thread', 'spacing', 'angle', 'stitchLength', 'stagger', 'underlayType', 'underlayInset', 'underlaySpacing', 'fillMethod', 'crossSize',
@@ -27,13 +28,13 @@ export function copyStyle() {
     kind: object.kind,
     values: Object.fromEntries(STYLE_KEYS.filter(k => object[k] !== undefined).map(k => [k, object[k]])),
   }});
-  editor.toast(t('Style copied. Paste it onto other objects with Ctrl+Alt+V.'));
+  editor.toast(t('Style copied. Paste it onto other objects with {shortcut}.', {shortcut: shortcutLabel([{mod: true, alt: true, key: 'V'}])}));
 }
 
 /** Pastes the copied style onto every selected object. */
 export function pasteStyle() {
   if (!clipboardNow().styleClip) {
-    editor.toast(t('Copy a style first (Ctrl+Alt+C).'));
+    editor.toast(t('Copy a style first ({shortcut}).', {shortcut: shortcutLabel([{mod: true, alt: true, key: 'C'}])}));
     return;
   }
   /** @type {any[]} */

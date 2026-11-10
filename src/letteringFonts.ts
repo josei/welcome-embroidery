@@ -59,13 +59,15 @@ interface FontEntry {
 /** What the lettering edits need from the editor, supplied by app.js. */
 export interface LetteringApi {
   /** Runs one undoable command through the document store. */
-  edit(operations: unknown[], after?: () => void): boolean;
+  edit(operations: unknown[], after?: () => void, coalesceKey?: string): boolean;
   /** Runs one undoable command that changes the document itself; false puts the document back. */
   transact(fn: () => void): boolean;
   /** Shows a short message to the user. */
-  toast(message: string): void;
+  toast(message: string, kind?: 'status' | 'error'): void;
   /** Redraws the editor after a font finishes loading. */
   render(): void;
+  /** Brings the selected text into view when it is cut off or under the floating toolbar. */
+  reveal(): void;
 }
 
 interface FontPicker {
@@ -119,7 +121,8 @@ export function kickFontLoads() {
       () => {
         fontLoading.delete(id);
         fontFailed.add(id);
-        wired().toast(`Font ${id} could not be loaded.`);
+        const name = fontIndex.find(f => f.fid === id)?.name;
+        wired().toast(name ? t('Could not load the font {font}. Choose another font.', {font: name}) : t('Could not load this font. Choose another font.'), 'error');
       },
     );
   }
@@ -192,7 +195,7 @@ export function syncTextInspector(o: TextObject | null) {
     fontInfoHidden: !(entry || custom),
     fontInfoText: custom
       ? `${custom.name} — loaded from a file; stored inside this project. ` +
-        `${custom.license || 'Check the licence of the font file before sharing the design.'}`
+        `${custom.license || 'Check the license of the font file before sharing the design.'}`
       : entry
         ? `${entry.name} — ${entry.license || ''}` +
           `${entry.original && entry.original !== entry.name ? ` · ${t('based on')} ${entry.original}` : ''}` +
@@ -209,7 +212,7 @@ export async function setFont(fid: string) {
   try {
     await ensureFontLoaded(fid);
   } catch (error) {
-    wired().toast((error as Error).message);
+    wired().toast((error as Error).message, 'error');
     syncTextInspector(textObj());
     return;
   }
@@ -234,7 +237,7 @@ export async function setFont(fid: string) {
 }
 
 /**
- * Vertical lettering fits the hoop: a column taller than 90% of the hoop height is scaled down by its height ratio, with
+ * Vertical text fits the hoop: a column taller than 90% of the hoop height is scaled down by its height ratio, with
  * the width kept in proportion (the same transform the lettering height field uses).
  */
 export function fitVerticalToHoop(id: string) {
@@ -250,7 +253,7 @@ export function fitVerticalToHoop(id: string) {
     const o2 = (documentNow().doc.objects as TextObject[]).find(v => v.id === id)!;
     const b2 = objectBounds(o2), cx = (b2[0] + b2[2]) / 2, cy = (b2[1] + b2[3]) / 2;
     wired().edit([{op: 'transform', id, x: o2.x - cx, y: o2.y - cy}]);
-    wired().toast(t('Vertical lettering fitted to the hoop at {h} mm.', {h: height}));
+    wired().toast(t('Vertical text fitted to the hoop at {h} mm.', {h: height}));
   }
 }
 
@@ -266,7 +269,7 @@ export async function loadFontFile(file: File) {
     const font = ttfToFont(bytes, {
       id,
       name: file.name.replace(/\.[^.]+$/, ''),
-      license: 'Loaded from a local file — check its licence',
+      license: 'Loaded from a local file — check its license',
       keywords: ['truetype', 'outline', 'custom'],
     });
     if (Object.keys(font.glyphs).length < 10) throw Error('That font has too few Latin glyphs.');
@@ -302,11 +305,11 @@ export async function loadFontFile(file: File) {
         },
       ];
       populateFontSelect();
-      toast(`Loaded ${font.name}. It is stored in this project.`);
+      toast(t('Loaded {name}. It is stored in this project.', {name: font.name}));
       syncTextInspector(selectedObject() ?? null);
     }
   } catch (error) {
-    toast((error as Error).message);
+    toast((error as Error).message, 'error');
   }
 }
 
@@ -346,8 +349,9 @@ export function initFontPicker() {
     fileInput: byId('fontFile') as HTMLInputElement,
     getIndex: pickerIndex,
     getCurrent: () => textObj()?.font || newTextFont,
-    getSample: () => (textObj()?.text || 'Hello 123').split('\n')[0].slice(0, 14),
-    getColor: () => textObj()?.thread || '#1d2925',
+    // The start of the text, in the normal field colour: a thread colour can be too pale to read on white.
+    getSample: () => (textObj()?.text || 'Hello 123').split('\n')[0].slice(0, 24),
+    getColor: () => '#1d2925',
     ensureLoaded: ensureFontLoaded,
     onPick: setFont,
     onLoadFile: loadFontFile,
@@ -361,9 +365,22 @@ export function initFontPicker() {
   });
 }
 
+/** The text as the document stores it: one line, upper case, at most 24 characters, unless the font is a registry font. */
+function storedLetteringText(o: NonNullable<ReturnType<typeof textObj>>, text: string): string {
+  return isRegistryFont(o.font) ? text : text.replace(/\n/g, ' ').toUpperCase().slice(0, 24);
+}
+
 /** Wires the lettering edits and the font picker. app.js calls this once, before the first render. */
 export function configureLettering(next: LetteringApi) {
   api = next;
+  letteringActions.preview = text => {
+    const o = textObj();
+    if (!o) return;
+    const value = storedLetteringText(o, text);
+    if (!value.trim() || value === o.text) return;
+    wired().edit([{op: 'set_object', id: o.id, text: value}], undefined, `lettering-text:${o.id}`);
+    wired().reveal();
+  };
   letteringActions.commit = (field, text) => {
     if (field === 'alongOffset') {
       const o = selectedObject();
@@ -373,14 +390,14 @@ export function configureLettering(next: LetteringApi) {
     const o = textObj();
     if (!o) return;
     if (field === 'text') {
-      let value = text;
-      if (!isRegistryFont(o.font)) value = value.replace(/\n/g, ' ').toUpperCase().slice(0, 24);
+      const value = storedLetteringText(o, text);
       if (!value.trim()) {
-        wired().toast('Lettering needs some text.');
+        wired().toast(t('A text object needs some text.'), 'error');
         syncTextInspector(o);
         return false;
       }
-      wired().edit([{op: 'set_object', id: o.id, text: value}]);
+      if (value !== o.text) wired().edit([{op: 'set_object', id: o.id, text: value}]);
+      wired().reveal();
       return;
     }
     if (field === 'height') {
@@ -408,7 +425,7 @@ export function configureLettering(next: LetteringApi) {
     if (!o) return;
     if (field === 'vertical') {
       if (value && !isRegistryFont(o.font)) {
-        wired().toast(t('Vertical lettering needs a bundled or loaded font. Choose one in Font.'));
+        wired().toast(t('Vertical text needs a bundled or loaded font. Choose one in Font.'), 'error');
         return false;
       }
       if (wired().edit([{op: 'set_object', id: o.id, vertical: Boolean(value)}]) && value) fitVerticalToHoop(o.id);

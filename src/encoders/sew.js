@@ -18,13 +18,15 @@ export function encodeSew(plan){
  if(plan.errors.length)throw Error(plan.errors.join(' '));
  /** @type {string[]} */ const blocks=[plan.stitches.find(p=>p.cmd!=='end'&&p.thread)?.thread||'#527461'];
  for(const p of plan.stitches)if(p.cmd==='color'||p.cmd==='stop')blocks.push(p.thread||last(blocks));
- if(blocks.length>255)throw Error('SEW supports up to 255 colour blocks.');
+ if(blocks.length>255)throw Error('SEW supports up to 255 color blocks.');
  /** @type {number[]} */ const out=[blocks.length&0xff,blocks.length>>8];for(const hex of blocks){const i=sewChartIndex(hex);out.push(i&0xff,i>>8);}
  while(out.length<0x1D78)out.push(0);
  let x=0,y=0;
  /** @type {(nx: number, ny: number, jump: boolean) => void} */
  const move=(nx,ny,jump)=>
    {let dx=nx-x,dy=ny-y;
+   // A zero-length stitch is kept as a 00 00 stitch record, so the count matches the plan.
+   if(!jump&&dx===0&&dy===0){out.push(0,0);return;}
    while(dx!==0||dy!==0){const sx=Math.max(-127,Math.min(127,dx)),sy=Math.max(-127,Math.min(127,dy));if(jump)out.push(0x80,0x04);out.push(sx&0xff,(-sy)&0xff);
    dx-=sx;dy-=sy;x+=sx;y+=sy;}};
  for(const p of plan.stitches){const nx=Math.round(p.x*10),ny=Math.round(p.y*10);if(p.cmd==='end')continue;

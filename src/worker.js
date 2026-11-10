@@ -19,4 +19,4 @@ self.onmessage=async e=>
   decoded=decodeEmbroidery(data,format);if(decoded.stitches.length>250_000)throw Error('This design exceeds the 250,000 stitch import limit.');const digest=
   await crypto.subtle.digest('SHA-256',data),sha256=[...new Uint8Array(digest)].map(v=>v.toString(16).padStart(2,'0')).join('');
   self.postMessage({id,generation,ok:true,decoded,sourceBytesBase64:base64(data),sha256,fileName});}else throw Error(`Unsupported worker task: ${type}`);}catch(
-  error){self.postMessage({id,generation,ok:false,error:error?.message||String(error)});}};
+  error){self.postMessage({id,generation,ok:false,error:error?.message||String(error),details:error?.details});}};

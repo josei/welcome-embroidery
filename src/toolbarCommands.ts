@@ -1,6 +1,8 @@
 // The canvas toolbar's buttons: add a shape, group, ungroup, duplicate, delete, undo, redo, edit nodes and align or
+import {t} from './i18n.js';
 // distribute. Each runs the same edit, selection and history change as the id-wired handlers it replaces.
 import {documentNow, setDocument} from './documentState.js';
+import type {HistoryEntry} from './documentState.js';
 import {selState, setSelection} from './selectionState.js';
 import {alignActions} from './alignState.js';
 import {snapObjState, snapObjActions} from './snapObjState.js';
@@ -14,7 +16,7 @@ export interface ToolbarApi {
   /** Runs one undoable command through the document store. */
   edit(operations: unknown[], after?: () => void): boolean;
   render(): void;
-  toast(message: string): void;
+  toast(message: string, kind?: 'status' | 'error'): void;
   /** Drops the compiled plan and the playback position after a history change. */
   clearComputed(): void;
   /** Adds a new rectangle, ellipse or lettering object to the canvas. */
@@ -46,10 +48,20 @@ export function ungroupSelection() {
   if (ids.length) wired().edit([{op: 'ungroup', ids}]);
 }
 
-/** Duplicates the selection 3 mm down and right, regrouping the copies when every original was in one group. */
+/** The most objects a design can hold; validate.js enforces the same limit on the saved document. */
+const MAX_OBJECTS = 100;
+
+/**
+ * Duplicates the selection 3 mm down and right, regrouping the copies when every original was in one group. If the copies
+ * would take the design past MAX_OBJECTS, nothing is copied and the user gets a message instead of a project-validation error.
+ */
 export function duplicateSelection() {
   const ids = [...selState().multi];
   if (!ids.length) return;
+  if (objects().length + ids.length > MAX_OBJECTS) {
+    wired().toast(t('This would go over the 100-object limit.'));
+    return;
+  }
   const copies = ids.map(id => [id, crypto.randomUUID()] as const);
   const regroup = ids.length > 1
     && new Set(ids.map(id => objects().find(o => o.id === id)?.groupId)).size === 1
@@ -67,8 +79,13 @@ export function duplicateSelection() {
 export function undoDocument() {
   const d = documentNow();
   if (!d.history.length) return;
-  const prev = d.history.at(-1) ?? {};
-  setDocument({doc: {...prev, revision: prev.revision + 1}, history: d.history.slice(0, -1), future: [...d.future, clone(d.doc)], dirty: true});
+  const prev = d.history.at(-1) as HistoryEntry;
+  setDocument({
+    doc: {...prev.doc, revision: prev.doc.revision + 1},
+    history: d.history.slice(0, -1),
+    future: [...d.future, {doc: clone(d.doc), label: prev.label, dirty: d.dirty}],
+    dirty: prev.dirty ?? true,
+  });
   wired().clearComputed();
   wired().render();
 }
@@ -77,8 +94,13 @@ export function undoDocument() {
 export function redoDocument() {
   const d = documentNow();
   if (!d.future.length) return;
-  const next = d.future.at(-1) ?? {};
-  setDocument({doc: {...next, revision: next.revision + 1}, history: [...d.history, clone(d.doc)], future: d.future.slice(0, -1), dirty: true});
+  const next = d.future.at(-1) as HistoryEntry;
+  setDocument({
+    doc: {...next.doc, revision: next.doc.revision + 1},
+    history: [...d.history, {doc: clone(d.doc), label: next.label, dirty: d.dirty}],
+    future: d.future.slice(0, -1),
+    dirty: next.dirty ?? true,
+  });
   wired().clearComputed();
   wired().render();
 }
@@ -87,7 +109,7 @@ export function redoDocument() {
 export function editSelectedNodes() {
   const o = selectedObject();
   if (o && selState().multi.size === 1) enterEdit(o);
-  else wired().toast('Select one shape, path or lettering first.');
+  else wired().toast(t('Select one shape, path or text first.'));
 }
 
 /** The toolbar buttons and the context menu call these; the ids stay because keyboard shortcuts and tests address them. */
@@ -134,6 +156,6 @@ export function configureToolbarCommands(next: ToolbarApi) {
       // The setting simply is not remembered when the browser refuses storage.
     }
     wired().clearSnapMarker();
-    wired().toast(on ? 'Snapping to other objects on.' : 'Snapping to other objects off.');
+    wired().toast(t(on ? 'Snapping to other objects on.' : 'Snapping to other objects off.'));
   };
 }

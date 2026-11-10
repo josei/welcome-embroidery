@@ -11,7 +11,7 @@ try {
  await page.waitForFunction(()=>document.querySelector('#count').textContent.includes('stitches'));
  const lettering=page.locator('.object-row[data-id="word"]');
  if(await lettering.count())await lettering.click();
- await page.waitForFunction(()=>getComputedStyle(document.querySelector('#toast')).opacity==='0');
+ await page.waitForFunction(()=>document.querySelectorAll('#toast .toast-item').length===0);
  await fs.mkdir('design/progress',{recursive:true});
  await page.screenshot({path:'design/progress/public-preview.png',fullPage:true});
  console.log(JSON.stringify({url,screenshot:'design/progress/public-preview.png'}));

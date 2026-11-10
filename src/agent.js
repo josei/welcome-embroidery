@@ -1,6 +1,7 @@
 // @ts-check
 // Browser side of the agent relay: owns the session secrets, long-polls for jobs from the server and answers them
 // against the open document. The owner key stays in this tab's sessionStorage; the link token is what agents get.
+import {t} from './i18n.js';
 const KEY='welcome.agentSession';
 /**
  * @param {unknown} body
@@ -53,7 +54,7 @@ export function createAgentBridge({getDocument,applyRemote,addLayerRemote,getRef
     if(response.status===404||response.status===405){
       set(
       {status:'unavailable',message:
-      'This copy of Welcome is a static site without the agent relay. Run the Welcome server or the desktop app to connect an agent.'});return false;}
+      t('This copy of Welcome is a static site without the agent relay. Run the Welcome server or the desktop app to connect an agent.')});return false;}
     const body=await response.json().catch(()=>({}));if(!response.ok){set({status:'error',message:body.error||'Could not create an agent link.'});return false;}
     session={token:body.token,ownerKey:body.ownerKey};try{sessionStorage.setItem(KEY,JSON.stringify(session));}catch{}return true;
   }
@@ -94,10 +95,18 @@ export function createAgentBridge({getDocument,applyRemote,addLayerRemote,getRef
     async start(){if(!session&&!(await create()))return false;set({status:'waiting',mcpUrl:url()});loop();return true;},
     resume(){if(session){set({status:'waiting',mcpUrl:url()});loop();}},
     async revoke({renew=true}={}){
-      const old=session;running=false;abort?.abort();session=null;try{sessionStorage.removeItem(KEY);}catch{}
-      if(old)await fetch('/api/session/revoke',json({ownerKey:old.ownerKey})).catch(()=>{});
+      // The owner key is kept until the server confirms the revoke (200, or 401 = already gone). If it fails, the link is still
+      // live, so the key, the relay loop and the revoke control all stay, and the user can try again.
+      const old=session;
+      if(old){
+        let gone=false;
+        try{const response=await fetch('/api/session/revoke',json({ownerKey:old.ownerKey}));gone=response.ok||response.status===401;}catch{}
+        if(!gone){set({message:t('Could not revoke the link. It is still active; try again.')});return false;}
+      }
+      running=false;abort?.abort();session=null;try{sessionStorage.removeItem(KEY);}catch{}
       set({status:'idle',mcpUrl:null,agentLastSeen:null,agentCalls:0,message:'Link revoked. Anything still using it is now locked out.'});
       if(renew)return this.start();
+      return true;
     },
   };
 }

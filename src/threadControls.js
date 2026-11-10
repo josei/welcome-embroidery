@@ -9,7 +9,7 @@ import {openThreadPopover, closeThreadPopover, threadPopoverState} from './threa
 import {setStitchRow} from './stitchRowsState.js';
 import {nearestStockThread} from './threads.js';
 import {threadPlan, blockSeconds, blockTimeLabel, sewingWorksheet} from './engine.js';
-import {download, safeProjectFilename} from './appHelpers.js';
+import {download, exportStem} from './appHelpers.js';
 import {t} from './i18n.js';
 import {getPlan, getCompileError, compileNow} from './compileService.js';
 import {editor} from './editorContext.js';
@@ -40,12 +40,16 @@ export function syncThreads() {
     const button = /** @type {HTMLButtonElement | null} */ (select.nextElementSibling);
     if (!button?.classList.contains('thread-btn')) continue;
     const value = select.value, swatch = /** @type {HTMLElement} */ (button.querySelector('.sw'));
+    // An empty value with a disabled "Mixed" option means the selected objects use different threads.
+    const mixed = !value && [...select.options].some(option => option.value === '' && option.disabled);
+    const label = mixed ? t('Mixed') : value ? threadName(value) : t('None');
     swatch.className = value ? 'sw' : 'sw none';
     swatch.style.background = value || '';
     const name = /** @type {HTMLElement} */ (button.querySelector('.nm'));
-    name.textContent = value ? threadName(value) : t('None');
+    name.textContent = label;
     button.disabled = select.disabled;
-    button.setAttribute('aria-label', (select.closest('label')?.firstChild?.textContent || '').trim() + ': ' + (value ? threadName(value) : t('None')));
+    button.title = t("Change this object's thread color");
+    button.setAttribute('aria-label', (select.closest('label')?.firstChild?.textContent || '').trim() + ': ' + label);
   }
 }
 
@@ -112,10 +116,11 @@ function mountThreadSwatches() {
     button.className = 'thread-btn';
     button.setAttribute('aria-haspopup', 'dialog');
     button.innerHTML = '<span class="sw"></span><span class="nm"></span>';
+    button.title = t("Change this object's thread color");
     button.onclick = event => {
       event.preventDefault();
       if (threadPopoverState.get().owner?.id === select.id) closeThreadPopover();
-      else openThreadPopover({id: select.id, value: select.value, onPick: hex => applyThread(select, hex)}, button.getBoundingClientRect());
+      else openThreadPopover({id: select.id, value: select.value, onPick: hex => applyThread(select, hex)}, button.getBoundingClientRect(), button);
     };
     select.after(button);
   }
@@ -139,11 +144,11 @@ function mountWorksheet() {
       if (!plan || plan.revision !== documentNow().doc.revision) await compileNow(true);
       const current = getPlan();
       if (!current || current.revision !== documentNow().doc.revision) {
-        editor.toast(getCompileError() || t('Compile the design first.'));
+        editor.toast(getCompileError() || t('Compile the design first.'), 'error');
         return;
       }
       const format = /** @type {'text'|'svg'} */ (/** @type {HTMLSelectElement} */ (document.getElementById('worksheetFormat')).value);
-      const base = safeProjectFilename(documentNow().doc.name).replace(/\.welcome$/i, '');
+      const base = exportStem(documentNow().doc.name);
       download(sewingWorksheet(/** @type {any} */ (documentNow().doc), current, format), `${base}-worksheet.${format === 'svg' ? 'svg' : 'txt'}`,
         format === 'svg' ? 'image/svg+xml' : 'text/plain');
       editor.toast(t('Sewing worksheet downloaded.'));
@@ -157,14 +162,14 @@ function mountWorksheet() {
       if (!plan || plan.revision !== documentNow().doc.revision) await compileNow(true);
       const current = getPlan();
       if (!current || current.revision !== documentNow().doc.revision) {
-        editor.toast(getCompileError() || t('Compile the design first.'));
+        editor.toast(getCompileError() || t('Compile the design first.'), 'error');
         return;
       }
       try {
         await navigator.clipboard.writeText(sewingWorksheet(/** @type {any} */ (documentNow().doc), current, 'text'));
         editor.toast(t('Worksheet copied to the clipboard.'));
       } catch {
-        editor.toast(t('The browser did not allow copying. Use Download instead.'));
+        editor.toast(t('The browser did not allow copying. Use Download instead.'), 'error');
       }
     };
   }

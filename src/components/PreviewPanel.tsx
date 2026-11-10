@@ -11,7 +11,7 @@ export function PreviewPanel() {
    <div id="previewHint" hidden={!preview.threeD}>{t('Drag to orbit · scroll to zoom · double-click to reset')}</div>
    <div id="previewView" hidden={!preview.threeD} role="group" aria-label={t('3D view')}>
     {VIEWS.map(([view, label]) => (
-     <button key={view} type="button" aria-pressed={preview.view === view} onClick={() => previewActions.chooseView(view)}>{t(label)}</button>
+     <button key={view} type="button" aria-pressed={preview.view === view && !preview.orbited} onClick={() => previewActions.chooseView(view)}>{t(label)}</button>
     ))}
     <button type="button" aria-pressed={preview.loupe} onClick={() => previewActions.chooseLoupe(!preview.loupe)}>{t('Loupe 8×')}</button>
    </div>

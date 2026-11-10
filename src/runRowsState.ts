@@ -38,7 +38,7 @@ export function setRunRows(patch: Partial<RunRows>) {
 
 /** The rows call commit(field, text) for a committed number, and choose(field, value) for a checkbox or the stagger choice. app.js runs them. */
 export const runRowsActions: {
-  commit: (field: 'laydownSpacing' | 'stemWidth' | 'lengthVariance' | 'borderWidth', text: string) => void;
+  commit: (field: 'laydownSpacing' | 'stemWidth' | 'lengthVariance' | 'borderWidth', text: string) => boolean | void;
   choose: (field: 'underpath' | 'border' | 'stagger' | 'borderThread', value: boolean | string) => void;
 } = {
   commit() {},

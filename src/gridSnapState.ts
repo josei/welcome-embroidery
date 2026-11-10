@@ -1,4 +1,5 @@
 import {createStore} from './store.js';
+import {t} from './i18n.js';
 import {gridState} from './gridState.js';
 
 /** Whether drawing and dragging snap to the grid. Off at start-up. */
@@ -7,7 +8,7 @@ export const gridSnapState = createStore(false);
 /** What turning the grid snap on or off needs from the editor. */
 export interface GridSnapApi {
   render(): void;
-  toast(message: string): void;
+  toast(message: string, kind?: 'status' | 'error'): void;
 }
 
 let api: GridSnapApi | null = null;
@@ -23,7 +24,7 @@ export const gridSnapActions: {toggle: () => void} = {
     const on = !gridSnapState.get();
     gridSnapState.set(on);
     wired().render();
-    wired().toast(on ? `Snap to ${Number(gridState.get().value)} mm grid on.` : 'Snap off.');
+    wired().toast(on ? t('Snap to {n} mm grid on.', {n: Number(gridState.get().value)}) : t('Snap off.'));
   },
 };
 

@@ -3,20 +3,28 @@
 // file, starting a new design and the `?open=` link. The header's buttons and file inputs call these; app.js wires the
 // editor commands they need once at start-up.
 import {documentActions, documentNow, setDocument} from './documentState.js';
+import {setSave} from './saveState.js';
+import {lastEditMinutes, openDiscard} from './discardState.js';
+import {setSewingCounts} from './sewingCountsState.js';
 import {selState, setSelection} from './selectionState.js';
 import {setEditMode} from './editModeState.js';
 import {clone, download, safeProjectFilename} from './appHelpers.js';
 import {dxfDocument} from './dxf.js';
 import {withSavedHoop} from './storedPrefs.js';
 import {importSvg} from './svgImport.js';
-import {initialDocument, makeStitchLayer, validateDocument} from './engine.js';
+import {initialDocument, makeStitchLayer, measureText, validateDocument} from './engine.js';
 import {t} from './i18n.js';
+import {isRegistryFont, LEGACY_FONTS, loadFont} from './fonts.js';
 import {currentDocId, isDocId, openElsewhere, ownAutosaveKey, setDocId} from './docSlot.js';
 
 /** The largest project file the editor opens. */
 const PROJECT_LIMIT=33_554_432;
 /** The largest machine file the editor imports: the source bytes are kept inside the project. */
 const MACHINE_LIMIT=1_048_576;
+/** The font a lettering object is set in when its own font is neither bundled nor stored in the project. */
+const FALLBACK_FONT = 'welcome-mono/1';
+/** The height range Welcome Mono lettering may have, in millimetres. */
+const FALLBACK_HEIGHT = [4, 16];
 /** The machine formats the import accepts, as file extensions. */
 const MACHINE_EXTENSIONS=['jef','vp3','dst','sew','pec','pes','exp','hus','xxx','dsb','dsz','tap','tbf','pcs','shv','stx','bro','emd','ksm','10o'];
 
@@ -24,7 +32,7 @@ const MACHINE_EXTENSIONS=['jef','vp3','dst','sew','pec','pes','exp','hus','xxx',
  * @typedef {Object} ProjectApi What the project commands need from the editor, supplied by app.js.
  * @property {() => void} clearComputed Drops the compiled plan and the playback position after the document is replaced.
  * @property {() => void} render
- * @property {(message: string) => void} toast
+ * @property {(message: string, kind?: 'status' | 'error') => void} toast
  * @property {(operations: Record<string, unknown>[], after?: () => void) => boolean} edit Runs one undoable command.
  * @property {(fn: () => void) => boolean} transact Runs a change that manages the document itself.
  * @property {(data: Record<string, unknown>, transfer?: Transferable[]) => Promise<any>} request Sends one worker job.
@@ -57,19 +65,57 @@ export function configureProjectIO(next) {
 export function renameProject(text) {
   const name = text.trim();
   if (!name) {
-    wired().toast('Project name cannot be empty.');
+    wired().toast(t('Project name cannot be empty.'), 'error');
     return false;
   }
   wired().edit([{op: 'rename_document', name}]);
   return true;
 }
 
+/** The File System Access handle of the file the first Save chose; later Saves overwrite it. Null until one is chosen. */
+/** @type {any} */
+let fileHandle = null;
+
+/** The file types the picker offers: Welcome project files. */
+const PROJECT_TYPES = [{description: 'Welcome project', accept: {'application/json': ['.welcome']}}];
+
 /**
- * Saves the document as a .welcome file, with its document id, and marks this tab's autosave copy clean. Saving while
- * another tab holds the same document says so: the file is written, but that tab's edits are not part of it.
+ * True where the browser can pick the file to write (Chromium). Elsewhere Save downloads the file and Save As asks for a name.
+ * @returns {boolean}
  */
-export function projectSave() {
-  // The autosave is written on a delay; marking it clean once that write has run keeps a reload from offering it back.
+export function hasFilePicker() {
+  return typeof (/** @type {any} */ (window)).showSaveFilePicker === 'function';
+}
+
+/**
+ * Shows the browser's save picker. Starts the picker synchronously, so a click that calls it keeps its user activation.
+ * @returns {Promise<any|null>} the chosen handle, or null when the user cancels
+ */
+async function chooseFile() {
+  try {
+    return await (/** @type {any} */ (window)).showSaveFilePicker({suggestedName: safeProjectFilename(documentNow().doc.name), types: PROJECT_TYPES});
+  } catch (error) {
+    if (/** @type {Error} */ (error).name === 'AbortError') return null;
+    throw error;
+  }
+}
+
+/**
+ * The open project as the text a .welcome file holds, with its document id, and the revision it was taken from.
+ * @returns {{text: string, revision: number, name: string}}
+ */
+function projectText() {
+  const doc = documentNow().doc;
+  return {text: JSON.stringify({...doc, docId: currentDocId()}, null, 2), revision: doc.revision, name: doc.name};
+}
+
+/**
+ * Records a successful save: the unsaved marker clears (unless the design changed while the file was written) and the
+ * time is stamped. The autosave copy is marked clean once its delayed write has run, so a reload does not offer it back.
+ * @param {number} revision the revision that was written
+ * @param {string} fileName the file the save wrote to, shown in the status text
+ */
+function markSaved(revision, fileName) {
   setTimeout(() => {
     try {
       const saved = JSON.parse(localStorage.getItem(ownAutosaveKey()) || 'null');
@@ -79,25 +125,173 @@ export function projectSave() {
       }
     } catch {}
   }, 0);
-  const doc = documentNow().doc;
-  download(JSON.stringify({...doc, docId: currentDocId()}, null, 2), safeProjectFilename(doc.name), 'application/json');
-  setDocument({dirty: false});
+  if (documentNow().doc.revision === revision) setDocument({dirty: false});
+  setSave({savedAt: Date.now(), savedFileName: fileName});
   wired().render();
   if (openElsewhere()) wired().toast(t('Saved. This document is also open in another tab.'));
+}
+
+/** @param {unknown} error */
+function reportSaveError(error) {
+  wired().toast(/** @type {Error} */ (error).message || t('The project could not be saved.'), 'error');
+}
+
+/**
+ * Save. Where the browser has a file picker, the first Save asks for a file and later Saves overwrite it. Elsewhere Save
+ * downloads the project file under its document name.
+ */
+export async function projectSave() {
+  try {
+    if (!hasFilePicker()) {
+      const {text, revision, name} = projectText();
+      const fileName = safeProjectFilename(name);
+      download(text, fileName, 'application/json');
+      markSaved(revision, fileName);
+      return;
+    }
+    if (!fileHandle) {
+      const handle = await chooseFile();
+      if (!handle) return;
+      fileHandle = handle;
+    }
+    const {text, revision} = projectText();
+    await writeFile(fileHandle, text);
+    markSaved(revision, fileHandle.name);
+  } catch (error) {
+    reportSaveError(error);
+  }
+}
+
+/**
+ * Save As. Where the browser has a file picker, it always asks for a file and that file becomes the one Save overwrites.
+ * Elsewhere it opens the name prompt; the name it is given is the download's file name.
+ */
+export async function projectSaveAs() {
+  if (!hasFilePicker()) {
+    setSave({saveAsOpen: true, saveAsName: documentNow().doc.name || 'Untitled'});
+    return;
+  }
+  try {
+    const handle = await chooseFile();
+    if (!handle) return;
+    const {text, revision} = projectText();
+    await writeFile(handle, text);
+    fileHandle = handle;
+    markSaved(revision, handle.name);
+  } catch (error) {
+    reportSaveError(error);
+  }
+}
+
+/**
+ * Save As on the download fallback: downloads the project under the name the user typed.
+ * @param {string} name
+ */
+export function saveAsDownload(name) {
+  const {text, revision} = projectText();
+  const fileName = safeProjectFilename(name);
+  download(text, fileName, 'application/json');
+  setSave({saveAsOpen: false});
+  markSaved(revision, fileName);
+}
+
+/**
+ * Writes the text to a picked file.
+ * @param {any} handle
+ * @param {string} text
+ */
+async function writeFile(handle, text) {
+  const writable = await handle.createWritable();
+  await writable.write(text);
+  await writable.close();
+}
+
+/**
+ * Fetches a bundled font file, for loadFont.
+ * @param {string} path
+ * @returns {Promise<any>}
+ */
+const fetchFontJson = (path) => fetch(new URL('../' + path, import.meta.url)).then((r) => {
+  if (!r.ok) throw Error(`Font file ${path} could not be loaded (${r.status}).`);
+  return r.json();
+});
+
+/**
+ * True when the bundled font loads from the app's files.
+ * @param {string} id
+ * @returns {Promise<boolean>}
+ */
+async function loadedOrNot(id) {
+  try {
+    await loadFont(id, fetchFontJson);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * True when the browser can decode the picture: an image element that fails to load is not an image.
+ * @param {string} data a data URL
+ * @returns {Promise<boolean>}
+ */
+function pictureDecodes(data) {
+  return new Promise((resolve) => {
+    const image = new Image();
+    image.onload = () => resolve(image.naturalWidth > 0);
+    image.onerror = () => resolve(false);
+    image.src = data;
+  });
+}
+
+/**
+ * Makes a document read from a file or a link openable before it is validated. Lettering whose font is neither bundled
+ * nor stored in the project is set in Welcome Mono (its height is kept within that font's range), and a reference picture
+ * the browser cannot decode is left out. The rest of the design is untouched. Returns one note per change for the toast.
+ * @param {any} doc the parsed document; changed in place
+ * @returns {Promise<string[]>}
+ */
+async function repairOpened(doc) {
+  /** @type {string[]} */
+  const notes = [];
+  for (const o of Array.isArray(doc?.objects) ? doc.objects : []) {
+    if (!o || o.kind !== 'text' || LEGACY_FONTS.has(o.font)) continue;
+    if (isRegistryFont(o.font)) {
+      // A font stored in the project is always usable; a bundled one must load from the app's files.
+      if (o.font.startsWith('custom/') ? doc.customFonts?.[o.font.slice(7)] : await loadedOrNot(o.font)) continue;
+    }
+    const missing = String(o.font);
+    o.font = FALLBACK_FONT;
+    if (Number.isFinite(o.h)) {
+      o.h = Math.min(FALLBACK_HEIGHT[1], Math.max(FALLBACK_HEIGHT[0], o.h));
+      if (typeof o.text === 'string' && o.text.trim()) o.w = measureText(o.text, FALLBACK_FONT, o.h, o);
+    }
+    notes.push(t('{name} uses the font {font}, which is not bundled here; it is set in Welcome Mono.', {name: o.name || o.id, font: missing}));
+  }
+  if (doc?.reference && !(await pictureDecodes(String(doc.reference.data)))) {
+    delete doc.reference;
+    notes.push(t('The reference picture could not be read, so it was left out.'));
+  }
+  return notes;
 }
 
 /**
  * Opens a validated document as the project: no history, the first object selected, fitted to the view, and clean. The
  * document keeps the id a saved file carries, or takes a new one.
  * @param {any} next
+ * @param {string[]} [notes] what repairOpened changed or an import could not keep; shown as one toast, and none when empty
  */
-export function acceptProject(next) {
+export function acceptProject(next, notes = []) {
   const {docId, ...body} = next;
   validateDocument(body);
   const opened = clone(body);
   setDocId(isDocId(docId) ? docId : undefined);
-  wired().clearComputed();
+  fileHandle = null;
+  setSave({savedAt: null, savedFileName: null});
+  setSewingCounts({});
   setDocument({doc: opened});
+  // After the document is replaced: scheduleCompile skips a blank design, so clearing first left the restored one never compiled.
+  wired().clearComputed();
   setDocument({history: []});
   setDocument({future: []});
   setSelection({selected: documentNow().doc.objects[0]?.id || null});
@@ -108,7 +302,8 @@ export function acceptProject(next) {
   setDocument({dirty: false});
   wired().render();
   wired().fitAll();
-  wired().toast('Project opened locally.');
+  // Opening is confirmed by the document appearing; only a note the user needs to read gets a toast.
+  if (notes.length) wired().toast(notes.join(' '));
 }
 
 /**
@@ -121,7 +316,7 @@ export async function openArtifact(id) {
   if (response.status === 404) response = await fetch(`/artifacts/${id}.welcome`, {credentials: 'same-origin', redirect: 'error'});
   if (!response.ok) throw Error(`MCP project could not be opened (${response.status}).`);
   const next = await response.json();
-  acceptProject(next);
+  acceptProject(next, await repairOpened(next));
   window.history.replaceState(null, '', location.pathname);
 }
 
@@ -129,52 +324,110 @@ export async function openArtifact(id) {
  * Opens an autosaved document as the project, still marked unsaved so the user decides when to save it; a document that
  * fails validation shows its message and leaves the editor as it was.
  * @param {any} saved
+ * @param {boolean} [dirty=true] false when the copy matches the saved file, so it opens as saved
+ * @param {string|null} [savedFileName] the file the copy was saved to, when known
  */
-export function restoreProject(saved) {
+export function restoreProject(saved, dirty = true, savedFileName = null) {
   try {
     acceptProject(saved);
-    setDocument({dirty: true});
+    // The copy still knows which file it was saved to, so an edit after the restore reads as "Unsaved" against that file.
+    if (savedFileName) setSave({savedFileName});
+    setDocument({dirty});
     wired().render();
   } catch (error) {
-    wired().toast(/** @type {Error} */ (error).message);
+    wired().toast(/** @type {Error} */ (error).message, 'error');
   }
 }
 
 /**
- * Makes the browser ask before this tab is closed or reloaded while the document has unsaved changes. Clean documents
- * close without a prompt.
+ * Keeps the design a discard just replaced as one undo step, after the undo steps it already had, so Ctrl+Z restores it with
+ * its objects, order, hoop, name and unsaved marker. An untouched blank design (nothing to lose) leaves no step. The
+ * discarded design also stays in the autosave slot, which is only rewritten by the next edit (see autosave.js).
+ * @param {{doc: any, history: any[], dirty: boolean}} before the design as it was before the discard
+ * @param {string} label what the step is called, e.g. "new design"; Undo shows it as "Undo new design"
  */
-export function mountLeaveGuard() {
-  window.addEventListener('beforeunload', event => {
-    if (!documentNow().dirty) return;
-    event.preventDefault();
-    event.returnValue = '';
+function keepDiscarded(before, label) {
+  if (!before.dirty && before.doc.objects.length === 0) return;
+  const after = documentNow();
+  const history = [...before.history, {doc: clone(before.doc), label: t(label), dirty: before.dirty}, ...after.history];
+  setDocument({history: history.slice(-80), future: []});
+}
+
+/**
+ * Runs `proceed` once the open design may be replaced. A clean design, or one with no objects, is replaced at once. A design
+ * with unsaved objects first opens the discard dialog: Save saves it and then proceeds, Discard proceeds, and Cancel leaves
+ * the design as it was and shows `cancelNotice`. With `replaceFirst`, proceeding starts a new design before the action.
+ * Once the design is replaced, it stays one undo step labelled `undoLabel` (e.g. "new design"), so Ctrl+Z brings it back.
+ * @param {() => void} proceed
+ * @param {{cancelNotice?: string, replaceFirst?: boolean, undoLabel?: string}} [options]
+ */
+function guardDiscard(proceed, {cancelNotice = '', replaceFirst = false, undoLabel = ''} = {}) {
+  const state = documentNow();
+  const run = () => {
+    const before = documentNow();
+    try {
+      if (replaceFirst) startNewDesign();
+      proceed();
+    } catch (error) {
+      wired().toast(/** @type {Error} */ (error).message, 'error');
+    }
+    if (undoLabel && documentNow().doc !== before.doc) keepDiscarded(before, undoLabel);
+  };
+  if (!state.dirty || state.doc.objects.length === 0) {
+    run();
+    return;
+  }
+  openDiscard({
+    name: state.doc.name,
+    objects: state.doc.objects.length,
+    minutes: lastEditMinutes(),
+    save: async () => {
+      await projectSave();
+      return !documentNow().dirty;
+    },
+    proceed: run,
+    cancel: () => {
+      if (cancelNotice) wired().toast(cancelNotice);
+    },
   });
 }
 
 /**
- * Asks before a change throws away unsaved work: true when the document is clean or the user confirms. Cancel leaves the
- * design, its undo history and the autosave copy untouched.
- * @returns {boolean}
+ * Saves a copy from the restore prompt, then starts a new design. False when the save did not happen; the restored copy
+ * then stays open so the user can save it or leave it.
+ * @param {any} saved the autosaved document
+ * @returns {Promise<boolean>}
  */
-export function confirmDiscard() {
-  return !documentNow().dirty || confirm(t('Discard unsaved changes?'));
+export async function saveRestoredThenStartFresh(saved, savedFileName = null) {
+  restoreProject(saved, true, savedFileName);
+  await projectSave();
+  if (documentNow().dirty) return false;
+  startNewDesign();
+  return true;
 }
 
-/** Starts an empty design, after asking before throwing away unsaved changes. */
-export function newProject() {
-  setEditMode(false);
-  if (!confirmDiscard()) return;
+/** Starts an empty design now, with no prompt. Callers that might throw away unsaved work use newProject or guardDiscard. */
+function startNewDesign() {
   wired().clearComputed();
+  setSewingCounts({});
   setDocId(undefined);
+  fileHandle = null;
+  setSave({savedAt: null, savedFileName: null});
   setDocument({doc: withSavedHoop({...initialDocument(), name: 'Untitled design', objects: []})});
   setDocument({history: []});
   setDocument({future: []});
   setSelection({selected: null});
   setSelection({multi: new Set()});
-  setDocument({dirty: true});
+  // A new design is untouched until its first edit, so it is not "Unsaved" and New does not ask to discard it.
+  setDocument({dirty: false});
   wired().render();
   wired().fitHoop();
+}
+
+/** Starts an empty design, after offering to save or discard unsaved changes. */
+export function newProject() {
+  setEditMode(false);
+  guardDiscard(startNewDesign, {undoLabel: 'new design'});
 }
 
 /**
@@ -186,32 +439,36 @@ export async function openProjectFile(file) {
   try {
     if (file.size > PROJECT_LIMIT) throw Error('Welcome project files are limited to 32 MiB.');
     const lower = file.name.toLowerCase();
+    const openOptions = {cancelNotice: t('Open canceled.'), undoLabel: 'open file'};
     if (lower.endsWith('.svg')) {
       const imported = importSvg(await file.text());
-      if (!confirmDiscard()) return;
-      acceptProject(imported.doc);
-      setDocument({dirty: true});
-      wired().render();
-      if (imported.notes.length) wired().toast(imported.notes.join(' '));
+      guardDiscard(() => {
+        acceptProject(imported.doc);
+        // An imported design has no .welcome file yet, so it stays unsaved until the user saves it.
+        setDocument({dirty: true});
+        if (imported.notes.length) wired().toast(imported.notes.join(' '));
+      }, openOptions);
     } else if (lower.endsWith('.welcome') || lower.endsWith('.json')) {
       const next = JSON.parse(await file.text());
-      if (!confirmDiscard()) return;
-      acceptProject(next);
+      const notes = await repairOpened(next);
+      guardDiscard(() => acceptProject(next, notes), openOptions);
     } else if (lower.endsWith('.dxf')) {
       const dxf = dxfDocument(await file.text());
-      if (!confirmDiscard()) return;
-      acceptProject(dxf.doc);
-      setDocument({dirty: true});
-      wired().render();
-      const skipped = Object.entries(/** @type {Record<string, number>} */ (dxf.skipped)).map(([k, n]) => `${n} ${k}`).join(', ');
-      const paths = dxf.doc.objects.length;
-      wired().toast(`DXF imported: ${paths} path${paths === 1 ? '' : 's'}${skipped ? `; skipped ${skipped}` : ''}`
-        + `${dxf.bulged ? `; ${dxf.bulged} arc${dxf.bulged === 1 ? '' : 's'} sewn as straight segments` : ''}.`);
+      guardDiscard(() => {
+        acceptProject(dxf.doc);
+        setDocument({dirty: true});
+        const skipped = Object.entries(/** @type {Record<string, number>} */ (dxf.skipped)).map(([k, n]) => `${n} ${k}`).join(', ');
+        const paths = dxf.doc.objects.length;
+        const pathsText = paths === 1 ? t('1 path') : t('{n} paths', {n: paths});
+        const skippedText = skipped ? t('; skipped {list}', {list: skipped}) : '';
+        const arcsText = !dxf.bulged ? '' : dxf.bulged === 1 ? t('; 1 arc sewn as straight segments') : t('; {n} arcs sewn as straight segments', {n: dxf.bulged});
+        wired().toast(t('DXF imported: {paths}', {paths: pathsText}) + skippedText + arcsText + '.');
+      }, openOptions);
     } else {
       throw Error('Open a .welcome project, SVG or ASCII DXF here. Use Import JEF / VP3 for machine files.');
     }
   } catch (error) {
-    wired().toast(/** @type {Error} */ (error).message);
+    wired().toast(/** @type {Error} */ (error).message, 'error');
   }
 }
 
@@ -244,16 +501,18 @@ export async function importMachineFile(file) {
       size: file.size,
       originalBytesBase64: result.sourceBytesBase64,
     });
-    if (!confirmDiscard()) return;
-    const committed = wired().transact(() => {
-      setDocument({doc: {...documentNow().doc, objects: [...documentNow().doc.objects, layer]}});
-      setSelection({selected: layer.id});
-    });
-    if (committed) {
-      wired().toast(`Imported ${file.name} as a ${format.toUpperCase()} stitch layer.`);
-      wired().compileNow();
-    }
+    // Import asks first only when unsaved objects are open; Save or Discard then start a new design for the import.
+    guardDiscard(() => {
+      const committed = wired().transact(() => {
+        setDocument({doc: {...documentNow().doc, objects: [...documentNow().doc.objects, layer]}});
+        setSelection({selected: layer.id});
+      });
+      if (committed) {
+        wired().toast(t('Imported {name} as a {fmt} stitch layer.', {name: file.name, fmt: format.toUpperCase()}));
+        wired().compileNow();
+      }
+    }, {cancelNotice: t('Import canceled.'), replaceFirst: true, undoLabel: 'import file'});
   } catch (error) {
-    wired().toast(/** @type {Error} */ (error).message);
+    wired().toast(/** @type {Error} */ (error).message, 'error');
   }
 }

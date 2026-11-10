@@ -26,7 +26,7 @@ export function readBro(bytes) {
     if (control === 0x02 || control === 0xE0) break;
     if (control === 0x7E || control === 0x03) { move(); continue; }
     if (control > 0xE0 && control < 0xF0) {
-      block++; if (block >= MAX_THREADS) fail('too many colour changes');
+      block++; if (block >= MAX_THREADS) fail('too many color changes');
       push(stitches, x, y, 'color', block);
       move();
       continue;
@@ -57,7 +57,7 @@ export function readEmd(bytes) {
       push(stitches, x, y, 'jump', block);
       continue;
     }
-    if (b1 === 0x2A) { block++; if (block >= MAX_THREADS) fail('too many colour changes'); push(stitches, x, y, 'color', block); continue; }
+    if (b1 === 0x2A) { block++; if (block >= MAX_THREADS) fail('too many color changes'); push(stitches, x, y, 'color', block); continue; }
     if (b1 === 0x7D) continue;
     if (b1 === 0xAD || b1 === 0x90) { push(stitches, x, y, 'trim', block); continue; }
     if (b1 === 0xFD) break;

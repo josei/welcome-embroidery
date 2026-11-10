@@ -6,6 +6,7 @@ import {objectBounds} from './transforms.js';
 import {pathOutline,distP} from './pathGeometry.js';
 import {isRegistryFont,getFont} from './fonts.js';
 import {FABRIC_PROFILES} from './fabrics.js';
+import {objectLabel} from './objectNames.js';
 
 /** @typedef {import('./transforms.js').Obj & {mask?: boolean, photo?: boolean}} Item */
 /** @typedef {{op: string, ids?: string[], id?: string, dx?: number, dy?: number, stitch?: string, satinWidth?: number}} Fix */
@@ -38,7 +39,7 @@ export function designWarnings(doc){
   const w=(o,message,category,fix)=>{out.push({id:o.id,name:o.name||o.kind,message,category,...(fix?{fix}:{})});};
   for(const o of doc.objects){
     if(o.visible===false||o.mask||o.kind==='stitch_layer')continue;/** @type {number[]} */ let b;try{b=objectBounds(o);}catch{continue;}const bw=b[2]-b[0],
-      bh=b[3]-b[1],label=o.name||o.id;
+      bh=b[3]-b[1],label=objectLabel(o);
     if(b[0]<-hoopW/2||b[1]<-hoopH/2||b[2]>hoopW/2||b[3]>hoopH/2){
       // The fix moves the object inside the hoop, when it is no bigger than the hoop.
       const fits=bw<=hoopW&&bh<=hoopH,dx=b[0]<-hoopW/2?-hoopW/2-b[0]:b[2]>hoopW/2?hoopW/2-b[2]:0,dy=b[1]<-hoopH/2?-hoopH/2-b[1]:b[3]>hoopH/2?hoopH/2-b[3]:0;
@@ -46,7 +47,7 @@ export function designWarnings(doc){
     }
     const key=[o.kind,o.stitch,o.thread,Math.round(b[0]),Math.round(b[1]),Math.round(b[2]),Math.round(b[3])].join('|');
       if(seen.has(key))w(o,`${label} is a duplicate of ${seen.get(key)}: it would be sewn twice. Delete one.`,'duplicate',[{op:'delete',id:o.id}]);
-      else seen.set(key,label);
+      else seen.set(key,objectLabel(o,'other'));
     const filled=o.stitch==='fill'&&o.kind!=='text'&&(o.kind!=='path'||o.closed);
     if(filled&&!o.photo){const lines=geometry(o,0).filter(l=>l.length>=4);
       if(lines.length){const area=shapeArea(lines),per=lines.reduce((n,r)=>n+r.reduce((m,p,i)=>i?m+distP(p,r[i-1]):m,0),0),mean=per?2*area/per:0;
@@ -58,7 +59,7 @@ export function designWarnings(doc){
         o,`${label} is a small fill (${bw.toFixed(1)}×${bh.toFixed(1)} mm): it will sew, but the rows are very short and can look dense or rough. A ` +
         `satin stitch or a slightly larger shape usually sews cleaner.`,
         'fill');
-      else if(mean<1.4)w(o,`${label} is mostly narrower than 1.4 mm, so a fill will skip or look thin. Use a satin column along its centre line.`,'fill');}}
+      else if(mean<1.4)w(o,`${label} is mostly narrower than 1.4 mm, so a fill will skip or look thin. Use a satin column along its center line.`,'fill');}}
     if(o.kind==='path'&&!filled){const len=pathOutline(/** @type {import('./pathGeometry.js').PathLike} */(o)).reduce((n,p,i,a)=>i?n+distP(p,a[i-1]):0,0);
       if(len<2)w(o,`${label} is only ${len.toFixed(1)} mm long; stitches this short are skipped or bunch up.`,'short');
       if(o.stitch==='satin'){const wd=Math.max(Number(o.satinWidth)||3,Number(o.satinWidthEnd)||0);
@@ -67,7 +68,7 @@ export function designWarnings(doc){
         'satin',[{op:'set_object',id:o.id,satinWidth:1.5}]);
         if(wd>7)w(o,`${label} is a satin column wider than 7 mm; long satin stitches snag. Use a fill, or split it into narrower columns.`,'satin');}}
     if(o.kind==='text'&&Number(o.h)<5&&isRegistryFont(o.font)&&getFont(o.font)?.kind!=='line')w(
-      o,`${label} is only ${Number(o.h).toFixed(1)} mm tall; lettering under about 5 mm rarely sews cleanly in a satin or fill font.`,'lettering');
+      o,`${label} is only ${Number(o.h).toFixed(1)} mm tall; text under about 5 mm rarely sews cleanly in a satin or fill font.`,'lettering');
   }
   const fabric=doc.settings?.fabric,profile=fabric&&fabric!=='woven'?FABRIC_PROFILES[fabric]:null,first=profile&&
     doc.objects.find(o=>o.visible!==false&&!o.mask&&o.kind!=='stitch_layer');
@@ -78,7 +79,7 @@ export function designWarnings(doc){
 // The sewing tip categories, in the order the Tips settings list shows them. Each warning from designWarnings carries one of these ids.
 /** @type {Array<{id: string, label: string}>} */
 export const TIP_CATEGORIES=[{id:'hoop',label:'Outside the hoop'},{id:'duplicate',label:'Duplicate objects'},{id:'fill',label:'Small or thin fills'},
-  {id:'short',label:'Very short paths'},{id:'satin',label:'Satin columns too narrow or too wide'},{id:'lettering',label:'Small lettering'},
+  {id:'short',label:'Very short paths'},{id:'satin',label:'Satin columns too narrow or too wide'},{id:'lettering',label:'Small text'},
   {id:'fabric',label:'Fabric stabilizer'}];
 // Drops the tips whose category is hidden. A hidden id that is not a category matches nothing, so it is ignored.
 /**

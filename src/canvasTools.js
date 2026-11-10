@@ -12,6 +12,11 @@ import {stitchChoicesState} from './stitchChoicesState.js';
 import {measureState} from './measureState.js';
 import {knifeState} from './knifeState.js';
 import {t} from './i18n.js';
+import {enterEdit} from './canvasText.js';
+import {applyOperations} from './operations.js';
+import {objectBounds} from './transforms.js';
+import {hoopSize} from './hoops.js';
+import {newShapeSpot} from './newShapePlacement.js';
 
 const NS='http://www.w3.org/2000/svg';
 const $=(/** @type {string} */ s)=>/** @type {any} */(document.querySelector(s));
@@ -30,13 +35,10 @@ const TOOL_HINTS={
 /**
  * @param {any} api
  *  canvas: refresh(), snapPt(p), showSnap(hit), px(n);
- *  edits: commit(ops, after), render(), toast(text), setEditing(on), selectedObject();
+ *  edits: commit(ops, after), render(), toast(text), hint(text), clearHints(), setEditing(on), selectedObject();
  *  lettering: textFont(), ensureFontLoaded(id), fitHeight(fontId, text).
  */
 export function createCanvasTools(api){
-  /** @type {number} */
-  let objectDblclickAt=-Infinity;
-
   /**
    * The pointer position in mm, from the canvas's own coordinate system.
    * @param {any} e
@@ -54,22 +56,54 @@ export function createCanvasTools(api){
     return g?new Set(documentNow().doc.objects.filter((/** @type {any} */ o)=>o.groupId===g).map((/** @type {any} */ o)=>o.id)):new Set([id]);
   };
 
-  // A new shape or lettering object goes in at the hoop's centre with the thread and stitch in the sidebar.
+  // The placeholder a new lettering object starts with. The engine needs 1 to 24 characters of text, so it is a neutral word,
+  // not an empty box; the Text box opens with it selected, so typing replaces it.
+  const NEW_TEXT='Text';
+  // A new shape or lettering object goes in at the hoop's centre with the thread and stitch in the sidebar. Lettering's
+  // box is centred there too (see below); a new shape is placed at the hoop centre by its x/y origin.
   async function add(/** @type {string} */ kind){
     const id=crypto.randomUUID();
     if(kind==='text'){
-      try{await api.ensureFontLoaded(api.textFont());}catch(/** @type {any} */ error){api.toast(error.message);return;}
+      try{await api.ensureFontLoaded(api.textFont());}catch(/** @type {any} */ error){api.toast(error.message, 'error');return;}
       const f=getFont(api.textFont());
-      api.commit([{op:'add_text',id,text:'BLOOM',x:-18,y:18,height:api.fitHeight(api.textFont(),'BLOOM'),
-        thread:$('#thread').value,font:api.textFont(),...(f?.kind==='outline'?{stitch:'fill'}:{})}],()=>{
+      const op={op:'add_text',id,text:NEW_TEXT,x:0,y:0,height:api.fitHeight(api.textFont(),NEW_TEXT),
+        thread:$('#thread').value,font:api.textFont(),...(f?.kind==='outline'?{stitch:'fill'}:{})};
+      // Place the object so its bounding box is centred on the hoop centre (0, 0). The op is measured once at the origin,
+      // since the box offset depends on the glyphs and font. If another object's box is already centred there, the new
+      // one steps down by its own height plus 2 mm, so lettering never sits exactly on top of an earlier object.
+      const probe={...documentNow().doc,objects:[]};
+      applyOperations(probe,[op]);
+      const [bx0,by0,bx1,by1]=objectBounds(probe.objects[0]);
+      const cx=(bx0+bx1)/2, cy=(by0+by1)/2, step=by1-by0+2;
+      // A box centre within 1 mm of (0, y) means that spot is taken; step down until a free spot is found.
+      const taken=(/** @type {number} */ y)=>documentNow().doc.objects.some((/** @type {any} */ o)=>{const [a,b,c,d]=objectBounds(o);return Math.abs((a+c)/2)<1&&Math.abs((b+d)/2-y)<1;});
+      let dy=0;while(taken(dy))dy+=step;
+      op.x=-cx; op.y=-cy+dy;
+      api.commit([op],()=>{
         setSelection({selected: id});setSelection({multi: new Set([id])});
+        // The new object opens in the on-canvas text box with its placeholder selected, so typing replaces it. The box
+        // takes the keystrokes, so letters never reach the tool shortcuts.
+        enterEdit(documentNow().doc.objects.find((/** @type {any} */ o)=>o.id===id));
       });
       return;
     }
-    api.commit([{op:'add_shape',id,kind,name:kind==='ellipse'?'Ellipse':'Rectangle',x:-12,y:-8,width:24,height:16,
+    // Selected in both fields, as lettering is: the inspector reads the multi-selection, so the thread and stitch controls show.
+    // Placement: see newShapePlacement.js (issue #280). Successive adds take the next free slot beside the others.
+    const doc=documentNow().doc;
+    const spot=newShapeSpot(doc.objects,hoopSize(doc),24,16);
+    api.commit([{op:'add_shape',id,kind,name:kind==='ellipse'?'Ellipse':'Rectangle',x:spot.x,y:spot.y,width:24,height:16,
       thread:$('#thread').value,stitch:(stitchChoicesState.get().type==='satin'?'fill':stitchChoicesState.get().type)}],()=>{
-      setSelection({selected: id});
+      setSelection({selected: id});setSelection({multi: new Set([id])});
     });
+    // The hint says where the shape went and its default size, in millimetres, and warns when it sits on another shape.
+    const atCentre=spot.x===-12&&spot.y===-8;
+    const ellipse=kind==='ellipse';
+    const text=spot.overlaps
+      ?(ellipse?t('Ellipse added over another shape at hoop center, {w} × {h} mm',{w:24,h:16}):t('Rectangle added over another shape at hoop center, {w} × {h} mm',{w:24,h:16}))
+      :atCentre
+        ?(ellipse?t('Ellipse added at hoop center, {w} × {h} mm',{w:24,h:16}):t('Rectangle added at hoop center, {w} × {h} mm',{w:24,h:16}))
+        :(ellipse?t('Ellipse added beside the others near hoop center, {w} × {h} mm',{w:24,h:16}):t('Rectangle added beside the others near hoop center, {w} × {h} mm',{w:24,h:16}));
+    api.toast(text);
   }
 
   // The path and pen tools draw their draft over the design: the polyline (or the pen's curve outline), the handles
@@ -106,6 +140,8 @@ export function createCanvasTools(api){
 
   // Picking the tool already in use goes back to select; switching away finishes a path that has enough points.
   function setTool(/** @type {any} */ next){
+    // Switching tool ends the step the old hint described, so it goes; the new tool's hint is shown at the end.
+    api.clearHints();
     if(next===toolMode.get()&&next!=='select')next='select';
     if(pathDraftNow().pathMode&&pathDraftNow().pathPoints.length>=2&&next!==toolMode.get())endPath(false,false,true);
     api.canvas.showSnap(null);
@@ -120,10 +156,10 @@ export function createCanvasTools(api){
     $('#art').classList.toggle('drawing',toolMode.get()!=='select');
     $('.sides-row').hidden=!(toolMode.get()==='polygon'||toolMode.get()==='star');
     $('#stitches').replaceChildren();
-    if(toolMode.get()!=='select')api.toast(TOOL_HINTS[toolMode.get()]);
     if(toolMode.get()!=='select'&&toolMode.get()!=='knife'&&selState().selected){
       setSelection({selected: null});setSelection({multi: new Set()});setSelection({selNode: null});api.render();
     }
+    if(toolMode.get()!=='select')api.hint(t(TOOL_HINTS[toolMode.get()]));
   }
 
   // Continue an existing path with the pen: its points become the draft, so Enter or the first point finishes it.
@@ -135,7 +171,7 @@ export function createCanvasTools(api){
     setPathDraft({pathMode: true});
     setPathDraft({continueId: o.id});
     setPathDraft({continueStitch: o.stitch||'run'});
-    api.toast('Click to add points. Click the first point to close the path, or press Enter to finish.');
+    api.hint(t('Click to add points. Click the first point to close the path, or press Enter to finish.'));
   }
 
   // Commits the drafted path (or continues the one it started from) and clears the draft. Silent leaves the tool
@@ -201,7 +237,7 @@ export function createCanvasTools(api){
   $('#art').addEventListener('click',(/** @type {any} */ e)=>{
     if(toolMode.get()!=='path')return;
     const raw=coord(e),p=api.canvas.snapPt(raw);
-    if(Math.abs(p[0])>1000||Math.abs(p[1])>1000){api.toast('Path point is outside the supported workspace.');return;}
+    if(Math.abs(p[0])>1000||Math.abs(p[1])>1000){api.toast(t('Path point is outside the supported workspace.'));return;}
     if(pathDraftNow().pathPoints.length>=3
       &&Math.hypot(raw[0]-pathDraftNow().pathPoints[0][0],raw[1]-pathDraftNow().pathPoints[0][1])<2){endPath(true);return;}
     const last=pathDraftNow().pathPoints.at(-1);
@@ -209,7 +245,7 @@ export function createCanvasTools(api){
     setPathDraft({pathPoints:[...pathDraftNow().pathPoints,p]});
     if(pathDraftNow().pathPoints.length>1000){
       setPathDraft({pathPoints:pathDraftNow().pathPoints.slice(0,-1)});
-      api.toast('A path is limited to 1,000 points.');return;
+      api.toast(t('A path is limited to 1,000 points.'));return;
     }
     drawPathPreview();
   });
@@ -276,11 +312,11 @@ export function createCanvasTools(api){
     if(drag&&e.pointerId===drag.pointerId){
       const {start,end}=drag;
       setPathDraft({shapeDrag: null});
-      const t=toolMode.get(),dist=Math.hypot(end[0]-start[0],end[1]-start[1]);
+      const shape=toolMode.get(),dist=Math.hypot(end[0]-start[0],end[1]-start[1]);
       $('#stitches').replaceChildren();
-      if(t==='line'){if(dist<1){api.toast('Drag to draw a line.');return;}addLine(start,end);}
-      else if(dist<1)addPolyShape(t,start,12,-Math.PI/2);
-      else addPolyShape(t,start,dist,Math.atan2(end[1]-start[1],end[0]-start[0]));
+      if(shape==='line'){if(dist<1){api.toast(t('Drag to draw a line.'));return;}addLine(start,end);}
+      else if(dist<1)addPolyShape(shape,start,12,-Math.PI/2);
+      else addPolyShape(shape,start,dist,Math.atan2(end[1]-start[1],end[0]-start[0]));
       setTool('select');
     }
   });
@@ -289,14 +325,9 @@ export function createCanvasTools(api){
   });
   $('#continueDig').onclick=()=>{
     const o=api.selectedObject();
-    if(o?.kind!=='path'){api.toast('Select a path first.');return;}
+    if(o?.kind!=='path'){api.toast(t('Select a path first.'));return;}
     continueDigitizing(o);
   };
-  // A double-click on empty canvas adds a rectangle, unless the click that started it hit an object.
-  $('#art').addEventListener('dblclick',(/** @type {any} */ e)=>{
-    if(e.target===$('#art')&&!pathDraftNow().pathMode&&performance.now()-objectDblclickAt>500)add('rect');
-  });
-
   // ---- measure and knife clicks --------------------------------------------------------------------------------
   // The measure tool keeps a first point until the second click replaces it with a fresh first point.
   function measureClick(/** @type {any} */ p){
@@ -316,8 +347,5 @@ export function createCanvasTools(api){
     api.canvas.refresh();
     return true;
   }
-  /** Notes that a double-click landed on an object, so the canvas's empty-area double-click does not add a rectangle. */
-  function markObjectDblclick(){objectDblclickAt=performance.now();}
-
-  return {coord,withGroup,add,setTool,continueDigitizing,endPath,drawPathPreview,pathPress,measureClick,knifeClick,markObjectDblclick};
+  return {coord,withGroup,add,setTool,continueDigitizing,endPath,drawPathPreview,pathPress,measureClick,knifeClick};
 }

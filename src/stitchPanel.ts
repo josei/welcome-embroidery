@@ -1,11 +1,14 @@
 import {documentNow} from './documentState.js';
+import {editor} from './editorContext.js';
 import {selState} from './selectionState.js';
 import {setLayout} from './layoutState.js';
+import {angleLayout} from './angleLayout.js';
+import {MIXED_THREAD, mixedStitchTypes, mixedThreads} from './mixedSelection.js';
 import {setSelectionLabels} from './selectionLabelsState.js';
 import {setInspectorText} from './inspectorTextState.js';
 import {setStitchRow, stitchRowsState} from './stitchRowsState.js';
 import {setStitchChoices} from './stitchChoicesState.js';
-import {setTypeRows} from './typeRowsState.js';
+import {SATIN_WIDTH_DEFAULT, setTypeRows} from './typeRowsState.js';
 import {setFillValues} from './fillValuesState.js';
 import {setPathRows} from './pathRowsState.js';
 import {setRunRows} from './runRowsState.js';
@@ -31,9 +34,9 @@ import {configureStitchPanelActions} from './stitchPanelCommands.js';
 
 /** What the stitch panel needs from the editor: an undoable edit, the selected ids in order, and a toast. */
 export interface StitchPanelApi {
-  edit(operations: unknown[], after?: () => void): boolean;
+  edit(operations: unknown[], after?: () => void, coalesceKey?: string, label?: string): boolean;
   orderedIds(): string[];
-  toast(message: string): void;
+  toast(message: string, kind?: 'status' | 'error'): void;
 }
 
 interface PhotoValue {
@@ -164,9 +167,11 @@ export function syncStitchPanel() {
   const n = picked.length;
   const o = selectedObject();
   const kind = o?.kind;
-  const fillable = picked.some(v => v.stitch === 'fill' &&
+  const isFillable = (v: StitchObject) => v.stitch === 'fill' &&
     (v.kind === 'rect' || v.kind === 'ellipse' || (v.kind === 'path' && v.closed) ||
-      (v.kind === 'text' && getFont(v.font)?.kind === 'outline')));
+      (v.kind === 'text' && getFont(v.font)?.kind === 'outline'));
+  const fillable = picked.some(isFillable);
+  const typeMixed = mixedStitchTypes(picked), threadMixed = mixedThreads(picked);
 
   setLayout({secTransform: !(n >= 1)});
   setLayout({secStitch: false});
@@ -175,7 +180,8 @@ export function syncStitchPanel() {
   setLayout({secArray: !(n >= 1)});
   setLayout({secOrder: !(n >= 1)});
   setSelectionLabels({hintHidden: n >= 1});
-  setSelectionLabels({stitchTitle: n ? 'Stitching' : 'Fill defaults for new objects'});
+  setSelectionLabels({stitchTitle: n ? 'Stitching' : t('Default for objects without their own value')});
+  setLayout({objectHeadingHidden: n === 0});
   setLayout({typeHidden: n === 0 || (n >= 1 && picked.every(v => ['text', 'stitch_layer'].includes(v.kind)))});
   setLayout({threadHidden: n === 0});
   if (n === 0) setStitchRow('satinRow', true);
@@ -186,7 +192,6 @@ export function syncStitchPanel() {
       spacingLabel: lettered && !fillable ? 'Stitch spacing (mm) · lower = denser' : 'Row spacing (mm)',
     });
   }
-  setLayout({angleHidden: !(n === 0 || fillable)});
 
   const panel: Partial<StitchPanelState> = {};
   const src: Partial<StitchObject> = o ?? {};
@@ -195,14 +200,16 @@ export function syncStitchPanel() {
   const underlayable = n === 0 || fillable || satinish;
 
   if (o) {
-    setStitchChoices({type: ['run', 'satin', 'motif', 'sequin', 'bead', 'bling'].includes(o.stitch ?? '') ? o.stitch : 'fill'});
+    setStitchChoices({type: typeMixed ? '' : ['run', 'satin', 'motif', 'sequin', 'bead', 'bling'].includes(o.stitch ?? '') ? o.stitch : 'fill'});
     setStitchRow('satinRow', o.stitch !== 'satin');
-    setTypeRows({satinWidth: String(o.satinWidth ?? 3)});
+    setTypeRows({satinWidth: String(o.satinWidth ?? SATIN_WIDTH_DEFAULT)});
     setStitchChoices({satinOff: o.kind !== 'path'});
     setStitchChoices({typeDisabled: o.kind === 'stitch_layer'});
     setFillValues({
       spacing: String(o.spacing ?? settings.spacing),
       angle: String(o.angle ?? settings.angle),
+      spacingNote: o.spacing === undefined || o.spacing === null ?
+        t('Inherits {value} mm from document', {value: String(settings.spacing)}) : t('Set on this object'),
     });
     setStitchRow('fillReset', o.spacing === undefined && o.angle === undefined && o.stitchLength === undefined &&
       o.stagger === undefined && o.underlayType === undefined && o.underlayInset === undefined &&
@@ -220,7 +227,7 @@ export function syncStitchPanel() {
     });
     setStitchRow('alongRow', !o.along);
   } else {
-    setFillValues({spacing: String(settings.spacing), angle: String(settings.angle)});
+    setFillValues({spacing: String(settings.spacing), angle: String(settings.angle), spacingNote: ''});
     setStitchRow('fillReset', true);
     setStitchRow('alongRow', true);
     setStitchRow('satinRow', true);
@@ -242,10 +249,10 @@ export function syncStitchPanel() {
   const satinTypes: Array<[string, string]> = [
     ['auto', 'Auto (by width)'],
     ['none', 'None'],
-    ['center', 'Centre run'],
+    ['center', 'Center run'],
     ['contour', 'Edge walk'],
     ['zigzag', 'Zigzag'],
-    ['center+zigzag', 'Centre + zigzag'],
+    ['center+zigzag', 'Center + zigzag'],
     ['contour+zigzag', 'Edge walk + zigzag'],
   ];
   const types = satinish && !fillable ? satinTypes : fillTypes;
@@ -327,10 +334,12 @@ export function syncStitchPanel() {
   setStitchRow('borderWidthRow', !bordered);
   if (bordered) setRunRows({borderWidth: String(o?.borderWidth ?? 0)});
 
+  // Follow path shows only for one text object, and only when there is a path to follow or the text already follows one.
+  setStitchRow('followRow', !(n === 1 && o?.kind === 'text' && (objects.some(v => v.kind === 'path') || Boolean(o?.along))));
   if (n === 1 && o?.kind === 'text') {
     const paths = objects.filter(v => v.kind === 'path');
     const nextOptions: PanelOption[] = [
-      {value: '', label: t('Not on a path')},
+      {value: '', label: t('None')},
       ...paths.map(v => ({value: v.id, label: v.name || v.id})),
     ];
     if (o.along && !o.along.pathId) nextOptions.push({value: '__custom', label: t('Custom path')});
@@ -440,7 +449,7 @@ export function syncStitchPanel() {
     if (!g) setInteraction({guideDraft: null});
     const armed = Boolean(interactionNow().guideDraft);
     setGuideButtons({clearDisabled: !o?.guide, label: t(armed ? 'Finish guide' : 'Draw guide'), armed});
-    setLayout({angleHidden: !(n === 0 || (fillable && m === 'rows'))});
+    setLayout(angleLayout(n, picked.filter(isFillable).map(v => v.fillMethod), fillable && m === 'rows'));
   }
   setStitchRow('stitchLenRow', !(n === 0 || fillable ||
     (n === 1 && o?.stitch === 'run' && o.kind !== 'text' && o.kind !== 'stitch_layer')));
@@ -463,16 +472,19 @@ export function syncStitchPanel() {
   panel.pathJoin = !picked.some(v => v.kind === 'path');
 
   if (o) {
-    let options = stitchPanelState.get().threadOptions;
+    let options = stitchPanelState.get().threadOptions.filter(v => v.value !== MIXED_THREAD);
     if (!options.some(v => v.value.toLowerCase() === o.thread.toLowerCase())) {
       options = [...options, {
         value: o.thread,
         label: o.kind === 'stitch_layer' ? 'Imported · replace all' : 'Custom',
       }];
     }
-    panel.threadOptions = options;
-    panel.threadValue = o.thread;
+    panel.threadOptions = threadMixed ? [{value: MIXED_THREAD, label: t('Mixed')}, ...options] : options;
+    panel.threadValue = threadMixed ? MIXED_THREAD : o.thread;
   }
 
+  setStitchChoices({typeMixed});
   setStitchPanel(panel);
+  // The thread swatch button is outside React and reads the select after React commits the new value.
+  requestAnimationFrame(() => editor.syncThreads?.());
 }

@@ -1,8 +1,10 @@
 import {layoutState} from '../layoutState.js';
 import {stitchRowsState} from '../stitchRowsState.js';
-import {useSyncExternalStore} from 'react';
+import {useLayoutEffect, useRef, useSyncExternalStore} from 'react';
+import type {ChangeEvent, FocusEvent, KeyboardEvent} from 'react';
 import {letteringActions, letteringFieldsState} from '../letteringFieldsState.js';
 import {useDraftInput} from './useDraftInput';
+import {selectAllInField} from './selectAllKey';
 import {stitchPanelActions, stitchPanelState} from '../stitchPanelState.js';
 // The lettering panel, rendered by React. Ids match the markup it replaced, because app.js wires them by id.
 // The Fill and Outline choices for outline fonts: the value, its label and its icon.
@@ -13,7 +15,23 @@ export function LetteringPanel() {
  const l = useSyncExternalStore(letteringFieldsState.subscribe, letteringFieldsState.get);
  const panel = useSyncExternalStore(stitchPanelState.subscribe, stitchPanelState.get);
  const along = useDraftInput(l.alongOffset, text => letteringActions.commit('alongOffset', text), 'store');
- const text = useDraftInput(l.text, v => letteringActions.commit('text', v), 'typed', false);
+ const draftText = useDraftInput(l.text, v => letteringActions.commit('text', v), 'typed', false);
+ const text = {...draftText, onKeyDown: (e: KeyboardEvent<HTMLTextAreaElement>) => {
+  selectAllInField(e);
+  draftText.onKeyDown(e);
+ }, onBlur: (e: FocusEvent<HTMLTextAreaElement>) => {
+  draftText.onBlur(e);
+  e.currentTarget.scrollTop = 0;
+ }, onChange: (e: ChangeEvent<HTMLTextAreaElement>) => {
+  draftText.onChange(e);
+  letteringActions.preview(e.target.value);
+ }};
+// A long text scrolls to its end while it has focus, which is what keeps the caret visible. Unfocused, it shows the start.
+const textRef = useRef<HTMLTextAreaElement>(null);
+useLayoutEffect(() => {
+ const el = textRef.current;
+ if (el && el !== document.activeElement) el.scrollTop = 0;
+}, [text.value]);
  const height = useDraftInput(l.height, v => letteringActions.commit('height', v));
  const tracking = useDraftInput(l.tracking, v => letteringActions.commit('tracking', v));
  const wordSpacing = useDraftInput(l.wordSpacing, v => letteringActions.commit('wordSpacing', v));
@@ -21,17 +39,16 @@ export function LetteringPanel() {
  const boldMm = useDraftInput(l.boldMm, v => letteringActions.commit('boldMm', v));
  const italicDeg = useDraftInput(l.italicDeg, v => letteringActions.commit('italicDeg', v));
  return (
-  <section id="secText" data-sec="" hidden={layout.secText}><h4>Lettering</h4><label id="followRow">Follow path<select id="followPath"
-    title="Make the lettering follow a path; it stays attached when the path is edited" value={panel.followPathValue} onChange={e =>
+  <section id="secText" data-sec="" hidden={layout.secText}><h4>Lettering</h4><label id="followRow" hidden={rows.followRow}>Follow path<select id="followPath"
+    title="Make the text follow a path; it stays attached when the path is edited" value={panel.followPathValue} onChange={e =>
     stitchPanelActions.chooseFollowPath(e.target.value)}>{panel.followPathOptions.map(o =>
-    <option key={o.value} value={o.value}>{o.label}</option>)}</select></label><label id="alongRow" hidden={rows.alongRow}>{"Offset along path ("}
-    {"mm)"}<input id="alongOffset" type="number" step="0.5" {...along} /></label>
+    <option key={o.value} value={o.value}>{o.label}</option>)}</select></label><label id="alongRow" hidden={rows.alongRow}>{"Offset along path (mm)"}<input id="alongOffset" type="number" step="0.5" {...along} /></label>
 <div className="font-field"><span className="font-label">Font</span><button id="fontButton" type="button" className="font-button" aria-haspopup="dialog"
   aria-expanded="false" aria-controls="fontPanel"><svg id="fontButtonPreview" className="font-preview" aria-hidden="true"></svg><span
     id="fontButtonName">Welcome Mono</span><svg className="icon chevron" aria-hidden="true"><use href="#i-chevron"/></svg></button>
 <select id="font" className="sr-only" tabIndex={-1} aria-label="Embroidery font" value={l.fontValue} onChange={e =>
   letteringActions.choose('font', e.target.value)}>{l.fontOptions.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}</select></div>
-<label className="block">Text<textarea id="letteringText" rows={2} maxLength={120} aria-label="Lettering text" {...text} disabled={l.textOff} /></label>
+<label className="block">Text<textarea id="letteringText" ref={textRef} rows={2} maxLength={120} aria-label="Text content" {...text} disabled={l.textOff} /></label>
 <label>Font size (mm)<input id="letteringHeight" type="number" min={l.heightMin} max={l.heightMax} title={l.heightTitle ||
   undefined} step="0.5" {...height} disabled={l.textOff} /></label>
 <div className="style-row" role="group" aria-label="Text style"><button type="button" id="textBold" className="icon-button" aria-pressed={l.bold}
@@ -47,27 +64,18 @@ export function LetteringPanel() {
     className="icon-button" data-align-text="center" aria-pressed={l.align ===
   'center'} disabled={l.styleOff} onClick={() =>
   letteringActions.press('align',
-  'center')} title="Align centre" aria-label="Align centre"><svg className="icon"><use href="#i-al-hcenter"/></svg></button><button type="button"
+  'center')} title="Align center" aria-label="Align center"><svg className="icon"><use href="#i-al-hcenter"/></svg></button><button type="button"
     id="alignRight" className="icon-button" data-align-text="right" aria-pressed={l.align ===
   'right'} disabled={l.styleOff} onClick={() =>
   letteringActions.press('align', 'right')} title="Align right" aria-label="Align right"><svg className="icon"><use href="#i-al-right"/></svg></button></div>
-<div className="tool-grid text-options"><label>{"Letter spacing ("}
-  {"mm)"}<input id="tracking" type="number" min="-10" max="30" step="0.1" {...tracking} disabled={l.styleOff} /></label><span></span><label>{"Word spacing ("}
-  {"mm)"}<input id="wordSpacing" type="number" min="-10" max="50" step="0.5" {...wordSpacing} disabled={l.styleOff} /></label><span></span>
-  <label>{"Line height ("}
-  {"×)"}<input id="lineHeight" type="number" min="0.5" max="3" step="0.05" {...lineHeight} disabled={l.styleOff} /></label><label style={{gridColumn:
-    '1 / -1'}}>{"Vertical ("}
-  {"one letter under another)"}<input id="textVertical" type="checkbox" className="icon-check" checked={l.vertical} disabled={l.styleOff} onChange={e =>
-  letteringActions.choose('vertical',
-  e.target.checked)} /></label><label style={{gridColumn: '1 / -1'}}>Name drop: this lettering takes each name<input id="textNameDrop" type="checkbox"
-    className="icon-check" checked={l.nameDrop} onChange={e =>
-  letteringActions.choose('nameDrop', e.target.checked)} /></label><span></span><label>{"Bold ("}
-  {"mm)"}<input id="boldMm" type="number" min="0" max="3" step="0.1" {...boldMm} disabled={l.styleOff} /></label><span></span><label>{"Italic ("}
-  {"°)"}<input id="italicDeg" type="number" min="0" max="35" step="1" {...italicDeg} disabled={l.styleOff} /></label><span></span></div>
+<div className="tool-grid text-options"><label>{"Letter spacing (mm)"}<input id="tracking" type="number" min="-10" max="30" step="0.1" {...tracking} disabled={l.styleOff} /></label><span></span><label>{"Word spacing (mm)"}<input id="wordSpacing" type="number" min="-10" max="50" step="0.5" {...wordSpacing} disabled={l.styleOff} /></label><span></span>
+  <label>{"Line height (×)"}<input id="lineHeight" type="number" min="0.5" max="3" step="0.05" {...lineHeight} disabled={l.styleOff} /></label><label className="switch-row" style={{gridColumn: '1 / -1'}} title="Stack the letters one under another, top to bottom"><span>Vertical (one letter under another)</span><span className="switch-control"><input id="textVertical" type="checkbox" role="switch" className="switch-input" checked={l.vertical} disabled={l.styleOff} onChange={e => letteringActions.choose('vertical', e.target.checked)} /><span className="switch-state" aria-hidden="true">{l.vertical ? 'On' : 'Off'}</span></span></label>
+<label className="switch-row" style={{gridColumn: '1 / -1'}} title="Each letter of this text takes one name from the names list"><span>Name drop: this text takes each name</span><span className="switch-control"><input id="textNameDrop" type="checkbox" role="switch" className="switch-input" checked={l.nameDrop} onChange={e => letteringActions.choose('nameDrop', e.target.checked)} /><span className="switch-state" aria-hidden="true">{l.nameDrop ? 'On' : 'Off'}</span></span></label><span></span>
+<label title="Extra weight added to fills and satin columns, in mm. The B button turns bold on or off at a default amount.">{"Bold thickness (mm)"}<input id="boldMm" type="number" min="0" max="3" step="0.1" {...boldMm} disabled={l.styleOff} /></label><span></span>
+<label title="Slant of the letters, in degrees. The I button turns italic on or off at a default amount.">{"Italic slant (°)"}<input id="italicDeg" type="number" min="0" max="35" step="1" {...italicDeg} disabled={l.styleOff} /></label><span></span></div>
 <label id="textStitchRow" hidden={rows.textStitchRow}>Outline fonts sew as<select id="textStitch" className="sr-only" tabIndex={-1} value={l.stitch}
   disabled={l.textOff} onChange={e =>
-  letteringActions.choose('stitch', e.target.value)}><option value="fill">Fill</option><option value="run">{"Outline ("}
-  {"running)"}</option></select><div className="icon-seg" role="radiogroup" aria-label="Outline fonts sew as">{STITCH_CHOICES.map(([value, label, icon]) =>
+  letteringActions.choose('stitch', e.target.value)}><option value="fill">Fill</option><option value="run">{"Outline (running)"}</option></select><div className="icon-seg" role="radiogroup" aria-label="Outline fonts sew as">{STITCH_CHOICES.map(([value, label, icon]) =>
   <button key={value} type="button" data-value={value} title={label} aria-label={label} role="radio" aria-checked={l.stitch ===
   value} aria-pressed={l.stitch === value} onClick={e =>
   { e.preventDefault(); if (l.stitch !== value) letteringActions.choose('stitch', value);

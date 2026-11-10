@@ -1,4 +1,5 @@
 // @ts-check
+import {t} from './i18n.js';
 // Edit-mode canvas overlay: the guide line, the start/end/ripple pins, the path nodes and Bézier handles drawn at a
 // constant screen size, object snapping and its marker, dragging nodes and handles, and inserting or deleting nodes.
 // canvas.js exposes it on canvasView and registers its pointer listeners; app.js does the edits through `api`.
@@ -37,7 +38,7 @@ export function createCanvasEditing(api){
       for(const [key,cls] of /** @type {Array<[string, string]>} */([['startAt','start'],['endAt','end'],['rippleCenter','center']])){
         const f=o[key];if(!f)continue;const c=node('circle');c.setAttribute('class','pin '+cls);
         c.setAttribute('cx',b[0]+f[0]*(b[2]-b[0]));c.setAttribute('cy',b[1]+f[1]*(b[3]-b[1]));c.setAttribute('r',px(5));
-        const t=node('title');t.textContent=key==='startAt'?'Start point':key==='endAt'?'End point':'Ripple centre';
+        const t=node('title');t.textContent=key==='startAt'?'Start point':key==='endAt'?'End point':'Ripple center';
         c.append(t);controls.append(c);}}
     }
     if(!api.isEditing()||selectedPath?.kind!=='path'||selState().multi.size!==1)return;
@@ -174,6 +175,15 @@ export function createCanvasEditing(api){
     else api.render();
   }
 
+  // Escape during a node drag: forget the drag without committing. The node and its path are drawn from the document,
+  // so a re-render puts them back where the drag started and no undo entry is recorded.
+  function cancelNodeDrag(){
+    if(!interactionNow().nodeDrag)return false;
+    setInteraction({nodeDrag: null});
+    api.render();
+    return true;
+  }
+
   // ---- node insertion and deletion -----------------------------------------------------------------------------
   // Double-clicking a path inserts a node at the nearest point of its outline and selects it.
   function insertNodeAt(/** @type {any} */ o,/** @type {any} */ point){
@@ -199,7 +209,7 @@ export function createCanvasEditing(api){
   // The node buttons (PathNodeButtons.tsx) call these: each one edits the selected path, as it did from app.js.
   nodeActions.add=()=>{const o=selectedObject();if(o?.kind!=='path')return;
     const i=selState().selNode??0,a=o.points[i],b=o.points[(i+1)%o.points.length];
-    if(!b||(!o.closed&&i>=o.points.length-1)){api.toast('Select a node that has a following segment, or double-click the path.');return;}
+    if(!b||(!o.closed&&i>=o.points.length-1)){api.toast(t('Select a node that has a following segment, or double-click the path.'));return;}
     api.commit([{op:'insert_path_point',id:o.id,index:i+1,x:(a[0]+b[0])/2,y:(a[1]+b[1])/2}],()=>{setSelection({selNode: i+1});});};
   nodeActions.del=deleteNode;
   nodeActions.smooth=()=>{const o=selectedObject(),i=selState().selNode;
@@ -207,5 +217,5 @@ export function createCanvasEditing(api){
   nodeActions.corner=()=>{const o=selectedObject(),i=selState().selNode;
     if(o?.kind==='path'&&i!==null&&o.handles?.[i])api.commit([{op:'set_path_node_type',id:o.id,index:i,type:'corner'}]);};
 
-  return {px,snapv,drawControls,showSnap,snapPt,insertNodeAt,deleteNode,pointerMove,finishDrag};
+  return {px,snapv,drawControls,showSnap,snapPt,insertNodeAt,deleteNode,pointerMove,finishDrag,cancelNodeDrag};
 }

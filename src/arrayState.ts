@@ -1,4 +1,5 @@
 import {createStore} from './store.js';
+import {t} from './i18n.js';
 import {documentNow} from './documentState.js';
 import {selState} from './selectionState.js';
 import {setStitchRow} from './stitchRowsState.js';
@@ -45,7 +46,7 @@ export interface ArrayApi {
   /** Runs one undoable command through the document store. */
   edit(operations: unknown[]): boolean;
   /** Shows a short message to the user. */
-  toast(message: string): void;
+  toast(message: string, kind?: 'status' | 'error'): void;
 }
 
 let api: ArrayApi | null = null;
@@ -81,7 +82,7 @@ export function createArray() {
     const path = picked.find(o => o.kind === 'path');
     const motif = picked.find(o => o !== path);
     if (!path || !motif || picked.length !== 2) {
-      wired().toast('Select the motif and the path to follow (two objects).');
+      wired().toast(t('Select the motif and the path to follow (two objects).'));
       return;
     }
     op = {op: 'array', id: motif.id, mode: 'along', pathId: path.id, count};
@@ -90,7 +91,7 @@ export function createArray() {
     const objects = documentNow().doc.objects as ArrayObject[];
     const o = objects.find(v => v.id === selState().selected);
     if (!o) {
-      wired().toast('Select an object to repeat.');
+      wired().toast(t('Select an object to repeat.'));
       return;
     }
     op = mode === 'linear'

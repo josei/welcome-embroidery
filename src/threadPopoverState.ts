@@ -13,16 +13,20 @@ export interface ThreadOwner {
 export interface ThreadPopover {
   owner: ThreadOwner | null;
   anchor: {top: number; bottom: number; right: number} | null;
+  /** The .thread-btn that opened the picker; focus goes back to it when a colour is picked or the picker is dismissed. */
+  trigger: HTMLElement | null;
 }
 
-export const threadPopoverState = createStore<ThreadPopover>({owner: null, anchor: null});
+export const threadPopoverState = createStore<ThreadPopover>({owner: null, anchor: null, trigger: null});
 
 /** Opens the picker for a thread select, anchored to its button. */
-export function openThreadPopover(owner: ThreadOwner, anchor: {top: number; bottom: number; right: number}) {
-  threadPopoverState.set({owner, anchor});
+export function openThreadPopover(owner: ThreadOwner, anchor: {top: number; bottom: number; right: number}, trigger: HTMLElement | null = null) {
+  threadPopoverState.set({owner, anchor, trigger});
 }
 
-/** Closes the picker. */
-export function closeThreadPopover() {
-  threadPopoverState.set({owner: null, anchor: null});
+/** Closes the picker. With returnFocus, focus moves back to the button that opened it (keyboard users keep their place). */
+export function closeThreadPopover(returnFocus = false) {
+  const {trigger} = threadPopoverState.get();
+  threadPopoverState.set({owner: null, anchor: null, trigger: null});
+  if (returnFocus && trigger?.isConnected) trigger.focus();
 }

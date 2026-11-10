@@ -22,7 +22,7 @@ interface AgentBridge {
 /** What the agent dialog needs from the editor, supplied by app.js. */
 export interface AgentDialogApi {
   bridge: AgentBridge;
-  toast(message: string): void;
+  toast(message: string, kind?: 'status' | 'error'): void;
 }
 
 let api: AgentDialogApi | null = null;
@@ -44,10 +44,10 @@ export async function openAgentDialog() {
 export async function copyAgentLink(): Promise<boolean> {
   try {
     await navigator.clipboard.writeText(agentLinkState.get().url);
-    wired().toast('Copied the private MCP link.');
+    wired().toast(t('Copied the private MCP link.'));
     return true;
   } catch {
-    wired().toast('Select and copy the link.');
+    wired().toast(t('Select and copy the link.'));
     return false;
   }
 }

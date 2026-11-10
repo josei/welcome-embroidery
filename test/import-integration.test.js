@@ -21,7 +21,7 @@ test('stitch-layer transforms, thread replacement, hoop diagnostics and regenera
   assert.deepEqual(layer.stitches,before);assert.equal(layer.source.originalBytesBase64,raw);assert.ok(Object.keys(layer.threadOverrides).length>0);
   const plan=compile(doc);assert.deepEqual(plan.errors,[]);const output=encode(plan,'jef','#527461',doc.hoop,doc),decoded=decodeEmbroidery(output,'jef'),needle=decoded.stitches.filter(s=>s.cmd==='stitch'),planned=plan.stitches.filter(s=>s.cmd==='stitch');
   assert.equal(needle.length,planned.length);assert.deepEqual(needle.map(s=>[s.x,s.y]),planned.map(s=>[s.x,s.y]));
-  applyOperations(doc,[{op:'transform',id:layer.id,x:200}]);assert.match(compile(doc).errors.join(' '),/exceeds the selected 110 mm hoop/);assert.throws(()=>encode(compile(doc),'jef','#527461',doc.hoop,doc),/exceeds the selected 110 mm hoop/);
+  applyOperations(doc,[{op:'transform',id:layer.id,x:200}]);assert.match(compile(doc).errors.join(' '),/past the hoop/);assert.throws(()=>encode(compile(doc),'jef','#527461',doc.hoop,doc),/past the hoop/);
 });
 
 test('same-count edits cannot pass through stale source bytes',()=>{
@@ -67,8 +67,8 @@ test('hoop bounds errors are returned for every editable and imported object kin
     {id:'p',kind:'path',x:200,y:200,w:0,h:0,points:[[200,200],[201,201]],thread:'#527461',stitch:'run'},
     {id:'t',kind:'text',text:'A',font:'welcome-mono/1',x:200,y:210,w:6,h:8,thread:'#527461',stitch:'run'}
   ];
-  for(const object of variants){const doc=initialDocument();doc.objects=[object];assert.match(compile(doc).errors.join(' '),/exceeds the selected 110 mm hoop/,object.kind);}
-  const doc=initialDocument(),machine=importStitchLayer(pinnedMachineFixture('jef').bytes,'jef');doc.objects=[machine];applyOperations(doc,[{op:'transform',id:machine.id,x:200}]);assert.match(compile(doc).errors.join(' '),/exceeds the selected 110 mm hoop/,'stitch_layer');
+  for(const object of variants){const doc=initialDocument();doc.objects=[object];assert.match(compile(doc).errors.join(' '),/past the hoop/,object.kind);}
+  const doc=initialDocument(),machine=importStitchLayer(pinnedMachineFixture('jef').bytes,'jef');doc.objects=[machine];applyOperations(doc,[{op:'transform',id:machine.id,x:200}]);assert.match(compile(doc).errors.join(' '),/past the hoop/,'stitch_layer');
 });
 
 test('bounded maximum-size stitch-layer projects serialize and reopen within the browser limit',()=>{
@@ -85,10 +85,10 @@ test('a true JEF STOP imports, edits and re-exports as a stop with its own threa
  assert.equal(back.stitches.filter(s=>s.cmd==='stitch').length,plan.stitches.filter(s=>s.cmd==='stitch').length);
 });
 
-test('pinned PEC imports with its thread-chart colours, exports the untouched source and re-encodes after a move',()=>{
+test('pinned PEC imports with its thread-chart colors, exports the untouched source and re-encodes after a move',()=>{
   const {fileName,bytes}=pinnedMachineFixture('pec'),decoded=decodeEmbroidery(bytes,'pec'),doc=initialDocument(),layer=importStitchLayer(bytes,'pec',{fileName});doc.objects=[layer];
   assert.deepEqual(layer.stitches,decoded.stitches);
-  assert.ok(decoded.threads.length>1&&decoded.threads.every(t=>/^#[0-9a-f]{6}$/i.test(t.color)),'every PEC colour resolves to a thread-chart colour');
+  assert.ok(decoded.threads.length>1&&decoded.threads.every(t=>/^#[0-9a-f]{6}$/i.test(t.color)),'every PEC color resolves to a thread-chart color');
   assert.deepEqual(compile(doc).errors,[]);assert.deepEqual(encode(compile(doc),'pec','#527461',doc.hoop,doc),bytes);
   applyOperations(doc,[{op:'transform',id:layer.id,x:layer.x+1,y:layer.y-1}]);const plan=compile(doc);assert.deepEqual(plan.errors,[]);
   const output=encode(plan,'pec','#527461',doc.hoop,doc),back=decodeEmbroidery(output,'pec'),tenths=s=>[Math.round(s.x*10),Math.round(s.y*10)];
@@ -97,49 +97,49 @@ test('pinned PEC imports with its thread-chart colours, exports the untouched so
   assert.equal(next,want.length,'every planned needle point is written, in order');
 });
 
-test('pinned HUS imports with its own thread colours and compiles to DST',()=>{
+test('pinned HUS imports with its own thread colors and compiles to DST',()=>{
   const {fileName,bytes}=pinnedMachineFixture('hus'),decoded=decodeEmbroidery(bytes,'hus'),doc=initialDocument(),layer=importStitchLayer(bytes,'hus',{fileName});doc.objects=[layer];
   assert.deepEqual(layer.stitches,decoded.stitches);
-  assert.ok(decoded.threads.length>1&&decoded.threads.every(t=>/^#[0-9a-f]{6}$/i.test(t.color)&&t.brand==='HUS'&&t.catalogNumber),'every HUS colour comes from the HUS chart with its code');
-  assert.equal(layer.source.warnings.length,0,'HUS carries thread colours, so there are no placeholder warnings');
+  assert.ok(decoded.threads.length>1&&decoded.threads.every(t=>/^#[0-9a-f]{6}$/i.test(t.color)&&t.brand==='HUS'&&t.catalogNumber),'every HUS color comes from the HUS chart with its code');
+  assert.equal(layer.source.warnings.length,0,'HUS carries thread colors, so there are no placeholder warnings');
   assert.deepEqual(compile(doc).errors,[]);assert.ok(encode(compile(doc),'dst','#527461',doc.hoop,doc).length>100);
 });
 
-test('pinned XXX imports with its colour table, and a sample with no colour table gets reported placeholder colours',()=>{
+test('pinned XXX imports with its color table, and a sample with no color table gets reported placeholder colors',()=>{
   const {fileName,bytes}=pinnedMachineFixture('xxx'),decoded=decodeEmbroidery(bytes,'xxx'),doc=initialDocument(),layer=importStitchLayer(bytes,'xxx',{fileName});doc.objects=[layer];
   assert.deepEqual(layer.stitches,decoded.stitches);
-  assert.ok(decoded.threads.length>1&&decoded.threads.every(t=>/^#[0-9a-f]{6}$/i.test(t.color)&&t.brand==='XXX'),'every XXX colour comes from the colour table');
+  assert.ok(decoded.threads.length>1&&decoded.threads.every(t=>/^#[0-9a-f]{6}$/i.test(t.color)&&t.brand==='XXX'),'every XXX color comes from the color table');
   assert.deepEqual(compile(doc).errors,[]);assert.ok(encode(compile(doc),'dst','#527461',doc.hoop,doc).length>100);
   const [noTableName,noTable]=[...readMachineFixtures()].find(([name])=>name.endsWith('-premier.xxx')),bare=importStitchLayer(noTable,'xxx',{fileName:noTableName});
-  assert.equal(bare.threads.length,decodeEmbroidery(noTable,'xxx').stitches.filter(st=>st.cmd==='color').length+1,'one placeholder colour per colour block');assert.match(bare.source.warnings.join(' '),/no colour table/);
+  assert.equal(bare.threads.length,decodeEmbroidery(noTable,'xxx').stitches.filter(st=>st.cmd==='color').length+1,'one placeholder color per color block');assert.match(bare.source.warnings.join(' '),/no color table/);
   const bareDoc=initialDocument();bareDoc.objects=[bare];assert.deepEqual(compile(bareDoc).errors,[]);
 });
 
-test('pinned DSB imports with one placeholder colour per needle change, and compiles to DST',()=>{
+test('pinned DSB imports with one placeholder color per needle change, and compiles to DST',()=>{
   const [fileName,bytes]=[...readMachineFixtures()].find(([name])=>name.endsWith('spiralbox-wilcom.DSB')),decoded=decodeEmbroidery(bytes,'dsb'),doc=initialDocument(),layer=importStitchLayer(bytes,'dsb',{fileName});doc.objects=[layer];
   assert.deepEqual(layer.stitches,decoded.stitches);
   const blocks=decoded.stitches.filter(s=>s.cmd==='color').length+1;
-  assert.equal(layer.threads.length,blocks,'one placeholder colour per colour block');if(blocks>1)assert.match(layer.source.warnings.join(' '),/placeholder colours/);
+  assert.equal(layer.threads.length,blocks,'one placeholder color per color block');if(blocks>1)assert.match(layer.source.warnings.join(' '),/placeholder colors/);
   assert.deepEqual(compile(doc).errors,[]);assert.ok(encode(compile(doc),'dst','#527461',doc.hoop,doc).length>100);
 });
 
-test('pinned DSZ imports with one placeholder colour per needle change, and compiles to DST',()=>{
+test('pinned DSZ imports with one placeholder color per needle change, and compiles to DST',()=>{
   const [fileName,bytes]=[...readMachineFixtures()].find(([name])=>name.endsWith('spiralbox-wilcom.DSZ')),decoded=decodeEmbroidery(bytes,'dsz'),doc=initialDocument(),layer=importStitchLayer(bytes,'dsz',{fileName});doc.objects=[layer];
   assert.deepEqual(layer.stitches,decoded.stitches);
   const blocks=decoded.stitches.filter(s=>s.cmd==='color').length+1;
-  assert.equal(layer.threads.length,blocks,'one placeholder colour per colour block');
+  assert.equal(layer.threads.length,blocks,'one placeholder color per color block');
   assert.deepEqual(compile(doc).errors,[]);assert.ok(encode(compile(doc),'dst','#527461',doc.hoop,doc).length>100);
 });
 
-test('pinned TAP imports with one placeholder colour per colour block, and compiles to DST',()=>{
+test('pinned TAP imports with one placeholder color per color block, and compiles to DST',()=>{
   const {fileName,bytes}=pinnedMachineFixture('tap'),decoded=decodeEmbroidery(bytes,'tap'),doc=initialDocument(),layer=importStitchLayer(bytes,'tap',{fileName});doc.objects=[layer];
   assert.deepEqual(layer.stitches,decoded.stitches);
   const blocks=decoded.stitches.filter(s=>s.cmd==='color').length+1;
-  assert.equal(layer.threads.length,blocks,'one placeholder colour per colour block');
+  assert.equal(layer.threads.length,blocks,'one placeholder color per color block');
   assert.deepEqual(compile(doc).errors,[]);assert.ok(encode(compile(doc),'dst','#527461',doc.hoop,doc).length>100);
 });
 
-test('pinned TBF imports with its colour table and takes its name from the header, and compiles to DST',()=>{
+test('pinned TBF imports with its color table and takes its name from the header, and compiles to DST',()=>{
   const {fileName,bytes}=pinnedMachineFixture('tbf'),decoded=decodeEmbroidery(bytes,'tbf'),doc=initialDocument(),layer=importStitchLayer(bytes,'tbf',{fileName});doc.objects=[layer];
   assert.deepEqual(layer.stitches,decoded.stitches);
   assert.equal(layer.threads.length,Math.max(decoded.threads.length,decoded.stitches.filter(s=>s.cmd==='color').length+1));
@@ -147,14 +147,14 @@ test('pinned TBF imports with its colour table and takes its name from the heade
   assert.deepEqual(compile(doc).errors,[]);assert.ok(encode(compile(doc),'dst','#527461',doc.hoop,doc).length>100);
 });
 
-test('pinned PCS imports with its colour table, placeholder colours past it, and compiles to DST',()=>{
+test('pinned PCS imports with its color table, placeholder colors past it, and compiles to DST',()=>{
   const {fileName,bytes}=pinnedMachineFixture('pcs'),decoded=decodeEmbroidery(bytes,'pcs'),doc=initialDocument(),layer=importStitchLayer(bytes,'pcs',{fileName});doc.objects=[layer];
   assert.deepEqual(layer.stitches,decoded.stitches);
   assert.equal(layer.threads.length,Math.max(decoded.threads.length,decoded.stitches.filter(s=>s.cmd==='color').length+1));
   assert.deepEqual(compile(doc).errors,[]);assert.ok(encode(compile(doc),'dst','#527461',doc.hoop,doc).length>100);
 });
 
-test('pinned SHV imports with its colour table, the header name, and compiles to DST',()=>{
+test('pinned SHV imports with its color table, the header name, and compiles to DST',()=>{
   const {fileName,bytes}=pinnedMachineFixture('shv'),decoded=decodeEmbroidery(bytes,'shv'),doc=initialDocument(),layer=importStitchLayer(bytes,'shv',{fileName});doc.objects=[layer];
   assert.deepEqual(layer.stitches,decoded.stitches);
   assert.equal(layer.threads.length,Math.max(decoded.threads.length,decoded.stitches.filter(s=>s.cmd==='color').length+1));
@@ -162,46 +162,46 @@ test('pinned SHV imports with its colour table, the header name, and compiles to
   assert.deepEqual(compile(doc).errors,[]);assert.ok(encode(compile(doc),'dst','#527461',doc.hoop,doc).length>100);
 });
 
-test('pinned STX imports with placeholder colours per colour block, and compiles to DST',()=>{
+test('pinned STX imports with placeholder colors per color block, and compiles to DST',()=>{
   const {fileName,bytes}=pinnedMachineFixture('stx'),decoded=decodeEmbroidery(bytes,'stx'),doc=initialDocument(),layer=importStitchLayer(bytes,'stx',{fileName});doc.objects=[layer];
   assert.deepEqual(layer.stitches,decoded.stitches);
-  assert.equal(layer.threads.length,decoded.stitches.filter(s=>s.cmd==='color').length+1,'one placeholder colour per colour block');
+  assert.equal(layer.threads.length,decoded.stitches.filter(s=>s.cmd==='color').length+1,'one placeholder color per color block');
   assert.deepEqual(compile(doc).errors,[]);assert.ok(encode(compile(doc),'dst','#527461',doc.hoop,doc).length>100);
 });
 
-test('pinned BRO imports with placeholder colours per needle change, and compiles to DST',()=>{
+test('pinned BRO imports with placeholder colors per needle change, and compiles to DST',()=>{
   const {fileName,bytes}=pinnedMachineFixture('bro'),decoded=decodeEmbroidery(bytes,'bro'),doc=initialDocument(),layer=importStitchLayer(bytes,'bro',{fileName});doc.objects=[layer];
   assert.deepEqual(layer.stitches,decoded.stitches);
-  assert.equal(layer.threads.length,decoded.stitches.filter(s=>s.cmd==='color').length+1,'one placeholder colour per colour block');
+  assert.equal(layer.threads.length,decoded.stitches.filter(s=>s.cmd==='color').length+1,'one placeholder color per color block');
   assert.deepEqual(compile(doc).errors,[]);assert.ok(encode(compile(doc),'dst','#527461',doc.hoop,doc).length>100);
 });
 
-test('pinned EMD imports with placeholder colours per colour change, and compiles to DST',()=>{
+test('pinned EMD imports with placeholder colors per color change, and compiles to DST',()=>{
   const {fileName,bytes}=pinnedMachineFixture('emd'),decoded=decodeEmbroidery(bytes,'emd'),doc=initialDocument(),layer=importStitchLayer(bytes,'emd',{fileName});doc.objects=[layer];
   assert.deepEqual(layer.stitches,decoded.stitches);
-  assert.equal(layer.threads.length,decoded.stitches.filter(s=>s.cmd==='color').length+1,'one placeholder colour per colour block');
+  assert.equal(layer.threads.length,decoded.stitches.filter(s=>s.cmd==='color').length+1,'one placeholder color per color block');
   assert.deepEqual(compile(doc).errors,[]);assert.ok(encode(compile(doc),'dst','#527461',doc.hoop,doc).length>100);
 });
 
-test('pinned KSM imports with placeholder colours per colour block, and compiles to DST',()=>{
+test('pinned KSM imports with placeholder colors per color block, and compiles to DST',()=>{
   const {fileName,bytes}=pinnedMachineFixture('ksm'),decoded=decodeEmbroidery(bytes,'ksm'),doc=initialDocument(),layer=importStitchLayer(bytes,'ksm',{fileName});doc.objects=[layer];
   assert.deepEqual(layer.stitches,decoded.stitches);
-  assert.equal(layer.threads.length,decoded.stitches.filter(s=>s.cmd==='color').length+1,'one placeholder colour per colour block');
+  assert.equal(layer.threads.length,decoded.stitches.filter(s=>s.cmd==='color').length+1,'one placeholder color per color block');
   assert.deepEqual(compile(doc).errors,[]);assert.ok(encode(compile(doc),'dst','#527461',doc.hoop,doc).length>100);
 });
 
-test('pinned 10O imports with placeholder colours per colour change, and compiles to DST',()=>{
+test('pinned 10O imports with placeholder colors per color change, and compiles to DST',()=>{
   const {fileName,bytes}=pinnedMachineFixture('10o'),decoded=decodeEmbroidery(bytes,'10o'),doc=initialDocument(),layer=importStitchLayer(bytes,'10o',{fileName});doc.objects=[layer];
   assert.deepEqual(layer.stitches,decoded.stitches);
-  assert.equal(layer.threads.length,decoded.stitches.filter(s=>s.cmd==='color').length+1,'one placeholder colour per colour block');
+  assert.equal(layer.threads.length,decoded.stitches.filter(s=>s.cmd==='color').length+1,'one placeholder color per color block');
   assert.deepEqual(compile(doc).errors,[]);assert.ok(encode(compile(doc),'dst','#527461',doc.hoop,doc).length>100);
 });
 
-test('pinned EXP imports with placeholder colours, exports the untouched source and re-encodes after a move',()=>{
+test('pinned EXP imports with placeholder colors, exports the untouched source and re-encodes after a move',()=>{
   const {fileName,bytes}=pinnedMachineFixture('exp'),decoded=decodeEmbroidery(bytes,'exp'),doc=initialDocument(),layer=importStitchLayer(bytes,'exp',{fileName});doc.objects=[layer];
   assert.deepEqual(layer.stitches,decoded.stitches);
-  assert.ok(decoded.threads.length>1&&decoded.threads.every(t=>/^#[0-9a-f]{6}$/i.test(t.color)),'every EXP colour block has a placeholder colour');
-  assert.match(layer.source.warnings.join(' '),/no thread colours/);
+  assert.ok(decoded.threads.length>1&&decoded.threads.every(t=>/^#[0-9a-f]{6}$/i.test(t.color)),'every EXP color block has a placeholder color');
+  assert.match(layer.source.warnings.join(' '),/no thread colors/);
   assert.deepEqual(compile(doc).errors,[]);assert.deepEqual(encode(compile(doc),'exp','#527461',doc.hoop,doc),bytes);
   applyOperations(doc,[{op:'transform',id:layer.id,x:layer.x+1,y:layer.y-1}]);const plan=compile(doc);assert.deepEqual(plan.errors,[]);
   const output=encode(plan,'exp','#527461',doc.hoop,doc),back=decodeEmbroidery(output,'exp'),tenths=s=>[Math.round(s.x*10),Math.round(s.y*10)];
@@ -223,10 +223,10 @@ test('batch export copies an imported machine file into each hoop and encodes ev
   }
 });
 
-test('pinned SEW imports with its thread-chart colours, exports the untouched source and re-encodes after a move',()=>{
+test('pinned SEW imports with its thread-chart colors, exports the untouched source and re-encodes after a move',()=>{
   const {fileName,bytes}=pinnedMachineFixture('sew'),decoded=decodeEmbroidery(bytes,'sew'),doc=initialDocument(),layer=importStitchLayer(bytes,'sew',{fileName});doc.objects=[layer];
   assert.deepEqual(layer.stitches,decoded.stitches);
-  assert.ok(decoded.threads.length>1&&decoded.threads.every(t=>/^#[0-9a-f]{6}$/i.test(t.color)),'every SEW colour resolves to a thread-chart colour');
+  assert.ok(decoded.threads.length>1&&decoded.threads.every(t=>/^#[0-9a-f]{6}$/i.test(t.color)),'every SEW color resolves to a thread-chart color');
   assert.deepEqual(compile(doc).errors,[]);assert.deepEqual(encode(compile(doc),'sew','#527461',doc.hoop,doc),bytes);
   applyOperations(doc,[{op:'transform',id:layer.id,x:layer.x+1,y:layer.y-1}]);const plan=compile(doc);assert.deepEqual(plan.errors,[]);
   const output=encode(plan,'sew','#527461',doc.hoop,doc),back=decodeEmbroidery(output,'sew'),tenths=s=>[Math.round(s.x*10),Math.round(s.y*10)];

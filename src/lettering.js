@@ -61,7 +61,7 @@ export function textLines(obj) {
 function neonLines(obj){
   const sizeScale=Number(obj.h)/neon.nominalSizeMm,scale=Number(obj.h)/neon.unitsPerEm,requested=String(obj.text||'').toUpperCase();
   if(!Number.isFinite(scale)||sizeScale<neon.minScale||sizeScale>neon.maxScale)throw Error(
-    'Néon blinking lettering size must be 20–60 mm (OFL embroidery font limits).');
+    'Néon blinking text size must be 20–60 mm (OFL embroidery font limits).');
   const missing=[...new Set([...requested].filter(ch=>ch!==' '&&!neon.glyphs[ch]))];
     if(
     missing.length)throw Error(`Néon blinking supports A–Z, 0–9, space, period, comma, exclamation, question and hyphen; unsupported: ${missing.join(' ')}.`);

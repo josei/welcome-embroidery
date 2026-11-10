@@ -3,7 +3,7 @@ import {selState} from './selectionState.js';
 import {batchDocuments, batchPlan} from './engine.js';
 import {arrayState} from './arrayState.js';
 import {batchNames, batchState, setBatchFields} from './batchState.js';
-import {download, forWorker, safeProjectFilename} from './appHelpers.js';
+import {download, exportStem, forWorker} from './appHelpers.js';
 import {t} from './i18n.js';
 
 /** What the batch export needs from the editor, supplied by app.js. */
@@ -13,7 +13,7 @@ export interface BatchApi {
   /** Loads the fonts the export needs before it runs. */
   ensureFonts(): Promise<void>;
   /** Shows a short message to the user. */
-  toast(message: string): void;
+  toast(message: string, kind?: 'status' | 'error'): void;
 }
 
 /** A document object, typed with the one field the batch exports read. */
@@ -77,16 +77,16 @@ export async function exportBatch() {
       names: names.length ? names : null,
     });
   } catch (error) {
-    wired().toast((error as Error).message);
+    wired().toast((error as Error).message, 'error');
     return;
   }
   if (!docs.length) {
-    wired().toast(t('The design does not fit in one hoop.'));
+    wired().toast(t('The design does not fit in one hoop.'), 'error');
     return;
   }
   await wired().ensureFonts().catch(() => {});
   const format = batchState.get().format;
-  const base = safeProjectFilename(documentNow().doc.name).replace(/\.welcome$/i, '');
+  const base = exportStem(documentNow().doc.name);
   // The engine stores objects as plain records; these are the fields this export reads.
   const objects = documentNow().doc.objects as ExportObject[];
   const color = objects.find(o => o.id === selState().selected)?.thread || '#527461';

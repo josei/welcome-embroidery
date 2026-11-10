@@ -8,6 +8,7 @@ import {resetPlayback, resetPlaybackIndex, stopPlayback, mountSimulation} from '
 import {mountCanvas, render} from './editorView.js';
 import {toast, mountEditorChrome} from './editorChrome.js';
 import {mountKeyboard} from './keyboardShortcuts.js';
+import {mountFileDrop} from './fileDrop.js';
 import {mountPinGuide} from './pinGuideCommands.js';
 import {mountThreadControls} from './threadControls.js';
 import {mountAutosave} from './autosave.js';
@@ -23,12 +24,12 @@ import {configureShapePathActions} from './shapePathCommands.js';
 import {configureSelectionToolbarActions} from './selectionToolbarCommands.js';
 import {configureSelectionCommands} from './selectionCommands.js';
 import {configureLayersCommands} from './layersCommands.js';
-import {configureToolbarCommands} from './toolbarCommands.js';
+import {configureToolbarCommands, undoDocument} from './toolbarCommands.js';
 import {configureHoopCommands} from './hoopCommands.js';
 import {configureGrid} from './gridState.js';
 import {configureGridSnap} from './gridSnapState.js';
 import './toolbarSync.js';
-import {configureProjectIO, mountLeaveGuard, openArtifact} from './projectIO.js';
+import {configureProjectIO, openArtifact} from './projectIO.js';
 import {configureExportCommands} from './exportCommands.js';
 import {configureViewCommands} from './viewCommands.js';
 import {configurePhotoCommands} from './photoCommands.js';
@@ -42,7 +43,7 @@ editor.render = render;
 initializeDocument();
 configureCompile({ensureFonts: ensureDocFonts, onClear: resetPlayback, onCompiled: resetPlaybackIndex});
 
-configureSelectionCommands({edit, transact, render, toast});
+configureSelectionCommands({edit, transact, render, toast, undo: undoDocument});
 configureLayersCommands({edit});
 configureToolbarCommands({
   edit,
@@ -59,7 +60,7 @@ configureArray({edit, toast});
 configureShapePathActions({edit, toast, render});
 configureSelectionToolbarActions({edit});
 configureSewingOrder({edit});
-configureLettering({edit, transact, toast, render});
+configureLettering({edit, transact, toast, render, reveal: () => editor.canvas?.revealSelection()});
 configureFontsDialog({edit, toast});
 configureProjectIO({
   clearComputed: compile.clearComputed,
@@ -88,15 +89,15 @@ mountAgentBridge();
 mountSimulation();
 mountCanvas();
 mountKeyboard();
+mountFileDrop();
 render();
 const openId = new URL(location.href).searchParams.get('open');
-if (openId) openArtifact(openId).catch(error => toast(error.message));
+if (openId) openArtifact(openId).catch(error => toast(error.message, 'error'));
 mountPinGuide();
 scheduleCompile(100);
 mountEditorChrome();
 mountThreadControls();
 mountAutosave();
-mountLeaveGuard();
 mountSewingTips();
 mountRowActions();
 initFontPicker();

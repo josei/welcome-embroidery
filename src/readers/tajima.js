@@ -53,10 +53,10 @@ export function readDst(bytes) {
   /** @type {Thread[]} */
   const threads=[];
   for(let i=0;i<=block&&i<MAX_THREADS;i++){
-    threads.push({index:i,color:dstPalette[i%dstPalette.length],brand:'DST',catalogNumber:null,name:`Colour ${i+1}`});
+    threads.push({index:i,color:dstPalette[i%dstPalette.length],brand:'DST',catalogNumber:null,name:`Color ${i+1}`});
   }
-  if(block>=MAX_THREADS)fail('too many colour changes');
-  return result(stitches,threads,['DST files carry no thread colours: placeholder colours were assigned.']);
+  if(block>=MAX_THREADS)fail('too many color changes');
+  return result(stitches,threads,['DST files carry no thread colors: placeholder colors were assigned.']);
 }
 
 // Tajima-style TAP, read as pyembroidery 1.5.1 does (TapReader): DST records with no header, then pyembroidery's trim pass. A jump run of three or
@@ -90,7 +90,7 @@ export function readTap(bytes) {
   /** @type {Stitch[]} */ const stitches = [];
   let block = 0;
   for (const s of st) {
-    if (s.cmd === CMD.COLOR) { block++; if (block >= MAX_THREADS) fail('too many colour changes'); push(stitches, s.x, s.y, 'color', block); }
+    if (s.cmd === CMD.COLOR) { block++; if (block >= MAX_THREADS) fail('too many color changes'); push(stitches, s.x, s.y, 'color', block); }
     else if (s.cmd === CMD.STITCH) push(stitches, s.x, s.y, 'stitch', block);
     else if (s.cmd === CMD.JUMP) push(stitches, s.x, s.y, 'jump', block);
     else if (s.cmd === CMD.TRIM) push(stitches, s.x, s.y, 'trim', block);
@@ -125,7 +125,7 @@ export function readTbf(bytes) {
       if (needle >= 256) fail('TBF has more needle changes than its needle order');
       const value = order[needle++];
       if (value === 0) push(stitches, x, y, 'stop', block);
-      else { block++; if (block >= MAX_THREADS) fail('too many colour changes'); push(stitches, x, y, 'color', block); }
+      else { block++; if (block >= MAX_THREADS) fail('too many color changes'); push(stitches, x, y, 'color', block); }
     }
     else if (c === 0x90) {
       if (b0 === 0 && b1 === 0) push(stitches, x, y, 'trim', block);
@@ -139,12 +139,12 @@ export function readTbf(bytes) {
   /** @type {Thread[]} */ const threads = [];
   /** @type {string[]} */ const warnings = [];
   if (colours.length < block + 1) warnings.push(colours.length
-    ? 'TBF file has fewer colours than colour changes: placeholder colours were assigned.'
-    : 'TBF file has no colour table: placeholder colours were assigned.');
+    ? 'TBF file has fewer colors than color changes: placeholder colors were assigned.'
+    : 'TBF file has no color table: placeholder colors were assigned.');
   for (let i = 0; i <= Math.max(colours.length - 1, block); i++) {
     threads.push(i < colours.length
-      ? {index: i, color: colours[i], brand: 'TBF', catalogNumber: null, name: `Colour ${i + 1}`}
-      : {index: i, color: '#527461', brand: 'TBF', catalogNumber: null, name: `Colour ${i + 1}`});
+      ? {index: i, color: colours[i], brand: 'TBF', catalogNumber: null, name: `Color ${i + 1}`}
+      : {index: i, color: '#527461', brand: 'TBF', catalogNumber: null, name: `Color ${i + 1}`});
   }
   const decoded = result(stitches, threads, warnings);
   if (name) decoded.metadata = {name: name.slice(0, 240)};

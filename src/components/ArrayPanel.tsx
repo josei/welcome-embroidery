@@ -47,10 +47,10 @@ export function ArrayPanel() {
     <button id="batchExport" type="button" style={{gridColumn: '1 / -1'}} onClick={() => void exportBatch()}>
      Export batch
     </button>
-    <label id="arrALabel" hidden={along}>{radial ? 'Centre X (mm)' : 'Step X (mm)'}
+    <label id="arrALabel" hidden={along}>{radial ? 'Center X (mm)' : 'Step X (mm)'}
      <input id="arrA" type="number" step="1" value={fields.stepX} onChange={e => setArrayFields({stepX: e.target.value})} />
     </label>
-    <label id="arrBLabel" hidden={along}>{radial ? 'Centre Y (mm)' : 'Step Y (mm)'}
+    <label id="arrBLabel" hidden={along}>{radial ? 'Center Y (mm)' : 'Step Y (mm)'}
      <input id="arrB" type="number" step="1" value={fields.stepY} onChange={e => setArrayFields({stepY: e.target.value})} />
     </label>
     <label id="arrAngleRow" hidden={rows.arrAngleRow}>Total angle (°)

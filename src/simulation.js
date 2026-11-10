@@ -77,7 +77,7 @@ export function syncPlaybackControls() {
     spans: cache.spans, colourChanges: cache.changes, trims: cache.trims, metres: cache.metres,
   });
   if (!plan) { setStatus({playback: 'Ready to simulate', needle: ''}); return; }
-  if (ready) { setStatus({playback: `Ready · ${plan.count.toLocaleString()} stitches`, needle: ''}); return; }
+  if (ready) { setStatus({playback: t('Ready · {n} stitches', {n: plan.count.toLocaleString()}), needle: ''}); return; }
   const percent = length ? Math.floor(limit / length * 100) : 0;
   setStatus({
     playback: `${sewn.toLocaleString()} / ${plan.count.toLocaleString()} stitches · ${percent}%`,
@@ -105,9 +105,14 @@ function refreshPull() {
 
 /** Mounts the 3D preview canvas and wires the preview controls. */
 export function mountSimulation() {
-  preview3d = createThreadPreview(document.getElementById('preview3d'));
+  preview3d = createThreadPreview(document.getElementById('preview3d'), atStart => setPreviewState({orbited: !atStart}));
   previewActions.choosePull = checked => { setPreviewState({pull: checked}); refreshPull(); };
-  previewActions.chooseView = view => setPreviewState({view});
+  previewActions.chooseView = view => {
+    // Choosing the view you are on puts the camera back at its start, so the highlight comes back with it. The turntable keeps its angle.
+    const state = previewState.get();
+    if (view === state.view && view !== 'turntable' && preview3d.available) preview3d.reset();
+    setPreviewState({view, orbited: false});
+  };
   previewActions.chooseLoupe = on => setPreviewState({loupe: on});
   previewState.subscribe(() => {
     if (!preview3d.available) return;

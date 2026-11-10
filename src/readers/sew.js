@@ -26,7 +26,7 @@ export const SEW_CHART = [
 export function readSew(bytes) {
   if (bytes.length < 0x1D78) fail('SEW header is truncated');
   const colours = bytes[0] | bytes[1] << 8;
-  if (colours < 1 || colours > MAX_THREADS) fail('invalid SEW colour count');
+  if (colours < 1 || colours > MAX_THREADS) fail('invalid SEW color count');
   /** @type {Thread[]} */ const threads = [];
   for (let i = 0; i < colours; i++) {
     const [r, g, b] = SEW_CHART[(bytes[2 + 2*i] | bytes[3 + 2*i] << 8) % SEW_CHART.length];
@@ -41,7 +41,7 @@ export function readSew(bytes) {
     if (p + 2 > bytes.length) break;
     const dx = s8(bytes[p]), dy = s8(bytes[p+1]);
     p += 2;
-    if (b & 1) { block++; if (block >= colours) fail('more colour changes than colours'); push(stitches, x, y, 'color', block); continue; }
+    if (b & 1) { block++; if (block >= colours) fail('more color changes than colors'); push(stitches, x, y, 'color', block); continue; }
     if (b === 0x02 || b === 0x04) { x += dx; y -= dy; push(stitches, x, y, 'jump', block); continue; }
     if (b === 0x10) { x += dx; y -= dy; push(stitches, x, y, 'stitch', block); continue; }
     break;

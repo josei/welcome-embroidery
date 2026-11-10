@@ -45,7 +45,7 @@ export function initialDocument() {
       x:-27.35,y:-7.72,w:20.35,h:12.72,
       thread:'#527461',stitch:'fill',fillMethod:'contour',border:true,borderThread:'#38503f'},
     // Cursive wordmark in a bundled script font (filled, not a mono running line), so the lettering reads as sewn calligraphy.
-    {id:'letters',name:'Lettering',kind:'text',text:'Bloom',x:-13.45,y:33,w:26.9,h:11,thread:'#527461',stitch:'fill',fillMethod:'rows',font:'ttf/greatvibes'}
+    {id:'letters',name:'Text',kind:'text',text:'Bloom',x:-13.45,y:33,w:26.9,h:11,thread:'#527461',stitch:'fill',fillMethod:'rows',font:'ttf/greatvibes'}
   ]};
 }
 
@@ -70,7 +70,7 @@ export function batchDocuments(doc,{copies=1,gap=3,names=null}={}){
   // Name drop writes each name into the lettering marked nameDrop; with none marked, into the first lettering object.
 const marked=doc.objects.filter(o=>o.kind==='text'&&o.nameDrop===true),targets=
   new Set((marked.length?marked:doc.objects.filter(o=>o.kind==='text').slice(0,1)).map(o=>o.id));
-  if(names&&!targets.size)throw Error('Name drop needs a lettering object in the design.');if(names)copies=names.length;const p=batchPlan(doc,{copies,gap});
+  if(names&&!targets.size)throw Error('Name drop needs a text object in the design.');if(names)copies=names.length;const p=batchPlan(doc,{copies,gap});
   if(!p||!p.perHoop)return [];const [dw,dh]=p.design,cw=dw+gap,ch=dh+gap,gridW=p.cols*cw-gap,gridH=Math.ceil(p.perHoop/p.cols)*ch-gap,docs=[];
   for(let start=0;start<copies;start+=p.perHoop){const n=Math.min(p.perHoop,copies-start),d={...structuredClone(doc),objects:/** @type {Item[]} */([])};
   for(let k=0;k<n;k++){const col=k%p.cols,row=Math.floor(k/p.cols),dx=-gridW/2+col*cw-p.origin[0],dy=-gridH/2+row*ch-p.origin[1],tag=`${start+k+1}`;

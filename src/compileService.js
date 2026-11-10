@@ -4,6 +4,8 @@
 import {documentNow} from './documentState.js';
 import {forWorker} from './appHelpers.js';
 import {setSewingCounts} from './sewingCountsState.js';
+import {setCompileIssue} from './compileIssueState.js';
+import {setExportRefusal, EMPTY_EXPORT_REASON} from './exportDialogState.js';
 import {editor} from './editorContext.js';
 
 const worker = new Worker(new URL('./worker.js', import.meta.url), {type: 'module'});
@@ -34,7 +36,7 @@ worker.onmessage = (/** @type {any} */ e) => {
   const item = pending.get(data.id);
   if (!item) return;
   pending.delete(data.id);
-  data.ok ? item.resolve(data) : item.reject(Error(data.error));
+  data.ok ? item.resolve(data) : item.reject(Object.assign(Error(data.error), {details: data.details}));
 };
 
 /** @param {any} error */
@@ -92,7 +94,9 @@ export function configureCompile(/** @type {{ensureFonts: () => Promise<void>, o
 /** Debounced compile after an edit. */
 export function scheduleCompile(delay = 450) {
   clearTimeout(compileTimer);
-  if (!documentNow().doc.objects.length || workerFailure) { compileError = ''; return; }
+  // A blank design is not a compile failure: nothing is sewn yet, so nothing is reported as an error. Export says why it is disabled.
+  if (!documentNow().doc.objects.length) { compileError = ''; setCompileIssue(null); setExportRefusal(EMPTY_EXPORT_REASON); return; }
+  if (workerFailure) { compileError = ''; setCompileIssue(null); return; }
   compileTimer = setTimeout(() => compileNow(), delay);
 }
 
@@ -103,13 +107,14 @@ export function clearComputed() {
   for (const item of pending.values()) item.reject(new DOMException('The document changed.', 'AbortError'));
   pending.clear();
   plan = null;
-  setSewingCounts({});
+  // The last known counts stay on their rows until the next compile replaces them, so a failed compile keeps them.
   onClear?.();
   scheduleCompile();
 }
 
 /** Compiles the current document. A manual compile shows worker errors in the toast. */
 export async function compileNow(/** @type {boolean | Event} */ manual = false) {
+  if (!documentNow().doc.objects.length) { plan = null; scheduleCompile(); editor.render(); return; }
   compiling = true;
   try {
     await ensureFonts?.();
@@ -118,8 +123,10 @@ export async function compileNow(/** @type {boolean | Event} */ manual = false) 
     if (result.plan.revision !== revision || revision !== documentNow().doc.revision) return;
     plan = result.plan;
     lastPlan = plan;
+    setExportRefusal(plan.errors.join(' '));
     setSewingCounts(plan.objectCounts || {});
     compileError = '';
+    setCompileIssue(null);
     onCompiled?.();
     compiling = false;
     editor.render();
@@ -127,6 +134,7 @@ export async function compileNow(/** @type {boolean | Event} */ manual = false) 
     const err = /** @type {any} */ (error);
     if (err.name !== 'AbortError') {
       compileError = err.message;
+      setCompileIssue({message: err.message, objectIds: err.details?.objectIds ?? []});
       compiling = false;
       editor.render();
       if (manual === true || manual instanceof Event) editor.toast(err.message);

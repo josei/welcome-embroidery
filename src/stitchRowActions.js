@@ -3,14 +3,17 @@
 // one document edit. app.js keeps the stores and the transaction layer, so nothing here touches the DOM.
 import {selState} from './selectionState.js';
 import {selectedObject, orderedIds} from './selectionCommands.js';
+import {t} from './i18n.js';
 import {stitchChoiceActions} from './stitchChoicesState.js';
 import {capRowsActions} from './capRowsState.js';
 import {blingRowsActions} from './blingRowsState.js';
 import {satinEndRowsActions} from './satinEndRowsState.js';
-import {runRowsActions} from './runRowsState.js';
+import {runRowsActions, runRowsState} from './runRowsState.js';
 import {typeRowsActions} from './typeRowsState.js';
 import {raisedRowsActions} from './raisedRowsState.js';
-import {fillValuesActions} from './fillValuesState.js';
+import {fillValuesActions, fillValuesState} from './fillValuesState.js';
+import {batchEditLabel, settingEditLabel} from './batchEditLabel.js';
+import {BORDER_WIDTH_RANGE, ROW_SPACING_RANGE, inFieldRange, outOfRangeMessage} from './fieldRanges.js';
 import {pathRowsActions} from './pathRowsState.js';
 import {loopRowsActions} from './loopRowsState.js';
 import {radiusActions} from './radiusState.js';
@@ -38,6 +41,11 @@ export function mountRowActions() {
       return;
     }
     if (id === 'type') {
+      const sel = selectedObject();
+      if (value === 'satin' && sel && sel.kind !== 'path') {
+        editor.toast(t('Satin column needs a path. Convert to path first.'));
+        return;
+      }
       if (selState().selected) editor.edit([{op: 'set_object', id: selState().selected, stitch: value}]);
     }
   };
@@ -48,6 +56,10 @@ export function mountRowActions() {
 
   runRowsActions.commit = (field, text) => {
     if (field === 'borderWidth') {
+      if (!inFieldRange(text, BORDER_WIDTH_RANGE)) {
+        editor.toast(outOfRangeMessage('Border width', BORDER_WIDTH_RANGE, runRowsState.get().borderWidth));
+        return false;
+      }
       const ids = [...selState().multi];
       if (ids.length) editor.edit(ids.map(id => ({op: 'set_object', id, borderWidth: Number(text) > 0 ? Number(text) : null})));
       return;
@@ -106,7 +118,16 @@ export function mountRowActions() {
   };
 
   fillValuesActions.commit = (field, text) => {
-    editor.edit(selState().selected ? [{op: 'set_object', id: selState().selected, [field]: Number(text)}] : [{op: 'set_settings', [field]: Number(text)}]);
+    if (field === 'spacing' && !inFieldRange(text, ROW_SPACING_RANGE)) {
+      editor.toast(outOfRangeMessage('Row spacing', ROW_SPACING_RANGE, fillValuesState.get().spacing));
+      return false;
+    }
+    // A multi-selection (from the list's Shift or Ctrl clicks, or the canvas) gets the value on every selected object.
+    const ids = selState().multi.size ? orderedIds() : selState().selected ? [selState().selected] : [];
+    // A batch across several objects is one undo step, named for the field and the count; the document setting, with nothing
+    // selected, is named for the field.
+    editor.edit(ids.length ? ids.map(id => ({op: 'set_object', id, [field]: Number(text)})) : [{op: 'set_settings', [field]: Number(text)}],
+      undefined, undefined, ids.length ? batchEditLabel(field, ids.length) : settingEditLabel(field));
   };
 
   raisedRowsActions.choose = (field, checked) => {

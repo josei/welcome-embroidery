@@ -4,56 +4,95 @@ import {ActionButton} from './ActionButton';
 import {useDraftInput} from './useDraftInput';
 import {documentActions, documentState} from '../documentState.js';
 import {setSettingsOpen} from '../settingsState.js';
-import {agentLinkState, agentLinkActions} from '../agentLinkState.js';
-import {EXPORT_FORMATS, exportFormatState, setExportFormat} from '../exportFormatState.js';
+import {agentLinkState, type AgentLink} from '../agentLinkState.js';
+import {EMPTY_EXPORT_REASON} from '../exportDialogState.js';
 import {openExportDialog} from '../exportCommands.js';
+import {shortcutLabel} from '../shortcutLabels.js';
+import {shortcutFor} from '../shortcutTable.js';
 import {importMachineFile, newProject, openProjectFile, projectSave} from '../projectIO.js';
+import {saveState} from '../saveState.js';
+import {dirtyMark} from '../saveMark.js';
 import {toolbarActions} from '../toolbarCommands.js';
 import {t} from '../i18n.js';
+import {ArrangeMenu, EditMenu, FileMenu} from './MenuBar';
 // The project name field: it shows the document name, and a committed change is an edit (see documentActions).
-// Beside it, a dot marks unsaved changes, and the window title carries the same dot.
 function ProjectName() {
  const {doc, dirty} = useSyncExternalStore(documentState.subscribe, documentState.get);
- const name = doc.name ?? '';
- const field = useDraftInput(name, text => documentActions.rename(text));
+ const shown = t(doc.name ?? '');
+ const field = useDraftInput(shown, text => documentActions.rename(text === shown ? (doc.name ?? '') : text));
+ // The window title carries the same dot while there are unsaved changes (cleared by a successful .welcome save).
  useEffect(() => {
-  document.title = `${dirty ? '• ' : ''}${name} — ${t('Welcome Embroidery')}`;
- }, [dirty, name]);
+  document.title = `${dirty ? '• ' : ''}${shown} — ${t('Welcome Embroidery')}`;
+ }, [dirty, shown]);
+ // The dot sits before the wrapper, so it lands at the start of the name at every width.
+ // The wrapper carries the shown name for the narrow-width ellipsis (styles.css): an input cannot show one itself.
  return (
   <>
    <span id="unsavedMarker" className="unsaved-marker" role="img" aria-label={t('Unsaved changes')} title={t('Unsaved changes')} hidden={!dirty} />
-   <input id="name" {...field} />
+   <span className="name-field" data-shown={shown}><input id="name" {...field} /></span>
   </>
  );
 }
-// The agent button: it shows whether an AI agent is connected, and opens the Connect an AI agent dialog.
-function AgentPill() {
- const agent = useSyncExternalStore(agentLinkState.subscribe, agentLinkState.get);
- // The visible label is one word; the full status stays in the tooltip.
- const label = agent.active ? t('Connected') : agent.waiting ? t('Waiting') : t('Agent');
- const hint = agent.active ? t('Agent connected') : agent.waiting ? t('Waiting for agent') : t('Connect an AI agent');
+// Undo and Redo: the name says which action the step takes back (or forward), e.g. "Undo delete Rectangle". With no
+// step on that side, the name says so and the button is disabled (actionState).
+function HistoryButton({undo = false}: {undo?: boolean}) {
+ const {history, future} = useSyncExternalStore(documentState.subscribe, documentState.get);
+ const last = (undo ? history : future).at(-1)?.label;
+ const name = last === undefined ? t(undo ? 'Nothing to undo' : 'Nothing to redo') : t(undo ? 'Undo {action}' : 'Redo {action}', {action: last});
  return (
-  <button type="button" id="agentPill" className={agent.active ? 'agent-pill on' : 'agent-pill'} title={hint} onClick={() => agentLinkActions.open()}>
-   <span className="agent-dot" aria-hidden="true" />{label}
-  </button>
+  <ActionButton flag={undo ? 'undo' : 'redo'} className="icon-button" id={undo ? 'undo' : 'redo'} aria-label={name} title={name} data-tooltip={name}
+   onClick={() => (undo ? toolbarActions.undo() : toolbarActions.redo())}>
+   <svg className="icon"><use href={undo ? '#i-undo' : '#i-redo'} /></svg>
+  </ActionButton>
  );
 }
-// Export: the Export button opens the export dialog, and the format beside it is the same choice the dialog shows.
+
+// The save feedback: the unsaved marker while the design has changes ("Autosaved in this browser" until a file exists), then the time of the last save in this tab and the
+// file it wrote to.
+function SaveStatus() {
+ const {dirty} = useSyncExternalStore(documentState.subscribe, documentState.get);
+ const {savedAt, savedFileName} = useSyncExternalStore(saveState.subscribe, saveState.get);
+ if (dirty) {
+  const mark = dirtyMark(savedFileName, t);
+  return <span id="unsavedMark" className={mark.unsaved ? 'save-status unsaved' : 'save-status autosaved'} title={mark.text}>{mark.text}</span>;
+ }
+ if (savedAt === null) return null;
+ const when = new Date(savedAt);
+ const time = `${String(when.getHours()).padStart(2, '0')}:${String(when.getMinutes()).padStart(2, '0')}`;
+ return <span id="savedStatus" className="save-status" role="status">{savedFileName ? t('Saved {time} to {file}', {time, file: savedFileName}) : t('Saved {time}', {time})}</span>;
+}
+
+// Export: the one Export button opens the export dialog, where the format is chosen. Its name never changes with the format.
 function ExportSplit() {
- const {format} = useSyncExternalStore(exportFormatState.subscribe, exportFormatState.get);
+ const {doc} = useSyncExternalStore(documentState.subscribe, documentState.get);
+ const exportTip = t('Export ({shortcut})', {shortcut: shortcutFor('export')});
+ const blank = (doc.objects ?? []).length === 0;
+ // A blank design keeps the button focusable (aria-disabled, not disabled) so keyboard users reach the reason,
+ // which sits outside the teal fill, and activating it does nothing.
  return (
-  <div className="export-split">
-   <button id="export" onClick={() => openExportDialog()}>Export</button>
-   <select id="headerFormat" aria-label={t('Export format')} title={t('Export format')} value={format} onChange={e => setExportFormat(e.target.value)}>
-    {EXPORT_FORMATS.map(f => <option key={f.value} value={f.value}>{f.value.toUpperCase()}</option>)}
-   </select>
-  </div>
+  <>
+   {blank && <span id="exportReason" className="export-reason">{t(EMPTY_EXPORT_REASON)}</span>}
+   <div className={blank ? 'export-split is-blank' : 'export-split'}>
+    <button id="export" aria-disabled={blank} aria-describedby={blank ? 'exportReason' : undefined} title={exportTip} data-tooltip={exportTip} onClick={() => { if (!blank) openExportDialog(); }}>{t('Export')}</button>
+   </div>
+  </>
  );
+}
+// The agent connection shows on the Settings button, which opens the dialog where the agent link lives: a dot while an
+// agent is waiting or active, and the tooltip says which.
+function settingsButtonClass(agent: AgentLink) {
+ return ['icon-button', agent.waiting || agent.active ? 'agent-on' : '', agent.active ? 'agent-active' : ''].filter(Boolean).join(' ');
+}
+function settingsTip(agent: AgentLink) {
+ return agent.active ? t('Settings: agent connected') : agent.waiting ? t('Settings: waiting for agent') : t('Settings');
 }
 // The editor header, rendered by React. Ids and attributes match the markup this replaced,
 // because app.js wires its controls by id.
 export function Header() {
+ // The toolbar Save names the action and its shortcut, the same label the File menu and shortcut sheet use.
+ const saveLabel = `${t('Save')} (${shortcutLabel([{mod: true, key: 'S'}])})`;
  const rows = useSyncExternalStore(stitchRowsState.subscribe, stitchRowsState.get);
+ const agent = useSyncExternalStore(agentLinkState.subscribe, agentLinkState.get);
  const projectFile = useRef<HTMLInputElement>(null);
  const machineFile = useRef<HTMLInputElement>(null);
  return (
@@ -88,34 +127,26 @@ export function Header() {
         "-67L3485 -116L3499 -142L3504 -178L3497 -211L3488 -220L3476 -223L3462 -219L3403 -163L3368 -137L3327 -115L3285 -100L3247 -95L3205 -100L3174 -115L3162 " +
         "-127L3152 -141L3243 -171L3308 -209L3344 -249L3360 -282L3369 -338L3363 -381L3356 -400L3347 -417L3319 -444L3302 -454L3263 -465L3220 -465L3179 " +
         "-457L3142 -442L3093 -405L3066 -373L3036 -319L3020 -265L3016 -227ZM3136 -219L3140 -267L3152 -307L3175 -344L3206 -365L3240 -365L3253 -356L3260 " +
-        "-343L3261 -308L3244 -276L3229 -261L3198 -241L3159 -225Z"}/></svg></a><ProjectName /><button className="icon-button" id="new"
+        "-343L3261 -308L3244 -276L3229 -261L3198 -241L3159 -225Z"}/></svg></a><FileMenu /><EditMenu /><ArrangeMenu /><ProjectName /><SaveStatus /><button className="icon-button labelled" id="new"
           aria-label="New design" title="New design" data-tooltip="New design" onClick={(
     ) =>
     newProject(
-    )}><svg className="icon"><use href="#i-new"/></svg></button><button className="icon-button" id="open" aria-label="Open project or SVG"
+    )}><svg className="icon"><use href="#i-new"/></svg><span className="icon-label">{t('New design')}</span></button><button className="icon-button" id="open" aria-label="Open project or SVG"
       title="Open project or SVG" data-tooltip="Open project or SVG" onClick={(
     ) =>
     projectFile.current?.click(
-    )}><svg className="icon"><use href="#i-open"/></svg></button><button className="icon-button" id="importMachine"
-      aria-label="Import JEF, VP3, DST, SEW, PEC or EXP" title="Import JEF, VP3, DST, SEW, PEC or EXP"
-        data-tooltip="Import JEF, VP3, DST, SEW, PEC or EXP" onClick={(
+    )}><svg className="icon"><use href="#i-open"/></svg></button><button className="icon-button labelled" id="importMachine"
+      aria-label="Import JEF / VP3…" title="Import JEF / VP3…"
+        data-tooltip="Import JEF / VP3…" onClick={(
     ) =>
     machineFile.current?.click(
-    )}><svg className="icon"><use href="#i-import"/></svg></button><button className="icon-button" id="save" aria-label="Save project"
-      title="Save project" data-tooltip="Save project" onClick={(
+    )}><svg className="icon"><use href="#i-import"/></svg><span className="icon-label">{t('Import')}</span></button><button className="icon-button" id="save" aria-label={saveLabel}
+      title={saveLabel} data-tooltip={saveLabel} onClick={(
     ) =>
     projectSave(
     )}><svg className="icon"><use href="#i-save"/></svg></button><button className="icon-button" id="helpBtn" aria-label="Keyboard shortcuts (?)"
       title="Keyboard shortcuts (?)" data-tooltip="Keyboard shortcuts (?)"><svg className="icon"><use href="#i-keys"/></svg></button><span
-        className="sep"></span><div className="edit-tools"><ActionButton flag="undo" className="icon-button" id="undo" aria-label="Undo" title="Undo"
-          data-tooltip="Undo" onClick={(
-    ) =>
-    toolbarActions.undo(
-    )}><svg className="icon"><use href="#i-undo"/></svg></ActionButton><ActionButton flag="redo" className="icon-button" id="redo" aria-label="Redo"
-      title="Redo" data-tooltip="Redo" onClick={(
-    ) =>
-    toolbarActions.redo(
-    )}><svg className="icon"><use href="#i-redo"/></svg></ActionButton><ActionButton flag="duplicate" className="icon-button" id="duplicate"
+        className="sep"></span><div className="edit-tools"><HistoryButton undo /><HistoryButton /><ActionButton flag="duplicate" className="icon-button" id="duplicate"
       aria-label="Duplicate selected object" title="Duplicate selected object" data-tooltip="Duplicate" onClick={(
     ) =>
     toolbarActions.duplicate(
@@ -123,8 +154,8 @@ export function Header() {
       aria-label="Delete selected object" title="Delete selected object" data-tooltip="Delete" onClick={(
     ) =>
     toolbarActions.remove(
-    )}><svg className="icon"><use href="#i-delete"/></svg></ActionButton></div><AgentPill /><ExportSplit /><button type="button" className="icon-button"
-      id="settingsBtn" aria-label="Settings" title="Settings" data-tooltip="Settings" onClick={(
+    )}><svg className="icon"><use href="#i-delete"/></svg></ActionButton></div><ExportSplit /><button type="button" className={settingsButtonClass(agent)}
+      id="settingsBtn" aria-label="Settings" title={settingsTip(agent)} data-tooltip="Settings" onClick={(
     ) =>
     setSettingsOpen(
     true)}><svg className="icon"><use href="#i-gear"/></svg></button><input id="file" ref={projectFile} type="file"

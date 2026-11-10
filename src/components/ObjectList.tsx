@@ -4,10 +4,14 @@ import {documentState} from '../documentState.js';
 import {selectionState} from '../selectionState.js';
 import {layersActions} from '../layersState.js';
 import {sewingCountsState} from '../sewingCountsState.js';
+import {compileIssueState} from '../compileIssueState.js';
+import {inspectorOpenState, toggleInspectorOpen} from '../inspectorOpenState.js';
 import {t} from '../i18n.js';
-// The object list in sewing order, rendered by React. Groups collapse, each row has its eye and lock buttons, a click selects,
-// Shift adds to the selection, a double click renames, and rows drag to reorder. Ids and classes match the markup it replaced,
-// because the styles and tests use them.
+import {selectionChange} from '../objectListSelection.js';
+import type {Click} from '../objectListSelection.js';
+// The object list in sewing order, rendered by React. It is a listbox: each row is an option that a click, or Enter or Space,
+// selects (Shift selects a range from the anchor, Ctrl or Cmd adds or removes one row). Hide and Lock are their own buttons beside each row, not inside it. Groups collapse,
+// a double click renames, and rows drag to reorder. Ids and classes match the markup it replaced, because the styles and tests use them.
 interface Obj {
  id: string;
  name?: string;
@@ -30,6 +34,8 @@ const STITCH_ICON: Record<string, string> = {
 };
 const icon = (name: string) => <svg className="icon" aria-hidden="true"><use href={`#${name}`} /></svg>;
 type Drop = {id: string; after: boolean};
+// How a click or key press selects: Shift is a range, Ctrl or Cmd toggles one row, anything else replaces the selection.
+const clickOf = (e: {shiftKey: boolean; ctrlKey: boolean; metaKey: boolean}): Click => (e.shiftKey ? 'range' : e.ctrlKey || e.metaKey ? 'toggle' : 'plain');
 type Entry = {kind: 'group'; groupId: string; members: Obj[]; open: boolean} | {kind: 'row'; o: Obj; depth: number};
 
 // Groups are listed once, at their first member; the members follow, unless the group is collapsed.
@@ -63,12 +69,34 @@ function useObjects(): Obj[] {
 }
 
 // The heading: the object count and the thread count, as the sewing order panel shows them.
+// The page scroll before the inspector was opened from the Properties button, restored when it is folded again.
+let scrollBeforeOpen: number | null = null;
 export function ObjectListHead() {
  const objects = useObjects();
  const n = objects.length, threads = new Set(objects.map(o => o.thread)).size;
  const objectsText = n === 1 ? t('1 object') : t('{n} objects', {n});
  const threadsText = threads === 1 ? t('1 thread') : t('{m} threads', {m: threads});
- return <div className="layers-head"><h3>{t('Sewing order')}</h3><span>{`${objectsText} · ${threadsText}`}</span></div>;
+ const open = useSyncExternalStore(inspectorOpenState.subscribe, inspectorOpenState.get);
+ // At the stacked widths the inspector sits below the canvas, so this button is the way up to it; it folds it away again.
+ // Opening scrolls the inspector into view, since it starts below the fold.
+ const toggle = () => {
+  const opening = !inspectorOpenState.get();
+  if (opening) scrollBeforeOpen = window.scrollY;
+  toggleInspectorOpen();
+  // Folding it away puts the page back where it was, so the header is not left scrolled out of view.
+  requestAnimationFrame(() => {
+   if (opening) document.getElementById('inspector')?.scrollIntoView({block: 'start'});
+   else if (scrollBeforeOpen !== null) window.scrollTo({top: scrollBeforeOpen});
+   scrollBeforeOpen = null;
+  });
+ };
+ return (
+  <div className="layers-head">
+   <h3>{t('Layers')}</h3>
+   <span>{`${objectsText} · ${threadsText}`}</span>
+   <button type="button" className="inspector-toggle" aria-expanded={open} aria-controls="inspector" onClick={toggle}>{t('Properties')}</button>
+  </div>
+ );
 }
 
 // The name field of a row being renamed. Enter or leaving the field keeps the text, Escape drops it.
@@ -101,41 +129,79 @@ function RenameField({name, onDone}: {name: string; onDone: (text: string | null
  );
 }
 
-// The stitch count as the row shows it: nothing until the design compiles.
+// The stitch count as the row shows it. Before any count exists, a row the failed compile names says so instead of showing nothing.
 const stitchesText = (count: number) => (count === 1 ? t('1 stitch') : t('{n} stitches', {n: count.toLocaleString()}));
+const countText = (count: number | undefined, warning: string | undefined) => {
+ if (count !== undefined) return stitchesText(count);
+ return warning ? t('not compiled') : '';
+};
 
-function ObjectRow({o, depth, selected, dropping, renaming, count, onRenameDone}: {
+function ObjectRow({o, depth, selected, dropping, renaming, count, warning, onRenameDone, onSelect, onToggleVisible, onToggleLock}: {
  o: Obj;
  depth: number;
  selected: boolean;
  dropping: Drop | null;
  renaming: boolean;
  count: number | undefined;
+ warning: string | undefined;
  onRenameDone: (text: string | null) => void;
+ onSelect: (click: Click) => void;
+ onToggleVisible: () => void;
+ onToggleLock: () => void;
 }) {
  const name = o.name || o.kind;
  const hidden = o.visible === false, locked = Boolean(o.locked);
  const drop = dropping && (dropping.after ? 'drop-after' : 'drop-before');
  const cls = ['object-row', selected && 'selected', hidden && 'is-hidden', locked && 'is-locked', drop].filter(Boolean).join(' ');
  const stitchIcon = o.kind === 'stitch_layer' ? undefined : STITCH_ICON[o.stitch ?? ''];
+ const label = [name, countText(count, warning)].filter(Boolean).join(' · ');
+ // Hide and Lock are siblings of the row, not descendants, so the row's accessible name is only the object's name and count.
  return (
-  <div className={cls} data-id={o.id} draggable={true} tabIndex={0} role="button" style={{paddingLeft: `${8 + depth * 16}px`}}>
-   <i className="swatch" style={{background: o.thread}} />
-   {stitchIcon && <svg className="icon row-icon" aria-hidden="true"><use href={`#${stitchIcon}`} /></svg>}
-   <span className="row-text">
-    {renaming ? <RenameField name={o.name || ''} onDone={onRenameDone} /> : <span className="row-name">{name}</span>}
-    <span className="row-tag">
-     {[o.kind === 'stitch_layer' ? 'machine stitches' : o.stitch, count === undefined ? '' : stitchesText(count)].filter(Boolean).join(' · ')}
+  <div className="object-line" role="none">
+   <div
+    className={cls}
+    data-id={o.id}
+    draggable={true}
+    tabIndex={0}
+    role="option"
+    aria-selected={selected}
+    aria-label={label}
+    style={{paddingLeft: `${8 + depth * 16}px`}}
+    onKeyDown={e => {
+     if (e.target !== e.currentTarget) return;
+     if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      onSelect(clickOf(e));
+     }
+    }}
+   >
+    <i className="swatch" style={{background: o.thread}} />
+    {stitchIcon && <svg className="icon row-icon" aria-hidden="true"><use href={`#${stitchIcon}`} /></svg>}
+    <span className="row-text">
+     {renaming ? <RenameField name={o.name || ''} onDone={onRenameDone} /> : <span className="row-name">{name}</span>}
+     <span className="row-tag">
+      {[o.kind === 'stitch_layer' ? t('stitch layer') : t(o.stitch), countText(count, warning)].filter(Boolean).join(' · ')}
+     </span>
     </span>
-   </span>
-   <button type="button" className="row-btn row-eye" aria-label={`${hidden ? 'Show' : 'Hide'} ${name}`} title={hidden ? 'Show' : 'Hide'}>
+    {warning && <span className="row-warn" role="img" aria-label={warning} title={warning}>⚠</span>}
+   </div>
+   <button
+    type="button"
+    className="row-btn row-eye"
+    aria-label={`Hide ${name}`}
+    aria-pressed={hidden}
+    title={`Hide ${name}`}
+    onClick={onToggleVisible}
+   >
     {icon(hidden ? 'i-eye-off' : 'i-eye')}
    </button>
    <button
     type="button"
     className={`row-btn row-lock${locked ? ' on' : ''}`}
-    aria-label={`${locked ? 'Unlock' : 'Lock'} ${name}`}
-    title={locked ? 'Unlock' : 'Lock'}
+    aria-label={`Lock ${name}`}
+    aria-pressed={locked}
+    title={`Lock ${name}`}
+    onClick={onToggleLock}
    >
     {icon(locked ? 'i-lock' : 'i-unlock')}
    </button>
@@ -143,28 +209,54 @@ function ObjectRow({o, depth, selected, dropping, renaming, count, onRenameDone}
  );
 }
 
-function GroupRow({groupId, members, open, selectedIds, count}: {
+function GroupRow({groupId, members, open, selectedIds, count, warning, onSelect, onToggleOpen, onToggleVisible, onToggleLock}: {
  groupId: string;
  members: Obj[];
  open: boolean;
  selectedIds: Set<string>;
  count: number | undefined;
+ warning: string | undefined;
+ onSelect: (click: Click) => void;
+ onToggleOpen: () => void;
+ onToggleVisible: () => void;
+ onToggleLock: () => void;
 }) {
  const all = members.every(m => selectedIds.has(m.id));
  const hiddenAll = members.every(m => m.visible === false);
  const lockedAll = members.every(m => m.locked);
+ const name = `Group · ${members.length} objects`;
+ const label = [name, countText(count, warning)].filter(Boolean).join(' · ');
  return (
-  <div className={`group-row${all ? ' selected' : ''}`} data-group={groupId} tabIndex={0} role="button">
-   <button type="button" className="row-btn group-caret" aria-label={`${open ? 'Collapse' : 'Expand'} group`} aria-expanded={open}>
+  <div className="object-line group-line" role="none">
+   <button type="button" className="row-btn group-caret" aria-label={`${open ? 'Collapse' : 'Expand'} group`} aria-expanded={open} onClick={onToggleOpen}>
     {icon(open ? 'i-chevron' : 'i-chevron-right')}
    </button>
-   {icon('i-group')}
-   <span className="row-text">
-    <span className="row-name">{`Group · ${members.length} objects`}</span>
-    {count !== undefined && <span className="row-tag">{stitchesText(count)}</span>}
-   </span>
-   <button type="button" className="row-btn row-eye" aria-label={`${hiddenAll ? 'Show' : 'Hide'} group`}>{icon(hiddenAll ? 'i-eye-off' : 'i-eye')}</button>
-   <button type="button" className={`row-btn row-lock${lockedAll ? ' on' : ''}`} aria-label={`${lockedAll ? 'Unlock' : 'Lock'} group`}>
+   <div
+    className={`group-row${all ? ' selected' : ''}`}
+    data-group={groupId}
+    tabIndex={0}
+    role="option"
+    aria-selected={all}
+    aria-label={label}
+    onKeyDown={e => {
+     if (e.target !== e.currentTarget) return;
+     if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      onSelect(clickOf(e));
+     }
+    }}
+   >
+    {icon('i-group')}
+    <span className="row-text">
+     <span className="row-name">{name}</span>
+     {countText(count, warning) && <span className="row-tag">{countText(count, warning)}</span>}
+    </span>
+    {warning && <span className="row-warn" role="img" aria-label={warning} title={warning}>⚠</span>}
+   </div>
+   <button type="button" className="row-btn row-eye" aria-label={`Hide ${name}`} aria-pressed={hiddenAll} title={`Hide ${name}`} onClick={onToggleVisible}>
+    {icon(hiddenAll ? 'i-eye-off' : 'i-eye')}
+   </button>
+   <button type="button" className={`row-btn row-lock${lockedAll ? ' on' : ''}`} aria-label={`Lock ${name}`} aria-pressed={lockedAll} title={`Lock ${name}`} onClick={onToggleLock}>
     {icon(lockedAll ? 'i-lock' : 'i-unlock')}
    </button>
   </div>
@@ -175,6 +267,10 @@ export function ObjectList() {
  const objects = useObjects();
  const sel = useSyncExternalStore(selectionState.subscribe, selectionState.get);
  const counts = useSyncExternalStore(sewingCountsState.subscribe, sewingCountsState.get);
+ const issue = useSyncExternalStore(compileIssueState.subscribe, compileIssueState.get);
+ // The reason a failed compile gives, on the rows it names. The counts above stay on their rows meanwhile.
+ const warningFor = (id: string) => (issue?.objectIds.includes(id) ? `Can't compile: ${issue.message}` : undefined);
+ const groupWarning = (members: Obj[]) => members.map(m => warningFor(m.id)).find(Boolean);
  const [collapsed, setCollapsed] = useState<Set<string>>(() => new Set());
  const [renaming, setRenaming] = useState<string | null>(null);
  const [drop, setDrop] = useState<Drop | null>(null);
@@ -185,42 +281,53 @@ export function ObjectList() {
   const g = objects.find(o => o.id === id)?.groupId;
   return g ? idsOfGroup(g) : [id];
  };
- // One handler for the whole list: it reads the row or group the click landed on, as the list did before it moved to React.
+ // The anchor: the row last clicked with a plain or Ctrl/Cmd click. A Shift-click selects from it to the clicked row.
+ const anchor = useRef<string | null>(null);
+ // The rows as the list shows them, each with the ids it selects: a group row and the rows inside it select all the members.
+ const entries = entriesOf(objects, collapsed);
+ const rows = entries.map(entry => (entry.kind === 'group' ? entry.members.map(m => m.id) : idsWithGroup(entry.o.id)));
+ // Selecting a row or group is the same whether a click or the keyboard (Enter or Space) asks for it. The index is the entry's
+ // own, not found by id: an open group's header also lists its members, so an id match would land on the header.
+ const pick = (at: number, click: Click) => {
+  if (at < 0) return;
+  const change = selectionChange(rows, sel.multi, anchor.current, at, click);
+  if (!change) return;
+  anchor.current = change.anchor;
+  layersActions.select(change.ids, change.primary);
+ };
+ const selectRow = (id: string, click: Click) => pick(entries.findIndex(e => e.kind === 'row' && e.o.id === id), click);
+ const selectGroup = (groupId: string, click: Click) => pick(entries.findIndex(e => e.kind === 'group' && e.groupId === groupId), click);
+ // Hide and Lock toggle the given objects: they show or unlock unless every one already is.
+ const toggleVisible = (ids: string[]) => {
+  const hide = !objects.filter(o => ids.includes(o.id)).every(o => o.visible === false);
+  layersActions.setVisible(ids, !hide);
+ };
+ const toggleLocked = (ids: string[]) => {
+  const lock = !objects.filter(o => ids.includes(o.id)).every(o => o.locked);
+  layersActions.setLocked(ids, lock);
+ };
+ const toggleGroupOpen = (groupId: string) => {
+  setCollapsed(c => {
+   const next = new Set(c);
+   if (next.has(groupId)) next.delete(groupId);
+   else next.add(groupId);
+   return next;
+  });
+ };
+ // One handler for the rows and group rows: it reads the row or group the click landed on. Hide, Lock and the group caret are
+ // their own buttons, beside the row, with their own handlers.
  const onClick = (e: MouseEvent<HTMLDivElement>) => {
   const target = e.target as Element;
   const head = target.closest<HTMLElement>('.group-row');
   const row = target.closest<HTMLElement>('.object-row');
-  if (head && target.closest('.group-caret')) {
-   const g = head.dataset.group!;
-   setCollapsed(c => {
-    const next = new Set(c);
-    if (next.has(g)) next.delete(g);
-    else next.add(g);
-    return next;
-   });
-   return;
-  }
-  if (target.closest('.row-eye') && (head || row)) {
-   const ids = head ? idsOfGroup(head.dataset.group!) : [row!.dataset.id!];
-   const hide = !objects.filter(o => ids.includes(o.id)).every(o => o.visible === false);
-   layersActions.setVisible(ids, !hide);
-   return;
-  }
-  if (target.closest('.row-lock') && (head || row)) {
-   const ids = head ? idsOfGroup(head.dataset.group!) : [row!.dataset.id!];
-   const lock = !objects.filter(o => ids.includes(o.id)).every(o => o.locked);
-   layersActions.setLocked(ids, lock);
-   return;
-  }
   if (head) {
-   const ids = idsOfGroup(head.dataset.group!);
-   if (e.shiftKey) layersActions.select([...new Set([...sel.multi, ...ids])], ids.at(-1)!);
-   else layersActions.select(ids, ids.at(-1)!);
+   selectGroup(head.dataset.group!, clickOf(e));
    return;
   }
   if (!row) return;
   const id = row.dataset.id!;
-  if (!e.shiftKey && target.closest('.row-name')) {
+  const click = clickOf(e);
+  if (click === 'plain' && target.closest('.row-name')) {
    const now = performance.now();
    if (lastClick.current && lastClick.current.id === id && now - lastClick.current.t < 450) {
     lastClick.current = null;
@@ -229,14 +336,7 @@ export function ObjectList() {
    }
    lastClick.current = {id, t: now};
   }
-  if (e.shiftKey) {
-   const next = new Set(sel.multi);
-   if (next.has(id) && next.size > 1) next.delete(id);
-   else next.add(id);
-   layersActions.select([...next], id);
-  } else {
-   layersActions.select(idsWithGroup(id), id);
-  }
+  selectRow(id, click);
  };
  const onDragStart = (e: DragEvent<HTMLDivElement>) => {
   const row = (e.target as Element).closest<HTMLElement>('.object-row');
@@ -278,30 +378,45 @@ export function ObjectList() {
  };
  return (
   <div id="objects" onClick={onClick} onDragStart={onDragStart} onDragOver={onDragOver} onDragLeave={onDragLeave} onDrop={onDrop} onDragEnd={onDragEnd}>
-   {entriesOf(objects, collapsed).map(entry => entry.kind === 'group' ? (
-    <GroupRow
-     key={`group:${entry.groupId}`}
-     groupId={entry.groupId}
-     members={entry.members}
-     open={entry.open}
-     selectedIds={sel.multi}
-     count={groupCount(entry.members, counts)}
-    />
-   ) : (
-    <ObjectRow
-     key={entry.o.id}
-     o={entry.o}
-     depth={entry.depth}
-     selected={sel.multi.has(entry.o.id)}
-     dropping={drop && drop.id === entry.o.id ? drop : null}
-     renaming={renaming === entry.o.id}
-     count={counts[entry.o.id]}
-     onRenameDone={text => {
-      setRenaming(null);
-      layersActions.rename(entry.o.id, text);
-     }}
-    />
-   ))}
+   {issue && <div className="list-warning" role="status">{`⚠ Can't compile: ${issue.message}`}</div>}
+   {objects.length === 0 && <p className="sel-hint empty-hint">{t('No objects yet. Draw a shape or import an image to start.')}</p>}
+   {objects.length > 0 && (
+    <div className="object-rows" role="listbox" aria-label={t('Layers')} aria-multiselectable="true">
+     {entriesOf(objects, collapsed).map(entry => entry.kind === 'group' ? (
+      <GroupRow
+       key={`group:${entry.groupId}`}
+       groupId={entry.groupId}
+       members={entry.members}
+       open={entry.open}
+       selectedIds={sel.multi}
+       count={groupCount(entry.members, counts)}
+       warning={groupWarning(entry.members)}
+       onSelect={click => selectGroup(entry.groupId, click)}
+       onToggleOpen={() => toggleGroupOpen(entry.groupId)}
+       onToggleVisible={() => toggleVisible(entry.members.map(m => m.id))}
+       onToggleLock={() => toggleLocked(entry.members.map(m => m.id))}
+      />
+     ) : (
+      <ObjectRow
+       key={entry.o.id}
+       o={entry.o}
+       depth={entry.depth}
+       selected={sel.multi.has(entry.o.id)}
+       dropping={drop && drop.id === entry.o.id ? drop : null}
+       renaming={renaming === entry.o.id}
+       count={counts[entry.o.id]}
+       warning={warningFor(entry.o.id)}
+       onRenameDone={text => {
+        setRenaming(null);
+        layersActions.rename(entry.o.id, text);
+       }}
+       onSelect={click => selectRow(entry.o.id, click)}
+       onToggleVisible={() => toggleVisible([entry.o.id])}
+       onToggleLock={() => toggleLocked([entry.o.id])}
+      />
+     ))}
+    </div>
+   )}
   </div>
  );
 }

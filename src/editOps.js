@@ -111,7 +111,7 @@ export function arrayCopies(doc,op){const src=doc.objects.find(v=>v.id===op.id);
     if(![dx,dy].every(Number.isFinite)||(!dx&&!dy))throw Error('A linear array needs a non-zero dx/dy step in mm.');const c0=objectCenter(src);
     for(let k=1;k<n;k++)made.push(placeCopy(src,[c0[0]+dx*k,c0[1]+dy*k],null,0,ids));}
   else if(op.mode==='radial'){const pivot=/** @type {Pt} */([Number(op.cx),Number(op.cy)]),total=op.angle===undefined?360:Number(op.angle);
-    if(![...pivot,total].every(Number.isFinite)||!total)throw Error('A radial array needs a centre (cx, cy) and a non-zero total angle.');const step=
+    if(![...pivot,total].every(Number.isFinite)||!total)throw Error('A radial array needs a center (cx, cy) and a non-zero total angle.');const step=
     Math.abs(total)>=360?total/n:total/(n-1);for(let k=1;k<n;k++)made.push(placeCopy(src,null,pivot,step*k,ids));}
   else if(op.mode==='along'){const path=doc.objects.find(v=>v.id===op.pathId);
     if(!path||path.kind!=='path')throw Error(`The array path must be a path object: ${op.pathId}`);const ring=geometry(path,0)[0],cum=[0];
@@ -200,7 +200,7 @@ export function reorderObject(doc,id,to,index){const i=doc.objects.findIndex(v=>
 export function redworkGroup(doc,ids){if(!Array.isArray(ids)||!ids.length)throw Error('Nothing to redwork.');const chosen=new Set(ids);
   if(chosen.size!==ids.length)throw Error('Each object can be chosen once.');const objs=doc.objects.filter(o=>chosen.has(o.id));
   if(objs.length!==chosen.size)throw Error('Unknown object in the redwork selection.');
-  for(const o of objs){if(o.kind!=='path')throw Error('Redwork by colour needs paths: draw the outline as a path, or use Redwork outline on a closed shape.');
+  for(const o of objs){if(o.kind!=='path')throw Error('Redwork by color needs paths: draw the outline as a path, or use Redwork outline on a closed shape.');
   o.stitch='run';o.runStyle='redwork';}
   /** @type {string[]} */
   const colours=[];for(const o of objs)if(!colours.includes(threadKey(o)))colours.push(threadKey(o));const grouped=
@@ -215,7 +215,7 @@ export function redworkGroup(doc,ids){if(!Array.isArray(ids)||!ids.length)throw 
  * @returns {void}
  */
 export function replaceThread(doc,from,to){const hex=/^#[0-9a-fA-F]{6}$/;
-  if(typeof from!=='string'||typeof to!=='string'||!hex.test(from)||!hex.test(to))throw Error('Replace thread needs two colours as #rrggbb.');const f=
+  if(typeof from!=='string'||typeof to!=='string'||!hex.test(from)||!hex.test(to))throw Error('Replace thread needs two colors as #rrggbb.');const f=
   from.toLowerCase(),t=to.toLowerCase();for(const o of doc.objects)if(o.kind!=='stitch_layer'&&o.thread&&o.thread.toLowerCase()===f)o.thread=t;}
 
 /**

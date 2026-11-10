@@ -1,4 +1,5 @@
-import {useEffect, useRef, useSyncExternalStore} from 'react';
+import {useRef, useSyncExternalStore} from 'react';
+import {useModalDialog} from './useModalDialog';
 import {lang, setLanguage, t} from '../i18n.js';
 import {setSettingsOpen, settingsState} from '../settingsState.js';
 import {stitchRowsState} from '../stitchRowsState.js';
@@ -10,12 +11,7 @@ export function SettingsDialog() {
  const rows = useSyncExternalStore(stitchRowsState.subscribe, stitchRowsState.get);
  const agent = useSyncExternalStore(agentLinkState.subscribe, agentLinkState.get);
  const ref = useRef<HTMLDialogElement>(null);
- useEffect(() => {
-  const dialog = ref.current;
-  if (!dialog) return;
-  if (open && !dialog.open) dialog.showModal();
-  if (!open && dialog.open) dialog.close();
- }, [open]);
+ useModalDialog(ref, open, '#helpBtn');
  return (
   <dialog id="settingsDialog" ref={ref} onClose={() => setSettingsOpen(false)}>
    <form method="dialog">
@@ -27,8 +23,13 @@ export function SettingsDialog() {
       <button type="button" id="langEs" aria-pressed={lang === 'es'} onClick={() => setLanguage('es')}>Español</button>
      </div>
     </fieldset>
+    <fieldset className="settings-group">
+     <legend>{t('Sewing tips to show')}</legend>
+     <div id="tipsList" className="tips-list"></div>
+    </fieldset>
     <fieldset className="settings-group" hidden={rows.copyEndpoint}>
      <legend>{t('AI agent')}</legend>
+     <p id="agentState" className="agent-state" role="status">{agent.active ? t('Agent connected') : agent.waiting ? t('Waiting for agent') : t('Not connected')}</p>
      <button type="button" id="copyEndpoint" className={[agent.waiting || agent.active ? 'agent-on' : '', agent.active ? 'agent-active' : ''].filter(
        Boolean).join(' ') || undefined} onClick={() => agentLinkActions.open()}>{t('Connect an AI agent')}</button>
     </fieldset>

@@ -1,8 +1,17 @@
 import {layoutState} from '../layoutState.js';
+import {inspectorOpenState} from '../inspectorOpenState.js';
+import {selectionLabelsState} from '../selectionLabelsState.js';
+import {t} from '../i18n.js';
+import {designName} from '../designName.js';
+import {documentState} from '../documentState.js';
+import {sewingCountsState} from '../sewingCountsState.js';
+import {shortcutLabel} from '../shortcutLabels.js';
+import {shortcutFor} from '../shortcutTable.js';
 import {CanvasTextEditor} from './CanvasTextEditor';
 import {PreviewPanel} from './PreviewPanel';
 import {useSyncExternalStore} from 'react';
 import {SelectionHint} from './SelectionHint';
+import {CanvasHint} from './CanvasHint';
 import {ActionButton} from './ActionButton';
 import {DesignSummary, SelectionHeading, SourceInfo} from './InspectorText';
 import {AlignButtons} from './AlignButtons';
@@ -19,6 +28,7 @@ import {BooleanButtons, FlipButtons} from './SelectionToolbarButtons';
 import {SewingOrder} from './SewingOrder';
 import {SnapObjectButton} from './SnapObjectButton';
 import {StatusRun} from './StatusRun';
+import {ToastStack} from './ToastStack';
 import {StitchAccordionRows} from './StitchAccordionRows';
 import {StitchBlendRows} from './StitchBlendRows';
 import {StitchBlingRows} from './StitchBlingRows';
@@ -45,10 +55,17 @@ import {gridSnapState} from '../gridSnapState.js';
 import {editModeState} from '../editModeState.js';
 import {deletingGuideState, handModeState, panningState} from '../canvasModeState.js';
 import {setTraceDialogOpen} from '../traceDialogState.js';
+const groupLabel = t('Group ({shortcut})', {shortcut: shortcutLabel([{mod: true, key: 'G'}])});
+const ungroupLabel = t('Ungroup ({shortcut})', {shortcut: shortcutLabel([{mod: true, shift: true, key: 'G'}])});
+
 // The editor layout: the object list, the canvas and the inspector. Rendered by React; ids match the markup it
 // replaced, because the keyboard shortcuts and tests address them.
 export function EditorLayout() {
+ const canvasDoc = useSyncExternalStore(documentState.subscribe, documentState.get);
+ const canvasCounts = useSyncExternalStore(sewingCountsState.subscribe, sewingCountsState.get);
  const layout = useSyncExternalStore(layoutState.subscribe, layoutState.get);
+ const inspectorOpen = useSyncExternalStore(inspectorOpenState.subscribe, inspectorOpenState.get);
+ const selectionLabels = useSyncExternalStore(selectionLabelsState.subscribe, selectionLabelsState.get);
  const view = useSyncExternalStore(viewMode.subscribe, viewMode.get);
  const snapping = useSyncExternalStore(gridSnapState.subscribe, gridSnapState.get);
  const editing = useSyncExternalStore(editModeState.subscribe, editModeState.get);
@@ -73,10 +90,10 @@ export function EditorLayout() {
         <div className={canvasClass}>
           <div className={"tool-row tool-rail"} aria-label={"Tools"}>
             <SelectTool />
-            <AddShapeButton kind={"rect"} id={"rect"} label={"Add rectangle"} icon={"rect"} />
-            <AddShapeButton kind={"ellipse"} id={"ellipse"} label={"Add ellipse"} icon={"ellipse"} />
+            <AddShapeButton kind={"rect"} id={"rect"} label={"Add rectangle"} icon={"rect"} tip={t('Add rectangle ({shortcut})', {shortcut: shortcutFor('rect')})} />
+            <AddShapeButton kind={"ellipse"} id={"ellipse"} label={"Add ellipse"} icon={"ellipse"} tip={t('Add ellipse ({shortcut})', {shortcut: shortcutFor('ellipse')})} />
             <PathTool />
-            <AddShapeButton kind={"text"} id={"letter"} label={"Add lettering"} icon={"text"} />
+            <AddShapeButton kind={"text"} id={"letter"} label={"Add lettering"} icon={"text"} tip={t('Add lettering ({shortcut})', {shortcut: shortcutFor('letter')})} />
             <ToolButtons />
             <button
               className={"icon-button"}
@@ -104,6 +121,7 @@ export function EditorLayout() {
           </div>
           <canvas id={"preview3d"} hidden={true} aria-label={"3D thread preview. Drag to orbit, scroll to zoom, double-click to reset."}>
           </canvas>
+          <CanvasHint />
           <ZoomBar />
           <PreviewPanel />
           <div className={"floating"} role={"toolbar"} aria-label={"Canvas tools"}>
@@ -112,8 +130,8 @@ export function EditorLayout() {
             <GridControl />
             <AlignButtons />
             <FlipButtons />
-            <ActionButton flag="group" hideWhenDisabled className={"icon-button"} aria-label={"Group (Ctrl+G)"} title={"Group (Ctrl+G)"}
-              data-tooltip={"Group (Ctrl+G)"} id={"group"} onClick={(
+            <ActionButton flag="group" hideWhenDisabled className={"icon-button"} aria-label={groupLabel} title={groupLabel}
+              data-tooltip={groupLabel} id={"group"} onClick={(
               ) => toolbarActions.group()}>
               <svg className={"icon"}>
                 <use href={"#i-group"} />
@@ -121,9 +139,9 @@ export function EditorLayout() {
             </ActionButton>
             <ActionButton flag="ungroup" hideWhenDisabled
               className={"icon-button"}
-              aria-label={"Ungroup (Ctrl+Shift+G)"}
-              title={"Ungroup (Ctrl+Shift+G)"}
-              data-tooltip={"Ungroup (Ctrl+Shift+G)"}
+              aria-label={ungroupLabel}
+              title={ungroupLabel}
+              data-tooltip={ungroupLabel}
               id={"ungroup"}
               onClick={() => toolbarActions.ungroup()}
             >
@@ -158,9 +176,9 @@ export function EditorLayout() {
             </ActionButton>
             <ActionButton flag="textOnPath" hideWhenDisabled
               className={"icon-button tb-start"}
-              aria-label={"Put the selected lettering on the selected path"}
-              title={"Put the selected lettering on the selected path"}
-              data-tooltip={"Put the selected lettering on the selected path"}
+              aria-label={"Put the selected text on the selected path"}
+              title={"Put the selected text on the selected path"}
+              data-tooltip={"Put the selected text on the selected path"}
               id={"textOnPath"}
               onClick={() => selectionToolbarActions.textOnPath()}
             >
@@ -170,9 +188,9 @@ export function EditorLayout() {
             </ActionButton>
             <ActionButton flag="textOffPath" hideWhenDisabled
               className={"icon-button"}
-              aria-label={"Detach lettering from its path"}
-              title={"Detach lettering from its path"}
-              data-tooltip={"Detach lettering from its path"}
+              aria-label={"Detach text from its path"}
+              title={"Detach text from its path"}
+              data-tooltip={"Detach text from its path"}
               id={"textOffPath"}
               onClick={() => selectionToolbarActions.textOffPath()}
             >
@@ -194,7 +212,7 @@ export function EditorLayout() {
             </ActionButton>
             <PathNodeButtons />
           </div>
-          <svg id={"art"} viewBox={"-60 -60 120 120"} {...referenceCanvasHandlers}>
+          <svg id={"art"} viewBox={"-60 -60 120 120"} tabIndex={0} role={"application"} aria-label={designName(canvasDoc.doc.objects ?? [], canvasCounts)} {...referenceCanvasHandlers}>
             <defs>
               <pattern id={"linen"} width={"2.6"} height={"2.6"} patternUnits={"userSpaceOnUse"}>
                 <path d={"M0 0H2.6M0 0V2.6"} stroke={"#a9a397"} strokeOpacity={".11"} strokeWidth={".18"} />
@@ -218,21 +236,23 @@ export function EditorLayout() {
           <CanvasTextEditor />
         </div>
         <footer>
+          <ToastStack />
           <PlaybackBar />
           <StatusRun />
         </footer>
       </main>
-      <aside className={"panel"}>
+      <aside className={inspectorOpen ? "panel" : "panel inspector-collapsed"} id={"inspector"}>
         <SelectionHeading />
         <TipCard />
-        <details id={"tipsSettings"} className={"tips-settings"}>
-          <summary>
-            {"Sewing tips to show"}
-          </summary>
-          <div id={"tipsList"} className={"tips-list"}>
-          </div>
-        </details>
         <SelectionHint />
+        {selectionLabels.hintHidden ? null : (
+          <div className={"scope-document"}>
+            <h3 className={"scope-heading"}>
+              {"Document"}
+            </h3>
+            <DocumentSettings />
+          </div>
+        )}
         <SourceInfo />
         <TransformPanel />
         <section id={"secStitch"} data-sec={""} hidden={layout.secStitch}>
@@ -253,9 +273,14 @@ export function EditorLayout() {
         <SewingOrder />
         <ReferencePicture />
         <ThreadPlan />
-        <DocumentSettings />
-        <DesignSummary />
-        <FabricSection />
+        <div className={"scope-document"}>
+          <h3 className={"scope-heading"}>
+            {"Document"}
+          </h3>
+          {selectionLabels.hintHidden ? <DocumentSettings /> : null}
+          <DesignSummary />
+          <FabricSection />
+        </div>
       </aside>
     </div>
   </>

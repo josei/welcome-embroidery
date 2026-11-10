@@ -37,7 +37,7 @@ export function SliderField({id, label, min, max, step, value, onCommit, swatch 
   />
  );
  if (!swatch) return input;
- // 44 px for 4 mm: 11 px to the millimetre, so a row's pitch on the tile is its spacing.
+ // 44 px for 4 mm: 11 px to the millimeter, so a row's pitch on the tile is its spacing.
  const spacingMm = Number(shown);
  return (
   <div className="density-row">

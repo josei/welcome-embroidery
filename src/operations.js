@@ -10,6 +10,7 @@ import {flipObjects,mapPathPoints,normAngle,objById,objectBounds,refreshPathBoun
 import {hoopSize} from './hoops.js';
 import {refreshAlong,alongPoints,pathSig} from './pathFollow.js';
 import {refreshClips} from './clipMasks.js';
+import {copyName} from './objectNames.js';
 import {booleanShapes,knifeShape,offsetShape,strokeToShape,isClosedShape,appliqueGroup} from './shapeOps.js';
 import {removeSmallHoles,removeSmallIslands} from './cleanup.js';
 import {roundPathCorners,arrayCopies,simplifyPath,splitPath,joinPaths,reorderObject,redworkGroup,replaceThread,sortByColor,nodeFraction} from './editOps.js';
@@ -45,7 +46,7 @@ export function applyOperations(doc,operations) {
       Object.fromEntries([...TEXT_OPTION_KEYS,'stitchLength','stagger','underlayType','underlayInset','underlaySpacing','angle','spacing'].filter(k=>op[k]!==
       undefined).map(k=>[k,op[k]]));
       doc.objects.push(
-      {id:op.id||crypto.randomUUID(),name:`Lettering: ${String(op.text).split('\n')[0]}`,kind:'text',text:op.text,x:op.x,y:op.y,w:op.width||
+      {id:op.id||crypto.randomUUID(),name:`Text: ${String(op.text).split('\n')[0]}`,kind:'text',text:op.text,x:op.x,y:op.y,w:op.width||
       measureText(op.text,op.font||'welcome-mono/1',h,opts),h,thread:op.thread||'#527461',stitch:op.stitch||(rf?.kind==='outline'?'fill':'run'),font:op.font||
       'welcome-mono/1',...opts});}
     else if(op.op==='clear'){doc.objects=[];}
@@ -73,7 +74,7 @@ export function applyOperations(doc,operations) {
       undefined){if(op[k]===null)delete o[k];else o[k]=op[k];if(op.radius!==undefined&&op.radii===undefined)delete o.radii;}
       if(o.kind==='text'&&(['text','font',...TEXT_OPTION_KEYS].some(k=>op[k]!==undefined))){const f=isRegistryFont(o.font)?getFont(o.font):null;
         if(f&&op.font!==undefined&&op.h===undefined&&!(o.h>=f.size*f.minScale&&o.h<=f.size*f.maxScale))o.h=f.size;o.w=
-        measureText(o.text,o.font||'welcome-mono/1',o.h,o);if(op.text!==undefined&&typeof op.text==='string')o.name=`Lettering: ${op.text.split('\n')[0]}`;}if(
+        measureText(o.text,o.font||'welcome-mono/1',o.h,o);if(op.text!==undefined&&typeof op.text==='string')o.name=`Text: ${op.text.split('\n')[0]}`;}if(
         o.kind==='stitch_layer'&&op.thread!==undefined)o.threadOverrides=
         Object.fromEntries(o.threads.map((/** @type {any} */ _,/** @type {any} */ i)=>[i,op.thread]));}
     else if(op.op==='set_path_point'){const o=doc.objects.find(v=>v.id===op.id);
@@ -111,7 +112,7 @@ export function applyOperations(doc,operations) {
     else if(op.op==='remove_small_islands')removeSmallIslands(doc,op.ids,op.maxArea??1);
     else if(op.op==='clear_holes'){const o=doc.objects.find(v=>v.id===op.id);if(!o||o.kind!=='path')throw Error(`Unknown path: ${op.id}`);delete o.holes;}
     else if(op.op==='text_on_path'){const t=doc.objects.find(v=>v.id===op.textId),p=doc.objects.find(v=>v.id===op.pathId);
-      if(!t||t.kind!=='text')throw Error(`Unknown lettering object: ${op.textId}`);
+      if(!t||t.kind!=='text')throw Error(`Unknown text object: ${op.textId}`);
       if(!p||p.kind!=='path')throw Error(`Lettering follows a path object: ${op.pathId}`);
       const pts=alongPoints(p);delete t.rotation;t.along={points:pts,closed:Boolean(p.closed),offset:Number(op.offset)||0,pathId:p.id,sig:pathSig(p)};}
     else if(op.op==='set_along_offset'){const t=doc.objects.find(v=>v.id===op.textId);
@@ -137,7 +138,7 @@ export function applyOperations(doc,operations) {
       if(!(Number.isFinite(op.radius)&&op.radius>0&&op.radius<=200))throw Error('Corner radius must be between 0 and 200 mm.');
       if(o.smooth)throw Error('Turn off Smooth curve before rounding corners.');roundPathCorners(o,op.radius,op.indexes);}
     else if(op.op==='text_off_path'){const t=doc.objects.find(v=>v.id===op.textId);
-      if(!t||t.kind!=='text')throw Error(`Unknown lettering object: ${op.textId}`);delete t.along;}
+      if(!t||t.kind!=='text')throw Error(`Unknown text object: ${op.textId}`);delete t.along;}
     else if(op.op==='move_path_points'){const o=objectById(doc,op.id);
       if(o.kind!=='path'||!Array.isArray(op.indexes)||!op.indexes.length)throw Error('move_path_points needs a path and a list of node indexes.');const dx=
       Number(op.dx),dy=Number(op.dy);if(![dx,dy].every(Number.isFinite))throw Error('Move needs numeric dx and dy.');
@@ -238,7 +239,7 @@ export function applyOperations(doc,operations) {
     else if(op.op==='duplicate'){const o=doc.objects.find(v=>v.id===op.id);if(!o)throw Error(`Unknown object: ${op.id}`);const copy=structuredClone(o);
       delete copy.groupId;copy.id=op.newId||crypto.randomUUID();if(copy.along)copy.along.points=
       copy.along.points.map(/** @type {(p: number[]) => number[]} */(p)=>{const [x,y]=p;return [x+(op.dx??3),y+(op.dy??3)];});copy.name=
-      op.name||`${o.name} copy`;copy.x+=op.dx??3;copy.y+=op.dy??3;if(copy.kind==='path')mapPathPoints(copy,([x,y])=>[x+(op.dx??3),y+(op.dy??3)]);
+      op.name||copyName(o.name,o.kind,doc.objects.map(v=>v.name));copy.x+=op.dx??3;copy.y+=op.dy??3;if(copy.kind==='path')mapPathPoints(copy,([x,y])=>[x+(op.dx??3),y+(op.dy??3)]);
       doc.objects.push(copy);}
     else throw Error(`Unsupported operation: ${op.op}`);
   }

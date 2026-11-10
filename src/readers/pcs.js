@@ -17,7 +17,7 @@ export function readPcs(bytes) {
   let p = 4;
   /** @type {string[]} */ const colourList = [];
   for (let i = 0; i < colours; i++) {
-    if (p + 4 > bytes.length) fail('PCS colour table is truncated');
+    if (p + 4 > bytes.length) fail('PCS color table is truncated');
     colourList.push('#' + ((bytes[p] << 16 | bytes[p + 1] << 8 | bytes[p + 2]) & 0xFFFFFF).toString(16).padStart(6, '0'));
     p += 4;
   }
@@ -31,19 +31,19 @@ export function readPcs(bytes) {
     const ctrl = bytes[p + 8];
     const X = s24(p + 1) * ratio, Y = -s24(p + 5) * ratio;
     if (ctrl === 0x00) { x = X; y = Y; push(stitches, x, y, 'stitch', block); }
-    else if (ctrl & 0x01) { block++; if (block >= MAX_THREADS) fail('too many colour changes'); push(stitches, x, y, 'color', block); }
+    else if (ctrl & 0x01) { block++; if (block >= MAX_THREADS) fail('too many color changes'); push(stitches, x, y, 'color', block); }
     else if (ctrl & 0x04) { x = X; y = Y; push(stitches, x, y, 'jump', block); }
     else break;
   }
   push(stitches, x, y, 'end', block);
   /** @type {string[]} */ const warnings = [];
   if (colourList.length < block + 1) warnings.push(colourList.length
-    ? 'PCS file has fewer colours than colour changes: placeholder colours were assigned.'
-    : 'PCS file has no colour table: placeholder colours were assigned.');
+    ? 'PCS file has fewer colors than color changes: placeholder colors were assigned.'
+    : 'PCS file has no color table: placeholder colors were assigned.');
   /** @type {Thread[]} */ const threads = [];
   for (let i = 0; i <= Math.max(colourList.length - 1, block); i++) {
     const color = i < colourList.length ? colourList[i] : '#527461';
-    threads.push({index: i, color, brand: 'PCS', catalogNumber: null, name: `Colour ${i + 1}`});
+    threads.push({index: i, color, brand: 'PCS', catalogNumber: null, name: `Color ${i + 1}`});
   }
   return result(stitches, threads, warnings);
 }

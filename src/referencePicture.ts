@@ -25,7 +25,7 @@ export interface ReferenceApi {
   /** Runs one undoable command through the document store. */
   edit(operations: unknown[], after?: () => void): boolean;
   /** Shows a short message to the user. */
-  toast(message: string): void;
+  toast(message: string, kind?: 'status' | 'error'): void;
   /** A pointer event's position in millimetres on the canvas. */
   coord(e: {clientX: number; clientY: number}): [number, number];
 }
@@ -138,7 +138,7 @@ export async function loadReference(file: File) {
     setReferenceFields({refOpen: true});
     toast(t('Reference picture loaded. Draw on top of it; it is not sewn.'));
   } catch (err) {
-    toast((err as Error).message || t('That picture could not be read.'));
+    toast((err as Error).message || t('That picture could not be read.'), 'error');
   }
 }
 

@@ -1,4 +1,5 @@
 import {useEffect, useRef, useState, useSyncExternalStore} from 'react';
+import {useModalDialog} from './useModalDialog';
 import {setTraceDialogOpen, traceDialogState} from '../traceDialogState.js';
 import {tracePicture} from '../traceCommands.js';
 import {t} from '../i18n.js';
@@ -14,11 +15,8 @@ export function TraceDialog() {
  const detail = useRef<HTMLSelectElement>(null);
  const width = useRef<HTMLInputElement>(null);
  const background = useRef<HTMLInputElement>(null);
+ useModalDialog(dialog, open);
  useEffect(() => {
-  const element = dialog.current;
-  if (!element) return;
-  if (open && !element.open) element.showModal();
-  if (!open && element.open) element.close();
   if (open) setInfo('');
  }, [open]);
  async function trace() {
@@ -48,21 +46,21 @@ export function TraceDialog() {
    <form method="dialog">
     <h2>{"Trace a picture"}</h2>
     <p className="dlg-note">
-     {"Turns a logo, drawing or clip art into filled shapes, one per colour region. For photographs use the photo stitch tool instead."}
+     {"Turns a logo, drawing or clip art into filled shapes, one per color region. For photographs use the photo stitch tool instead."}
     </p>
     <label className="agent-field">{"Picture"}<input id="traceFile" ref={file} type="file" accept="image/*" /></label>
     <label>{"Mode"}<select id="traceMode" value={mode} onChange={e => setMode(e.target.value === 'lines' ? 'lines' : 'regions')}>
-     <option value="regions">{"Colour regions (filled shapes)"}</option>
+     <option value="regions">{"Color regions (filled shapes)"}</option>
      <option value="lines">{"Line art (strokes)"}</option>
     </select></label>
-    <label id="traceColorsRow" hidden={lines}>{"Colours"}<input id="traceColors" ref={colors} type="number" min="2" max="16" defaultValue="6" /></label>
+    <label id="traceColorsRow" hidden={lines}>{"Colors"}<input id="traceColors" ref={colors} type="number" min="2" max="16" defaultValue="6" /></label>
     <label>{"Detail"}<select id="traceDetail" ref={detail} defaultValue="0.5">
      <option value="0.3">{"Fine"}</option>
      <option value="0.5">{"Normal"}</option>
      <option value="1.2">{"Smooth"}</option>
     </select></label>
     <label>{"Width (mm)"}<input id="traceWidth" ref={width} type="number" min="10" max="200" step="1" defaultValue="60" /></label>
-    <label id="traceBgRow" hidden={lines}>{"Skip the background colour "}<input id="traceBg" ref={background} type="checkbox" defaultChecked={true} /></label>
+    <label id="traceBgRow" hidden={lines}>{"Skip the background color "}<input id="traceBg" ref={background} type="checkbox" defaultChecked={true} /></label>
     <p id="traceInfo" role="status">{info}</p>
     <div className="agent-actions">
      <button type="button" id="traceGo" onClick={() => void trace()}>{"Trace"}</button>

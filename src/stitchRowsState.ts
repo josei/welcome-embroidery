@@ -24,6 +24,7 @@ export const stitchRowsState = createStore<Record<string, boolean>>({
   endInsetEndRow: true,
   endInsetStartRow: true,
   fillRaisedRow: true,
+  followRow: true,
   fillReset: true,
   guideRow: true,
   joinRow: true,

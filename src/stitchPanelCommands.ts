@@ -6,6 +6,8 @@ import {underlayActions} from './underlayState.js';
 import {accordionRowsActions} from './accordionRowsState.js';
 import {capRowsActions} from './capRowsState.js';
 import {t} from './i18n.js';
+import {batchEditLabel, settingEditLabel} from './batchEditLabel.js';
+import {STITCH_LENGTH_RANGE, inFieldRange, outOfRangeMessage} from './fieldRanges.js';
 import type {StitchPanelApi} from './stitchPanel.js';
 
 /** The fields the panel's own actions read from the selected object. */
@@ -44,9 +46,15 @@ function setAccordion(which: 'accordionStart' | 'accordionEnd', v: number | null
 export function configureStitchPanelActions(next: StitchPanelApi) {
   api = next;
   stitchPanelActions.commitValue = (field, text) => {
+    if (field === 'stitchLength' && !inFieldRange(text, STITCH_LENGTH_RANGE)) {
+      wired().toast(outOfRangeMessage('Stitch length', STITCH_LENGTH_RANGE, stitchPanelState.get().stitchLength));
+      return false;
+    }
     const v = Number(text);
-    if (selState().multi.size) wired().edit(wired().orderedIds().map(id => ({op: 'set_object', id, [field]: v})));
-    else wired().edit([{op: 'set_settings', [field]: v}]);
+    if (selState().multi.size) {
+      const ids = wired().orderedIds();
+      wired().edit(ids.map(id => ({op: 'set_object', id, [field]: v})), undefined, undefined, batchEditLabel(field, ids.length));
+    } else wired().edit([{op: 'set_settings', [field]: v}], undefined, undefined, settingEditLabel(field));
   };
   stitchPanelActions.resetFill = () => {
     if (!selState().selected) return;
@@ -92,7 +100,7 @@ export function configureStitchPanelActions(next: StitchPanelApi) {
     setStitchPanel({blendPalette: palette});
     const cols = palette.filter(Boolean);
     if (cols.length === 1) {
-      wired().toast(t('Choose at least two colours for a palette.'));
+      wired().toast(t('Choose at least two colors for a palette.'));
       return;
     }
     wired().edit([{

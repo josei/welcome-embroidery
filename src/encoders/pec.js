@@ -32,10 +32,10 @@ export function pecBody(plan,name){
   const nx=Math.round(p.x*10),ny=Math.round(p.y*10);
   minX=Math.min(minX,nx);maxX=Math.max(maxX,nx);minY=Math.min(minY,ny);maxY=Math.max(maxY,ny);
   if(p.cmd==="stitch"){
-    if(jumping){if(nx-xx!==0&&ny-yy!==0){value(0,false,0);value(0,false,0);}jumping=false;}chunks(nx-xx,ny-yy,(sx,sy)=>{value(sx,false,0);value(sy,false,0);});
+    jumping=false;chunks(nx-xx,ny-yy,(sx,sy)=>{value(sx,false,0);value(sy,false,0);});
     xx=nx;yy=ny;}
   else if(p.cmd==="jump"){jumping=true;const flag=init?0x10:0x20;chunks(nx-xx,ny-yy,(sx,sy)=>{value(sx,true,flag);value(sy,true,flag);});xx=nx;yy=ny;}
-  else if(p.cmd==="color"||p.cmd==="stop"){if(jumping){value(0,false,0);value(0,false,0);jumping=false;}body.push(0xFE,0xB0,colourTwo?2:1);colourTwo=
+  else if(p.cmd==="color"||p.cmd==="stop"){jumping=false;body.push(0xFE,0xB0,colourTwo?2:1);colourTwo=
     !colourTwo;}
   else if(p.cmd==="trim"){}
   else throw Error(`Unsupported stitch command for PEC: ${p.cmd}`);

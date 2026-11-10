@@ -63,7 +63,7 @@ export function setStitchPanel(patch: Partial<StitchPanelState>) {
 
 /** The panel's fields call these when the user commits a value or picks an option. stitchPanel.ts runs the edit. */
 export const stitchPanelActions: {
-  commitValue: (field: 'stitchLength' | 'underlayInset' | 'underlaySpacing', text: string) => void;
+  commitValue: (field: 'stitchLength' | 'underlayInset' | 'underlaySpacing', text: string) => boolean | void;
   resetFill: () => void;
   chooseThread: (value: string) => void;
   chooseFollowPath: (value: string) => void;

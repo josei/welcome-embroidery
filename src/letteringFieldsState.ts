@@ -32,7 +32,7 @@ export interface LetteringFields {
 
 export const letteringFieldsState = createStore<LetteringFields>({
   alongOffset: '0',
-  text: 'BLOOM',
+  text: '',
   height: '8',
   heightMin: '2',
   heightMax: '200',
@@ -67,14 +67,16 @@ export function setLetteringFields(patch: Partial<LetteringFields>) {
 /**
  * The lettering panel calls these. commit(field, text) runs for a committed text or number field; choose(field, value)
  * for a checkbox or select; press(name, value) for a style button. app.js runs them. commit returns false to show the
- * stored value again.
+ * stored value again. preview(text) runs on each keystroke in the Text box, so the canvas follows the typing.
  */
 export const letteringActions: {
   commit: (field: 'alongOffset' | 'text' | 'height' | 'tracking' | 'wordSpacing' | 'lineHeight' | 'boldMm' | 'italicDeg', text: string) => boolean | void;
   choose: (field: 'vertical' | 'nameDrop' | 'stitch' | 'font', value: boolean | string) => boolean | void;
   press: (name: 'bold' | 'italic' | 'align', value?: string) => void;
+  preview: (text: string) => void;
 } = {
   commit() {},
   choose() {},
   press() {},
+  preview() {},
 };

@@ -9,7 +9,7 @@ export function PlaybackBar() {
  const p = useSyncExternalStore(playbackState.subscribe, playbackState.get);
  const playLabel = p.playing ? t('Pause stitch simulation') : p.hasPlan ? t('Play stitch simulation') : t('Compile and play stitch simulation');
  const sewnText = p.ready ? t('Ready to simulate') : t('{n} of {m} stitches', {n: p.sewn.toLocaleString(), m: p.count.toLocaleString()});
- const changesText = p.colourChanges === 1 ? t('1 colour change') : t('{n} colour changes', {n: p.colourChanges});
+ const changesText = p.colourChanges === 1 ? t('1 color change') : t('{n} color changes', {n: p.colourChanges});
  const trimsText = p.trims === 1 ? t('1 trim') : t('{n} trims', {n: p.trims});
  const metresText = t('{m} m thread', {m: p.metres.toFixed(1)});
  return (
@@ -39,8 +39,8 @@ export function PlaybackBar() {
        className="timeline-marker"
        data-index={s.start}
        style={{left: `${(s.start / p.seekMax) * 100}%`, background: s.thread}}
-       title={t('Colour change to {n} at {time}', {n: name, time: when})}
-       aria-label={t('Colour change to {n} at {time}', {n: name, time: when})}
+       title={t('Color change to {n} at {time}', {n: name, time: when})}
+       aria-label={t('Color change to {n} at {time}', {n: name, time: when})}
        onClick={() => playbackActions.seek(s.start)}
       />
      );

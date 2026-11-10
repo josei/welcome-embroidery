@@ -1,5 +1,6 @@
 import {documentNow} from './documentState.js';
 import {selState} from './selectionState.js';
+import {t} from './i18n.js';
 
 /** Where the selected objects go: first, one step earlier, one step later, or last. */
 export type OrderMove = 'back' | 'backward' | 'forward' | 'front';
@@ -7,7 +8,7 @@ export type OrderMove = 'back' | 'backward' | 'forward' | 'front';
 /** What the sewing order needs from the editor, supplied by app.js. */
 export interface OrderApi {
   /** Runs one undoable command through the document store. */
-  edit(operations: unknown[]): boolean;
+  edit(operations: unknown[], after?: () => void, coalesceKey?: string, label?: string): boolean;
 }
 
 let api: OrderApi | null = null;
@@ -27,7 +28,7 @@ function wired(): OrderApi {
 export function moveSelection(to: OrderMove) {
   const ids = (documentNow().doc.objects as Array<{id: string}>).map(o => o.id).filter(id => selState().multi.has(id));
   if (to === 'back' || to === 'forward') ids.reverse();
-  if (ids.length) wired().edit(ids.map(id => ({op: 'reorder', id, to})));
+  if (ids.length) wired().edit(ids.map(id => ({op: 'reorder', id, to})), undefined, undefined, t('reorder'));
 }
 
 /** Groups the document's objects by thread colour, so the machine changes thread as few times as it can. */
