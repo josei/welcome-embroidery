@@ -374,7 +374,7 @@ input[aria-invalid="true"]{border-color:var(--warn)!important;background:var(--w
 .top{flex-wrap:nowrap;padding:0 8px}
 .top .logo-mark{height:18px}
 .top .icon-button{width:30px;min-width:30px;height:30px}
-.top #name{min-width:0}
+.top #name{min-width:0;overflow:hidden;text-overflow:ellipsis}
 /* The blank-design reason is still read by screen readers (Export points at it), but it cannot take a row of its own here. */
 .top .export-reason{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;margin:0}
 .layout>aside.panel:first-child>.layers-head{padding:0 10px}

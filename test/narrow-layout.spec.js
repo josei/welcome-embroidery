@@ -40,6 +40,9 @@ test('the top bar stays on one row at 760px and the title gives way first',async
  for(const t of info.tops) expect(Math.abs(t-info.tops[0]),'child top within the bar row').toBeLessThan(12);
  expect(info.height,'bar height is one row').toBeLessThanOrEqual(58);
  expect(info.overflow,'no horizontal overflow').toBeLessThanOrEqual(0);
+ // The title is the element that gives way, and it shows an ellipsis rather than clipping the text.
+ const title=await page.locator('header.top #name').evaluate(e=>getComputedStyle(e).textOverflow);
+ expect(title,'title text-overflow').toBe('ellipsis');
  // The controls stay whole: Undo and Redo are visible and inside the window.
  for(const id of ['#undo','#redo']){
   const box=await page.locator(id).boundingBox();expect(box,id).not.toBeNull();
