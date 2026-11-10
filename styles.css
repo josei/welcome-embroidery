@@ -145,7 +145,7 @@ label[hidden],button[hidden],.sel-hint[hidden]{display:none!important}
 
 #count.error{color:var(--warn)}.issues-btn{border:1px solid var(--warn-line);background:var(--warn-soft);color:var(--warn);font-size:11px;padding:3px 9px;border-radius:99px;cursor:pointer}#stitches.stale{opacity:.35;transition:opacity .15s}
 
-.tool-grid label{min-width:0}.tool-grid input,.tool-grid select{width:112px!important}.tool-grid{grid-template-columns:minmax(0,1fr) auto}#arrBLabel{grid-column:1}#arrALabel{grid-column:1}
+.tool-grid label{min-width:0}.tool-grid input,.tool-grid select{width:112px!important}.tool-grid{grid-template-columns:minmax(0,1fr) auto}
 
 /* rulers, guides, smart guides, on-canvas text editor */
 #rulerTop,#rulerLeft{position:absolute;z-index:4;display:block;cursor:crosshair;touch-action:none}#rulerTop{top:0;left:0;height:18px}#rulerLeft{top:0;left:0;width:18px}.ruler-corner{position:absolute;z-index:5;left:0;top:0;width:18px;height:18px;background:#fbfbf9;border-right:1px solid #dfe3dd;border-bottom:1px solid #dfe3dd}
@@ -289,10 +289,15 @@ input:not([type=checkbox]):not([type=range]),select,textarea,.panel textarea{fon
 
 .icon-seg.labelled .stitch-thumb{width:40px;height:24px;display:block;color:#4f5551}.icon-seg.labelled button[aria-pressed=true] .stitch-thumb{color:var(--teal)}
 /* Inspector rows: one label column and one field column, so every field starts at the same left edge and has the same width. Labels wrap inside their column and never push the field. */
-.panel label:not(.block):not(#blendPaletteRow>label){display:grid;grid-template-columns:minmax(0,1fr) 112px;align-items:center;column-gap:8px}
+.panel label:not(.block):not(#blendPaletteRow>label):not(.xywh>label){display:grid;grid-template-columns:minmax(0,1fr) 112px;align-items:center;column-gap:8px}
 .panel label:not(.block)>input:not([type=checkbox]),.panel label:not(.block)>select{grid-column:2;width:100%;min-width:0}
 .panel label:not(.block)>input[type=checkbox]{grid-column:2;justify-self:start;margin:0}
 .panel label:not(.block)>.field-range{grid-column:2;justify-self:start;margin:0}
+/* Tool rows (array, path, lettering spacing): the label spans the row and its field and button share the 112 px column with the inspector rows. Blend rows keep their own layout. */
+.tool-grid:has(>span,>button){grid-template-columns:minmax(0,1fr) 112px}
+.tool-grid:has(>span,>button)>label{grid-column:1/-1}
+.tool-grid:has(>span,>button)>span{display:none}
+.tool-grid:has(>span,>button)>button{grid-column:2;width:112px;justify-self:stretch}
 
 .density-row{display:flex;align-items:center;gap:10px}.density-row input[type=range]{flex:1;min-width:0}.density-swatch{width:44px;height:44px;flex:none;border:1px solid var(--field-line);border-radius:6px;background-color:#f6f5f1;background-image:repeating-linear-gradient(0deg,var(--teal) 0 1px,transparent 1px var(--pitch))}
 
