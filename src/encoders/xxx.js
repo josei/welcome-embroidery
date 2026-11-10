@@ -31,7 +31,8 @@ export function encodeXxx(plan){
     while(Math.abs(dx)>123||Math.abs(dy)>123){const sx=Math.max(-123,Math.min(123,dx)),sy=Math.max(-123,Math.min(123,dy));
     piece(kind==='stitch'?'stitch':'jump',sx,sy);dx-=sx;dy-=sy;}piece(final,dx,dy);};
   for(const p of plan.stitches){if(p.cmd==='end')continue;const nx=Math.round(p.x*10),ny=Math.round(p.y*10);
-    if(p.cmd==='stitch'||p.cmd==='jump'){if(nx!==x||ny!==y)move(nx,ny,p.cmd);}
+    // A zero-length stitch is kept as a zero-delta stitch record; a zero-length jump is dropped.
+    if(p.cmd==='stitch'||p.cmd==='jump'){if(nx!==x||ny!==y||p.cmd==='stitch')move(nx,ny,p.cmd);}
     else if(p.cmd==='trim')move(nx,ny,'jump','trim');
     else if(p.cmd==='color'||p.cmd==='stop'){body.push(0x7F,0x08,0,0);records++;if(nx!==x||ny!==y)move(nx,ny,'jump');}
     else throw Error(`Unsupported stitch command for XXX: ${p.cmd}`);

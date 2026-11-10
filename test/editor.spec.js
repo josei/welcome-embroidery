@@ -3490,6 +3490,22 @@ test('autosave: a dirty design asks before the page closes; a clean one leaves w
  expect(errors).toEqual([]);
 });
 
+// #284: the starter design has no edits, so clicking the logo right after load must not raise the leave-page prompt.
+test('autosave: the starter design leaves at once with no prompt; an edited design still asks',async({page})=>{
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));
+ const dialogs=[];page.on('dialog',d=>{dialogs.push(d.type());d.accept();});
+ for(let run=0;run<5;run++){
+  await page.goto('/');await expect(page.locator('.object-row')).toHaveCount(5);
+  await page.locator('.logo').click();await page.waitForURL(url=>new URL(url).pathname==='/');
+ }
+ expect(dialogs).toEqual([]);
+ await page.goto('/');await expect(page.locator('.object-row')).toHaveCount(5);
+ await page.locator('#rect').click();await expect(page.locator('.object-row')).toHaveCount(6);
+ await page.locator('.logo').click();await page.waitForURL(url=>new URL(url).pathname==='/');
+ expect(dialogs).toEqual(['beforeunload']);
+ expect(errors).toEqual([]);
+});
+
 test('autosave: a design too large to autosave shows one warning, not one per edit',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));page.on('dialog',d=>d.accept());
  const skipped=page.locator('#toast .toast-item',{hasText:'too large to autosave'});
