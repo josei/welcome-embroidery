@@ -2861,7 +2861,7 @@ test('save mark: autosaved with no file, Unsaved once a file exists and the desi
  });
  await page.goto('/');
  // First run: the sample is shown with no prompt, no mark, and nothing replaced it.
- await expect(page.locator('.object-row')).toHaveCount(5);await expect(page.locator('#name')).toHaveValue('Botanical badge');
+ await expect(page.locator('.object-row')).toHaveCount(5);await expect(page.locator('#name')).toHaveValue('Untitled design');
  await expect(page.locator('#restoreDialog')).toBeHidden();await expect(page.locator('#discardDialog')).toBeHidden();await expect(page.locator('#unsavedMark')).toHaveCount(0);
  await page.locator('#rect').click();await expect(page.locator('#unsavedMark')).toHaveText('Autosaved in this browser');
  await expect(page.locator('#unsavedMark')).not.toHaveClass(/\bunsaved\b/);
@@ -3458,7 +3458,7 @@ test('restore prompt: blank canvas behind it, starter after Start fresh, and plu
  await expect(page.locator('#restoreInfo')).toContainText('1 object. Autosaved in this browser');await expect(page.locator('#restoreInfo')).not.toContainText('Unsaved changes');await expect(page.locator('#restoreInfo')).not.toContainText('1 objects');
  await expect(page.locator('.object-row')).toHaveCount(0);await expect(page.locator('#name')).not.toHaveValue('Botanical badge');
  await page.locator('#restoreNo').click();await page.locator('#discardDiscard').click();await expect(page.locator('#restoreDialog')).toBeHidden();
- await expect(page.locator('.object-row')).toHaveCount(5);await expect(page.locator('#name')).toHaveValue('Botanical badge');
+ await expect(page.locator('.object-row')).toHaveCount(5);await expect(page.locator('#name')).toHaveValue('Untitled design');
  await newDesign(page);await page.locator('#rect').click();await page.locator('#ellipse').click();await page.locator('#rect').click();await expect(page.locator('.object-row')).toHaveCount(3);
  await page.locator('#name').fill('Trio badge');await page.locator('#name').press('Enter');await page.waitForTimeout(1200);
  await page.reload();await expect(page.locator('#restoreDialog')).toBeVisible();await expect(page.locator('#restoreInfo')).toContainText('3 objects. Autosaved in this browser');
