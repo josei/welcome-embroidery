@@ -22,3 +22,27 @@ export function parseDecimal(text) {
  const normal = String(text).trim().replace(',', '.');
  return normal !== '' && Number.isFinite(Number(normal)) ? normal : '';
 }
+
+/**
+ * The text a numeric field or readout shows for a stored dot-form value, in the UI language's separator, with the decimal
+ * places one rule gives its unit. An mm value always shows one decimal place, so 3 reads "3.0" beside 0.4 and 0.05 keeps
+ * its digits (the rule pads, it never rounds). Other units keep the stored form. Display only: the stored value is unchanged.
+ * @param {string} stored  e.g. "3", "0.4" or "-12.0"
+ * @param {string} language  'en' or 'es'
+ * @param {string} [unit]  'mm' for lengths; '' or any other unit for values shown as stored
+ * @returns {string}  e.g. "3.0" and "0.4" in English, "3,0" and "0,4" in Spanish
+ */
+export function fieldText(stored, language, unit = 'mm') {
+ const text = unit === 'mm' && /^-?\d+$/.test(stored) ? `${stored}.0` : stored;
+ return decimalText(text, language);
+}
+
+/**
+ * A whole count with thousands grouping in the UI language's style, e.g. "1,234" in English and "1.234" in Spanish.
+ * @param {number} n
+ * @param {string} language  'en' or 'es'
+ * @returns {string}
+ */
+export function formatCount(n, language) {
+ return n.toLocaleString(language === 'es' ? 'es-ES' : 'en-US');
+}

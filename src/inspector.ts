@@ -11,7 +11,8 @@ import {pivotActions, pivotState} from './pivotState.js';
 import {setStatus} from './statusState.js';
 import {syncTextInspector} from './letteringFonts.js';
 import {sewTime} from './appHelpers.js';
-import {t} from './i18n.js';
+import {t, lang} from './i18n.js';
+import {formatCount} from './decimalText.js';
 
 /** One object of the engine's document, typed with the fields the inspector reads. */
 interface InspectorObject {
@@ -88,7 +89,7 @@ function sourceInfo(o: InspectorObject | undefined): SourceInfo | null {
           .join(' · ')
       : '',
     details: [
-      `${o.stitches?.length.toLocaleString()} commands · ${o.threads?.length} source threads`,
+      `${formatCount(o.stitches?.length ?? 0, lang)} commands · ${o.threads?.length} source threads`,
       `${s.fileName} · ${(s.size / 1024).toFixed(1)} KiB`,
       `Source bounds ${s.bounds.map(v => v.toFixed(1)).join(' × ')} mm`,
     ],
@@ -119,7 +120,7 @@ export function syncInspector({plan, compileError, tips}: {plan: PlanInfo | null
     count: compileError
       ? t('⚠ Can\'t compile: {e}', {e: t(compileError)})
       : plan
-        ? `${t('{n} stitches', {n: plan.count.toLocaleString()})} · ${plan.errors.length ? plan.errors[0] : t('compiled')}`
+        ? `${t('{n} stitches', {n: formatCount(plan.count, lang)})} · ${plan.errors.length ? plan.errors[0] : t('compiled')}`
         : documentNow().doc.objects.length
           ? 'Compiling…'
           : 'Nothing to sew yet',
@@ -139,7 +140,7 @@ export function syncInspector({plan, compileError, tips}: {plan: PlanInfo | null
   setInspectorText({
     summary: plan
       ? t('{n} stitches · {m} m estimated thread · {c} thread colors', {
-          n: plan.count.toLocaleString(),
+          n: formatCount(plan.count, lang),
           m: (plan.threadLength / 1000).toFixed(1),
           c: plan.colors.length,
         }) +

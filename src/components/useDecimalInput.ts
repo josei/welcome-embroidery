@@ -1,7 +1,7 @@
 import {useDraftInput} from './useDraftInput';
 import {useNumberInput} from './useNumberInput';
 import type {FieldRange} from '../numberField.js';
-import {decimalText, parseDecimal} from '../decimalText.js';
+import {fieldText, parseDecimal} from '../decimalText.js';
 import {lang} from '../i18n.js';
 
 // The object inspector's numeric fields are type="text" inputMode="decimal": they show the stored dot form in the UI
@@ -13,14 +13,14 @@ function dotted(text: string): string {
   return n === '' ? text : n;
 }
 
-/** useNumberInput for a decimal field: the stored value is shown in the UI language's separator. */
+/** useNumberInput for a decimal field: the stored value is shown in the UI language's separator and its unit's places. */
 export function useDecimalNumber(
   stored: string,
   commit: (text: string) => void,
   range?: FieldRange,
   options: {allowEmpty?: boolean; unit?: string} = {},
 ) {
-  return useNumberInput(decimalText(stored, lang), commit, range, options);
+  return useNumberInput(fieldText(stored, lang, options.unit ?? 'mm'), commit, range, options);
 }
 
 /** useDraftInput for a decimal field: the stored value is shown in the UI language's separator. */
@@ -32,7 +32,7 @@ export function useDecimalDraft(
   valid?: (text: string) => boolean,
 ) {
   return useDraftInput(
-    decimalText(stored, lang),
+    fieldText(stored, lang),
     text => commit(dotted(text)),
     settle,
     commitOnEnter,
