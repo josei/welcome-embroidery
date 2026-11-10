@@ -1,4 +1,6 @@
 // A choice shown as pill buttons. The select keeps the value (visually hidden, for the form, the keyboard and the tests) and the pills show it.
+// Use of pills is limited to one purpose: a mutually exclusive mode with a few short options, all visible at once (e.g. underlay type).
+// Any other single choice is a native select, which uses the same border and fill as a text input (see styles.css, issue #324).
 // Clicking a pill picks its value, as choosing the option does.
 export function PillSelect({id, groupLabel, value, options, onChoose}: {
   id: string;
