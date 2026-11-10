@@ -85,6 +85,9 @@ export function mountAutosave() {
     const key = state.doc.revision + '|' + state.doc.name + '|' + state.dirty;
     if (key === lastKey) return;
     lastKey = key;
+    // A design with no edits yet (the starter, revision 0) has nothing to write, so it is not pending either: otherwise the
+    // leave-page prompt would fire during the first moments after load.
+    if (state.doc.revision <= 0) return;
     clearTimeout(timer);
     pending = true;
     timer = setTimeout(write, 700);
