@@ -17,13 +17,15 @@ import {shortcutForCommand} from '../shortcutTable.js';
 // and is disabled exactly when that command does not apply, using the same flags the toolbar uses. Nothing here is removed
 // from the toolbar, inspector, context menu or shortcut sheet; the menus are one more route to the same commands.
 
-/** One dropdown row. `key` is shown as the shortcut; `hint` is a second line of explanation (File uses it). */
+/** One dropdown row. `key` is shown as the shortcut; `hint` is a second line of explanation (File uses it). `reason` says why
+ * the row is disabled; it is visible text, so it can be read without a hover (touch has none). Shown only when disabled. */
 interface Entry {
  id: string;
  label: string;
  key?: string;
  hint?: string;
  disabled?: boolean;
+ reason?: string;
  run: () => void;
 }
 type Row = Entry | '-';
@@ -121,6 +123,7 @@ function Dropdown({id, label, rows}: {id: string; label: string; rows: Row[]}) {
        <span>{row.label}</span>
        {row.key && <kbd>{row.key}</kbd>}
        {row.hint && <small>{row.hint}</small>}
+       {row.disabled && row.reason && <small className="menu-reason">{row.reason}</small>}
       </button>
      ))}
     </div>
@@ -142,26 +145,32 @@ export function FileMenu() {
  return <Dropdown id="fileMenu" label={t('File')} rows={rows} />;
 }
 
-/** The Edit menu: history, the clipboard, duplicate and delete. */
+// Reasons for disabled rows. The selection-count ones match the thresholds toolbarSync uses for the toolbar buttons.
+const NEEDS_ONE = 'Select an object first';
+const NEEDS_TWO = 'Select two or more objects';
+const NEEDS_THREE = 'Select three or more objects';
+
+/** The Edit menu: history, the clipboard, duplicate, select all and delete. */
 export function EditMenu() {
  const actions = useSyncExternalStore(actionState.subscribe, actionState.get);
  const selection = useSyncExternalStore(selectionState.subscribe, selectionState.get);
  const clip = useSyncExternalStore(clipboardState.subscribe, clipboardState.get);
  const noneSelected = selection.multi.size === 0;
  const rows: Row[] = [
-  {id: 'menuUndo', label: t('Undo'), key: shortcutForCommand('undo'), disabled: actions.undo, run: () => runCommand('undo')},
-  {id: 'menuRedo', label: t('Redo'), key: shortcutForCommand('redo'), disabled: actions.redo, run: () => runCommand('redo')},
+  {id: 'menuUndo', label: t('Undo'), key: shortcutForCommand('undo'), disabled: actions.undo, reason: t('Nothing to undo'), run: () => runCommand('undo')},
+  {id: 'menuRedo', label: t('Redo'), key: shortcutForCommand('redo'), disabled: actions.redo, reason: t('Nothing to redo'), run: () => runCommand('redo')},
   '-',
-  {id: 'menuCut', label: t('Cut'), key: shortcutForCommand('cut'), disabled: noneSelected, run: () => runCommand('cut')},
-  {id: 'menuCopy', label: t('Copy'), key: shortcutForCommand('copy'), disabled: noneSelected, run: () => runCommand('copy')},
-  {id: 'menuPaste', label: t('Paste'), key: shortcutForCommand('paste'), disabled: !clip.clipboard, run: () => runCommand('paste')},
+  {id: 'menuCut', label: t('Cut'), key: shortcutForCommand('cut'), disabled: noneSelected, reason: t(NEEDS_ONE), run: () => runCommand('cut')},
+  {id: 'menuCopy', label: t('Copy'), key: shortcutForCommand('copy'), disabled: noneSelected, reason: t(NEEDS_ONE), run: () => runCommand('copy')},
+  {id: 'menuPaste', label: t('Paste'), key: shortcutForCommand('paste'), disabled: !clip.clipboard, reason: t('Copy something first'), run: () => runCommand('paste')},
   '-',
-  {id: 'menuDuplicate', label: t('Duplicate'), key: shortcutForCommand('duplicate'), disabled: actions.duplicate, run: () => runCommand('duplicate')},
+  {id: 'menuDuplicate', label: t('Duplicate'), key: shortcutForCommand('duplicate'), disabled: actions.duplicate, reason: t(NEEDS_ONE), run: () => runCommand('duplicate')},
+  {id: 'menuSelectAll', label: t('Select all'), key: shortcutForCommand('selectAll'), run: () => runCommand('selectAll')},
   '-',
   {id: 'menuCommandPalette', label: t('Command palette'), key: shortcutForCommand('openPalette'), run: () => setPaletteOpen(true)},
   {id: 'menuRepeat', label: t('Repeat last action'), key: shortcutForCommand('repeatLast'), run: () => runCommand('repeatLast')},
   '-',
-  {id: 'menuDelete', label: t('Delete'), key: 'Del', disabled: actions.remove, run: () => runCommand('delete')},
+  {id: 'menuDelete', label: t('Delete'), key: 'Del', disabled: actions.remove, reason: t(NEEDS_ONE), run: () => runCommand('delete')},
  ];
  return <Dropdown id="editMenu" label={t('Edit')} rows={rows} />;
 }
@@ -176,25 +185,25 @@ export function ArrangeMenu() {
  const flip = (name: 'flipH' | 'flipV') => () => selectionToolbarActions.press(name);
  const bool = (name: 'subtract' | 'union' | 'intersect') => () => selectionToolbarActions.press(name);
  const rows: Row[] = [
-  {id: 'menuAlignLeft', label: t('Align left'), disabled: align.align, run: press('left')},
-  {id: 'menuAlignHCenter', label: t('Align horizontal centers'), disabled: align.align, run: press('hcenter')},
-  {id: 'menuAlignRight', label: t('Align right'), disabled: align.align, run: press('right')},
-  {id: 'menuAlignTop', label: t('Align top'), disabled: align.align, run: press('top')},
-  {id: 'menuAlignVCenter', label: t('Align vertical centers'), disabled: align.align, run: press('vcenter')},
-  {id: 'menuAlignBottom', label: t('Align bottom'), disabled: align.align, run: press('bottom')},
+  {id: 'menuAlignLeft', label: t('Align left'), disabled: align.align, reason: t(NEEDS_ONE), run: press('left')},
+  {id: 'menuAlignHCenter', label: t('Align horizontal centers'), disabled: align.align, reason: t(NEEDS_ONE), run: press('hcenter')},
+  {id: 'menuAlignRight', label: t('Align right'), disabled: align.align, reason: t(NEEDS_ONE), run: press('right')},
+  {id: 'menuAlignTop', label: t('Align top'), disabled: align.align, reason: t(NEEDS_ONE), run: press('top')},
+  {id: 'menuAlignVCenter', label: t('Align vertical centers'), disabled: align.align, reason: t(NEEDS_ONE), run: press('vcenter')},
+  {id: 'menuAlignBottom', label: t('Align bottom'), disabled: align.align, reason: t(NEEDS_ONE), run: press('bottom')},
   '-',
-  {id: 'menuDistributeH', label: t('Distribute horizontally'), disabled: align.distribute, run: press('horizontal')},
-  {id: 'menuDistributeV', label: t('Distribute vertically'), disabled: align.distribute, run: press('vertical')},
+  {id: 'menuDistributeH', label: t('Distribute horizontally'), disabled: align.distribute, reason: t(NEEDS_THREE), run: press('horizontal')},
+  {id: 'menuDistributeV', label: t('Distribute vertically'), disabled: align.distribute, reason: t(NEEDS_THREE), run: press('vertical')},
   '-',
-  {id: 'menuFlipH', label: t('Flip horizontally'), disabled: toolbar.flip, run: flip('flipH')},
-  {id: 'menuFlipV', label: t('Flip vertically'), disabled: toolbar.flip, run: flip('flipV')},
+  {id: 'menuFlipH', label: t('Flip horizontally'), disabled: toolbar.flip, reason: t(NEEDS_ONE), run: flip('flipH')},
+  {id: 'menuFlipV', label: t('Flip vertically'), disabled: toolbar.flip, reason: t(NEEDS_ONE), run: flip('flipV')},
   '-',
-  {id: 'menuToFront', label: t('Bring to front'), key: 'End', disabled: noneSelected, run: () => moveSelection('front')},
-  {id: 'menuToBack', label: t('Send to back'), key: 'Home', disabled: noneSelected, run: () => moveSelection('back')},
+  {id: 'menuToFront', label: t('Bring to front'), key: 'End', disabled: noneSelected, reason: t(NEEDS_ONE), run: () => moveSelection('front')},
+  {id: 'menuToBack', label: t('Send to back'), key: 'Home', disabled: noneSelected, reason: t(NEEDS_ONE), run: () => moveSelection('back')},
   '-',
-  {id: 'menuSubtract', label: t('Subtract'), disabled: toolbar.subtract, run: bool('subtract')},
-  {id: 'menuUnion', label: t('Union'), disabled: toolbar.union, run: bool('union')},
-  {id: 'menuIntersect', label: t('Intersect'), disabled: toolbar.intersect, run: bool('intersect')},
+  {id: 'menuSubtract', label: t('Subtract'), disabled: toolbar.subtract, reason: t(NEEDS_TWO), run: bool('subtract')},
+  {id: 'menuUnion', label: t('Union'), disabled: toolbar.union, reason: t(NEEDS_TWO), run: bool('union')},
+  {id: 'menuIntersect', label: t('Intersect'), disabled: toolbar.intersect, reason: t(NEEDS_TWO), run: bool('intersect')},
  ];
  return <Dropdown id="arrangeMenu" label={t('Arrange')} rows={rows} />;
 }

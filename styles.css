@@ -337,6 +337,7 @@ input:not([type=checkbox]):not([type=range]),select,textarea,.panel textarea{fon
 .file-menu-list kbd{font:inherit;font-size:var(--fs-caption);color:#66726c}
 .file-menu-list .menu-sep{border:0;border-top:1px solid #e3e6e1;margin:4px 2px}
 .file-menu-list small{font-size:var(--fs-caption);color:#66726c}
+.file-menu-list small.menu-reason{color:#7a5a12}
 .list-warning{font-size:var(--fs-body);color:var(--warn);background:var(--warn-soft);border:1px solid var(--warn-line);border-radius:8px;padding:7px 9px;margin:0 0 6px;line-height:1.4}
 .row-warn{flex:none;color:var(--warn);font-size:var(--fs-body);line-height:1;cursor:help}
 .empty-hint{margin:4px 2px 0}

@@ -3040,10 +3040,20 @@ test('Edit and Arrange menus run the same commands as their shortcuts and disabl
  await page.keyboard.press('Escape');
  await page.locator('#editMenu').click();
  for(const id of ['menuCut','menuCopy','menuDuplicate','menuDelete','menuPaste'])await expect(page.locator(`#${id}`)).toBeDisabled();
+ // Each disabled row says why, as visible text. Enabled rows show no reason (Undo is on: two shapes were drawn).
+ await expect(page.locator('#menuCut')).toContainText('Select an object first');
+ await expect(page.locator('#menuPaste')).toContainText('Copy something first');
+ await expect(page.locator('#menuUndo')).not.toContainText('Nothing to undo');
  await page.locator('#editMenu').click();
  await page.locator('#arrangeMenu').click();
  for(const id of ['menuAlignLeft','menuDistributeH','menuFlipH','menuToFront','menuToBack','menuSubtract'])await expect(page.locator(`#${id}`)).toBeDisabled();
  await page.locator('#arrangeMenu').click();
+ // Select All is listed under Edit with its shortcut and selects everything, as Cmd+A does.
+ await page.keyboard.press('Escape');await page.locator('#editMenu').click();
+ await expect(page.locator('#menuSelectAll')).toBeEnabled();await expect(page.locator('#menuSelectAll')).toContainText('Select all');
+ await page.locator('#menuSelectAll').click();await expect(page.locator('.object-row.selected')).toHaveCount(2);
+ await page.locator('#editMenu').click();await expect(page.locator('#menuCut')).not.toContainText('Select an object first');
+ await page.keyboard.press('Escape');
  // One object: align and flip apply (align to the hoop), boolean and distribute do not.
  await rows.nth(0).click();
  await page.locator('#arrangeMenu').click();
