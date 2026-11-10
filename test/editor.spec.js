@@ -4009,3 +4009,5 @@ test('1024 px: Properties opens and folds the inspector without moving the canva
  await toggle.click();await expect(toggle).toHaveAttribute('aria-expanded','false');
  expect(await geo()).toEqual(before);
 });
+
+test('a click on empty canvas while new lettering is open keeps the lettering selected',async({page})=>{page.on('dialog',d=>d.accept());const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');await newDesign(page);await page.locator('#letter').click();await expect(page.locator('#canvasText')).toBeFocused();const a=await page.locator('#art').boundingBox();await page.mouse.click(a.x+a.width*0.2,a.y+a.height/2);await expect(page.locator('#canvasText')).toHaveCount(0);await expect(page.locator('#selected')).toContainText('BLOOM');await expect(page.locator('.object-row').first()).toContainText('Text: BLOOM');await page.keyboard.press('Enter');await expect(page.locator('#canvasText')).toBeFocused();expect(errors).toEqual([]);});
