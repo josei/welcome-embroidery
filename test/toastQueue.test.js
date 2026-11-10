@@ -109,3 +109,28 @@ test('a repeat of a message already on screen replaces it instead of stacking', 
   assert.deepEqual(q.visible().map(t => t.text), ['Saved.', limit]);
   assert.equal(q.log().length, 5, 'every message still reaches the log');
 });
+
+test('two tool hints in sequence leave only the newer one on screen', () => {
+  const q = createToastQueue();
+  q.push('Click to add points. Click the first point to close a polygon.', 'status', 0, null, true);
+  q.push('Drag on the canvas to draw a line.', 'status', 100, null, true);
+  assert.deepEqual(q.visible().map(t => t.text), ['Drag on the canvas to draw a line.']);
+  assert.equal(q.log().length, 2, 'the replaced hint still reaches the log');
+});
+
+test('a tool hint does not replace a confirmation or an error', () => {
+  const q = createToastQueue();
+  q.push('Saved.', 'status', 0);
+  q.push('Invalid embroidery file.', 'error', 0);
+  q.push('Drag on the canvas to draw a line.', 'status', 0, null, true);
+  assert.equal(q.visible().length, 3);
+});
+
+test('clearing hints removes the tool hint and keeps other toasts', () => {
+  const q = createToastQueue();
+  q.push('Saved.', 'status', 0);
+  q.push('Drag on the canvas to draw a line.', 'status', 0, null, true);
+  q.clearHints();
+  assert.deepEqual(q.visible().map(t => t.text), ['Saved.']);
+  assert.equal(q.nextExpiry(), TOAST_MIN_MS, 'the confirmation keeps its timer');
+});

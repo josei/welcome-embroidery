@@ -3,6 +3,7 @@
 // sections, and the shortcuts button. app.js mounts it once after the React tree exists.
 import {setShortcutsOpen} from './shortcutsState.js';
 import {toastActions} from './toastState.js';
+import {selectionState, selState} from './selectionState.js';
 
 /**
  * Shows a message in the toast stack and keeps it in the log. An error stays until the user dismisses it.
@@ -12,6 +13,20 @@ import {toastActions} from './toastState.js';
  */
 export function toast(message, kind = 'status', action) {
   toastActions.push(message, kind, action ?? null);
+}
+
+/**
+ * Shows the hint for the tool in use. It replaces any tool hint already on screen, and clears when its step ends
+ * (see clearToolHints and the selection watch in mountEditorChrome).
+ * @param {string} message
+ */
+export function toolHint(message) {
+  toastActions.push(message, 'status', null, true);
+}
+
+/** Removes the tool hint on screen: the step it described has ended. */
+export function clearToolHints() {
+  toastActions.clearHints();
 }
 
 function mountTooltip() {
@@ -68,6 +83,12 @@ function mountFolds() {
 
 /** Mounts the tooltip, persisted folds and the shortcuts button. */
 export function mountEditorChrome() {
+  // A tool hint describes the selection it was shown for, so a change of selected object ends it.
+  let selected = selState().selected;
+  selectionState.subscribe(() => {
+    const next = selState().selected;
+    if (next !== selected) { selected = next; clearToolHints(); }
+  });
   mountTooltip();
   mountFolds();
   const help = /** @type {HTMLElement | null} */ (document.getElementById('helpBtn'));

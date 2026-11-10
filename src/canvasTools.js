@@ -35,7 +35,7 @@ const TOOL_HINTS={
 /**
  * @param {any} api
  *  canvas: refresh(), snapPt(p), showSnap(hit), px(n);
- *  edits: commit(ops, after), render(), toast(text), setEditing(on), selectedObject();
+ *  edits: commit(ops, after), render(), toast(text), hint(text), clearHints(), setEditing(on), selectedObject();
  *  lettering: textFont(), ensureFontLoaded(id), fitHeight(fontId, text).
  */
 export function createCanvasTools(api){
@@ -140,6 +140,8 @@ export function createCanvasTools(api){
 
   // Picking the tool already in use goes back to select; switching away finishes a path that has enough points.
   function setTool(/** @type {any} */ next){
+    // Switching tool ends the step the old hint described, so it goes; the new tool's hint is shown at the end.
+    api.clearHints();
     if(next===toolMode.get()&&next!=='select')next='select';
     if(pathDraftNow().pathMode&&pathDraftNow().pathPoints.length>=2&&next!==toolMode.get())endPath(false,false,true);
     api.canvas.showSnap(null);
@@ -154,10 +156,10 @@ export function createCanvasTools(api){
     $('#art').classList.toggle('drawing',toolMode.get()!=='select');
     $('.sides-row').hidden=!(toolMode.get()==='polygon'||toolMode.get()==='star');
     $('#stitches').replaceChildren();
-    if(toolMode.get()!=='select')api.toast(t(TOOL_HINTS[toolMode.get()]));
     if(toolMode.get()!=='select'&&toolMode.get()!=='knife'&&selState().selected){
       setSelection({selected: null});setSelection({multi: new Set()});setSelection({selNode: null});api.render();
     }
+    if(toolMode.get()!=='select')api.hint(t(TOOL_HINTS[toolMode.get()]));
   }
 
   // Continue an existing path with the pen: its points become the draft, so Enter or the first point finishes it.
@@ -169,7 +171,7 @@ export function createCanvasTools(api){
     setPathDraft({pathMode: true});
     setPathDraft({continueId: o.id});
     setPathDraft({continueStitch: o.stitch||'run'});
-    api.toast(t('Click to add points. Click the first point to close the path, or press Enter to finish.'));
+    api.hint(t('Click to add points. Click the first point to close the path, or press Enter to finish.'));
   }
 
   // Commits the drafted path (or continues the one it started from) and clears the draft. Silent leaves the tool
