@@ -438,7 +438,7 @@ export function createCanvas(/** @type {any} */ api){
       if(s.moved&&Math.hypot(...s.delta)>.02)api.commit([{op:'translate',ids:s.ids,dx:s.delta[0],dy:s.delta[1]}],undefined,t('move'));
       else{if(!s.moved&&api.ids().length>1&&!e.shiftKey&&s.wasSelected){const g=tools.withGroup(s.clicked.id);api.select([...g],s.clicked.id);}else refresh();
       }return;}
-    if(s.type==='marquee'){const r=s.rect;if(!r||(r[2]-r[0])*vp.s<4&&(r[3]-r[1])*vp.s<4){if(!s.add&&!s.dismissesText)api.select([],null);else{refresh();if(s.dismissesText){const t=/** @type {HTMLTextAreaElement|null} */(document.getElementById('letteringText'));if(t){t.focus();t.setSelectionRange(t.value.length,t.value.length);}}}return;}
+    if(s.type==='marquee'){const r=s.rect;if(!r||(r[2]-r[0])*vp.s<4&&(r[3]-r[1])*vp.s<4){if(!s.add&&!s.dismissesText)api.select([],null);else{refresh();if(s.dismissesText){const t=/** @type {HTMLTextAreaElement|null} */(document.getElementById('letteringText'));if(t){t.focus();t.select();}}}return;}
       const picked=new Set(s.add?api.ids():[]);
         for(const o of api.doc().objects){if(o.visible===false||o.locked)continue;const b=objectBounds(o);
         if(b[2]>=r[0]&&b[0]<=r[2]&&b[3]>=r[1]&&b[1]<=r[3])for(const id of tools.withGroup(o.id))picked.add(id);}
