@@ -12,7 +12,7 @@ import {agentDialogState, copyAgentLink, revokeAgentLink, setAgentDialogOpen} fr
 import {EXPORT_FORMAT_GROUPS, EXPORT_FORMATS, MACHINE_BRANDS, exportFormatState, exportKind, formatsForBrand, setExportBrand, setExportFormat, setExportShowAll} from '../exportFormatState.js';
 import {t} from '../i18n.js';
 import {exportDialogState, setExportDialog} from '../exportDialogState.js';
-import {exportCurrent, exportFileName, MACHINE_FORMATS} from '../exportCommands.js';
+import {defaultExportStem, exportCurrent, exportFileName, MACHINE_FORMATS} from '../exportCommands.js';
 import {documentState} from '../documentState.js';
 import {bundledFontUsage, customFontUsage} from '../engine.js';
 import {getFont} from '../fonts.js';
@@ -171,6 +171,17 @@ export function EditorOverlays() {
         <p id={"exportHint"}>
           {"Check hoop and thread choices for your machine and materials."}
         </p>
+        <label htmlFor={"exportFileStem"}>
+          {t("File name")}
+        </label>
+        <input
+          id={"exportFileStem"}
+          type={"text"}
+          value={exportDialog.fileStem}
+          placeholder={defaultExportStem()}
+          onChange={e => setExportDialog({fileStem: e.target.value})}
+          onKeyDown={e => { if (e.key === 'Enter') e.preventDefault(); }}
+        />
         <p id={"exportFile"}>
           {"Output file: "}
           <code id={"exportFileName"}>

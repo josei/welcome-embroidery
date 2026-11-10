@@ -40,12 +40,18 @@ export function configureExportCommands(next: ExportApi) {
 
 /** Opens the export dialog; the worksheet row follows the format it reads from the store. */
 export function openExportDialog() {
-  setExportDialog({open: true});
+  setExportDialog({open: true, fileStem: ''});
 }
 
-/** The file name stem an export is built on: the project name without its .welcome extension. */
-function exportBase(): string {
+/** The file name stem an export gets when the user has not typed one: the project name without its .welcome extension. */
+export function defaultExportStem(): string {
   return exportStem(documentNow().doc.name);
+}
+
+/** The file name stem an export is built on: the name typed in the export dialog, else the document's. */
+function exportBase(): string {
+  const typed = exportDialogState.get().fileStem.trim();
+  return typed ? exportStem(typed) : defaultExportStem();
 }
 
 /** The file name an export of this format downloads as, so the dialog can show it before the download. */
