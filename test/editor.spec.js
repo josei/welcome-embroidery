@@ -2681,6 +2681,27 @@ test('sidebars: the right inspector is as wide as the left sidebar',async({page}
  }
 });
 
+// The status bar: each item stays on one line at 1440px and 1280px in English and Spanish, and the colour-change ticks do not overlap.
+test('status bar: every item stays on one line at 1440px and 1280px, in English and Spanish',async({page})=>{
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));page.on('dialog',d=>d.accept());
+ for (const lang of ['en','es']) for (const width of [1440,1280]) {
+  await page.setViewportSize({width,height:900});
+  await page.goto(`/?lang=${lang}`);await expect(page.locator('#count')).toContainText(lang==='es'?'compilad':'compiled');
+  await page.locator('button[data-view="stitches"]').click();await expect(page.locator('#play')).toBeVisible();
+  const lines=await page.evaluate(()=>{
+   const ids=['cursorPosition','playbackTime','playbackStitches','playbackSummary','playbackProgress','needlePosition','count','issuesBtn','messagesBtn'];
+   return ids.map(id=>{const el=document.getElementById(id);if(!el||el.hidden||getComputedStyle(el).display==='none')return [id,'hidden',1];
+    const r=document.createRange();r.selectNodeContents(el);const tops=new Set([...r.getClientRects()].filter(q=>q.height>0).map(q=>Math.round(q.top)));return [id,'shown',tops.size];});
+  });
+  // An empty item (the needle readout outside Design) has no line box to check.
+  for (const [id,state,n] of lines) if (state==='shown' && n) expect(n,`${id} at ${width}px ${lang}`).toBe(1);
+  const ticks=await page.evaluate(()=>{const m=[...document.querySelectorAll('.timeline-marker')].map(e=>e.getBoundingClientRect());
+   let overlap=0;for(let i=1;i<m.length;i++)if(m[i].left<m[i-1].right-0.5)overlap++;return overlap;});
+  expect(ticks,`colour-change ticks overlap at ${width}px ${lang}`).toBe(0);
+ }
+ expect(errors).toEqual([]);
+});
+
 test('header: export and settings gear sit together at the right edge, the same height',async({page})=>{await page.goto('/');const gear=await page.locator('#settingsBtn').boundingBox(),split=await page.locator('.export-split').boundingBox(),header=await page.locator('header.top').boundingBox();expect(Math.abs(gear.height-split.height)).toBeLessThan(1);expect(split.x+split.width).toBeLessThan(gear.x);expect(Math.abs(gear.x+gear.width-(header.x+header.width-14))).toBeLessThan(2);});
 
 test('autosave: each tab keeps its own recovery copy, and a reload restores only that tab\'s design',async({page})=>{

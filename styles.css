@@ -337,3 +337,20 @@ input[aria-invalid="true"]{border-color:var(--warn)!important;background:var(--w
 .palette-row.is-disabled{color:#9aa39e;cursor:default}
 .palette-row kbd{font:600 11px ui-monospace,monospace;background:#f1f3ef;border:1px solid #d8ddd6;border-radius:4px;padding:2px 6px;white-space:nowrap}
 .palette-empty{padding:12px 9px;color:#66726c}
+
+/* Status bar (#207): the bar's items each stay on one line. The simulation bar takes a full row so its track keeps its width, and the
+   status items wrap to the row below as whole items. Coordinates, counts and the progress text sit in fixed-width slots, so their width
+   does not change as the values change; text that is too long is cut off with an ellipsis, not wrapped. */
+.layout main>footer>*{flex:none}
+.layout main>footer>.playback-bar{flex:1 1 100%;min-width:0}
+.layout main>footer>#cursorPosition,.layout main>footer>#count,.layout main>footer>#playbackProgress,.layout main>footer>#needlePosition,.layout main>footer>#messagesBtn{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-variant-numeric:tabular-nums}
+#cursorPosition{width:15.5em;max-width:100%}
+#count{width:15em;max-width:100%}
+#playbackProgress{width:14em;min-width:0;max-width:100%}
+#needlePosition{width:14em;min-width:0;max-width:100%}
+.playback-bar .playback-time{width:10.5em;min-width:0;overflow:hidden}
+.playback-bar .playback-time span{overflow:hidden;text-overflow:ellipsis}
+.playback-track{flex:1 1 240px;min-width:160px}
+.playback-summary{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+.timeline-marker{width:8px;height:8px;margin-left:-4px;border-width:1.5px}
+.layout main>footer{flex-wrap:wrap;align-content:center;row-gap:6px;padding-top:6px;padding-bottom:6px}
