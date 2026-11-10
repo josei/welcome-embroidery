@@ -2,8 +2,9 @@ import {createStore} from './store.js';
 
 /**
  * The 3D preview's own state: whether the 3D view is on, its view (front, close-up or turntable), whether the loupe is on,
- * whether the pull estimate is shown, and the line under the checkbox that gives the estimate's peak. app.js sets threeD and
- * note and passes view and loupe to the 3D canvas; the controls change them through previewActions.
+ * whether the pull estimate is shown, whether the camera has been orbited off the chosen view's start (orbited), and the line
+ * under the checkbox that gives the estimate's peak. app.js sets threeD and note and passes view and loupe to the 3D canvas; the
+ * controls change them through previewActions. The 3D canvas sets orbited when the user moves the camera.
  */
 export type PreviewView = 'front' | 'close' | 'turntable';
 export interface PreviewState {
@@ -11,10 +12,11 @@ export interface PreviewState {
   view: PreviewView;
   loupe: boolean;
   pull: boolean;
+  orbited: boolean;
   note: string;
 }
 
-export const previewState = createStore<PreviewState>({threeD: false, view: 'front', loupe: false, pull: false, note: ''});
+export const previewState = createStore<PreviewState>({threeD: false, view: 'front', loupe: false, pull: false, orbited: false, note: ''});
 
 /** Changes some of the preview values. */
 export function setPreviewState(patch: Partial<PreviewState>) {

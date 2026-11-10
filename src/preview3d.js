@@ -91,7 +91,8 @@ if(!gl.getProgramParameter(p,gl.LINK_STATUS))throw Error(gl.getProgramInfoLog(p)
 return p;
 }
 
-export function createThreadPreview(/** @type {any} */ canvas){
+// onCamera(atStart) runs when the user moves the camera: false once it is orbited or zoomed, true when a double-click puts it back at the view's start.
+export function createThreadPreview(/** @type {any} */ canvas, /** @type {(atStart: boolean) => void} */ onCamera = () => {}){
   /** @type {WebGL2RenderingContext} */
   let gl=/** @type {WebGL2RenderingContext} */(/** @type {unknown} */(null));
   try{gl=/** @type {WebGL2RenderingContext} */(canvas.getContext('webgl2',{antialias:true,alpha:false,preserveDrawingBuffer:true}));
@@ -185,16 +186,16 @@ export function createThreadPreview(/** @type {any} */ canvas){
   canvas.addEventListener('pointerdown',(/** @type {any} */ e)=>
     {drag={x:e.clientX,y:e.clientY,id:e.pointerId};canvas.setPointerCapture?.(e.pointerId);hideLoupe();});
   canvas.addEventListener('pointermove',(/** @type {any} */ e)=>
-    {if(!drag||e.pointerId!==drag.id){hover={x:e.clientX,y:e.clientY};showLoupe();return;}yaw-=(e.clientX-drag.x)*.008;tilt=
-    Math.max(0,Math.min(1.3,tilt-(e.clientY-drag.y)*.006));drag.x=e.clientX;drag.y=e.clientY;schedule();});
+    {if(!drag||e.pointerId!==drag.id){hover={x:e.clientX,y:e.clientY};showLoupe();return;}const dx=e.clientX-drag.x,dy=e.clientY-drag.y;if(dx||dy)onCamera(false);yaw-=dx*.008;tilt=
+    Math.max(0,Math.min(1.3,tilt-dy*.006));drag.x=e.clientX;drag.y=e.clientY;schedule();});
   const end=(/** @type {any} */ e)=>{if(drag&&e.pointerId===drag.id)drag=null;
   };
   canvas.addEventListener('pointerup',end);
   canvas.addEventListener('pointercancel',end);
   canvas.addEventListener('pointerleave',()=>{hover=null;hideLoupe();});
-  canvas.addEventListener('wheel',(/** @type {any} */ e)=>{e.preventDefault();zoom=Math.max(.5,Math.min(8,zoom*Math.exp(-e.deltaY*.0015)));schedule();},
+  canvas.addEventListener('wheel',(/** @type {any} */ e)=>{e.preventDefault();zoom=Math.max(.5,Math.min(8,zoom*Math.exp(-e.deltaY*.0015)));onCamera(false);schedule();},
     {passive:false});
-  canvas.addEventListener('dblclick',()=>{reset();schedule();});
+  canvas.addEventListener('dblclick',()=>{reset();onCamera(true);schedule();});
   new ResizeObserver(schedule).observe(canvas);
   return {
     available:true,

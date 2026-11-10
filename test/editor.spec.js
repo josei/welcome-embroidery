@@ -282,6 +282,19 @@ test('subtract makes a hole (even-odd render, fewer stitches) and ties add lock 
  await page.locator('#secDoc summary').click();await page.locator('#ties').check();await page.locator('#count').click();await expect.poll(async()=>(await n())>holed).toBe(true);expect(errors).toEqual([]);
 });
 
+test('3D preview preset highlight clears when the camera is orbited and returns on choosing it again',async({page})=>{
+ await page.goto('/');const webgl=await page.evaluate(()=>Boolean(document.createElement('canvas').getContext('webgl2')));test.skip(!webgl,'WebGL2 is not available in this browser');
+ await page.locator('button[data-view="preview"]').click();const canvas=page.locator('#preview3d');await expect(canvas).toHaveAttribute('data-instances',/^[1-9]\d+$/,{timeout:8000});
+ const front=page.getByRole('button',{name:'Front ¾'});await expect(front).toHaveAttribute('aria-pressed','true');
+ const box=await canvas.boundingBox();await page.mouse.move(box.x+box.width/2,box.y+box.height/2);await page.mouse.down();await page.mouse.move(box.x+box.width/2+60,box.y+box.height/2,{steps:4});await page.mouse.up();
+ await expect(front).toHaveAttribute('aria-pressed','false');await expect(page.getByRole('button',{name:'Close-up'})).toHaveAttribute('aria-pressed','false');
+ const orbitedYaw=await canvas.getAttribute('data-yaw');expect(orbitedYaw).not.toBe('0.000');
+ await page.locator('button[data-view="design"]').click();await expect(canvas).toBeHidden();await page.locator('button[data-view="preview"]').click();await expect(canvas).toBeVisible();await expect(canvas).toHaveAttribute('data-yaw',orbitedYaw);await expect(front).toHaveAttribute('aria-pressed','false');
+ await page.getByRole('button',{name:'Close-up'}).click();await expect(page.getByRole('button',{name:'Close-up'})).toHaveAttribute('aria-pressed','true');await expect(canvas).toHaveAttribute('data-yaw','0.000');
+ const c2=await canvas.boundingBox();await page.mouse.move(c2.x+c2.width/2,c2.y+c2.height/2);await page.mouse.wheel(0,-200);await expect(page.getByRole('button',{name:'Close-up'})).toHaveAttribute('aria-pressed','false');
+ await front.click();await expect(front).toHaveAttribute('aria-pressed','true');await expect(canvas).toHaveAttribute('data-zoom','1.000');
+});
+
 test('WebGL thread preview renders stitches, orbits, zooms and resets; fabric shows in preview only',async({page})=>{
  await page.goto('/');const webgl=await page.evaluate(()=>Boolean(document.createElement('canvas').getContext('webgl2')));test.skip(!webgl,'WebGL2 is not available in this browser');
  await expect(page.locator('#preview3d')).toBeHidden();await page.locator('button[data-view="preview"]').click();const canvas=page.locator('#preview3d');await expect(canvas).toBeVisible();await expect(canvas).toHaveAttribute('data-instances',/^[1-9]\d+$/,{timeout:8000});
