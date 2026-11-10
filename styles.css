@@ -36,6 +36,12 @@ nav button[data-view]{padding:7px 13px;color:#66726c}nav button[data-view].activ
 #seek{accent-color:var(--teal)}#play,#resetPlayback{border-color:var(--field-line);color:#66726c}
 .panel input:not([type=checkbox]),.panel select{border-color:var(--field-line);background:#f6f7f5;border-radius:6px}
 @media(max-width:1100px){.layout{grid-template-columns:208px minmax(0,1fr) 208px}}
+/* Issue #319: 901-1100px keeps the inspector beside the canvas. Its column is wide enough for the controls (about 30% of the window, 260-300px),
+   so the fields, the Transform pairs and the corner radii fit without clipping; a folded inspector gives its column back to the canvas. */
+@media(min-width:901px) and (max-width:1100px){
+.layout{grid-template-columns:208px minmax(0,1fr) clamp(260px,30vw,300px)}
+.layout:has(>.panel.inspector-collapsed:last-child){grid-template-columns:208px minmax(0,1fr)}
+}
 .path-node{fill:#fff;stroke:var(--teal);stroke-width:.42;vector-effect:non-scaling-stroke;cursor:crosshair;pointer-events:all}.path-node:hover{fill:#d7eee7;stroke-width:.6}
 #sourceInfo{padding:10px;background:#f1f5f1;border-radius:8px;font-size:var(--fs-caption);line-height:1.55;color:#56645d}#sourceInfo[hidden]{display:none}#sourceInfo strong{color:#245d4d}#sourceInfo em{color:#826a42;font-style:normal}
 
@@ -128,7 +134,7 @@ nav .icon-button:first-of-type{margin-left:auto}
 .tool-grid{display:grid;grid-template-columns:1fr auto;gap:2px 8px;align-items:end}.tool-grid label{margin:6px 0}.tool-grid input,.tool-grid select{width:90px!important}.tool-grid button{margin-bottom:6px}.btn-row{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}.btn-row button,.tool-grid button{font-size:var(--fs-caption);padding:5px 8px}#fillReset[hidden],#arrAngleRow[hidden]{display:none!important}#arrAngleRow{grid-column:1/-1}
 
 /* Font picker and text options */
-.sr-only{position:absolute!important;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0;opacity:0}
+.sr-only{position:absolute!important;width:1px!important;height:1px!important;margin:-1px;padding:0;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0;opacity:0}
 .font-field{display:flex;flex-direction:column;gap:5px;margin:10px 0}.font-label{color:#606863}
 .font-button{display:flex;align-items:center;gap:8px;width:100%;padding:5px 8px;border:1px solid var(--field-line);border-radius:7px;background:#fff;text-align:left;cursor:pointer;min-height:42px}.font-button:hover{border-color:#7b9a89}.font-button .font-preview{flex:1;min-width:0;height:28px;color:#1d2925}.font-button #fontButtonName{font-size:var(--fs-caption);color:#606863;max-width:92px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.font-button .chevron{width:14px;height:14px;flex:none;color:var(--mute-text)}
 .font-panel{position:fixed;z-index:60;display:flex;flex-direction:column;gap:8px;padding:10px;background:#fff;border:1px solid #dfe3dd;border-radius:12px;box-shadow:0 14px 44px #1d29252e;overflow:hidden}.font-panel[hidden]{display:none}
@@ -240,8 +246,9 @@ label[hidden],button[hidden],.sel-hint[hidden]{display:none!important}
 @media (max-width:1100px){.canvas .floating{grid-template-columns:repeat(14,26px);gap:6px 3px}.canvas .floating .icon-button{width:26px;min-width:26px;height:26px}.canvas .floating #grid{font-size:var(--fs-caption);height:26px}}
 .sew-tips{margin:0 0 12px;padding:8px 10px;border:1px solid #ecd9a1;border-radius:8px;background:#fff8e1;color:#6b5314;font-size:var(--fs-body);line-height:1.45}.sew-tips[hidden]{display:none}.sew-tips b{display:block;font-size:var(--fs-caption);letter-spacing:.07em;text-transform:uppercase;margin-bottom:3px}.sew-tips p{margin:0 0 4px}
 
-/* Phones: the canvas leads and the tool and inspector panels stack below it; the page scrolls instead of the panes */
-@media (max-width:1100px),(max-height:500px) and (pointer:coarse){
+/* Phones and small tablets (900px and narrower): the canvas leads and the tool and inspector panels stack below it; the page scrolls instead of the panes.
+   From 901 to 1100px the three columns stay, so the inspector sits beside the canvas (issue #319). */
+@media (max-width:900px),(max-height:500px) and (pointer:coarse){
 body{height:auto;min-height:0;overflow-x:hidden;overflow-y:auto}
 .top{height:auto;flex-wrap:wrap;gap:6px 4px;padding:8px 10px}
 .top .logo{margin-right:0;order:0}

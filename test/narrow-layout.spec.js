@@ -117,3 +117,38 @@ test('status bar readouts do not overlap at 1440x900 with 100 objects, in stitch
  }
  expect(errors).toEqual([]);
 });
+
+// Issue #319: with an object selected, an inspector field is reachable without scrolling the page past the canvas. At 1024x700 the
+// inspector is a column beside the canvas (the page does not scroll); at 1440x900 it stays the desktop column.
+for(const [width,height] of [[1024,700],[1440,900]]){
+ test(`an inspector field is in view without page scroll at ${width}x${height}`,async({page})=>{
+  const errors=[];page.on('pageerror',e=>errors.push(e.message));page.on('dialog',d=>d.accept());
+  await page.setViewportSize({width,height});
+  await page.goto('/');await newDesign(page);await page.locator('#rect').click();
+  const field=page.locator('#inspector input:not([type=checkbox]):visible').first();
+  await expect(field).toBeVisible();
+  const box=await field.boundingBox();
+  expect(box.y+box.height,'inspector field bottom inside the viewport').toBeLessThanOrEqual(height);
+  expect(box.y,'inspector field top inside the viewport').toBeGreaterThanOrEqual(0);
+  expect(await page.evaluate(()=>document.scrollingElement.scrollTop),'page scroll').toBe(0);
+  // The page itself does not move when the user scrolls over the canvas (the inspector's own column scrolls, not the page).
+  await page.locator('main .canvas').hover();await page.mouse.wheel(0,400);await page.waitForTimeout(150);
+  expect(await page.evaluate(()=>scrollY),'page scrollY after wheel').toBe(0);
+  // Every visible inspector control sits inside the window (no clipping at the right edge), and the page does not overflow sideways.
+  const outside=await page.evaluate((w)=>{
+   const bad=[];
+   for(const el of document.querySelectorAll('#inspector input,#inspector select,#inspector button,#inspector label')){
+    const cs=getComputedStyle(el);if(cs.display==='none'||cs.visibility==='hidden'||el.closest('[hidden]'))continue;
+    const r=el.getBoundingClientRect();if(r.width===0&&r.height===0)continue;
+    if(r.right>w+0.5||r.left<-0.5)bad.push(`${el.id||el.tagName}:${Math.round(r.left)}-${Math.round(r.right)}`);
+   }
+   return {bad,docWidth:document.documentElement.scrollWidth};
+  },width);
+  expect(outside.bad,'inspector controls outside the window').toEqual([]);
+  expect(outside.docWidth,'document width').toBeLessThanOrEqual(width);
+  // The canvas stays visible beside the inspector.
+  const canvas=await page.locator('main .canvas').boundingBox();
+  expect(canvas.width,'canvas width').toBeGreaterThan(300);
+  expect(errors).toEqual([]);
+ });
+}
