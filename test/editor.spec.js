@@ -2980,7 +2980,7 @@ test('the export file name is editable in the export dialog and is used for the 
  await page.locator('#export').click();
  await expect(page.locator('#exportDialog')).toBeVisible();
  await expect(page.locator('#exportFileStem')).toHaveValue('');
- await expect(page.locator('#exportFileStem')).toHaveAttribute('placeholder','Untitled design');
+ await expect(page.locator('#exportFileStem')).toHaveAttribute('placeholder','Bloom');
  await pickFormat(page,'jef');
  await page.locator('#exportFileStem').fill('Dad birthday');
  await expect(page.locator('#exportFileName')).toHaveText('Dad birthday.jef');

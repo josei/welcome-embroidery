@@ -46,6 +46,18 @@ export function exportStem(name){
   return stem==='Untitled design'?t(stem):stem;}
 
 /**
+ * The file name stem an export gets when the user has not typed one. A document the user named keeps that name; an
+ * unnamed one takes its lettering (text objects joined with spaces, so "WE" gives WE); with neither, Untitled design.
+ * @param {{name?: string, objects?: any[]}} doc
+ * @returns {string}
+ */
+export function designExportStem(doc){
+  if(doc.name&&doc.name!=='Untitled design')return exportStem(doc.name);
+  const lettering=(doc.objects||[]).filter(o=>o.kind==='text'&&typeof o.text==='string')
+    .map(o=>o.text.replace(/\s+/g,' ').trim()).filter(Boolean).join(' ').slice(0,80).trim();
+  return exportStem(lettering||doc.name);}
+
+/**
  * @param {any} p the plan's sewing span, as sewingSeconds reads it
  * @returns {string}
  */

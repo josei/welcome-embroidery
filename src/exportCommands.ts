@@ -2,7 +2,7 @@ import {documentNow} from './documentState.js';
 import {selectedObject} from './selectionCommands.js';
 import {exportFormatState, exportKind} from './exportFormatState.js';
 import {EMPTY_EXPORT_REASON, exportDialogState, setExportDialog} from './exportDialogState.js';
-import {download, exportStem, forWorker} from './appHelpers.js';
+import {download, designExportStem, exportStem, forWorker} from './appHelpers.js';
 import {exportAppliqueTemplates, exportPrintTemplate, exportSvg, jefWarnings, sewingWorksheet} from './engine.js';
 import {exportDxf} from './dxf.js';
 import {t} from './i18n.js';
@@ -43,9 +43,12 @@ export function openExportDialog() {
   setExportDialog({open: true, fileStem: ''});
 }
 
-/** The file name stem an export gets when the user has not typed one: the project name without its .welcome extension. */
+/**
+ * The file name stem an export gets when the user has not typed one. A document the user named keeps that name; an
+ * unnamed one takes its lettering, so "WE" gives WE; with neither, Untitled design.
+ */
 export function defaultExportStem(): string {
-  return exportStem(documentNow().doc.name);
+  return designExportStem(documentNow().doc);
 }
 
 /** The file name stem an export is built on: the name typed in the export dialog, else the document's. */
