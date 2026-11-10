@@ -1,5 +1,5 @@
 // @ts-check
-import {decimalText, parseDecimal} from './decimalText.js';
+import {fieldText, parseDecimal} from './decimalText.js';
 import {lang} from './i18n.js';
 // Stepping for numeric fields, the same on every field. Up and Down move the value by the field's own step attribute;
 // Shift multiplies that step by 10 and Alt by 0.1, as the canvas nudge keys do in spirit. Ctrl and Cmd do nothing here.
@@ -96,7 +96,7 @@ function setFieldText(input, text) {
 
 /**
  * A numeric field: a type="number" input, or a decimal text field (type="text" inputmode="decimal") that shows its
- * value through decimalText. Both step and scrub the same way.
+ * value through fieldText. Both step and scrub the same way.
  * @param {EventTarget | null} el
  * @returns {el is HTMLInputElement}
  */
@@ -110,10 +110,15 @@ function shownNumber(input) {
   return Number.parseFloat(input.type === 'number' ? input.value : parseDecimal(input.value));
 }
 
-/** The text to show for a value: a number field keeps the dot form the browser expects, a decimal field follows the UI language. */
-/** @param {HTMLInputElement} input @param {string} value */
-function shownText(input, value) {
-  return input.type === 'number' ? value : decimalText(value, lang);
+/**
+ * The text to show for a value: a number field keeps the dot form the browser expects; a decimal field goes through
+ * fieldText, the same formatter the hooks use, with the unit the field declares in data-unit.
+ * @param {{type: string, dataset: {unit?: string}}} input
+ * @param {string} value
+ * @param {string} [language]
+ */
+export function shownText(input, value, language = lang) {
+  return input.type === 'number' ? value : fieldText(value, language, input.dataset.unit ?? '');
 }
 
 const PIXELS_PER_STEP = 5;

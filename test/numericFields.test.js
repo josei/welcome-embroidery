@@ -1,6 +1,6 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
-import {scrubValue, steppedValue, stepMultiplier} from '../src/numericFields.js';
+import {scrubValue, shownText, steppedValue, stepMultiplier} from '../src/numericFields.js';
 
 const NONE = {shiftKey: false, altKey: false};
 const SHIFT = {shiftKey: true, altKey: false};
@@ -30,4 +30,14 @@ test('scrubbing moves by whole pixel steps, coarser with Shift, clamped to the r
   assert.equal(String(scrubValue(2, -10, 5, 0.5, NONE)), '1');
   assert.equal(String(scrubValue(2, 10, 5, 0.5, SHIFT)), '12');
   assert.equal(String(scrubValue(2, -100, 5, 0.5, NONE, {min: 0.5, max: 7})), '0.5');
+});
+
+test('a stepped or scrubbed mm field shows one decimal place, as the hooks do, in the UI language separator', () => {
+  const mm = {type: 'text', dataset: {unit: 'mm'}};
+  const angle = {type: 'text', dataset: {unit: '°'}};
+  assert.equal(shownText(mm, '4', 'en'), '4.0');
+  assert.equal(shownText(mm, '4', 'es'), '4,0');
+  assert.equal(shownText(mm, '0.4', 'en'), '0.4');
+  assert.equal(shownText(angle, '0', 'en'), '0');
+  assert.equal(shownText({type: 'number', dataset: {}}, '4', 'en'), '4');
 });

@@ -20,7 +20,10 @@ export function useDecimalNumber(
   range?: FieldRange,
   options: {allowEmpty?: boolean; unit?: string} = {},
 ) {
-  return useNumberInput(fieldText(stored, lang, options.unit ?? 'mm'), commit, range, options);
+  const unit = options.unit ?? 'mm';
+  const field = useNumberInput(fieldText(stored, lang, unit), commit, range, options);
+  // The unit rides on the input so the stepping and scrub paths (numericFields.js) format with the same rule.
+  return {...field, inputProps: {...field.inputProps, 'data-unit': unit}};
 }
 
 /** useDraftInput for a decimal field: the stored value is shown in the UI language's separator. */
