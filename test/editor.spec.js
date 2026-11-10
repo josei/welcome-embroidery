@@ -2783,7 +2783,7 @@ test('Ctrl+S saves and is prevented; Ctrl+O and Ctrl+N run Open and New outside 
 
 test('Save downloads the project each time without a file picker, and Save As names the download',async({page})=>{
  await page.goto('/');
- await page.locator('#rect').click();await expect(page.locator('#unsavedMark')).toHaveText('Unsaved');
+ await page.locator('#rect').click();await expect(page.locator('#unsavedMark')).toHaveText('Autosaved in this browser');
  const first=page.waitForEvent('download');await page.locator('#save').click();const a=await first;
  await expect(page.locator('#unsavedMark')).toHaveCount(0);await expect(page.locator('#savedStatus')).toContainText('Saved');
  expect(a.suggestedFilename()).toMatch(/\.welcome$/);
@@ -2794,6 +2794,26 @@ test('Save downloads the project each time without a file picker, and Save As na
  await page.locator('#menuSaveAs').click();await page.locator('#saveAsName').fill('My logo');
  const third=page.waitForEvent('download');await page.locator('#saveAsConfirm').click();expect((await third).suggestedFilename()).toBe('My logo.welcome');
  await expect(page.locator('#saveAsDialog')).toBeHidden();
+});
+
+// Without a project file, edits are autosaved in this browser and say so; "Unsaved" needs a file that is out of date.
+test('save mark: autosaved with no file, Unsaved once a file exists and the design moves past it, and the first-run sample stays',async({page})=>{
+ await page.addInitScript(()=>{
+  window.showSaveFilePicker=async()=>({name:'badge.welcome',createWritable:async()=>({write:async()=>{},close:async()=>{}})});
+ });
+ await page.goto('/');
+ // First run: the sample is shown with no prompt, no mark, and nothing replaced it.
+ await expect(page.locator('.object-row')).toHaveCount(5);await expect(page.locator('#name')).toHaveValue('Botanical badge');
+ await expect(page.locator('#restoreDialog')).toBeHidden();await expect(page.locator('#discardDialog')).toBeHidden();await expect(page.locator('#unsavedMark')).toHaveCount(0);
+ await page.locator('#rect').click();await expect(page.locator('#unsavedMark')).toHaveText('Autosaved in this browser');
+ await expect(page.locator('#unsavedMark')).not.toHaveClass(/\bunsaved\b/);
+ await expect(page.locator('#unsavedMark')).toHaveText(/Autosaved/);
+ await page.locator('#save').click();await expect(page.locator('#unsavedMark')).toHaveCount(0);await expect(page.locator('#savedStatus')).toContainText('badge.welcome');
+ await page.locator('#rect').click();await expect(page.locator('#unsavedMark')).toHaveText('Unsaved');await expect(page.locator('#unsavedMark')).toHaveClass(/\bunsaved\b/);
+ // The file name survives a reload through the autosave copy, so the restored edits still read as Unsaved.
+ await page.waitForTimeout(1200);await page.reload();await expect(page.locator('#restoreDialog')).toBeVisible();
+ await page.locator('#restoreYes').click();await expect(page.locator('#restoreDialog')).toBeHidden();
+ await expect(page.locator('#unsavedMark')).toHaveText('Unsaved');
 });
 
 test('Save writes the chosen file and later Saves overwrite it, while Save As always asks',async({page})=>{

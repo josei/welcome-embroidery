@@ -402,6 +402,8 @@ input[aria-invalid="true"]{border-color:var(--warn)!important;background:var(--w
 .top #savedStatus{min-width:0;overflow:hidden;text-overflow:ellipsis}
 /* The unsaved marker keeps its word for screen readers, and shows as an amber dot here, so the title keeps its width. */
 .top .save-status.unsaved{flex:none;width:8px;height:8px;border-radius:50%;background:#8a5a00;color:transparent;font-size:0;overflow:hidden}
+/* The autosaved mark (no project file yet) is the same dot in grey-green: it is not a warning, and its words show as a tooltip. */
+.top .save-status.autosaved{flex:none;width:8px;height:8px;border-radius:50%;background:#66726c;color:transparent;font-size:0;overflow:hidden}
 .top #agentPill,.top .icon-button{flex:none}
 .top .agent-pill{padding:0 8px}
 .top .export-split #export{padding:0 10px}

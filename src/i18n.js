@@ -12,7 +12,7 @@ export const ES={
 'Settings':'Ajustes',
 'Save As':'Guardar como','File name':'Nombre del archivo',
 'Arrange':'Organizar','Bring to front':'Traer al frente','Send to back':'Enviar al fondo','Subtract':'Restar','Union':'Unión','Intersect':'Intersecar',
-'Saved {time}':'Guardado {time}','Saved {time} to {file}':'Guardado {time} en {file}','Unsaved':'Sin guardar',
+'Autosaved in this browser':'Autoguardado en este navegador','Saved {time}':'Guardado {time}','Saved {time} to {file}':'Guardado {time} en {file}','Unsaved':'Sin guardar',
 'This design is too large to autosave, so this browser does not keep a copy. Save the project file to keep your work.':'Este diseño es demasiado grande para el autoguardado, así que este navegador no guarda una copia. Guarda el archivo del proyecto para conservar tu trabajo.',
 'Stitch length':'Largo de puntada','Row spacing':'Separación de filas','Border width':'Ancho del borde','The document':'El documento',
 '{field} must be {range}. {object} keeps {kept} mm.':'{field} debe estar entre {range}. {object} mantiene {kept} mm.',

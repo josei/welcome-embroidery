@@ -124,7 +124,7 @@ export function mountAutosave() {
       restoreActions.yes = () => {
         // A copy from another tab is used up once restored; this tab's own copy is rewritten by the next autosave.
         if (key !== ownAutosaveKey()) removeKey(key);
-        restoreProject({...saved.doc, docId: isDocId(saved.docId) ? saved.docId : undefined}, !saved.clean);
+        restoreProject({...saved.doc, docId: isDocId(saved.docId) ? saved.docId : undefined}, !saved.clean, saved.savedFileName || null);
         setRestore({open: false});
       };
       restoreActions.no = () => {
@@ -140,7 +140,7 @@ export function mountAutosave() {
           name: saved.doc.name,
           objects: saved.doc.objects.length,
           minutes: ago,
-          save: () => saveRestoredThenStartFresh({...saved.doc, docId: isDocId(saved.docId) ? saved.docId : undefined}),
+          save: () => saveRestoredThenStartFresh({...saved.doc, docId: isDocId(saved.docId) ? saved.docId : undefined}, saved.savedFileName || null),
           proceed: () => {
             removeKey(key);
             showStarterDesign();

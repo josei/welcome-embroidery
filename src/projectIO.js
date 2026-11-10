@@ -324,10 +324,13 @@ export async function openArtifact(id) {
  * fails validation shows its message and leaves the editor as it was.
  * @param {any} saved
  * @param {boolean} [dirty=true] false when the copy matches the saved file, so it opens as saved
+ * @param {string|null} [savedFileName] the file the copy was saved to, when known
  */
-export function restoreProject(saved, dirty = true) {
+export function restoreProject(saved, dirty = true, savedFileName = null) {
   try {
     acceptProject(saved);
+    // The copy still knows which file it was saved to, so an edit after the restore reads as "Unsaved" against that file.
+    if (savedFileName) setSave({savedFileName});
     setDocument({dirty});
     wired().render();
   } catch (error) {
@@ -394,8 +397,8 @@ function guardDiscard(proceed, {cancelNotice = '', replaceFirst = false, undoLab
  * @param {any} saved the autosaved document
  * @returns {Promise<boolean>}
  */
-export async function saveRestoredThenStartFresh(saved) {
-  restoreProject(saved);
+export async function saveRestoredThenStartFresh(saved, savedFileName = null) {
+  restoreProject(saved, true, savedFileName);
   await projectSave();
   if (documentNow().dirty) return false;
   startNewDesign();

@@ -11,6 +11,7 @@ import {shortcutLabel} from '../shortcutLabels.js';
 import {shortcutFor} from '../shortcutTable.js';
 import {importMachineFile, newProject, openProjectFile, projectSave} from '../projectIO.js';
 import {saveState} from '../saveState.js';
+import {dirtyMark} from '../saveMark.js';
 import {toolbarActions} from '../toolbarCommands.js';
 import {t} from '../i18n.js';
 import {ArrangeMenu, EditMenu, FileMenu} from './MenuBar';
@@ -36,12 +37,15 @@ function HistoryButton({undo = false}: {undo?: boolean}) {
  );
 }
 
-// The save feedback: the unsaved marker while the design has changes, then the time of the last save in this tab and the
+// The save feedback: the unsaved marker while the design has changes ("Autosaved in this browser" until a file exists), then the time of the last save in this tab and the
 // file it wrote to.
 function SaveStatus() {
  const {dirty} = useSyncExternalStore(documentState.subscribe, documentState.get);
  const {savedAt, savedFileName} = useSyncExternalStore(saveState.subscribe, saveState.get);
- if (dirty) return <span id="unsavedMark" className="save-status unsaved">{t('Unsaved')}</span>;
+ if (dirty) {
+  const mark = dirtyMark(savedFileName, t);
+  return <span id="unsavedMark" className={mark.unsaved ? 'save-status unsaved' : 'save-status autosaved'} title={mark.text}>{mark.text}</span>;
+ }
  if (savedAt === null) return null;
  const when = new Date(savedAt);
  const time = `${String(when.getHours()).padStart(2, '0')}:${String(when.getMinutes()).padStart(2, '0')}`;
