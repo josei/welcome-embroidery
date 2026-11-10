@@ -46,7 +46,7 @@ test('browser design, settings, history, local project and offline compilation/e
  await page.locator('button[data-view=design]').click();await page.screenshot({path:'/tmp/welcome-browser-workspace.png'});
  const projectDownload=page.waitForEvent('download');await page.locator('#save').click();const saved=await projectDownload;const projectPath='/tmp/welcome-browser-project.welcome';await saved.saveAs(projectPath);
  const source=JSON.parse(await (await import('node:fs/promises')).readFile(projectPath,'utf8'));expect(source.schema).toBe('welcome/1');expect(source.name).toBe('Garden badge');expect(source.objects.length).toBe(7);
- const artifactId='123e4567-e89b-42d3-a456-426614174000';const linked=await page.context().newPage();await linked.route(`**/artifacts/${artifactId}.welcome`,route=>route.fulfill({status:200,contentType:'application/json',body:JSON.stringify(source)}));await linked.goto(`/?open=${artifactId}`);await expect(linked.locator('#name')).toHaveValue('Garden badge');await expect(linked.locator('.object-row')).toHaveCount(7);await expect(linked.locator('#toast')).toHaveText('Project opened locally.');await linked.close();
+ const artifactId='123e4567-e89b-42d3-a456-426614174000';const linked=await page.context().newPage();await linked.route(`**/artifacts/${artifactId}.welcome`,route=>route.fulfill({status:200,contentType:'application/json',body:JSON.stringify(source)}));await linked.goto(`/?open=${artifactId}`);await expect(linked.locator('#name')).toHaveValue('Garden badge');await expect(linked.locator('.object-row')).toHaveCount(7);await expect(linked.locator('#toast .toast-item')).toHaveCount(0);await linked.close();
  await newDesign(page);await expect(page.locator('.object-row')).toHaveCount(0);
  await page.locator('#file').setInputFiles({name:'bad.welcome',mimeType:'application/json',buffer:Buffer.from(JSON.stringify({...source,objects:[{...source.objects[0],kind:'triangle'}]}))});await expect(page.locator('.object-row')).toHaveCount(0);await expect(page.locator('#toast')).toContainText('unsupported kind');
  await page.locator('#file').setInputFiles({name:'reopened.welcome',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(source))});await expect(page.locator('.object-row')).toHaveCount(7);await expect(page.locator('#name')).toHaveValue('Garden badge');
@@ -1785,8 +1785,18 @@ test('a filled SVG square imports as a fill; a counter becomes a hole; two islan
  await expect(page.locator('.object-row')).toHaveCount(2);await expect(page.locator('.object-row').filter({hasText:'fill'})).toHaveCount(2);
  await page.locator('#file').setInputFiles('test/fixtures/two-islands.svg');
  await expect(page.locator('#toast')).toContainText('several outer shapes');
+ await expect(page.locator('#toast .toast-item')).toHaveCount(1);
  await expect(page.locator('.object-row').filter({hasText:'run'})).toHaveCount(2);
  expect(errors).toEqual([]);
+});
+
+test('Delete in the header has a gap from Duplicate and no danger colour at rest',async({page})=>{
+ await page.goto('/');await newDesign(page);await page.locator('#file').setInputFiles('test/fixtures/filled.svg');await expect(page.locator('.object-row')).toHaveCount(1);
+ const remove=page.locator('#remove'),duplicate=page.locator('#duplicate');
+ const gap=(await remove.boundingBox()).x-((await duplicate.boundingBox()).x+(await duplicate.boundingBox()).width);
+ expect(gap).toBeGreaterThanOrEqual(8);
+ expect(await remove.evaluate(el=>getComputedStyle(el).color)).not.toBe('rgb(155, 44, 31)');
+ await remove.hover();expect(await remove.evaluate(el=>getComputedStyle(el).color)).toBe('rgb(155, 44, 31)');
 });
 
 test('DXF export downloads the design outlines as a DXF file',async({page})=>{

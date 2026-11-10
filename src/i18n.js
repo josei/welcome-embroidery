@@ -221,7 +221,7 @@ export const ES={
 'Select two or more open paths to join.':'Selecciona dos o más trazados abiertos para unir.','Select the motif and the path to follow (two objects).':
   'Selecciona el motivo y el trazado a seguir (dos objetos).','Select an object to repeat.':'Selecciona un objeto para repetir.','A text object needs some text.':
   'Un objeto de texto necesita algo de texto.',
-'Project opened locally.':'Proyecto abierto localmente.','Project name cannot be empty.':'El nombre del proyecto no puede estar vacío.',
+'Project name cannot be empty.':'El nombre del proyecto no puede estar vacío.',
   'SVG exported (design only, not a stitch plan).':'SVG exportado (solo el diseño, no un plan de puntadas).','Copied the private MCP link.':
   'Enlace privado copiado.','Select and copy the link.':'Selecciona y copia el enlace.','This would go over the 100-object limit.':'Esto superaría el límite de 100 objetos.','Select one shape, path or text first.':
   'Selecciona primero una forma, un trazado o un texto.',

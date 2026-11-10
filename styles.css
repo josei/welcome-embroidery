@@ -77,6 +77,8 @@ nav .icon-button:first-of-type{margin-left:auto}
 .segmented button[data-view]{border:0;background:transparent;border-radius:6px;padding:6px 12px;color:#66726c}
 .segmented button[data-view].active{background:#fff;color:var(--teal);font-weight:var(--fw-emphasis);box-shadow:0 1px 2px #1d29251f}
 .edit-tools{display:flex;gap:2px}
+/* Delete sits apart from Duplicate and turns red only on hover, so a slip is less likely; its focus ring is the shared one. */
+.edit-tools #remove{margin-left:8px}.edit-tools #remove:hover:not(:disabled){color:#9b2c1f;border-color:#d9a79e;background:#fbeeea}
 .top #name{min-width:80px;flex:0 1 180px}
 .top .name-field{display:contents}
 .canvas{position:relative;height:calc(100% - 92px)}

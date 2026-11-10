@@ -279,7 +279,7 @@ async function repairOpened(doc) {
  * Opens a validated document as the project: no history, the first object selected, fitted to the view, and clean. The
  * document keeps the id a saved file carries, or takes a new one.
  * @param {any} next
- * @param {string[]} [notes] what repairOpened changed, shown after the open message
+ * @param {string[]} [notes] what repairOpened changed or an import could not keep; shown as one toast, and none when empty
  */
 export function acceptProject(next, notes = []) {
   const {docId, ...body} = next;
@@ -302,7 +302,8 @@ export function acceptProject(next, notes = []) {
   setDocument({dirty: false});
   wired().render();
   wired().fitAll();
-  wired().toast([t('Project opened locally.'), ...notes].join(' '));
+  // Opening is confirmed by the document appearing; only a note the user needs to read gets a toast.
+  if (notes.length) wired().toast(notes.join(' '));
 }
 
 /**
