@@ -6,7 +6,7 @@ import {objectBounds} from './transforms.js';
 import {pathOutline,distP} from './pathGeometry.js';
 import {isRegistryFont,getFont} from './fonts.js';
 import {FABRIC_PROFILES} from './fabrics.js';
-import {objectLabel} from './objectNames.js';
+import {objectLabel,hasName} from './objectNames.js';
 
 /** @typedef {import('./transforms.js').Obj & {mask?: boolean, photo?: boolean}} Item */
 /** @typedef {{op: string, ids?: string[], id?: string, dx?: number, dy?: number, stitch?: string, satinWidth?: number}} Fix */
@@ -35,6 +35,13 @@ export function designWarnings(doc){
   // A warning may carry a fix: the edit operations that clear it, applied as one undo step. Only the unambiguous cases have one.
   /** @type {Warning[]} */ const out=[];
   const hoopW=doc.hoop,hoopH=doc.hoopH??doc.hoop,seen=new Map();
+  // Objects that share a name are numbered by their place among them in the list ("Rectangle 2"), so a duplicate tip can say which to delete.
+  /** @type {Map<string, number>} */ const sameNameTotal=new Map(),nameOrdinal=new Map();
+  for(const o of doc.objects)if(hasName(o)){const n=o.name?.trim()??'';sameNameTotal.set(n,(sameNameTotal.get(n)??0)+1);}
+  /** @type {Map<string, number>} */ const nameCount=new Map();
+  for(const o of doc.objects)if(hasName(o)){const n=o.name?.trim()??'';nameCount.set(n,(nameCount.get(n)??0)+1);nameOrdinal.set(o,nameCount.get(n)??0);}
+  /** The label for a duplicate tip: a name shared with another object gets its number among them. @param {Item} o @returns {string} */
+  const tipLabel=o=>{const n=o.name?.trim()??'';return hasName(o)&&(sameNameTotal.get(n)??0)>1?`${n} ${nameOrdinal.get(o)}`:objectLabel(o,'other');};
   /** @type {(o: Item, message: string, category: string, fix?: Fix[]) => void} */
   const w=(o,message,category,fix)=>{out.push({id:o.id,name:o.name||o.kind,message,category,...(fix?{fix}:{})});};
   for(const o of doc.objects){
@@ -46,8 +53,8 @@ export function designWarnings(doc){
       w(o,`${label} reaches outside the ${hoopW}×${hoopH} mm hoop.`,'hoop',fits?[{op:'translate',ids:[o.id],dx:+dx.toFixed(3),dy:+dy.toFixed(3)}]:undefined);
     }
     const key=[o.kind,o.stitch,o.thread,Math.round(b[0]),Math.round(b[1]),Math.round(b[2]),Math.round(b[3])].join('|');
-      if(seen.has(key))w(o,`${label} is a duplicate of ${seen.get(key)}: it would be sewn twice. Delete one.`,'duplicate',[{op:'delete',id:o.id}]);
-      else seen.set(key,objectLabel(o,'other'));
+      if(seen.has(key))w(o,`${hasName(o)&&(sameNameTotal.get(o.name?.trim()??'')??0)>1?tipLabel(o):label} is a duplicate of ${seen.get(key)}: it would be sewn twice. Delete one.`,'duplicate',[{op:'delete',id:o.id}]);
+      else seen.set(key,tipLabel(o));
     const filled=o.stitch==='fill'&&o.kind!=='text'&&(o.kind!=='path'||o.closed);
     if(filled&&!o.photo){const lines=geometry(o,0).filter(l=>l.length>=4);
       if(lines.length){const area=shapeArea(lines),per=lines.reduce((n,r)=>n+r.reduce((m,p,i)=>i?m+distP(p,r[i-1]):m,0),0),mean=per?2*area/per:0;

@@ -727,6 +727,11 @@ test('sewing warnings and the clear / restore operations',async()=>{
  const w=designWarnings(d),msg=id=>w.filter(x=>x.id===id).map(x=>x.message).join(' ');
  assert.match(msg('tiny'),/too small for a clean fill/);assert.match(msg('eye'),/small fill/);assert.match(msg('hair'),/under 1 mm/);assert.match(msg('thick'),/wider than 7 mm/);assert.match(msg('a')+msg('b'),/outside the 110|duplicate/);assert.ok(w.some(x=>/duplicate of/.test(x.message)),'duplicates are flagged');
  const ok=blank();applyOperations(ok,[{op:'add_shape',id:'good',kind:'rect',x:0,y:0,width:20,height:10}]);assert.deepEqual(designWarnings(ok),[]);
+ // Same-name duplicates are told apart by their place among the objects of that name.
+const same=blank();applyOperations(same,[{op:'add_shape',id:'r1',kind:'rect',x:0,y:0,width:10,height:10,name:'Rectangle'},{op:'add_shape',id:'r2',kind:'rect',x:0,y:0,width:10,height:10,name:'Rectangle'}]);
+const sameTip=designWarnings(same).filter(t=>t.category==='duplicate');assert.equal(sameTip.length,1);assert.equal(sameTip[0].id,'r2');assert.equal(sameTip[0].message,'Rectangle 2 is a duplicate of Rectangle 1: it would be sewn twice. Delete one.');assert.deepEqual(sameTip[0].fix,[{op:'delete',id:'r2'}]);
+const mixed=blank();applyOperations(mixed,[{op:'add_shape',id:'a',kind:'rect',x:0,y:0,width:10,height:10,name:'Box'},{op:'add_shape',id:'b',kind:'rect',x:0,y:0,width:10,height:10,name:'Crate'}]);assert.equal(designWarnings(mixed)[0].message,'Crate is a duplicate of Box: it would be sewn twice. Delete one.');
+
  const keep=structuredClone(d.objects);applyOperations(d,[{op:'clear'}]);assert.equal(d.objects.length,0);applyOperations(d,[{op:'restore',objects:keep,settings:d.settings,name:'Back',hoop:d.hoop}]);validateDocument(d);assert.equal(d.objects.length,keep.length);assert.equal(d.name,'Back');
  assert.throws(()=>applyOperations(d,[{op:'restore'}]),/restore needs/);
 });
