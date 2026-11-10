@@ -43,9 +43,9 @@ export function StitchCapRows() {
     e.target.checked)} id="applique" type="checkbox" className="icon-check" data-icon="applique"
       title={"Appliqué: sews a placement line, stops for the fabric, tacks it down, stops to trim, then covers the edge with satin (the area is not " +
         "filled)"} /></label><label id="appliqueWidthRow" hidden={rows.appliqueWidthRow}>{"Cover width (mm)"}<input id="appliqueWidth" type="text" inputMode="decimal" min="1" max="8" step="0.5" {...appliqueWidth.inputProps} />{appliqueWidth.note && <span className="clamp-note" role="status">{appliqueWidth.note}</span>}</label><div id="compRow" className="slider-field"
-      hidden={rows.compRow}><label>{"Pull compensation (mm)"}<input id="compensation" {...compensation.inputProps} type="text" inputMode="decimal" min="0" max="2" step="0.05" placeholder="document"
+      hidden={rows.compRow}><label>{"Pull compensation"}<input id="compensation" {...compensation.inputProps} type="text" inputMode="decimal" min="0" max="2" step="0.05" placeholder="document"
       title="Overrides the document pull compensation for this object; leave empty to use the document value" />{compensation.note && <span className="clamp-note" role="status">{compensation.note}</span>}</label><SliderField
-        id="compensationSlider" label="Pull compensation (mm)" min={0} max={2} step={0.05} value={shownComp} onCommit={text =>
+        id="compensationSlider" label="Pull compensation" min={0} max={2} step={0.05} value={shownComp} onCommit={text =>
     capRowsActions.commit('compensation', text)} /><button type="button" id="compUseDoc" className="link-button" hidden={cap.compensation === ''} onClick={() =>
     capRowsActions.commit('compensation', '')}>Use document value</button></div></>
  );

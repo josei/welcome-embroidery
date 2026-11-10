@@ -189,7 +189,7 @@ export function syncStitchPanel() {
     const lettered = picked.some(v => v.kind === 'text' && isRegistryFont(v.font));
     setLayout({
       spacingHidden: !(n === 0 || fillable || lettered || picked.some(v => v.stitch === 'satin')),
-      spacingLabel: lettered && !fillable ? 'Stitch spacing (mm) · lower = denser' : 'Row spacing (mm)',
+      spacingLabel: lettered && !fillable ? 'Stitch spacing (mm) · lower = denser' : 'Row spacing',
     });
   }
 

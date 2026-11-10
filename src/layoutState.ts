@@ -35,7 +35,7 @@ export const layoutState = createStore<Layout>({
   typeHidden: false,
   threadHidden: false,
   spacingHidden: false,
-  spacingLabel: 'Row spacing (mm)',
+  spacingLabel: 'Row spacing',
   angleHidden: false,
   angleDisabled: false,
   angleNote: '',

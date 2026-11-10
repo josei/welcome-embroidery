@@ -3,6 +3,11 @@ import {documentState, settingsActions} from '../documentState.js';
 import {useDecimalNumber} from './useDecimalInput';
 import {FABRIC_PROFILES} from '../engine.js';
 import {setFontsDialogOpen} from '../fontsDialogState.js';
+import {rangeText} from '../fieldRanges.js';
+
+// The units of these two fields are shown under them, not in the label, so the label fits the inspector's label column (issue #326).
+const TRIM_RANGE = {min: 2, max: 30};
+const COMP_RANGE = {min: 0, max: 2};
 // The document stitch settings panel, rendered by React. Ids match the markup it replaced, because app.js wires them by id.
 // The fabric choice, at the bottom of the inspector: it sets the document's density, underlay, pull compensation and stabilizer tip.
 export function FabricSection() {
@@ -40,13 +45,13 @@ export function DocumentSettings() {
   <details id="secDoc" className="doc-settings" open={open} onToggle={e => {documentSettingsOpen = e.currentTarget.open; setOpen(e.currentTarget.open);}}><summary>Document stitch settings</summary><label>Tie-in /
     tie-off <input id="ties" type="checkbox" checked={Boolean(settings.ties)} onChange={e =>
     settingsActions.set({ties: e.target.checked})} /></label><label>Trim long jumps <input id="trims" type="checkbox" checked={Boolean(
-    settings.trims)} onChange={e => settingsActions.set({trims: e.target.checked})} /></label><label>{"Trim jumps from (mm)"}<input id="trimMm" type="text" inputMode="decimal" min="2" max="30" step="0.5" placeholder="5"
-      {...trim.inputProps} title="A jump at least this long is trimmed when Trim long jumps is on (2-30 mm, default 5)" />{trim.note && <span className="clamp-note" role="status">{trim.note}</span>}</label><label title="Underlay: a first layer of stitches under the top stitches that holds the fabric flat. Automatic by default.">Underlay <input
+    settings.trims)} onChange={e => settingsActions.set({trims: e.target.checked})} /></label><label>{"Trim jumps from"}<input id="trimMm" type="text" inputMode="decimal" min="2" max="30" step="0.5" placeholder="5"
+      {...trim.inputProps} title="A jump at least this long is trimmed when Trim long jumps is on (2-30 mm, default 5)" /><span className="field-range">{rangeText(TRIM_RANGE)}</span>{trim.note && <span className="clamp-note" role="status">{trim.note}</span>}</label><label title="Underlay: a first layer of stitches under the top stitches that holds the fabric flat. Automatic by default.">Underlay <input
         id="underlay" type="checkbox" checked={Boolean(
     settings.underlay)} onChange={e =>
     settingsActions.set(
     {underlay: e.target.checked})} /></label><button type="button" id="organizeFonts"
       title="List the custom fonts in this document and remove the ones no lettering uses" onClick={(
-    ) => setFontsDialogOpen(true)}>Organize fonts</button><label>{"Pull compensation (mm)"}<input id="comp" type="text" inputMode="decimal" min="0" max="2" step="0.05" {...comp.inputProps} />{comp.note && <span className="clamp-note" role="status">{comp.note}</span>}</label></details>
+    ) => setFontsDialogOpen(true)}>Organize fonts</button><label>{"Pull compensation"}<input id="comp" type="text" inputMode="decimal" min="0" max="2" step="0.05" {...comp.inputProps} /><span className="field-range">{rangeText(COMP_RANGE)}</span>{comp.note && <span className="clamp-note" role="status">{comp.note}</span>}</label></details>
  );
 }

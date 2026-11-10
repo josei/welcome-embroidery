@@ -2740,17 +2740,17 @@ test('pull compensation is a slider that shows the document value until the obje
  expect(errors).toEqual([]);
 });
 
-test('underlay pills: clicking one sets the underlay as one undo step, and the hidden select keeps the same value',async({page})=>{
+test('underlay select: choosing one sets the underlay as one undo step',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));
  await page.goto('/');page.on('dialog',d=>d.accept());await expect(page.locator('#count')).toContainText('compiled');
  await newDesign(page);await page.locator('#rect').click();
- const pill=v=>page.locator(`.pill-group [data-value="${v}"]`);
- await expect(pill('auto')).toHaveAttribute('aria-checked','true');await expect(page.locator('#underlayType')).toHaveValue('auto');
- await expect(pill('none')).toBeVisible();
- await pill('none').click();
- await expect(pill('none')).toHaveAttribute('aria-checked','true');await expect(page.locator('#underlayType')).toHaveValue('none');
+ const underlay=page.locator('#underlayType');
+ await expect(underlay).toHaveValue('auto');
+ await expect(underlay.locator('option[value="none"]')).toHaveCount(1);
+ await underlay.selectOption('none');
+ await expect(underlay).toHaveValue('none');
  await page.locator('#undo').click();
- await expect(pill('auto')).toHaveAttribute('aria-checked','true');await expect(page.locator('#underlayType')).toHaveValue('auto');
+ await expect(underlay).toHaveValue('auto');
  expect(errors).toEqual([]);
 });
 
@@ -4180,8 +4180,8 @@ test('inspector: stitch types lay out 4 + 3 and every field starts on one left e
  await page.mouse.move(b.x+b.width*.4,b.y+b.height*.4);await page.mouse.down();await page.mouse.move(b.x+b.width*.6,b.y+b.height*.6,{steps:5});await page.mouse.up();
  const buttons=await page.locator('.icon-seg.labelled button').evaluateAll(els=>els.map(e=>Math.round(e.getBoundingClientRect().top)));
  expect(buttons).toHaveLength(7);expect(new Set(buttons.slice(0,4)).size).toBe(1);expect(new Set(buttons.slice(4)).size).toBe(1);expect(new Set(buttons).size).toBe(2);
- // Every single-value field in the inspector: a label, then one input or select. Exempt by design, named here: sub-grids (corners, colours, underlay details, blend ranges) keep their own layout, and Position X/Y/W/H is included in the shared column; the stitch-type and underlay pill groups are segmented controls, not fields; the thread and pattern pickers (including Blend into thread), the Fabric section and the worksheet format are wide pickers outside the inspector's field rows.
- const exempt=['type','thread','fillMethod','borderThread','blendThread','fabric','underlayType','worksheetFormat'];
+ // Every single-value field in the inspector: a label, then one input or select. Exempt by design, named here: sub-grids (corners, colours, underlay details, blend ranges) keep their own layout, and Position X/Y/W/H is included in the shared column; the stitch-type pill group is a segmented control, not a field; the thread and pattern pickers (including Blend into thread), the Fabric section and the worksheet format are wide pickers outside the inspector's field rows.
+ const exempt=['type','thread','fillMethod','borderThread','blendThread','fabric','worksheetFormat'];
  const fields=await page.locator('.panel label:not(.block)').evaluateAll((ls,exempt)=>ls.filter(l=>!l.closest('.corner-radii,.underlay-details,#blendRange,#blendPaletteRow')&&!/^Color /.test(l.textContent.trim())&&!l.hidden&&!l.closest('[hidden]')).map(l=>l.querySelector(':scope>input:not([type=checkbox]),:scope>select')).filter(f=>f&&f.offsetParent&&!exempt.includes(f.id)).map(f=>{const r=f.getBoundingClientRect();return {left:Math.round(r.left),width:Math.round(r.width),label:f.closest('label').textContent.trim().slice(0,30)};}),[...exempt]);
  expect(fields.length).toBeGreaterThan(5);
  expect(new Set(fields.map(f=>f.left)).size,JSON.stringify(fields)).toBe(1);

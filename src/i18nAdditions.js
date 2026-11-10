@@ -3,6 +3,8 @@
 // first, so an entry in i18n.js wins over one here with the same key.
 export const ES_ADDITIONS={
 'motif':'motivo',
+'Pull compensation':'Compensación de tirón',
+'Trim jumps from':'Cortar saltos desde',
 'sequin':'lentejuela',
 'bead':'abalorio',
 'bling':'pedrería',
