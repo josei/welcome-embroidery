@@ -14,15 +14,20 @@ import zlib from 'node:zlib';
 import {initialDocument,compile,encode,applyOperations,validateDocument,importStitchLayer,jefWarnings,exportSvg,designWarnings,objectBounds,threadPlan,sewingWorksheet} from './src/engine.js';
 import {renderStitches,renderDesign} from './server-render.js';
 import {LIMITS,str,bounded} from './input-limits.js';
+import {exportRetentionDays,startExportSweep} from './server-artifacts.js';
 
 // Settings come from WELCOME_* environment variables.
 // WELCOME_TRUST_PROXY=1: read the client address from cf-connecting-ip / x-forwarded-for.
 //   Turn it on only when every request reaches this process through a tunnel or proxy that sets those
 //   headers (e.g. Cloudflare Tunnel). Off by default: the headers are client-supplied, so with it on a client
 //   can rotate them and get a fresh per-IP link cap every time.
+// WELCOME_EXPORT_RETENTION_DAYS=7 (default 7): design exports in the artifacts folder (machine files, SVG, worksheets,
+//   previews) are deleted this many days after they were written. The sweep runs at startup and hourly. Saved
+//   documents (*.welcome from document_save) are never deleted. Change the default in server-artifacts.js.
 const env=name=>process.env[`WELCOME_${name}`];
 const root=path.dirname(fileURLToPath(import.meta.url)),distRoot=path.join(root,'dist'),dataDir=env('DATA_DIR')||path.join(root,'var'),anonymousDocs=new Map(),relay=createRelay({storePath:env('SESSION_FILE')===''?null:(env('SESSION_FILE')||path.join(dataDir,'sessions.json'))}),anonymousAllowed=env('ANONYMOUS_MCP')==='1',artifacts=path.join(dataDir,'artifacts'),mime={'.html':'text/html; charset=utf-8','.css':'text/css; charset=utf-8','.js':'text/javascript; charset=utf-8','.json':'application/json; charset=utf-8','.svg':'image/svg+xml','.png':'image/png','.woff2':'font/woff2'};
 await fs.mkdir(artifacts,{recursive:true});
+await startExportSweep(artifacts,{days:exportRetentionDays(env('EXPORT_RETENTION_DAYS'))}).first;
 const fontCount=loadBundledFonts(root);
 const fontIndex=(await Promise.all(['inkstitch','ttf'].map(async g=>JSON.parse(await fs.readFile(path.join(root,'fonts',g,'index.json'),'utf8').catch(()=>'[]')).map(f=>({...f,fid:`${g}/${f.id}`}))))).flat();
 const fontFileOk=name=>/^fonts\/(inkstitch|ttf)\/[A-Za-z0-9_.-]+\.json$/.test(name);
@@ -163,7 +168,7 @@ const server=http.createServer(async(req,res)=>{try{
   relay.touchAgent(s);await mcpRequest(req,res,{docs:s.docs,live:{getDocument:async()=>(await relay.callBrowser(s,'get_document')).document,applyOps:(operations,expectedRevision)=>relay.callBrowser(s,'apply_ops',{operations,expectedRevision}),addLayer:(layer,expectedRevision)=>relay.callBrowser(s,'add_layer',{layer,expectedRevision}),getReference:opts=>relay.callBrowser(s,'get_reference',opts)}});return;}
  if(req.method!=='GET'&&req.method!=='HEAD'){res.writeHead(405);res.end('Method not allowed');return;}
  let relative=url.pathname==='/'?'index.html':decodeURIComponent(url.pathname).replace(/^\/+/, '');
- if(relative.startsWith('artifacts/')){const name=relative.slice('artifacts/'.length);if(!/^[0-9a-f-]{36}\.(jef|vp3|dst|welcome|svg|txt)$/.test(name)){res.writeHead(404);res.end('Not found');return;}const data=await fs.readFile(path.join(artifacts,name));const type=(name.endsWith('.welcome')||name.endsWith('.welcome'))?'application/json':name.endsWith('.svg')?'image/svg+xml':name.endsWith('.txt')?'text/plain; charset=utf-8':'application/octet-stream';res.writeHead(200,{'content-type':type,'content-length':data.length,'content-disposition':`attachment; filename="${name}"`,'cache-control':'no-store','x-content-type-options':'nosniff'});res.end(data);return;}
+ if(relative.startsWith('artifacts/')){const name=relative.slice('artifacts/'.length);if(!/^[0-9a-f-]{36}\.(jef|vp3|dst|welcome|svg|txt)$/.test(name)){res.writeHead(404);res.end('Not found');return;}const data=await fs.readFile(path.join(artifacts,name)).catch(error=>{if(error.code==='ENOENT')return null;throw error;});if(!data){res.writeHead(404);res.end('Not found');return;}const type=(name.endsWith('.welcome')||name.endsWith('.welcome'))?'application/json':name.endsWith('.svg')?'image/svg+xml':name.endsWith('.txt')?'text/plain; charset=utf-8':'application/octet-stream';res.writeHead(200,{'content-type':type,'content-length':data.length,'content-disposition':`attachment; filename="${name}"`,'cache-control':'no-store','x-content-type-options':'nosniff'});res.end(data);return;}
  if(!editorFileOk(relative)){res.writeHead(404);res.end('Not found');return;}const file=path.join(distRoot,relative);if(!await fs.stat(file).then(st=>st.isFile(),()=>false)){res.writeHead(404,{'content-type':'text/plain; charset=utf-8'});res.end('The editor is not built. Run npm run build.');return;}
  if(relative==='index.html'){const html=(await fs.readFile(file,'utf8')).replace('<meta name="welcome-static" content="true">','');res.writeHead(200,{'content-type':'text/html; charset=utf-8','cache-control':'no-cache','x-content-type-options':'nosniff'});res.end(req.method==='HEAD'?undefined:html);return;}await sendFile(req,res,file,mime[path.extname(file)]||'application/octet-stream');
  }catch(error){if(!res.headersSent){res.writeHead(error instanceof SyntaxError?400:500,{'content-type':'application/json'});res.end(JSON.stringify({error:error.message}));}else res.destroy(error);}});
