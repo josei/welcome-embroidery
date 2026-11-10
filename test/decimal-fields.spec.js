@@ -152,3 +152,55 @@ test.describe('Corner radius and rows, English UI on a Spanish browser',()=>{
   await expect(page.locator('#posX')).toHaveValue('-12.0');
  });
 });
+
+// Dialog and document-settings decimal fields (#292): Trim jumps and Pull compensation, Trace width, and the reference picture's X, Y, W, H.
+// Each is a text field with inputmode="decimal" that shows the UI language's separator and reads either separator.
+for(const [locale,lang,sep,other] of [['en-US','en','.',','],['es-ES','es',',','.']]){
+ test.describe(`dialog decimal fields (${locale})`,()=>{
+  test.use({locale,actionTimeout:10000});
+
+  test(`dialog and settings decimal fields show the ${lang} separator and accept both`,async({page})=>{
+   test.setTimeout(120000);
+   await page.addInitScript(l=>localStorage.setItem('welcome.lang',l),lang);
+   await freshDesign(page);
+   await expect(page.locator('html')).toHaveAttribute('lang',lang);
+   const failures=[];
+   const check=async(label,field,x,{sepExpected=sep,commitKey='Enter'}={})=>{
+    try{
+     await expect(field,label).toBeVisible();
+     expect(await field.getAttribute('type'),`${label} type`).toBe('text');
+     expect(await field.getAttribute('inputmode'),`${label} inputmode`).toBe('decimal');
+     for(const typed of [`${x},5`,`${x}.5`]){
+      await field.fill(typed);
+      // Enter submits the trace dialog's form (it closes), so that field commits on Tab.
+      await field.press(commitKey);
+      await expect(field,`${label} typed ${typed}`).toHaveValue(`${x}${sepExpected}5`);
+      expect(await field.inputValue(),label).not.toContain(other);
+     }
+    }catch(e){failures.push(`${label}: ${e.message.split('\n')[0]}`);}
+   };
+
+   // Document stitch settings: Trim jumps from (mm) and Pull compensation (mm).
+   await page.locator('#secDoc > summary').click();
+   await check('trimMm',page.locator('#trimMm'),3);
+   await check('comp',page.locator('#comp'),0);
+
+   // Trace dialog: Width (mm) is decimal; Colours stays a whole-number field.
+   await page.locator('#traceBtn').click();
+   await expect(page.locator('#traceDialog')).toBeVisible();
+   await check('traceWidth',page.locator('#traceWidth'),12,{commitKey:'Tab'});
+   expect(await page.locator('#traceColors').getAttribute('type'),'traceColors type').toBe('number');
+   await page.keyboard.press('Escape');
+
+   // Reference picture: X, Y, W, H, shown once a picture is loaded.
+   await page.locator('#refFile').setInputFiles('test/fixtures/thin-band.png');
+   await expect(page.locator('#refControls')).toBeVisible();
+   await check('refX',page.locator('#refX'),3);
+   await check('refY',page.locator('#refY'),3);
+   await check('refW',page.locator('#refW'),20);
+   await check('refH',page.locator('#refH'),20);
+
+   expect(failures,'fields that did not show the UI separator').toEqual([]);
+  });
+ });
+}

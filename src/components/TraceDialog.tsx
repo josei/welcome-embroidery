@@ -1,6 +1,7 @@
 import {useEffect, useRef, useState, useSyncExternalStore} from 'react';
 import {useModalDialog} from './useModalDialog';
 import {useNumberInput} from './useNumberInput';
+import {useDecimalNumber} from './useDecimalInput';
 import {setTraceDialogOpen, traceDialogState} from '../traceDialogState.js';
 import {tracePicture} from '../traceCommands.js';
 import {t} from '../i18n.js';
@@ -16,7 +17,7 @@ export function TraceDialog() {
  const colorsField = useNumberInput(colorsText, setColorsText, {min: 2, max: 16}, {unit: ''});
  const detail = useRef<HTMLSelectElement>(null);
  const [widthText, setWidthText] = useState('60');
- const widthField = useNumberInput(widthText, setWidthText, {min: 10, max: 200});
+ const widthField = useDecimalNumber(widthText, setWidthText, {min: 10, max: 200});
  const background = useRef<HTMLInputElement>(null);
  useModalDialog(dialog, open);
  useEffect(() => {
@@ -62,7 +63,7 @@ export function TraceDialog() {
      <option value="0.5">{"Normal"}</option>
      <option value="1.2">{"Smooth"}</option>
     </select></label>
-    <label>{"Width (mm)"}<input id="traceWidth" type="number" min="10" max="200" step="1" {...widthField.inputProps} />{widthField.note && <span className="clamp-note" role="status">{widthField.note}</span>}</label>
+    <label>{"Width (mm)"}<input id="traceWidth" type="text" inputMode="decimal" min="10" max="200" step="1" {...widthField.inputProps} />{widthField.note && <span className="clamp-note" role="status">{widthField.note}</span>}</label>
     <label id="traceBgRow" hidden={lines}>{"Skip the background color "}<input id="traceBg" ref={background} type="checkbox" defaultChecked={true} /></label>
     <p id="traceInfo" role="status">{info}</p>
     <div className="agent-actions">
