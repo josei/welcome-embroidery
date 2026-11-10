@@ -371,10 +371,16 @@ input[aria-invalid="true"]{border-color:var(--warn)!important;background:var(--w
 /* Issue #208: from 601px to 1100px the top bar stays on one row (the title shrinks first, the controls stay whole; the blank-design reason is kept for screen readers only), and the
    object list heading lines up with the 10px padding of the object list below it. Below 601px the bar still wraps. */
 @media (min-width:601px) and (max-width:1100px){
-.top{flex-wrap:nowrap;padding:0 8px}
+.top{flex-wrap:nowrap;gap:4px;padding:0 6px}
 .top .logo-mark{height:18px}
 .top .icon-button{width:30px;min-width:30px;height:30px}
-.top #name{min-width:0;overflow:hidden;text-overflow:ellipsis}
+.top #name{flex:1 1 0;min-width:64px;overflow:hidden;text-overflow:ellipsis}
+.top #savedStatus{min-width:0;overflow:hidden;text-overflow:ellipsis}
+/* The unsaved marker keeps its word for screen readers, and shows as an amber dot here, so the title keeps its width. */
+.top .save-status.unsaved{flex:none;width:8px;height:8px;border-radius:50%;background:#8a5a00;color:transparent;font-size:0;overflow:hidden}
+.top #agentPill,.top .icon-button{flex:none}
+.top .agent-pill{padding:0 8px}
+.top .export-split #export{padding:0 10px}
 /* The blank-design reason is still read by screen readers (Export points at it), but it cannot take a row of its own here. */
 .top .export-reason{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;margin:0}
 .layout>aside.panel:first-child>.layers-head{padding:0 10px}

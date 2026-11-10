@@ -31,6 +31,10 @@ test('the top bar stays on one row at 760px and the title gives way first',async
  const errors=[];page.on('pageerror',e=>errors.push(e.message));page.on('dialog',d=>d.accept());
  await page.setViewportSize({width:760,height:900});
  await page.goto('/');await newDesign(page);
+ // A long name and an unsaved design: the title is the element that gives way, and the unsaved marker stays visible.
+ await page.locator('header.top #name').fill('A very long embroidery design name that keeps going');
+ await page.locator('header.top #name').press('Enter');
+ await page.locator('header.top #name').blur();
  const bar=page.locator('header.top');
  const info=await bar.evaluate(top=>{
   const kids=[...top.children].filter(e=>e.getBoundingClientRect().width>0);
@@ -43,6 +47,10 @@ test('the top bar stays on one row at 760px and the title gives way first',async
  // The title is the element that gives way, and it shows an ellipsis rather than clipping the text.
  const title=await page.locator('header.top #name').evaluate(e=>getComputedStyle(e).textOverflow);
  expect(title,'title text-overflow').toBe('ellipsis');
+ const titleBox=await page.locator('header.top #name').boundingBox();
+ expect(titleBox.width,'title keeps a usable width').toBeGreaterThanOrEqual(60);
+ expect(await page.locator('header.top #name').evaluate(e=>e.scrollWidth>e.clientWidth),'long title is truncated').toBe(true);
+ expect(await page.locator('#unsavedMark').evaluate(e=>e.getBoundingClientRect().width),'unsaved marker is shown').toBeGreaterThan(0);
  // The controls stay whole: Undo and Redo are visible and inside the window.
  for(const id of ['#undo','#redo']){
   const box=await page.locator(id).boundingBox();expect(box,id).not.toBeNull();
