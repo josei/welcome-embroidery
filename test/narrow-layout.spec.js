@@ -62,3 +62,58 @@ test('the top bar stays on one row at 760px and the title gives way first',async
  }
  expect(errors).toEqual([]);
 });
+
+// Issue #238 (from audit #167 finding 4): a drag that starts on the canvas or a ruler, from any edge, does not select the page text
+// around it (the zoom bar and the status line). The drag still runs on the canvas, so the marquee is not the thing being tested.
+test('a drag from any canvas or ruler edge does not select page text',async({page})=>{
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));
+ await page.setViewportSize({width:1440,height:900});
+ await page.goto('/');
+ const c=await page.locator('main .canvas').boundingBox();
+ const target=await page.locator('#cursorPosition').boundingBox();
+ // Starts: the corner beside the rulers, the top and left rulers, and the top, right and bottom edges of the canvas.
+ const starts=[[c.x+4,c.y+4],[c.x+60,c.y+6],[c.x+6,c.y+60],[c.x+c.width-4,c.y+4],[c.x+c.width-4,c.y+c.height/2],[c.x+c.width/2,c.y+c.height-4]];
+ for(const [x,y] of starts){
+  await page.evaluate(()=>getSelection().removeAllRanges());
+  await page.mouse.move(x,y);await page.mouse.down();
+  await page.mouse.move(target.x+20,target.y+target.height/2,{steps:12});await page.mouse.up();
+  const selected=await page.evaluate(()=>getSelection().toString());
+  expect(selected,`page text selected by a drag from ${Math.round(x)},${Math.round(y)}`).toBe('');
+ }
+ expect(errors).toEqual([]);
+});
+
+// Issue #238 (from audit #167 finding 3 and audit #277 finding 7): with a 100-object design at 1440x900, the status bar's readouts
+// do not overlap one another or the simulation summary, in the stitch view and the 3D view, in English and Spanish.
+test('status bar readouts do not overlap at 1440x900 with 100 objects, in stitch and 3D views',async({page})=>{
+ test.setTimeout(120000);
+ const {initialDocument,applyOperations}=await import('../src/engine.js');
+ const doc=initialDocument();doc.objects=[];doc.hoop=400;doc.name='Probe';doc.revision=1;const cols=10,step=16,ops=[];
+ for(let i=0;i<100;i++){const c=i%cols,r=Math.floor(i/cols);ops.push({op:'add_shape',id:`s${i}`,kind:'rect',x:-(cols*step)/2+c*step,y:-(cols*step)/2+r*step,width:12,height:12,thread:`#${((i*2654435761)>>>0).toString(16).slice(0,6).padStart(6,'0')}`,stitch:i%3?'fill':'run'});}
+ applyOperations(doc,ops);
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));
+ await page.setViewportSize({width:1440,height:900});
+ for(const lang of ['en','es']){
+  await page.goto(`/?lang=${lang}`);
+  await page.evaluate(d=>localStorage.setItem('welcome.autosave:'+sessionStorage.getItem('welcome.tabId'),JSON.stringify({doc:d,clean:false,savedAt:Date.now()})),doc);
+  await page.reload();
+  await page.locator('#restoreYes').click();await expect(page.locator('.object-row')).toHaveCount(100);
+  for(const view of ['stitches','preview']){
+   await page.locator(`button[data-view="${view}"]`).click();await expect(page.locator('#play')).toBeVisible();
+   await page.waitForTimeout(300);
+   // Every readout's box, and the simulation's time, stitch count and summary, must not overlap another visible box.
+   const boxes=await page.evaluate(()=>{
+    const ids=['cursorPosition','count','messagesBtn','playbackProgress','needlePosition','playbackTime','playbackSummary'];
+    return ids.map(id=>document.getElementById(id)).filter(e=>e&&!e.hidden&&getComputedStyle(e).display!=='none'&&e.getBoundingClientRect().width>0)
+     .map(e=>({id:e.id,...e.getBoundingClientRect().toJSON()}));
+   });
+   expect(boxes.length,`readouts shown in ${view} ${lang}`).toBeGreaterThanOrEqual(5);
+   for(let i=0;i<boxes.length;i++)for(let j=i+1;j<boxes.length;j++){
+    const a=boxes[i],b=boxes[j];
+    const overlap=a.left<b.right-0.5&&b.left<a.right-0.5&&a.top<b.bottom-0.5&&b.top<a.bottom-0.5;
+    expect(overlap,`${a.id} and ${b.id} overlap in ${view} ${lang}`).toBe(false);
+   }
+  }
+ }
+ expect(errors).toEqual([]);
+});
