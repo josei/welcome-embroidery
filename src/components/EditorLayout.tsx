@@ -247,7 +247,7 @@ export function EditorLayout() {
         <SelectionHint />
         {selectionLabels.hintHidden ? null : (
           <div className={"scope-document"}>
-            <h3 className={"scope-heading"}>
+            <h3 className={"section-heading scope-heading"}>
               {"Document"}
             </h3>
             <DocumentSettings />
@@ -274,7 +274,7 @@ export function EditorLayout() {
         <ReferencePicture />
         <ThreadPlan />
         <div className={"scope-document"}>
-          <h3 className={"scope-heading"}>
+          <h3 className={"section-heading scope-heading"}>
             {"Document"}
           </h3>
           {selectionLabels.hintHidden ? <DocumentSettings /> : null}

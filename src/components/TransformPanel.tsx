@@ -26,7 +26,7 @@ export function TransformPanel() {
  const rotation = useDecimalNumber(fields.rotation, text => transformActions.commit('rotation', text), undefined, {unit: '°'});
  const info = picking ? t('Click the canvas to set the pivot.') : pivot ? t('Pivot at {x}, {y} mm', {x: pivot[0], y: pivot[1]}) : '';
  return (
-  <section id="secTransform" data-sec="" hidden={layout.secTransform}><h4>Transform · mm</h4><div className="xywh"><label>X<input id="posX" type="text" inputMode="decimal"
+  <section id="secTransform" data-sec="" hidden={layout.secTransform}><h4 className="section-heading">Transform · mm</h4><div className="xywh"><label>X<input id="posX" type="text" inputMode="decimal"
     step="0.1" {...posX.inputProps} />{posX.note && <span className="clamp-note" role="status">{posX.note}</span>}</label><label>Y<input id="posY" type="text" inputMode="decimal" step="0.1" {...posY.inputProps} />{posY.note && <span className="clamp-note" role="status">{posY.note}</span>}</label><label>W<input id="sizeW" type="text" inputMode="decimal" min="0.5"
       step="0.1" {...sizeW.inputProps} />{sizeW.note && <span className="clamp-note" role="status">{sizeW.note}</span>}</label><label>H<input id="sizeH" type="text" inputMode="decimal" min="0.5" step="0.1" {...sizeH.inputProps} />{sizeH.note && <span className="clamp-note" role="status">{sizeH.note}</span>}</label></div><label>{"Rotation (°)"}<input id="rotation" type="text" inputMode="decimal" step="1" {...rotation.inputProps} />{rotation.note && <span className="clamp-note" role="status">{rotation.note}</span>}</label><div className="pivot-row"><button type="button" id="pivotPick"
       aria-pressed={picking} onClick={(

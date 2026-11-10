@@ -15,7 +15,7 @@ export function FabricSection() {
  const settings = doc.settings ?? {};
  return (
   <section className="fabric-section" aria-labelledby="fabricHeading">
-   <h4 id="fabricHeading">Fabric</h4>
+   <h4 id="fabricHeading" className="section-heading">Fabric</h4>
    <label className="block">
     <select
      id="fabric"

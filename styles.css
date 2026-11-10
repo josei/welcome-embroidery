@@ -333,7 +333,7 @@ input:not([type=checkbox]):not([type=range]),select,textarea,.panel textarea{fon
 
 .sel-angle{fill:#fff;stroke:#dba944;stroke-width:1.6;vector-effect:non-scaling-stroke;pointer-events:all;cursor:grab}.sel-angle-line{stroke:#dba944;stroke-dasharray:3 2;vector-effect:non-scaling-stroke;pointer-events:none}
 .panel .corner-radii input{width:100%}
-.scope-document{margin-top:8px}.scope-heading{margin:14px 0 0;font-size:var(--fs-caption);letter-spacing:.07em;text-transform:uppercase;color:#34413b;font-weight:var(--fw-emphasis)}
+.scope-document{margin-top:8px}.scope-heading{margin-top:14px}
 .fabric-section{margin-top:14px}.fabric-hint{font-size:var(--fs-caption);color:#66726c;margin:6px 0 0;line-height:1.4}
 #compUseDoc{margin:2px 0 0;font-size:var(--fs-caption);padding:0;border:0;background:none;color:var(--teal);cursor:pointer;text-decoration:underline}#compUseDoc[hidden]{display:none}
 .fabric-section select{width:100%}
@@ -443,3 +443,13 @@ input[aria-invalid="true"]{border-color:var(--warn)!important;background:var(--w
 .field-reset{display:flex;align-items:center;gap:6px}.field-reset>label{flex:1 1 auto;min-width:0}
 .reset-default{flex:none;width:28px;height:28px;padding:0;display:inline-flex;align-items:center;justify-content:center;border:1px solid var(--field-line);border-radius:6px;background:#fff;color:#4f5551;cursor:pointer}
 .reset-default[hidden]{display:none!important}.reset-default .icon{width:16px;height:16px}.reset-default:hover{border-color:#7b9a89;color:var(--teal)}.reset-default:focus-visible{outline:2px solid var(--teal);outline-offset:1px}
+
+/* One section heading style for the inspector and side panels (#323): every heading and every collapsible summary
+   shares this case, tracking, size, weight and colour. Collapsible sections (<details class="sec-fold|doc-settings">) get a
+   disclosure triangle; plain headings get none. */
+.panel .section-heading,.panel .sec-fold>summary,.panel .doc-settings>summary{font-size:var(--fs-caption);font-weight:var(--fw-emphasis);letter-spacing:.07em;text-transform:uppercase;color:#66726c}
+.panel .sec-fold>summary,.panel .doc-settings>summary{cursor:pointer;list-style:none;position:relative;padding:6px 0 6px 14px}
+.panel .sec-fold>summary::-webkit-details-marker,.panel .doc-settings>summary::-webkit-details-marker{display:none}
+.panel .sec-fold>summary::before,.panel .doc-settings>summary::before{content:"";position:absolute;left:2px;top:50%;margin-top:-4px;border-style:solid;border-width:4px 0 4px 5px;border-color:transparent transparent transparent currentColor;transition:transform .12s}
+.panel .sec-fold[open]>summary::before,.panel .doc-settings[open]>summary::before{transform:rotate(90deg)}
+.panel .sec-fold[open]>summary,.panel .doc-settings[open]>summary{margin-bottom:4px}

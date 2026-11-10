@@ -92,7 +92,7 @@ export function ObjectListHead() {
  };
  return (
   <div className="layers-head">
-   <h3>{t('Layers')}</h3>
+   <h3 className="section-heading">{t('Layers')}</h3>
    <span>{`${objectsText} · ${threadsText}`}</span>
    <button type="button" className="inspector-toggle" aria-expanded={open} aria-controls="inspector" onClick={toggle}>{t('Properties')}</button>
   </div>

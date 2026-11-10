@@ -25,7 +25,7 @@ export function StitchTypeRows() {
  const motifSpacing = useDecimalNumber(type.motifSpacing, text => typeRowsActions.commit('motifSpacing', text), {min: 1, max: 20});
  const motifSize = useDecimalNumber(type.motifSize, text => typeRowsActions.commit('motifSize', text), {min: 0.4, max: 6});
  return (
-  <><h4 id="stitchTitle">{labels.stitchTitle}</h4><label className="block" hidden={layout.typeHidden}>Stitch type<IconSelect id="type"
+  <><h4 id="stitchTitle" className="section-heading">{labels.stitchTitle}</h4><label className="block" hidden={layout.typeHidden}>Stitch type<IconSelect id="type"
     groupLabel="Stitch type" labelled value={choices.type} disabled={choices.typeDisabled} options={[
     {value: 'fill', label: 'Fill', icon: 'i-fill', thumb: 'fill', disabled: choices.fillOff},
     {value: 'run', label: 'Running stitch', icon: 'i-run', thumb: 'run'},
