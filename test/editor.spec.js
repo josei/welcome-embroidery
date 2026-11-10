@@ -517,8 +517,8 @@ test('lettering is edited on the canvas: live outlines while typing, Enter commi
  await page.locator('#letter').click();const text=page.locator('#shapes g.shape').first();let before=await text.boundingBox();const b=before;
  await page.mouse.dblclick(b.x+b.width/2,b.y+b.height/2);await expect(page.locator('#canvasText')).toBeFocused();await page.keyboard.type('ROSES AND MORE');await expect.poll(async()=>(await text.boundingBox()).width).toBeGreaterThan(before.width*1.6);
  await expect(page.locator('#saved')).toHaveCount(0);await page.keyboard.press('Enter');await expect(page.locator('#canvasText')).toHaveCount(0);await expect(page.locator('.object-row').first()).toContainText('ROSES AND MORE');
- await page.keyboard.press('Control+z');await expect(page.locator('.object-row').first()).toContainText('BLOOM');expect((await text.boundingBox()).width).toBeCloseTo(before.width,0);
- await page.locator('.object-row').first().click();await page.keyboard.press('Enter');await page.keyboard.type('X');await page.keyboard.press('Escape');await expect(page.locator('.object-row').first()).toContainText('BLOOM');await expect(page.locator('#canvasText')).toHaveCount(0);expect(errors).toEqual([]);
+ await page.keyboard.press('Control+z');await expect(page.locator('.object-row').first()).toContainText('Text: Text');expect((await text.boundingBox()).width).toBeCloseTo(before.width,0);
+ await page.locator('.object-row').first().click();await page.keyboard.press('Enter');await page.keyboard.type('X');await page.keyboard.press('Escape');await expect(page.locator('.object-row').first()).toContainText('Text: Text');await expect(page.locator('#canvasText')).toHaveCount(0);expect(errors).toEqual([]);
 });
 
 test('keyboard resize and rotate: Ctrl+Arrows change size, Ctrl+Alt+Left/Right rotate',async({page})=>{
@@ -2930,7 +2930,7 @@ test('lettering text applies while typing, without Tab, and survives a canvas cl
 test('new lettering lands at the hoop centre, and a second one steps down rather than stacking',async({page})=>{page.on('dialog',d=>d.accept());const errors=[];page.on('pageerror',e=>errors.push(e.message));
  await page.setViewportSize({width:1600,height:1000});await page.goto('/');await newDesign(page);
  await page.locator('#letter').click();await page.keyboard.press('Enter');
- await expect(page.locator('.object-row').filter({hasText:'BLOOM'}).first()).toBeAttached();
+ await expect(page.locator('.object-row').filter({hasText:'Text: Text'}).first()).toBeAttached();
  // The hoop ring is the hoop's size in mm; its on-screen box gives the scale to check the lettering box within 1 mm.
  const ring=await page.locator('#hoopRing').boundingBox();const mmPerPx=(Number(await page.inputValue('#hoopW')))/ring.width;
  const hc={x:ring.x+ring.width/2,y:ring.y+ring.height/2};
@@ -2940,13 +2940,14 @@ test('new lettering lands at the hoop centre, and a second one steps down rather
  expect(Math.abs((first.x+first.width/2-hc.x)*mmPerPx)).toBeLessThan(1);
  expect(Math.abs((first.y+first.height/2-hc.y)*mmPerPx)).toBeLessThan(1);
  await page.locator('#letter').click();await page.keyboard.press('Enter');
- await expect(page.locator('.object-row').filter({hasText:'BLOOM'})).toHaveCount(2);
+ await expect(page.locator('.object-row').filter({hasText:'Text: Text'})).toHaveCount(2);
  const bboxes=await page.evaluate(()=>[...document.querySelectorAll('#art [data-id]')].map(o=>o.getBoundingClientRect().toJSON()));
  const second=bboxes[bboxes.length-1];
  expect(Math.abs(second.y-first.y)).toBeGreaterThan(1);
  expect(errors).toEqual([]);});
 
-test('new lettering opens in place with its placeholder selected; typed letters never reach tool shortcuts',async({page})=>{page.on('dialog',d=>d.accept());const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');await newDesign(page);const before=await page.locator('.object-row').count();await page.locator('#letter').click();await expect(page.locator('#canvasText')).toBeFocused();await expect(page.locator('#selected')).toContainText('BLOOM');await page.keyboard.type('Hello');await expect(page.locator('#canvasText')).toHaveValue('Hello');await expect(page.locator('.object-row')).toHaveCount(before+1);await page.keyboard.press('Enter');await expect(page.locator('#canvasText')).toHaveCount(0);await expect(page.locator('.object-row').first()).toContainText('Text: HELLO');await expect(page.locator('#selected')).toContainText('HELLO');await expect(page.locator('.object-row')).toHaveCount(before+1);expect(errors).toEqual([]);});
+test('new lettering opens in place with its Text placeholder selected; typed letters never reach tool shortcuts',async({page})=>{page.on('dialog',d=>d.accept());const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');await newDesign(page);const before=await page.locator('.object-row').count();await page.locator('#letter').click();await expect(page.locator('#canvasText')).toBeFocused();await expect(page.locator('#canvasText')).toHaveValue('Text');await expect(page.locator('.object-row').first()).not.toContainText('BLOOM');await page.keyboard.type('Hello');await expect(page.locator('#canvasText')).toHaveValue('Hello');await expect(page.locator('.object-row')).toHaveCount(before+1);await page.keyboard.press('Enter');await expect(page.locator('#canvasText')).toHaveCount(0);await expect(page.locator('.object-row').first()).toContainText('Text: HELLO');await expect(page.locator('#selected')).toContainText('HELLO');await expect(page.locator('.object-row')).toHaveCount(before+1);expect(errors).toEqual([]);});
+test('new lettering starts with a neutral Text placeholder, not BLOOM, and Follow path is hidden with no path',async({page})=>{page.on('dialog',d=>d.accept());const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');await newDesign(page);await page.locator('#letter').click();await expect(page.locator('#canvasText')).toBeFocused();await expect(page.locator('#canvasText')).toHaveValue('Text');await expect(page.locator('#letteringText')).toHaveValue('Text');await expect(page.locator('.object-row').first()).toContainText('Text: Text');await expect(page.locator('.object-row').filter({hasText:'BLOOM'})).toHaveCount(0);await expect(page.locator('#followRow')).toBeHidden();await page.keyboard.press('Escape');await expect(page.locator('#canvasText')).toHaveCount(0);expect(errors).toEqual([]);});
 test('placing lettering selects it and focuses its text; empty double-click adds nothing',async({page})=>{page.on('dialog',d=>d.accept());const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');await newDesign(page);await page.locator('#letter').click();await expect(page.locator('#canvasText')).toBeFocused();await expect(page.locator('#letteringText')).toBeEnabled();await page.keyboard.type('HELLO');await page.keyboard.press('Tab');await expect(page.locator('.object-row').first()).toContainText('Text: HELLO');await expect(page.locator('.object-row')).toHaveCount(1);const a=await page.locator('#art').boundingBox();await page.mouse.dblclick(a.x+30,a.y+30);await expect(page.locator('.object-row')).toHaveCount(1);const t=page.locator('#shapes g.shape').first(),tb=await t.boundingBox();await page.mouse.dblclick(tb.x+tb.width/2,tb.y+tb.height/2);await expect(page.locator('#canvasText')).toBeFocused();await page.keyboard.type('X');await page.keyboard.press('Escape');await expect(page.locator('#canvasText')).toHaveCount(0);await expect(page.locator('.object-row').first()).toContainText('HELLO');expect(errors).toEqual([]);});
 
 // Tool buttons expose their state: the armed tool is aria-pressed="true" and the rest are "false". Each drawing tool
@@ -2976,7 +2977,7 @@ test('drawing tools report aria-pressed and return to Select after one placement
  // Add lettering from an armed draw tool: the line tool is dropped and Select is the pressed one.
  await page.locator('#line').click();await expectOnly('line');
  await page.locator('#letter').click();await expectOnly('select');
- await expect(page.locator('.object-row').filter({hasText:'BLOOM'}).first()).toBeAttached();
+ await expect(page.locator('.object-row').filter({hasText:'Text: Text'}).first()).toBeAttached();
  // Add rectangle and Add ellipse are one-shot: never pressed, and Select is pressed after each placement.
  for(const id of ['rect','ellipse']){
   await page.locator('#line').click();await expectOnly('line');

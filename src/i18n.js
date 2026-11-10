@@ -342,7 +342,7 @@ export const ES={
   'Ancho final (mm)','Leave empty for a constant width; a different value tapers the column from the start width to this one':
   'Déjalo vacío para un ancho constante; un valor distinto estrecha la columna del ancho inicial a este','Follow path':'Seguir trazado',
   'Make the text follow a path; it stays attached when the path is edited':'Hace que el texto siga un trazado; sigue unido cuando se edita el trazado',
-  'Not on a path':'Sin trazado','Custom path':'Trazado propio','Border width (mm)':'Ancho del borde (mm)',
+  'Custom path':'Trazado propio','Border width (mm)':'Ancho del borde (mm)',
   '0 sews a plain running outline; more makes a satin border of that width':'0 borda un contorno de puntada recta; más crea un borde de satén de ese ancho',
   'Round corners (mm)':'Redondear esquinas (mm)','Round corners':'Redondear esquinas',
   'Round the corners: rectangles get a corner radius, paths get arcs at their corner nodes (selected nodes only, when some are selected)':

@@ -56,6 +56,9 @@ export function createCanvasTools(api){
     return g?new Set(documentNow().doc.objects.filter((/** @type {any} */ o)=>o.groupId===g).map((/** @type {any} */ o)=>o.id)):new Set([id]);
   };
 
+  // The placeholder a new lettering object starts with. The engine needs 1 to 24 characters of text, so it is a neutral word,
+  // not an empty box; the Text box opens with it selected, so typing replaces it.
+  const NEW_TEXT='Text';
   // A new shape or lettering object goes in at the hoop's centre with the thread and stitch in the sidebar. Lettering's
   // box is centred there too (see below); a new shape is placed at the hoop centre by its x/y origin.
   async function add(/** @type {string} */ kind){
@@ -63,7 +66,7 @@ export function createCanvasTools(api){
     if(kind==='text'){
       try{await api.ensureFontLoaded(api.textFont());}catch(/** @type {any} */ error){api.toast(error.message, 'error');return;}
       const f=getFont(api.textFont());
-      const op={op:'add_text',id,text:'BLOOM',x:0,y:0,height:api.fitHeight(api.textFont(),'BLOOM'),
+      const op={op:'add_text',id,text:NEW_TEXT,x:0,y:0,height:api.fitHeight(api.textFont(),NEW_TEXT),
         thread:$('#thread').value,font:api.textFont(),...(f?.kind==='outline'?{stitch:'fill'}:{})};
       // Place the object so its bounding box is centred on the hoop centre (0, 0). The op is measured once at the origin,
       // since the box offset depends on the glyphs and font. If another object's box is already centred there, the new

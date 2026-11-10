@@ -334,10 +334,12 @@ export function syncStitchPanel() {
   setStitchRow('borderWidthRow', !bordered);
   if (bordered) setRunRows({borderWidth: String(o?.borderWidth ?? 0)});
 
+  // Follow path shows only for one text object, and only when there is a path to follow or the text already follows one.
+  setStitchRow('followRow', !(n === 1 && o?.kind === 'text' && (objects.some(v => v.kind === 'path') || Boolean(o?.along))));
   if (n === 1 && o?.kind === 'text') {
     const paths = objects.filter(v => v.kind === 'path');
     const nextOptions: PanelOption[] = [
-      {value: '', label: t('Not on a path')},
+      {value: '', label: t('None')},
       ...paths.map(v => ({value: v.id, label: v.name || v.id})),
     ];
     if (o.along && !o.along.pathId) nextOptions.push({value: '__custom', label: t('Custom path')});

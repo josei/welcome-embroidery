@@ -39,7 +39,7 @@ useLayoutEffect(() => {
  const boldMm = useDraftInput(l.boldMm, v => letteringActions.commit('boldMm', v));
  const italicDeg = useDraftInput(l.italicDeg, v => letteringActions.commit('italicDeg', v));
  return (
-  <section id="secText" data-sec="" hidden={layout.secText}><h4>Lettering</h4><label id="followRow">Follow path<select id="followPath"
+  <section id="secText" data-sec="" hidden={layout.secText}><h4>Lettering</h4><label id="followRow" hidden={rows.followRow}>Follow path<select id="followPath"
     title="Make the text follow a path; it stays attached when the path is edited" value={panel.followPathValue} onChange={e =>
     stitchPanelActions.chooseFollowPath(e.target.value)}>{panel.followPathOptions.map(o =>
     <option key={o.value} value={o.value}>{o.label}</option>)}</select></label><label id="alongRow" hidden={rows.alongRow}>{"Offset along path (mm)"}<input id="alongOffset" type="number" step="0.5" {...along} /></label>

@@ -32,7 +32,7 @@ export interface LetteringFields {
 
 export const letteringFieldsState = createStore<LetteringFields>({
   alongOffset: '0',
-  text: 'BLOOM',
+  text: '',
   height: '8',
   heightMin: '2',
   heightMax: '200',
