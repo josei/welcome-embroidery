@@ -19,9 +19,11 @@ import {t} from './i18n.js';
 import {editor} from './editorContext.js';
 import {TOOL_KEYS} from './shortcutTable.js';
 import {focusStitchType} from './focusStitchType.js';
+import {mountNumericFields} from './numericFields.js';
 
 /** Mounts the editor's keyboard handling. */
 export function mountKeyboard() {
+  mountNumericFields();
   // A toolbar button clicked with the mouse keeps focus, so a later Enter would go to it instead of starting node edit.
   // Release focus after mouse clicks only (detail > 0); keyboard activation keeps focus for keyboard users.
   document.addEventListener('click', e => {
