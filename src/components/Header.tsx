@@ -40,9 +40,10 @@ function HistoryButton({undo = false}: {undo?: boolean}) {
  const last = (undo ? history : future).at(-1)?.label;
  const name = last === undefined ? t(undo ? 'Nothing to undo' : 'Nothing to redo') : t(undo ? 'Undo {action}' : 'Redo {action}', {action: last});
  return (
-  <ActionButton flag={undo ? 'undo' : 'redo'} className="icon-button" id={undo ? 'undo' : 'redo'} aria-label={name} title={name} data-tooltip={name}
+  <ActionButton flag={undo ? 'undo' : 'redo'} className="icon-button labelled" id={undo ? 'undo' : 'redo'} aria-label={name} title={name} data-tooltip={name}
    onClick={() => (undo ? toolbarActions.undo() : toolbarActions.redo())}>
    <svg className="icon"><use href={undo ? '#i-undo' : '#i-redo'} /></svg>
+   <span className="icon-label">{t(undo ? 'Undo' : 'Redo')}</span>
   </ActionButton>
  );
 }
@@ -146,15 +147,15 @@ export function Header() {
     projectSave(
     )}><svg className="icon"><use href="#i-save"/></svg></button><button className="icon-button" id="helpBtn" aria-label="Keyboard shortcuts (?)"
       title="Keyboard shortcuts (?)" data-tooltip="Keyboard shortcuts (?)"><svg className="icon"><use href="#i-keys"/></svg></button><span
-        className="sep"></span><div className="edit-tools"><HistoryButton undo /><HistoryButton /><ActionButton flag="duplicate" className="icon-button" id="duplicate"
+        className="sep"></span><div className="edit-tools"><HistoryButton undo /><HistoryButton /><ActionButton flag="duplicate" className="icon-button labelled" id="duplicate"
       aria-label="Duplicate selected object" title="Duplicate selected object" data-tooltip="Duplicate" onClick={(
     ) =>
     toolbarActions.duplicate(
-    )}><svg className="icon"><use href="#i-copy"/></svg></ActionButton><ActionButton flag="remove" className="icon-button" id="remove"
+    )}><svg className="icon"><use href="#i-copy"/></svg><span className="icon-label">{t('Duplicate')}</span></ActionButton><ActionButton flag="remove" className="icon-button labelled" id="remove"
       aria-label="Delete selected object" title="Delete selected object" data-tooltip="Delete" onClick={(
     ) =>
     toolbarActions.remove(
-    )}><svg className="icon"><use href="#i-delete"/></svg></ActionButton></div><ExportSplit /><button type="button" className={settingsButtonClass(agent)}
+    )}><svg className="icon"><use href="#i-delete"/></svg><span className="icon-label">{t('Delete')}</span></ActionButton></div><ExportSplit /><button type="button" className={settingsButtonClass(agent)}
       id="settingsBtn" aria-label="Settings" title={settingsTip(agent)} data-tooltip="Settings" onClick={(
     ) =>
     setSettingsOpen(
