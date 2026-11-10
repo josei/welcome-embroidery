@@ -18,9 +18,9 @@ test('a matching copy with no known file name still says it matches', () => {
     '"Botanical badge", 6 objects. Matches saved file.');
 });
 
-test('a differing copy says it holds unsaved changes and gives the age', () => {
+test('a differing copy with no file says it is autosaved in this browser, not unsaved', () => {
   assert.equal(restorePromptInfo({...copy, clean: false, savedFileName: null}, en),
-    '"Botanical badge", 6 objects. Unsaved changes, 3 min ago.');
+    '"Botanical badge", 6 objects. Autosaved in this browser, 3 min ago.');
 });
 
 test('a differing copy also shows the saved file name when one is known', () => {
@@ -31,7 +31,7 @@ test('a differing copy also shows the saved file name when one is known', () => 
 test('a single object is counted in the singular', () => {
   const one = {...copy, objects: 1, clean: false};
   const singular = (text, values) => (text === '1 object' ? '1 object' : en(text, values));
-  assert.match(restorePromptInfo(one, singular), /^"Botanical badge", 1 object\. Unsaved changes, 3 min ago\.$/);
+  assert.match(restorePromptInfo(one, singular), /^"Botanical badge", 1 object\. Autosaved in this browser, 3 min ago\.$/);
 });
 
 test('every English prompt line has a Spanish translation', () => {
@@ -45,7 +45,7 @@ test('every English prompt line has a Spanish translation', () => {
     '"{name}", {objects}. Matches saved file "{file}".',
     '"{name}", {objects}. Matches saved file.',
     '"{name}", {objects}. Unsaved changes, {m} min ago. Saved file: "{file}".',
-    '"{name}", {objects}. Unsaved changes, {m} min ago.',
+    '"{name}", {objects}. Autosaved in this browser, {m} min ago.',
   ];
   assert.equal(lines.length, templates.length);
   for (const template of templates) assert.ok(ES[template], `missing Spanish for: ${template}`);

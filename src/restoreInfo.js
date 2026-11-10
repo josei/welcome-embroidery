@@ -18,5 +18,5 @@ export function restorePromptInfo(copy, t) {
   }
   return file
     ? t('"{name}", {objects}. Unsaved changes, {m} min ago. Saved file: "{file}".', {name: copy.name, objects, m: copy.minutes, file})
-    : t('"{name}", {objects}. Unsaved changes, {m} min ago.', {name: copy.name, objects, m: copy.minutes});
+    : t('"{name}", {objects}. Autosaved in this browser, {m} min ago.', {name: copy.name, objects, m: copy.minutes});
 }

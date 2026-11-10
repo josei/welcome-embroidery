@@ -282,7 +282,7 @@ export const ES={
   '"{name}", {objects}. Matches saved file "{file}".':'"{name}", {objects}. Coincide con el archivo guardado "{file}".',
   '"{name}", {objects}. Matches saved file.':'"{name}", {objects}. Coincide con el archivo guardado.',
   '"{name}", {objects}. Unsaved changes, {m} min ago. Saved file: "{file}".':'"{name}", {objects}. Cambios sin guardar, hace {m} min. Archivo guardado: "{file}".',
-  '"{name}", {objects}. Unsaved changes, {m} min ago.':'"{name}", {objects}. Cambios sin guardar, hace {m} min.','about {t} to sew':'unos {t} de bordado','Recent':'Recientes',
+  '"{name}", {objects}. Autosaved in this browser, {m} min ago.':'"{name}", {objects}. Autoguardado en este navegador, hace {m} min.','about {t} to sew':'unos {t} de bordado','Recent':'Recientes',
   'Use':'Usar','Change this object\'s thread color':'Cambiar el color de hilo de este objeto','Custom color':'Color personalizado','Hex color':'Color hexadecimal','Choose a thread color':'Elegir un color de hilo','White':'Blanco',
   'Ivory':'Marfil','Cream':'Crema','Light gray':'Gris claro','Silver':'Plata','Gray':'Gris','Charcoal':'Carbón','Black':'Negro','Pale pink':'Rosa pálido',
   'Pink':'Rosa','Hot pink':'Fucsia','Red':'Rojo','Cherry':'Cereza','Burgundy':'Burdeos','Rust':'Óxido','Peach':'Melocotón','Orange':'Naranja','Gold':'Oro',
