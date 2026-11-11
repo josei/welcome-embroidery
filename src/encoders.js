@@ -17,7 +17,6 @@ import {encodeU01} from './encoders/u01.js';
 import {encodeExp} from './encoders/exp.js';
 import {encodeDst} from './encoders/dst.js';
 import {encodeCol, encodeEdr} from './encoders/colour.js';
-import {stitchRule} from './encoders/shared.js';
 
 /**
  * A design: its objects, and the stitch layers imported into it keep their source bytes.
@@ -42,9 +41,6 @@ export {
   encodeCol, encodeEdr,
 };
 
-/** Writers that split non-jump moves longer than their stitch limit; an imported file with such a move is re-encoded instead of passed through. */
-const LONG_MOVE_FORMATS=['pec','pes','pes6','vp3','dst','exp','sew','u01','tbf','xxx','jef'];
-
 /**
  * Writes a compiled plan in one machine format. An unchanged imported file is returned as its source bytes.
  * @param {Plan} plan
@@ -61,7 +57,7 @@ export function encode(plan,format,color,hoop=110,document=null){
     format)))throw Error(`Unsupported machine format: ${format}. Choose JEF, VP3, DST, EXP, PEC, PES, PES v6, SEW, U01, XXX, TBF, COL or EDR.`);
   if(plan.errors.length)throw Error(plan.errors.join(' '));
   const layers=/** @type {Layer[]} */((document?.objects||[]).filter(o=>o.visible!==false&&o.kind==='stitch_layer'));
-  if(layers.length===1&&document?.objects.length===1&&layerCanPassThrough(layers[0],format)&&!(LONG_MOVE_FORMATS.includes(format)&&hasLongStitch(layers[0].stitches,stitchRule(format)))){
+  if(layers.length===1&&document?.objects.length===1&&layerCanPassThrough(layers[0],format)){
     const bytes=Uint8Array.from(atob(/** @type {string} */(layers[0].source.originalBytesBase64)),c=>c.charCodeAt(0));
     if(bytes.byteLength===layers[0].source.size){try{const checked=decodeEmbroidery(bytes,format);if(sourceMatches(checked,layers[0]))return bytes;}catch{}}
   }
