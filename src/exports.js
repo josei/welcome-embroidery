@@ -3,6 +3,7 @@
 // as cutting templates. The engine re-exports these functions, so callers keep importing them from engine.js.
 import {geometry} from './outlines.js';
 import {hoopSize} from './hoops.js';
+import {displayName} from './appHelpers.js';
 
 /** @typedef {import('./geom.js').Pt} Pt */
 /** @typedef {import('./transforms.js').Obj & {source?: {bounds: number[], format: string, defaultPlacement: object, originalBytesBase64?: string|null},
@@ -47,7 +48,7 @@ const d=(lines,close=false)=>lines.map(l=>'M'+l.map(([x,y])=>`${f(x)} ${f(y)}`).
       `fill-rule="evenodd"${o.border?` stroke="${o.borderThread||o.thread}" stroke-width="${f(Math.max(.5,Number(o.borderWidth)||0))}"`:''}>${title}</path>`);
     else out.push(`<path d="${d(lines)}" fill="none" stroke="${o.thread}" stroke-width=".4" stroke-linecap="round" stroke-linejoin="round">${title}</path>`);}
   return `<?xml version="1.0" encoding="UTF-8"?>\n<svg xmlns="http://www.w3.org/2000/svg" width="${f(hs.w)}mm" height="${f(hs.h)}mm" ` +
-  `viewBox="${f(-hs.w/2)} ${f(-hs.h/2)} ${f(hs.w)} ${f(hs.h)}">\n<title>${esc(doc.name)}</title>\n${out.join('\n')}\n</svg>\n`;
+  `viewBox="${f(-hs.w/2)} ${f(-hs.h/2)} ${f(hs.w)} ${f(hs.h)}">\n<title>${esc(displayName(doc.name))}</title>\n${out.join('\n')}\n</svg>\n`;
 }
 
 // Print template: a 1:1 placement sheet in millimetres (the sheet is the hoop, origin at its centre). Design outlines in green, the hoop dashed red, a centre
@@ -72,7 +73,7 @@ const d=lines=>lines.map(l=>'M'+l.map(([x,y])=>`${f(x)} ${f(y)}`).join('L')).joi
     const lines=geometry(o,0);if(lines.length)out.push(`<path d="${d(lines)}" fill="none" stroke="${ink}" stroke-width="0.2" stroke-linejoin="round"/>`);}
   return `<?xml version="1.0" encoding="UTF-8"?>\n<svg xmlns="http://www.w3.org/2000/svg" width="${f(w)}mm" height="${f(h)}mm" ` +
   `viewBox="${f(x0)} ${f(y0)} ${f(w)} ${f(h)}">`+
-    `<title>${esc(doc.name||'Design')} print template</title>`+
+    `<title>${esc(displayName(doc.name||'Design'))} print template</title>`+
     `<rect x="${f(x0)}" y="${f(y0)}" width="${f(w)}" height="${f(h)}" fill="none" stroke="#c0392b" stroke-width="0.3" stroke-dasharray="2 1"/>`+
     `<path d="M-5 0H5M0 -5V5" fill="none" stroke="#c0392b" stroke-width="0.2"/>`+
     out.join('')+
@@ -82,7 +83,7 @@ const d=lines=>lines.map(l=>'M'+l.map(([x,y])=>`${f(x)} ${f(y)}`).join('L')).joi
     // the length named on it.
     `<path d="M${f(x0+5)} ${f(y0+h-15)}H${f(x0+5+Math.min(100,w-10))}" fill="none" stroke="#000" stroke-width="0.3"/>`+
     `<text x="${f(x0+5)}" y="${f(y0+h-17)}" font-size="2.5" font-family="sans-serif">${f(Math.min(100,w-10))} mm check: measure this line</text>`+
-    `<text x="${f(x0+3)}" y="${f(y0+4)}" font-size="2.5" font-family="sans-serif">${esc(doc.name||'Design')} · 1:1 placement sheet</text></svg>\n`;
+    `<text x="${f(x0+3)}" y="${f(y0+4)}" font-size="2.5" font-family="sans-serif">${esc(displayName(doc.name||'Design'))} · 1:1 placement sheet</text></svg>\n`;
 }
 
 // Appliqué templates: each appliqué piece's outline on its own, 1:1 in mm, stacked down one SVG sheet under its name and size, for cutting the fabric piece. A
@@ -110,7 +111,7 @@ const margin=10,gap=12,ink='#000';
   if(!parts.length)throw Error('The appliqué pieces have no outline to print.');
   const H=top-gap+margin;
   return `<?xml version="1.0" encoding="UTF-8"?>\n<svg xmlns="http://www.w3.org/2000/svg" width="${f(W)}mm" height="${f(H)}mm" viewBox="0 0 ${f(W)} ${f(H)}">`+
-    `<title>${esc(doc.name||'Design')} appliqué templates</title>`+
+    `<title>${esc(displayName(doc.name||'Design'))} appliqué templates</title>`+
     `<path d="M${margin} 5H${margin+10}" fill="none" stroke="#000" stroke-width="0.3"/><text x="${margin+12}" y="6.5" font-size="2.5" ` +
     `font-family="sans-serif">10 mm</text>`+
     parts.join('')+'</svg>\n';

@@ -34,16 +34,21 @@ export function safeProjectFilename(name){
   const stem=String(name||'').replace(/\.welcome$/i,'').replace(/[\/\\:*?"<>|\u0000-\u001F\u007F]/g,'_').trim();
   // Windows reserves these device names, with or without an extension, so the base name gets a trailing `_`.
   const safe=/^(CON|PRN|AUX|NUL|COM[1-9]|LPT[1-9])(?=\.|$)/i.test(stem)?stem.replace(/^([^.]*)/,'$1_'):stem;
-  return `${safe||t('Untitled design')}.welcome`;}
+  return `${safe?displayName(safe):t('Untitled design')}.welcome`;}
+
+/**
+ * The name a document shows: the stored untranslated default is translated, and any name the user gave is kept.
+ * @param {any} name
+ * @returns {any}
+ */
+export function displayName(name){return name==='Untitled design'?t(name):name;}
 
 /**
  * The name an export file gets: the document name without `.welcome`, with the default name translated.
  * @param {string|null|undefined} name
  * @returns {string}
  */
-export function exportStem(name){
-  const stem=safeProjectFilename(name).replace(/\.welcome$/i,'');
-  return stem==='Untitled design'?t(stem):stem;}
+export function exportStem(name){return safeProjectFilename(name).replace(/\.welcome$/i,'');}
 
 /**
  * The file name stem an export gets when the user has not typed one. A document the user named keeps that name; an

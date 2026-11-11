@@ -413,7 +413,8 @@ function startNewDesign() {
   setDocId(undefined);
   fileHandle = null;
   setSave({savedAt: null, savedFileName: null});
-  setDocument({doc: withSavedHoop({...initialDocument(), name: t('Untitled design'), objects: []})});
+  // The stored default is the untranslated string, so exports can recognise it in every locale; exportStem translates it on output.
+  setDocument({doc: withSavedHoop({...initialDocument(), name: 'Untitled design', objects: []})});
   setDocument({history: []});
   setDocument({future: []});
   setSelection({selected: null});
