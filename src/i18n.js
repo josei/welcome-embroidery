@@ -28,9 +28,9 @@ export const ES={...ES_ADDITIONS,
 'View':'Vista','Design':'Diseño','Stitches':'Puntadas','Preview':'Vista previa','Undo':'Deshacer','Redo':'Rehacer','Duplicate selected object':
   'Duplicar el objeto seleccionado','Duplicate':'Duplicar','Delete selected object':'Eliminar el objeto seleccionado','Delete':'Eliminar','Export':'Exportar',
 'Objects':'Objetos','Tools':'Herramientas','Select (V)':'Seleccionar (V)',
-'Select ({shortcut})':'Seleccionar ({shortcut})','Draw path ({shortcut})':'Dibujar trazado ({shortcut})','Measure ({shortcut})':'Medir ({shortcut})','Line ({shortcut}, drag)':'Línea ({shortcut}, arrastrar)','Polygon ({shortcut}, drag from center)':'Polígono ({shortcut}, arrastrar desde el centro)','Star ({shortcut}, drag from center)':'Estrella ({shortcut}, arrastrar desde el centro)','Pen with curves ({shortcut}, drag for handles)':'Pluma con curvas ({shortcut}, arrastrar para tiradores)','Add rectangle ({shortcut})':'Añadir rectángulo ({shortcut})','Add ellipse ({shortcut})':'Añadir elipse ({shortcut})','Add lettering ({shortcut})':'Añadir Lettering ({shortcut})','Export ({shortcut})':'Exportar ({shortcut})',
+'Select ({shortcut})':'Seleccionar ({shortcut})','Draw path ({shortcut})':'Dibujar trazado ({shortcut})','Measure ({shortcut})':'Medir ({shortcut})','Line ({shortcut}, drag)':'Línea ({shortcut}, arrastrar)','Polygon ({shortcut}, drag from center)':'Polígono ({shortcut}, arrastrar desde el centro)','Star ({shortcut}, drag from center)':'Estrella ({shortcut}, arrastrar desde el centro)','Pen with curves ({shortcut}, drag for handles)':'Pluma con curvas ({shortcut}, arrastrar para tiradores)','Add rectangle ({shortcut})':'Añadir rectángulo ({shortcut})','Add ellipse ({shortcut})':'Añadir elipse ({shortcut})','Add lettering ({shortcut})':'Añadir texto ({shortcut})','Export ({shortcut})':'Exportar ({shortcut})',
 'Add rectangle':'Añadir rectángulo','Skip to drawing tools':'Ir a las herramientas de dibujo','Add ellipse':'Añadir elipse','Draw path':
-  'Dibujar trazado','Draw path (N)':'Dibujar trazado (N)','Add lettering':'Añadir Lettering',
+  'Dibujar trazado','Draw path (N)':'Dibujar trazado (N)','Add lettering':'Añadir texto',
 'Line (L, drag)':'Línea (L, arrastrar)','Polygon (G, drag from center)':'Polígono (G, arrastrar desde el centro)','Star (S, drag from center)':
   'Estrella (S, arrastrar desde el centro)','Pen with curves (P, drag for handles)':'Pluma con curvas (P, arrastrar para tiradores)',
 'Sides / star points':'Lados / puntas de estrella','Hoop':'Bastidor','Hoop width (mm)':'Ancho del bastidor (mm)','Hoop height (mm)':'Alto del bastidor (mm)',
@@ -158,7 +158,7 @@ export const ES={...ES_ADDITIONS,
   'Edge walk + zigzag':'Recorrido del borde + zigzag',
 'Border':'Borde','Border thread':'Hilo del borde','Closed shape':'Forma cerrada','Smooth curve':'Curva suave','This object overrides row spacing/angle':
   'Este objeto sustituye la separación/ángulo de filas','Use defaults':'Usar valores por defecto',
-'Lettering':'Lettering','Offset along path (mm)':'Desplazamiento a lo largo del trazado (mm)','Font':'Fuente','Embroidery font':'Fuente de bordado',
+'Lettering':'Texto','Offset along path (mm)':'Desplazamiento a lo largo del trazado (mm)','Font':'Fuente','Embroidery font':'Fuente de bordado',
   'Néon blinking (centerline)':'Néon blinking (línea central)','Text':'Texto','Text content':'Contenido del texto','Edit text content':
   'Editar contenido del texto',
 'Enter or clicking outside saves the text. Escape cancels.':'Enter o clic fuera guarda el texto. Escape cancela.',

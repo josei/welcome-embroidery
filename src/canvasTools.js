@@ -58,7 +58,7 @@ export function createCanvasTools(api){
 
   // The placeholder a new lettering object starts with. The engine needs 1 to 24 characters of text, so it is a neutral word,
   // not an empty box; the Text box opens with it selected, so typing replaces it.
-  const NEW_TEXT='Text';
+  const NEW_TEXT=t('Text');
   // A new shape or lettering object goes in at the hoop's centre with the thread and stitch in the sidebar. Lettering's
   // box is centred there too (see below); a new shape is placed at the hoop centre by its x/y origin.
   async function add(/** @type {string} */ kind){
