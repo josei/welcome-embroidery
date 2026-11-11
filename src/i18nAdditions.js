@@ -77,4 +77,8 @@ export const ES_ADDITIONS={
 'Extra weight added to fills and satin columns, in mm. The B button turns bold on or off at a default amount.':'Grosor extra que se añade a los rellenos y a las columnas de satén, en mm. El botón B activa o desactiva la negrita con una cantidad predeterminada.',
 'Slant of the letters, in degrees. The I button turns italic on or off at a default amount.':'Inclinación de las letras, en grados. El botón I activa o desactiva la cursiva con una cantidad predeterminada.',
 'The bundled single-line alphabet does not support: {chars}. Use A–Z, 0–9 and spaces.':'El alfabeto de trazo simple incluido no admite: {chars}. Usa A–Z, 0–9 y espacios.',
+'{n} planned stitches':'{n} puntadas planificadas','{n} planned stitches · {m} m estimated thread · {c} thread colors':'{n} puntadas planificadas · {m} m de hilo estimado · {c} colores de hilo','{n} planned stitches · {m} m estimated thread · {c} thread color':'{n} puntadas planificadas · {m} m de hilo estimado · {c} color de hilo',
+'{n} stitches in the {f} export':'{n} puntadas en la exportación {f}',
+'{m} m estimated thread · {c} thread colors':'{m} m de hilo estimado · {c} colores de hilo',
+'{m} m estimated thread · {c} thread color':'{m} m de hilo estimado · {c} color de hilo',
 };

@@ -281,6 +281,7 @@ export function compile(doc,legacyPlacement=false) {
   });
   // Non-DST writers take the placement of the legacy pass, so their bytes match the export before the 0.1 mm placement fix.
   const writer=hasImportedLayer&&!legacyPlacement?compile(doc,true).writer:{stitches:writerStitches,count:writerCount,bounds:writerBounds};
-  return {revision:doc.revision,stitches,bounds,count,objectCounts,writer,threadLength:Math.round(length*1.12),
+  // An imported layer's count is the planned one: the DST plan splits long moves, so it can differ from the stitches the other writers and the source hold.
+  return {revision:doc.revision,stitches,bounds,count,planned:hasImportedLayer,objectCounts,writer,threadLength:Math.round(length*1.12),
     colors:[...new Set(stitches.filter(s=>s.cmd==='stitch'||s.cmd==='color').map(s=>s.thread).filter(Boolean))],errors:[...new Set(errors)],issues};
 }

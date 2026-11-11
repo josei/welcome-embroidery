@@ -38,9 +38,19 @@ interface InspectorObject {
   threads?: unknown[];
 }
 
+/** The count with its label: an imported layer's count is the export's (or the planned count when no stitch export applies). */
+function countLabel(plan: PlanInfo, n: string): string {
+  if (plan.exportFormat) return t('{n} stitches in the {f} export', {n, f: plan.exportFormat});
+  return t(plan.planned ? '{n} planned stitches' : '{n} stitches', {n});
+}
+
 /** The compiled plan fields the status run and the summary show. */
 export interface PlanInfo {
   count: number;
+  /** True when the count is the planned one (the plan holds an imported layer), not what every export writes. */
+  planned?: boolean;
+  /** The export format the count is for, when the count is what that export decodes to (an imported layer). */
+  exportFormat?: string;
   errors: string[];
   issues: Array<{id: string; message: string}>;
   threadLength: number;
@@ -120,7 +130,7 @@ export function syncInspector({plan, compileError, tips}: {plan: PlanInfo | null
     count: compileError
       ? t('⚠ Can\'t compile: {e}', {e: t(compileError)})
       : plan
-        ? `${t('{n} stitches', {n: formatCount(plan.count, lang)})} · ${plan.errors.length ? plan.errors[0] : t('compiled')}`
+        ? `${countLabel(plan, formatCount(plan.count, lang))} · ${plan.errors.length ? plan.errors[0] : t('compiled')}`
         : documentNow().doc.objects.length
           ? 'Compiling…'
           : 'Nothing to sew yet',
@@ -139,11 +149,12 @@ export function syncInspector({plan, compileError, tips}: {plan: PlanInfo | null
   });
   setInspectorText({
     summary: plan
-      ? t(lang === 'es' && plan.colors.length === 1 ? '{n} stitches · {m} m estimated thread · {c} thread color' : '{n} stitches · {m} m estimated thread · {c} thread colors', {
-          n: formatCount(plan.count, lang),
-          m: (plan.threadLength / 1000).toFixed(1),
-          c: plan.colors.length,
-        }) +
+      ? countLabel(plan, formatCount(plan.count, lang)) +
+          ' · ' +
+          t(lang === 'es' && plan.colors.length === 1 ? '{m} m estimated thread · {c} thread color' : '{m} m estimated thread · {c} thread colors', {
+            m: (plan.threadLength / 1000).toFixed(1),
+            c: plan.colors.length,
+          }) +
         ' · ' +
         (lang === 'es' && sewTime(plan) === '1 min' ? t('about 1 min to sew') : t('about {t} to sew', {t: sewTime(plan)})) +
         (plan.errors.length ? ' · ' + plan.errors.join(' ') : '')

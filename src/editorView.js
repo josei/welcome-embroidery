@@ -2,6 +2,14 @@
 // The editor view: creates the canvas, draws the document and its controls, and keeps the stores the React inspector
 // and simulation read in step with the document. app.js calls render after every change.
 import {documentNow} from './documentState.js';
+
+/** An imported layer's canvas count is the count the export the dialog picked writes, so the status line matches the file the user gets. @param {any} plan */
+function inspectorPlan(plan) {
+  if (!plan?.planned) return plan;
+  const {format} = exportFormatState.get();
+  const count = exportedStitchCount(plan, format, documentNow().doc);
+  return count === null ? plan : {...plan, count, exportFormat: format === 'pes6' ? 'PES v6' : format.toUpperCase()};
+}
 import {selState, setSelection} from './selectionState.js';
 import {selectedObject, orderedIds, selectIds} from './selectionCommands.js';
 import {syncInspector} from './inspector.js';
@@ -25,11 +33,23 @@ import {gridSnapState} from './gridSnapState.js';
 import {gridState} from './gridState.js';
 import {setTransformFields} from './transformState.js';
 import {getPlan, getCompileError, compileNow} from './compileService.js';
+import {exportedStitchCount, exportedObjectCounts} from './exportedCount.js';
+import {setSewingCounts} from './sewingCountsState.js';
+import {exportFormatState} from './exportFormatState.js';
 import {renderSimulation} from './simulation.js';
 import {copyStyle, pasteStyle} from './styleClipboard.js';
 import {edit} from './documentCommands.js';
 import {editor} from './editorContext.js';
 import {toolHint, clearToolHints} from './editorChrome.js';
+
+/** Sends the plan and the sewing tips to the inspector. Also run when the export format changes, since an imported layer's count follows it. @returns {any} the sewing tips */
+function syncInspectorNow() {
+  const tips = sewingTips();
+  const plan = getPlan();
+  if (plan?.planned) setSewingCounts(exportedObjectCounts(plan, exportFormatState.get().format, documentNow().doc));
+  syncInspector({plan: inspectorPlan(getPlan()), compileError: getCompileError(), tips});
+  return tips;
+}
 
 /** Draws everything that depends on the document or the plan. */
 export function render() {
@@ -53,8 +73,7 @@ export function render() {
   const canvas = editor.canvas;
   canvas?.drawScene();
   canvas?.drawControls();
-  const tips = sewingTips();
-  syncInspector({plan: getPlan(), compileError: getCompileError(), tips});
+  const tips = syncInspectorNow();
   renderSewTips(tips);
   syncStitchPanel();
   renderSimulation();
@@ -63,6 +82,8 @@ export function render() {
 
 /** Creates the canvas and wires its tools, context menu, text editor, reference layer and stitch panel. */
 export function mountCanvas() {
+  // The status line and inspector count follow the export format, so re-sync them when it changes (no edit or reload needed).
+  exportFormatState.subscribe(() => syncInspectorNow());
   const canvas = createCanvas({
     svg: document.getElementById('art'),
     container: document.querySelector('.canvas'),
