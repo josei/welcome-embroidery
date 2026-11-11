@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {writeFileSync} from 'node:fs';
 import {decodeEmbroidery} from '../src/readers.js';
-import {compile,encode,importStitchLayer,initialDocument,applyOperations,validateDocument,batchDocuments} from '../src/engine.js';
+import {compile,encode,importStitchLayer,initialDocument,applyOperations,validateDocument,batchDocuments,makeStitchLayer} from '../src/engine.js';
 import {pinnedMachineFixture,readMachineFixtures} from './fixture-archive.js';
 
 // Pinned VP3 and PEC files carry non-jump moves longer than 12.7 mm, so they are re-encoded rather than passed through (see #356).
@@ -239,4 +239,23 @@ test('pinned SEW imports with its thread-chart colors, exports the untouched sou
   const want=steps.filter(s=>s.cmd==='stitch').map(s=>s.p),got=back.stitches.filter(s=>s.cmd==='stitch').map(tenths);let next=0;
   for(const [x,y] of got)if(next<want.length&&want[next][0]===x&&want[next][1]===y)next++;
   assert.equal(next,want.length,'every planned needle point is written, in order');
+});
+
+// An imported design whose first stitch is away from the writers' origin opens with a jump to that stitch, so no format sews a lead-in from (0, 0) (#376).
+test('an imported design that opens away from the origin starts with a jump, not a lead-in stitch',()=>{
+  const source=[[-400,-300],[-380,-300],[-360,-290],[-340,-290]];
+  const decoded={stitches:[...source.map(([x,y])=>({x,y,cmd:'stitch',thread:0})),{x:-340,y:-290,cmd:'end',thread:0}],threads:[{index:0,color:'#527461'}],bounds:[-400,-300,-340,-290]};
+  const doc=initialDocument();doc.objects=[makeStitchLayer(decoded,'dst',{fileName:'lead.dst'})];validateDocument(doc);
+  const plan=compile(doc);assert.deepEqual(plan.errors,[]);
+  assert.equal(plan.stitches[0].cmd,'jump');
+  assert.deepEqual([plan.stitches[1].x,plan.stitches[1].y],[plan.stitches[0].x,plan.stitches[0].y]);
+  // The sewn lines of the plan: every sewn point of a writer's output must lie within 0.1 mm of one of them.
+  const lines=[];for(let i=1;i<plan.stitches.length;i++)if(plan.stitches[i].cmd==='stitch')lines.push([plan.stitches[i-1],plan.stitches[i]]);
+  const distance=(p,[a,b])=>{const dx=b.x-a.x,dy=b.y-a.y,l2=dx*dx+dy*dy,t=l2?Math.max(0,Math.min(1,((p.x-a.x)*dx+(p.y-a.y)*dy)/l2)):0;return Math.hypot(p.x-a.x-t*dx,p.y-a.y-t*dy);};
+  for(const format of ['jef','vp3','dst','exp','pec','pes','sew','u01','xxx','tbf']){
+    const back=decodeEmbroidery(encode(plan,format,'#527461',doc.hoop,null),format);
+    const sewn=back.stitches.filter(s=>s.cmd==='stitch');
+    assert.ok(sewn.length>=source.length-1,`${format} sews the source`);
+    for(const s of sewn)assert.ok(lines.some(l=>distance(s,l)<=0.1+1e-6),`${format} sewn point ${s.x},${s.y} lies off the source`);
+  }
 });

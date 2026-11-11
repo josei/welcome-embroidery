@@ -85,11 +85,11 @@ export function compile(doc) {
     records.push({o,lines:useLines,satin,rails,maskRings,clippedFill});
   }
   if(complexity>2_000_000)throw Error('Design exceeds the safe digitizing complexity limit. Simplify geometry or increase row spacing.');
-  const stitches=/** @type {any[]} */([]);let previous=/** @type {any} */(null),currentThread=/** @type {any} */(null),lastNeedle=/** @type {any} */(null),
+  const stitches=/** @type {any[]} */([]);let leadIn=0;let previous=/** @type {any} */(null),currentThread=/** @type {any} */(null),lastNeedle=/** @type {any} */(null),
     position=/** @type {any} */(null),hasImportedLayer=false;
   const push=(/** @type {any} */ x,/** @type {any} */ y,/** @type {any} */ cmd,/** @type {any} */ thread,preserve=false)=>
     {const rx=round(x),ry=round(y);if(!preserve&&cmd==='stitch'&&lastNeedle&&rx===lastNeedle[0]&&ry===lastNeedle[1])return;
-    if(stitches.length>=250_000)throw Error('Design exceeds the 250,000 stitch safety limit. Simplify geometry or increase row spacing.');
+    if(stitches.length-leadIn>=250_000)throw Error('Design exceeds the 250,000 stitch safety limit. Simplify geometry or increase row spacing.');
     stitches.push({x:rx,y:ry,cmd,thread});position=[rx,ry];if(cmd==='stitch')lastNeedle=[rx,ry];};
   const ties=doc.settings.ties===true,trims=doc.settings.trims===true,trimMm=doc.settings.trimMm??5;let lastDir=[1,0];
   // With trims on, any jump of trimMm (5 mm by default) or more after sewing is preceded by a thread cut at the last needle position.
@@ -116,8 +116,14 @@ export function compile(doc) {
         firstNeedle?(o.threadOverrides[firstNeedle.thread]||o.threads[firstNeedle.thread].color||o.thread):o.thread,firstSewEvent=
         o.stitches.find((/** @type {any} */ s)=>s.cmd==='stitch'||s.cmd==='color'),hasSourceColorBeforeNeedle=firstSewEvent?.cmd==='color';
       if(position&&firstNeedle&&currentThread!==firstThread&&!hasSourceColorBeforeNeedle)push(position[0],position[1],'color',firstThread,true);
+      // Writers start from the machine origin (0, 0). When nothing has been emitted yet and the import opens with a sewn stitch away from it, a jump to
+      // the first stitch comes first, so no writer sews a lead-in from the origin. Welcome's own objects already open with a jump (see the run and fill paths).
+      let leading=stitches.length===0;
       for(const s of o.stitches){const lx=(s.x-(sx0+sx1)/2)*sx,ly=(s.y-(sy0+sy1)/2)*sy,x=cx+lx*c-ly*sn,y=cy+lx*sn+ly*c,thread=
-        o.threadOverrides[s.thread]||o.threads[s.thread].color||o.thread;if(s.cmd==='end'){position=[round(x),round(y)];continue;}push(x,y,s.cmd,thread,true);
+        o.threadOverrides[s.thread]||o.threads[s.thread].color||o.thread;if(s.cmd==='end'){position=[round(x),round(y)];continue;}
+        // The one added record is not counted against the 250,000 limit, which guards the imported stitches; an import at that limit still compiles.
+        if(leading){leading=false;if(s.cmd==='stitch'){stitches.push({x:round(x),y:round(y),cmd:'jump',thread});position=[round(x),round(y)];leadIn=1;}}
+        push(x,y,s.cmd,thread,true);
         currentThread=thread;previous=s.cmd==='trim'?null:[round(x),round(y)];}
       continue;
     }
