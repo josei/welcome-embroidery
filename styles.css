@@ -14,7 +14,7 @@ select:not(.sr-only){min-height:24px}label:has(input[type=checkbox]){min-height:
 /* Refined linen workspace, aligned with design/index2.html's botanical direction. */
 :root{font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;color:#1d2925;background:#f6f7f5;font-size:var(--fs-body)}
 body{background:#f6f7f5;min-height:580px}
-.top{height:48px;padding:0 14px;gap:9px;border-color:#e3e6e1}
+.top{height:48px;padding:0 14px;gap:7px;border-color:#e3e6e1}
 .top>b{color:var(--teal);font-size:var(--fs-large);letter-spacing:-.4px}
 .top input{width:180px;font-weight:var(--fw-emphasis)}
 .top button{border-color:transparent;color:#66726c}.top button:hover{background:#eef1ec;border-color:transparent}
@@ -92,8 +92,13 @@ nav .icon-button:first-of-type{margin-left:auto}
 /* Delete sits apart from Duplicate and turns red only on hover, so a slip is less likely; its focus ring is the shared one. */
 .edit-tools #remove{margin-left:8px}.edit-tools #remove:hover:not(:disabled){color:#9b2c1f;border-color:#d9a79e;background:#fbeeea}
 /* Issue #379: the title field is at least 24px tall, so its click and Tab target meets the minimum. The field has no border, so only its hit area grows. */
-.top #name{min-width:80px;flex:0 1 180px;min-height:24px}
+.top #name{min-width:80px;flex:1 1 0;width:auto;min-height:24px}
 .top .name-field{display:contents}
+/* Issue #435: the design name takes the bar's spare width, so no empty stretch sits between the menus and the commands. The save status
+   has a fixed slot beside it, always rendered, so the clean and dirty states draw the same box; its words are cut with an ellipsis. */
+@media (min-width:1101px){
+.top .save-status{flex:0 0 200px;width:200px;overflow:hidden;text-overflow:ellipsis}
+}
 .unsaved-marker:not([hidden]){display:inline-block;flex:none;width:8px;height:8px;margin:0 -8px 0 2px;border-radius:50%;background:#8a5a00}
 .top .unsaved-marker{order:0}
 .canvas{position:relative;height:calc(100% - 92px)}
@@ -486,10 +491,11 @@ input[aria-invalid="true"]{border-color:var(--warn)!important;background:var(--w
 }
 /* Issue #433: one control style across the top bar. Every command is an icon-only 36 px button with a tooltip (the shortcut is
    in it where one exists); Export is the only text button. The menus are text, centred on the same line. One divider sits between
-   each group: menus | name | file | edit | export, help and settings. The name takes the free width, so the right-hand group sits flush. */
+   each group: menus | file | edit | name | export, help and settings. The name takes the free width, so the right-hand group sits flush.
+   Issue #435: the dividers keep 1 px margins, so the menus and the first command sit 15 px apart and read as one strip. */
 @media (min-width:1101px){
 .top{gap:6px}
-.top .sep{margin:0 4px}
+.top .sep{margin:0 1px}
 .top .file-menu>button{height:36px;display:inline-flex;align-items:center}
 .top #name{flex:1 1 0;min-width:64px;width:auto;height:36px}
 .top .export-split{margin-left:0}

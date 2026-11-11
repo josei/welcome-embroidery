@@ -29,9 +29,9 @@ for(const [lang,name] of cases){
   expect(bar.scrollWidth,'top bar has no horizontal overflow').toBe(bar.clientWidth);
   // The name shortens rather than pushing controls out: it keeps a usable width.
   expect(await page.locator('header.top #name').evaluate(e=>e.getBoundingClientRect().width),'project name width').toBeGreaterThanOrEqual(60);
-  // Keyboard: tab from the name to Delete; it must be on screen, with the page not scrolled to hide it.
+  // Keyboard: shift+tab from the name back to Delete (the name follows the commands, Issue #435); it must be on screen, with the page not scrolled to hide it.
   await page.locator('header.top #name').focus();
-  for(let i=0;i<12;i++){ if(await page.evaluate(()=>document.activeElement?.id)==='remove')break; await page.keyboard.press('Tab'); }
+  for(let i=0;i<12;i++){ if(await page.evaluate(()=>document.activeElement?.id)==='remove')break; await page.keyboard.press('Shift+Tab'); }
   expect(await page.evaluate(()=>document.activeElement?.id),'Tab reaches Delete').toBe('remove');
   const focused=await box('#remove');
   expect(focused.right,'focused Delete right edge inside 1280px').toBeLessThanOrEqual(1280);
