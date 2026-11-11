@@ -430,7 +430,7 @@ input[aria-invalid="true"]{border-color:var(--warn)!important;background:var(--w
 /* Issue #379: the logo link is at least 24px tall (its SVG stays 18px, centred), so its click target meets the minimum. */
 .top .logo{min-height:24px}
 .top .icon-button{width:30px;min-width:30px;height:30px}
-.top .name-field{display:flex;position:relative;flex:1 1 0;min-width:64px}
+.top .name-field{display:flex;position:relative;flex:1 1 0;min-width:48px}
 .top #name{flex:1 1 0;min-width:0;width:100%;overflow:hidden;text-overflow:ellipsis}
 /* While the title is not focused, its text is drawn by the wrapper, which can show an ellipsis (an input cannot). The input keeps
    the value, focus and editing; its own text is transparent until it is focused. */
