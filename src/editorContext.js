@@ -9,7 +9,7 @@
  *   edit: (operations: any[], after?: () => void, coalesceKey?: string, label?: string) => boolean,
  *   transact: (fn: () => void) => boolean,
  *   compile: any,
- *   autosave: {schedule: () => void} | null,
+ *   autosave: {schedule: () => void, flush: () => void} | null,
  *   syncThreads: (() => void) | null,
  *   renderPlan: (() => void) | null,
  * }} EditorRuntime

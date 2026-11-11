@@ -101,7 +101,13 @@ export function mountAutosave() {
     event.preventDefault();
     event.returnValue = '';
   });
-  editor.autosave = {schedule};
+  /** Writes the pending edit now, without waiting for the 700 ms debounce (used before the desktop window closes). */
+  const flush = () => {
+    clearTimeout(timer);
+    lastKey = '';
+    write();
+  };
+  editor.autosave = {schedule, flush};
 
   mountSlot();
   onSlotChange(() => {
