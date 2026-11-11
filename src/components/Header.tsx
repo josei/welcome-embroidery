@@ -14,7 +14,8 @@ import {saveState} from '../saveState.js';
 import {dirtyMark} from '../saveMark.js';
 import {toolbarActions} from '../toolbarCommands.js';
 import {t} from '../i18n.js';
-import {ArrangeMenu, EditMenu, FileMenu} from './MenuBar';
+import {ArrangeMenu, EditMenu, FileMenu, PhoneMenu} from './MenuBar';
+import {usePhoneWidth} from '../phoneSheetState.js';
 // The project name field: it shows the document name, and a committed change is an edit (see documentActions).
 function ProjectName() {
  const {doc, dirty} = useSyncExternalStore(documentState.subscribe, documentState.get);
@@ -98,6 +99,7 @@ function withKeys(name: string, command: string) {
 // The editor header, rendered by React. Ids and attributes match the markup this replaced,
 // because app.js wires its controls by id.
 export function Header() {
+ const phone = usePhoneWidth();
  // The toolbar Save names the action and its shortcut, the same label the File menu and shortcut sheet use.
  const saveLabel = `${t('Save')} (${shortcutLabel([{mod: true, key: 'S'}])})`;
  const rows = useSyncExternalStore(stitchRowsState.subscribe, stitchRowsState.get);
@@ -140,7 +142,7 @@ export function Header() {
         "-67L3485 -116L3499 -142L3504 -178L3497 -211L3488 -220L3476 -223L3462 -219L3403 -163L3368 -137L3327 -115L3285 -100L3247 -95L3205 -100L3174 -115L3162 " +
         "-127L3152 -141L3243 -171L3308 -209L3344 -249L3360 -282L3369 -338L3363 -381L3356 -400L3347 -417L3319 -444L3302 -454L3263 -465L3220 -465L3179 " +
         "-457L3142 -442L3093 -405L3066 -373L3036 -319L3020 -265L3016 -227ZM3136 -219L3140 -267L3152 -307L3175 -344L3206 -365L3240 -365L3253 -356L3260 " +
-        "-343L3261 -308L3244 -276L3229 -261L3198 -241L3159 -225Z"}/></svg></a><FileMenu /><EditMenu /><ArrangeMenu /><span className="sep" aria-hidden="true" /><button className="icon-button" id="new"
+        "-343L3261 -308L3244 -276L3229 -261L3198 -241L3159 -225Z"}/></svg></a><FileMenu />{phone ? <PhoneMenu /> : <><EditMenu /><ArrangeMenu /></>}<span className="sep" aria-hidden="true" /><button className="icon-button" id="new"
           aria-label="New design" title={newTip} data-tooltip={newTip} onClick={() => newProject()}><svg className="icon"><use href="#i-new"/></svg></button><button className="icon-button" id="open" aria-label="Open project or SVG"
       title={openTip} data-tooltip={openTip} onClick={() => projectFile.current?.click()}><svg className="icon"><use href="#i-open"/></svg></button><button className="icon-button" id="importMachine"
       aria-label="Import JEF / VP3…" title="Import JEF / VP3…" data-tooltip="Import JEF / VP3…" onClick={() => machineFile.current?.click()}><svg className="icon"><use href="#i-import"/></svg></button><button className="icon-button" id="save" aria-label={saveLabel}

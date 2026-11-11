@@ -315,6 +315,12 @@ input:not([type=checkbox]):not([type=range]),select,textarea,.panel textarea{fon
 .canvas .tool-rail{position:absolute;left:28px;top:28px;z-index:6;display:flex;flex-direction:column;gap:2px;margin:0;padding:6px;background:#fff;border:0;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,.08);max-height:calc(100% - 56px);overflow:auto;order:0}
 .canvas .tool-rail .icon-button{width:36px;height:36px;min-width:36px}
 .canvas.preview-mode .tool-rail{display:none}
+/* Issue #443: at phone widths (600px and narrower) the tool rail is one row along the bottom of the canvas. It scrolls sideways inside
+   its own box, so the page never scrolls and every tool is one tap away. Each tool button is 40px, above the 24px touch minimum. */
+@media (max-width:600px){
+.canvas .tool-rail{left:8px;right:8px;top:auto;bottom:50px;width:auto;max-width:none;max-height:none;flex-direction:row;flex-wrap:nowrap;align-items:center;justify-content:flex-start;gap:4px;padding:6px;border-radius:12px;overflow-x:auto;overflow-y:hidden;overscroll-behavior-x:contain;scrollbar-width:thin}
+.canvas .tool-rail .icon-button{width:40px;min-width:40px;height:40px;flex:none}
+}
 
 .canvas .floating{top:56px;left:auto;right:12px;transform:none;display:flex;flex-direction:column;flex-wrap:wrap;align-items:center;align-content:flex-start;justify-content:flex-start;gap:2px;width:auto;max-width:none;max-height:calc(100% - 76px);padding:6px;overflow:visible;grid-template-columns:none}
 .canvas .floating #grid{width:84px;height:28px;margin:0;grid-column:auto}
@@ -366,6 +372,7 @@ input:not([type=checkbox]):not([type=range]),select,textarea,.panel textarea{fon
 .file-menu-list .menu-sep{border:0;border-top:1px solid #e3e6e1;margin:4px 2px}
 .file-menu-list small{font-size:var(--fs-caption);color:#66726c}
 .file-menu-list small.menu-reason{color:#7a5a12}
+.file-menu-list .menu-heading{padding:8px 10px 2px;font-size:var(--fs-caption);font-weight:var(--fw-emphasis);letter-spacing:.07em;text-transform:uppercase;color:#66726c}
 .list-warning{font-size:var(--fs-body);color:var(--warn);background:var(--warn-soft);border:1px solid var(--warn-line);border-radius:8px;padding:7px 9px;margin:0 0 6px;line-height:1.4}
 .row-warn{flex:none;color:var(--warn);font-size:var(--fs-body);line-height:1;cursor:help}
 .empty-hint{margin:4px 2px 0}
@@ -493,6 +500,8 @@ input[aria-invalid="true"]{border-color:var(--warn)!important;background:var(--w
 .top{flex-wrap:nowrap;gap:3px;padding:0 4px;height:58px}
 .top .logo,.top #new,.top #open,.top #importMachine,.top #save,.top #duplicate,.top #redo{display:none}
 .top .file-menu>button{padding:6px 4px;font-size:var(--fs-caption)}
+/* Issue #443: the phone Menu holds Edit and Arrange, so its list scrolls inside the window instead of running off the bottom. */
+.file-menu-list{max-height:calc(100dvh - 76px);overflow-y:auto;overscroll-behavior:contain}
 .top .edit-tools{gap:2px}.top .edit-tools #remove{margin-left:0}
 .top .icon-button.labelled{width:30px;min-width:30px;padding:0;justify-content:center}
 .top .icon-label{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;margin:0}

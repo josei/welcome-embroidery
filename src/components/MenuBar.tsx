@@ -28,7 +28,11 @@ interface Entry {
  reason?: string;
  run: () => void;
 }
-type Row = Entry | '-';
+/** A non-clickable label that heads a group of rows (the phone menu groups Edit and Arrange this way). */
+interface Heading {
+ heading: string;
+}
+type Row = Entry | Heading | '-';
 
 // A dropdown: a header button that opens a list of entries. Keyboard: Enter, Space or ArrowDown on the header opens it and
 // focuses the first enabled item (ArrowUp, the last); ArrowUp and ArrowDown move between enabled items and wrap; Home and End
@@ -117,15 +121,19 @@ function Dropdown({id, label, rows}: {id: string; label: string; rows: Row[]}) {
     }}>{label}</button>
    {open && (
     <div role="menu" id={`${id}List`} className="file-menu-list">
-     {rows.map((row, i) => row === '-' ? <hr key={`sep${i}`} className="menu-sep" /> : (
-      <button key={row.id} type="button" role="menuitem" id={row.id} disabled={row.disabled}
+     {rows.map((row, i) => {
+      if (row === '-') return <hr key={`sep${i}`} className="menu-sep" />;
+      if ('heading' in row) return <div key={`head${i}`} role="presentation" className="menu-heading">{row.heading}</div>;
+      return (
+       <button key={row.id} type="button" role="menuitem" id={row.id} disabled={row.disabled}
         className={row.key ? 'menu-item' : undefined} onClick={() => choose(row)}>
-       <span>{row.label}</span>
-       {row.key && <kbd>{row.key}</kbd>}
-       {row.hint && <small>{row.hint}</small>}
-       {row.disabled && row.reason && <small className="menu-reason">{row.reason}</small>}
-      </button>
-     ))}
+        <span>{row.label}</span>
+        {row.key && <kbd>{row.key}</kbd>}
+        {row.hint && <small>{row.hint}</small>}
+        {row.disabled && row.reason && <small className="menu-reason">{row.reason}</small>}
+       </button>
+      );
+     })}
     </div>
    )}
   </div>
@@ -150,8 +158,8 @@ const NEEDS_ONE = 'Select an object first';
 const NEEDS_TWO = 'Select two or more objects';
 const NEEDS_THREE = 'Select three or more objects';
 
-/** The Edit menu: history, the clipboard, duplicate, select all and delete. */
-export function EditMenu() {
+/** The Edit menu's rows: history, the clipboard, duplicate, select all and delete. */
+export function useEditRows(): Row[] {
  const actions = useSyncExternalStore(actionState.subscribe, actionState.get);
  const selection = useSyncExternalStore(selectionState.subscribe, selectionState.get);
  const clip = useSyncExternalStore(clipboardState.subscribe, clipboardState.get);
@@ -172,11 +180,16 @@ export function EditMenu() {
   '-',
   {id: 'menuDelete', label: t('Delete'), key: 'Del', disabled: actions.remove, reason: t(NEEDS_ONE), run: () => runCommand('delete')},
  ];
- return <Dropdown id="editMenu" label={t('Edit')} rows={rows} />;
+ return rows;
 }
 
-/** The Arrange menu: align and distribute, flip, sewing order (front and back) and the boolean shape operations. */
-export function ArrangeMenu() {
+/** The Edit menu. */
+export function EditMenu() {
+ return <Dropdown id="editMenu" label={t('Edit')} rows={useEditRows()} />;
+}
+
+/** The Arrange menu's rows: align and distribute, flip, sewing order (front and back) and the boolean shape operations. */
+export function useArrangeRows(): Row[] {
  const align = useSyncExternalStore(alignState.subscribe, alignState.get);
  const toolbar = useSyncExternalStore(selectionToolbarState.subscribe, selectionToolbarState.get);
  const selection = useSyncExternalStore(selectionState.subscribe, selectionState.get);
@@ -205,5 +218,18 @@ export function ArrangeMenu() {
   {id: 'menuUnion', label: t('Union'), disabled: toolbar.union, reason: t(NEEDS_TWO), run: bool('union')},
   {id: 'menuIntersect', label: t('Intersect'), disabled: toolbar.intersect, reason: t(NEEDS_TWO), run: bool('intersect')},
  ];
- return <Dropdown id="arrangeMenu" label={t('Arrange')} rows={rows} />;
+ return rows;
+}
+
+/** The Arrange menu. */
+export function ArrangeMenu() {
+ return <Dropdown id="arrangeMenu" label={t('Arrange')} rows={useArrangeRows()} />;
+}
+
+/** At phone widths Edit and Arrange sit behind one Menu button. Each group keeps its own heading and its own rows. */
+export function PhoneMenu() {
+ const edit = useEditRows();
+ const arrange = useArrangeRows();
+ const rows: Row[] = [{heading: t('Edit')}, ...edit, '-', {heading: t('Arrange')}, ...arrange];
+ return <Dropdown id="phoneMenu" label={t('Menu')} rows={rows} />;
 }

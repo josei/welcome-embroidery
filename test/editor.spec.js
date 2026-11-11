@@ -3247,12 +3247,15 @@ test('with 30 objects every sewing-order row scrolls clear of the hoop footer',a
  // The hoop controls stay on screen and reachable while the list is long.
  await expect(page.locator('#hoopPreset')).toBeVisible();await expect(page.locator('#hoopRotate')).toBeVisible();
  // Every row can be scrolled fully into view, and at that point the topmost element at its centre is the row itself.
+ // The check polls: right after a scroll the list can still be settling (fonts, the toast, the footer), so a single read is racy.
+ // A row that stays covered or clipped fails every poll and still fails the test.
  for(let i=0;i<31;i++){
-  const row=rows.nth(i);await row.scrollIntoViewIfNeeded();
-  const hit=await row.evaluate(el=>{const r=el.getBoundingClientRect(),list=document.getElementById('objects').getBoundingClientRect();
-   const top=document.elementFromPoint(r.x+r.width/2,r.y+r.height/2);
-   return {fully:r.top>=list.top-0.5&&r.bottom<=list.bottom+0.5,ownsPoint:Boolean(top&&el.contains(top)),covered:Boolean(top&&top.closest('.footer.hoop-edit'))};});
-  expect(hit,`row ${i}`).toEqual({fully:true,ownsPoint:true,covered:false});
+  const row=rows.nth(i);
+  await expect.poll(async()=>{await row.scrollIntoViewIfNeeded();
+   return row.evaluate(el=>{const r=el.getBoundingClientRect(),list=document.getElementById('objects').getBoundingClientRect();
+    const top=document.elementFromPoint(r.x+r.width/2,r.y+r.height/2);
+    return {fully:r.top>=list.top-0.5&&r.bottom<=list.bottom+0.5,ownsPoint:Boolean(top&&el.contains(top)),covered:Boolean(top&&top.closest('.footer.hoop-edit'))};});
+  },{message:`row ${i}`,timeout:4000}).toEqual({fully:true,ownsPoint:true,covered:false});
  }
 });
 

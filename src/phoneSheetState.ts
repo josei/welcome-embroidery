@@ -1,3 +1,4 @@
+import {useSyncExternalStore} from 'react';
 import {createStore} from './store.js';
 
 /**
@@ -19,5 +20,17 @@ export function closePhoneSheet() {
 
 /** The phone width at which Layers and Properties are bottom sheets (the same breakpoint as the CSS). */
 export function isPhoneWidth(): boolean {
-  return window.matchMedia('(max-width: 600px)').matches;
+  return window.matchMedia(PHONE_QUERY).matches;
+}
+
+const PHONE_QUERY = '(max-width: 600px)';
+function subscribePhone(onChange: () => void) {
+  const query = window.matchMedia(PHONE_QUERY);
+  query.addEventListener('change', onChange);
+  return () => query.removeEventListener('change', onChange);
+}
+
+/** Whether the window is at phone width right now. Components use it to choose a layout, not just to hide one. */
+export function usePhoneWidth(): boolean {
+  return useSyncExternalStore(subscribePhone, isPhoneWidth);
 }
