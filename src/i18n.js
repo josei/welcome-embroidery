@@ -51,7 +51,7 @@ export const ES={...ES_ADDITIONS,
   'Ajusta la densidad, la base, la compensación de tirón y la estabilización de la tela del diseño. Los objetos con valores propios los mantienen.',
 'Fix tip':'Corregir','Ignore':'Ignorar',
 'Color change to {n} at {time}':'Cambio de color a {n} a los {time}',
-'Grid spacing: {n} mm. Click to change.':'Separación de la cuadrícula: {n} mm. Haz clic para cambiarla.',
+'Grid spacing: {n} mm. Click to change.':'Separación de la cuadrícula: {n} mm. Haz clic para cambiarla.','Grid spacing: {n} mm':'Cuadrícula: {n} mm',
 'Drag to orbit · scroll to zoom · double-click to reset':'Arrastra para orbitar · rueda para zoom · doble clic para restablecer',
 'Zoom':'Zoom','Color 1':'Color 1','Color 2':'Color 2','Color 3':'Color 3','Color 4':'Color 4','Choose at least two colors for a palette.':
   'Elige al menos dos colores para la paleta.','Hand tool: drag to pan':'Herramienta mano: arrastra para mover la vista','Zoom out (−)':'Alejar (−)',

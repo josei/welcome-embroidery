@@ -11,6 +11,8 @@ export function GridControl() {
  // The cell is 3 px at 0.1 mm, and grows by about 2.4 px for each doubling of the spacing.
  const cell = Math.round(3 + 2.4 * Math.log2(Number(value) / 0.1));
  const title = t('Grid spacing: {n} mm. Click to change.', {n: value});
+ // The visible chip shows only the spacing and unit, which fit the 30 px box in every language. The word moves to the name.
+ const name = t('Grid spacing: {n} mm', {n: value});
  return (
   <>
    <select id="grid" className="sr-only" tabIndex={-1} aria-label={t('Grid spacing')} value={value} onChange={e => gridActions.choose(e.target.value)}>
@@ -20,13 +22,14 @@ export function GridControl() {
     type="button"
     id="gridCycle"
     className="grid-chip"
+    aria-label={name}
     title={title}
     data-tooltip={title}
     data-next={next}
     onClick={() => gridActions.choose(next)}
    >
     <span className="grid-tile" style={{'--cell': `${cell}px`} as React.CSSProperties} aria-hidden="true" />
-    <span className="grid-label">{t('Grid {n} mm', {n: value})}</span>
+    <span className="grid-label">{`${value} mm`}</span>
    </button>
   </>
  );

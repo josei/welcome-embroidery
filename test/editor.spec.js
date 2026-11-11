@@ -2795,14 +2795,14 @@ test('grid chip: it is no wider than the toolbar buttons, shows the spacing, and
  const errors=[];page.on('pageerror',e=>errors.push(e.message));
  await page.goto('/');page.on('dialog',d=>d.accept());await expect(page.locator('#count')).toContainText('compiled');
  const chip=page.locator('#gridCycle'),snap=page.locator('#snap');
- await expect(chip).toBeVisible();await expect(chip).toContainText('Grid 1 mm');await expect(chip).toHaveAttribute('title','Grid spacing: 1 mm. Click to change.');
+ await expect(chip).toBeVisible();await expect(chip).toContainText('1 mm');await expect(chip).toHaveAttribute('aria-label','Grid spacing: 1 mm');await expect(chip).toHaveAttribute('title','Grid spacing: 1 mm. Click to change.');
  const cw=(await chip.boundingBox()).width,sw=(await snap.boundingBox()).width;
  expect(cw).toBeLessThanOrEqual(sw+0.5);
  await chip.click();await expect(page.locator('#grid')).toHaveValue('2');
- await expect(chip).toContainText('Grid 2 mm');await expect(chip).toHaveAttribute('title','Grid spacing: 2 mm. Click to change.');
+ await expect(chip).toContainText('2 mm');await expect(chip).toHaveAttribute('aria-label','Grid spacing: 2 mm');await expect(chip).toHaveAttribute('title','Grid spacing: 2 mm. Click to change.');
  await chip.click();await expect(page.locator('#grid')).toHaveValue('5');
  await chip.click();await expect(page.locator('#grid')).toHaveValue('0.1');
- await page.locator('#grid').selectOption('0.25');await expect(chip).toContainText('Grid 0.25 mm');await expect(chip).toHaveAttribute('title','Grid spacing: 0.25 mm. Click to change.');
+ await page.locator('#grid').selectOption('0.25');await expect(chip).toContainText('0.25 mm');await expect(chip).toHaveAttribute('aria-label','Grid spacing: 0.25 mm');await expect(chip).toHaveAttribute('title','Grid spacing: 0.25 mm. Click to change.');
  expect(errors).toEqual([]);
 });
 
