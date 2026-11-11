@@ -2,7 +2,7 @@
 // Spanish table entries that did not fit in src/i18n.js under its 500-line limit. i18n.js spreads these into ES
 // first, so an entry in i18n.js wins over one here with the same key.
 export const ES_ADDITIONS={
-'Imported {name} as a {fmt} stitch layer. The design extends past the hoop: move it or choose a larger hoop.':'{name} importado como capa de puntadas {fmt}. El diseño se sale del bastidor: muévelo o elige un bastidor más grande.',
+'Imported {name} as {article} {fmt} stitch layer. The design extends past the hoop: move it or choose a larger hoop.':'{name} importado como capa de puntadas {fmt}. El diseño se sale del bastidor: muévelo o elige un bastidor más grande.',
 'motif':'motivo',
 'Pull compensation':'Compensación de tirón',
 'Trim jumps from':'Cortar saltos desde',

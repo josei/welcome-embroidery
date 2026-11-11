@@ -523,9 +523,11 @@ export async function importMachineFile(file) {
         // The toast waits for the compile the import starts, so it can say whether the layer reaches past the hoop.
         wired().compileNow().then(() => {
           const past = layerPastHoop(getPlan(), revision, layer.id);
+          // The format name is read letter by letter, so EXP takes "an" ("ee-ex-pee" starts with a vowel sound).
+          const article = format === 'exp' ? 'an' : 'a';
           wired().toast(past
-            ? t('Imported {name} as a {fmt} stitch layer. The design extends past the hoop: move it or choose a larger hoop.', {name: file.name, fmt: format.toUpperCase()})
-            : t('Imported {name} as a {fmt} stitch layer.', {name: file.name, fmt: format.toUpperCase()}));
+            ? t('Imported {name} as {article} {fmt} stitch layer. The design extends past the hoop: move it or choose a larger hoop.', {name: file.name, article, fmt: format.toUpperCase()})
+            : t('Imported {name} as {article} {fmt} stitch layer.', {name: file.name, article, fmt: format.toUpperCase()}));
         });
       }
     }, {cancelNotice: t('Import canceled.'), replaceFirst: true, undoLabel: 'import file'});

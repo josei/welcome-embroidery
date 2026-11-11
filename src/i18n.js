@@ -372,7 +372,7 @@ export const ES={...ES_ADDITIONS,
   'Este diseño mide {w} × {h} mm, más grande de lo que una máquina JEF puede bordar (200 × 200 mm). Hazlo más pequeño o exporta otro formato.',
 'This object':'Este objeto','This text':'Este texto','another object':'otro objeto','another text':'otro texto',
 'Snap to {n} mm grid on.':'Ajuste a la cuadrícula de {n} mm activado.',
-  'Loaded {name}. It is stored in this project.':'{name} cargada. Se guarda en este proyecto.','Imported {name} as a {fmt} stitch layer.':
+  'Loaded {name}. It is stored in this project.':'{name} cargada. Se guarda en este proyecto.','Imported {name} as {article} {fmt} stitch layer.':
   '{name} importado como capa de puntadas {fmt}.',
 'Agent applied {n} edits.':'El agente aplicó {n} ediciones.',
   'Agent applied 1 edit.':'El agente aplicó 1 edición.','Agent imported {name}.':'El agente importó {name}.','Copied {n} objects.':'{n} objetos copiados.',
