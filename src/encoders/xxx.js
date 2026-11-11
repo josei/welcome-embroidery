@@ -15,7 +15,7 @@ export function encodeXxx(plan){
   plan={...plan,stitches:splitLongStitches(plan.stitches,stitchRule('xxx'))};
   /** @type {string[]} */ const blocks=[plan.stitches.find(p=>p.cmd!=='end'&&p.thread)?.thread||'#527461'];
   for(const p of plan.stitches)if(p.cmd==='color'||p.cmd==='stop')blocks.push(p.thread||last(blocks));
-  if(blocks.length>21)throw Error('XXX holds up to 21 thread blocks.');
+  if(blocks.length>21)throw Error(`XXX holds up to 21 thread blocks; this design has ${blocks.length}.`);
   /** @type {number[]} */ const body=[];
   /** @type {(v: number) => number[]} */
   const le16=(v)=>{const u=Math.trunc(v)&0xFFFF;return [u&0xFF,u>>8];};

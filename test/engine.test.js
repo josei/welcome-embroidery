@@ -1578,6 +1578,14 @@ test('XXX export: a 252-byte header and the stitches from 0x100, a jump of 30 mm
  assert.equal(bytes.length,endAt+4+2+2*4+(21-2)*4+6,'the thread table holds the two blocks, then 21 slots');
 });
 
+test('XXX export: a design with more thread blocks than the table holds is refused with the limit and the design\'s count',()=>{
+ const stitches=[{cmd:'jump',x:0,y:0,thread:'#000000'}];
+ for(let i=1;i<=21;i++)stitches.push({cmd:'color',x:i*5,y:0,thread:'#'+i.toString(16).padStart(6,'0')});
+ assert.throws(()=>encode({errors:[],stitches},'xxx','#000000',110,null),{message:'XXX holds up to 21 thread blocks; this design has 22.'});
+ const fits={errors:[],stitches:stitches.slice(0,21)};
+ assert.doesNotThrow(()=>encode(fits,'xxx','#000000',110,null),'a design with 21 blocks is still accepted');
+});
+
 test('TBF export: a 0x600-byte ASCII header with the needle order and thread table, records from 0x600, a jump of 30 mm is three pieces, a color change is a needle record with a jump after it, and the file ends 8F 1A',()=>{
  const jump={errors:[],stitches:[{cmd:'jump',x:0,y:0,thread:'#000000'},{cmd:'jump',x:30,y:0,thread:'#000000'}]};
  const j=encode(jump,'tbf','#000000',110,null);
