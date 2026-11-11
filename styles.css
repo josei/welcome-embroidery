@@ -459,6 +459,22 @@ input[aria-invalid="true"]{border-color:var(--warn)!important;background:var(--w
 .panel .sec-fold[open]>summary,.panel .doc-settings[open]>summary{margin-bottom:4px}
 /* Keyboard focus (issue #364): disclosure summaries and layer rows get the same 2 px teal ring as other controls. */
 .sec-fold>summary:focus-visible,.doc-settings>summary:focus-visible,.object-row:focus-visible,.group-row:focus-visible{outline:2px solid var(--teal);outline-offset:2px}
+/* Issue #437: at phone widths (600px and narrower) the top bar stays on one row, so the page never scrolls sideways. The logo, the
+   New, Open, Import, Save, Duplicate and Redo buttons leave the bar (their actions stay in the File, Edit and Arrange menus and the
+   keyboard), the menu labels and icons tighten, and the design name takes what is left, down to nothing, so Undo, Delete, Export and
+   Settings stay whole inside the window. The bar keeps the 58px row it has from 601px up. */
+@media (max-width:600px){
+.top{flex-wrap:nowrap;gap:3px;padding:0 4px;height:58px}
+.top .logo,.top #new,.top #open,.top #importMachine,.top #save,.top #duplicate,.top #redo{display:none}
+.top .file-menu>button{padding:6px 4px;font-size:var(--fs-caption)}
+.top .edit-tools{gap:2px}.top .edit-tools #remove{margin-left:0}
+.top .icon-button.labelled{width:30px;min-width:30px;padding:0;justify-content:center}
+.top .icon-label{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;margin:0}
+.top #remove .icon-label{display:none}
+.top #name{flex:1 1 0;min-width:0}
+.top #unsavedMark,.top #savedStatus{flex:0 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.top .export-split #export{padding:0 6px}
+}
 /* Issue #375: between 1101 px and 1439 px the top bar fits on one row in Spanish and with a long project name. The gaps tighten, and the
    project name and the save status give way (the name first, down to its minimum; the status then shrinks to an ellipsis) so the
    controls to their right keep their full width. From 1440 px the bar is unchanged. */
