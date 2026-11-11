@@ -41,6 +41,14 @@ function hoopMessage(o,b,hoop){
   return `${objectLabel(o)} extends ${mm} mm past the hoop. Move it or choose a larger hoop.`;
 }
 
+
+/** Bounds [x0,y0,x1,y1] of a plan's needle positions (stitch commands only); Infinity values if there are none. */
+function needleBounds(list){
+  let x0=Infinity,y0=Infinity,x1=-Infinity,y1=-Infinity;
+  for(const p of list)if(p.cmd==='stitch'){x0=Math.min(x0,p.x);y0=Math.min(y0,p.y);x1=Math.max(x1,p.x);y1=Math.max(y1,p.y);}
+  return [x0,y0,x1,y1];
+}
+
 /**
  * @param {any} doc
  * @returns {any}
@@ -249,12 +257,15 @@ export function compile(doc) {
   if(previous!==null&&!hasImportedLayer)tieOff(currentThread);
   if(!stitches.some(s=>s.cmd==='stitch'))throw Error('The design has no sewable geometry. Add an object before exporting.');
   if(hasImportedLayer&&position)push(position[0],position[1],'end',currentThread||'#527461',true);
-  // Long moves are split to the plan rule here, so the preview draws the stitches every writer sews. Object starts move with the split.
+  // The writers get the plan as it was before long moves are split (each writer applies its own rule). The preview and the counts the UI reports
+  // use the 12.1 mm split, which is what the DST export sews (DST keeps this list, see encode()). Object starts move with the split.
+  const writerStitches=stitches;
+  const writerCount=writerStitches.reduce((n,p)=>n+(p.cmd==='stitch'?1:0),0);
+  const writerBounds=needleBounds(writerStitches);
   const split=splitLongStitchesIndexed(stitches,PLAN_STITCH_RULE);stitches=split.stitches;
   for(const o of objectStarts)o.start=split.starts[o.start];
-  let minNeedleX=Infinity,minNeedleY=Infinity,maxNeedleX=-Infinity,maxNeedleY=-Infinity,count=0;
-    for(const p of stitches)if(p.cmd==='stitch'){minNeedleX=Math.min(minNeedleX,p.x);minNeedleY=Math.min(minNeedleY,p.y);maxNeedleX=Math.max(maxNeedleX,p.x);
-    maxNeedleY=Math.max(maxNeedleY,p.y);count++;}const bounds=[minNeedleX,minNeedleY,maxNeedleX,maxNeedleY];
+  const bounds=needleBounds(stitches);
+  const count=stitches.reduce((n,p)=>n+(p.cmd==='stitch'?1:0),0);
   const length=stitches.reduce((sum,p,i)=>i?sum+Math.hypot(p.x-stitches[i-1].x,p.y-stitches[i-1].y):0,0);
   // Stitches per object: an object's stitches run from its start to the next object's start (the last one runs to the end).
   /** @type {Record<string, number>} */
@@ -264,6 +275,6 @@ export function compile(doc) {
     let n=0;for(let i=start;i<end;i++)if(stitches[i].cmd==='stitch')n++;
     objectCounts[id]=(objectCounts[id]||0)+n;
   });
-  return {revision:doc.revision,stitches,bounds,count,objectCounts,threadLength:Math.round(length*1.12),
+  return {revision:doc.revision,stitches,bounds,count,objectCounts,writer:{stitches:writerStitches,count:writerCount,bounds:writerBounds},threadLength:Math.round(length*1.12),
     colors:[...new Set(stitches.filter(s=>s.cmd==='stitch'||s.cmd==='color').map(s=>s.thread).filter(Boolean))],errors:[...new Set(errors)],issues};
 }

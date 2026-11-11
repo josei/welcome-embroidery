@@ -30,7 +30,7 @@ import {encodeCol, encodeEdr} from './encoders/colour.js';
 
 /**
  * @typedef {{x: number, y: number, cmd: string, thread: string}} PlanStitch
- * @typedef {{errors: string[], stitches: PlanStitch[], bounds: number[], count: number}} Plan
+ * @typedef {{errors: string[], stitches: PlanStitch[], bounds: number[], count: number, writer?: {stitches: PlanStitch[], count: number, bounds: number[]}}} Plan
  * @typedef {{thread: string, palette?: number, items: PlanStitch[]}} JefBlock
  * @typedef {{thread: string, start: number[], items: PlanStitch[]}} Vp3Block
  */
@@ -56,6 +56,8 @@ export function encode(plan,format,color,hoop=110,document=null){
     !(['jef','vp3','dst','exp','pec','pes','pes6','sew','u01','xxx','tbf','col','edr'].includes(
     format)))throw Error(`Unsupported machine format: ${format}. Choose JEF, VP3, DST, EXP, PEC, PES, PES v6, SEW, U01, XXX, TBF, COL or EDR.`);
   if(plan.errors.length)throw Error(plan.errors.join(' '));
+  // DST sews the preview's 12.1 mm split, so it takes the plan as compiled. Every other writer takes the plan before that split, so its bytes do not change.
+  if(format!=='dst'&&plan.writer)plan={...plan,stitches:plan.writer.stitches,count:plan.writer.count,bounds:plan.writer.bounds};
   const layers=/** @type {Layer[]} */((document?.objects||[]).filter(o=>o.visible!==false&&o.kind==='stitch_layer'));
   if(layers.length===1&&document?.objects.length===1&&layerCanPassThrough(layers[0],format)){
     const bytes=Uint8Array.from(atob(/** @type {string} */(layers[0].source.originalBytesBase64)),c=>c.charCodeAt(0));

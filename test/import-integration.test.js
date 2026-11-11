@@ -37,7 +37,7 @@ test('pinned VP3 imports with retained source pass through unchanged, and edited
   const {fileName,bytes}=pinnedMachineFixture('vp3'),decoded=decodeEmbroidery(bytes,'vp3'),doc=initialDocument(),layer=importStitchLayer(bytes,'vp3',{fileName});doc.objects=[layer];
   assert.deepEqual(layer.stitches,decoded.stitches);assert.deepEqual(compile(doc).errors,[]);const untouchedVp3=encode(compile(doc),'vp3','#527461',doc.hoop,doc);assert.equal(Buffer.compare(Buffer.from(untouchedVp3),Buffer.from(bytes)),0,"an unchanged import is written back as its source bytes");
   applyOperations(doc,[{op:'transform',id:layer.id,x:layer.x+1,y:layer.y-1,width:layer.w*.8,height:layer.h*.8,rotation:3}]);const plan=compile(doc);assert.deepEqual(plan.errors,[]);
-  const output=encode(plan,'vp3','#527461',doc.hoop,doc),roundTrip=decodeEmbroidery(output,'vp3'),needle=roundTrip.stitches.filter(s=>s.cmd==='stitch');assert.ok(needle.length>=plan.count);assert.ok(longestStitchMove(roundTrip)<=LONG_LIMIT);{let j=0;const want=plan.stitches.filter(s=>s.cmd==='stitch');for(const n of needle)if(j<want.length&&Math.abs(n.x-want[j].x)<=0.1+1e-6&&Math.abs(n.y-want[j].y)<=0.1+1e-6)j++;assert.equal(j,want.length,'every planned needle survives the split');}writeFileSync('/tmp/welcome-edited-import.vp3',output);writeFileSync('/tmp/welcome-edited-import-vp3-expected.json',JSON.stringify(plan.stitches.filter(s=>s.cmd==='stitch').map(s=>[s.x,s.y])));
+  const output=encode(plan,'vp3','#527461',doc.hoop,doc),roundTrip=decodeEmbroidery(output,'vp3'),needle=roundTrip.stitches.filter(s=>s.cmd==='stitch');assert.ok(needle.length>=plan.writer.count);assert.ok(longestStitchMove(roundTrip)<=LONG_LIMIT);{let j=0;const want=plan.writer.stitches.filter(s=>s.cmd==='stitch');for(const n of needle)if(j<want.length&&Math.abs(n.x-want[j].x)<=0.1+1e-6&&Math.abs(n.y-want[j].y)<=0.1+1e-6)j++;assert.equal(j,want.length,'every planned needle survives the split');}writeFileSync('/tmp/welcome-edited-import.vp3',output);writeFileSync('/tmp/welcome-edited-import-vp3-expected.json',JSON.stringify(plan.stitches.filter(s=>s.cmd==='stitch').map(s=>[s.x,s.y])));
 });
 
 test('VP3 color block at both zero axes nudges each origin axis without shifting needle coordinates',()=>{
@@ -96,7 +96,7 @@ test('pinned PEC imports with its thread-chart colors pass through unchanged, an
   assert.deepEqual(compile(doc).errors,[]);const untouchedPec=encode(compile(doc),'pec','#527461',doc.hoop,doc);assert.equal(Buffer.compare(Buffer.from(untouchedPec),Buffer.from(bytes)),0,"an unchanged import is written back as its source bytes");
   applyOperations(doc,[{op:'transform',id:layer.id,x:layer.x+1,y:layer.y-1}]);const plan=compile(doc);assert.deepEqual(plan.errors,[]);
   const output=encode(plan,'pec','#527461',doc.hoop,doc),back=decodeEmbroidery(output,'pec'),tenths=s=>[Math.round(s.x*10),Math.round(s.y*10)];
-  const want=plan.stitches.filter(s=>s.cmd==='stitch').map(tenths),got=back.stitches.filter(s=>s.cmd==='stitch').map(tenths);let next=0;
+  const want=plan.writer.stitches.filter(s=>s.cmd==='stitch').map(tenths),got=back.stitches.filter(s=>s.cmd==='stitch').map(tenths);let next=0;
   for(const [x,y] of got)if(next<want.length&&want[next][0]===x&&want[next][1]===y)next++;
   assert.equal(next,want.length,'every planned needle point is written, in order');
 });
@@ -210,7 +210,7 @@ test('pinned EXP imports with placeholder colors, exports the untouched source a
   applyOperations(doc,[{op:'transform',id:layer.id,x:layer.x+1,y:layer.y-1}]);const plan=compile(doc);assert.deepEqual(plan.errors,[]);
   const output=encode(plan,'exp','#527461',doc.hoop,doc),back=decodeEmbroidery(output,'exp'),tenths=s=>[Math.round(s.x*10),Math.round(s.y*10)];
   // A zero-length step leaves no EXP record, so repeated planned points are written once.
-  const want=plan.stitches.filter(s=>s.cmd==='stitch').map(tenths).filter((p,i,all)=>i===0||p[0]!==all[i-1][0]||p[1]!==all[i-1][1]),got=back.stitches.filter(s=>s.cmd==='stitch').map(tenths);let next=0;
+  const want=plan.writer.stitches.filter(s=>s.cmd==='stitch').map(tenths).filter((p,i,all)=>i===0||p[0]!==all[i-1][0]||p[1]!==all[i-1][1]),got=back.stitches.filter(s=>s.cmd==='stitch').map(tenths);let next=0;
   for(const [x,y] of got)if(next<want.length&&want[next][0]===x&&want[next][1]===y)next++;
   assert.equal(next,want.length,'every planned needle point is written, in order');
 });
@@ -235,7 +235,7 @@ test('pinned SEW imports with its thread-chart colors, exports the untouched sou
   applyOperations(doc,[{op:'transform',id:layer.id,x:layer.x+1,y:layer.y-1}]);const plan=compile(doc);assert.deepEqual(plan.errors,[]);
   const output=encode(plan,'sew','#527461',doc.hoop,doc),back=decodeEmbroidery(output,'sew'),tenths=s=>[Math.round(s.x*10),Math.round(s.y*10)];
   // Zero-length steps leave no SEW record, and moves longer than 12.7 mm are split into several, so every planned needle that moves must appear in order.
-  const steps=plan.stitches.filter(s=>s.cmd!=='end'&&s.cmd!=='trim').map(s=>({cmd:s.cmd,p:tenths(s)})).filter((s,i,a)=>i===0||s.p[0]!==a[i-1].p[0]||s.p[1]!==a[i-1].p[1]);
+  const steps=plan.writer.stitches.filter(s=>s.cmd!=='end'&&s.cmd!=='trim').map(s=>({cmd:s.cmd,p:tenths(s)})).filter((s,i,a)=>i===0||s.p[0]!==a[i-1].p[0]||s.p[1]!==a[i-1].p[1]);
   const want=steps.filter(s=>s.cmd==='stitch').map(s=>s.p),got=back.stitches.filter(s=>s.cmd==='stitch').map(tenths);let next=0;
   for(const [x,y] of got)if(next<want.length&&want[next][0]===x&&want[next][1]===y)next++;
   assert.equal(next,want.length,'every planned needle point is written, in order');
