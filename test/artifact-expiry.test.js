@@ -15,10 +15,11 @@ test('sweep removes backdated export files and keeps fresh ones and saved docume
  const dir=mkdtempSync(path.join(tmpdir(),'welcome-expiry-'));
  const names={old:`${crypto.randomUUID()}.jef`,fresh:`${crypto.randomUUID()}.svg`,oldDoc:`${crypto.randomUUID()}.welcome`,oldOther:'notes.txt'};
  for(const n of Object.values(names))writeFileSync(path.join(dir,n),'x');
- backdate(path.join(dir,names.old),8*DAY);
- backdate(path.join(dir,names.oldDoc),30*DAY);
- backdate(path.join(dir,names.oldOther),30*DAY);
- backdate(path.join(dir,names.fresh),6*DAY);
+ // Backdate from the sweep's fixed `now`, not the wall clock: the sweep measures age against `now`.
+ backdate(path.join(dir,names.old),8*DAY,now);
+ backdate(path.join(dir,names.oldDoc),30*DAY,now);
+ backdate(path.join(dir,names.oldOther),30*DAY,now);
+ backdate(path.join(dir,names.fresh),6*DAY,now);
  const removed=await sweepExports(dir,{maxAgeMs:7*DAY,now});
  assert.deepEqual(removed,[names.old]);
  assert.equal(existsSync(path.join(dir,names.old)),false);

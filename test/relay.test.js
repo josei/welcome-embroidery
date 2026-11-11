@@ -2,13 +2,16 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {spawn} from 'node:child_process';
 import {mkdtempSync,readFileSync} from 'node:fs';
+import net from 'node:net';
 import {tmpdir} from 'node:os';
 import path from 'node:path';
 import {Client} from '@modelcontextprotocol/sdk/client/index.js';
 import {StreamableHTTPClientTransport} from '@modelcontextprotocol/sdk/client/streamableHttp.js';
 import {initialDocument,applyOperations,validateDocument} from '../src/engine.js';
 
-const port=18793,base=`http://127.0.0.1:${port}`;
+// A port the OS has just confirmed free: a fixed one can be held by a leftover server, and start() would then talk to that server instead of the one under test.
+const freePort=()=>new Promise((resolve,reject)=>{const probe=net.createServer();probe.once('error',reject);probe.listen(0,'127.0.0.1',()=>{const {port}=probe.address();probe.close(()=>resolve(port));});});
+const port=await freePort(),base=`http://127.0.0.1:${port}`;
 const post=(path,body,headers={})=>fetch(base+path,{method:'POST',headers:{'content-type':'application/json','x-welcome-client':'1',...headers},body:JSON.stringify(body)});
 async function connect(token){const client=new Client({name:'relay-test',version:'1'});await client.connect(new StreamableHTTPClientTransport(new URL(`${base}/mcp/${token}`)));return client;}
 const call=async(client,name,args)=>client.callTool({name,arguments:args});
@@ -58,7 +61,7 @@ test('links survive a server restart without storing secrets, and revocation sur
 });
 
 test('WELCOME_DATA_DIR relocates artifacts and relay sessions (used by the desktop app)',async()=>{
- const dir=mkdtempSync(path.join(tmpdir(),'welcome-data-')),port2=18797,proc=spawn(process.execPath,['server.js'],{env:{...process.env,HOST:'127.0.0.1',PORT:String(port2),WELCOME_DATA_DIR:dir,WELCOME_SESSION_FILE:undefined},stdio:'ignore'});
+ const dir=mkdtempSync(path.join(tmpdir(),'welcome-data-')),port2=await freePort(),proc=spawn(process.execPath,['server.js'],{env:{...process.env,HOST:'127.0.0.1',PORT:String(port2),WELCOME_DATA_DIR:dir,WELCOME_SESSION_FILE:undefined},stdio:'ignore'});
  try{for(let i=0;i<100;i++){try{if((await fetch(`http://127.0.0.1:${port2}/health`)).ok)break;}catch{}await new Promise(r=>setTimeout(r,100));}
   const r=await fetch(`http://127.0.0.1:${port2}/api/session`,{method:'POST',headers:{'content-type':'application/json','x-welcome-client':'1'},body:'{}'});assert.equal(r.status,200);await new Promise(x=>setTimeout(x,900));
   assert.ok(JSON.parse(readFileSync(path.join(dir,'sessions.json'),'utf8')).length===1,'sessions are stored under the data dir');assert.ok(readFileSync(path.join(dir,'artifacts','..','sessions.json')).length>10);
