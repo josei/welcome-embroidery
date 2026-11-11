@@ -59,6 +59,9 @@ export function createCanvasTools(api){
   // The placeholder a new lettering object starts with. The engine needs 1 to 24 characters of text, so it is a neutral word,
   // not an empty box; the Text box opens with it selected, so typing replaces it.
   const NEW_TEXT=t('Text');
+  // Placement is measured with the untranslated placeholder, so the Spanish "Texto" (wider) does not shift where the
+  // lettering the user types lands. The displayed placeholder is still translated.
+  const PLACEMENT_TEXT='Text';
   // A new shape or lettering object goes in at the hoop's centre with the thread and stitch in the sidebar. Lettering's
   // box is centred there too (see below); a new shape is placed at the hoop centre by its x/y origin.
   async function add(/** @type {string} */ kind){
@@ -66,13 +69,13 @@ export function createCanvasTools(api){
     if(kind==='text'){
       try{await api.ensureFontLoaded(api.textFont());}catch(/** @type {any} */ error){api.toast(error.message, 'error');return;}
       const f=getFont(api.textFont());
-      const op={op:'add_text',id,text:NEW_TEXT,x:0,y:0,height:api.fitHeight(api.textFont(),NEW_TEXT),
+      const op={op:'add_text',id,text:NEW_TEXT,x:0,y:0,height:api.fitHeight(api.textFont(),PLACEMENT_TEXT),
         thread:$('#thread').value,font:api.textFont(),...(f?.kind==='outline'?{stitch:'fill'}:{})};
       // Place the object so its bounding box is centred on the hoop centre (0, 0). The op is measured once at the origin,
       // since the box offset depends on the glyphs and font. If another object's box is already centred there, the new
       // one steps down by its own height plus 2 mm, so lettering never sits exactly on top of an earlier object.
       const probe={...documentNow().doc,objects:[]};
-      applyOperations(probe,[op]);
+      applyOperations(probe,[{...op,text:PLACEMENT_TEXT}]);
       const [bx0,by0,bx1,by1]=objectBounds(probe.objects[0]);
       const cx=(bx0+bx1)/2, cy=(by0+by1)/2, step=by1-by0+2;
       // A box centre within 1 mm of (0, y) means that spot is taken; step down until a free spot is found.
