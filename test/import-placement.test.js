@@ -111,3 +111,29 @@ test('every DST sewn point lies within 0.1 mm of a drawn line on every machine s
   }
   assert.ok(checked>100,`expected the machine samples to be checked, got ${checked}`);
 });
+
+// PES is a non-DST writer, but it takes the planned (grid) stitches of an imported layer, so its points sit on the same 0.1 mm placement as DST.
+// Before that, the legacy writer placed them at the exact midpoint (b9b0fbc), and random1.u01 and random1-ew.exp read back 0.111 to 0.141 mm
+// off their source points. Every PES export, both versions, must read back within 0.1 mm of each placed source point and of the drawn lines.
+test('every PES export of every machine sample stays within 0.1 mm of the placed source and its drawn lines',()=>{
+  let checked=0;
+  for(const [name,bytes] of readMachineFixtures()){
+    const format=name.split('.').pop().toLowerCase();let decoded,layer;
+    try{decoded=decodeEmbroidery(bytes,format);layer=importStitchLayer(bytes,format,{fileName:name});}catch{continue;}
+    const source=decoded.stitches;if(!source.some(s=>s.cmd==='stitch'))continue;
+    const doc=initialDocument();doc.objects=[layer];const plan=compile(doc);if(plan.errors.length)continue;
+    const [mx,my]=importMidpoint(layer.source.bounds),cx=layer.x+layer.w/2,cy=layer.y+layer.h/2;
+    const placed=s=>[cx+s.x-mx,cy+s.y-my];
+    const lines=[];
+    source.forEach((s,i)=>{if(s.cmd!=='stitch')return;lines.push([placed(s),placed(s)]);if(i>0)lines.push([placed(source[i-1]),placed(s)]);});
+    for(const pesFormat of ['pes','pes6']){
+      const back=decodeEmbroidery(encode(plan,pesFormat,'#527461',doc.hoop,doc),'pes').stitches.filter(s=>s.cmd==='stitch');
+      checked++;
+      for(const q of back){const d=Math.min(...lines.map(l=>segmentDistance([q.x,q.y],l)));
+        assert.ok(d<=0.1+1e-9,`${name} (${pesFormat}): PES point ${q.x},${q.y} is ${d.toFixed(3)} mm from every drawn line`);}
+      for(const s of source.filter(st=>st.cmd==='stitch')){const p=placed(s);
+        assert.ok(Math.min(...back.map(q=>dist([q.x,q.y],p)))<=0.1+1e-9,`${name} (${pesFormat}): source point ${s.x},${s.y} has no PES point within 0.1 mm`);}
+    }
+  }
+  assert.ok(checked>100,`expected the machine samples to be checked, got ${checked}`);
+});
