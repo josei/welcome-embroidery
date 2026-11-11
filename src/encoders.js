@@ -30,7 +30,7 @@ import {encodeCol, encodeEdr} from './encoders/colour.js';
 
 /**
  * @typedef {{x: number, y: number, cmd: string, thread: string}} PlanStitch
- * @typedef {{errors: string[], stitches: PlanStitch[], bounds: number[], count: number, writer?: {stitches: PlanStitch[], count: number, bounds: number[]}}} Plan
+ * @typedef {{errors: string[], stitches: PlanStitch[], bounds: number[], count: number, planned?: boolean, writer?: {stitches: PlanStitch[], count: number, bounds: number[]}}} Plan
  * @typedef {{thread: string, palette?: number, items: PlanStitch[]}} JefBlock
  * @typedef {{thread: string, start: number[], items: PlanStitch[]}} Vp3Block
  */
@@ -40,6 +40,9 @@ export {
   encodePec, encodePes, encodePesV6, encodeSew, encodeTbf, encodeXxx, encodeU01, encodeExp, encodeDst,
   encodeCol, encodeEdr,
 };
+
+/** PES formats that write an imported layer's planned stitches, so the file's stitch count is the canvas count (see encode()). */
+const PLANNED_PES_FORMATS = new Set(['pes', 'pes6']);
 
 /**
  * Writes a compiled plan in one machine format. An unchanged imported file is returned as its source bytes.
@@ -57,7 +60,10 @@ export function encode(plan,format,color,hoop=110,document=null){
     format)))throw Error(`Unsupported machine format: ${format}. Choose JEF, VP3, DST, EXP, PEC, PES, PES v6, SEW, U01, XXX, TBF, COL or EDR.`);
   if(plan.errors.length)throw Error(plan.errors.join(' '));
   // DST sews the preview's 12.1 mm split, so it takes the plan as compiled. Every other writer takes the plan before that split, so its bytes do not change.
-  if(format!=='dst'&&plan.writer)plan={...plan,stitches:plan.writer.stitches,count:plan.writer.count,bounds:plan.writer.bounds};
+  // An imported layer's PES file is the exception: the canvas counts the planned (split) stitches, so PES takes them too and the file holds that
+  // same count. Its geometry is the DST list, which sits within 0.1 mm of the drawn lines; the PES writer's own 12.7 mm split then splits nothing.
+  const usePlanned=plan.planned&&PLANNED_PES_FORMATS.has(format);
+  if(format!=='dst'&&plan.writer&&!usePlanned)plan={...plan,stitches:plan.writer.stitches,count:plan.writer.count,bounds:plan.writer.bounds};
   const layers=/** @type {Layer[]} */((document?.objects||[]).filter(o=>o.visible!==false&&o.kind==='stitch_layer'));
   if(layers.length===1&&document?.objects.length===1&&layerCanPassThrough(layers[0],format)){
     const bytes=Uint8Array.from(atob(/** @type {string} */(layers[0].source.originalBytesBase64)),c=>c.charCodeAt(0));

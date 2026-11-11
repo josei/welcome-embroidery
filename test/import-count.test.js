@@ -61,3 +61,37 @@ test('an imported PES file picks PES for export, and other imports keep the pick
   const {doc,plan}=planFor(bytes,'pes','random1-ew.pes');
   assert.equal(exportedStitchCount(plan,exportFormatAfterImport('pes'),doc),stitchCount(decodeEmbroidery(bytes,'pes').stitches),'the count the canvas shows after a PES import is the file\'s own decoded count');
 });
+// An imported layer's PES file holds the planned stitches (encode() writes them for PES, see encoders.js), so the count the canvas shows is the count
+// the PES file decodes to. The corpus check covers every import that exports; out-of-hoop imports are skipped, since no file is written for them.
+test('random1-wilcom.U01: the canvas count, the DST export and the PES export all decode to the same stitch count', ()=>{
+  const [[,bytes]]=[...readMachineFixtures(/random1-wilcom\.U01$/i)];
+  const {doc,plan}=planFor(bytes,'u01','random1-wilcom.U01');
+  assert.equal(plan.count,48,'the canvas count for this file is the planned 48');
+  assert.equal(stitchCount(exported(plan,doc,'dst')),plan.count,'the DST export decodes to the canvas count');
+  assert.equal(stitchCount(exported(plan,doc,'pes')),plan.count,'the PES export decodes to the canvas count');
+  assert.equal(exportedStitchCount(plan,'pes',doc),plan.count,'with PES picked, the canvas count is the PES count');
+});
+test('every import that exports: the DST, PES and PES v6 counts equal the canvas count', ()=>{
+  let checked=0;
+  for(const [name,bytes] of readMachineFixtures()){
+    const format=name.split('.').pop().toLowerCase();let layer;
+    try{layer=importStitchLayer(bytes,format,{fileName:name});}catch{continue;}
+    const doc=initialDocument();doc.objects=[layer];const plan=compile(doc);if(plan.errors.length||!plan.planned)continue;
+    for(const f of ['dst','pes','pes6']){
+      let decoded;
+      try{decoded=stitchCount(decodeEmbroidery(encode(plan,f,'#527461',doc.hoop,doc),f==='pes6'?'pes':f).stitches);}catch{continue;}
+      assert.equal(decoded,plan.count,`${name}: the ${f} export decodes to ${decoded} stitches, the canvas shows ${plan.count}`);
+      checked++;
+    }
+  }
+  assert.ok(checked>=200,`expected the corpus to be checked, got ${checked} exports`);
+});
+// The PES stitches must stay where the DST stitches are: both come from the same planned list, so each PES stitch is within 0.1 mm of the DST stitch
+// with the same index. This is the 0.1 mm rule for the geometry the PES writer now sews.
+test('random1-wilcom.U01: the PES stitches are within 0.1 mm of the DST stitches, one for one', ()=>{
+  const [[,bytes]]=[...readMachineFixtures(/random1-wilcom\.U01$/i)];
+  const {doc,plan}=planFor(bytes,'u01','random1-wilcom.U01');
+  const dst=exported(plan,doc,'dst').filter(s=>s.cmd==='stitch'),pes=exported(plan,doc,'pes').filter(s=>s.cmd==='stitch');
+  assert.equal(pes.length,dst.length);
+  pes.forEach((s,i)=>assert.ok(Math.hypot(s.x-dst[i].x,s.y-dst[i].y)<=0.1+1e-9,`PES stitch ${i} is ${Math.hypot(s.x-dst[i].x,s.y-dst[i].y).toFixed(3)} mm from its DST stitch`));
+});
