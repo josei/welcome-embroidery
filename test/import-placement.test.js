@@ -70,3 +70,17 @@ test('random1 in its own format reads back within 0.1 mm of its placed points',(
       assert.ok(Math.min(...back.map(q=>dist(q,p)))<=0.1+1e-9,`${name}: source point ${s.x},${s.y} has no output point within 0.1 mm`);}
   }
 });
+
+// Non-DST writers take the placement from before the 0.1 mm fix (the source's exact midpoint), so their bytes stay as they were.
+// random1-wilcom-b.BRO has an off-grid midpoint; its writer stitches must be the exact-midpoint placement, and the DST plan the rounded one.
+test('non-DST writers keep the exact-midpoint placement, and DST keeps the 0.1 mm grid placement',()=>{
+  const [name,bytes]=machineFixture('/random1-wilcom-b.BRO'),decoded=decodeEmbroidery(bytes,'bro'),layer=importStitchLayer(bytes,'bro',{fileName:name});
+  const b=layer.source.bounds;assert.ok(Math.abs(importMidpoint(b)[0]-(b[0]+b[2])/2)>1e-9,'the fixture midpoint is off the grid');
+  const doc=initialDocument();doc.objects=[layer];const plan=compile(doc);
+  const cx=layer.x+layer.w/2,cy=layer.y+layer.h/2,sx=layer.w/(b[2]-b[0]),sy=layer.h/(b[3]-b[1]);
+  const exact=decoded.stitches.filter(s=>s.cmd==='stitch').map(s=>[Math.round((cx+(s.x-(b[0]+b[2])/2)*sx)*10)/10+0,Math.round((cy+(s.y-(b[1]+b[3])/2)*sy)*10)/10+0]);
+  const writerNeedles=plan.writer.stitches.filter(s=>s.cmd==='stitch').map(s=>[s.x,s.y]);
+  assert.equal(writerNeedles.length,exact.length);
+  for(const [x,y] of exact.slice(0,50))assert.ok(writerNeedles.some(([wx,wy])=>Math.abs(wx-x)<1e-9&&Math.abs(wy-y)<1e-9),`writer point ${x},${y} is not the legacy placement`);
+  assert.notDeepEqual(plan.stitches.filter(s=>s.cmd==='stitch').map(s=>[s.x,s.y]).slice(0,5),writerNeedles.slice(0,5),'DST plan is placed on the grid, not the writer placement');
+});

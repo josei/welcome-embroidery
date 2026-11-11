@@ -51,10 +51,14 @@ function needleBounds(list){
 
 /**
  * @param {any} doc
+ * @param {boolean} [legacyPlacement=false] place imports at the source's exact midpoint (the pre-0.1 mm placement). Only the writers
+ *   of non-DST formats use this pass, so their bytes stay as they were before the placement fix.
  * @returns {any}
  */
-export function compile(doc) {
+export function compile(doc,legacyPlacement=false) {
   validateDocument(doc);
+  // The import midpoint: rounded to the 0.1 mm grid for the DST export and the preview, exact for the legacy writer pass.
+  const placementMid=/** @type {(b: number[]) => [number, number]} */(b=>legacyPlacement?[(b[0]+b[2])/2,(b[1]+b[3])/2]:importMidpoint(b));
   const spacing=doc.settings.spacing,angle=doc.settings.angle,comp=doc.settings.compensation,hoop=hoopSize(doc);
   registerDocumentFonts(doc);const unloaded=doc.objects.find((/** @type {any} */ o)=>o.kind==='text'&&isRegistryFont(o.font)&&!getFont(o.font));
     if(unloaded)throw Error(`Font ${unloaded.font} is not loaded yet. Open it in the editor or wait for it to load, then try again.`);
@@ -69,7 +73,7 @@ export function compile(doc) {
     if(o.visible===false||o.mask)continue;
     const comp=o.compensation??doc.settings.compensation;
     if(o.kind==='stitch_layer'){
-      const [sx0,sy0,sx1,sy1]=o.source.bounds,[mx,my]=importMidpoint(o.source.bounds),sx=o.w/Math.max(.1,sx1-sx0),sy=o.h/Math.max(.1,sy1-sy0),a=(Number(o.rotation)||0)*Math.PI/180,c=Math.cos(a),
+      const [sx0,sy0,sx1,sy1]=o.source.bounds,[mx,my]=placementMid(o.source.bounds),sx=o.w/Math.max(.1,sx1-sx0),sy=o.h/Math.max(.1,sy1-sy0),a=(Number(o.rotation)||0)*Math.PI/180,c=Math.cos(a),
         sn=Math.sin(a),cx=o.x+o.w/2,cy=o.y+o.h/2;
       const corners=[[sx0,sy0],[sx1,sy0],[sx1,sy1],[sx0,sy1]].map(([x,y])=>
         {const lx=(x-mx)*sx,ly=(y-my)*sy;return [cx+lx*c-ly*sn,cy+lx*sn+ly*c];});
@@ -119,7 +123,7 @@ export function compile(doc) {
     const comp=o.compensation??doc.settings.compensation;
     if(o.kind==='stitch_layer'){
       hasImportedLayer=true;
-      const [sx0,sy0,sx1,sy1]=o.source.bounds,[mx,my]=importMidpoint(o.source.bounds),sx=o.w/Math.max(.1,sx1-sx0),sy=o.h/Math.max(.1,sy1-sy0),a=(Number(o.rotation)||0)*Math.PI/180,c=Math.cos(a),
+      const [sx0,sy0,sx1,sy1]=o.source.bounds,[mx,my]=placementMid(o.source.bounds),sx=o.w/Math.max(.1,sx1-sx0),sy=o.h/Math.max(.1,sy1-sy0),a=(Number(o.rotation)||0)*Math.PI/180,c=Math.cos(a),
         sn=Math.sin(a),cx=o.x+o.w/2,cy=o.y+o.h/2;
       const firstNeedle=o.stitches.find((/** @type {any} */ s)=>s.cmd==='stitch'),firstThread=
         firstNeedle?(o.threadOverrides[firstNeedle.thread]||o.threads[firstNeedle.thread].color||o.thread):o.thread,firstSewEvent=
@@ -275,6 +279,8 @@ export function compile(doc) {
     let n=0;for(let i=start;i<end;i++)if(stitches[i].cmd==='stitch')n++;
     objectCounts[id]=(objectCounts[id]||0)+n;
   });
-  return {revision:doc.revision,stitches,bounds,count,objectCounts,writer:{stitches:writerStitches,count:writerCount,bounds:writerBounds},threadLength:Math.round(length*1.12),
+  // Non-DST writers take the placement of the legacy pass, so their bytes match the export before the 0.1 mm placement fix.
+  const writer=hasImportedLayer&&!legacyPlacement?compile(doc,true).writer:{stitches:writerStitches,count:writerCount,bounds:writerBounds};
+  return {revision:doc.revision,stitches,bounds,count,objectCounts,writer,threadLength:Math.round(length*1.12),
     colors:[...new Set(stitches.filter(s=>s.cmd==='stitch'||s.cmd==='color').map(s=>s.thread).filter(Boolean))],errors:[...new Set(errors)],issues};
 }

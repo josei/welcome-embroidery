@@ -23,14 +23,14 @@ test('stitch-layer transforms, thread replacement, hoop diagnostics and regenera
   const before=structuredClone(layer.stitches),raw=layer.source.originalBytesBase64;
   applyOperations(doc,[{op:'transform',id:layer.id,x:layer.x+2,y:layer.y-1,rotation:2},{op:'set_object',id:layer.id,thread:'#aa5500'}]);
   assert.deepEqual(layer.stitches,before);assert.equal(layer.source.originalBytesBase64,raw);assert.ok(Object.keys(layer.threadOverrides).length>0);
-  const plan=compile(doc);assert.deepEqual(plan.errors,[]);const output=encode(plan,'jef','#527461',doc.hoop,doc),decoded=decodeEmbroidery(output,'jef'),needle=decoded.stitches.filter(s=>s.cmd==='stitch'),planned=plan.stitches.filter(s=>s.cmd==='stitch');
+  const plan=compile(doc);assert.deepEqual(plan.errors,[]);const output=encode(plan,'jef','#527461',doc.hoop,doc),decoded=decodeEmbroidery(output,'jef'),needle=decoded.stitches.filter(s=>s.cmd==='stitch'),planned=plan.writer.stitches.filter(s=>s.cmd==='stitch');
   assert.equal(needle.length,planned.length);assert.deepEqual(needle.map(s=>[s.x,s.y]),planned.map(s=>[s.x,s.y]));
   applyOperations(doc,[{op:'transform',id:layer.id,x:200}]);assert.match(compile(doc).errors.join(' '),/past the hoop/);assert.throws(()=>encode(compile(doc),'jef','#527461',doc.hoop,doc),/past the hoop/);
 });
 
 test('same-count edits cannot pass through stale source bytes',()=>{
   const {bytes}=pinnedMachineFixture('jef'),doc=initialDocument(),layer=importStitchLayer(bytes,'jef');doc.objects=[layer];const first=layer.stitches.find(s=>s.cmd==='stitch');first.x+=1;
-  const plan=compile(doc),output=encode(plan,'jef','#527461',doc.hoop,doc),decoded=decodeEmbroidery(output,'jef');assert.notDeepEqual(output,bytes);assert.equal(decoded.stitches.filter(s=>s.cmd==='stitch').length,plan.count);assert.deepEqual(decoded.stitches.filter(s=>s.cmd==='stitch').map(s=>[s.x,s.y]),plan.stitches.filter(s=>s.cmd==='stitch').map(s=>[s.x,s.y]));
+  const plan=compile(doc),output=encode(plan,'jef','#527461',doc.hoop,doc),decoded=decodeEmbroidery(output,'jef');assert.notDeepEqual(output,bytes);assert.equal(decoded.stitches.filter(s=>s.cmd==='stitch').length,plan.count);assert.deepEqual(decoded.stitches.filter(s=>s.cmd==='stitch').map(s=>[s.x,s.y]),plan.writer.stitches.filter(s=>s.cmd==='stitch').map(s=>[s.x,s.y]));
 });
 
 test('pinned VP3 imports with retained source pass through unchanged, and edited commands re-export with transformed coordinates',()=>{
@@ -54,7 +54,7 @@ test('VP3 color block at both zero axes nudges each origin axis without shifting
 
 test('mixed vector and two imported layers keep one terminal end and explicit color/travel continuity',()=>{
   const {bytes}=pinnedMachineFixture('jef'),doc=initialDocument(),first=importStitchLayer(bytes,'jef',{id:'layer-a',name:'First source'}),second=structuredClone(first);second.id='layer-b';second.name='Second source';doc.objects=[first,second,{id:'path-after',name:'Threaded path',kind:'path',x:0,y:0,w:0,h:0,points:[[0,0],[2,0]],thread:'#527461',stitch:'run'}];
-  applyOperations(doc,[{op:'transform',id:'layer-b',x:5,y:5,width:45,height:45,rotation:3}]);const plan=compile(doc);assert.deepEqual(plan.errors,[]);assert.equal(plan.stitches.filter(s=>s.cmd==='end').length,1);assert.equal(plan.count,62);assert.ok(plan.stitches.some(s=>s.cmd==='color'));const output=encode(plan,'jef','#527461',doc.hoop,doc),decoded=decodeEmbroidery(output,'jef'),needle=plan.stitches.filter(s=>s.cmd==='stitch');assert.equal(decoded.stitches.filter(s=>s.cmd==='stitch').length,needle.length);assert.deepEqual(decoded.stitches.filter(s=>s.cmd==='stitch').map(s=>[s.x,s.y]),needle.map(s=>[s.x,s.y]));
+  applyOperations(doc,[{op:'transform',id:'layer-b',x:5,y:5,width:45,height:45,rotation:3}]);const plan=compile(doc);assert.deepEqual(plan.errors,[]);assert.equal(plan.stitches.filter(s=>s.cmd==='end').length,1);assert.equal(plan.count,62);assert.ok(plan.stitches.some(s=>s.cmd==='color'));const output=encode(plan,'jef','#527461',doc.hoop,doc),decoded=decodeEmbroidery(output,'jef'),needle=plan.writer.stitches.filter(s=>s.cmd==='stitch');assert.equal(decoded.stitches.filter(s=>s.cmd==='stitch').length,needle.length);assert.deepEqual(decoded.stitches.filter(s=>s.cmd==='stitch').map(s=>[s.x,s.y]),needle.map(s=>[s.x,s.y]));
   writeFileSync('/tmp/welcome-mixed-import.jef',output);writeFileSync('/tmp/welcome-mixed-import-expected.json',JSON.stringify(needle.map(s=>[s.x,s.y])));
 });
 
