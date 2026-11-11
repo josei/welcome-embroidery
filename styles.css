@@ -456,3 +456,13 @@ input[aria-invalid="true"]{border-color:var(--warn)!important;background:var(--w
 .panel .sec-fold[open]>summary,.panel .doc-settings[open]>summary{margin-bottom:4px}
 /* Keyboard focus (issue #364): disclosure summaries and layer rows get the same 2 px teal ring as other controls. */
 .sec-fold>summary:focus-visible,.doc-settings>summary:focus-visible,.object-row:focus-visible,.group-row:focus-visible{outline:2px solid var(--teal);outline-offset:2px}
+/* Issue #375: between 1101 px and 1439 px the top bar fits on one row in Spanish and with a long project name. The gaps tighten, and the
+   project name and the save status give way (the name first, down to its minimum; the status then shrinks to an ellipsis) so the
+   controls to their right keep their full width. From 1440 px the bar is unchanged. */
+@media (min-width:1101px) and (max-width:1439px){
+.top{gap:6px}
+.top #name{flex:1 1 0;min-width:64px;width:auto}
+.top #savedStatus,.top #unsavedMark{flex:0 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+/* Duplicate and Delete become icon-only here; their names stay on the buttons for screen readers and tooltips. */
+.top #duplicate,.top #remove{width:36px;min-width:36px;padding:0}.top #duplicate .icon-label,.top #remove .icon-label{display:none}
+}
