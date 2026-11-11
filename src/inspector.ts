@@ -139,13 +139,13 @@ export function syncInspector({plan, compileError, tips}: {plan: PlanInfo | null
   });
   setInspectorText({
     summary: plan
-      ? t('{n} stitches · {m} m estimated thread · {c} thread colors', {
+      ? t(lang === 'es' && plan.colors.length === 1 ? '{n} stitches · {m} m estimated thread · {c} thread color' : '{n} stitches · {m} m estimated thread · {c} thread colors', {
           n: formatCount(plan.count, lang),
           m: (plan.threadLength / 1000).toFixed(1),
           c: plan.colors.length,
         }) +
         ' · ' +
-        t('about {t} to sew', {t: sewTime(plan)}) +
+        (lang === 'es' && sewTime(plan) === '1 min' ? t('about 1 min to sew') : t('about {t} to sew', {t: sewTime(plan)})) +
         (plan.errors.length ? ' · ' + plan.errors.join(' ') : '')
       : 'No generated stitches.',
   });

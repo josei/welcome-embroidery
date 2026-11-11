@@ -72,7 +72,7 @@ export const ES={...ES_ADDITIONS,
 'Edit nodes (Enter) — converts rectangles and ellipses to paths':'Editar nodos (Enter) — convierte rectángulos y elipses en trazados',
   'Paired loops across the width (uses Satin width)':'Bucles en pareja a lo ancho (usa el ancho de satén)','Spacing (mm)':'Separación (mm)',
   '{perHoop} copies fit one {hoop} mm hoop ({cols} × {rows}). {copies} copies need {hoops} hoop(s).':
-  '{perHoop} copias caben en un bastidor de {hoop} mm ({cols} × {rows}). {copies} copias necesitan {hoops} bastidor(es).','{n} {fmt} files exported, one per hoop.':
+  '{perHoop} copias caben en un bastidor de {hoop} mm ({cols} × {rows}). {copies} copias necesitan {hoops} bastidores.','{perHoop} copies fit one {hoop} mm hoop ({cols} × {rows}). {copies} copies need 1 hoop.':'{perHoop} copias caben en un bastidor de {hoop} mm ({cols} × {rows}). {copies} copias necesitan 1 bastidor.','{n} {fmt} files exported, one per hoop.':
   '{n} archivos {fmt} exportados, uno por bastidor.','Export batch':'Exportar lote','Batch format':'Formato del lote','The design does not fit in one hoop.':
   'El diseño no cabe en un solo bastidor.','Close edges at the mask (back-stitch at cut ends)':'Cerrar bordes en la máscara (pespunte en los cortes)','Loop shape':
   'Forma del bucle','Stone shape':'Forma de la piedra','Oval':'Óvalo','Twin sequins (two side by side across the path)':
@@ -380,8 +380,8 @@ export const ES={...ES_ADDITIONS,
 '{n} objects selected':'{n} objetos seleccionados','⚠ {n} issues':'⚠ {n} avisos','⚠ 1 issue':'⚠ 1 aviso','{n} requests so far.':'{n} peticiones hasta ahora.',
   '1 request so far.':'1 petición hasta ahora.',
 'Ready · {n} stitches':'Listo · {n} puntadas','{a} / {b} stitches · {p}%':'{a} / {b} puntadas · {p}%','Needle {x}, {y} mm':'Aguja {x}, {y} mm','compiled':
-  'compilado','⚠ Can\'t compile: {e}':'⚠ No se puede compilar: {e}',
-'{n} stitches · {m} m estimated thread · {c} thread colors':'{n} puntadas · {m} m de hilo estimado · {c} colores de hilo',
+  'listo para bordar','⚠ Can\'t compile: {e}':'⚠ No se puede compilar: {e}',
+'{n} stitches · {m} m estimated thread · {c} thread colors':'{n} puntadas · {m} m de hilo estimado · {c} colores de hilo','{n} stitches · {m} m estimated thread · {c} thread color':'{n} puntadas · {m} m de hilo estimado · {c} color de hilo','about 1 min to sew':'menos de 1 min de bordado',
   '{n} stitches · {m} m estimated thread · {c} thread colors · {x}':'{n} puntadas · {m} m de hilo estimado · {c} colores de hilo · {x}',
 '{lo}–{hi} mm for this font':'{lo}–{hi} mm para esta fuente','Text: {t}':'Texto: {t}',
 '{name} — loaded from a file; stored inside this project. Check the license of the font file before sharing the design.':

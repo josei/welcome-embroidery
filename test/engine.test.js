@@ -461,6 +461,16 @@ test('i18n: Spanish placeholders and exact strings resolve', async()=>{
     '⚠ No se puede compilar: El diseño no tiene geometría para bordar. Añade un objeto antes de exportar.');
   assert.equal(t('Stitch length (mm)'),'Largo de puntada (mm)');
   assert.equal(t('fill'),'relleno');
+  // counts of one agree with their noun, and counts of many keep the plural
+  assert.equal(t('{n} stitches · {m} m estimated thread · {c} thread color',{n:'26',m:'1.2',c:1}),'26 puntadas · 1.2 m de hilo estimado · 1 color de hilo');
+  assert.equal(t('{n} stitches · {m} m estimated thread · {c} thread colors',{n:'26',m:'1.2',c:3}),'26 puntadas · 1.2 m de hilo estimado · 3 colores de hilo');
+  assert.equal(t('about 1 min to sew'),'menos de 1 min de bordado');
+  assert.equal(t('about {t} to sew',{t:'4 min'}),'unos 4 min de bordado');
+  assert.equal(t('{perHoop} copies fit one {hoop} mm hoop ({cols} × {rows}). {copies} copies need 1 hoop.',{perHoop:2,hoop:'110×110',cols:1,rows:2,copies:2}),
+    '2 copias caben en un bastidor de 110×110 mm (1 × 2). 2 copias necesitan 1 bastidor.');
+  assert.equal(t('{perHoop} copies fit one {hoop} mm hoop ({cols} × {rows}). {copies} copies need {hoops} hoop(s).',{perHoop:2,hoop:'110×110',cols:1,rows:2,copies:6,hoops:3}),
+    '2 copias caben en un bastidor de 110×110 mm (1 × 2). 6 copias necesitan 3 bastidores.');
+  assert.equal(t('compiled'),'listo para bordar');
   delete globalThis.location;
 });
 

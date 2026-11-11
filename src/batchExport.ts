@@ -4,7 +4,7 @@ import {batchDocuments, batchPlan} from './engine.js';
 import {arrayState} from './arrayState.js';
 import {batchNames, batchState, setBatchFields} from './batchState.js';
 import {download, exportStem, forWorker} from './appHelpers.js';
-import {t} from './i18n.js';
+import {t, lang} from './i18n.js';
 
 /** What the batch export needs from the editor, supplied by app.js. */
 export interface BatchApi {
@@ -50,7 +50,10 @@ export function syncBatchInfo() {
   const info = !p
     ? ''
     : p.perHoop
-      ? t('{perHoop} copies fit one {hoop} mm hoop ({cols} × {rows}). {copies} copies need {hoops} hoop(s).', {
+      // The singular key is looked up only in Spanish; English keeps its text.
+      ? t(lang === 'es' && p.hoopsNeeded === 1
+        ? '{perHoop} copies fit one {hoop} mm hoop ({cols} × {rows}). {copies} copies need 1 hoop.'
+        : '{perHoop} copies fit one {hoop} mm hoop ({cols} × {rows}). {copies} copies need {hoops} hoop(s).', {
         perHoop: p.perHoop,
         hoop: `${p.hoop[0]}×${p.hoop[1]}`,
         cols: p.cols,
