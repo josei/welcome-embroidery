@@ -15,6 +15,7 @@ import {fillRuns,satinRuns} from './fillStitch.js';
 import {validateDocument} from './validate.js';
 import {hasName,objectLabel} from './objectNames.js';
 import {distP,railsFromLine,railsFromCenterline,widthAt} from './pathGeometry.js';
+import {PLAN_STITCH_RULE, splitLongStitchesIndexed} from './encoders/shared.js';
 
 // Rounds to one decimal place (a stitch position in mm).
 /** @type {(n: number) => number} */
@@ -85,7 +86,7 @@ export function compile(doc) {
     records.push({o,lines:useLines,satin,rails,maskRings,clippedFill});
   }
   if(complexity>2_000_000)throw Error('Design exceeds the safe digitizing complexity limit. Simplify geometry or increase row spacing.');
-  const stitches=/** @type {any[]} */([]);let leadIn=0;let previous=/** @type {any} */(null),currentThread=/** @type {any} */(null),lastNeedle=/** @type {any} */(null),
+  let stitches=/** @type {any[]} */([]);let leadIn=0;let previous=/** @type {any} */(null),currentThread=/** @type {any} */(null),lastNeedle=/** @type {any} */(null),
     position=/** @type {any} */(null),hasImportedLayer=false;
   const push=(/** @type {any} */ x,/** @type {any} */ y,/** @type {any} */ cmd,/** @type {any} */ thread,preserve=false)=>
     {const rx=round(x),ry=round(y);if(!preserve&&cmd==='stitch'&&lastNeedle&&rx===lastNeedle[0]&&ry===lastNeedle[1])return;
@@ -248,6 +249,9 @@ export function compile(doc) {
   if(previous!==null&&!hasImportedLayer)tieOff(currentThread);
   if(!stitches.some(s=>s.cmd==='stitch'))throw Error('The design has no sewable geometry. Add an object before exporting.');
   if(hasImportedLayer&&position)push(position[0],position[1],'end',currentThread||'#527461',true);
+  // Long moves are split to the plan rule here, so the preview draws the stitches every writer sews. Object starts move with the split.
+  const split=splitLongStitchesIndexed(stitches,PLAN_STITCH_RULE);stitches=split.stitches;
+  for(const o of objectStarts)o.start=split.starts[o.start];
   let minNeedleX=Infinity,minNeedleY=Infinity,maxNeedleX=-Infinity,maxNeedleY=-Infinity,count=0;
     for(const p of stitches)if(p.cmd==='stitch'){minNeedleX=Math.min(minNeedleX,p.x);minNeedleY=Math.min(minNeedleY,p.y);maxNeedleX=Math.max(maxNeedleX,p.x);
     maxNeedleY=Math.max(maxNeedleY,p.y);count++;}const bounds=[minNeedleX,minNeedleY,maxNeedleX,maxNeedleY];
