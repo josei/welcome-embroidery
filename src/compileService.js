@@ -23,6 +23,9 @@ let compileError = '';
 /** @type {any} */
 let compileTimer = null;
 let compiling = false;
+/** The compile running now, so an export can wait for it. */
+/** @type {Promise<void> | null} */
+let active = null;
 /** @type {(() => void) | null} */
 let onClear = null;
 /** @type {(() => void) | null} */
@@ -97,7 +100,7 @@ export function scheduleCompile(delay = 450) {
   // A blank design is not a compile failure: nothing is sewn yet, so nothing is reported as an error. Export says why it is disabled.
   if (!documentNow().doc.objects.length) { compileError = ''; setCompileIssue(null); setExportRefusal(EMPTY_EXPORT_REASON); return; }
   if (workerFailure) { compileError = ''; setCompileIssue(null); return; }
-  compileTimer = setTimeout(() => compileNow(), delay);
+  compileTimer = setTimeout(() => { compileTimer = null; compileNow(); }, delay);
 }
 
 /** Drops the plan and every request in flight because the document changed. Playback resets through onClear. */
@@ -113,12 +116,36 @@ export function clearComputed() {
 }
 
 /** Compiles the current document. A manual compile shows worker errors in the toast. */
-export async function compileNow(/** @type {boolean | Event} */ manual = false) {
+export function compileNow(/** @type {boolean | Event} */ manual = false) {
+  const run = compileDocument(manual);
+  active = run;
+  run.then(() => { if (active === run) active = null; });
+  return run;
+}
+
+/**
+ * Waits for the compile that is queued or running, so an export sees the design the user just edited. Does nothing, and
+ * costs nothing, when no compile is pending.
+ */
+export async function settleCompile() {
+  if (compileTimer !== null) {
+    clearTimeout(compileTimer);
+    compileTimer = null;
+    await compileNow();
+  } else if (active) {
+    await active;
+  }
+}
+
+/** @param {boolean | Event} manual */
+async function compileDocument(manual) {
   if (!documentNow().doc.objects.length) { plan = null; scheduleCompile(); editor.render(); return; }
   compiling = true;
+  /** @type {number | undefined} */
+  let revision;
   try {
     await ensureFonts?.();
-    const revision = documentNow().doc.revision;
+    revision = documentNow().doc.revision;
     const result = await request({type: 'compile', document: forWorker(documentNow().doc)});
     if (result.plan.revision !== revision || revision !== documentNow().doc.revision) return;
     plan = result.plan;
@@ -132,7 +159,8 @@ export async function compileNow(/** @type {boolean | Event} */ manual = false) 
     editor.render();
   } catch (error) {
     const err = /** @type {any} */ (error);
-    if (err.name !== 'AbortError') {
+    // A failure for a revision the user has since edited says nothing about the design now; the newer compile reports instead.
+    if (err.name !== 'AbortError' && revision === documentNow().doc.revision) {
       compileError = err.message;
       setCompileIssue({message: err.message, objectIds: err.details?.objectIds ?? []});
       compiling = false;
@@ -154,4 +182,5 @@ export const compile = {
   scheduleCompile,
   clearComputed,
   compileNow,
+  settleCompile,
 };

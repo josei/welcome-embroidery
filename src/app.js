@@ -3,7 +3,7 @@
 // the DOM and starts the first render and compile. Nothing here looks up, writes to or listens on the DOM.
 import {editor} from './editorContext.js';
 import {initializeDocument, edit, transact} from './documentCommands.js';
-import {compile, configureCompile, compileNow, scheduleCompile} from './compileService.js';
+import {compile, configureCompile, compileNow, scheduleCompile, settleCompile} from './compileService.js';
 import {resetPlayback, resetPlaybackIndex, stopPlayback, mountSimulation} from './simulation.js';
 import {mountCanvas, render} from './editorView.js';
 import {toast, mountEditorChrome} from './editorChrome.js';
@@ -73,7 +73,7 @@ configureProjectIO({
   fitAll: () => editor.canvas?.fitAll(),
   fitHoop: () => editor.canvas?.fitHoop(),
 });
-configureExportCommands({request: compile.request, ensureFonts: ensureDocFonts, toast, render, setPlan: next => compile.setPlan(next)});
+configureExportCommands({request: compile.request, ensureFonts: ensureDocFonts, toast, render, setPlan: next => compile.setPlan(next), settleCompile});
 configureViewCommands({
   hasPlan: () => Boolean(compile.getPlan()),
   stopPlayback,

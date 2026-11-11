@@ -23,6 +23,8 @@ export interface ExportApi {
   render(): void;
   /** Makes the compiled plan the one the simulation and the worksheet use. */
   setPlan(plan: ExportPlan): void;
+  /** Waits for a compile that is queued or running, so the export sees the latest edit. Resolves at once when none is pending. */
+  settleCompile(): Promise<void>;
 }
 
 let api: ExportApi | null = null;
@@ -100,6 +102,8 @@ export async function exportCurrent() {
 /** One export attempt. Throws on failure; `job.abandoned` is set when the timeout has already reported it. */
 async function runExport(job: {abandoned: boolean}) {
   await wired().ensureFonts().catch(() => {});
+  if (job.abandoned) return;
+  await wired().settleCompile();
   if (job.abandoned) return;
   // The store types the document loosely; the engine validates it before any export reads it.
   const doc = documentNow().doc as Parameters<typeof exportDxf>[0];

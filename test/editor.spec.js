@@ -4288,5 +4288,22 @@ test('numeric fields clamp to their range with a note, restore a blank value, an
  expect(errors).toEqual([]);
 });
 
+// Export clicked right after committing lettering, before the debounced compile has finished: Export waits for that compile
+// and downloads the design, so the file holds the 26 stitches of "WE" and no "no sewable geometry" error shows.
+test('export clicked right after committing lettering waits for the pending compile and downloads WE',async({page})=>{
+ page.on('dialog',d=>d.accept());const errors=[];page.on('pageerror',e=>errors.push(e.message));
+ await page.goto('/');await newDesign(page);
+ await page.locator('#letter').click();const a=await page.locator('#art').boundingBox();await page.mouse.click(a.x+a.width/2,a.y+a.height/2);
+ await expect(page.locator('#canvasText')).toBeFocused();await expect(page.locator('#canvasText')).toHaveValue('Text');await expect.poll(()=>page.locator('#canvasText').evaluate(t=>[t.selectionStart,t.selectionEnd])).toEqual([0,4]);await page.keyboard.type('WE');await page.mouse.click(a.x+a.width*0.8,a.y+a.height/2);
+ const download=page.waitForEvent('download');
+ await page.locator('#export').click();await pickFormat(page,'dst');await page.locator('#download').click();
+ const file=await download;expect(file.suggestedFilename()).toBe('WE.dst');
+ const path=await file.path();const bytes=new Uint8Array(readFileSync(path));
+ let stitches=0;for(let i=512;i+2<bytes.length;i+=3){const b2=bytes[i+2];if((b2&0xF3)===0xF3)break;if((b2&0x83)!==0x83)stitches++;}
+ expect(stitches).toBe(26);
+ await expect(page.locator('#count')).not.toContainText("Can't compile");
+ expect(errors).toEqual([]);
+});
+
 test('lettering placed by a canvas click starts with its placeholder selected, so typing WE gives WE, not TextWE',async({page})=>{page.on('dialog',d=>d.accept());const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');await newDesign(page);await page.locator('#letter').click();const a=await page.locator('#art').boundingBox();await page.mouse.click(a.x+a.width/2,a.y+a.height/2);await expect(page.locator('#canvasText')).toBeFocused();await expect(page.locator('#canvasText')).toHaveValue('Text');await expect.poll(()=>page.locator('#canvasText').evaluate(t=>[t.selectionStart,t.selectionEnd])).toEqual([0,4]);await page.keyboard.type('WE');await expect(page.locator('#canvasText')).toHaveValue('WE');await page.keyboard.press('Enter');await expect(page.locator('#canvasText')).toHaveCount(0);await expect(page.locator('.object-row').first()).toContainText('Text: WE');await expect(page.locator('.object-row').first()).not.toContainText('TextWE');expect(errors).toEqual([]);});
 test('a lettering box placed then left blank or cancelled leaves no stray Text object',async({page})=>{page.on('dialog',d=>d.accept());const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');await newDesign(page);const before=await page.locator('.object-row').count();await page.locator('#letter').click();await expect.poll(()=>page.locator('#canvasText').evaluate(t=>[t.selectionStart,t.selectionEnd])).toEqual([0,4]);await page.keyboard.press('Backspace');await page.keyboard.press('Enter');await expect(page.locator('#canvasText')).toHaveCount(0);await expect(page.locator('.object-row')).toHaveCount(before);await page.locator('#letter').click();await page.keyboard.press('Escape');await expect(page.locator('#canvasText')).toHaveCount(0);await expect(page.locator('.object-row')).toHaveCount(before);expect(errors).toEqual([]);});
