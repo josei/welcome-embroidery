@@ -19,8 +19,9 @@ import {pecBody, pecChartIndex, pecPaletteIndices} from './pec.js';
 function pesSegments(plan,colourOf){
  /** @type {PesStitch[]} */
  const stitches=plan.stitches.filter(s=>s.cmd!=="end").map(s=>({cmd:s.cmd,x:Math.round(s.x*10),y:Math.round(s.y*10),thread:s.thread}));
- const xs=stitches.map(s=>s.x),ys=stitches.map(s=>s.y);
- const minX=Math.min(...xs),maxX=Math.max(...xs),minY=Math.min(...ys),maxY=Math.max(...ys);
+ // Loop rather than Math.min(...xs): spreading one argument per stitch overflows the call stack past ~140k stitches.
+ let minX=Infinity,maxX=-Infinity,minY=Infinity,maxY=-Infinity;
+ for(const s of stitches){if(s.x<minX)minX=s.x;if(s.x>maxX)maxX=s.x;if(s.y<minY)minY=s.y;if(s.y>maxY)maxY=s.y;}
  const cx=(minX+maxX)/2,cy=(minY+maxY)/2,left=minX-cx,top=minY-cy,right=maxX-cx,bottom=maxY-cy;
  const adjX=left+cx,adjY=bottom+cy;
  /** @type {{cmd: string, items: PesStitch[]}[]} */ const groups=[];
