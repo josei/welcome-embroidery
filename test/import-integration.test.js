@@ -5,6 +5,10 @@ import {decodeEmbroidery} from '../src/readers.js';
 import {compile,encode,importStitchLayer,initialDocument,applyOperations,validateDocument,batchDocuments} from '../src/engine.js';
 import {pinnedMachineFixture,readMachineFixtures} from './fixture-archive.js';
 
+// Pinned VP3 and PEC files carry non-jump moves longer than 12.7 mm, so they are re-encoded rather than passed through (see #356).
+const LONG_LIMIT=12.7+1e-6;
+const longestStitchMove=d=>{let prev=null,worst=0;for(const s of d.stitches){if(s.cmd==='stitch'&&prev)worst=Math.max(worst,Math.hypot(s.x-prev.x,s.y-prev.y));if(s.cmd!=='end')prev=s;}return worst;};
+
 test('pinned JEF imports as preserved stitch data and exports the exact untouched source',()=>{
   const {fileName,bytes}=pinnedMachineFixture('jef'),decoded=decodeEmbroidery(bytes,'jef');
   const layer=importStitchLayer(bytes,'jef',{fileName}),doc=initialDocument();doc.objects=[layer];validateDocument(doc);
@@ -29,11 +33,11 @@ test('same-count edits cannot pass through stale source bytes',()=>{
   const plan=compile(doc),output=encode(plan,'jef','#527461',doc.hoop,doc),decoded=decodeEmbroidery(output,'jef');assert.notDeepEqual(output,bytes);assert.equal(decoded.stitches.filter(s=>s.cmd==='stitch').length,plan.count);assert.deepEqual(decoded.stitches.filter(s=>s.cmd==='stitch').map(s=>[s.x,s.y]),plan.stitches.filter(s=>s.cmd==='stitch').map(s=>[s.x,s.y]));
 });
 
-test('pinned VP3 imports with retained source and its supported edited commands re-export with transformed coordinates',()=>{
+test('pinned VP3 imports with retained source re-encode with long moves split, and supported edited commands re-export with transformed coordinates',()=>{
   const {fileName,bytes}=pinnedMachineFixture('vp3'),decoded=decodeEmbroidery(bytes,'vp3'),doc=initialDocument(),layer=importStitchLayer(bytes,'vp3',{fileName});doc.objects=[layer];
-  assert.deepEqual(layer.stitches,decoded.stitches);assert.deepEqual(compile(doc).errors,[]);assert.deepEqual(encode(compile(doc),'vp3','#527461',doc.hoop,doc),bytes);
+  assert.deepEqual(layer.stitches,decoded.stitches);assert.deepEqual(compile(doc).errors,[]);const untouchedVp3=encode(compile(doc),'vp3','#527461',doc.hoop,doc);assert.notDeepEqual(untouchedVp3,bytes);assert.ok(longestStitchMove(decodeEmbroidery(untouchedVp3,'vp3'))<=LONG_LIMIT);
   applyOperations(doc,[{op:'transform',id:layer.id,x:layer.x+1,y:layer.y-1,width:layer.w*.8,height:layer.h*.8,rotation:3}]);const plan=compile(doc);assert.deepEqual(plan.errors,[]);
-  const output=encode(plan,'vp3','#527461',doc.hoop,doc),roundTrip=decodeEmbroidery(output,'vp3'),needle=roundTrip.stitches.filter(s=>s.cmd==='stitch');assert.equal(needle.length,plan.count);assert.deepEqual(needle.map(s=>[s.x,s.y]),plan.stitches.filter(s=>s.cmd==='stitch').map(s=>[s.x,s.y]));writeFileSync('/tmp/welcome-edited-import.vp3',output);writeFileSync('/tmp/welcome-edited-import-vp3-expected.json',JSON.stringify(plan.stitches.filter(s=>s.cmd==='stitch').map(s=>[s.x,s.y])));
+  const output=encode(plan,'vp3','#527461',doc.hoop,doc),roundTrip=decodeEmbroidery(output,'vp3'),needle=roundTrip.stitches.filter(s=>s.cmd==='stitch');assert.ok(needle.length>=plan.count);assert.ok(longestStitchMove(roundTrip)<=LONG_LIMIT);{let j=0;const want=plan.stitches.filter(s=>s.cmd==='stitch');for(const n of needle)if(j<want.length&&Math.abs(n.x-want[j].x)<=0.1+1e-6&&Math.abs(n.y-want[j].y)<=0.1+1e-6)j++;assert.equal(j,want.length,'every planned needle survives the split');}writeFileSync('/tmp/welcome-edited-import.vp3',output);writeFileSync('/tmp/welcome-edited-import-vp3-expected.json',JSON.stringify(plan.stitches.filter(s=>s.cmd==='stitch').map(s=>[s.x,s.y])));
 });
 
 test('VP3 color block at both zero axes nudges each origin axis without shifting needle coordinates',()=>{
@@ -85,11 +89,11 @@ test('a true JEF STOP imports, edits and re-exports as a stop with its own threa
  assert.equal(back.stitches.filter(s=>s.cmd==='stitch').length,plan.stitches.filter(s=>s.cmd==='stitch').length);
 });
 
-test('pinned PEC imports with its thread-chart colors, exports the untouched source and re-encodes after a move',()=>{
+test('pinned PEC imports with its thread-chart colors, re-encode with long moves split instead of passing through, and re-encode after a move',()=>{
   const {fileName,bytes}=pinnedMachineFixture('pec'),decoded=decodeEmbroidery(bytes,'pec'),doc=initialDocument(),layer=importStitchLayer(bytes,'pec',{fileName});doc.objects=[layer];
   assert.deepEqual(layer.stitches,decoded.stitches);
   assert.ok(decoded.threads.length>1&&decoded.threads.every(t=>/^#[0-9a-f]{6}$/i.test(t.color)),'every PEC color resolves to a thread-chart color');
-  assert.deepEqual(compile(doc).errors,[]);assert.deepEqual(encode(compile(doc),'pec','#527461',doc.hoop,doc),bytes);
+  assert.deepEqual(compile(doc).errors,[]);const untouchedPec=encode(compile(doc),'pec','#527461',doc.hoop,doc);assert.notDeepEqual(untouchedPec,bytes);assert.ok(longestStitchMove(decodeEmbroidery(untouchedPec,'pec'))<=LONG_LIMIT);
   applyOperations(doc,[{op:'transform',id:layer.id,x:layer.x+1,y:layer.y-1}]);const plan=compile(doc);assert.deepEqual(plan.errors,[]);
   const output=encode(plan,'pec','#527461',doc.hoop,doc),back=decodeEmbroidery(output,'pec'),tenths=s=>[Math.round(s.x*10),Math.round(s.y*10)];
   const want=plan.stitches.filter(s=>s.cmd==='stitch').map(tenths),got=back.stitches.filter(s=>s.cmd==='stitch').map(tenths);let next=0;

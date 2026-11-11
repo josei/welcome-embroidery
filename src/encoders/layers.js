@@ -3,6 +3,8 @@
 
 /** @typedef {import('../encoders.js').PlanStitch} PlanStitch */
 
+import {isLongStitch} from './shared.js';
+
 /**
  * @param {{kind: string, x: number, y: number, w: number, h: number, rotation?: number, thread?: string, threadOverrides: object, source: {format: string,
   * originalBytesBase64?: string|null, defaultThread: string, defaultPlacement: {x: number, y: number, w: number, h: number}}}} o
@@ -27,3 +29,12 @@ export function vp3LayerHasUnsupportedTravel(stitches){
   for(let i=0;i<stitches.length;i++){const p=stitches[i],prev=stitches[i-1],next=stitches[i+1];if(p.cmd==='trim'||p.cmd==='stop')return true;
   if(p.cmd==='jump'){const blockOrigin=i===0||prev?.cmd==='color'||next?.cmd==='color',noOp=prev&&p.x===prev.x&&p.y===prev.y;if(!blockOrigin&&!noOp)return true;
   }}return false;}
+/**
+ * True when an imported layer has a non-jump move longer than the Brother and Pfaff writers can emit. Such a file is re-encoded, not passed through.
+ * @param {Array<{x: number, y: number, cmd: string}>} stitches
+ * @returns {boolean}
+ */
+export function hasLongStitch(stitches){
+  let prev=null;
+  for(const s of stitches){if(isLongStitch(prev,s))return true;if(s.cmd!=='end')prev=s;}
+  return false;}

@@ -4,6 +4,7 @@
 /** @typedef {import('../encoders.js').Plan} Plan */
 
 import {PEC_CHART} from '../readers.js';
+import {splitLongStitches} from './shared.js';
 
 /** @param {string|null|undefined} hex @returns {number} */
 export const pecChartIndex=hex=>
@@ -17,6 +18,7 @@ export function pecColourSeq(plan){
 /** @param {Plan} plan @param {string} name @returns {number[]} */
 export function pecBody(plan,name){
  if(plan.errors.length)throw Error(plan.errors.join(" "));
+ plan={...plan,stitches:splitLongStitches(plan.stitches)};
  const seq=pecColourSeq(plan);
  const indices=seq.slice(0,255).map(pecChartIndex);
  /** @type {number[]} */ const body=[];

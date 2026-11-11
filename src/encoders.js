@@ -7,7 +7,7 @@ import {hoopSize} from './hoops.js';
 import {decodeEmbroidery} from './readers.js';
 import {encodeJef} from './encoders/jef.js';
 import {encodeVp3} from './encoders/vp3.js';
-import {layerCanPassThrough, sourceMatches, vp3LayerHasUnsupportedTravel} from './encoders/layers.js';
+import {hasLongStitch, layerCanPassThrough, sourceMatches, vp3LayerHasUnsupportedTravel} from './encoders/layers.js';
 import {encodePec} from './encoders/pec.js';
 import {encodePes, encodePesV6} from './encoders/pes.js';
 import {encodeSew} from './encoders/sew.js';
@@ -36,10 +36,13 @@ import {encodeCol, encodeEdr} from './encoders/colour.js';
  */
 
 export {
-  encodeJef, encodeVp3, layerCanPassThrough, sourceMatches, vp3LayerHasUnsupportedTravel,
+  encodeJef, encodeVp3, hasLongStitch, layerCanPassThrough, sourceMatches, vp3LayerHasUnsupportedTravel,
   encodePec, encodePes, encodePesV6, encodeSew, encodeTbf, encodeXxx, encodeU01, encodeExp, encodeDst,
   encodeCol, encodeEdr,
 };
+
+/** Writers that split non-jump moves longer than MAX_STITCH_MM; an imported file with such a move is re-encoded instead of passed through. */
+const LONG_MOVE_FORMATS=['pec','pes','pes6','vp3'];
 
 /**
  * Writes a compiled plan in one machine format. An unchanged imported file is returned as its source bytes.
@@ -57,7 +60,7 @@ export function encode(plan,format,color,hoop=110,document=null){
     format)))throw Error(`Unsupported machine format: ${format}. Choose JEF, VP3, DST, EXP, PEC, PES, PES v6, SEW, U01, XXX, TBF, COL or EDR.`);
   if(plan.errors.length)throw Error(plan.errors.join(' '));
   const layers=/** @type {Layer[]} */((document?.objects||[]).filter(o=>o.visible!==false&&o.kind==='stitch_layer'));
-  if(layers.length===1&&document?.objects.length===1&&layerCanPassThrough(layers[0],format)){
+  if(layers.length===1&&document?.objects.length===1&&layerCanPassThrough(layers[0],format)&&!(LONG_MOVE_FORMATS.includes(format)&&hasLongStitch(layers[0].stitches))){
     const bytes=Uint8Array.from(atob(/** @type {string} */(layers[0].source.originalBytesBase64)),c=>c.charCodeAt(0));
     if(bytes.byteLength===layers[0].source.size){try{const checked=decodeEmbroidery(bytes,format);if(sourceMatches(checked,layers[0]))return bytes;}catch{}}
   }

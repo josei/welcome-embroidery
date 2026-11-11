@@ -4,11 +4,12 @@
 /** @typedef {import('../encoders.js').Plan} Plan */
 /** @typedef {import('../encoders.js').Vp3Block} Vp3Block */
 
-import {ascii, be16, be32, i8} from './shared.js';
+import {ascii, be16, be32, i8, splitLongStitches} from './shared.js';
 
 /** @param {Plan} plan @param {string} [color] @returns {Uint8Array} */
 export function encodeVp3(plan,color='#527461') {
   if(plan.errors.length)throw Error(plan.errors.join(' '));
+  plan={...plan,stitches:splitLongStitches(plan.stitches)};
   /** @type {number[]} */ const out=[];
   /** @type {(s: string) => number[]} */
   const str16=s=>{const a=[];for(const c of s)a.push(0,c.charCodeAt(0));return [...be16(a.length),...a];};

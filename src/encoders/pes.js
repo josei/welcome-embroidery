@@ -3,7 +3,7 @@
 
 /** @typedef {import('../encoders.js').Plan} Plan */
 
-import {last} from './shared.js';
+import {last, splitLongStitches} from './shared.js';
 import {pecBody, pecChartIndex, pecColourSeq} from './pec.js';
 
 // PES version 1: '#PES0001', the PEC block offset, sew segments per colour block and a colour log, then the PEC block.
@@ -41,6 +41,7 @@ function pesSegments(plan,colourOf){
 /** @param {Plan} plan @param {string} name @param {number} version @returns {Uint8Array} */
 function pesWriter(plan,name,version){
  if(plan.errors.length)throw Error(plan.errors.join(" "));
+ plan={...plan,stitches:splitLongStitches(plan.stitches)};
  /** @type {string[]} */ const threads=[];
  /** @type {(hex: string) => number} */
  const colourOf=hex=>
