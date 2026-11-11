@@ -259,3 +259,18 @@ test('an imported design that opens away from the origin starts with a jump, not
     for(const s of sewn)assert.ok(lines.some(l=>distance(s,l)<=0.1+1e-6),`${format} sewn point ${s.x},${s.y} lies off the source`);
   }
 });
+
+// U01 (Barudan) files the reader accepts: the ten that decode, including the ones written with a 0x80-coded header. The five "-me" files the reader refuses are out of scope (#314).
+test('every U01 file the reader accepts imports, validates and exports to the other machine formats',()=>{
+  const accepted=[];
+  for(const [name,bytes] of readMachineFixtures(/\.u01$/i)){
+    try{decodeEmbroidery(bytes,'u01');accepted.push([name,bytes]);}catch{}
+  }
+  assert.equal(accepted.length,10);
+  for(const [fileName,bytes] of accepted){
+    const layer=importStitchLayer(bytes,'u01',{fileName}),doc=initialDocument();doc.hoop=200;doc.objects=[layer];
+    assert.equal(layer.source.format,'u01',fileName);validateDocument(doc);
+    const plan=compile(doc);assert.deepEqual(plan.errors,[],fileName);
+    for(const format of ['jef','vp3','dst','exp','pes','u01'])assert.ok(encode(plan,format,'#527461',doc.hoop,doc).length>0,`${fileName} to ${format}`);
+  }
+});

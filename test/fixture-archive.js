@@ -2,7 +2,7 @@ import {readFileSync} from 'node:fs';
 import {inflateRawSync} from 'node:zlib';
 
 const archive=readFileSync(new URL('../fixtures/embroidepy/samples.zip',import.meta.url));
-const MACHINE_FIXTURE=/\.(jef|vp3|sew|pec|exp|hus|xxx|dsb|dsz|tap|tbf|pcs|shv|stx|bro|emd|ksm|10o)$/i;
+const MACHINE_FIXTURE=/\.(jef|vp3|sew|pec|exp|hus|xxx|dsb|dsz|tap|tbf|pcs|shv|stx|bro|emd|ksm|10o|u01)$/i;
 export function readMachineFixtures(pattern=MACHINE_FIXTURE){
   let eocd=-1;
   for(let p=archive.length-22;p>=Math.max(0,archive.length-65557);p--)if(archive.readUInt32LE(p)===0x06054b50){eocd=p;break;}

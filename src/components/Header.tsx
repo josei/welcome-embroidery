@@ -164,7 +164,7 @@ export function Header() {
     { const chosen = e.target.files?.[0]; if (!chosen) return;
     try { await openProjectFile(chosen); } finally { e.target.value = '';
     } }} /><input id="machineFile" ref={machineFile} type="file"
-      accept=".jef,.vp3,.dst,.sew,.pec,.pes,.exp,.hus,.xxx,.dsb,.dsz,.tap,.tbf,.pcs,.shv,.stx,.bro,.emd,.ksm,.10o,application/octet-stream" hidden
+      accept=".jef,.vp3,.dst,.sew,.pec,.pes,.exp,.hus,.xxx,.dsb,.dsz,.tap,.tbf,.pcs,.shv,.stx,.bro,.emd,.ksm,.10o,.u01,application/octet-stream" hidden
         onChange={async e =>
     { const chosen = e.target.files?.[0]; if (!chosen) return; try { await importMachineFile(chosen); } finally { e.target.value = ''; } }} /></header>
  );

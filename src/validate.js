@@ -230,7 +230,7 @@ export function validateDocument(doc){
       o.h>(o.kind==='stitch_layer'?2000:260))fail(`object ${o.id} needs positive finite dimensions within its supported range.`);
     if(o.kind==='stitch_layer'){
       if(
-        !['jef','vp3','dst','sew','pec','pes','exp','hus','xxx','dsb','dsz','tap','tbf','pcs','shv','stx','bro','emd','ksm','10o'].includes(o.source?.format)||
+        !['jef','vp3','dst','sew','pec','pes','exp','hus','xxx','dsb','dsz','tap','tbf','pcs','shv','stx','bro','emd','ksm','10o','u01'].includes(o.source?.format)||
         !Array.isArray(o.threads)||o.threads.length<1||o.threads.length>256||!Array.isArray(o.stitches)||o.stitches.length<1||o.stitches.length>
         250000)fail(`stitch layer ${o.id} exceeds import bounds or has invalid source metadata.`);
       if(!Array.isArray(o.source.bounds)||o.source.bounds.length!==4||

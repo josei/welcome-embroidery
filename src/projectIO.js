@@ -26,7 +26,7 @@ const FALLBACK_FONT = 'welcome-mono/1';
 /** The height range Welcome Mono lettering may have, in millimetres. */
 const FALLBACK_HEIGHT = [4, 16];
 /** The machine formats the import accepts, as file extensions. */
-const MACHINE_EXTENSIONS=['jef','vp3','dst','sew','pec','pes','exp','hus','xxx','dsb','dsz','tap','tbf','pcs','shv','stx','bro','emd','ksm','10o'];
+const MACHINE_EXTENSIONS=['jef','vp3','dst','sew','pec','pes','exp','hus','xxx','dsb','dsz','tap','tbf','pcs','shv','stx','bro','emd','ksm','10o','u01'];
 
 /**
  * @typedef {Object} ProjectApi What the project commands need from the editor, supplied by app.js.
@@ -491,7 +491,7 @@ export async function importMachineFile(file) {
   try {
     const format = machineFormat(file.name);
     if (!format) {
-      throw Error(t('Choose a .jef, .vp3, .dst, .sew, .pec, .pes, .exp, .hus, .xxx, .dsb, .dsz, .tap, .tbf, .pcs, .shv, .stx, .bro, .emd, .ksm or .10o file.'));
+      throw Error(t('Choose a .jef, .vp3, .dst, .sew, .pec, .pes, .exp, .hus, .xxx, .dsb, .dsz, .tap, .tbf, .pcs, .shv, .stx, .bro, .emd, .ksm, .10o or .u01 file.'));
     }
     if (file.size > MACHINE_LIMIT) throw Error('Machine-file imports are limited to 1 MiB so original source bytes fit in the project.');
     const bytes = await file.arrayBuffer();
