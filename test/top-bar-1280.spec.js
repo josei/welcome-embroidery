@@ -40,3 +40,17 @@ for(const [lang,name] of cases){
   expect(errors).toEqual([]);
  });
 }
+
+// Issue #447: with a rectangle selected, the save status shows in full in the top bar at 1280px and 1024px, in English and Spanish.
+// Spanish needs 189px at 1280px; the New design and Import buttons show as icons in that range to make room.
+for(const lang of ['en','es']) for(const width of [1280,1024]){
+ test(`save status is not clipped at ${width}px in ${lang}`,async({page})=>{
+  await page.addInitScript(()=>{delete window.showSaveFilePicker;});
+  await page.setViewportSize({width,height:800});
+  await page.goto(`/?lang=${lang}`);
+  await page.locator('#rect').click();
+  await expect(page.locator('#remove')).toBeEnabled();
+  const mark=await page.locator('#unsavedMark').evaluate(e=>({scrollWidth:e.scrollWidth,clientWidth:e.clientWidth}));
+  expect(mark.scrollWidth,'save status not clipped').toBeLessThanOrEqual(mark.clientWidth);
+ });
+}

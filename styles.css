@@ -483,7 +483,8 @@ input[aria-invalid="true"]{border-color:var(--warn)!important;background:var(--w
 .top #name{flex:1 1 0;min-width:64px;width:auto}
 .top #savedStatus,.top #unsavedMark{flex:0 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 /* Duplicate and Delete become icon-only here; their names stay on the buttons for screen readers and tooltips. */
-.top #duplicate,.top #remove{width:36px;min-width:36px;padding:0}.top #duplicate .icon-label,.top #remove .icon-label{display:none}
+/* New design and Import drop their words here too, so the save status gets the width its longest translation needs (Spanish: 189px). */
+.top #duplicate,.top #remove,.top #new,.top #importMachine{width:36px;min-width:36px;padding:0}.top #duplicate .icon-label,.top #remove .icon-label,.top #new .icon-label,.top #importMachine .icon-label{display:none}
 }
 /* Checkboxes show a 24px box, the WCAG 2.5.8 minimum for the visible control, not just its label row. Icon checkboxes keep their own size. */
 input[type=checkbox]:not(.icon-check){width:24px;height:24px;min-width:24px;margin:0;flex:none}
