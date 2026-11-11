@@ -7,7 +7,7 @@ import {hoopSize} from './hoops.js';
 import {decodeEmbroidery} from './readers.js';
 import {encodeJef} from './encoders/jef.js';
 import {encodeVp3} from './encoders/vp3.js';
-import {hasLongStitch, layerCanPassThrough, sourceMatches, vp3LayerHasStop} from './encoders/layers.js';
+import {hasLongStitch, layerCanPassThrough, sourceMatches} from './encoders/layers.js';
 import {encodePec} from './encoders/pec.js';
 import {encodePes, encodePesV6} from './encoders/pes.js';
 import {encodeSew} from './encoders/sew.js';
@@ -37,7 +37,7 @@ import {stitchRule} from './encoders/shared.js';
  */
 
 export {
-  encodeJef, encodeVp3, hasLongStitch, layerCanPassThrough, sourceMatches, vp3LayerHasStop,
+  encodeJef, encodeVp3, hasLongStitch, layerCanPassThrough, sourceMatches,
   encodePec, encodePes, encodePesV6, encodeSew, encodeTbf, encodeXxx, encodeU01, encodeExp, encodeDst,
   encodeCol, encodeEdr,
 };
@@ -65,8 +65,6 @@ export function encode(plan,format,color,hoop=110,document=null){
     const bytes=Uint8Array.from(atob(/** @type {string} */(layers[0].source.originalBytesBase64)),c=>c.charCodeAt(0));
     if(bytes.byteLength===layers[0].source.size){try{const checked=decodeEmbroidery(bytes,format);if(sourceMatches(checked,layers[0]))return bytes;}catch{}}
   }
-  if(format==='vp3'&&layers.some(o=>vp3LayerHasStop(o.stitches)))throw Error(
-    'This VP3 design contains stop commands, which the VP3 format cannot carry without changing its colour blocks. Export JEF or another format, or remove the stops.');
   if(format==='jef')return encodeJef(plan,color,hoop);if(format==='dst')return encodeDst(plan,document?.name||'Welcome');
     if(format==='exp')return encodeExp(plan);if(format==='pec')return encodePec(plan,document?.name||'Welcome');
     if(format==='pes')return encodePes(plan,document?.name||'Welcome');if(format==='pes6')return encodePesV6(plan,document?.name||'Welcome');

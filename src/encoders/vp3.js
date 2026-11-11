@@ -26,11 +26,12 @@ export function encodeVp3(plan,color='#527461') {
   /** @type {Vp3Block|null} */ let block=null;
   /** @type {number[]|null} */ let pendingOrigin=null;
   for(let i=0;i<plan.stitches.length;i++){const p=plan.stitches[i],previous=plan.stitches[i-1],next=plan.stitches[i+1];
-    if(p.cmd==='jump'&&next?.cmd==='color'){pendingOrigin=[p.x,p.y];continue;}
+    if(p.cmd==='jump'&&(next?.cmd==='color'||next?.cmd==='stop')){pendingOrigin=[p.x,p.y];continue;}
+    // A stop is a block boundary too: VP3 has no stop command, so it is written like a colour change and read back as one.
     // A design that starts with a colour change gets an empty first block: VP3 counts colour changes as block boundaries, so without it the first change
     // would be lost. This is the same rule the PEC writer follows.
-    if(p.cmd==='color'&&!blocks.length){blocks.push({thread:p.thread||color,start:pendingOrigin||[p.x,p.y],items:[]});}
-    if(p.cmd==='color'){block=
+    if((p.cmd==='color'||p.cmd==='stop')&&!blocks.length){blocks.push({thread:p.thread||color,start:pendingOrigin||[p.x,p.y],items:[]});}
+    if(p.cmd==='color'||p.cmd==='stop'){block=
     {thread:p.thread||color,start:pendingOrigin||[p.x,p.y],items:[]};blocks.push(block);pendingOrigin=null;continue;}if(p.cmd==='jump'&&block&&
     !block.items.some(item=>item.cmd==='stitch')){block.start=[p.x,p.y];continue;}if(!block){block={thread:p.thread||color,start:[p.x,p.y],items:[]};
     blocks.push(block);}block.items.push(p);}if(!blocks.length)blocks.push({thread:color,start:[0,0],items:[]});
