@@ -6,6 +6,7 @@ import {layersActions} from '../layersState.js';
 import {sewingCountsState} from '../sewingCountsState.js';
 import {compileIssueState} from '../compileIssueState.js';
 import {inspectorOpenState, toggleInspectorOpen} from '../inspectorOpenState.js';
+import {closePhoneSheet, isPhoneWidth, phoneSheetState, togglePhoneSheet} from '../phoneSheetState.js';
 import {t} from '../i18n.js';
 import {selectionChange} from '../objectListSelection.js';
 import type {Click} from '../objectListSelection.js';
@@ -77,9 +78,15 @@ export function ObjectListHead() {
  const objectsText = n === 1 ? t('1 object') : t('{n} objects', {n});
  const threadsText = threads === 1 ? t('1 thread') : t('{m} threads', {m: threads});
  const open = useSyncExternalStore(inspectorOpenState.subscribe, inspectorOpenState.get);
+ const phoneSheet = useSyncExternalStore(phoneSheetState.subscribe, phoneSheetState.get);
  // At the stacked widths the inspector sits below the canvas, so this button is the way up to it; it folds it away again.
  // Opening scrolls the inspector into view, since it starts below the fold.
  const toggle = () => {
+  // At phone widths the Properties button is in the Layers sheet and swaps it for the Properties sheet.
+  if (isPhoneWidth()) {
+   togglePhoneSheet('properties');
+   return;
+  }
   const opening = !inspectorOpenState.get();
   if (opening) scrollBeforeOpen = window.scrollY;
   toggleInspectorOpen();
@@ -94,7 +101,8 @@ export function ObjectListHead() {
   <div className="layers-head">
    <h2 className="section-heading">{t('Layers')}</h2>
    <span>{`${objectsText} · ${threadsText}`}</span>
-   <button type="button" className="inspector-toggle" aria-expanded={open} aria-controls="inspector" onClick={toggle}>{t('Properties')}</button>
+   <button type="button" className="inspector-toggle" aria-expanded={isPhoneWidth() ? phoneSheet === 'properties' : open} aria-controls="inspector" onClick={toggle}>{t('Properties')}</button>
+   <button type="button" className="sheet-close" onClick={closePhoneSheet}>{t('Close')}</button>
   </div>
  );
 }

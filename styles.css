@@ -443,6 +443,26 @@ input[aria-invalid="true"]{border-color:var(--warn)!important;background:var(--w
 .layout>aside.panel:first-child>.layers-head{padding:0 10px}
 }
 
+/* Issue #441: at phone widths (600px and narrower) Layers and Properties are bottom sheets, each 50% of the screen tall, opened from the
+   Layers and Properties buttons under the canvas. Only one is open at a time, and the canvas stays visible above it (at least 30% of the
+   screen). The sheets scroll inside themselves and have a Close button. The sheet buttons and close buttons are hidden at wider widths. */
+.sheet-bar,.sheet-head,.sheet-close,.sheet-switch{display:none}
+@media (max-width:600px){
+.sheet-bar{display:flex;gap:8px;padding:8px 10px;background:#fff;border-top:1px solid #e3e6e1}
+.sheet-bar button{flex:1 1 0;min-height:40px;border:1px solid var(--field-line);border-radius:8px;background:#fff;color:#3c423e;font:inherit;font-size:var(--fs-body);font-weight:var(--fw-emphasis);cursor:pointer}
+.sheet-bar button[aria-expanded=true]{background:var(--teal-soft);border-color:var(--teal);color:var(--teal-deep)}
+.sheet-bar button:focus-visible,.sheet-close:focus-visible,.sheet-switch:focus-visible{outline:2px solid var(--teal);outline-offset:2px}
+.sheet-close{display:inline-flex;align-items:center;justify-content:center;flex:none;min-width:40px;min-height:40px;padding:0 12px;margin-left:0;border:1px solid var(--field-line);border-radius:8px;background:#fff;color:#3c423e;font:inherit;font-size:var(--fs-body);cursor:pointer}
+.sheet-head{display:flex;justify-content:flex-end;gap:8px;margin:0 0 4px}
+.sheet-head .sheet-switch{margin-left:auto}
+.layers-head .sheet-close{margin-left:0}
+.sheet-switch{display:inline-flex;align-items:center;justify-content:center;min-height:40px;padding:0 12px;border:1px solid var(--field-line);border-radius:8px;background:#fff;color:#3c423e;font:inherit;font-size:var(--fs-body);font-weight:var(--fw-emphasis);cursor:pointer}
+.sheet-switch:focus-visible{outline:2px solid var(--teal);outline-offset:2px}
+.layout>aside.panel:first-child,.layout>.panel:last-child{display:none}
+.layout>aside.panel:first-child.sheet-open,.layout>.panel:last-child.sheet-open{display:flex;flex-direction:column;position:fixed;left:0;right:0;bottom:0;z-index:40;width:auto;height:50vh;height:50dvh;margin:0;padding:10px 12px 16px;overflow-y:auto;overscroll-behavior:contain;background:#fff;border:0;border-radius:14px 14px 0 0;box-shadow:0 -6px 24px #1d292533}
+.layout>.panel.sheet-open.inspector-collapsed:last-child{display:flex}
+}
+
 .field-note{display:block;font-size:var(--fs-caption);line-height:1.4;color:var(--mute-text)}
 /* A clamp note: the value was moved to the nearest bound; it sits beside its field until the next edit. */
 .clamp-note{color:var(--warn);font-size:var(--fs-caption);margin-left:6px;white-space:nowrap}
@@ -478,7 +498,7 @@ input[aria-invalid="true"]{border-color:var(--warn)!important;background:var(--w
 .top .icon-label{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;margin:0}
 .top #remove .icon-label{display:none}
 .top #name{flex:1 1 0;min-width:0}
-.top #unsavedMark,.top #savedStatus{flex:0 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.top .save-status{flex:0 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .top .export-split #export{padding:0 6px}
 }
 /* Issue #375: between 1101 px and 1439 px the top bar fits on one row in Spanish and with a long project name. The gaps tighten, and the

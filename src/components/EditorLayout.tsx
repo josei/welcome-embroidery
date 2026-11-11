@@ -1,5 +1,6 @@
 import {layoutState} from '../layoutState.js';
 import {inspectorOpenState} from '../inspectorOpenState.js';
+import {closePhoneSheet, phoneSheetState, togglePhoneSheet} from '../phoneSheetState.js';
 import {selectionLabelsState} from '../selectionLabelsState.js';
 import {t} from '../i18n.js';
 import {designName} from '../designName.js';
@@ -65,6 +66,7 @@ export function EditorLayout() {
  const canvasCounts = useSyncExternalStore(sewingCountsState.subscribe, sewingCountsState.get);
  const layout = useSyncExternalStore(layoutState.subscribe, layoutState.get);
  const inspectorOpen = useSyncExternalStore(inspectorOpenState.subscribe, inspectorOpenState.get);
+ const phoneSheet = useSyncExternalStore(phoneSheetState.subscribe, phoneSheetState.get);
  const selectionLabels = useSyncExternalStore(selectionLabelsState.subscribe, selectionLabelsState.get);
  const view = useSyncExternalStore(viewMode.subscribe, viewMode.get);
  const snapping = useSyncExternalStore(gridSnapState.subscribe, gridSnapState.get);
@@ -77,7 +79,7 @@ export function EditorLayout() {
  return (
   <>
     <div className={"layout"}>
-      <aside className={"panel"} aria-label={t('Objects')}>
+      <aside className={phoneSheet === 'layers' ? "panel sheet-open" : "panel"} id={"layersSheet"} aria-label={t('Objects')}>
         <ObjectListHead />
         <label className={"sides-row"} hidden={true}>
           {"Sides / star points "}
@@ -235,13 +237,21 @@ export function EditorLayout() {
           </svg>
           <CanvasTextEditor />
         </div>
+        <div className={"sheet-bar"}>
+          <button type="button" aria-expanded={phoneSheet === 'layers'} aria-controls={"layersSheet"} onClick={() => togglePhoneSheet('layers')}>{t('Layers')}</button>
+          <button type="button" aria-expanded={phoneSheet === 'properties'} aria-controls={"inspector"} onClick={() => togglePhoneSheet('properties')}>{t('Properties')}</button>
+        </div>
         <footer>
           <ToastStack />
           <PlaybackBar />
           <StatusRun />
         </footer>
       </main>
-      <aside className={inspectorOpen ? "panel" : "panel inspector-collapsed"} id={"inspector"} aria-label={t('Properties')}>
+      <aside className={[inspectorOpen ? "panel" : "panel inspector-collapsed", phoneSheet === 'properties' && 'sheet-open'].filter(Boolean).join(' ')} id={"inspector"} aria-label={t('Properties')}>
+        <div className={"sheet-head"}>
+          <button type="button" className={"sheet-switch"} onClick={() => togglePhoneSheet('layers')}>{t('Layers')}</button>
+          <button type="button" className={"sheet-close"} onClick={closePhoneSheet}>{t('Close')}</button>
+        </div>
         <SelectionHeading />
         <TipCard />
         <SelectionHint />
