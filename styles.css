@@ -90,7 +90,8 @@ nav .icon-button:first-of-type{margin-left:auto}
 .edit-tools{display:flex;gap:2px}
 /* Delete sits apart from Duplicate and turns red only on hover, so a slip is less likely; its focus ring is the shared one. */
 .edit-tools #remove{margin-left:8px}.edit-tools #remove:hover:not(:disabled){color:#9b2c1f;border-color:#d9a79e;background:#fbeeea}
-.top #name{min-width:80px;flex:0 1 180px}
+/* Issue #379: the title field is at least 24px tall, so its click and Tab target meets the minimum. The field has no border, so only its hit area grows. */
+.top #name{min-width:80px;flex:0 1 180px;min-height:24px}
 .top .name-field{display:contents}
 .unsaved-marker:not([hidden]){display:inline-block;flex:none;width:8px;height:8px;margin:0 -8px 0 2px;border-radius:50%;background:#8a5a00}
 .top .unsaved-marker{order:0}
@@ -413,6 +414,8 @@ input[aria-invalid="true"]{border-color:var(--warn)!important;background:var(--w
 @media (min-width:601px) and (max-width:1100px){
 .top{flex-wrap:nowrap;gap:4px;padding:0 6px}
 .top .logo-mark{height:18px}
+/* Issue #379: the logo link is at least 24px tall (its SVG stays 18px, centred), so its click target meets the minimum. */
+.top .logo{min-height:24px}
 .top .icon-button{width:30px;min-width:30px;height:30px}
 .top .name-field{display:flex;position:relative;flex:1 1 0;min-width:64px}
 .top #name{flex:1 1 0;min-width:0;width:100%;overflow:hidden;text-overflow:ellipsis}

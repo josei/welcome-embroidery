@@ -43,3 +43,25 @@ test('checkboxes draw a 24px box at 1280 and 1024 px wide',async({page})=>{
  }
  expect(errors).toEqual([]);
 });
+
+// Issue #379 (from bet #372): the document name field and the logo link are at least 24px tall at 1280 and 1024 px, and the top bar
+// still fits inside 1280 px. The measured heights are attached to the test report.
+test('document name field and logo link are 24px tall at 1280 and 1024 px',async({page})=>{
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));page.on('dialog',d=>d.accept());
+ await page.addInitScript(()=>{delete window.showSaveFilePicker;});
+ await page.setViewportSize({width:1280,height:800});
+ await page.goto('/');await newDesign(page);
+ const measured={};
+ for(const width of [1280,1024]){
+  await page.setViewportSize({width,height:800});
+  const name=await page.locator('header.top #name').boundingBox();
+  const bar=await page.locator('header.top').evaluate(e=>({scrollWidth:e.scrollWidth,clientWidth:e.clientWidth}));
+  const rec={name:{width:Math.round(name.width),height:Math.round(name.height)},bar};
+  if(width===1024){const logo=await page.locator('header.top a.logo').boundingBox();rec.logo={width:Math.round(logo.width),height:Math.round(logo.height)};expect(logo.height,`logo link height at ${width}`).toBeGreaterThanOrEqual(24);}
+  expect(name.height,`document name field height at ${width}`).toBeGreaterThanOrEqual(24);
+  expect(bar.scrollWidth,`top bar overflow at ${width}`).toBe(bar.clientWidth);
+  measured[width]=rec;
+ }
+ test.info().attach('measured-heights',{body:JSON.stringify(measured,null,1),contentType:'application/json'});
+ expect(errors).toEqual([]);
+});
