@@ -154,18 +154,17 @@ function ObjectRow({o, depth, selected, dropping, renaming, count, warning, onRe
  const drop = dropping && (dropping.after ? 'drop-after' : 'drop-before');
  const cls = ['object-row', selected && 'selected', hidden && 'is-hidden', locked && 'is-locked', drop].filter(Boolean).join(' ');
  const stitchIcon = o.kind === 'stitch_layer' ? undefined : STITCH_ICON[o.stitch ?? ''];
- const label = [name, countText(count, warning)].filter(Boolean).join(' · ');
- // Hide and Lock are siblings of the row, not descendants, so the row's accessible name is only the object's name and count.
+ // Hide and Lock are siblings of the row, not descendants: a list item may hold buttons, a button may not hold buttons. The row
+ // takes its name from its visible text (name, stitch type and count), so the spoken name matches what is on screen.
  return (
-  <div className="object-line" role="none">
+  <div className="object-line" role="listitem">
    <div
     className={cls}
     data-id={o.id}
     draggable={true}
     tabIndex={0}
-    role="option"
-    aria-selected={selected}
-    aria-label={label}
+    role="button"
+    aria-pressed={selected}
     style={{paddingLeft: `${8 + depth * 16}px`}}
     onKeyDown={e => {
      if (e.target !== e.currentTarget) return;
@@ -225,9 +224,8 @@ function GroupRow({groupId, members, open, selectedIds, count, warning, onSelect
  const hiddenAll = members.every(m => m.visible === false);
  const lockedAll = members.every(m => m.locked);
  const name = `${t('Group')} · ${t('{n} objects', {n: members.length})}`;
- const label = [name, countText(count, warning)].filter(Boolean).join(' · ');
  return (
-  <div className="object-line group-line" role="none">
+  <div className="object-line group-line" role="listitem">
    <button type="button" className="row-btn group-caret" aria-label={`${open ? 'Collapse' : 'Expand'} group`} aria-expanded={open} onClick={onToggleOpen}>
     {icon(open ? 'i-chevron' : 'i-chevron-right')}
    </button>
@@ -235,9 +233,8 @@ function GroupRow({groupId, members, open, selectedIds, count, warning, onSelect
     className={`group-row${all ? ' selected' : ''}`}
     data-group={groupId}
     tabIndex={0}
-    role="option"
-    aria-selected={all}
-    aria-label={label}
+    role="button"
+    aria-pressed={all}
     onKeyDown={e => {
      if (e.target !== e.currentTarget) return;
      if (e.key === 'Enter' || e.key === ' ') {
@@ -381,7 +378,7 @@ export function ObjectList() {
    {issue && <div className="list-warning" role="status">{t('⚠ Can\'t compile: {e}', {e: t(issue.message)})}</div>}
    {objects.length === 0 && <p className="sel-hint empty-hint">{t('No objects yet. Draw a shape or import an image to start.')}</p>}
    {objects.length > 0 && (
-    <div className="object-rows" role="listbox" aria-label={t('Layers')} aria-multiselectable="true">
+    <div className="object-rows" role="list" aria-label={t('Layers')}>
      {entriesOf(objects, collapsed).map(entry => entry.kind === 'group' ? (
       <GroupRow
        key={`group:${entry.groupId}`}

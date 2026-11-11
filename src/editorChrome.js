@@ -32,7 +32,8 @@ export function clearToolHints() {
 function mountTooltip() {
   const tip = document.createElement('div');
   tip.id = 'tooltip';
-  tip.setAttribute('role', 'tooltip');
+  // Not a tooltip role: the control it describes already has its name (aria-label), so the bubble is a visual repeat.
+  tip.setAttribute('aria-hidden', 'true');
   document.body.append(tip);
   /** @type {Element | null} */
   let current = null;

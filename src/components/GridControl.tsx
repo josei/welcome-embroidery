@@ -13,7 +13,7 @@ export function GridControl() {
  const title = t('Grid spacing: {n} mm. Click to change.', {n: value});
  return (
   <>
-   <select id="grid" className="sr-only" tabIndex={-1} value={value} onChange={e => gridActions.choose(e.target.value)}>
+   <select id="grid" className="sr-only" tabIndex={-1} aria-label={t('Grid spacing')} value={value} onChange={e => gridActions.choose(e.target.value)}>
     {GRID_SPACINGS.map(v => <option key={v} value={v}>{t('Grid {n} mm', {n: v})}</option>)}
    </select>
    <button
@@ -21,7 +21,6 @@ export function GridControl() {
     id="gridCycle"
     className="grid-chip"
     title={title}
-    aria-label={title}
     data-tooltip={title}
     data-next={next}
     onClick={() => gridActions.choose(next)}

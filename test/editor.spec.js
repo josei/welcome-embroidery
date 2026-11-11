@@ -3815,19 +3815,19 @@ test('blank document: export looks disabled, its reason is readable beside it, a
  expect(errors).toEqual([]);
 });
 
-// Sewing-order rows are listbox options: Enter or Space selects, and Hide and Lock are their own buttons, reached with Tab.
+// Layer rows are buttons with a pressed state: Enter or Space selects, and Hide and Lock are their own buttons, reached with Tab.
 test('sewing order: a row selects from the keyboard, and its Hide and Lock toggle from the keyboard',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());await newDesign(page);
  await page.locator('#rect').click();await page.locator('.object-row').first().locator('.row-name').dblclick();await page.locator('.row-rename').fill('Wildflower');await page.locator('.row-rename').press('Enter');
  // A second object, so the first (Wildflower) starts unselected: a new object is selected when drawn.
  await page.locator('#ellipse').click();await expect(page.locator('.object-row')).toHaveCount(2);
- const row=page.getByRole('option',{name:/^Wildflower/});
+ const row=page.getByRole('button',{name:/^Wildflower/});
  const focused=async loc=>loc.evaluate(el=>el===document.activeElement);
  for(let i=0;i<150&&!(await focused(row));i++)await page.keyboard.press('Tab');
  await expect(row).toBeFocused();
- await expect(row).toHaveAttribute('aria-selected','false');
+ await expect(row).toHaveAttribute('aria-pressed','false');
  await page.keyboard.press('Enter');
- await expect(row).toHaveAttribute('aria-selected','true');
+ await expect(row).toHaveAttribute('aria-pressed','true');
  await expect(page.locator('#selected')).toContainText('Wildflower');
  await expect(page.locator('#selHint')).toBeHidden();
  await page.keyboard.press('Tab');
@@ -3848,7 +3848,7 @@ test('sewing order: a row selects from the keyboard, and its Hide and Lock toggl
  await expect(lock).toHaveAttribute('aria-pressed','true');
  await expect(page.locator('.object-row.is-locked')).toHaveCount(1);
  // The row keeps its selected state, and its name is the object's, not its controls'.
- await expect(row).toHaveAttribute('aria-selected','true');
+ await expect(row).toHaveAttribute('aria-pressed','true');
  await expect(row).toHaveAccessibleName(/^Wildflower/);
  await expect(row).not.toHaveAccessibleName(/Hide|Lock/);
  expect(errors).toEqual([]);

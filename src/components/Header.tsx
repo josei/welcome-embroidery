@@ -29,7 +29,7 @@ function ProjectName() {
  return (
   <>
    <span id="unsavedMarker" className="unsaved-marker" role="img" aria-label={t('Unsaved changes')} title={t('Unsaved changes')} hidden={!dirty} />
-   <span className="name-field" data-shown={shown}><input id="name" {...field} /></span>
+   <span className="name-field" data-shown={shown}><input id="name" aria-label={t('Design name')} {...field} /></span>
   </>
  );
 }
@@ -97,7 +97,7 @@ export function Header() {
  const projectFile = useRef<HTMLInputElement>(null);
  const machineFile = useRef<HTMLInputElement>(null);
  return (
-  <header className="top"><a className="logo" href="/" aria-label="Welcome"><svg className="logo-mark" viewBox="50 -939 3454 944" width="95.1" height="26"
+  <><h1 className="sr-only">{t('Welcome Embroidery')}</h1><header className="top"><a className="logo" href="/" aria-label="Welcome"><svg className="logo-mark" viewBox="50 -939 3454 944" width="95.1" height="26"
     role="img" aria-label="Welcome"><path fillRule="evenodd"
       d={"M804 -305L817 -302L827 -295L835 -268L830 -233L814 -209L768 -189L710 -180L646 -182L606 -191L527 -73L485 -26L443 0L409 5L374 -3L360 -12L341 -40L326 " +
         "-101L318 -201L263 -73L238 -36L214 -12L177 3L137 3L104 -13L92 -27L76 -58L65 -102L51 -299L50 -408L52 -428L68 -454L98 -466L142 -464L158 -455L167 " +
@@ -166,6 +166,6 @@ export function Header() {
     } }} /><input id="machineFile" ref={machineFile} type="file"
       accept=".jef,.vp3,.dst,.sew,.pec,.pes,.exp,.hus,.xxx,.dsb,.dsz,.tap,.tbf,.pcs,.shv,.stx,.bro,.emd,.ksm,.10o,.u01,application/octet-stream" hidden
         onChange={async e =>
-    { const chosen = e.target.files?.[0]; if (!chosen) return; try { await importMachineFile(chosen); } finally { e.target.value = ''; } }} /></header>
+    { const chosen = e.target.files?.[0]; if (!chosen) return; try { await importMachineFile(chosen); } finally { e.target.value = ''; } }} /></header></>
  );
 }

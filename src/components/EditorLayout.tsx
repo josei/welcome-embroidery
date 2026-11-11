@@ -77,7 +77,7 @@ export function EditorLayout() {
  return (
   <>
     <div className={"layout"}>
-      <aside className={"panel"}>
+      <aside className={"panel"} aria-label={t('Objects')}>
         <ObjectListHead />
         <label className={"sides-row"} hidden={true}>
           {"Sides / star points "}
@@ -241,7 +241,7 @@ export function EditorLayout() {
           <StatusRun />
         </footer>
       </main>
-      <aside className={inspectorOpen ? "panel" : "panel inspector-collapsed"} id={"inspector"}>
+      <aside className={inspectorOpen ? "panel" : "panel inspector-collapsed"} id={"inspector"} aria-label={t('Properties')}>
         <SelectionHeading />
         <TipCard />
         <SelectionHint />
