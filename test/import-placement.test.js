@@ -84,3 +84,30 @@ test('non-DST writers keep the exact-midpoint placement, and DST keeps the 0.1 m
   for(const [x,y] of exact.slice(0,50))assert.ok(writerNeedles.some(([wx,wy])=>Math.abs(wx-x)<1e-9&&Math.abs(wy-y)<1e-9),`writer point ${x},${y} is not the legacy placement`);
   assert.notDeepEqual(plan.stitches.filter(s=>s.cmd==='stitch').map(s=>[s.x,s.y]).slice(0,5),writerNeedles.slice(0,5),'DST plan is placed on the grid, not the writer placement');
 });
+
+// Distance from a point to a segment [a, b] (a zero-length segment is a point).
+const segmentDistance=(p,[a,b])=>{const vx=b[0]-a[0],vy=b[1]-a[1],len=vx*vx+vy*vy,u=len?Math.max(0,Math.min(1,((p[0]-a[0])*vx+(p[1]-a[1])*vy)/len)):0;
+  return Math.hypot(p[0]-a[0]-u*vx,p[1]-a[1]-u*vy);};
+
+// Every DST sewn point must lie on a drawn line. The drawn lines are the source's own sewn moves: each stitch is drawn from the point before it, so a
+// stitch that follows a jump, colour change or trim is drawn from that landing, which is the line the machine sews. Lead-in moves from a landing are
+// therefore on a drawn line, not off it. Jumps are travel and are not checked.
+test('every DST sewn point lies within 0.1 mm of a drawn line on every machine sample',()=>{
+  let checked=0;
+  for(const [name,bytes] of readMachineFixtures()){
+    const format=name.split('.').pop().toLowerCase();let decoded,layer;
+    try{decoded=decodeEmbroidery(bytes,format);layer=importStitchLayer(bytes,format,{fileName:name});}catch{continue;}
+    const source=decoded.stitches;
+    const doc=initialDocument();doc.objects=[layer];const plan=compile(doc);if(plan.errors.length)continue;
+    const [mx,my]=importMidpoint(layer.source.bounds),cx=layer.x+layer.w/2,cy=layer.y+layer.h/2;
+    const placed=s=>[cx+s.x-mx,cy+s.y-my];
+    const lines=[];
+    source.forEach((s,i)=>{if(s.cmd!=='stitch')return;lines.push([placed(s),placed(s)]);if(i>0)lines.push([placed(source[i-1]),placed(s)]);});
+    if(!lines.length)continue;
+    const back=decodeEmbroidery(encode(plan,'dst','#527461',doc.hoop,doc),'dst').stitches.filter(s=>s.cmd==='stitch');
+    checked++;
+    for(const q of back){const d=Math.min(...lines.map(l=>segmentDistance([q.x,q.y],l)));
+      assert.ok(d<=0.1+1e-9,`${name}: DST sewn point ${q.x},${q.y} is ${d.toFixed(3)} mm from every drawn line`);}
+  }
+  assert.ok(checked>100,`expected the machine samples to be checked, got ${checked}`);
+});
