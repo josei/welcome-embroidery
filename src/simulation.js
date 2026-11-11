@@ -11,6 +11,7 @@ import {createThreadPreview} from './preview3d.js';
 import {t} from './i18n.js';
 import {getPlan, getLastPlan, compileNow} from './compileService.js';
 import {editor} from './editorContext.js';
+import {buildThreadPaths} from './threadPaths.js';
 
 const SVG_NS = 'http://www.w3.org/2000/svg';
 /** @type {any} */
@@ -131,22 +132,8 @@ export function renderSimulation() {
   const P = plan || (viewMode.get() === 'stitches' && !active && lastPlan && lastPlan.revision !== undefined ? lastPlan : null);
   const limit = P ? (active ? Math.min(playIndex ?? 0, P.stitches.length) : P.stitches.length) : 0;
   root.classList.toggle('stale', Boolean(P) && !plan);
-  let needle = null;
   if (P && (viewMode.get() !== 'design' || active)) {
-    const paths = new Map();
-    let travel = '', last = null, color = P.colors[0] || '#527461';
-    for (let i = 0; i < limit; i++) {
-      const item = P.stitches[i];
-      if (item.cmd === 'color') { color = item.thread || color; last = {x: item.x, y: item.y}; continue; }
-      if (item.cmd === 'jump') { if (last) travel += `M${last.x},${last.y}L${item.x},${item.y}`; last = item; continue; }
-      if (item.cmd === 'trim' || item.cmd === 'end') { last = null; continue; }
-      if (item.cmd === 'stop') continue;
-      if (item.cmd === 'stitch') {
-        if (last) paths.set(color, (paths.get(color) || '') + `M${last.x},${last.y}L${item.x},${item.y}`);
-        last = item;
-        needle = item;
-      }
-    }
+    const {paths, travel, needle} = buildThreadPaths(P.stitches, limit, P.colors[0] || '#527461');
     if (viewMode.get() === 'preview' && !active && !preview3d.available) {
       /** @type {(cls: string, d: string, width: number, stroke: string | null, dx?: number, dy?: number) => SVGPathElement} */
       const layer = (cls, d, width, stroke, dx = 0, dy = 0) => {
