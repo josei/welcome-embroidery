@@ -81,7 +81,7 @@ test('the Menu button opens Edit and Arrange and every enabled item is clickable
  await menu.click();
  const list=page.locator('#phoneMenuList');
  await expect(list,'Menu opens').toBeVisible();
- await expect(list.locator('.menu-heading'),'Edit and Arrange headings').toHaveText(['Edit','Arrange']);
+ await expect(list.locator('.menu-heading'),'Edit and Arrange headings').toHaveText(['File','Edit','Arrange']);
  const ids=await list.locator('[role="menuitem"]').evaluateAll(els=>els.map(e=>e.id));
  expect(ids,'Edit items are in the menu').toEqual(expect.arrayContaining(['menuUndo','menuCopy','menuDelete']));
  expect(ids,'Arrange items are in the menu').toEqual(expect.arrayContaining(['menuAlignLeft','menuToFront','menuIntersect']));

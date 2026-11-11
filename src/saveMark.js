@@ -11,3 +11,20 @@
 export function dirtyMark(savedFileName, t) {
   return savedFileName ? {text: t('Unsaved'), unsaved: true} : {text: t('Autosaved in this browser'), unsaved: false};
 }
+
+/**
+ * The save status in words: the text the header shows at desktop widths and the phone Menu shows in its place. A dirty design
+ * gets the dirtyMark words; a clean one shows when it was last saved in this tab, and the file it went to.
+ * @param {boolean} dirty whether the design has changes since the last save
+ * @param {number|null} savedAt the time of the last save in this tab, or null before one
+ * @param {string|null|undefined} savedFileName the file that save wrote to, or none
+ * @param {(text: string, vars?: object) => string} t
+ * @returns {string}
+ */
+export function saveStatusWords(dirty, savedAt, savedFileName, t) {
+  if (dirty) return dirtyMark(savedFileName, t).text;
+  if (savedAt === null) return t('Autosaved in this browser');
+  const when = new Date(savedAt);
+  const time = `${String(when.getHours()).padStart(2, '0')}:${String(when.getMinutes()).padStart(2, '0')}`;
+  return savedFileName ? t('Saved {time} to {file}', {time, file: savedFileName}) : t('Saved {time}', {time});
+}

@@ -11,7 +11,7 @@ import {shortcutLabel} from '../shortcutLabels.js';
 import {shortcutFor, shortcutForCommand} from '../shortcutTable.js';
 import {importMachineFile, newProject, openProjectFile, projectSave} from '../projectIO.js';
 import {saveState} from '../saveState.js';
-import {dirtyMark} from '../saveMark.js';
+import {dirtyMark, saveStatusWords} from '../saveMark.js';
 import {toolbarActions} from '../toolbarCommands.js';
 import {t} from '../i18n.js';
 import {ArrangeMenu, EditMenu, FileMenu, PhoneMenu} from './MenuBar';
@@ -51,20 +51,19 @@ function HistoryButton({undo = false}: {undo?: boolean}) {
 }
 
 // The save feedback: the unsaved marker while the design has changes ("Autosaved in this browser" until a file exists), then the time of the last save in this tab and the
-// file it wrote to.
+// file it wrote to. The words come from saveStatusWords, which the phone Menu shows too.
 function SaveStatus() {
  const {dirty} = useSyncExternalStore(documentState.subscribe, documentState.get);
  const {savedAt, savedFileName} = useSyncExternalStore(saveState.subscribe, saveState.get);
  // The status slot is always rendered (issue #435), so the bar keeps its shape as the state changes: a clean design that has not been saved
  // shows the same autosave words as a dirty one, with no unsaved marker.
+ const text = saveStatusWords(dirty, savedAt, savedFileName, t);
  if (dirty) {
   const mark = dirtyMark(savedFileName, t);
-  return <span id="unsavedMark" className={mark.unsaved ? 'save-status unsaved' : 'save-status autosaved'} title={mark.text}>{mark.text}</span>;
+  return <span id="unsavedMark" className={mark.unsaved ? 'save-status unsaved' : 'save-status autosaved'} title={text}>{text}</span>;
  }
- if (savedAt === null) return <span id="idleStatus" className="save-status autosaved" title={t('Autosaved in this browser')}>{t('Autosaved in this browser')}</span>;
- const when = new Date(savedAt);
- const time = `${String(when.getHours()).padStart(2, '0')}:${String(when.getMinutes()).padStart(2, '0')}`;
- return <span id="savedStatus" className="save-status" role="status">{savedFileName ? t('Saved {time} to {file}', {time, file: savedFileName}) : t('Saved {time}', {time})}</span>;
+ if (savedAt === null) return <span id="idleStatus" className="save-status autosaved" title={text}>{text}</span>;
+ return <span id="savedStatus" className="save-status" role="status">{text}</span>;
 }
 
 // Export: the one Export button opens the export dialog, where the format is chosen. Its name never changes with the format.
@@ -142,7 +141,7 @@ export function Header() {
         "-67L3485 -116L3499 -142L3504 -178L3497 -211L3488 -220L3476 -223L3462 -219L3403 -163L3368 -137L3327 -115L3285 -100L3247 -95L3205 -100L3174 -115L3162 " +
         "-127L3152 -141L3243 -171L3308 -209L3344 -249L3360 -282L3369 -338L3363 -381L3356 -400L3347 -417L3319 -444L3302 -454L3263 -465L3220 -465L3179 " +
         "-457L3142 -442L3093 -405L3066 -373L3036 -319L3020 -265L3016 -227ZM3136 -219L3140 -267L3152 -307L3175 -344L3206 -365L3240 -365L3253 -356L3260 " +
-        "-343L3261 -308L3244 -276L3229 -261L3198 -241L3159 -225Z"}/></svg></a><FileMenu />{phone ? <PhoneMenu /> : <><EditMenu /><ArrangeMenu /></>}<span className="sep" aria-hidden="true" /><button className="icon-button" id="new"
+        "-343L3261 -308L3244 -276L3229 -261L3198 -241L3159 -225Z"}/></svg></a>{phone ? <PhoneMenu /> : <><FileMenu /><EditMenu /><ArrangeMenu /></>}<span className="sep" aria-hidden="true" /><button className="icon-button" id="new"
           aria-label="New design" title={newTip} data-tooltip={newTip} onClick={() => newProject()}><svg className="icon"><use href="#i-new"/></svg></button><button className="icon-button" id="open" aria-label="Open project or SVG"
       title={openTip} data-tooltip={openTip} onClick={() => projectFile.current?.click()}><svg className="icon"><use href="#i-open"/></svg></button><button className="icon-button" id="importMachine"
       aria-label="Import JEF / VP3…" title="Import JEF / VP3…" data-tooltip="Import JEF / VP3…" onClick={() => machineFile.current?.click()}><svg className="icon"><use href="#i-import"/></svg></button><button className="icon-button" id="save" aria-label={saveLabel}

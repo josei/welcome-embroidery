@@ -503,7 +503,7 @@ input[aria-invalid="true"]{border-color:var(--warn)!important;background:var(--w
    Settings stay whole inside the window. The bar keeps the 58px row it has from 601px up. */
 @media (max-width:600px),(max-height:500px) and (pointer:coarse){
 .top{flex-wrap:nowrap;gap:3px;padding:0 4px;height:58px}
-.top .logo,.top #new,.top #open,.top #importMachine,.top #save,.top #duplicate,.top #redo{display:none}
+.top .logo,.top #new,.top #open,.top #importMachine,.top #save,.top #duplicate{display:none}
 .top .file-menu>button{padding:6px 4px;font-size:var(--fs-caption)}
 /* Issue #443: the phone Menu holds Edit and Arrange, so its list scrolls inside the window instead of running off the bottom. */
 .file-menu-list{max-height:calc(100dvh - 76px);overflow-y:auto;overscroll-behavior:contain}
@@ -516,6 +516,13 @@ input[aria-invalid="true"]{border-color:var(--warn)!important;background:var(--w
 .top #name{flex:1 1 0;min-width:0}
 .top .save-status{flex:0 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .top .export-split #export{padding:0 6px}
+}
+/* Issue #454: at phone widths (600 px and narrower, portrait) the top bar holds Menu, the design name, undo, redo and Export, at the
+   desktop bar's 48 px. Every other command, the save status included, is listed in the phone Menu (MenuBar.tsx PhoneMenu). */
+@media (max-width:600px){
+.top{height:48px}
+.top .sep,.top .logo,.top #new,.top #open,.top #importMachine,.top #save,.top #duplicate,.top #remove,.top #helpBtn,.top #settingsBtn,.top .save-status{display:none}
+.top .file-menu-list .menu-note{padding:8px 12px;font-size:var(--fs-caption);color:#5c625e;line-height:1.4;white-space:normal;overflow-wrap:anywhere}
 }
 /* Issue #375: between 1101 px and 1439 px the top bar fits on one row in Spanish and with a long project name. The gaps tighten, and the
    project name and the save status give way (the name first, down to its minimum; the status then shrinks to an ellipsis) so the

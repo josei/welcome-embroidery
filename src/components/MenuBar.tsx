@@ -12,6 +12,12 @@ import {t} from '../i18n.js';
 import {runCommand} from '../commandRegistry';
 import {setPaletteOpen} from '../commandPaletteState';
 import {shortcutForCommand} from '../shortcutTable.js';
+import {setShortcutsOpen} from '../shortcutsState';
+import {setSettingsOpen} from '../settingsState';
+import {agentLinkState} from '../agentLinkState';
+import {documentState} from '../documentState.js';
+import {saveState} from '../saveState.js';
+import {saveStatusWords} from '../saveMark.js';
 
 // The menu bar's dropdowns. Each item runs the same command as its toolbar button, context-menu row or keyboard shortcut,
 // and is disabled exactly when that command does not apply, using the same flags the toolbar uses. Nothing here is removed
@@ -28,11 +34,15 @@ interface Entry {
  reason?: string;
  run: () => void;
 }
-/** A non-clickable label that heads a group of rows (the phone menu groups Edit and Arrange this way). */
+/** A non-clickable label that heads a group of rows (the phone menu groups its sections this way). */
 interface Heading {
  heading: string;
 }
-type Row = Entry | Heading | '-';
+/** A line of visible text that is not a command, such as the save status in the phone menu. */
+interface Note {
+ note: string;
+}
+type Row = Entry | Heading | Note | '-';
 
 // A dropdown: a header button that opens a list of entries. Keyboard: Enter, Space or ArrowDown on the header opens it and
 // focuses the first enabled item (ArrowUp, the last); ArrowUp and ArrowDown move between enabled items and wrap; Home and End
@@ -124,6 +134,7 @@ function Dropdown({id, label, rows}: {id: string; label: string; rows: Row[]}) {
      {rows.map((row, i) => {
       if (row === '-') return <hr key={`sep${i}`} className="menu-sep" />;
       if ('heading' in row) return <div key={`head${i}`} role="presentation" className="menu-heading">{row.heading}</div>;
+      if ('note' in row) return <div key={`note${i}`} role="status" className="menu-note">{row.note}</div>;
       return (
        <button key={row.id} type="button" role="menuitem" id={row.id} disabled={row.disabled}
         className={row.key ? 'menu-item' : undefined} onClick={() => choose(row)}>
@@ -140,13 +151,20 @@ function Dropdown({id, label, rows}: {id: string; label: string; rows: Row[]}) {
  );
 }
 
-/** The File menu: Save and Save As, the same commands as the floppy icon and Ctrl+S / Ctrl+Shift+S. Each item says which
- * way it saves in this browser: to the file the user picks, or as a download. */
-export function FileMenu() {
+/** Save and Save As, the same commands as the floppy icon and Ctrl+S / Ctrl+Shift+S. Each item says which way it saves in this
+ * browser: to the file the user picks, or as a download. The File menu and the phone Menu both list them. */
+function saveRows(): Row[] {
  const picker = hasFilePicker();
- const rows: Row[] = [
+ return [
   {id: 'menuSave', label: t('Save'), hint: picker ? t('Writes to the file you chose') : t('Downloads the project file'), run: () => void projectSave()},
   {id: 'menuSaveAs', label: t('Save As'), hint: picker ? t('Choose a new file') : t('Download under a name you type'), run: () => void projectSaveAs()},
+ ];
+}
+
+/** The File menu: Save and Save As, then the command palette. Shown at desktop widths; the phone Menu lists the same rows. */
+export function FileMenu() {
+ const rows: Row[] = [
+  ...saveRows(),
   '-',
   {id: 'menuCommandPalette', label: t('Command palette'), key: shortcutForCommand('openPalette'), run: () => setPaletteOpen(true)},
  ];
@@ -226,15 +244,31 @@ export function ArrangeMenu() {
  return <Dropdown id="arrangeMenu" label={t('Arrange')} rows={useArrangeRows()} />;
 }
 
-/** At phone widths Edit and Arrange sit behind one Menu button. Each group keeps its own heading and its own rows. */
+/** At phone widths the top bar keeps only Menu, the name, undo, redo and Export, so every other command is listed here: New
+ * design, the File commands (save, open, import, the save status), Edit, Arrange, the shortcut sheet and Settings. Each row runs
+ * the same command as its top-bar button had, which is hidden at these widths (styles.css). */
 export function PhoneMenu() {
  const edit = useEditRows();
  const arrange = useArrangeRows();
+ const {dirty} = useSyncExternalStore(documentState.subscribe, documentState.get);
+ const {savedAt, savedFileName} = useSyncExternalStore(saveState.subscribe, saveState.get);
+ const agent = useSyncExternalStore(agentLinkState.subscribe, agentLinkState.get);
+ // The save status is a line of text, not a command: it shows here because the bar has no room for it at phone widths.
+ const settingsHint = agent.active ? t('Settings: agent connected') : agent.waiting ? t('Settings: waiting for agent') : undefined;
  // New design leads the list: the top bar hides its New button at phone widths, and it runs the same newProject as that button.
  const rows: Row[] = [
   {id: 'menuNew', label: t('New design'), key: shortcutForCommand('new'), run: () => newProject()},
   '-',
-  {heading: t('Edit')}, ...edit, '-', {heading: t('Arrange')}, ...arrange,
+  {heading: t('File')},
+  ...saveRows(),
+  // The file inputs are hidden in the header; a click on them opens the same pickers as the Open and Import buttons did.
+  {id: 'menuOpen', label: t('Open project or SVG'), run: () => document.getElementById('file')?.click()},
+  {id: 'menuImport', label: t('Import JEF / VP3…'), run: () => document.getElementById('machineFile')?.click()},
+  {note: saveStatusWords(dirty, savedAt, savedFileName, t)},
+  '-',
+  {heading: t('Edit')}, ...edit, '-', {heading: t('Arrange')}, ...arrange, '-',
+  {id: 'menuShortcuts', label: t('Keyboard shortcuts'), run: () => setShortcutsOpen(true)},
+  {id: 'menuSettings', label: t('Settings'), hint: settingsHint, run: () => setSettingsOpen(true)},
  ];
  return <Dropdown id="phoneMenu" label={t('Menu')} rows={rows} />;
 }

@@ -155,7 +155,7 @@ for(const [width,height] of [[1024,700],[1440,900]]){
 }
 
 // Issue #437: on a phone (375 and 390px, portrait, touch) the page fits the window in English and Spanish, the top bar stays on one row,
-// and the Delete and Export controls are inside the window and clickable.
+// and the Undo, Redo and Export controls are inside the window and clickable.
 for(const width of [375,390]) for(const lang of ['en','es']){
  test(`the phone top bar fits on one row at ${width}px in ${lang}`,async({page})=>{
   const errors=[];page.on('pageerror',e=>errors.push(e.message));page.on('dialog',d=>d.accept());
@@ -169,16 +169,16 @@ for(const width of [375,390]) for(const lang of ['en','es']){
    const kids=[...top.children].filter(e=>!e.classList.contains('sr-only')&&e.getBoundingClientRect().width>0);
    return {tops:kids.map(e=>e.getBoundingClientRect().top),height:top.getBoundingClientRect().height,overflow:top.scrollWidth-top.clientWidth};
   });
-  // One row, no taller than the single-row bar at 760px (58px), and nothing scrolls sideways inside the bar.
+  // One row, no taller than the desktop bar (48px, Issue #454), and nothing scrolls sideways inside the bar.
   for(const t of info.tops) expect(Math.abs(t-info.tops[0]),'child top within the bar row').toBeLessThan(12);
-  expect(info.height,'bar height is one row').toBeLessThanOrEqual(58);
+  expect(info.height,'bar height is one row').toBeLessThanOrEqual(48);
   expect(info.overflow,'no horizontal overflow in the bar').toBeLessThanOrEqual(0);
-  // Delete and Export are inside the window and are the element at their own centre (nothing covers them).
-  for(const id of ['#remove','#export']){
+  // Undo, Redo and Export are inside the window and are the element at their own centre (nothing covers them). Delete moved to the Menu (Issue #454).
+  for(const id of ['#undo','#redo','#export']){
    const box=await page.locator(id).boundingBox();expect(box,id).not.toBeNull();
    expect(box.x,`${id} left edge inside the window`).toBeGreaterThanOrEqual(0);
    expect(box.x+box.width,`${id} right edge inside the window`).toBeLessThanOrEqual(width);
-   const hit=await page.evaluate(([x,y])=>{const e=document.elementFromPoint(x,y);return !!e&&!!e.closest('#remove,#export');},[box.x+box.width/2,box.y+box.height/2]);
+   const hit=await page.evaluate(([x,y])=>{const e=document.elementFromPoint(x,y);return !!e&&!!e.closest('#undo,#redo,#export');},[box.x+box.width/2,box.y+box.height/2]);
    expect(hit,`${id} is clickable at its centre`).toBe(true);
   }
   expect(errors).toEqual([]);
