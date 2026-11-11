@@ -59,3 +59,33 @@ test('server removes an expired export at startup and serves 404 for it', async 
   assert.equal((await fetch(`http://127.0.0.1:${port}/artifacts/${docName}`)).status,200);
  }finally{child.kill('SIGTERM');}
 });
+
+test('server stops serving an export once its mtime passes retention, while it is running', async () => {
+ const port=8800+Math.floor(Math.random()*150);
+ const dataDir=mkdtempSync(path.join(tmpdir(),'welcome-expiry-live-'));
+ const artifacts=path.join(dataDir,'artifacts');
+ mkdirSync(artifacts,{recursive:true});
+ const child=spawn(process.execPath,['server.js'],{env:{...process.env,HOST:'127.0.0.1',PORT:String(port),WELCOME_SESSION_FILE:'',WELCOME_DATA_DIR:dataDir},stdio:'ignore'});
+ try{
+  let up=false;
+  for(let i=0;i<100&&!up;i++){try{up=(await fetch(`http://127.0.0.1:${port}/health`)).ok;}catch{}if(!up)await new Promise(r=>setTimeout(r,100));}
+  assert.ok(up,'server did not start');
+  // Written after startup, so the startup sweep cannot have removed it: only the at-serve check can return 404.
+  const oldName=`${crypto.randomUUID()}.jef`,freshName=`${crypto.randomUUID()}.jef`,sewName=`${crypto.randomUUID()}.sew`,docName=`${crypto.randomUUID()}.welcome`;
+  for(const n of [oldName,freshName,sewName,docName])writeFileSync(path.join(artifacts,n),'data:'+n);
+  backdate(path.join(artifacts,oldName),8*DAY);
+  backdate(path.join(artifacts,docName),60*DAY);
+  backdate(path.join(artifacts,freshName),6*DAY);
+  backdate(path.join(artifacts,sewName),1*DAY);
+  const get=async n=>{const r=await fetch(`http://127.0.0.1:${port}/artifacts/${n}`);return {status:r.status,body:await r.text()};};
+  assert.equal((await get(oldName)).status,404,'8-day-old export is not served');
+  const fresh=await get(freshName);
+  assert.equal(fresh.status,200);
+  assert.equal(fresh.body,'data:'+freshName);
+  const sew=await get(sewName);
+  assert.equal(sew.status,200,'a .sew export within retention is served');
+  assert.equal(sew.body,'data:'+sewName);
+  assert.equal((await get(docName)).status,200,'saved documents are not expired at serve time');
+  assert.equal(existsSync(path.join(artifacts,oldName)),true,'serve check does not delete; the sweep does');
+ }finally{child.kill('SIGTERM');}
+});
