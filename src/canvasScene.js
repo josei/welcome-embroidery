@@ -7,6 +7,7 @@ import {selState} from './selectionState.js';
 import {setHoopFields} from './hoopState.js';
 import {isRegistryFont} from './fonts.js';
 import {photoUrl} from './photoUrl.js';
+import {importMidpoint} from './stitchImport.js';
 
 const NS='http://www.w3.org/2000/svg';
 const $=(/** @type {string} */ s)=>/** @type {any} */(document.querySelector(s));
@@ -102,9 +103,9 @@ export function drawScene(){
   element.setAttribute('stroke',o.thread);
   element.setAttribute('stroke-width','.45');
   if(o.kind==='stitch_layer'){
-   const [x0,y0,x1,y1]=o.source.bounds,sx=o.w/Math.max(.1,x1-x0),sy=o.h/Math.max(.1,y1-y0),
+   const [x0,y0,x1,y1]=o.source.bounds,[mx,my]=importMidpoint(o.source.bounds),sx=o.w/Math.max(.1,x1-x0),sy=o.h/Math.max(.1,y1-y0),
     a=(o.rotation||0)*Math.PI/180,c=Math.cos(a),s=Math.sin(a),cx=o.x+o.w/2,cy=o.y+o.h/2,
-    coords=(/** @type {any} */ st)=>{const lx=(st.x-(x0+x1)/2)*sx,ly=(st.y-(y0+y1)/2)*sy;return [cx+lx*c-ly*s,cy+lx*s+ly*c];};
+    coords=(/** @type {any} */ st)=>{const lx=(st.x-mx)*sx,ly=(st.y-my)*sy;return [cx+lx*c-ly*s,cy+lx*s+ly*c];};
    const paths=new Map();
    let travel='',previous=null;
    for(const st of o.stitches){

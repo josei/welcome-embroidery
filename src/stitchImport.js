@@ -41,6 +41,27 @@ export function importStitchLayer(bytes,format,metadata={}){
 }
 
 /**
+ * The point of a stitch layer's source that sits at the centre of its placement. The compiler maps source point s to
+ * centre + (s - midpoint), so with a midpoint between 0.1 mm steps (source bounds whose sum is an odd number of 0.1 mm) the
+ * translation is off the grid and every point is rounded by up to 0.07 mm. The midpoint is rounded to the 0.1 mm grid here, so
+ * a default-placed import (centred at the origin) keeps every source point on the grid. A midpoint exactly halfway between two steps
+ * rounds toward zero, so the placement is at most 0.05 mm from the true centre, and a translation is never more than 0.071 mm.
+ * @param {number[]} bounds [x0, y0, x1, y1] of the source, in mm
+ * @returns {[number, number]}
+ */
+export function importMidpoint(bounds){
+  const [x0,y0,x1,y1]=bounds;return [halfStepMid(x0,x1),halfStepMid(y0,y1)];
+}
+/**
+ * The midpoint of [a, b] in 0.1 mm steps, with a halfway case rounded toward zero. The sum is taken in tenths first so float noise
+ * (47.4 - 47.3 is not exactly 0.1) cannot push a tie to the wrong side.
+ * @param {number} a
+ * @param {number} b
+ * @returns {number}
+ */
+function halfStepMid(a,b){const sum=Math.round((a+b)*10);return Math.trunc(sum/2)/10+0;}
+
+/**
  * @param {string} s
  * @returns {Uint8Array}
  */

@@ -10,7 +10,7 @@ import {hoopSize} from './hoops.js';
 import {clipLines} from './clipMasks.js';
 import {sameThread} from './threads.js';
 import {closeRing,clipRuns,bartack} from './stitchRuns.js';
-import {decodeBase64} from './stitchImport.js';
+import {decodeBase64,importMidpoint} from './stitchImport.js';
 import {fillRuns,satinRuns} from './fillStitch.js';
 import {validateDocument} from './validate.js';
 import {hasName,objectLabel} from './objectNames.js';
@@ -19,7 +19,7 @@ import {PLAN_STITCH_RULE, splitLongStitchesIndexed} from './encoders/shared.js';
 
 // Rounds to one decimal place (a stitch position in mm).
 /** @type {(n: number) => number} */
-const round = n => Math.round(n * 10) / 10;
+const round = n => Math.round(n * 10) / 10 + 0; // + 0 turns -0 into 0 so the plan never carries a negative zero
 
 /**
  * Whether sewable bounds [x0,y0,x1,y1] reach past the hoop, which is centred on the origin.
@@ -69,10 +69,10 @@ export function compile(doc) {
     if(o.visible===false||o.mask)continue;
     const comp=o.compensation??doc.settings.compensation;
     if(o.kind==='stitch_layer'){
-      const [sx0,sy0,sx1,sy1]=o.source.bounds,sx=o.w/Math.max(.1,sx1-sx0),sy=o.h/Math.max(.1,sy1-sy0),a=(Number(o.rotation)||0)*Math.PI/180,c=Math.cos(a),
+      const [sx0,sy0,sx1,sy1]=o.source.bounds,[mx,my]=importMidpoint(o.source.bounds),sx=o.w/Math.max(.1,sx1-sx0),sy=o.h/Math.max(.1,sy1-sy0),a=(Number(o.rotation)||0)*Math.PI/180,c=Math.cos(a),
         sn=Math.sin(a),cx=o.x+o.w/2,cy=o.y+o.h/2;
       const corners=[[sx0,sy0],[sx1,sy0],[sx1,sy1],[sx0,sy1]].map(([x,y])=>
-        {const lx=(x-(sx0+sx1)/2)*sx,ly=(y-(sy0+sy1)/2)*sy;return [cx+lx*c-ly*sn,cy+lx*sn+ly*c];});
+        {const lx=(x-mx)*sx,ly=(y-my)*sy;return [cx+lx*c-ly*sn,cy+lx*sn+ly*c];});
         const b=[Math.min(...corners.map(p=>p[0])),Math.min(...corners.map(p=>p[1])),Math.max(...corners.map(p=>p[0])),Math.max(...corners.map(p=>p[1]))];
         overall=[Math.min(overall[0],b[0]),Math.min(overall[1],b[1]),Math.max(overall[2],b[2]),Math.max(overall[3],b[3])];
         if(outsideHoop(b,hoop)){const m=hoopMessage(o,b,hoop);
@@ -119,7 +119,7 @@ export function compile(doc) {
     const comp=o.compensation??doc.settings.compensation;
     if(o.kind==='stitch_layer'){
       hasImportedLayer=true;
-      const [sx0,sy0,sx1,sy1]=o.source.bounds,sx=o.w/Math.max(.1,sx1-sx0),sy=o.h/Math.max(.1,sy1-sy0),a=(Number(o.rotation)||0)*Math.PI/180,c=Math.cos(a),
+      const [sx0,sy0,sx1,sy1]=o.source.bounds,[mx,my]=importMidpoint(o.source.bounds),sx=o.w/Math.max(.1,sx1-sx0),sy=o.h/Math.max(.1,sy1-sy0),a=(Number(o.rotation)||0)*Math.PI/180,c=Math.cos(a),
         sn=Math.sin(a),cx=o.x+o.w/2,cy=o.y+o.h/2;
       const firstNeedle=o.stitches.find((/** @type {any} */ s)=>s.cmd==='stitch'),firstThread=
         firstNeedle?(o.threadOverrides[firstNeedle.thread]||o.threads[firstNeedle.thread].color||o.thread):o.thread,firstSewEvent=
@@ -128,7 +128,7 @@ export function compile(doc) {
       // Writers start from the machine origin (0, 0). When nothing has been emitted yet and the import opens with a sewn stitch away from it, a jump to
       // the first stitch comes first, so no writer sews a lead-in from the origin. Welcome's own objects already open with a jump (see the run and fill paths).
       let leading=stitches.length===0;
-      for(const s of o.stitches){const lx=(s.x-(sx0+sx1)/2)*sx,ly=(s.y-(sy0+sy1)/2)*sy,x=cx+lx*c-ly*sn,y=cy+lx*sn+ly*c,thread=
+      for(const s of o.stitches){const lx=(s.x-mx)*sx,ly=(s.y-my)*sy,x=cx+lx*c-ly*sn,y=cy+lx*sn+ly*c,thread=
         o.threadOverrides[s.thread]||o.threads[s.thread].color||o.thread;if(s.cmd==='end'){position=[round(x),round(y)];continue;}
         // The one added record is not counted against the 250,000 limit, which guards the imported stitches; an import at that limit still compiles.
         if(leading){leading=false;if(s.cmd==='stitch'){stitches.push({x:round(x),y:round(y),cmd:'jump',thread});position=[round(x),round(y)];leadIn=1;}}

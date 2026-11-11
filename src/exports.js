@@ -2,6 +2,7 @@
 // Print and interchange exports: a plain SVG of the design, a 1:1 print template of the hoop, and the appliqué pieces
 // as cutting templates. The engine re-exports these functions, so callers keep importing them from engine.js.
 import {geometry} from './outlines.js';
+import {importMidpoint} from './stitchImport.js';
 import {hoopSize} from './hoops.js';
 import {displayName} from './appHelpers.js';
 
@@ -28,9 +29,9 @@ const esc=t=>String(t).replace(/[&<>"]/g,c=>/** @type {Record<string, string>} *
 const d=(lines,close=false)=>lines.map(l=>'M'+l.map(([x,y])=>`${f(x)} ${f(y)}`).join('L')+(close?'Z':'')).join('');
   const out=[];
   for(const o of doc.objects){if(o.visible===false)continue;const title=`<title>${esc(o.name||o.kind)}</title>`;
-    if(o.kind==='stitch_layer'){const [x0,y0,x1,y1]=/** @type {NonNullable<Item['source']>} */(o.source).bounds,sx=o.w/Math.max(.1,x1-x0),sy=o.h/
+    if(o.kind==='stitch_layer'){const [x0,y0,x1,y1]=/** @type {NonNullable<Item['source']>} */(o.source).bounds,[mx,my]=importMidpoint([x0,y0,x1,y1]),sx=o.w/Math.max(.1,x1-x0),sy=o.h/
       Math.max(.1,y1-y0),a=(Number(o.rotation)||0)*Math.PI/180,c=Math.cos(a),sn=Math.sin(a),cx=o.x+o.w/2,cy=o.y+o.h/2,paths=new Map();let prev=null;
-      for(const st of /** @type {NonNullable<Item['stitches']>} */(o.stitches)){const lx=(st.x-(x0+x1)/2)*sx,ly=(st.y-(y0+y1)/2)*sy,
+      for(const st of /** @type {NonNullable<Item['stitches']>} */(o.stitches)){const lx=(st.x-mx)*sx,ly=(st.y-my)*sy,
         p=[cx+lx*c-ly*sn,cy+lx*sn+ly*c];
         if(st.cmd==='stitch'){const col=o.threadOverrides?.[st.thread]||/** @type {NonNullable<Item['threads']>} */(o.threads)[st.thread]?.color||o.thread;
         if(!paths.has(col))paths.set(col,'');paths.set(col,paths.get(col)+(prev?`M${f(prev[0])} ${f(prev[1])}L${f(p[0])} ${f(p[1])}`:`M${f(p[0])} ${f(p[1])}`));
