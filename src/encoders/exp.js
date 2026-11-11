@@ -3,10 +3,13 @@
 
 /** @typedef {import('../encoders.js').Plan} Plan */
 
+import {splitLongStitches, stitchRule} from './shared.js';
+
 // EXP (Melco): signed byte pairs in 0.1 mm, y negated; 80 04 = jump, 80 01 = colour change, 80 80 07 00 = trim, no header.
 /** @param {Plan} plan @returns {Uint8Array} */
 export function encodeExp(plan){
   if(plan.errors.length)throw Error(plan.errors.join(' '));
+  plan={...plan,stitches:splitLongStitches(plan.stitches,stitchRule('exp'))};
   /** @type {number[]} */ const out=[];
   let x=0,y=0;
   /** @type {(nx: number, ny: number, jump: boolean) => void} */

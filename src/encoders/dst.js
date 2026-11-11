@@ -3,11 +3,14 @@
 
 /** @typedef {import('../encoders.js').Plan} Plan */
 
+import {splitLongStitches, stitchRule} from './shared.js';
+
 // Tajima DST writer, following pyembroidery's DstWriter/encode_record: 512-byte ASCII header, balanced-ternary 3-byte records
 // (max 12.1 mm per record), long jumps split, a trim is three small alternating jumps, colour change and stop are 0xC3, end is 0xF3.
 /** @param {Plan} plan @param {string} [name] @returns {Uint8Array} */
 export function encodeDst(plan,name='Welcome'){
   if(plan.errors.length)throw Error(plan.errors.join(' '));
+  plan={...plan,stitches:splitLongStitches(plan.stitches,stitchRule('dst'))};
   const XBITS={p81:2,n81:3,p27:2,n27:3,p9:2,n9:3,p3:0,n3:1,p1:0,n1:1},YBITS={p81:5,n81:4,p27:5,n27:4,p9:5,n9:4,p3:7,n3:6,p1:7,n1:6};
   /** @type {(v: number, bits: typeof XBITS) => {b0: number, b1: number, b2: number}} */
   const ternary=(v,bits)=>

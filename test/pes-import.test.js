@@ -24,12 +24,12 @@ test('a PES file whose PEC offset points past the end is refused, and a file wit
  assert.throws(()=>importStitchLayer(notPes,'pes'),/signature/);
 });
 
-test('a PES layer exports to JEF when its steps fit, and a sample with steps over 12.7 mm is refused by JEF but exports to DST',()=>{
+test('a PES layer exports to JEF when its steps fit, and a sample with steps over 12.7 mm exports to JEF and DST',()=>{
  const layer=importStitchLayer(bytes,'pes');const doc=initialDocument();doc.objects=[layer];validateDocument(doc);
  assert.ok(encode(compile(doc),'jef',{},doc).length>0,'the spiral design exports as JEF');
  const long=importStitchLayer(longSteps,'pes');const longDoc=initialDocument();longDoc.objects=[long];validateDocument(longDoc);
  const longPlan=compile(longDoc);
- assert.throws(()=>encode(longPlan,'jef',{},longDoc),/12\.7 mm/,'JEF refuses a step longer than 12.7 mm');
+ assert.ok(encode(longPlan,'jef',{},longDoc).length>0,'JEF splits a step longer than 12.7 mm');
  assert.ok(encode(longPlan,'dst',{},longDoc).length>0,'DST splits the long steps into jumps');
 });
 

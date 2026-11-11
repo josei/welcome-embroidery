@@ -4,7 +4,7 @@
 /** @typedef {import('../encoders.js').Plan} Plan */
 
 import {SEW_CHART} from '../readers.js';
-import {last} from './shared.js';
+import {last, splitLongStitches, stitchRule} from './shared.js';
 
 /** @param {string|null|undefined} hex @returns {number} */
 const sewChartIndex=hex=>
@@ -16,6 +16,7 @@ const sewChartIndex=hex=>
 /** @param {Plan} plan @returns {Uint8Array} */
 export function encodeSew(plan){
  if(plan.errors.length)throw Error(plan.errors.join(' '));
+ plan={...plan,stitches:splitLongStitches(plan.stitches,stitchRule('sew'))};
  /** @type {string[]} */ const blocks=[plan.stitches.find(p=>p.cmd!=='end'&&p.thread)?.thread||'#527461'];
  for(const p of plan.stitches)if(p.cmd==='color'||p.cmd==='stop')blocks.push(p.thread||last(blocks));
  if(blocks.length>255)throw Error('SEW supports up to 255 color blocks.');

@@ -50,10 +50,43 @@ for(const {format,reader} of CASES){
   });
 }
 
-test('jef still refuses a 39 mm move with a clear message',()=>{
-  const {plan}=planWithLongMove();
-  assert.throws(()=>encode(plan,'jef',RED),/JEF stitch delta exceeds 12\.7 mm/);
+test('jef splits a 39 mm move instead of refusing it',()=>{
+  const {plan,to}=planWithLongMove();
+  const decoded=decodeEmbroidery(encode(plan,'jef',RED),'jef');
+  assert.ok(longestStitchMove(decoded)<=LIMIT,`jef longest move ${longestStitchMove(decoded)} mm`);
+  assert.ok(decoded.stitches.some(s=>s.cmd==='stitch'&&Math.abs(s.x-to.x)<=0.11&&Math.abs(s.y-to.y)<=0.11),'jef reaches the injected point');
 });
+
+// A constructed design with one 26 mm stitch from (0, 0) to (24, 10), long on both axes so a diagonal cut would show.
+// Every stitch the writer emits must stay on that segment (within 0.1 mm), and the endpoints must be kept.
+const SEGMENT={from:{x:0,y:0},to:{x:24,y:10}};
+const LONG_PLAN={
+  errors:[],bounds:[],count:3,
+  stitches:[
+    {x:0,y:0,cmd:'stitch',thread:RED},
+    {x:SEGMENT.to.x,y:SEGMENT.to.y,cmd:'stitch',thread:RED},
+    {x:SEGMENT.to.x,y:SEGMENT.to.y,cmd:'end',thread:RED},
+  ],
+};
+
+// Distance from p to the segment a-b, in mm.
+function distanceToSegment(p,a,b){
+  const dx=b.x-a.x,dy=b.y-a.y,len2=dx*dx+dy*dy;
+  const t=len2?Math.max(0,Math.min(1,((p.x-a.x)*dx+(p.y-a.y)*dy)/len2)):0;
+  return Math.hypot(p.x-(a.x+t*dx),p.y-(a.y+t*dy));
+}
+
+const WRITER_CASES=['dst','exp','sew','u01','tbf','xxx','jef'];
+for(const format of WRITER_CASES){
+  test(`${format}: a 26 mm stitch is split along its own line with endpoints kept`,()=>{
+    const decoded=decodeEmbroidery(encode(LONG_PLAN,format,RED),format);
+    const points=decoded.stitches.filter(s=>s.cmd==='stitch');
+    assert.ok(points.length>2,`${format} split the stitch into more than one piece`);
+    for(const p of points)assert.ok(distanceToSegment(p,SEGMENT.from,SEGMENT.to)<=0.1,`${format} point ${p.x},${p.y} is off the source line`);
+    assert.ok(Math.hypot(points[0].x-SEGMENT.from.x,points[0].y-SEGMENT.from.y)<=0.11,`${format} keeps the start point`);
+    assert.ok(Math.hypot(points.at(-1).x-SEGMENT.to.x,points.at(-1).y-SEGMENT.to.y)<=0.11,`${format} keeps the end point`);
+  });
+}
 
 test('an imported stitch layer with a long move is re-encoded, not passed through',async()=>{
   const {hasLongStitch}=await import('../src/encoders.js');

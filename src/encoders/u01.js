@@ -3,6 +3,8 @@
 
 /** @typedef {import('../encoders.js').Plan} Plan */
 
+import {splitLongStitches, stitchRule} from './shared.js';
+
 // Barudan U01, written as pyembroidery 1.5.1 writes it. A 256-byte header: 0x80 ASCII '0's, then int16 bounds (min x, -max y, max x, -min y), a zero int32, the
 // record count + 2 as int32 (pyembroidery's convention), and the last stitch as int16 (x, -y), padded to 0x100. Then 3-byte records: a control byte, dy, dx in 0.1 mm, with dy positive
 // when 0x40 is set and dx negative when 0x20 is set. Commands in the low five bits: 0x00 stitch, 0x01 jump, 0x07 trim, 0x08 stop, 0x09-0x17 needle change to
@@ -10,6 +12,7 @@
 /** @param {Plan} plan @returns {Uint8Array} */
 export function encodeU01(plan){
   if(plan.errors.length)throw Error(plan.errors.join(' '));
+  plan={...plan,stitches:splitLongStitches(plan.stitches,stitchRule('u01'))};
   /** @type {number[][]} */ const recs=[];
   let x=0,y=0,minX=0,minY=0,maxX=0,maxY=0,changes=0,lastX=0,lastY=0;
   /** @type {(cmd: number, dx: number, dy: number) => void} */

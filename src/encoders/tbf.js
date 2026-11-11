@@ -3,7 +3,7 @@
 
 /** @typedef {import('../encoders.js').Plan} Plan */
 
-import {last} from './shared.js';
+import {last, splitLongStitches, stitchRule} from './shared.js';
 
 // Tajima TBF, written as pyembroidery 1.5.1 writes it. A 0x600-byte ASCII header: '3.00', the name at 0x80 (LA), the stitch and colour-change counts (ST, CO),
 // the bounds (+X, -X, +Y, -Y), the last stitch (AX, AY), TP and JC, the needle order (256 bytes at 0x10A, one entry per colour change), and the thread table
@@ -13,6 +13,7 @@ import {last} from './shared.js';
 /** @param {Plan} plan @param {string} [name] @returns {Uint8Array} */
 export function encodeTbf(plan,name='Welcome'){
   if(plan.errors.length)throw Error(plan.errors.join(' '));
+  plan={...plan,stitches:splitLongStitches(plan.stitches,stitchRule('tbf'))};
   /** @type {string[]} */ const blocks=[plan.stitches.find(p=>p.cmd!=='end'&&p.thread)?.thread||'#527461'];
   for(const p of plan.stitches)if(p.cmd==='color')blocks.push(p.thread||last(blocks));
   if(blocks.length>72)throw Error('TBF holds up to 72 thread blocks.');

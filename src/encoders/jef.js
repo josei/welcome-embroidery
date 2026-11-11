@@ -4,12 +4,13 @@
 /** @typedef {import('../encoders.js').Plan} Plan */
 /** @typedef {import('../encoders.js').JefBlock} JefBlock */
 
-import {clamp} from './shared.js';
+import {clamp, splitLongStitches, stitchRule} from './shared.js';
 import {nearestJefColor} from '../jefPalette.js';
 
 /** @param {Plan} plan @param {string} [color] @param {number|{w: number, h: number}} [hoop] @returns {Uint8Array} */
 export function encodeJef(plan,color='#527461',hoop=110) {
   if(plan.errors.length)throw Error(plan.errors.join(' '));
+  plan={...plan,stitches:splitLongStitches(plan.stitches,stitchRule('jef'))};
   // A true STOP is written like pyembroidery does: the 80 01 code with an extra thread slot whose palette entry is 0 (toggled back to the previous colour on
   // the next STOP).
   /** @type {JefBlock[]} */ const blocks=[];

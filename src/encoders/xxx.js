@@ -3,7 +3,7 @@
 
 /** @typedef {import('../encoders.js').Plan} Plan */
 
-import {last} from './shared.js';
+import {last, splitLongStitches, stitchRule} from './shared.js';
 
 // Singer XXX, written as pyembroidery 1.5.1 writes it: a 252-byte header (23 zero bytes, the record count, 12 zeros, the thread count, the bounds in 0.1 mm,
 // the last stitch), an int32 offset of the end of the stitches at 0xFC, the stitches from 0x100, then the end record 7F 7F 02 14 and the thread table. Records:
@@ -12,6 +12,7 @@ import {last} from './shared.js';
 /** @param {Plan} plan @returns {Uint8Array} */
 export function encodeXxx(plan){
   if(plan.errors.length)throw Error(plan.errors.join(' '));
+  plan={...plan,stitches:splitLongStitches(plan.stitches,stitchRule('xxx'))};
   /** @type {string[]} */ const blocks=[plan.stitches.find(p=>p.cmd!=='end'&&p.thread)?.thread||'#527461'];
   for(const p of plan.stitches)if(p.cmd==='color'||p.cmd==='stop')blocks.push(p.thread||last(blocks));
   if(blocks.length>21)throw Error('XXX holds up to 21 thread blocks.');

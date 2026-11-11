@@ -30,11 +30,12 @@ export function vp3LayerHasUnsupportedTravel(stitches){
   if(p.cmd==='jump'){const blockOrigin=i===0||prev?.cmd==='color'||next?.cmd==='color',noOp=prev&&p.x===prev.x&&p.y===prev.y;if(!blockOrigin&&!noOp)return true;
   }}return false;}
 /**
- * True when an imported layer has a non-jump move longer than the Brother and Pfaff writers can emit. Such a file is re-encoded, not passed through.
+ * True when an imported layer has a non-jump move longer than the writer for its format can emit in one stitch. Such a file is re-encoded, not passed through.
  * @param {Array<{x: number, y: number, cmd: string}>} stitches
+ * @param {import('./shared.js').StitchRule} [rule]
  * @returns {boolean}
  */
-export function hasLongStitch(stitches){
+export function hasLongStitch(stitches,rule){
   let prev=null;
-  for(const s of stitches){if(isLongStitch(prev,s))return true;if(s.cmd!=='end')prev=s;}
+  for(const s of stitches){if(isLongStitch(prev,s,rule))return true;if(s.cmd!=='end')prev=s;}
   return false;}
