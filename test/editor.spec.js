@@ -88,7 +88,8 @@ test('pinned JEF import renders a stitch layer, saves source commands, transform
 
 
 test('inline icon controls are accessible and rotated stitch-layer preview matches the compile plan',async({page})=>{
- const fixture=pinnedMachineFixture('vp3'),doc=initialDocument(),layer=importStitchLayer(fixture.bytes,'vp3');doc.objects=[layer];applyOperations(doc,[{op:'transform',id:layer.id,rotation:17}]);const firstNeedle=compile(doc).stitches.find(s=>s.cmd==='stitch');
+ const fixture=pinnedMachineFixture('vp3'),doc=initialDocument(),layer=importStitchLayer(fixture.bytes,'vp3');doc.objects=[layer];applyOperations(doc,[{op:'transform',id:layer.id,rotation:17}]);// Plan stitch 0 is a split point on the 12.7 mm limit between the origin jump and the first needle, so the first needle the canvas draws is plan stitch 1.
+const firstNeedle=compile(doc).stitches.filter(s=>s.cmd==='stitch')[1];
  await page.goto('/');page.on('dialog',dialog=>dialog.accept());await expect(page.getByRole('button',{name:'New design'})).toHaveAttribute('data-tooltip',/^New design \(/);await expect(page.getByRole('button',{name:'Add ellipse'})).toHaveAttribute('title','Add ellipse (O)');await expect(page.getByRole('button',{name:'Nothing to undo'})).toBeDisabled();
  await newDesign(page);await page.locator('#machineFile').setInputFiles({name:'rotated.vp3',mimeType:'application/octet-stream',buffer:Buffer.from(fixture.bytes)});await expect(page.locator('#sourceInfo')).toContainText('VP3 stitch layer');await expect(page.locator('.object-row')).toHaveCount(1);await page.locator('#rotation').fill('17');await page.locator('#rotation').press('Tab');await expect(page.locator('#rotation')).toHaveValue('17');
  const importedId=await page.locator('.object-row').last().getAttribute('data-id'),group=page.locator(`#shapes [data-id="${importedId}"]`);expect(await group.count()).toBe(1);expect(await group.getAttribute('transform')).toBeNull();const paths=await group.locator('path').evaluateAll(nodes=>nodes.map(node=>node.getAttribute('d'))),coordinates=paths.flatMap(d=>[...d.matchAll(/[ML](-?(?:\d+\.?\d*|\.\d+))\s+(-?(?:\d+\.?\d*|\.\d+))/g)].map(m=>[Number(m[1]),Number(m[2])]));expect(coordinates.some(([x,y])=>Math.abs(x-firstNeedle.x)<=.06&&Math.abs(y-firstNeedle.y)<=.06)).toBe(true);const saved=page.waitForEvent('download');await page.locator('#save').click();const output=await saved,path='/tmp/welcome-rotated-import.welcome';await output.saveAs(path);const project=JSON.parse(await (await import('node:fs/promises')).readFile(path,'utf8'));expect(project.objects[0].rotation).toBe(17);
@@ -102,8 +103,11 @@ test('browser reopens a maximum-command saved stitch project below the advertise
 test('browser VP3 import round-trips supported files and names unsupported travel before export',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));page.on('dialog',dialog=>dialog.accept());const supported=pinnedMachineFixture('vp3');await page.goto('/');await newDesign(page);await page.locator('#importMachine').click();await page.locator('#machineFile').setInputFiles({name:'sample.vp3',mimeType:'application/octet-stream',buffer:Buffer.from(supported.bytes)});await expect(page.locator('#sourceInfo')).toContainText('80 commands');
  const original=page.waitForEvent('download');await page.locator('#export').click();await pickFormat(page,'vp3');await page.locator('#download').click();const rawExport=await original,rawPath='/tmp/welcome-import-original.vp3';await rawExport.saveAs(rawPath);expect(Buffer.compare(await (await import('node:fs/promises')).readFile(rawPath),Buffer.from(supported.bytes))).toBe(0);
- const x=Number(await page.locator('#posX').inputValue());await page.locator('#posX').fill(String(x+1));await page.locator('#posX').press('Tab');const changed=page.waitForEvent('download');await page.locator('#export').click();await page.locator('#download').click();const changedExport=await changed,changedPath='/tmp/welcome-import-edited.vp3';await changedExport.saveAs(changedPath);expect(decodeEmbroidery(new Uint8Array(await (await import('node:fs/promises')).readFile(changedPath)),'vp3').stitches.filter(s=>s.cmd==='stitch')).toHaveLength(60);
- await newDesign(page);const unsupported=[...readMachineFixtures()].find(([name])=>name.endsWith('/random1.vp3'));await page.locator('#importMachine').click();await page.locator('#machineFile').setInputFiles({name:'travel.vp3',mimeType:'application/octet-stream',buffer:Buffer.from(unsupported[1])});await expect(page.locator('#sourceInfo')).toContainText('51 commands');const moved=Number(await page.locator('#posX').inputValue());await page.locator('#posX').fill(String(moved+1));await page.locator('#posX').press('Tab');let downloaded=false;page.on('download',()=>{downloaded=true;});await page.locator('#export').click();await pickFormat(page,'vp3');await page.locator('#download').click();await expect.poll(()=>downloaded).toBe(true);await expect(page.locator('#exportError')).toHaveText('');expect(errors).toEqual([]);
+ const x=Number(await page.locator('#posX').inputValue());await page.locator('#posX').fill(String(x+1));await page.locator('#posX').press('Tab');const changed=page.waitForEvent('download');await page.locator('#export').click();await page.locator('#download').click();const changedExport=await changed,changedPath='/tmp/welcome-import-edited.vp3';await changedExport.saveAs(changedPath);const edited=decodeEmbroidery(new Uint8Array(await (await import('node:fs/promises')).readFile(changedPath)),'vp3').stitches;
+ // VP3 export splits moves longer than 12.7 mm (see #356), so the file holds at least the 60 source needles and no move is longer than that.
+ const editedNeedles=edited.filter(s=>s.cmd==='stitch');expect(editedNeedles.length).toBeGreaterThanOrEqual(60);
+ {let prev=null,worst=0;for(const s of edited){if(s.cmd==='stitch'&&prev)worst=Math.max(worst,Math.hypot(s.x-prev.x,s.y-prev.y));if(s.cmd!=='end')prev=s;}expect(worst).toBeLessThanOrEqual(12.7+1e-6);}
+ await newDesign(page);const unsupported=[...readMachineFixtures()].find(([name])=>name.endsWith('/random1.vp3'));await page.locator('#importMachine').click();await page.locator('#machineFile').setInputFiles({name:'travel.vp3',mimeType:'application/octet-stream',buffer:Buffer.from(unsupported[1])});await expect(page.locator('#sourceInfo')).toContainText('51 commands');const moved=Number(await page.locator('#posX').inputValue());await page.locator('#posX').fill(String(moved+1));await page.locator('#posX').press('Tab');let downloaded=false;page.on('download',()=>{downloaded=true;});await page.locator('#export').click();await pickFormat(page,'vp3');await page.locator('#download').click();await expect.poll(()=>downloaded).toBe(true);await expect(page.locator('#exportError')).toBeHidden();expect(errors).toEqual([]);
 });
 
 test('opening a project fits the real geometry (rotated stitches, text outlines) in view; later edits never move the view',async({page})=>{page.on('dialog',d=>d.accept());
@@ -188,19 +192,19 @@ test('sidebar tools: select, line, polygon, star and pen with curve handles, plu
 
 test('hoop is editable: custom size resizes the canvas, flags overflow, keeps undo, and exports within JEF limits',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());await newDesign(page);
- await expect(page.locator('#hoopW')).toHaveValue('110');await expect(page.locator('#hoopH')).toHaveValue('110');
+ await expect(page.locator('#hoopW')).toHaveValue('110.0');await expect(page.locator('#hoopH')).toHaveValue('110.0');
  await page.locator('#rect').click();await page.locator('#hoopW').fill('80');await page.locator('#hoopW').press('Tab');await page.locator('#hoopH').fill('60');await page.locator('#hoopH').press('Tab');
  await expect(page.locator('#hoopRing')).toHaveAttribute('width','80');await expect(page.locator('#hoopRing')).toHaveAttribute('height','60');
- await page.locator('#hoopW').fill('50');await page.locator('#hoopW').press('Tab');await page.locator('#hoopH').fill('50');await page.locator('#hoopH').press('Tab');await expect(page.locator('#hoopW')).toHaveValue('50');await page.locator('#posX').fill('40');await page.locator('#posX').press('Tab');
+ await page.locator('#hoopW').fill('50');await page.locator('#hoopW').press('Tab');await page.locator('#hoopH').fill('50');await page.locator('#hoopH').press('Tab');await expect(page.locator('#hoopW')).toHaveValue('50.0');await page.locator('#posX').fill('40');await page.locator('#posX').press('Tab');
  await page.locator('button[data-view="stitches"]').click();await expect(page.locator('#count')).toContainText('past the hoop');
- await page.locator('#undo').click();await page.locator('#undo').click();await page.locator('#undo').click();await expect(page.locator('#hoopW')).toHaveValue('80');
+ await page.locator('#undo').click();await page.locator('#undo').click();await page.locator('#undo').click();await expect(page.locator('#hoopW')).toHaveValue('80.0');
  await page.locator('#hoopW').fill('140');await page.locator('#hoopW').press('Tab');await page.locator('#hoopH').fill('200');await page.locator('#hoopH').press('Tab');const download=page.waitForEvent('download');await page.locator('#export').click();await pickFormat(page,'vp3');await page.locator('#download').click();await download;
- await page.locator('#hoopW').fill('5');await page.locator('#hoopW').press('Tab');await expect(page.locator('#hoopW')).toHaveValue('10');await expect(page.locator('.hoop-edit .clamp-note')).toContainText('Min 10 mm');expect(errors).toEqual([]);
+ await page.locator('#hoopW').fill('5');await page.locator('#hoopW').press('Tab');await expect(page.locator('#hoopW')).toHaveValue('10.0');await expect(page.locator('.hoop-edit .clamp-note')).toContainText('Min 10 mm');expect(errors).toEqual([]);
 });
 
 test('the last hoop size is remembered for new documents and reloads',async({page})=>{
  await page.goto('/');page.on('dialog',d=>d.accept());await page.locator('#hoopW').fill('90');await page.locator('#hoopW').press('Tab');await page.locator('#hoopH').fill('70');await page.locator('#hoopH').press('Tab');
- await newDesign(page);await expect(page.locator('#hoopW')).toHaveValue('90');await page.reload();await expect(page.locator('#hoopW')).toHaveValue('90');await expect(page.locator('#hoopH')).toHaveValue('70');
+ await newDesign(page);await expect(page.locator('#hoopW')).toHaveValue('90.0');await page.reload();await expect(page.locator('#hoopW')).toHaveValue('90.0');await expect(page.locator('#hoopH')).toHaveValue('70.0');
 });
 
 test('agent relay: the Agent dialog creates a private link and an MCP client edits the open document live; revoke locks it out',async({page})=>{
@@ -264,9 +268,9 @@ test('satin width reset: shown off default, one click restores 3 mm as one undo 
  await page.locator('#satinWidth').fill('6');await page.locator('#satinWidth').press('Enter');
  await expect(reset).toBeVisible();await expect(reset).toHaveAccessibleName('Reset to default (3 mm)');await expect(reset).toHaveAttribute('title','Reset to default (3 mm)');
  await reset.focus();await page.keyboard.press('Enter');
- await expect(page.locator('#satinWidth')).toHaveValue('3');await expect(reset).toBeHidden();
+ await expect(page.locator('#satinWidth')).toHaveValue('3.0');await expect(reset).toBeHidden();
  expect(await page.locator('#shapes polyline.shape').evaluate(el=>getComputedStyle(el).strokeWidth)).toBe('3px');
- await page.locator('#undo').click();await expect(page.locator('#satinWidth')).toHaveValue('6');await expect(reset).toBeVisible();
+ await page.locator('#undo').click();await expect(page.locator('#satinWidth')).toHaveValue('6.0');await expect(reset).toBeVisible();
  expect(errors).toEqual([]);
 });
 
@@ -1672,7 +1676,7 @@ test('satin end inset field shows for satin paths and a typed value is kept',asy
  const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());await newDesign(page);
  await page.locator('#path').click();const m=await ctm(page);for(const [x,y] of [[-20,0],[20,0]]){const s=toScreen(m,x,y);await page.mouse.click(s.x,s.y);}await page.keyboard.press('Enter');
  await page.locator('#type').selectOption('satin');await expect(page.locator('#endInsetStartRow')).toBeVisible();await expect(page.locator('#endInsetEndRow')).toBeVisible();
- await page.locator('#endInsetStart').fill('1');await page.locator('#endInsetStart').press('Tab');await expect(page.locator('#endInsetStart')).toHaveValue('1');
+ await page.locator('#endInsetStart').fill('1');await page.locator('#endInsetStart').press('Tab');await expect(page.locator('#endInsetStart')).toHaveValue('1.0');
  await page.locator('#endInsetEnd').fill('0.5');await page.locator('#endInsetEnd').press('Tab');await expect(page.locator('#endInsetEnd')).toHaveValue('0.5');
  await page.locator('#type').selectOption('run');await expect(page.locator('#endInsetStartRow')).toBeHidden();
  expect(errors).toEqual([]);
@@ -1692,7 +1696,7 @@ test('sequin fill is a fill pattern that lays sequins inside a closed shape',asy
 test('hoop preset select sets the hoop, and a typed size moves it to custom',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());await newDesign(page);
  await page.locator('#hoopPreset').selectOption('5x7in');await expect(page.locator('#hoopPreset option:checked')).toHaveText('5×7 in');
- await expect(page.locator('#hoopW')).toHaveValue('177.8');await expect(page.locator('#hoopH')).toHaveValue('127');
+ await expect(page.locator('#hoopW')).toHaveValue('177.8');await expect(page.locator('#hoopH')).toHaveValue('127.0');
  await page.locator('#hoopW').fill('120');await page.locator('#hoopW').press('Tab');
  await expect(page.locator('#hoopPreset')).toHaveValue('custom');
  expect(errors).toEqual([]);
@@ -1716,9 +1720,9 @@ test('accordion spacing fields show for rows fills and a start value gives the e
  await page.locator('#type').selectOption('fill');await expect(page.locator('#accordionStartRow')).toBeVisible();await expect(page.locator('#accordionEndRow')).toBeVisible();
  await expect.poll(count).toBeGreaterThan(0);const even=await count();
  await page.locator('#accordionStart').fill('1');await page.locator('#accordionStart').press('Tab');
- await expect(page.locator('#accordionEnd')).toHaveValue('1');
+ await expect(page.locator('#accordionEnd')).toHaveValue('1.0');
  await page.locator('#accordionEnd').fill('0.4');await page.locator('#accordionEnd').press('Tab');
- await expect(page.locator('#accordionStart')).toHaveValue('1');await expect.poll(count).toBeLessThan(even);
+ await expect(page.locator('#accordionStart')).toHaveValue('1.0');await expect.poll(count).toBeLessThan(even);
  await page.locator('#fillMethod').selectOption('spiral');await expect(page.locator('#accordionStartRow')).toBeHidden();
  expect(errors).toEqual([]);
 });
@@ -1730,7 +1734,7 @@ test('bling fill is a fill pattern that lays stones inside a closed shape, and t
  await page.locator('#type').selectOption('fill');await expect(page.locator('#fillMethod option[value="bling"]')).toHaveCount(1);
  await expect.poll(count).toBeGreaterThan(0);const rows=await count();
  await page.locator('#fillMethod').selectOption('bling');await expect(page.locator('#fillMethod')).toHaveValue('bling');
- await expect(page.locator('#blingShapeRow')).toBeVisible();await expect(page.locator('#motifSpacing')).toHaveValue('8');await expect(page.locator('#motifSize')).toHaveValue('4');await expect.poll(count).not.toBe(rows);const round=await count();
+ await expect(page.locator('#blingShapeRow')).toBeVisible();await expect(page.locator('#motifSpacing')).toHaveValue('8.0');await expect(page.locator('#motifSize')).toHaveValue('4.0');await expect.poll(count).not.toBe(rows);const round=await count();
  await page.locator('#blingShape').selectOption('hexagon');await expect.poll(count).not.toBe(round);
  expect(errors).toEqual([]);
 });
@@ -2194,7 +2198,7 @@ test('stem width: the field appears for a stem run, takes 2 mm and keeps it when
  await expect(page.locator('#stemWidthRow')).toBeVisible();
  await page.locator('#stemWidth').fill('2');await page.locator('#stemWidth').press('Enter');
  await page.locator('.object-row').first().click();
- await expect(page.locator('#stemWidth')).toHaveValue('2');
+ await expect(page.locator('#stemWidth')).toHaveValue('2.0');
  expect(errors).toEqual([]);
 });
 
@@ -2205,7 +2209,7 @@ test('laydown rows: the field appears for a laydown underlay, takes 6 mm and kee
  await expect(page.locator('#laydownSpacingRow')).toBeVisible();
  await page.locator('#laydownSpacing').fill('6');await page.locator('#laydownSpacing').press('Enter');
  await page.locator('.object-row').first().click();
- await expect(page.locator('#laydownSpacing')).toHaveValue('6');
+ await expect(page.locator('#laydownSpacing')).toHaveValue('6.0');
  expect(errors).toEqual([]);
 });
 
@@ -2226,9 +2230,9 @@ test('trim jumps from: the length field takes 10 mm and keeps it after reloading
  await page.locator('#trims').evaluate(el=>{el.closest('details').open=true;});
  await page.locator('#trims').check();
  await page.locator('#trimMm').fill('10');await page.locator('#trimMm').press('Enter');
- await expect(page.locator('#trimMm')).toHaveValue('10');
+ await expect(page.locator('#trimMm')).toHaveValue('10.0');
  await page.locator('#rect').click();await page.locator('.object-row').first().click();
- await expect(page.locator('#trimMm')).toHaveValue('10');
+ await expect(page.locator('#trimMm')).toHaveValue('10.0');
  expect(errors).toEqual([]);
 });
 
@@ -2316,7 +2320,7 @@ test('corner radii: a rectangle takes four corner radii in its panel, and a chan
  const errors=[];page.on('pageerror',e=>errors.push(e.message));page.on('dialog',d=>d.accept());
  await page.goto('/');await newDesign(page);await page.locator('#rect').click();await page.locator('.object-row').first().click();
  await page.locator('#radiusTR').fill('5');await page.locator('#radiusTR').press('Enter');
- await expect(page.locator('#radiusTR')).toHaveValue('5');await expect(page.locator('#radiusTL')).toHaveValue('0');await expect(page.locator('#radiusBL')).toHaveValue('0');
+ await expect(page.locator('#radiusTR')).toHaveValue('5.0');await expect(page.locator('#radiusTL')).toHaveValue('0.0');await expect(page.locator('#radiusBL')).toHaveValue('0.0');
  await expect(page.locator('.object-row')).toHaveCount(1);
  expect(errors).toEqual([]);
 });
@@ -2358,7 +2362,7 @@ test('rotate hoop swaps the hoop width and height in the panel',async({page})=>{
  await page.locator('#hoopW').fill('100');await page.locator('#hoopW').press('Enter');
  await page.locator('#hoopH').fill('160');await page.locator('#hoopH').press('Enter');
  await page.locator('#hoopRotate').click();
- await expect(page.locator('#hoopW')).toHaveValue('160');await expect(page.locator('#hoopH')).toHaveValue('100');
+ await expect(page.locator('#hoopW')).toHaveValue('160.0');await expect(page.locator('#hoopH')).toHaveValue('100.0');
  expect(errors).toEqual([]);
 });
 
@@ -2477,7 +2481,7 @@ test('paired motif loops can taper with the end width in the panel',async({page}
  await page.locator('#path').click();const m=await ctm(page);for(const [x,y] of [[-20,0],[20,0]]){const s=toScreen(m,x,y);await page.mouse.click(s.x,s.y);}await page.keyboard.press('Enter');
  await page.locator('#type').selectOption('motif');await page.locator('#motifPair').check();
  await expect(page.locator('#satinEndRow')).toBeVisible();await page.locator('#satinWidthEnd').fill('8');await page.locator('#satinWidthEnd').press('Tab');
- await expect(page.locator('#satinWidthEnd')).toHaveValue('8');expect(errors).toEqual([]);
+ await expect(page.locator('#satinWidthEnd')).toHaveValue('8.0');expect(errors).toEqual([]);
 });
 
 test('PES v6 is an export format and downloads as a .pes file',async({page})=>{
@@ -2820,7 +2824,7 @@ test('status bar: every item stays on one line at 1440px and 1280px, in English 
  const errors=[];page.on('pageerror',e=>errors.push(e.message));page.on('dialog',d=>d.accept());
  for (const lang of ['en','es']) for (const width of [1440,1280]) {
   await page.setViewportSize({width,height:900});
-  await page.goto(`/?lang=${lang}`);await expect(page.locator('#count')).toContainText(lang==='es'?'compilad':'compiled');
+  await page.goto(`/?lang=${lang}`);await expect(page.locator('#count')).toContainText(lang==='es'?ES['compiled']:'compiled');
   await page.locator('button[data-view="stitches"]').click();await expect(page.locator('#play')).toBeVisible();
   const lines=await page.evaluate(()=>{
    const ids=['cursorPosition','playbackTime','playbackStitches','playbackSummary','playbackProgress','needlePosition','count','issuesBtn','messagesBtn'];
@@ -3247,15 +3251,15 @@ test('with 30 objects every sewing-order row scrolls clear of the hoop footer',a
  // The hoop controls stay on screen and reachable while the list is long.
  await expect(page.locator('#hoopPreset')).toBeVisible();await expect(page.locator('#hoopRotate')).toBeVisible();
  // Every row can be scrolled fully into view, and at that point the topmost element at its centre is the row itself.
- // The check polls: right after a scroll the list can still be settling (fonts, the toast, the footer), so a single read is racy.
- // A row that stays covered or clipped fails every poll and still fails the test.
+ // Layout is synchronous once the fonts are in, so the wait is for document.fonts (the only async load that moves the rows) and
+ // each row is scrolled with an instant scroll and read once. No timed poll: a row that stays covered or clipped fails the check.
+ await page.evaluate(()=>document.fonts.ready);
  for(let i=0;i<31;i++){
   const row=rows.nth(i);
-  await expect.poll(async()=>{await row.scrollIntoViewIfNeeded();
-   return row.evaluate(el=>{const r=el.getBoundingClientRect(),list=document.getElementById('objects').getBoundingClientRect();
+  await row.evaluate(el=>el.scrollIntoView({block:'nearest',behavior:'instant'}));
+  expect(await row.evaluate(el=>{const r=el.getBoundingClientRect(),list=document.getElementById('objects').getBoundingClientRect();
     const top=document.elementFromPoint(r.x+r.width/2,r.y+r.height/2);
-    return {fully:r.top>=list.top-0.5&&r.bottom<=list.bottom+0.5,ownsPoint:Boolean(top&&el.contains(top)),covered:Boolean(top&&top.closest('.footer.hoop-edit'))};});
-  },{message:`row ${i}`,timeout:4000}).toEqual({fully:true,ownsPoint:true,covered:false});
+    return {fully:r.top>=list.top-0.5&&r.bottom<=list.bottom+0.5,ownsPoint:Boolean(top&&el.contains(top)),covered:Boolean(top&&top.closest('.footer.hoop-edit'))};})).toEqual({fully:true,ownsPoint:true,covered:false});
  }
 });
 
@@ -3377,7 +3381,7 @@ test('an out-of-range fill row spacing is clamped and noted, on Enter',async({pa
 test('an out-of-range fill border width is clamped and noted, on Enter',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));
  await openRectangle(page);await page.locator('#border').check();await expect(page.locator('#borderWidth')).toBeVisible();
- await expectOutOfRangeClamp(page,{field:'#borderWidth',bad:'-5',keep:'0',range:'0–12 mm',note:'Min 0 mm',commitKey:'Enter'});
+ await expectOutOfRangeClamp(page,{field:'#borderWidth',bad:'-5',keep:'0.0',range:'0–12 mm',note:'Min 0 mm',commitKey:'Enter'});
  expect(errors).toEqual([]);
 });
 
@@ -4278,7 +4282,7 @@ test('numeric fields clamp to their range with a note, restore a blank value, an
  const errors=[];page.on('pageerror',e=>errors.push(e.message));
  await page.goto('/');await page.locator('#new').click();await page.locator('#letter').click();
  await expect(page.locator('#letteringHeight')).toBeEnabled();await page.locator('#letteringHeight').fill('40');await page.locator('#letteringHeight').press('Enter');
- await expect(page.locator('#letteringHeight')).toHaveValue('16');await expect(page.locator('#letteringHeight').locator('..').locator('.clamp-note')).toContainText('Max 16 mm');
+ await expect(page.locator('#letteringHeight')).toHaveValue('16.0');await expect(page.locator('#letteringHeight').locator('..').locator('.clamp-note')).toContainText('Max 16 mm');
  await expect(page.locator('#toast')).not.toContainText('Invalid Welcome project');
  await page.locator('#rect').click();
  const x0=await page.locator('#posX').inputValue();await page.locator('#posX').fill('');await page.locator('#posX').press('Tab');
@@ -4287,7 +4291,7 @@ test('numeric fields clamp to their range with a note, restore a blank value, an
  await expect(page.locator('#sizeW').locator('..').locator('.clamp-note')).toContainText('Min 0.5 mm');
  await page.locator('#type').selectOption('fill');await page.locator('#spacing').fill('0.1');await page.locator('#spacing').press('Tab');await expect(page.locator('#spacing')).toHaveValue('0.25');
  await page.locator('#spacing').fill('2');await page.locator('#spacing').press('Tab');await expect(page.locator('#spacing')).toHaveValue('1.2');
- await page.locator('#hoopH').fill('400');await page.locator('#hoopH').press('Tab');await expect(page.locator('#hoopH')).toHaveValue('400');
+ await page.locator('#hoopH').fill('400');await page.locator('#hoopH').press('Tab');await expect(page.locator('#hoopH')).toHaveValue('400.0');
  expect(errors).toEqual([]);
 });
 
