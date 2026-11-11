@@ -225,3 +225,42 @@ for(const lang of ['en','es']){
   expect(errors).toEqual([]);
  });
 }
+// Issue #440: on a landscape phone (667x375 and 844x390, touch) the page fits the window in English and Spanish, the top bar stays on one
+// row, and the tool column is icons only. Each tool keeps its accessible name, so a screen reader still announces it.
+test.describe('landscape phone',()=>{
+test.use({isMobile:true,hasTouch:true});
+for(const [width,height] of [[667,375],[844,390]]) for(const lang of ['en','es']){
+ test(`the landscape phone fits and the top bar is one row at ${width}x${height} in ${lang}`,async({page})=>{
+  const errors=[];page.on('pageerror',e=>errors.push(e.message));page.on('dialog',d=>d.accept());
+  await page.setViewportSize({width,height});
+  await page.goto(`/?lang=${lang}`);await page.locator('#rect').click();
+  // No horizontal overflow: the document is exactly as wide as the window.
+  expect(await page.evaluate(()=>document.documentElement.scrollWidth),'document width').toBe(width);
+  const info=await page.locator('header.top').evaluate(top=>{
+   const kids=[...top.children].filter(e=>!e.classList.contains('sr-only')&&e.getBoundingClientRect().width>0);
+   return {tops:kids.map(e=>e.getBoundingClientRect().top),height:top.getBoundingClientRect().height,overflow:top.scrollWidth-top.clientWidth};
+  });
+  // One row, no taller than the single-row bar at 760px (58px).
+  for(const t of info.tops) expect(Math.abs(t-info.tops[0]),'child top within the bar row').toBeLessThan(12);
+  expect(info.height,'bar height is one row').toBeLessThanOrEqual(58);
+  expect(info.overflow,'no horizontal overflow in the bar').toBeLessThanOrEqual(0);
+  // Icons only: no visible text in the tool rail or the canvas tool bar. The grid chip's "mm" text is clipped to 1px, and its name is kept.
+  const tools=await page.evaluate(()=>{
+   const out=[];
+   for(const b of document.querySelectorAll('.canvas .tool-rail button, .canvas .floating button')){
+    if(!b.getBoundingClientRect().width)continue;
+    const label=b.querySelector('.grid-label');
+    const text=label?(label.getBoundingClientRect().width>1?label.textContent:''):b.innerText.trim();
+    out.push({id:b.id||b.getAttribute('aria-label'),text,name:b.getAttribute('aria-label')||b.textContent.trim()});
+   }
+   return out;
+  });
+  expect(tools.length,'tool buttons shown').toBeGreaterThan(10);
+  for(const t of tools){
+   expect(t.text,`${t.id} shows no visible text`).toBe('');
+   expect(t.name,`${t.id} keeps an accessible name`).not.toBe('');
+  }
+  expect(errors).toEqual([]);
+ });
+}
+});

@@ -469,7 +469,7 @@ input[aria-invalid="true"]{border-color:var(--warn)!important;background:var(--w
    New, Open, Import, Save, Duplicate and Redo buttons leave the bar (their actions stay in the File, Edit and Arrange menus and the
    keyboard), the menu labels and icons tighten, and the design name takes what is left, down to nothing, so Undo, Delete, Export and
    Settings stay whole inside the window. The bar keeps the 58px row it has from 601px up. */
-@media (max-width:600px){
+@media (max-width:600px),(max-height:500px) and (pointer:coarse){
 .top{flex-wrap:nowrap;gap:3px;padding:0 4px;height:58px}
 .top .logo,.top #new,.top #open,.top #importMachine,.top #save,.top #duplicate,.top #redo{display:none}
 .top .file-menu>button{padding:6px 4px;font-size:var(--fs-caption)}
@@ -506,3 +506,8 @@ input[aria-invalid="true"]{border-color:var(--warn)!important;background:var(--w
 .top #duplicate,.top #remove,.top #new,.top #importMachine{width:36px;min-width:36px;padding:0}.top #duplicate .icon-label,.top #remove .icon-label,.top #new .icon-label,.top #importMachine .icon-label{display:none}
 /* Checkboxes show a 24px box, the WCAG 2.5.8 minimum for the visible control, not just its label row. Icon checkboxes keep their own size. */
 input[type=checkbox]:not(.icon-check){width:24px;height:24px;min-width:24px;margin:0;flex:none}
+/* Issue #440: on a landscape phone (height 500 px or less, touch) the tool column is icons only. The grid chip keeps its drawn grid
+   tile and loses its visible "1 mm" text; its name stays on the button as aria-label, so a screen reader still announces it. */
+@media (max-height:500px) and (pointer:coarse){
+.canvas .floating .grid-chip .grid-label{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;margin:0}
+}
