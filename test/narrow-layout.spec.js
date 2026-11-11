@@ -184,3 +184,44 @@ for(const width of [375,390]) for(const lang of ['en','es']){
   expect(errors).toEqual([]);
  });
 }
+
+// Issue #438 (from #430): at 1024x768 no two inspector controls sit on top of each other, in English or Spanish. Closed sections
+// (Document stitch settings, Thread plan) take no room, so the controls below them are not pushed onto their hidden boxes.
+const boxIn=(page,sel)=>page.evaluate(s=>{const e=document.querySelector(s);if(!e)return null;const sc=document.getElementById('inspector');const b=sc.getBoundingClientRect();const r=e.getBoundingClientRect();if(!r.width||!r.height)return null;return {l:r.left,t:r.top-b.top+sc.scrollTop,r:r.right,b:r.bottom-b.top+sc.scrollTop};},sel);
+const meets=(a,b)=>a.l<b.r&&b.l<a.r&&a.t<b.b&&b.t<a.b;
+for(const lang of ['en','es']){
+ test(`inspector controls do not overlap at 1024x768 (${lang})`,async({page})=>{
+  const errors=[];page.on('pageerror',e=>errors.push(e.message));page.on('dialog',d=>d.accept());
+  await page.setViewportSize({width:1024,height:768});
+  await page.goto(`/?lang=${lang}`);await newDesign(page);
+  // Nothing selected: the document settings (trims, underlay, pull compensation) sit beside the default stitch fields. With the
+  // sections open as a worst case, and with two rectangles selected, the thread plan's Replace control must not sit on Fabric.
+  const pairs=[['#trims','#spacing'],['#underlay','#angle'],['#comp','#stitchLength']];
+  // A closed section draws none of its controls, so its control has no box to overlap; the field below it must still be drawn.
+  const checkClosed=async()=>{
+   for(const [x,y] of pairs){
+    expect(await boxIn(page,x),`${x} is not drawn while its section is closed`).toBeNull();
+    expect(await boxIn(page,y),`${y} is shown`).not.toBeNull();
+   }
+  };
+  const check=async(label)=>{
+   for(const [x,y] of pairs){
+    const a=await boxIn(page,x),b=await boxIn(page,y);
+    expect(a,`${x} is shown (${label})`).not.toBeNull();expect(b,`${y} is shown (${label})`).not.toBeNull();
+    expect(meets(a,b),`${x} and ${y} overlap (${label})`).toBe(false);
+   }
+  };
+  await checkClosed();
+  await page.evaluate(()=>document.querySelectorAll('#inspector details').forEach(d=>d.open=true));
+  await check('nothing selected, sections open');
+  for(const [a,b,c,d] of [[400,300,600,450],[250,500,380,600]]){await page.locator('#rect').click();await page.mouse.move(a,b);await page.mouse.down();await page.mouse.move(c,d,{steps:5});await page.mouse.up();}
+  await expect(page.locator('.plan-replace').first()).toHaveCount(1);
+  await page.evaluate(()=>{document.getElementById('secPlan').open=true;});
+  const replace=await boxIn(page,'.plan-replace'),fabric=await boxIn(page,'#fabric');
+  expect(replace,'Replace this thread is shown').not.toBeNull();expect(fabric,'Fabric is shown').not.toBeNull();
+  expect(meets(replace,fabric),'Replace this thread and Fabric overlap').toBe(false);
+  // The controls the user reaches for are shown.
+  for(const sel of ['#spacing','#angle','#stitchLength','#fabric']) await expect(page.locator(sel),sel).toBeVisible();
+  expect(errors).toEqual([]);
+ });
+}

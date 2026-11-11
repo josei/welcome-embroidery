@@ -455,6 +455,9 @@ input[aria-invalid="true"]{border-color:var(--warn)!important;background:var(--w
 .panel .sec-fold>summary::before,.panel .doc-settings>summary::before{content:"";position:absolute;left:2px;top:50%;margin-top:-4px;border-style:solid;border-width:4px 0 4px 5px;border-color:transparent transparent transparent currentColor;transition:transform .12s}
 .panel .sec-fold[open]>summary::before,.panel .doc-settings[open]>summary::before{transform:rotate(90deg)}
 .panel .sec-fold[open]>summary,.panel .doc-settings[open]>summary{margin-bottom:4px}
+/* Issue #438: a closed inspector section takes no room. Its controls are not drawn, but Chromium still lays them out, so their
+   boxes would sit on top of the visible controls below (Trim long jumps over Row spacing, and so on). */
+.panel details:not([open])>:not(summary){display:none!important}
 /* Keyboard focus (issue #364): disclosure summaries and layer rows get the same 2 px teal ring as other controls. */
 .sec-fold>summary:focus-visible,.doc-settings>summary:focus-visible,.object-row:focus-visible,.group-row:focus-visible{outline:2px solid var(--teal);outline-offset:2px}
 /* Issue #437: at phone widths (600px and narrower) the top bar stays on one row, so the page never scrolls sideways. The logo, the
