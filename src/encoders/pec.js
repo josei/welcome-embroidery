@@ -11,16 +11,23 @@ export const pecChartIndex=hex=>
   {const m=/^#?([0-9a-f]{6})$/i.exec(hex||"")||[0,"527461"];const n=parseInt(m[1],16),c=[n>>16&255,n>>8&255,n&255];let best=0,bd=Infinity;
   PEC_CHART.forEach((r,i)=>{const d=(r[0]-c[0])**2+(r[1]-c[1])**2+(r[2]-c[2])**2;if(d<bd){bd=d;best=i;}});return best+1;};
 // PEC (Brother): 512-byte header with palette indices, a stitch block in 0.1 mm, then blank 48 x 38 icons (one overview, one per colour).
-/** @param {Plan} plan @returns {string[]} */
+// One palette entry per colour block: the first block, then one per colour change or stop. Each FE B0 code in the body starts the next entry, so the
+// palette has exactly one more entry than there are codes. A block that repeats the previous thread keeps its entry, since the reader needs one per
+// code; PEC readers turn such a repeat into a stop, not a colour change. A design that starts with a colour change has an empty first block, which
+// gets no thread (null, written as palette index 0) so the reader never merges it with the block that follows.
+/** @param {Plan} plan @returns {(string|null)[]} */
 export function pecColourSeq(plan){
-/** @type {string[]} */ const seq=[];
-  for(const p of plan.stitches){if(p.cmd==="end")continue;if(p.thread&&seq.at(-1)!==p.thread)seq.push(p.thread);}if(!seq.length)seq.push("#527461");return seq;}
+/** @type {(string|null)[]} */ const seq=[];
+  const stitches=plan.stitches.filter(p=>p.cmd!=="end");
+  seq.push(stitches[0]&&stitches[0].cmd!=="color"&&stitches[0].cmd!=="stop"?stitches[0].thread||"#527461":null);
+  for(const p of stitches){if(p.cmd==="color"||p.cmd==="stop")seq.push(p.thread||"#527461");}return seq;}
+/** @param {Plan} plan @returns {number[]} palette indices, one per colour block; 0 is no thread */
+export const pecPaletteIndices=plan=>pecColourSeq(plan).slice(0,255).map(hex=>hex===null?0:pecChartIndex(hex));
 /** @param {Plan} plan @param {string} name @returns {number[]} */
 export function pecBody(plan,name){
  if(plan.errors.length)throw Error(plan.errors.join(" "));
  plan={...plan,stitches:splitLongStitches(plan.stitches)};
- const seq=pecColourSeq(plan);
- const indices=seq.slice(0,255).map(pecChartIndex);
+ const indices=pecPaletteIndices(plan);
  /** @type {number[]} */ const body=[];
  /** @type {(v: number, long: boolean, flag: number) => void} */
  const value=(v,long,flag)=>{if(!long&&v>-64&&v<63){body.push(v&0x7F);return;}let x=v&0x0FFF;x|=0x8000;x|=flag<<8;body.push((x>>8)&0xFF,x&0xFF);};

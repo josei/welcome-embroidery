@@ -4,7 +4,7 @@
 /** @typedef {import('../encoders.js').Plan} Plan */
 
 import {last, splitLongStitches} from './shared.js';
-import {pecBody, pecChartIndex, pecColourSeq} from './pec.js';
+import {pecBody, pecChartIndex, pecPaletteIndices} from './pec.js';
 
 // PES version 1: '#PES0001', the PEC block offset, sew segments per colour block and a colour log, then the PEC block.
 /**
@@ -99,7 +99,7 @@ function pesWriter(plan,name,version){
    out[pecPlaceholder+3]=(pecAt>>>24)&0xFF;
  for(const b of pecBody(plan,name))out.push(b);
  if(version===6){
-  const seq=pecColourSeq(plan),indices=seq.slice(0,255).map(pecChartIndex),list=[indices.length-1,...indices];
+  const indices=pecPaletteIndices(plan),list=[indices.length-1,...indices];
   out.push(...list);for(let k=list.length;k<128;k++)out.push(0x20);
   const rgb=threads.map(h=>{const n=parseInt(h.slice(1),16);return [n>>16&255,n>>8&255,n&255];});
   for(let k=0;k<rgb.length;k++)for(let z=0;z<0x90;z++)out.push(0);
