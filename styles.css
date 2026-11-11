@@ -179,6 +179,7 @@ label[hidden],button[hidden],.sel-hint[hidden]{display:none!important}
 .canvas .floating{top:28px}.zoombar{left:30px}
 .guide{stroke:#2f80ed;stroke-width:1;vector-effect:non-scaling-stroke;pointer-events:none}.guide-hit{stroke:transparent;stroke-width:9;vector-effect:non-scaling-stroke;pointer-events:stroke;cursor:move}.smart{stroke:#e0457b;stroke-width:1;stroke-dasharray:4 3;vector-effect:non-scaling-stroke;pointer-events:none}.canvas.deleting-guide{cursor:not-allowed}
 #canvasText{box-shadow:0 0 0 3px #1c806940,0 8px 28px #1d29252b;position:absolute;z-index:9;resize:none;font:var(--fw-emphasis) var(--fs-large) Inter,system-ui,sans-serif;line-height:1.25;padding:6px 8px;background:#ffffffeb;color:var(--teal-deep);border:1.5px solid var(--teal);border-radius:8px;box-shadow:0 8px 28px #1d29252b;outline:none}
+#canvasText.keyboard-focus{outline:2px solid var(--teal);outline-offset:2px}
 
 .underlay-details{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin:-4px 0 6px;font-size:var(--fs-caption)}.underlay-details label{margin:4px 0}.underlay-details input{width:100%!important;min-width:0}.underlay-details[hidden],#stitchLenRow[hidden],#staggerRow[hidden],#underlayRow[hidden]{display:none!important}
 
@@ -453,3 +454,5 @@ input[aria-invalid="true"]{border-color:var(--warn)!important;background:var(--w
 .panel .sec-fold>summary::before,.panel .doc-settings>summary::before{content:"";position:absolute;left:2px;top:50%;margin-top:-4px;border-style:solid;border-width:4px 0 4px 5px;border-color:transparent transparent transparent currentColor;transition:transform .12s}
 .panel .sec-fold[open]>summary::before,.panel .doc-settings[open]>summary::before{transform:rotate(90deg)}
 .panel .sec-fold[open]>summary,.panel .doc-settings[open]>summary{margin-bottom:4px}
+/* Keyboard focus (issue #364): disclosure summaries and layer rows get the same 2 px teal ring as other controls. */
+.sec-fold>summary:focus-visible,.doc-settings>summary:focus-visible,.object-row:focus-visible,.group-row:focus-visible{outline:2px solid var(--teal);outline-offset:2px}

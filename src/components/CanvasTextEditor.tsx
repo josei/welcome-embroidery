@@ -8,6 +8,14 @@ import {selectAllInField} from './selectAllKey';
 // The lettering text box over the canvas. interactionState.canvasText says which object is being edited and where its
 // screen rectangle is; typing updates the object's text and width, Enter commits as one undo step, Shift+Enter adds a
 // line, Escape cancels and restores the original text, and leaving the box commits.
+// Whether the most recent input was from the keyboard. A box opened from the keyboard (Add lettering, Enter) shows a
+// focus ring; one opened by a mouse or touch press does not, so mouse editing looks as it always did.
+let keyboardInput = false;
+if (typeof window !== 'undefined') {
+  window.addEventListener('keydown', () => { keyboardInput = true; }, true);
+  window.addEventListener('pointerdown', () => { keyboardInput = false; }, true);
+}
+
 export function CanvasTextEditor() {
   const {canvasText} = useSyncExternalStore(interactionState.subscribe, interactionState.get);
   const box = useRef<HTMLTextAreaElement>(null);
@@ -19,6 +27,7 @@ export function CanvasTextEditor() {
       box.current?.select();
     };
     focusAndSelect();
+    box.current?.classList.toggle('keyboard-focus', keyboardInput);
     // A box placed by a canvas click opens under the pointer, so the release of that click lands on the textarea and
     // moves the caret to the end of the placeholder. Two cases, both covered so the result does not depend on how
     // fast React commits: a release that already happened before this effect ran is handled by the zero-delay timer,
@@ -83,6 +92,7 @@ export function CanvasTextEditor() {
         style={{left: canvasText.left, top: canvasText.top, width: canvasText.width, height: canvasText.height}}
         onInput={input}
         onKeyDown={keyDown}
+        onPointerDown={e => e.currentTarget.classList.remove('keyboard-focus')}
         onBlur={e => finish(true, e.currentTarget.value)}
       />
       <p id="canvasTextHint" className="canvas-hint canvas-text-hint">
