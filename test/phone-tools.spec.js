@@ -142,3 +142,31 @@ for(const [width,height] of [[390,844],[360,740]]) for(const lang of ['en','es']
   expect(errors).toEqual([]);
  });
 }
+
+// Issue #460: at 390x844 and 360x740 every tool in the desktop tool list is reachable with one tap and no sideways swipe. The rail
+// wraps onto more rows instead of scrolling, so each tool button is inside the window, unclipped, receives a tap, and is 44 px square.
+const toolIds=page=>page.locator('.canvas .tool-rail button[id]').evaluateAll(els=>els.map(e=>e.id).sort());
+for(const [width,height] of [[390,844],[360,740]]) test(`every desktop tool is reachable with one tap at ${width}x${height}`,async({page})=>{
+ await page.setViewportSize({width:1024,height:768});
+ await page.goto('/');
+ const desktop=await toolIds(page);
+ expect(desktop.length,'the desktop tool list was found').toBeGreaterThan(10);
+ const errors=await openEditor(page,width,height);
+ expect(await toolIds(page),'phone tool set equals the desktop tool set').toEqual(desktop);
+ expect(await page.evaluate(()=>document.documentElement.scrollWidth-innerWidth),'no page overflow').toBeLessThanOrEqual(0);
+ const rail=page.locator('.canvas .tool-rail');
+ expect(await rail.evaluate(e=>e.scrollWidth-e.clientWidth),'the rail does not scroll sideways').toBeLessThanOrEqual(0);
+ for(const id of desktop){
+  const btn=rail.locator(`#${id}`);
+  const box=await btn.boundingBox();
+  expect(box,`${id} has a box`).not.toBeNull();
+  expect(box.x,`${id} is not clipped on the left`).toBeGreaterThanOrEqual(0);
+  expect(box.x+box.width,`${id} is not clipped on the right`).toBeLessThanOrEqual(width);
+  expect(box.y,`${id} is not clipped on the top`).toBeGreaterThanOrEqual(0);
+  expect(box.y+box.height,`${id} is not clipped on the bottom`).toBeLessThanOrEqual(height);
+  expect(Math.min(box.width,box.height),`${id} touch target is at least 44 px`).toBeGreaterThanOrEqual(44);
+  const hit=await btn.evaluate(e=>{const r=e.getBoundingClientRect();const top=document.elementFromPoint(r.x+r.width/2,r.y+r.height/2);return !!top&&e.contains(top);});
+  expect(hit,`${id} receives a tap`).toBe(true);
+ }
+ expect(errors).toEqual([]);
+});

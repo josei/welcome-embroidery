@@ -315,13 +315,14 @@ input:not([type=checkbox]):not([type=range]),select,textarea,.panel textarea{fon
 .canvas .tool-rail{position:absolute;left:28px;top:28px;z-index:6;display:flex;flex-direction:column;gap:2px;margin:0;padding:6px;background:#fff;border:0;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,.08);max-height:calc(100% - 56px);overflow:auto;order:0}
 .canvas .tool-rail .icon-button{width:36px;height:36px;min-width:36px}
 .canvas.preview-mode .tool-rail{display:none}
-/* Issue #443: at phone widths (600px and narrower) the tool rail is one row along the bottom of the canvas. It scrolls sideways inside
-   its own box, so the page never scrolls and every tool is one tap away. Each tool button is 40px, above the 24px touch minimum. */
+/* Issue #443: at phone widths (600px and narrower) the tool rail sits along the bottom of the canvas, above the zoom bar.
+   Issue #460: it wraps onto as many rows as it needs, so every tool is visible and one tap away with no sideways swipe.
+   Each tool button is 44px, the touch target from #453. */
 @media (max-width:600px){
-.canvas .tool-rail{left:8px;right:8px;top:auto;bottom:50px;width:auto;max-width:none;max-height:none;flex-direction:row;flex-wrap:nowrap;align-items:center;justify-content:flex-start;gap:4px;padding:6px;border-radius:12px;overflow-x:auto;overflow-y:hidden;overscroll-behavior-x:contain;scrollbar-width:thin}
-.canvas .tool-rail .icon-button{width:40px;min-width:40px;height:40px;flex:none}
-/* Issue #459: the hint sits above the tool strip, wraps inside the canvas, and leaves the zoom bar uncovered. */
-.canvas .canvas-text-hint{bottom:108px;max-width:calc(100% - 16px);white-space:normal;text-align:center;line-height:1.3}
+.canvas .tool-rail{left:8px;right:8px;top:auto;bottom:50px;width:auto;max-width:none;max-height:none;flex-direction:row;flex-wrap:wrap;align-items:center;align-content:center;justify-content:center;gap:4px;padding:6px;border-radius:12px;overflow:visible}
+.canvas .tool-rail .icon-button{width:44px;min-width:44px;height:44px;flex:none}
+/* Issue #459: the hint sits above the tool strip (two rows of 44px buttons at most), wraps inside the canvas, and leaves the zoom bar uncovered. */
+.canvas .canvas-text-hint{bottom:162px;max-width:calc(100% - 16px);white-space:normal;text-align:center;line-height:1.3}
 }
 
 .canvas .floating{top:56px;left:auto;right:12px;transform:none;display:flex;flex-direction:column;flex-wrap:wrap;align-items:center;align-content:flex-start;justify-content:flex-start;gap:2px;width:auto;max-width:none;max-height:calc(100% - 76px);padding:6px;overflow:visible;grid-template-columns:none}
