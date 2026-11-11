@@ -37,7 +37,8 @@ test('the top bar stays on one row at 760px and the title gives way first',async
  await page.locator('header.top #name').blur();
  const bar=page.locator('header.top');
  const info=await bar.evaluate(top=>{
-  const kids=[...top.children].filter(e=>e.getBoundingClientRect().width>0);
+  // The visually hidden page title (sr-only) is not part of the visible row.
+  const kids=[...top.children].filter(e=>!e.classList.contains('sr-only')&&e.getBoundingClientRect().width>0);
   return {tops:kids.map(e=>e.getBoundingClientRect().top),height:top.getBoundingClientRect().height,overflow:top.scrollWidth-top.clientWidth};
  });
  // One row: every visible child sits on the same line (a wrapped row would sit lower).

@@ -11,7 +11,7 @@ test.beforeEach(async({page})=>{await page.addInitScript(()=>{delete window.show
 const headings=page=>page.evaluate(()=>{
  const out=[];
  const visible=el=>{for(let e=el;e&&e!==document.body;e=e.parentElement){if(e.hidden||e.closest('[hidden]'))return false;const s=getComputedStyle(e);if(s.display==='none'||s.visibility==='hidden')return false;}const r=el.getBoundingClientRect();return r.width>0&&r.height>0;};
- const sel='.panel h3, .panel h4, .panel summary, .layers-head h3';
+ const sel='.panel h3, .panel h4, .panel summary, .layers-head h2';
  for(const el of document.querySelectorAll(sel)){
   if(el.id==='selected'||!visible(el))continue;
   const cs=getComputedStyle(el);
