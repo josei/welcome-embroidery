@@ -58,16 +58,17 @@ export const isLongStitch=(prev,s,rule=BROTHER_RULE)=>s.cmd==='stitch'&&!!prev&&
 
 /**
  * Splits each long non-jump move into equal stitches on the same line, each within the rule's limit less a rounding margin, in the same thread and command.
- * Jumps, trims and short moves are untouched. The walk starts at the machine origin (0, 0), which is where the writers start too.
+ * Jumps, trims and short moves are untouched. The walk starts at `from`, by default the machine origin (0, 0), where the Brother and JEF writers start.
  * @template {{x: number, y: number, cmd: string, thread: string}} P
  * @param {P[]} stitches
  * @param {StitchRule} [rule]
+ * @param {{x: number, y: number}} [from]
  * @returns {P[]}
  */
-export function splitLongStitches(stitches,rule=BROTHER_RULE){
+export function splitLongStitches(stitches,rule=BROTHER_RULE,from={x:0,y:0}){
   const stepMm=rule.limitMm-SPLIT_MARGIN_MM;
   /** @type {P[]} */ const out=[];
-  /** @type {{x: number, y: number}} */ let prev={x:0,y:0};
+  /** @type {{x: number, y: number}} */ let prev=from;
   for(const s of stitches){
     if(isLongStitch(prev,s,rule)){
       const n=Math.ceil(lengthOf(prev,s,rule)/stepMm);
