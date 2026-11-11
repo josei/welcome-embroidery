@@ -15,6 +15,8 @@ import {importSvg} from './svgImport.js';
 import {initialDocument, makeStitchLayer, measureText, validateDocument} from './engine.js';
 import {t} from './i18n.js';
 import {getPlan} from './compileService.js';
+import {exportFormatAfterImport} from './exportedCount.js';
+import {setExportBrand, setExportFormat} from './exportFormatState.js';
 import {layerPastHoop} from './importHoop.js';
 import {isRegistryFont, LEGACY_FONTS, loadFont} from './fonts.js';
 import {currentDocId, isDocId, openElsewhere, ownAutosaveKey, setDocId} from './docSlot.js';
@@ -511,6 +513,12 @@ export async function importMachineFile(file) {
         setSelection({selected: layer.id});
       });
       if (committed) {
+        // A PES file passes through unchanged, so pick PES for export: the canvas count then matches the file it decodes to.
+        const exportFormat = exportFormatAfterImport(format);
+        if (exportFormat) {
+          setExportBrand('brother');
+          setExportFormat(exportFormat);
+        }
         const revision = documentNow().doc.revision;
         // The toast waits for the compile the import starts, so it can say whether the layer reaches past the hoop.
         wired().compileNow().then(() => {

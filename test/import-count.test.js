@@ -4,7 +4,7 @@ import {readFileSync} from 'node:fs';
 import {decodeEmbroidery} from '../src/readers.js';
 import {compile,encode,importStitchLayer,initialDocument} from '../src/engine.js';
 import {readMachineFixtures} from './fixture-archive.js';
-import {exportedStitchCount, exportedObjectCounts} from '../src/exportedCount.js';
+import {exportedStitchCount, exportedObjectCounts, exportFormatAfterImport} from '../src/exportedCount.js';
 
 // The plan count is the DST list, which splits long moves, so an import can hold more stitches than its source. The canvas shows the count
 // of the export format picked (exportedStitchCount), so each export is checked against the count the canvas shows for that format.
@@ -53,4 +53,11 @@ test("random1-ew.pes: the object list row shows the picked format's count, not t
   assert.equal(plan.objectCounts[layer.id],plan.count,'the plan holds the planned count for the layer');
   assert.equal(exportedObjectCounts(plan,'pes',doc)[layer.id],stitchCount(decodeEmbroidery(encode(plan,'pes','#527461',doc.hoop,doc),'pes').stitches),'with PES picked, the layer row shows the PES export count');
   assert.equal(exportedObjectCounts(plan,'dst',doc)[layer.id],plan.count,'with DST picked, the layer row shows the DST count');
+});
+test('an imported PES file picks PES for export, and other imports keep the picked format', ()=>{
+  assert.equal(exportFormatAfterImport('pes'),'pes');
+  for(const format of ['dst','u01','pec','jef','vp3']) assert.equal(exportFormatAfterImport(format),null,`${format} imports keep the picked format`);
+  const [[,bytes]]=[...readMachineFixtures(/random1-ew\.pes$/i)];
+  const {doc,plan}=planFor(bytes,'pes','random1-ew.pes');
+  assert.equal(exportedStitchCount(plan,exportFormatAfterImport('pes'),doc),stitchCount(decodeEmbroidery(bytes,'pes').stitches),'the count the canvas shows after a PES import is the file\'s own decoded count');
 });

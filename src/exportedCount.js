@@ -65,3 +65,14 @@ export function exportedObjectCounts(plan, format, doc) {
   }
   return adjusted;
 }
+
+/**
+ * The export format the dialog should pick after a machine file is imported. A PES file imported unchanged is passed through as its
+ * own bytes, so the canvas count matches the file only when PES is the picked format; the default DST would show the planned count.
+ * Other imports keep the picked format (null).
+ * @param {string} importedFormat the format the file was read as
+ * @returns {string|null}
+ */
+export function exportFormatAfterImport(importedFormat) {
+  return importedFormat === 'pes' ? 'pes' : null;
+}
