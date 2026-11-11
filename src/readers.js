@@ -18,6 +18,7 @@
  * @typedef {{dflt: number, table: number[] | null, width: number, lengths: number[]}} Huff
  */
 
+import {hasAnchorTail} from './anchor.js';
 import {MAX_FILE_BYTES, MAX_THREADS, asBytes, fail} from './readers/shared.js';
 import {readJef} from './readers/jef.js';
 import {readVp3} from './readers/vp3.js';
@@ -37,17 +38,20 @@ import {readU01} from './readers/u01.js';
 export {PEC_CHART} from './readers/pec.js';
 export {SEW_CHART} from './readers/sew.js';
 
+/** Marks a decoded file as hoop-anchored when its bytes end with the anchor tail (see anchor.js). @param {Decoded} decoded @param {Uint8Array} bytes */
+function anchoredIf(decoded,bytes){if(hasAnchorTail(bytes))decoded.anchored=true;return decoded;}
+
 /** @param {Uint8Array | ArrayBuffer} input @param {string} format @returns {Decoded} */
 export function decodeEmbroidery(input, format) {
   const bytes=asBytes(input);
   if(bytes.byteLength>MAX_FILE_BYTES) fail('file exceeds 64 MiB limit');
-  if(format==='jef') return readJef(bytes);
+  if(format==='jef') return anchoredIf(readJef(bytes),bytes);
   if(format==='vp3') return readVp3(bytes);
   if(format==='dst') return readDst(bytes);
   if(format==='sew') return readSew(bytes);
   if(format==='pec') return readPec(bytes);
-  if(format==='pes') return readPes(bytes);
-  if(format==='exp') return readExp(bytes);
+  if(format==='pes') return anchoredIf(readPes(bytes),bytes);
+  if(format==='exp') return anchoredIf(readExp(bytes),bytes);
   if(format==='hus') return readHus(bytes);
   if(format==='xxx') return readXxx(bytes);
   if(format==='dsb') return readDsb(bytes);

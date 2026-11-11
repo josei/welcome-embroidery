@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import {decodeEmbroidery} from '../src/readers.js';
 import {compile,encode,importStitchLayer,initialDocument} from '../src/engine.js';
 import {importMidpoint} from '../src/stitchImport.js';
+import {applyOperations} from '../src/operations.js';
 import {readMachineFixtures} from './fixture-archive.js';
 
 // Imported points are placed at centre + (source - midpoint). The default placement puts the source midpoint at the origin, so a
@@ -168,4 +169,49 @@ test('a default-placed DST import keeps its 0.00 mm round trip after an export',
   assert.ok(once.anchored,'the editor writes its DST stream as hoop-anchored');
   const reimported=importStitchLayer(encode(plan,'dst','#527461',doc.hoop,doc),'dst',{fileName:'again.dst'});
   assert.ok(Math.abs(reimported.x+reimported.w/2-(layer.x+layer.w/2))<=0.1+1e-9,'re-import keeps the centre of the layer');
+});
+
+// A moved imported design written to JEF, PES v6 or EXP carries the anchor tail, so its re-import keeps the drawn lines where they were
+// placed, within 0.1 mm, as DST does. An unmoved import is written with no tail and still imports centred.
+test('a moved import re-imports from JEF, PES v6 and EXP at its canvas position, within 0.1 mm',()=>{
+  const [name,bytes]=machineFixture('/spiralbox-wilcom-b.BRO'),base=importStitchLayer(bytes,'bro',{fileName:name});
+  const box=pts=>[Math.min(...pts.map(p=>p[0])),Math.min(...pts.map(p=>p[1])),Math.max(...pts.map(p=>p[0])),Math.max(...pts.map(p=>p[1]))];
+  const drawn=stitches=>stitches.filter(s=>s.cmd==='stitch').map(s=>[s.x,s.y]);
+  for(const [dx,dy] of [[20,0],[0,20],[20,20]]){
+    const doc=initialDocument();doc.objects=[{...base,x:base.x+dx,y:base.y+dy}];const plan=compile(doc);
+    const a=box(drawn(plan.stitches));
+    for(const [format,decodeAs] of [['dst','dst'],['jef','jef'],['exp','exp'],['pes6','pes']]){
+      const out=encode(plan,format,'#527461',doc.hoop,doc);
+      const reimported=importStitchLayer(out,decodeAs,{fileName:`again.${decodeAs}`});
+      const again=initialDocument();again.objects=[reimported];
+      const b=box(drawn(compile(again).stitches));
+      for(let i=0;i<4;i++)assert.ok(Math.abs(a[i]-b[i])<=0.1+1e-9,`${format} moved ${dx},${dy}: box ${a.map(v=>v.toFixed(2))} vs re-import ${b.map(v=>v.toFixed(2))}`);
+    }
+  }
+});
+
+// A native object the person moved is flagged by the move operation, so its JEF, PES v6 and EXP export carries the anchor tail and re-imports
+// at its canvas position, within 0.1 mm. The same shape as gen-path-monogram: an open path, moved +20 mm in X or in X and Y. An unmoved native
+// object gets no flag, so its bytes do not change.
+test('a moved native path re-imports from DST, JEF, PES v6 and EXP at its canvas position, within 0.1 mm',()=>{
+  const RED='#527461';
+  const path={id:'m1',name:'M',kind:'path',closed:false,smooth:false,x:0,y:0,w:0,h:0,points:[[-20,-20],[-20,20],[0,0],[20,-20],[20,20]],thread:RED,stitch:'run'};
+  const box=pts=>[Math.min(...pts.map(p=>p[0])),Math.min(...pts.map(p=>p[1])),Math.max(...pts.map(p=>p[0])),Math.max(...pts.map(p=>p[1]))];
+  const drawn=stitches=>stitches.filter(s=>s.cmd==='stitch').map(s=>[s.x,s.y]);
+  for(const [dx,dy] of [[20,0],[0,20],[20,20]]){
+    const doc=initialDocument();doc.objects=[structuredClone(path)];
+    applyOperations(doc,[{op:'translate',ids:['m1'],dx,dy}]);
+    assert.equal(doc.objects[0].moved,true,'the move flags the object');
+    const plan=compile(doc);const a=box(drawn(plan.stitches));
+    for(const format of ['dst','jef','exp','pes6']){
+      const decodeAs=format==='pes6'?'pes':format;
+      const out=encode(plan,format,RED,doc.hoop,doc);
+      const reimported=importStitchLayer(out,decodeAs,{fileName:`again.${decodeAs}`});
+      const again=initialDocument();again.objects=[reimported];
+      const b=box(drawn(compile(again).stitches));
+      for(let i=0;i<4;i++)assert.ok(Math.abs(a[i]-b[i])<=0.1+1e-9,`${format} moved ${dx},${dy}: box ${a.map(v=>v.toFixed(2))} vs re-import ${b.map(v=>v.toFixed(2))}`);
+    }
+  }
+  const unmoved=initialDocument();unmoved.objects=[structuredClone(path)];
+  assert.equal(unmoved.objects[0].moved,undefined,'an unmoved native object carries no flag');
 });

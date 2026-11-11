@@ -34,6 +34,25 @@ const objectById=(doc,id)=>objById(doc,id);
 export function applyOperations(doc,operations) {
   if(!doc||doc.schema!=='welcome/1'||!Array.isArray(doc.objects)||!Array.isArray(operations))throw Error('Invalid Welcome document operation.');
   for(const op of operations){
+    // A move flags the objects it shifted, so their exports keep the canvas position (see anchor.js). Undo restores snapshots, which carry their own flags.
+    const before=MOVE_OPS.has(op.op)?new Map(doc.objects.map(o=>[o.id,[o.x,o.y]])):null;
+    applyOperation(doc,op);
+    if(before)for(const o of doc.objects){const b=before.get(o.id);if(b&&(o.x!==b[0]||o.y!==b[1]))o.moved=true;}
+  }
+  refreshAlong(doc);refreshClips(doc);
+  return doc;
+}
+
+/** Operations that move existing objects; the objects they shift are flagged `moved`. */
+const MOVE_OPS=new Set(['translate','transform','align','distribute']);
+
+/**
+ * Applies one operation to the document in place.
+ * @param {Doc} doc
+ * @param {Operation} op
+ */
+function applyOperation(doc,op){
+  {
     if(op.op==='add_shape')doc.objects.push(
       {id:op.id||crypto.randomUUID(),name:op.name|| (op.kind==='ellipse'?'Ellipse':'Rectangle'),kind:op.kind,x:op.x,y:op.y,w:op.width,h:op.height,thread:
       op.thread||'#527461',stitch:op.stitch||'fill',...(op.radius>0&&op.kind==='rect'?{radius:op.radius}:{})});
@@ -237,12 +256,10 @@ export function applyOperations(doc,operations) {
       for(const item of items.slice(1,-1)){const d=cursor-item.b[ax];translateObject(item.o,ax?0:d,ax?d:0);cursor+=item.b[ax+2]-item.b[ax]+gap;}}
     else if(op.op==='delete'){const i=doc.objects.findIndex(v=>v.id===op.id);if(i<0)throw Error(`Unknown object: ${op.id}`);doc.objects.splice(i,1);}
     else if(op.op==='duplicate'){const o=doc.objects.find(v=>v.id===op.id);if(!o)throw Error(`Unknown object: ${op.id}`);const copy=structuredClone(o);
-      delete copy.groupId;copy.id=op.newId||crypto.randomUUID();if(copy.along)copy.along.points=
+      delete copy.groupId;delete copy.moved;copy.id=op.newId||crypto.randomUUID();if(copy.along)copy.along.points=
       copy.along.points.map(/** @type {(p: number[]) => number[]} */(p)=>{const [x,y]=p;return [x+(op.dx??3),y+(op.dy??3)];});copy.name=
       op.name||copyName(o.name,o.kind,doc.objects.map(v=>v.name));copy.x+=op.dx??3;copy.y+=op.dy??3;if(copy.kind==='path')mapPathPoints(copy,([x,y])=>[x+(op.dx??3),y+(op.dy??3)]);
       doc.objects.push(copy);}
     else throw Error(`Unsupported operation: ${op.op}`);
   }
-  refreshAlong(doc);refreshClips(doc);
-  return doc;
 }

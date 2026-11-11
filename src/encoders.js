@@ -6,6 +6,7 @@
 import {hoopSize} from './hoops.js';
 import {decodeEmbroidery} from './readers.js';
 import {encodeJef} from './encoders/jef.js';
+import {hasMovedImport, withAnchorTail} from './anchor.js';
 import {encodeVp3} from './encoders/vp3.js';
 import {hasLongStitch, layerCanPassThrough, sourceMatches} from './encoders/layers.js';
 import {encodePec} from './encoders/pec.js';
@@ -43,6 +44,8 @@ export {
 
 /** PES formats that write an imported layer's planned stitches, so the file's stitch count is the canvas count (see encode()). */
 const PLANNED_PES_FORMATS = new Set(['pes', 'pes6']);
+/** Formats whose moved design carries the anchor tail (see anchor.js). */
+const ANCHORABLE = new Set(['jef', 'exp', 'pes', 'pes6']);
 
 /**
  * Writes a compiled plan in one machine format. An unchanged imported file is returned as its source bytes.
@@ -69,9 +72,12 @@ export function encode(plan,format,color,hoop=110,document=null){
     const bytes=Uint8Array.from(atob(/** @type {string} */(layers[0].source.originalBytesBase64)),c=>c.charCodeAt(0));
     if(bytes.byteLength===layers[0].source.size){try{const checked=decodeEmbroidery(bytes,format);if(sourceMatches(checked,layers[0]))return bytes;}catch{}}
   }
-  if(format==='jef')return encodeJef(plan,color,hoop);if(format==='dst')return encodeDst(plan,document?.name||'Welcome');
-    if(format==='exp')return encodeExp(plan);if(format==='pec')return encodePec(plan,document?.name||'Welcome');
-    if(format==='pes')return encodePes(plan,document?.name||'Welcome');if(format==='pes6')return encodePesV6(plan,document?.name||'Welcome');
+  // A document with a moved imported layer writes its JEF, PES and EXP file with the anchor tail, so the re-import keeps every position (see anchor.js).
+  const anchored=ANCHORABLE.has(format)&&hasMovedImport(document);
+  const tailed=(/** @type {Uint8Array} */ bytes,/** @type {number[]} */ lead=[])=>(anchored?withAnchorTail(bytes,lead):bytes);
+  if(format==='jef')return tailed(encodeJef(plan,color,hoop));if(format==='dst')return encodeDst(plan,document?.name||'Welcome');
+    if(format==='exp')return tailed(encodeExp(plan),[0x80,0xF0]);if(format==='pec')return encodePec(plan,document?.name||'Welcome');
+    if(format==='pes')return tailed(encodePes(plan,document?.name||'Welcome'));if(format==='pes6')return tailed(encodePesV6(plan,document?.name||'Welcome'));
     if(format==='sew')return encodeSew(plan);if(format==='u01')return encodeU01(plan);if(format==='xxx')return encodeXxx(plan);
     if(format==='tbf')return encodeTbf(plan,document?.name||'Welcome');if(format==='col')return encodeCol(plan);if(format==='edr')return encodeEdr(plan);
     return encodeVp3(plan,color);
