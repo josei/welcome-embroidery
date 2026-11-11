@@ -524,6 +524,10 @@ input[aria-invalid="true"]{border-color:var(--warn)!important;background:var(--w
 .top{height:48px}
 .top .sep,.top .logo,.top #new,.top #open,.top #importMachine,.top #save,.top #duplicate,.top #remove,.top #helpBtn,.top #settingsBtn,.top .save-status{display:none}
 .top .file-menu-list .menu-note{padding:8px 12px;font-size:var(--fs-caption);color:#5c625e;line-height:1.4;white-space:normal;overflow-wrap:anywhere}
+/* Issue #465: the blank-design reason takes no room in the bar, so the design name keeps its width beside Export. It hangs as a
+   small caption under the bar (outside its box, so it never overlaps the name or Export), and screen readers still get it. */
+.top{position:relative;z-index:7}
+.top .export-reason{position:absolute;top:100%;right:4px;width:auto;height:auto;clip:auto;overflow:visible;margin:2px 0 0;padding:4px 8px;background:#fff;border:1px solid #e3e6e1;border-radius:4px;font-size:var(--fs-caption);line-height:1.3;white-space:normal;max-width:calc(100vw - 16px);text-align:right}
 }
 /* Issue #375: between 1101 px and 1439 px the top bar fits on one row in Spanish and with a long project name. The gaps tighten, and the
    project name and the save status give way (the name first, down to its minimum; the status then shrinks to an ellipsis) so the

@@ -109,3 +109,22 @@ test('nothing leaves the top bar at 1024x768 and no phone Menu is shown',async({
  }
  expect(errors).toEqual([]);
 });
+
+// Issue #465: after New on a phone, the blank-design hint "Add an object to export" must not take the design name's row. The name keeps
+// at least 8 characters of width, and the hint and the name, and the hint and Export, do not overlap.
+for(const [width,height] of PHONES) for(const lang of ['en','es']){
+ test(`after New the name keeps its width and the export hint overlaps neither name nor Export at ${width}x${height} (${lang})`,async({page})=>{
+  const errors=await openEditor(page,width,height,lang);
+  await page.locator('#phoneMenu').click();
+  await page.locator('#phoneMenuList #menuNew').click();
+  await expect(page.locator('#exportReason')).toBeVisible();
+  const box=sel=>page.locator(sel).evaluate(e=>{const r=e.getBoundingClientRect();return {x:r.x,y:r.y,w:r.width,h:r.height};});
+  const name=await box('#name'), hint=await box('#exportReason'), exp=await box('#export');
+  const meets=(a,b)=>a.x<b.x+b.w && b.x<a.x+a.w && a.y<b.y+b.h && b.y<a.y+a.h;
+  // A name shown at 8 characters of the heading font is about 8 x 9 px; 100 px is a generous floor for the field.
+  expect(name.w,'name width').toBeGreaterThanOrEqual(100);
+  expect(meets(name,hint),'hint overlaps name').toBe(false);
+  expect(meets(exp,hint),'hint overlaps Export').toBe(false);
+  expect(errors).toEqual([]);
+ });
+}
