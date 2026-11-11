@@ -60,7 +60,7 @@ nav button[data-view]{padding:7px 13px;color:#66726c}nav button[data-view].activ
 .icon-button[data-tooltip]::after{content:attr(data-tooltip);position:absolute;z-index:20;left:50%;bottom:calc(100% + 7px);transform:translate(-50%,3px);padding:5px 8px;border-radius:6px;background:#1d2925;color:#fff;font:var(--fw-regular) var(--fs-caption)/1.2 Inter,ui-sans-serif,system-ui,sans-serif;white-space:nowrap;opacity:0;pointer-events:none;transition:opacity .12s,transform .12s}
 .icon-button[data-tooltip]:hover::after,.icon-button[data-tooltip]:focus-visible::after{opacity:1;transform:translate(-50%,0)}
 .top .icon-button{width:36px;height:36px}
-.top .icon-button.labelled{width:auto;min-width:36px;display:inline-flex;align-items:center;gap:6px;padding:0 10px}.icon-label{font-size:var(--fs-body);font-weight:var(--fw-regular);white-space:nowrap}.agent-state{margin:0 0 10px;font-size:var(--fs-body);color:#66726c}
+.agent-state{margin:0 0 10px;font-size:var(--fs-body);color:#66726c}
 .top #export{display:flex;align-items:center;justify-content:center;min-height:36px}
 .tool-row{display:flex;gap:4px;margin:0 0 10px}
 .tool-row .icon-button{background:#f6f7f5;color:#53635b}
@@ -88,6 +88,7 @@ nav .icon-button:first-of-type{margin-left:auto}
 .segmented button[data-view]{border:0;background:transparent;border-radius:6px;padding:6px 12px;color:#66726c}
 .segmented button[data-view].active{background:#fff;color:var(--teal);font-weight:var(--fw-emphasis);box-shadow:0 1px 2px #1d29251f}
 .edit-tools{display:flex;gap:2px}
+/* Delete sits apart from Duplicate and turns red only on hover, so a slip is less likely; its focus ring is the shared one. */
 /* Delete sits apart from Duplicate and turns red only on hover, so a slip is less likely; its focus ring is the shared one. */
 .edit-tools #remove{margin-left:8px}.edit-tools #remove:hover:not(:disabled){color:#9b2c1f;border-color:#d9a79e;background:#fbeeea}
 /* Issue #379: the title field is at least 24px tall, so its click and Tab target meets the minimum. The field has no border, so only its hit area grows. */
@@ -434,9 +435,6 @@ input[aria-invalid="true"]{border-color:var(--warn)!important;background:var(--w
 .top .export-split #export{padding:0 10px}
 /* The blank-design reason is still read by screen readers (Export points at it), but it cannot take a row of its own here. */
 .top .export-reason{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;margin:0}
-/* The New design and Import buttons keep their name and tooltip, but their visible words would push the bar past 760px, so they show as icons here. */
-.top .icon-button.labelled{width:30px;min-width:30px;padding:0;justify-content:center}
-.top .icon-label{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;margin:0}
 .layout>aside.panel:first-child>.layers-head{padding:0 10px}
 }
 
@@ -482,9 +480,20 @@ input[aria-invalid="true"]{border-color:var(--warn)!important;background:var(--w
 .top{gap:6px}
 .top #name{flex:1 1 0;min-width:64px;width:auto}
 .top #savedStatus,.top #unsavedMark{flex:0 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-/* Duplicate and Delete become icon-only here; their names stay on the buttons for screen readers and tooltips. */
-/* New design and Import drop their words here too, so the save status gets the width its longest translation needs (Spanish: 189px). */
-.top #duplicate,.top #remove,.top #new,.top #importMachine{width:36px;min-width:36px;padding:0}.top #duplicate .icon-label,.top #remove .icon-label,.top #new .icon-label,.top #importMachine .icon-label{display:none}
 }
+/* Issue #433: one control style across the top bar. Every command is an icon-only 36 px button with a tooltip (the shortcut is
+   in it where one exists); Export is the only text button. The menus are text, centred on the same line. One divider sits between
+   each group: menus | name | file | edit | export, help and settings. The name takes the free width, so the right-hand group sits flush. */
+@media (min-width:1101px){
+.top{gap:6px}
+.top .sep{margin:0 4px}
+.top .file-menu>button{height:36px;display:inline-flex;align-items:center}
+.top #name{flex:1 1 0;min-width:64px;width:auto;height:36px}
+.top .export-split{margin-left:0}
+/* The unsaved dot sits 6px before the name: the gap alone spaces it, so its negative margin goes. */
+.top .unsaved-marker:not([hidden]){margin-right:0}
+}
+/* Duplicate, Delete, New and Import are icon-only at every width; their names stay on the buttons for screen readers and tooltips. */
+.top #duplicate,.top #remove,.top #new,.top #importMachine{width:36px;min-width:36px;padding:0}.top #duplicate .icon-label,.top #remove .icon-label,.top #new .icon-label,.top #importMachine .icon-label{display:none}
 /* Checkboxes show a 24px box, the WCAG 2.5.8 minimum for the visible control, not just its label row. Icon checkboxes keep their own size. */
 input[type=checkbox]:not(.icon-check){width:24px;height:24px;min-width:24px;margin:0;flex:none}

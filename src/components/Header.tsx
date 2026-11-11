@@ -8,7 +8,7 @@ import {agentLinkState, type AgentLink} from '../agentLinkState.js';
 import {EMPTY_EXPORT_REASON} from '../exportDialogState.js';
 import {openExportDialog} from '../exportCommands.js';
 import {shortcutLabel} from '../shortcutLabels.js';
-import {shortcutFor} from '../shortcutTable.js';
+import {shortcutFor, shortcutForCommand} from '../shortcutTable.js';
 import {importMachineFile, newProject, openProjectFile, projectSave} from '../projectIO.js';
 import {saveState} from '../saveState.js';
 import {dirtyMark} from '../saveMark.js';
@@ -34,16 +34,17 @@ function ProjectName() {
  );
 }
 // Undo and Redo: the name says which action the step takes back (or forward), e.g. "Undo delete Rectangle". With no
-// step on that side, the name says so and the button is disabled (actionState).
+// step on that side, the name says so and the button is disabled (actionState). Icon-only; the tooltip adds the shortcut.
 function HistoryButton({undo = false}: {undo?: boolean}) {
  const {history, future} = useSyncExternalStore(documentState.subscribe, documentState.get);
  const last = (undo ? history : future).at(-1)?.label;
  const name = last === undefined ? t(undo ? 'Nothing to undo' : 'Nothing to redo') : t(undo ? 'Undo {action}' : 'Redo {action}', {action: last});
+ const keys = shortcutForCommand(undo ? 'undo' : 'redo');
+ const tip = keys ? `${name} (${keys})` : name;
  return (
-  <ActionButton flag={undo ? 'undo' : 'redo'} className="icon-button labelled" id={undo ? 'undo' : 'redo'} aria-label={name} title={name} data-tooltip={name}
+  <ActionButton flag={undo ? 'undo' : 'redo'} className="icon-button" id={undo ? 'undo' : 'redo'} aria-label={name} title={tip} data-tooltip={tip}
    onClick={() => (undo ? toolbarActions.undo() : toolbarActions.redo())}>
    <svg className="icon"><use href={undo ? '#i-undo' : '#i-redo'} /></svg>
-   <span className="icon-label">{t(undo ? 'Undo' : 'Redo')}</span>
   </ActionButton>
  );
 }
@@ -87,6 +88,11 @@ function settingsButtonClass(agent: AgentLink) {
 function settingsTip(agent: AgentLink) {
  return agent.active ? t('Settings: agent connected') : agent.waiting ? t('Settings: waiting for agent') : t('Settings');
 }
+// A tooltip for a command with a shortcut in the table: the name, then the key in brackets.
+function withKeys(name: string, command: string) {
+ const keys = shortcutForCommand(command);
+ return keys ? `${t(name)} (${keys})` : t(name);
+}
 // The editor header, rendered by React. Ids and attributes match the markup this replaced,
 // because app.js wires its controls by id.
 export function Header() {
@@ -96,6 +102,10 @@ export function Header() {
  const agent = useSyncExternalStore(agentLinkState.subscribe, agentLinkState.get);
  const projectFile = useRef<HTMLInputElement>(null);
  const machineFile = useRef<HTMLInputElement>(null);
+ const newTip = withKeys('New design', 'new');
+ const openTip = withKeys('Open project or SVG', 'open');
+ const duplicateTip = withKeys('Duplicate', 'duplicate');
+ const deleteTip = withKeys('Delete', 'delete');
  return (
   <><header className="top"><h1 className="sr-only">{t('Welcome Embroidery')}</h1><a className="logo" href="/" aria-label="Welcome"><svg className="logo-mark" viewBox="50 -939 3454 944" width="95.1" height="26"
     role="img" aria-label="Welcome"><path fillRule="evenodd"
@@ -128,38 +138,15 @@ export function Header() {
         "-67L3485 -116L3499 -142L3504 -178L3497 -211L3488 -220L3476 -223L3462 -219L3403 -163L3368 -137L3327 -115L3285 -100L3247 -95L3205 -100L3174 -115L3162 " +
         "-127L3152 -141L3243 -171L3308 -209L3344 -249L3360 -282L3369 -338L3363 -381L3356 -400L3347 -417L3319 -444L3302 -454L3263 -465L3220 -465L3179 " +
         "-457L3142 -442L3093 -405L3066 -373L3036 -319L3020 -265L3016 -227ZM3136 -219L3140 -267L3152 -307L3175 -344L3206 -365L3240 -365L3253 -356L3260 " +
-        "-343L3261 -308L3244 -276L3229 -261L3198 -241L3159 -225Z"}/></svg></a><FileMenu /><EditMenu /><ArrangeMenu /><ProjectName /><SaveStatus /><button className="icon-button labelled" id="new"
-          aria-label="New design" title="New design" data-tooltip="New design" onClick={(
-    ) =>
-    newProject(
-    )}><svg className="icon"><use href="#i-new"/></svg><span className="icon-label">{t('New design')}</span></button><button className="icon-button" id="open" aria-label="Open project or SVG"
-      title="Open project or SVG" data-tooltip="Open project or SVG" onClick={(
-    ) =>
-    projectFile.current?.click(
-    )}><svg className="icon"><use href="#i-open"/></svg></button><button className="icon-button labelled" id="importMachine"
-      aria-label="Import JEF / VP3…" title="Import JEF / VP3…"
-        data-tooltip="Import JEF / VP3…" onClick={(
-    ) =>
-    machineFile.current?.click(
-    )}><svg className="icon"><use href="#i-import"/></svg><span className="icon-label">{t('Import')}</span></button><button className="icon-button" id="save" aria-label={saveLabel}
-      title={saveLabel} data-tooltip={saveLabel} onClick={(
-    ) =>
-    projectSave(
-    )}><svg className="icon"><use href="#i-save"/></svg></button><button className="icon-button" id="helpBtn" aria-label="Keyboard shortcuts (?)"
-      title="Keyboard shortcuts (?)" data-tooltip="Keyboard shortcuts (?)"><svg className="icon"><use href="#i-keys"/></svg></button><span
-        className="sep"></span><div className="edit-tools"><HistoryButton undo /><HistoryButton /><ActionButton flag="duplicate" className="icon-button labelled" id="duplicate"
-      aria-label="Duplicate selected object" title="Duplicate selected object" data-tooltip="Duplicate" onClick={(
-    ) =>
-    toolbarActions.duplicate(
-    )}><svg className="icon"><use href="#i-copy"/></svg><span className="icon-label">{t('Duplicate')}</span></ActionButton><ActionButton flag="remove" className="icon-button labelled" id="remove"
-      aria-label="Delete selected object" title="Delete selected object" data-tooltip="Delete" onClick={(
-    ) =>
-    toolbarActions.remove(
-    )}><svg className="icon"><use href="#i-delete"/></svg><span className="icon-label">{t('Delete')}</span></ActionButton></div><ExportSplit /><button type="button" className={settingsButtonClass(agent)}
-      id="settingsBtn" aria-label="Settings" title={settingsTip(agent)} data-tooltip="Settings" onClick={(
-    ) =>
-    setSettingsOpen(
-    true)}><svg className="icon"><use href="#i-gear"/></svg></button><input id="file" ref={projectFile} type="file"
+        "-343L3261 -308L3244 -276L3229 -261L3198 -241L3159 -225Z"}/></svg></a><FileMenu /><EditMenu /><ArrangeMenu /><span className="sep" aria-hidden="true" /><ProjectName /><SaveStatus /><span className="sep" aria-hidden="true" /><button className="icon-button" id="new"
+          aria-label="New design" title={newTip} data-tooltip={newTip} onClick={() => newProject()}><svg className="icon"><use href="#i-new"/></svg></button><button className="icon-button" id="open" aria-label="Open project or SVG"
+      title={openTip} data-tooltip={openTip} onClick={() => projectFile.current?.click()}><svg className="icon"><use href="#i-open"/></svg></button><button className="icon-button" id="importMachine"
+      aria-label="Import JEF / VP3…" title="Import JEF / VP3…" data-tooltip="Import JEF / VP3…" onClick={() => machineFile.current?.click()}><svg className="icon"><use href="#i-import"/></svg></button><button className="icon-button" id="save" aria-label={saveLabel}
+      title={saveLabel} data-tooltip={saveLabel} onClick={() => projectSave()}><svg className="icon"><use href="#i-save"/></svg></button><span className="sep" aria-hidden="true" /><div className="edit-tools"><HistoryButton undo /><HistoryButton /><ActionButton flag="duplicate" className="icon-button" id="duplicate"
+      aria-label="Duplicate selected object" title={duplicateTip} data-tooltip={duplicateTip} onClick={() => toolbarActions.duplicate()}><svg className="icon"><use href="#i-copy"/></svg></ActionButton><ActionButton flag="remove" className="icon-button" id="remove"
+      aria-label="Delete selected object" title={deleteTip} data-tooltip={deleteTip} onClick={() => toolbarActions.remove()}><svg className="icon"><use href="#i-delete"/></svg></ActionButton></div><span className="sep" aria-hidden="true" /><ExportSplit /><button className="icon-button" id="helpBtn" aria-label="Keyboard shortcuts (?)"
+      title="Keyboard shortcuts (?)" data-tooltip="Keyboard shortcuts (?)"><svg className="icon"><use href="#i-keys"/></svg></button><button type="button" className={settingsButtonClass(agent)}
+      id="settingsBtn" aria-label="Settings" title={settingsTip(agent)} data-tooltip="Settings" onClick={() => setSettingsOpen(true)}><svg className="icon"><use href="#i-gear"/></svg></button><input id="file" ref={projectFile} type="file"
       accept=".welcome,.welcome,.svg,.dxf,application/json,image/svg+xml" hidden onChange={async e =>
     { const chosen = e.target.files?.[0]; if (!chosen) return;
     try { await openProjectFile(chosen); } finally { e.target.value = '';

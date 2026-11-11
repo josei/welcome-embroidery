@@ -89,7 +89,7 @@ test('pinned JEF import renders a stitch layer, saves source commands, transform
 
 test('inline icon controls are accessible and rotated stitch-layer preview matches the compile plan',async({page})=>{
  const fixture=pinnedMachineFixture('vp3'),doc=initialDocument(),layer=importStitchLayer(fixture.bytes,'vp3');doc.objects=[layer];applyOperations(doc,[{op:'transform',id:layer.id,rotation:17}]);const firstNeedle=compile(doc).stitches.find(s=>s.cmd==='stitch');
- await page.goto('/');page.on('dialog',dialog=>dialog.accept());await expect(page.getByRole('button',{name:'New design'})).toHaveAttribute('data-tooltip','New design');await expect(page.getByRole('button',{name:'Add ellipse'})).toHaveAttribute('title','Add ellipse (O)');await expect(page.getByRole('button',{name:'Nothing to undo'})).toBeDisabled();
+ await page.goto('/');page.on('dialog',dialog=>dialog.accept());await expect(page.getByRole('button',{name:'New design'})).toHaveAttribute('data-tooltip',/^New design \(/);await expect(page.getByRole('button',{name:'Add ellipse'})).toHaveAttribute('title','Add ellipse (O)');await expect(page.getByRole('button',{name:'Nothing to undo'})).toBeDisabled();
  await newDesign(page);await page.locator('#machineFile').setInputFiles({name:'rotated.vp3',mimeType:'application/octet-stream',buffer:Buffer.from(fixture.bytes)});await expect(page.locator('#sourceInfo')).toContainText('VP3 stitch layer');await expect(page.locator('.object-row')).toHaveCount(1);await page.locator('#rotation').fill('17');await page.locator('#rotation').press('Tab');await expect(page.locator('#rotation')).toHaveValue('17');
  const importedId=await page.locator('.object-row').last().getAttribute('data-id'),group=page.locator(`#shapes [data-id="${importedId}"]`);expect(await group.count()).toBe(1);expect(await group.getAttribute('transform')).toBeNull();const paths=await group.locator('path').evaluateAll(nodes=>nodes.map(node=>node.getAttribute('d'))),coordinates=paths.flatMap(d=>[...d.matchAll(/[ML](-?(?:\d+\.?\d*|\.\d+))\s+(-?(?:\d+\.?\d*|\.\d+))/g)].map(m=>[Number(m[1]),Number(m[2])]));expect(coordinates.some(([x,y])=>Math.abs(x-firstNeedle.x)<=.06&&Math.abs(y-firstNeedle.y)<=.06)).toBe(true);const saved=page.waitForEvent('download');await page.locator('#save').click();const output=await saved,path='/tmp/welcome-rotated-import.welcome';await output.saveAs(path);const project=JSON.parse(await (await import('node:fs/promises')).readFile(path,'utf8'));expect(project.objects[0].rotation).toBe(17);
 });
@@ -1210,7 +1210,7 @@ test('tooltips are drawn on top of the panels, inside the window, above the cont
  const box=async()=>page.evaluate(()=>{const t=document.querySelector('#tooltip').getBoundingClientRect(),vw=document.documentElement.clientWidth,z=getComputedStyle(document.querySelector('#tooltip')),b=document.querySelector('#rect').getBoundingClientRect();return {l:t.left,r:t.right,t:t.top,b:t.bottom,vw,pos:z.position,zi:Number(z.zIndex),above:t.bottom<=b.top+1,below:t.top>=b.bottom-1};});
  let m=await box();expect(m.pos).toBe('fixed');expect(m.zi).toBeGreaterThan(1000);expect(m.l).toBeGreaterThanOrEqual(0);expect(m.r).toBeLessThanOrEqual(m.vw);
  await page.locator('#select').hover();await expect(page.locator('#tooltip')).toContainText('Select');m=await page.evaluate(()=>{const t=document.querySelector('#tooltip').getBoundingClientRect();return {l:t.left,r:t.right,vw:document.documentElement.clientWidth};});expect(m.l).toBeGreaterThanOrEqual(0);
- await page.locator('#export').hover({force:true});await page.locator('#undo').hover({force:true});await expect(page.locator('#tooltip')).toHaveText('Nothing to undo');const top=await page.evaluate(()=>{const t=document.querySelector('#tooltip').getBoundingClientRect(),b=document.querySelector('#undo').getBoundingClientRect();return t.top>=b.bottom-1&&t.top>=0;});expect(top).toBe(true);
+ await page.locator('#export').hover({force:true});await page.locator('#undo').hover({force:true});await expect(page.locator('#tooltip')).toHaveText(/^Nothing to undo \(/);const top=await page.evaluate(()=>{const t=document.querySelector('#tooltip').getBoundingClientRect(),b=document.querySelector('#undo').getBoundingClientRect();return t.top>=b.bottom-1&&t.top>=0;});expect(top).toBe(true);
  await page.mouse.move(700,500);await expect(page.locator('#tooltip')).not.toHaveClass(/show/);
 });
 
@@ -2965,8 +2965,8 @@ test('a reference picture that is not an image is left out and the design opens'
 test('header controls have accessible names: New design and Import are labelled, and the agent status lives in Settings',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));
  await page.goto('/');await expect(page.locator('#count')).toContainText('compiled');
- await expect(page.getByRole('button',{name:'New design',exact:true})).toHaveText(/New design/);
- await expect(page.getByRole('button',{name:'Import JEF / VP3…'})).toHaveText(/Import/);
+ await expect(page.getByRole('button',{name:'New design',exact:true})).toHaveAttribute('title',/^New design \(/);
+ await expect(page.getByRole('button',{name:'Import JEF / VP3…'})).toHaveAttribute('title','Import JEF / VP3…');
  await expect(page.getByRole('button',{name:'Settings',exact:true})).toBeVisible();
  await expect(page.locator('header.top #agentPill')).toHaveCount(0);
  await page.getByRole('button',{name:'Settings',exact:true}).click();
@@ -3428,7 +3428,7 @@ test('deleting an object confirms with a toast whose Undo restores it; the Undo 
  await page.locator('#remove').click();await expect(page.locator('.object-row')).toHaveCount(0);
  await expect(page.locator('#toast')).toContainText('Deleted Rectangle.');
  await expect(page.locator('#undo')).toHaveAttribute('aria-label','Undo delete Rectangle');
- await page.locator('#undo').hover({force:true});await expect(page.locator('#tooltip')).toHaveText('Undo delete Rectangle');
+ await page.locator('#undo').hover({force:true});await expect(page.locator('#tooltip')).toHaveText(/^Undo delete Rectangle \(/);
  await page.locator('#toast .toast-action').filter({hasText:'Undo'}).click();
  await expect(page.locator('.object-row')).toHaveCount(1);await expect(page.locator('.object-row').first()).toHaveAttribute('data-id',id);
  await expect(page.locator('#toast .toast-action')).toHaveCount(0);
