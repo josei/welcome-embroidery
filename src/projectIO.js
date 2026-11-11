@@ -14,6 +14,8 @@ import {withSavedHoop} from './storedPrefs.js';
 import {importSvg} from './svgImport.js';
 import {initialDocument, makeStitchLayer, measureText, validateDocument} from './engine.js';
 import {t} from './i18n.js';
+import {getPlan} from './compileService.js';
+import {layerPastHoop} from './importHoop.js';
 import {isRegistryFont, LEGACY_FONTS, loadFont} from './fonts.js';
 import {currentDocId, isDocId, openElsewhere, ownAutosaveKey, setDocId} from './docSlot.js';
 
@@ -509,8 +511,14 @@ export async function importMachineFile(file) {
         setSelection({selected: layer.id});
       });
       if (committed) {
-        wired().toast(t('Imported {name} as a {fmt} stitch layer.', {name: file.name, fmt: format.toUpperCase()}));
-        wired().compileNow();
+        const revision = documentNow().doc.revision;
+        // The toast waits for the compile the import starts, so it can say whether the layer reaches past the hoop.
+        wired().compileNow().then(() => {
+          const past = layerPastHoop(getPlan(), revision, layer.id);
+          wired().toast(past
+            ? t('Imported {name} as a {fmt} stitch layer. The design extends past the hoop: move it or choose a larger hoop.', {name: file.name, fmt: format.toUpperCase()})
+            : t('Imported {name} as a {fmt} stitch layer.', {name: file.name, fmt: format.toUpperCase()}));
+        });
       }
     }, {cancelNotice: t('Import canceled.'), replaceFirst: true, undoLabel: 'import file'});
   } catch (error) {
