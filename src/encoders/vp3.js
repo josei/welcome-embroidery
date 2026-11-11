@@ -49,9 +49,10 @@ export function encodeVp3(plan,color='#527461') {
     const rgb=b.thread.match(/[0-9a-f]{2}/gi)?.map(v=>parseInt(v,16))||[82,116,97];
       put(1,0,rgb[0],rgb[1],rgb[2],0,0,0,5,40,...str8(''),...str8(b.thread),...str8('Welcome'));
     put(...be32(Math.round((lastX-firstX)*100)),...be32(Math.round(-(lastY-firstY)*100)),0,1,0);const stitchPatch=out.length;put(0,0,0,0,10,246,0);let px=
-      fileStartX,py=fileStartY,hasNeedle=false;
-    for(const p of b.items){if(p.cmd==='jump'){if(hasNeedle)put(128,3);continue;}if(p.cmd!=='stitch')continue;const nx=Math.round(p.x*10),ny=
-      Math.round(p.y*10),dx=nx-px,dy=ny-py;px=nx;py=ny;hasNeedle=true;
+      fileStartX,py=fileStartY,hasNeedle=false,trimmed=false;
+    // A trim, or a jump between stitches, is written as a trim marker where the needle is. The next stitch is sewn from that point, as the reader expects.
+    for(const p of b.items){if(p.cmd==='trim'||p.cmd==='jump'){if(hasNeedle&&!trimmed){put(128,3);trimmed=true;}continue;}if(p.cmd!=='stitch')continue;const nx=Math.round(p.x*10),ny=
+      Math.round(p.y*10),dx=nx-px,dy=ny-py;px=nx;py=ny;hasNeedle=true;trimmed=false;
       if(dx<-32768||dx>32767||dy<-32768||dy>32767)throw Error('VP3 stitch delta exceeds the signed 16-bit range.');
       if(dx>=-127&&dx<=127&&dy>=-127&&dy<=127)put(...i8(dx),...i8(dy));else put(128,1,...be16(dx),...be16(dy),128,2);}
     put(128,3);patch(stitchPatch);put(0);patch(blockPatch);

@@ -58,10 +58,10 @@ test('mixed vector and two imported layers keep one terminal end and explicit co
   writeFileSync('/tmp/welcome-mixed-import.jef',output);writeFileSync('/tmp/welcome-mixed-import-expected.json',JSON.stringify(needle.map(s=>[s.x,s.y])));
 });
 
-test('malformed machine imports fail before changing project data and unsupported VP3 regeneration is explicit',()=>{
+test('malformed machine imports fail before changing project data and edited VP3 travel regenerates as VP3',()=>{
   assert.throws(()=>importStitchLayer(new Uint8Array([1,2,3]),'jef'),/Invalid embroidery file/);
   const [fileName,bytes]=[...readMachineFixtures()].find(([name])=>name.endsWith('/random1.vp3')),doc=initialDocument(),vp3Layer=importStitchLayer(bytes,'vp3',{fileName});doc.objects=[vp3Layer];applyOperations(doc,[{op:'transform',id:vp3Layer.id,x:vp3Layer.x+1}]);
-  const plan=compile(doc);assert.throws(()=>encode(plan,'vp3','#527461',110,doc),/cannot preserve after edits/);
+  const plan=compile(doc);const decoded=decodeEmbroidery(encode(plan,'vp3','#527461',110,doc),'vp3');assert.ok(decoded.stitches.some(s=>s.cmd==='stitch'));
 });
 
 test('hoop bounds errors are returned for every editable and imported object kind',()=>{

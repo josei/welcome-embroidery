@@ -24,11 +24,12 @@ export function sourceMatches(decoded,o){
   o.stitches.length)return false;
   for(let i=0;i<decoded.stitches.length;i++){const a=decoded.stitches[i],b=o.stitches[i];
   if(a.x!==b.x||a.y!==b.y||a.cmd!==b.cmd||a.thread!==b.thread)return false;}return true;}
-/** @param {PlanStitch[]} stitches @returns {boolean} */
-export function vp3LayerHasUnsupportedTravel(stitches){
-  for(let i=0;i<stitches.length;i++){const p=stitches[i],prev=stitches[i-1],next=stitches[i+1];if(p.cmd==='trim'||p.cmd==='stop')return true;
-  if(p.cmd==='jump'){const blockOrigin=i===0||prev?.cmd==='color'||next?.cmd==='color',noOp=prev&&p.x===prev.x&&p.y===prev.y;if(!blockOrigin&&!noOp)return true;
-  }}return false;}
+/**
+ * True when a plan holds a stop. VP3 has no stop command: the reader never produces one, and writing it as a colour block would change the colour-change count.
+ * @param {PlanStitch[]} stitches
+ * @returns {boolean}
+ */
+export function vp3LayerHasStop(stitches){return stitches.some(p=>p.cmd==='stop');}
 /**
  * True when an imported layer has a non-jump move longer than the writer for its format can emit in one stitch. Such a file is re-encoded, not passed through.
  * @param {Array<{x: number, y: number, cmd: string}>} stitches
