@@ -16,6 +16,18 @@ if (typeof window !== 'undefined') {
   window.addEventListener('pointerdown', () => { keyboardInput = false; }, true);
 }
 
+// The box keeps its place over the object, but never runs past the canvas edge. A left offset is a percentage of the canvas
+// width (the box is positioned in .canvas), so the right edge stays 8 px inside it even when the canvas is narrower than
+// the box wants; the width shrinks to the canvas on a phone. The box is never shorter than 44 px, a touch target.
+function fitInCanvas(c: {left: number; top: number; width: number; height: number}) {
+  return {
+    left: `min(${c.left}px, calc(100% - ${c.width}px - 8px))`,
+    top: c.top,
+    width: `min(${c.width}px, calc(100% - 16px))`,
+    height: c.height,
+  };
+}
+
 export function CanvasTextEditor() {
   const {canvasText} = useSyncExternalStore(interactionState.subscribe, interactionState.get);
   const box = useRef<HTMLTextAreaElement>(null);
@@ -89,7 +101,7 @@ export function CanvasTextEditor() {
         maxLength={canvasText.maxLength}
         aria-label="Edit text content"
         aria-describedby="canvasTextHint"
-        style={{left: canvasText.left, top: canvasText.top, width: canvasText.width, height: canvasText.height}}
+        style={fitInCanvas(canvasText)}
         onInput={input}
         onKeyDown={keyDown}
         onPointerDown={e => e.currentTarget.classList.remove('keyboard-focus')}
