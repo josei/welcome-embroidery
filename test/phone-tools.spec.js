@@ -109,3 +109,36 @@ test('Edit and Arrange keep their own buttons above the phone width',async({page
  await expect(page.locator('#arrangeMenu')).toBeVisible();
  expect(errors).toEqual([]);
 });
+
+// Issue #458: a phone has no visible New button, so New design leads the phone Menu. At 390x844 and 360x740, in English and
+// Spanish, it is the first row, sits inside the window without scrolling the list, is at least 44 px tall, and starts a new design.
+for(const [width,height] of [[390,844],[360,740]]) for(const lang of ['en','es']){
+ test(`New design is the first Menu row and starts a new design at ${width}x${height} (${lang})`,async({page})=>{
+  const errors=await openEditor(page,width,height,lang);
+  await page.locator('#rect').click();
+  await expect(page.locator('.object-row'),'a shape is on the canvas').not.toHaveCount(0);
+  await expect(page.locator('#new'),'the top bar keeps New hidden on a phone').toBeHidden();
+  const menu=page.locator('#phoneMenu');
+  await menu.click();
+  const list=page.locator('#phoneMenuList');
+  await expect(list).toBeVisible();
+  const first=list.locator('[role="menuitem"]').first();
+  await expect(first,'New design is the first item').toHaveAttribute('id','menuNew');
+  await expect(first).toHaveText(lang==='es'?/Nuevo diseño/:/New design/);
+  // Inside the window and inside the list without scrolling it.
+  const box=await first.boundingBox();
+  expect(box.y,'first row is in the window').toBeGreaterThanOrEqual(0);
+  expect(box.y+box.height,'first row is in the window').toBeLessThanOrEqual(height);
+  expect(await list.evaluate(e=>e.scrollTop),'the list is not scrolled').toBe(0);
+  expect(Math.min(box.width,box.height),'touch target is at least 44 px').toBeGreaterThanOrEqual(44);
+  await first.click();
+  await expect(list,'the menu closes').toHaveCount(0);
+  // The shape is unsaved, so New asks first, as the top-bar button does on desktop.
+  const prompt=page.locator('dialog[open]');
+  await expect(prompt,'unsaved changes are confirmed').toHaveCount(1);
+  await prompt.getByRole('button',{name:lang==='es'?'Descartar':'Discard'}).click();
+  await expect(page.locator('.object-row'),'the design is cleared').toHaveCount(0);
+  await expect(page.locator('#name'),'the new design is untitled').toHaveValue(lang==='es'?/sin título/:/Untitled design/);
+  expect(errors).toEqual([]);
+ });
+}

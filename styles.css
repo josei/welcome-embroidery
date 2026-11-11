@@ -502,6 +502,8 @@ input[aria-invalid="true"]{border-color:var(--warn)!important;background:var(--w
 .top .file-menu>button{padding:6px 4px;font-size:var(--fs-caption)}
 /* Issue #443: the phone Menu holds Edit and Arrange, so its list scrolls inside the window instead of running off the bottom. */
 .file-menu-list{max-height:calc(100dvh - 76px);overflow-y:auto;overscroll-behavior:contain}
+/* Issue #458: every phone Menu row is at least 44 px tall, the touch target from #453. */
+.top .file-menu-list button{min-height:44px}
 .top .edit-tools{gap:2px}.top .edit-tools #remove{margin-left:0}
 .top .icon-button.labelled{width:30px;min-width:30px;padding:0;justify-content:center}
 .top .icon-label{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;margin:0}

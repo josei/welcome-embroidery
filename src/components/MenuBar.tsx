@@ -7,7 +7,7 @@ import {clipboardState} from '../clipboardState.js';
 import {selectionState} from '../selectionState.js';
 import {selectionToolbarActions, selectionToolbarState} from '../selectionToolbarState.js';
 import {moveSelection} from '../sewingOrder.js';
-import {hasFilePicker, projectSave, projectSaveAs} from '../projectIO.js';
+import {hasFilePicker, newProject, projectSave, projectSaveAs} from '../projectIO.js';
 import {t} from '../i18n.js';
 import {runCommand} from '../commandRegistry';
 import {setPaletteOpen} from '../commandPaletteState';
@@ -230,6 +230,11 @@ export function ArrangeMenu() {
 export function PhoneMenu() {
  const edit = useEditRows();
  const arrange = useArrangeRows();
- const rows: Row[] = [{heading: t('Edit')}, ...edit, '-', {heading: t('Arrange')}, ...arrange];
+ // New design leads the list: the top bar hides its New button at phone widths, and it runs the same newProject as that button.
+ const rows: Row[] = [
+  {id: 'menuNew', label: t('New design'), key: shortcutForCommand('new'), run: () => newProject()},
+  '-',
+  {heading: t('Edit')}, ...edit, '-', {heading: t('Arrange')}, ...arrange,
+ ];
  return <Dropdown id="phoneMenu" label={t('Menu')} rows={rows} />;
 }
