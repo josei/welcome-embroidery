@@ -137,3 +137,35 @@ test('every PES export of every machine sample stays within 0.1 mm of the placed
   }
   assert.ok(checked>100,`expected the machine samples to be checked, got ${checked}`);
 });
+
+// A design the person has moved off the hoop centre must come back where it was after DST export and re-import. The DST stream starts at the
+// hoop centre and the writer marks that, so the importer keeps the stream's position instead of centring the source. The drawn-line bounding box
+// (the placed stitches) must match within 0.1 mm in each axis, for every machine sample, moved by +20 mm in X, Y, and both.
+test('an off-centre import re-imports from DST at its canvas position, within 0.1 mm, for every machine sample',()=>{
+  const offsets=[[20,0],[0,20],[20,20]];let checked=0;
+  const box=pts=>[Math.min(...pts.map(p=>p[0])),Math.min(...pts.map(p=>p[1])),Math.max(...pts.map(p=>p[0])),Math.max(...pts.map(p=>p[1]))];
+  for(const [name,bytes] of readMachineFixtures()){
+    const format=name.split('.').pop().toLowerCase();let layer;
+    try{layer=importStitchLayer(bytes,format,{fileName:name});}catch{continue;}
+    if(!layer.stitches.some(s=>s.cmd==='stitch'))continue;
+    for(const [dx,dy] of offsets){
+      const moved={...layer,x:layer.x+dx,y:layer.y+dy};
+      const doc=initialDocument();doc.objects=[moved];const plan=compile(doc);if(plan.errors.length)continue;
+      const placed=plan.stitches.filter(s=>s.cmd==='stitch').map(s=>[s.x,s.y]);
+      const back=decodeEmbroidery(encode(plan,'dst','#527461',doc.hoop,doc),'dst').stitches.filter(s=>s.cmd==='stitch').map(s=>[s.x,s.y]);
+      checked++;
+      const a=box(placed),b=box(back);
+      for(let i=0;i<4;i++)assert.ok(Math.abs(a[i]-b[i])<=0.1+1e-9,`${name} moved ${dx},${dy}: bounding box ${a.map(v=>v.toFixed(2))} vs re-import ${b.map(v=>v.toFixed(2))}`);
+    }
+  }
+  assert.ok(checked>100,`expected the machine samples to be checked, got ${checked}`);
+});
+
+test('a default-placed DST import keeps its 0.00 mm round trip after an export',()=>{
+  const [name,bytes]=machineFixture('/random1-wilcom-b.BRO'),layer=importStitchLayer(bytes,'bro',{fileName:name});
+  const doc=initialDocument();doc.objects=[layer];const plan=compile(doc);
+  const once=decodeEmbroidery(encode(plan,'dst','#527461',doc.hoop,doc),'dst');
+  assert.ok(once.anchored,'the editor writes its DST stream as hoop-anchored');
+  const reimported=importStitchLayer(encode(plan,'dst','#527461',doc.hoop,doc),'dst',{fileName:'again.dst'});
+  assert.ok(Math.abs(reimported.x+reimported.w/2-(layer.x+layer.w/2))<=0.1+1e-9,'re-import keeps the centre of the layer');
+});

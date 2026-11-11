@@ -13,7 +13,7 @@
  *   index: number, color: string | null, brand: string, catalogNumber: string | null, name: string | null,
  *   threadType?: number, weight?: number, transition?: number
  * }} Thread
- * @typedef {{stitches: Stitch[], threads: Thread[], bounds: number[], warnings: string[], metadata?: Record<string, string>}} Decoded
+ * @typedef {{stitches: Stitch[], threads: Thread[], bounds: number[], warnings: string[], metadata?: Record<string, string>, anchored?: boolean}} Decoded
  * @typedef {{x: number, y: number, cmd: number}} Step
  * @typedef {{dflt: number, table: number[] | null, width: number, lengths: number[]}} Huff
  */

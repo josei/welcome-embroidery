@@ -5,6 +5,11 @@
 
 import {splitLongStitches, stitchRule} from './shared.js';
 
+// The header's HOOP_FRAME_KEY line says the stream starts at the hoop centre, so the first stitch's position is an absolute position in the
+// hoop. Readers that know the key place the design where the stream puts it; other readers ignore the unknown header key.
+/** Header line marking a stream whose origin is the hoop centre (the editor's origin). Read back by readers/tajima.js. */
+export const HOOP_FRAME_KEY='WE:CENTRE';
+
 // Tajima DST writer, following pyembroidery's DstWriter/encode_record: 512-byte ASCII header, balanced-ternary 3-byte records
 // (max 12.1 mm per record), long jumps split, a trim is three small alternating jumps, colour change and stop are 0xC3, end is 0xF3.
 /** @param {Plan} plan @param {string} [name] @returns {Uint8Array} */
@@ -46,7 +51,7 @@ export function encodeDst(plan,name='Welcome'){
   /** @type {(v: number, n: number) => string} */
   const signed=(v,n)=>(v>=0?'+':'-')+String(Math.abs(v)).padStart(n);
   const header=`LA:${label}\rST:${pad(count,7)}\rCO:${pad(colors,3)}\r+X:${pad(Math.abs(maxX),5)}\r-X:${pad(Math.abs(minX),5)}\r+Y:` +
-  `${pad(Math.abs(-minY),5)}\r-Y:${pad(Math.abs(-maxY),5)}\rAX:${signed(x,5)}\rAY:${signed(-y,5)}\rMX:+${pad(0,5)}\rMY:+${pad(0,5)}\rPD:******\r\x1a`;
+  `${pad(Math.abs(-minY),5)}\r-Y:${pad(Math.abs(-maxY),5)}\rAX:${signed(x,5)}\rAY:${signed(-y,5)}\rMX:+${pad(0,5)}\rMY:+${pad(0,5)}\r${HOOP_FRAME_KEY}\rPD:******\r\x1a`;
   const out=new Uint8Array(512+recs.length*3).fill(0x20);for(let i=0;i<header.length;i++)out[i]=header.charCodeAt(i);recs.forEach((r,i)=>out.set(r,512+i*3));
     return out;
 }

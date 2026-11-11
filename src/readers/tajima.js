@@ -50,13 +50,17 @@ export function readDst(bytes) {
   }
   flush();
   push(stitches,x,y,'end',block);
+  // A stream written by this editor starts at the hoop centre, so its stitches are already in the hoop frame (see encoders/dst.js).
+  const anchored=/\rWE:CENTRE\r/.test(head);
   /** @type {Thread[]} */
   const threads=[];
   for(let i=0;i<=block&&i<MAX_THREADS;i++){
     threads.push({index:i,color:dstPalette[i%dstPalette.length],brand:'DST',catalogNumber:null,name:`Color ${i+1}`});
   }
   if(block>=MAX_THREADS)fail('too many color changes');
-  return result(stitches,threads,['DST files carry no thread colors: placeholder colors were assigned.']);
+  const decoded=result(stitches,threads,['DST files carry no thread colors: placeholder colors were assigned.']);
+  if(anchored)decoded.anchored=true;
+  return decoded;
 }
 
 // Tajima-style TAP, read as pyembroidery 1.5.1 does (TapReader): DST records with no header, then pyembroidery's trim pass. A jump run of three or

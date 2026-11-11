@@ -18,9 +18,13 @@ export function makeStitchLayer(decoded,format,
   const [x0,y0,x1,y1]=decoded.bounds,w=Math.max(.1,x1-x0),h=Math.max(.1,y1-y0);
   if(decoded.stitches.length>250000)throw Error('This design exceeds the 250,000 stitch import limit.');
   const first=decoded.threads.find(t=>/^#[0-9a-f]{6}$/i.test(t.color||'')),defaultThread=first?.color||'#527461';
+  // The default placement is always centred on the origin (validate.js and the pass-through check rely on it). A stream anchored to the hoop
+  // centre (DST written by this editor) is placed where its stream puts it instead: its midpoint maps to itself, so each point keeps its
+  // position. Such a layer is therefore off its default placement and re-encodes rather than passing its source bytes through.
   const placement={x:-w/2,y:-h/2,w,h};
+  const [mx,my]=decoded.anchored?importMidpoint(decoded.bounds):[0,0],at={...placement,x:mx-w/2,y:my-h/2};
   const fileMeta=decoded.metadata&&typeof decoded.metadata==='object'?{...decoded.metadata}:null,layerName=fileMeta?.name||name;
-  return {id,name:layerName,kind:'stitch_layer',...placement,rotation:0,thread:defaultThread,stitch:'run',threads:structuredClone(decoded.threads),stitches:
+  return {id,name:layerName,kind:'stitch_layer',...at,rotation:0,thread:defaultThread,stitch:'run',threads:structuredClone(decoded.threads),stitches:
     structuredClone(decoded.stitches),threadOverrides:{},source:
     {format,fileName:String(fileName).slice(0,240),size,sha256,bounds:[...decoded.bounds],coordinateMapping:'source_mm_centered_on_editor_origin',
     defaultPlacement:placement,defaultThread,warnings:[...(decoded.warnings||[])],...(fileMeta?{metadata:fileMeta}:{}),originalBytesBase64}};
