@@ -223,6 +223,7 @@ export function createCanvas(/** @type {any} */ api){
   function drawAngle(/** @type {any} */ spot,/** @type {any} */ deg,label=/** @type {string|null} */(null)){
     const k=1/vp.s,rad=deg*Math.PI/180,r=spot.dist+18*k,hp=[spot.c[0]+r*Math.cos(rad),spot.c[1]+r*Math.sin(rad)];
     overlay.append(el('line',{class:'sel-stem sel-angle-line',x1:spot.c[0],y1:spot.c[1],x2:hp[0],y2:hp[1]}));
+    overlay.append(el('circle',{class:'sel-hit','data-hit':'angle',cx:hp[0],cy:hp[1],r:22*k}));
     overlay.append(el('circle',{
       class:'sel-angle','data-handle':'angle',tabindex:0,role:'button',
       'aria-label':t('Fill angle {deg}°. Drag or use the arrow keys to turn the rows.',{deg:deg.toFixed(0)}),
@@ -238,18 +239,20 @@ export function createCanvas(/** @type {any} */ api){
     const corners=[[-.5,-.5],[.5,-.5],[.5,.5],[-.5,.5]].map(([a,b])=>toWorld(f,a*f.W,b*f.H));
     overlay.append(el('polygon',{class:'sel-box',points:corners.map(p=>p.join(',')).join(' '),fill:'none'}));
     for(const [name,fx,fy] of HANDLES){if(name.length===1&&((name==='n'||name==='s')?f.W*vp.s<30:f.H*vp.s<30))continue;const [x,y]=
-      toWorld(f,(fx-.5)*f.W,(fy-.5)*f.H);
+      toWorld(f,(fx-.5)*f.W,(fy-.5)*f.H),rot=f.rot?`rotate(${f.rot*180/Math.PI} ${x} ${y})`:'';
+      overlay.append(el('rect',{class:'sel-hit','data-hit':name,x:x-22*k,y:y-22*k,width:44*k,height:44*k,transform:rot}));
       overlay.append(
       el('rect',
       {class:'sel-handle','data-handle':name,tabindex:0,role:'button','aria-label':HANDLE_LABEL[name],x:x-hs,y:y-hs,width:hs*2,height:hs*2,transform:
       f.rot?`rotate(${f.rot*180/Math.PI} ${x} ${y})`:''}));}
     const top=toWorld(f,0,-f.H/2),rot=toWorld(f,0,-f.H/2-22*k);overlay.append(el('line',{class:'sel-stem',x1:top[0],y1:top[1],x2:rot[0],y2:rot[1]}));
-      overlay.append(
+      overlay.append(el('circle',{class:'sel-hit','data-hit':'rot',cx:rot[0],cy:rot[1],r:22*k}),
       el('circle',{class:'sel-handle sel-rotate','data-handle':'rot',tabindex:0,role:'button','aria-label':HANDLE_LABEL.rot,cx:rot[0],cy:rot[1],r:5*k}));
     {const spot=angleSpot(f);if(spot)drawAngle(spot,spot.deg);}
     if(note){const base=toWorld(f,0,f.H/2),t=el('text',{class:'sel-note',x:base[0],y:base[1]+16*k,'text-anchor':'middle','font-size':11*k});t.textContent=
       note;overlay.append(t);}
     drawSmart();
+    overlay.prepend(...overlay.querySelectorAll('.sel-hit'));
     if(keyFocus){overlay.querySelector(`[data-handle="${keyFocus}"]`)?.focus({preventScroll:true});keyFocus=null;}
   }
 
@@ -305,7 +308,7 @@ export function createCanvas(/** @type {any} */ api){
     if(api.pickPivot?.(coord(e))){e.preventDefault();e.stopPropagation();return;}
     if(e.target.closest?.('.path-node,.path-handle'))return;
     closeMenu();
-    const handle=e.target.closest?.('[data-handle]');if(handle){e.preventDefault();startHandle(e,handle.dataset.handle);return;}
+    const handle=e.target.closest?.('[data-handle],[data-hit]');if(handle){e.preventDefault();startHandle(e,handle.dataset.handle??handle.dataset.hit);return;}
     const p=coord(e),o=hit(p);
     if(o){e.preventDefault();startMove(e,o,p);}else{startMarquee(e,p);if(document.getElementById('canvasText'))state.dismissesText=true;}
   });

@@ -165,6 +165,7 @@ section[data-sec][hidden]{display:none}
 .canvas textarea,.canvas input,.canvas [contenteditable]{user-select:text;-webkit-user-select:text}
 .canvas{display:block!important;overflow:hidden}#art{position:absolute;inset:0;width:100%!important;height:100%!important;overflow:hidden;cursor:default;touch-action:none;background:none}#art.drawing{cursor:crosshair}.canvas.panning #art,.canvas.hand #art{cursor:grab}.canvas.hand #art{touch-action:none}
 .sel-box{stroke:var(--teal);stroke-width:1.2;stroke-dasharray:4 3;vector-effect:non-scaling-stroke;pointer-events:none}.sel-stem{stroke:var(--teal);stroke-width:1;vector-effect:non-scaling-stroke;pointer-events:none}.measure-line{stroke:var(--teal);stroke-width:1.2;stroke-dasharray:6 4;vector-effect:non-scaling-stroke;pointer-events:none}.measure-point{fill:var(--teal);pointer-events:none}.pivot-mark{stroke:var(--teal);stroke-width:1;fill:none;vector-effect:non-scaling-stroke;pointer-events:none}.pivot-row{display:flex;flex-wrap:wrap;gap:6px;align-items:center}.corner-radii{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:4px 8px;margin-top:4px}.corner-radii label{font-size:var(--fs-caption);display:grid;gap:2px;min-width:0}.corner-radii input{width:100%;min-width:0;box-sizing:border-box}.stock-label{display:grid;gap:4px;margin-top:8px}.stock-label textarea{font:inherit;padding:6px;border:1px solid var(--field-line);border-radius:6px}.stock-match{display:flex;align-items:center;gap:6px;font-size:var(--fs-body);color:#555}.check-row:not([hidden]){display:flex;gap:6px;align-items:center;margin:6px 0}.tips-list{display:grid;gap:4px;padding:6px 0}.tips-list label{display:flex;gap:6px;align-items:center}
+.sel-hit{fill:transparent;pointer-events:all}.sel-hit[data-hit=nw],.sel-hit[data-hit=se]{cursor:nwse-resize}.sel-hit[data-hit=ne],.sel-hit[data-hit=sw]{cursor:nesw-resize}.sel-hit[data-hit=n],.sel-hit[data-hit=s]{cursor:ns-resize}.sel-hit[data-hit=e],.sel-hit[data-hit=w]{cursor:ew-resize}.sel-hit[data-hit=rot],.sel-hit[data-hit=angle]{cursor:grab}
 .sel-handle{fill:#fff;stroke:var(--teal);stroke-width:1.4;vector-effect:non-scaling-stroke;pointer-events:all}.sel-rotate{cursor:grab}.sel-handle[data-handle=nw],.sel-handle[data-handle=se]{cursor:nwse-resize}.sel-handle[data-handle=ne],.sel-handle[data-handle=sw]{cursor:nesw-resize}.sel-handle[data-handle=n],.sel-handle[data-handle=s]{cursor:ns-resize}.sel-handle[data-handle=e],.sel-handle[data-handle=w]{cursor:ew-resize}.sel-handle:hover{fill:#d7eee7}
 .marquee{fill:#1c7a6718;stroke:var(--teal);stroke-width:1;stroke-dasharray:3 2;vector-effect:non-scaling-stroke;pointer-events:none}.sel-note{fill:#1d2925;paint-order:stroke;stroke:#fff;stroke-width:3px;stroke-linejoin:round;pointer-events:none;font-family:inherit}
 .shape.selected,.shape.multi{stroke-dasharray:none}.path-node{stroke-width:1.5}.path-handle{stroke-width:1.3}.handle-line{stroke-width:1;vector-effect:non-scaling-stroke}
@@ -569,6 +570,66 @@ input[type=checkbox]:not(.icon-check){width:24px;height:24px;min-width:24px;marg
 @media (max-height:500px) and (pointer:coarse){
 .canvas .floating .grid-chip .grid-label{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;margin:0}
 }
+
+/* Issue #453 (from audit #449): at phone widths (600px and narrower) every visible control is at least 44x44 CSS px, the touch target
+   size. The top bar, tool strip, zoom bar, canvas grid row, view switch, Messages button and the Layers and Properties sheets all grow
+   to 44 px; the top bar's design name keeps the free width and takes its full 44 px height. */
+@media (max-width:600px){
+.top .file-menu>button,.top .icon-button,.top #undo,.top #remove,.top #settingsBtn,.top #helpBtn{min-width:44px;height:44px;min-height:44px}
+.top .file-menu>button{padding:6px 6px}
+.top .icon-button,.top #undo,.top #remove,.top #settingsBtn{width:44px}
+.top .icon-button.labelled{width:44px;min-width:44px}
+.top .export-split{height:44px}
+.top .export-split #export{min-height:44px;height:100%}
+.top #name{height:44px;min-height:44px}
+.top .name-field{min-height:44px;display:flex;align-items:center;flex:1 1 0;min-width:0;width:auto}
+.canvas .tool-rail{bottom:68px}
+.canvas #canvasHint{bottom:184px}
+.canvas .tool-rail .icon-button{width:44px;min-width:44px;height:44px}
+.canvas .zoombar{bottom:8px}
+.canvas .zoombar .icon-button,.canvas .zoombar .zoom-pct,.canvas .zoombar .zoom-fit,.canvas .zoombar button{min-width:44px;width:auto;height:44px;min-height:44px;padding:0 6px}
+.canvas .floating{grid-template-columns:repeat(14,44px);gap:6px 4px}
+.canvas .floating .icon-button{width:44px;min-width:44px;height:44px}
+.canvas .floating #grid{grid-column:span 2;width:100%;height:44px}
+.messages-btn{min-height:44px;padding:0 12px}
+.segmented button[data-view]{min-height:44px}
+.sheet-bar button,.sheet-switch,.sheet-close{min-height:44px}
+.sheet-close{min-width:44px}
+}
+@media (max-width:600px){
+.canvas .floating .grid-chip{width:44px;min-width:44px;height:44px;min-height:44px;grid-column:span 2}
+}
+@media (max-width:600px){
+.row-btn,.row-eye,.row-lock{width:44px;min-width:44px;height:44px;min-height:44px}
+.layers-head .inspector-toggle{min-height:44px}
+}
+@media (max-width:600px){
+.layout>.panel select,.layout>aside select,.sheet-open select,#objects select{min-height:44px}
+}
+@media (max-width:600px){
+.layout>aside input:not([type=checkbox]):not([type=range]):not(.sr-only),.layout>.panel input:not([type=checkbox]):not([type=range]):not(.sr-only),.layout .hoop-edit input{min-height:44px}
+}
+@media (max-width:600px){
+.top .name-field #name{width:100%;flex:1 1 auto;min-width:0;height:44px}
+}
+/* Issue #453: at phone widths the save status leaves the bar's row (it stays in the DOM, so screen readers still get it as a status), and
+   the design name takes the room, so the name field keeps a 44 px box in the top bar. */
+@media (max-width:600px){
+.top .save-status{position:absolute;width:0;height:0;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;margin:0}
+}
+/* Issue #453: at 360 px and narrower the bar's gaps and the Export label tighten, so the design name keeps a 44 px box on a 360 px screen. */
+@media (max-width:360px){
+.top{gap:2px;padding:0 4px}
+.top .edit-tools{gap:0}
+.top .export-split{min-width:44px}
+.top .export-split #export{font-size:var(--fs-caption);padding:0 4px;min-width:44px}
+}
+@media (max-width:340px){
+.top{gap:1px;padding:0 3px}
+.top .export-split #export{padding:0 2px}
+}
+/* Issue #453: the unsaved dot sits at the top of the name field, not centred in the bar, so it stays in the field's row. */
+.top .unsaved-marker:not([hidden]){align-self:flex-start;margin-top:6px}
 
 /* Issue #455: portrait tablets (601-1024 px wide) keep the tools on the canvas's left edge and open Properties as a drawer on the right, in
    its own column, so it never covers the canvas. With the drawer open the object list folds away to give the canvas the room: at 768 and 820 px
