@@ -33,6 +33,28 @@ const topBarOverlaps=page=>page.evaluate(()=>{
  return bad;
 });
 
+// Issue #487 (spec #470 sections 1 and 6): on a tablet the page never scrolls. Only the canvas and the inspector body scroll, so the
+// document is exactly one window tall and wide, and a scroll request leaves it at the top. Every inspector section (Stitch too) sits
+// inside the inspector's own scroll range, so it can be reached by scrolling the inspector body. Checked on portrait tablets (#475 layout);
+// a landscape tablet keeps its three columns and is not part of this rule yet.
+const expectNoPageScroll=async(page,where,w,h)=>{
+ if(!(w>600&&w<=1024&&h>w))return;
+ const m=await page.evaluate(()=>{
+  const ins=document.querySelector('#inspector');
+  window.scrollTo(0,600);
+  // Scroll the inspector body to its end: the Stitch section's last edge must then sit inside the inspector's box.
+  ins.scrollTop=ins.scrollHeight;
+  const stitch=document.querySelector('#secStitch');
+  const bottom=stitch&&!stitch.hidden?stitch.getBoundingClientRect().bottom:null;
+  return {sh:document.documentElement.scrollHeight,ih:innerHeight,sw:document.documentElement.scrollWidth,iw:innerWidth,
+   scrollY:window.scrollY,stitchBottom:bottom,insBottom:ins.getBoundingClientRect().bottom};
+ });
+ expect(m.sh,`scrollHeight with ${where}`).toBe(m.ih);
+ expect(m.sw,`scrollWidth with ${where}`).toBe(m.iw);
+ expect(m.scrollY,`scrollY after scrollTo(0,600) with ${where}`).toBe(0);
+ if(m.stitchBottom!==null)expect(m.stitchBottom,`Stitch section cannot be scrolled into the inspector with ${where}`).toBeLessThanOrEqual(m.insBottom+0.5);
+};
+
 for(const [w,h] of viewports){
  for(const lang of locales){
   test(`no sideways scroll or top-bar overlap at ${w}x${h} in ${lang}`,async({page})=>{
@@ -44,6 +66,7 @@ for(const [w,h] of viewports){
    expect(o.scrollWidth,`first screen scrollWidth at ${w}x${h} ${lang}: ${o.out.join('; ')}`).toBeLessThanOrEqual(o.innerWidth);
    expect(await topBarOverlaps(page),'top-bar boxes overlap').toEqual([]);
    expect(errors).toEqual([]);
+   await expectNoPageScroll(page,`first screen at ${w}x${h} ${lang}`,w,h);
   });
 
   test(`no sideways scroll with Layers and Properties open at ${w}x${h} in ${lang}`,async({page})=>{
@@ -73,6 +96,7 @@ for(const [w,h] of viewports){
    expect(o.scrollWidth,`scrollWidth with Layers and Properties open at ${w}x${h} ${lang}: ${o.out.join('; ')}`).toBeLessThanOrEqual(o.innerWidth);
    expect(await topBarOverlaps(page),'top-bar boxes overlap').toEqual([]);
    expect(errors).toEqual([]);
+   await expectNoPageScroll(page,`Layers and Properties open at ${w}x${h} ${lang}`,w,h);
   });
  }
 }

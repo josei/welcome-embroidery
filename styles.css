@@ -678,6 +678,9 @@ input[type=checkbox]:not(.icon-check){width:24px;height:24px;min-width:24px;marg
 .inspector-tabs{display:none}
 .rail-label{display:none}
 @media (min-width:601px) and (max-width:1024px) and (orientation:portrait){
+body{height:100vh;height:100dvh;min-height:0;overflow:hidden}
+/* The inspector is the containing block of its hidden selects (.sr-only is absolute), so they scroll with its body and not past the page. */
+.layout>#inspector{position:relative}
 /* Issue #483 (spec #470 section 5): a layer row's summary ("relleno · 1,102 puntadas") stays one line high, cut with an ellipsis, so it does not wrap in the narrow row. */
 .object-row .row-tag{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
 .top{height:56px;padding:0 8px;gap:6px}
