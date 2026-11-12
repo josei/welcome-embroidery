@@ -425,6 +425,14 @@ input[aria-invalid="true"]{border-color:var(--warn)!important;background:var(--w
 .playback-bar .playback-time span{overflow:hidden;text-overflow:ellipsis}
 .playback-track{flex:1 1 240px;min-width:160px}
 .playback-summary{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+/* Issue #467: at phone widths (600px and narrower) the status and playback readouts wrap onto as many lines as they need, so the full
+   stitch count, playback position and thread length are read rather than cut off. Wider screens keep the one-line slots above. */
+@media (max-width:600px){
+.layout main>footer>#count,.layout main>footer>#playbackProgress{width:auto;white-space:normal;overflow:visible;text-overflow:clip}
+.playback-bar .playback-time{width:auto;overflow:visible}
+.playback-bar .playback-time span{white-space:normal;overflow:visible;text-overflow:clip;overflow-wrap:anywhere}
+.playback-summary{white-space:normal;overflow:visible;text-overflow:clip}
+}
 .timeline-marker{width:8px;height:8px;margin-left:-4px;border-width:1.5px}
 .layout main>footer{flex-wrap:wrap;align-content:center;row-gap:6px;padding-top:6px;padding-bottom:6px}
 /* Issue #208: from 601px to 1100px the top bar stays on one row (the title shrinks first, the controls stay whole; the blank-design reason is kept for screen readers only), and the
