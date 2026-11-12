@@ -792,6 +792,9 @@ body{height:100vh;height:100dvh;min-height:0;overflow:hidden;overscroll-behavior
 .layout main>footer{grid-row:4;position:relative;flex:none;height:28px;min-height:0;margin:0;padding:0 12px;box-sizing:border-box;display:flex;align-items:center;gap:8px;overflow:visible;background:#fff;border:0;border-top:1px solid #e3e6e1}
 .layout main>footer>:not(#count):not(#toast){display:none}
 .layout main>footer>#count{flex:1 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;line-height:26px;font-size:var(--fs-caption)}
+/* Issue #495 (spec #470 sections 1 and 6): toasts stack above the contextual bar, so they never cover the dock (56 px) or the bar (52 px)
+   and the status line (28 px) stays the anchor: 28 + 56 + 52 + an 8 px gap. The dock and the bar never move. */
+#toast{bottom:144px;margin-bottom:0}
 }
 
 .tool-more{display:none}
@@ -884,6 +887,8 @@ body{height:100dvh;min-height:0;overflow:hidden}
 #phoneMenuList .menu-icon{flex:none;width:20px;height:20px}
 #phoneMenuList .menu-item small{flex:none;margin-left:auto;white-space:nowrap}
 #phoneMenuList .menu-heading{white-space:nowrap;padding:12px 10px 4px}
+/* Issue #495: the title row stays at the top of the list and takes a downward swipe that closes the Menu (MenuBar.tsx Dropdown). */
+#phoneMenuList .menu-title{position:sticky;top:-8px;z-index:1;display:flex;align-items:center;min-height:44px;margin:-8px -8px 4px;padding:0 18px;background:#fff;font-size:var(--fs-large);font-weight:var(--fw-emphasis);color:#243b32;touch-action:none;user-select:none;cursor:default}
 
 /* Issue #474: a landscape phone (height 500 px or less, up to 900 px wide, such as 844x390) shows the phone Menu too. Its top bar
    keeps Menu, the design name, Undo, Redo and Export, as the phone portrait bar does; New, Open, Import, Save and Duplicate are

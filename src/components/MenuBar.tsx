@@ -1,7 +1,7 @@
 import {useEffect, useRef, useState, useSyncExternalStore} from 'react';
 import {closePhoneSheet, phoneSheetState, togglePhoneSheet} from '../phoneSheetState.js';
 import {flushSync} from 'react-dom';
-import type {KeyboardEvent as ReactKeyboardEvent} from 'react';
+import type {KeyboardEvent as ReactKeyboardEvent, PointerEvent as ReactPointerEvent} from 'react';
 import {actionState} from '../actionState.js';
 import {alignActions, alignState} from '../alignState.js';
 import {clipboardState} from '../clipboardState.js';
@@ -60,6 +60,8 @@ type Row = Entry | Heading | Note | '-';
 // go to the first and last; Enter runs an item and closes the menu; Escape closes it and returns focus to the header; Tab
 // closes it and moves on; ArrowLeft and ArrowRight move to the neighbouring header, opening its menu if this one was open.
 // Closes on an outside press, Escape, or after an entry runs.
+// Issue #495: the phone Menu also closes on a downward swipe of at least TITLE_SWIPE_PX on its title row.
+const TITLE_SWIPE_PX = 60;
 function Dropdown({id, label, rows, iconOnly}: {id: string; label: string; rows: Row[]; iconOnly?: boolean}) {
  const [open, setOpen] = useState(false);
  const wrap = useRef<HTMLDivElement>(null);
@@ -82,6 +84,21 @@ function Dropdown({id, label, rows, iconOnly}: {id: string; label: string; rows:
   document.addEventListener('keydown', escape);
   return () => { document.removeEventListener('pointerdown', away); document.removeEventListener('keydown', escape); };
  }, [open]);
+ // Issue #495: the phone Menu is full height with no grab handle, so a downward drag on its title row closes it (spec #470 section 4).
+ // A drag from the list or the search field scrolls or does nothing. The row captures the pointer so the release is seen wherever it lands.
+ const titleDrag = useRef<{id: number; y: number} | null>(null);
+ const titleDown = (e: ReactPointerEvent<HTMLDivElement>) => {
+  if (e.button !== 0) return;
+  titleDrag.current = {id: e.pointerId, y: e.clientY};
+  e.currentTarget.setPointerCapture?.(e.pointerId);
+ };
+ const titleUp = (e: ReactPointerEvent<HTMLDivElement>) => {
+  const drag = titleDrag.current;
+  titleDrag.current = null;
+  if (!drag || drag.id !== e.pointerId || e.type !== 'pointerup' || e.clientY - drag.y < TITLE_SWIPE_PX) return;
+  setOpen(false);
+  trigger.current?.focus();
+ };
  // Issue #473: opening a menu closes any phone sheet (Layers or Properties), so only one of them is ever open.
  const openWith = (where: 'first' | 'last' | null) => { closePhoneSheet(); focusOnOpen.current = where; setOpen(true); };
  // Runs an item: the menu closes and focus goes back to the header, so keyboard users stay where they were.
@@ -145,6 +162,9 @@ function Dropdown({id, label, rows, iconOnly}: {id: string; label: string; rows:
     }}>{iconOnly ? <svg className="icon" aria-hidden="true"><use href="#i-menu" /></svg> : label}</button>
    {open && (
     <div role="menu" id={`${id}List`} className="file-menu-list">
+     {id === 'phoneMenu' && (
+      <div role="presentation" className="menu-title" data-menu-title="" onPointerDown={titleDown} onPointerUp={titleUp} onPointerCancel={titleUp}>{label}</div>
+     )}
      {rows.map((row, i) => {
       if (row === '-') return <hr key={`sep${i}`} className="menu-sep" />;
       if ('heading' in row) return <div key={`head${i}`} role="presentation" className="menu-heading">{row.heading}</div>;

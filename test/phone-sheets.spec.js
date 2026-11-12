@@ -226,3 +226,78 @@ test.describe('portrait detents and swipe',()=>{
   await page.keyboard.press('Escape');
  });
 });
+
+// Issue #495 (spec #470 sections 1, 4 and 6): the phone Menu is full height with no grab handle, so a downward swipe on its title row
+// closes it, at both phone sizes. A swipe from the list or the search field scrolls or does nothing. Escape and the Menu button still close it.
+// A toast at 390x844 stacks above the contextual bar, so it never covers the dock or the bar.
+for(const layout of LAYOUTS){
+ test.describe(`phone Menu swipe ${layout.name}`,()=>{
+  test.use({viewport:{width:layout.width,height:layout.height},...layout.options});
+
+  // A mouse drag downward from the centre of an element, stopping inside the viewport.
+  const dragDown=async(page,locator,want)=>{
+   const b=await locator.boundingBox();
+   const vh=page.viewportSize().height;
+   const x=b.x+b.width/2;
+   const y0=b.y+Math.min(b.height/2,12);
+   const dy=Math.min(want,vh-y0-4);
+   await page.mouse.move(x,y0);
+   await page.mouse.down();
+   for(let i=1;i<=10;i++)await page.mouse.move(x,y0+dy*i/10);
+   await page.mouse.up();
+  };
+
+  test('a swipe down on the Menu title row closes the Menu',async({page})=>{
+   await page.goto('/?lang=en');
+   await page.locator('#phoneMenu').click();
+   const list=page.locator('#phoneMenuList');
+   await expect(list).toBeVisible();
+   await dragDown(page,page.locator('#phoneMenuList .menu-title'),700);
+   await expect(list).toHaveCount(0);
+   await expect(page.locator('#phoneMenu')).toHaveAttribute('aria-expanded','false');
+  });
+
+  test('a swipe down from the search field or a list row does not close the Menu',async({page})=>{
+   await page.goto('/?lang=en');
+   await page.locator('#phoneMenu').click();
+   const list=page.locator('#phoneMenuList');
+   await expect(list).toBeVisible();
+   await dragDown(page,page.locator('#menuCommandPalette'),700);
+   await expect(list).toBeVisible();
+   await dragDown(page,page.locator('#menuNew'),700);
+   await expect(list).toBeVisible();
+   await page.keyboard.press('Escape');
+   await expect(list).toHaveCount(0);
+  });
+
+  test('Escape and the Menu button still close the Menu',async({page})=>{
+   await page.goto('/?lang=en');
+   await page.locator('#phoneMenu').click();
+   await expect(page.locator('#phoneMenuList')).toBeVisible();
+   await page.keyboard.press('Escape');
+   await expect(page.locator('#phoneMenuList')).toHaveCount(0);
+   await page.locator('#phoneMenu').click();
+   await expect(page.locator('#phoneMenuList')).toBeVisible();
+   await page.locator('#phoneMenu').click();
+   await expect(page.locator('#phoneMenuList')).toHaveCount(0);
+  });
+ });
+}
+
+test.describe('phone toast placement',()=>{
+ test.use({viewport:{width:390,height:844}});
+
+ test('a toast stacks above the contextual bar and never covers the dock at 390x844',async({page})=>{
+  await page.goto('/?lang=en');
+  await page.locator('#rect').click();
+  await page.locator('#rect').click();
+  const toast=page.locator('#toast .toast-item').first();
+  await expect(toast).toBeVisible();
+  const tb=await toast.boundingBox();
+  const dock=await page.locator('.layout main>.tool-rail').boundingBox();
+  const bar=await page.locator('.layout main>.floating').boundingBox();
+  expect(bar,'contextual bar is shown with a selection').not.toBeNull();
+  expect(tb.y+tb.height,'toast bottom edge is above the contextual bar').toBeLessThanOrEqual(bar.y);
+  expect(tb.y+tb.height,'toast bottom edge is above the dock').toBeLessThanOrEqual(dock.y);
+ });
+});
