@@ -781,3 +781,23 @@ body{height:100dvh;min-height:0;overflow:hidden}
 .layout>.panel:last-child.sheet-open summary,.layout>.panel:last-child.sheet-open input[type=range]{min-height:44px}
 .layout>.panel:last-child.sheet-open .sec-fold>summary,.layout>.panel:last-child.sheet-open .doc-settings>summary{display:flex;align-items:center}
 }
+
+/* Issue #474 (spec #470 sections 3 and 5): the phone Menu is a 44 px icon button in the top bar. It opens a full-height sheet that
+   scrolls inside itself, so the page never scrolls. Every row is one line, with an icon, and at least 44 px tall. */
+.top .file-menu>button.menu-trigger{width:44px;min-width:44px;height:44px;min-height:44px;padding:0;justify-content:center}
+#phoneMenuList{position:fixed;top:0;left:0;right:0;bottom:0;width:auto;min-width:0;max-height:none;height:100dvh;border:0;border-radius:0;box-shadow:none;padding:8px;overflow-y:auto;overscroll-behavior:contain;z-index:40}
+#phoneMenuList .menu-search{background:#f1f3ef}
+#phoneMenuList .menu-close{position:sticky;top:0;z-index:1;display:flex;align-items:center;justify-content:center;margin-left:auto;width:44px;height:44px;border:0;background:inherit;padding:0;cursor:pointer}
+#phoneMenuList .menu-close .icon{width:20px;height:20px}
+#phoneMenuList .menu-item{display:flex;align-items:center;gap:12px;min-height:44px;white-space:nowrap}
+#phoneMenuList .menu-item>span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#phoneMenuList .menu-icon{flex:none;width:20px;height:20px}
+#phoneMenuList .menu-item small{flex:none;margin-left:auto;white-space:nowrap}
+#phoneMenuList .menu-heading{white-space:nowrap;padding:12px 10px 4px}
+
+/* Issue #474: a landscape phone (height 500 px or less, up to 900 px wide, such as 844x390) shows the phone Menu too. Its top bar
+   keeps Menu, the design name, Undo, Redo and Export, as the phone portrait bar does; New, Open, Import, Save and Duplicate are
+   in the Menu's File and Edit groups. */
+@media (max-height:500px) and (max-width:900px){
+.top .logo,.top #new,.top #open,.top #importMachine,.top #save,.top #duplicate{display:none}
+}

@@ -42,6 +42,18 @@ function subscribePhone(onChange: () => void) {
   return () => query.removeEventListener('change', onChange);
 }
 
+/** Issue #474: the phone Menu shows at phone widths and on a landscape phone (height 500 px or less, up to 900 px wide, such as
+ * 844x390). Layers and Properties keep the 600 px breakpoint above. */
+const PHONE_MENU_QUERY = '(max-width: 600px), (max-height: 500px) and (max-width: 900px)';
+function subscribePhoneMenu(onChange: () => void) {
+  const query = window.matchMedia(PHONE_MENU_QUERY);
+  query.addEventListener('change', onChange);
+  return () => query.removeEventListener('change', onChange);
+}
+export function usePhoneMenu(): boolean {
+  return useSyncExternalStore(subscribePhoneMenu, () => window.matchMedia(PHONE_MENU_QUERY).matches);
+}
+
 /** Whether the window is at phone width right now. Components use it to choose a layout, not just to hide one. */
 export function usePhoneWidth(): boolean {
   return useSyncExternalStore(subscribePhone, isPhoneWidth);

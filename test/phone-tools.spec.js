@@ -70,7 +70,7 @@ test('every tool in the strip is reachable and becomes active at 375px',async({p
  expect(errors).toEqual([]);
 });
 
-test('the Menu button opens Edit and Arrange and every enabled item is clickable at 375px',async({page})=>{
+test('the Menu button opens File, Edit, View and Settings and Help, and every enabled item is clickable at 375px',async({page})=>{
  test.setTimeout(120000);
  const errors=await openEditor(page,375,667);
  await page.locator('#rect').click();
@@ -81,10 +81,10 @@ test('the Menu button opens Edit and Arrange and every enabled item is clickable
  await menu.click();
  const list=page.locator('#phoneMenuList');
  await expect(list,'Menu opens').toBeVisible();
- await expect(list.locator('.menu-heading'),'Edit and Arrange headings').toHaveText(['File','Edit','Arrange','View']);
+ await expect(list.locator('.menu-heading'),'the four groups').toHaveText(['File','Edit','View','Settings and Help']);
  const ids=await list.locator('[role="menuitem"]').evaluateAll(els=>els.map(e=>e.id));
- expect(ids,'Edit items are in the menu').toEqual(expect.arrayContaining(['menuUndo','menuCopy','menuDelete']));
- expect(ids,'Arrange items are in the menu').toEqual(expect.arrayContaining(['menuAlignLeft','menuToFront','menuIntersect']));
+ expect(ids,'Edit items are in the menu').toEqual(expect.arrayContaining(['menuUndo','menuCopy','menuDuplicate','menuSelectAll','menuRepeat']));
+ expect(ids,'Delete and keyboard shortcuts are not listed on a phone').not.toEqual(expect.arrayContaining(['menuDelete','menuShortcuts']));
  let clicked=0;
  for(const id of ids){
   if(!(await list.isVisible())) await menu.click();
@@ -122,9 +122,10 @@ for(const [width,height] of [[390,844],[360,740]]) for(const lang of ['en','es']
   await menu.click();
   const list=page.locator('#phoneMenuList');
   await expect(list).toBeVisible();
-  const first=list.locator('[role="menuitem"]').first();
-  await expect(first,'New design is the first item').toHaveAttribute('id','menuNew');
-  await expect(first).toHaveText(lang==='es'?/Nuevo diseño/:/New design/);
+  // The search field (Command palette) leads the sheet; New is the first group's first row.
+  const first=list.locator('#menuNew');
+  await expect(list.locator('[role="menuitem"]').first(),'the search field leads').toHaveAttribute('id','menuCommandPalette');
+  await expect(first).toHaveText(lang==='es'?/^Nuevo$/:/^New$/);
   // Inside the window and inside the list without scrolling it.
   const box=await first.boundingBox();
   expect(box.y,'first row is in the window').toBeGreaterThanOrEqual(0);

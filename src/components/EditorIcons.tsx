@@ -5,6 +5,54 @@ export function EditorIcons() {
     <svg className={"icon-defs"} aria-hidden={"true"} focusable={"false"}>
       <defs>
         {" "}
+        <symbol id={"i-menu"} viewBox={"0 0 24 24"}>
+          <path d={"M4 7h16M4 12h16M4 17h16"} />
+        </symbol>
+        {" "}
+        <symbol id={"i-search"} viewBox={"0 0 24 24"}>
+          <path d={"M10.5 4.5a6 6 0 1 0 0 12 6 6 0 0 0 0-12zM15.5 15.5L20 20"} />
+        </symbol>
+        {" "}
+        <symbol id={"i-export"} viewBox={"0 0 24 24"}>
+          <path d={"M12 4v11M7 10l5 5 5-5M5 20h14"} />
+        </symbol>
+        {" "}
+        <symbol id={"i-cut"} viewBox={"0 0 24 24"}>
+          <path d={"M6 6l12 12M18 6L6 18"} />
+        </symbol>
+        {" "}
+        <symbol id={"i-paste"} viewBox={"0 0 24 24"}>
+          <path d={"M9 4h6v3H9zM8 6H6v14h12V6h-2"} />
+        </symbol>
+        {" "}
+        <symbol id={"i-dup"} viewBox={"0 0 24 24"}>
+          <path d={"M9 9h10v10H9zM5 15V5h10"} />
+        </symbol>
+        {" "}
+        <symbol id={"i-select-all"} viewBox={"0 0 24 24"}>
+          <path d={"M4 8V4h4M16 4h4v4M20 16v4h-4M8 20H4v-4"} />
+        </symbol>
+        {" "}
+        <symbol id={"i-repeat"} viewBox={"0 0 24 24"}>
+          <path d={"M4 12a8 8 0 0 1 14-5.3L20 9M20 4v5h-5M20 12a8 8 0 0 1-14 5.3L4 15M4 20v-5h5"} />
+        </symbol>
+        {" "}
+        <symbol id={"i-grid"} viewBox={"0 0 24 24"}>
+          <path d={"M4 4h16v16H4zM4 12h16M12 4v16"} />
+        </symbol>
+        {" "}
+        <symbol id={"i-fit"} viewBox={"0 0 24 24"}>
+          <path d={"M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"} />
+        </symbol>
+        {" "}
+        <symbol id={"i-msg"} viewBox={"0 0 24 24"}>
+          <path d={"M4 5h16v11H9l-5 4z"} />
+        </symbol>
+        {" "}
+        <symbol id={"i-help"} viewBox={"0 0 24 24"}>
+          <path d={"M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18zM9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.7.3-1 .9-1 1.7M12 17h.01"} />
+        </symbol>
+        {" "}
         <symbol id={"i-new"} viewBox={"0 0 24 24"}>
           <path d={"M12 5v14M5 12h14"} />
         </symbol>

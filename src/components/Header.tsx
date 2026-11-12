@@ -15,7 +15,7 @@ import {dirtyMark, saveStatusWords} from '../saveMark.js';
 import {toolbarActions} from '../toolbarCommands.js';
 import {t} from '../i18n.js';
 import {ArrangeMenu, EditMenu, FileMenu, PhoneMenu} from './MenuBar';
-import {usePhoneWidth} from '../phoneSheetState.js';
+import {usePhoneMenu} from '../phoneSheetState.js';
 // The project name field: it shows the document name, and a committed change is an edit (see documentActions).
 function ProjectName() {
  const {doc, dirty} = useSyncExternalStore(documentState.subscribe, documentState.get);
@@ -98,7 +98,7 @@ function withKeys(name: string, command: string) {
 // The editor header, rendered by React. Ids and attributes match the markup this replaced,
 // because app.js wires its controls by id.
 export function Header() {
- const phone = usePhoneWidth();
+ const phone = usePhoneMenu();
  // The toolbar Save names the action and its shortcut, the same label the File menu and shortcut sheet use.
  const saveLabel = `${t('Save')} (${shortcutLabel([{mod: true, key: 'S'}])})`;
  const rows = useSyncExternalStore(stitchRowsState.subscribe, stitchRowsState.get);

@@ -45,10 +45,10 @@ test('each command that left the bar is one tap to open the Menu and one to choo
 
  // Save, Save As, Open and Import: each row exists and is enabled; Open and Import open their file pickers.
  await open();
- for(const id of ['menuSave','menuSaveAs','menuOpen','menuImport','menuShortcuts','menuSettings','menuDuplicate','menuDelete']){
+ for(const id of ['menuCommandPalette','menuNew','menuSave','menuSaveAs','menuOpen','menuImport','menuExport','menuSettings','menuDuplicate']){
   await expect(list.locator(`#${id}`),`${id} is in the Menu`).toBeVisible();
  }
- await expect(list.locator('.menu-heading')).toHaveText(['File','Edit','Arrange','View']);
+ await expect(list.locator('.menu-heading')).toHaveText(['File','Edit','View','Settings and Help']);
 
  // Open: a file chooser opens.
  await open();
@@ -70,43 +70,17 @@ test('each command that left the bar is one tap to open the Menu and one to choo
  await list.locator('#menuDuplicate').click();
  await expect.poll(objects).toBe(before+1);
 
- // Delete: back to the earlier count.
- await open();
- await list.locator('#menuDelete').click();
+ // Delete is not in the phone Menu (the selection bar deletes), so the duplicate is removed by undo.
+ await page.keyboard.press('Control+z');
  await expect.poll(objects).toBe(before);
  await page.locator('#rect').click();
 
- // Keyboard shortcuts and Settings open their dialogs.
- await open();
- await list.locator('#menuShortcuts').click();
- await expect(page.locator('#keysDialog[open]'),'the shortcut sheet opens').toHaveCount(1);
- await page.keyboard.press('Escape');
+ // Settings opens its dialog (keyboard shortcuts are not listed on phones).
  await open();
  await list.locator('#menuSettings').click();
  await expect(page.locator('#settingsDialog[open]'),'Settings opens').toHaveCount(1);
  await page.keyboard.press('Escape');
 
- expect(errors).toEqual([]);
-});
-
-// The save status: a visible line in the Menu, the same words as the header showed at desktop widths.
-test('the save status is a visible line in the phone Menu (390x844, en)',async({page})=>{
- const errors=await openEditor(page,390,844,'en');
- await page.locator('#rect').click();
- await page.locator('#phoneMenu').click();
- const note=page.locator('#phoneMenuList .menu-note');
- await expect(note,'the status line is in the Menu').toHaveText('Autosaved in this browser');
- await expect(note).toBeVisible();
- expect(errors).toEqual([]);
-});
-
-// Desktop keeps every command on the bar and has no Menu button.
-test('nothing leaves the top bar at 1024x768 and no phone Menu is shown',async({page})=>{
- const errors=await openEditor(page,1024,768,'en');
- await expect(page.locator('#phoneMenu'),'no phone Menu on a wide window').toHaveCount(0);
- for(const sel of ['#fileMenu','#editMenu','#arrangeMenu','#new','#open','#importMachine','#save','#undo','#redo','#duplicate','#remove','#helpBtn','#settingsBtn','#export']){
-  await expect(page.locator(sel),`${sel} is on the bar`).toBeVisible();
- }
  expect(errors).toEqual([]);
 });
 

@@ -13,12 +13,13 @@ import {t} from '../i18n.js';
 import {runCommand} from '../commandRegistry';
 import {setPaletteOpen} from '../commandPaletteState';
 import {shortcutForCommand} from '../shortcutTable.js';
-import {setShortcutsOpen} from '../shortcutsState';
+import {gridActions, gridState, GRID_SPACINGS} from '../gridState.js';
+import {gridSnapActions, gridSnapState} from '../gridSnapState.js';
+import {zoomActions} from '../zoomState';
+import {toastActions} from '../toastState.js';
+import {openExportDialog} from '../exportCommands';
 import {setSettingsOpen} from '../settingsState';
 import {agentLinkState} from '../agentLinkState';
-import {documentState} from '../documentState.js';
-import {saveState} from '../saveState.js';
-import {saveStatusWords} from '../saveMark.js';
 import {viewActions, viewMode} from '../viewMode.js';
 
 // The menu bar's dropdowns. Each item runs the same command as its toolbar button, context-menu row or keyboard shortcut,
@@ -30,6 +31,9 @@ import {viewActions, viewMode} from '../viewMode.js';
 interface Entry {
  id: string;
  label: string;
+ /** The icon-sprite symbol id (without `#`) shown before the label; phone rows use it. */
+ icon?: string;
+ className?: string;
  key?: string;
  hint?: string;
  disabled?: boolean;
@@ -51,7 +55,7 @@ type Row = Entry | Heading | Note | '-';
 // go to the first and last; Enter runs an item and closes the menu; Escape closes it and returns focus to the header; Tab
 // closes it and moves on; ArrowLeft and ArrowRight move to the neighbouring header, opening its menu if this one was open.
 // Closes on an outside press, Escape, or after an entry runs.
-function Dropdown({id, label, rows}: {id: string; label: string; rows: Row[]}) {
+function Dropdown({id, label, rows, iconOnly}: {id: string; label: string; rows: Row[]; iconOnly?: boolean}) {
  const [open, setOpen] = useState(false);
  const wrap = useRef<HTMLDivElement>(null);
  const trigger = useRef<HTMLButtonElement>(null);
@@ -127,20 +131,28 @@ function Dropdown({id, label, rows}: {id: string; label: string; rows: Row[]}) {
  return (
   <div className="file-menu" ref={wrap} onKeyDown={onKeyDown}>
    <button ref={trigger} type="button" id={id} aria-haspopup="menu" aria-expanded={open} aria-controls={open ? `${id}List` : undefined}
+    className={iconOnly ? 'icon-button menu-trigger' : undefined} aria-label={iconOnly ? label : undefined} title={iconOnly ? label : undefined}
     onClick={e => {
      // A click with no pointer (detail 0) came from the keyboard: Enter or Space opens the menu and focuses its first item.
      const keyboard = e.detail === 0;
      if (open) setOpen(false); else openWith(keyboard ? 'first' : null);
-    }}>{label}</button>
+    }}>{iconOnly ? <svg className="icon" aria-hidden="true"><use href="#i-menu" /></svg> : label}</button>
    {open && (
     <div role="menu" id={`${id}List`} className="file-menu-list">
+     {iconOnly && (
+      // The phone sheet fills the window, so a tap outside it cannot dismiss it: this button does, and Escape too.
+      <button type="button" className="menu-close" aria-label={t('Close')} title={t('Close')} onClick={() => { setOpen(false); trigger.current?.focus(); }}>
+       <svg className="icon" aria-hidden="true"><use href="#i-cross" /></svg>
+      </button>
+     )}
      {rows.map((row, i) => {
       if (row === '-') return <hr key={`sep${i}`} className="menu-sep" />;
       if ('heading' in row) return <div key={`head${i}`} role="presentation" className="menu-heading">{row.heading}</div>;
       if ('note' in row) return <div key={`note${i}`} role="status" className="menu-note">{row.note}</div>;
       return (
        <button key={row.id} type="button" role="menuitem" id={row.id} disabled={row.disabled}
-        className={row.key ? 'menu-item' : undefined} onClick={() => choose(row)}>
+        className={[row.key || row.icon ? 'menu-item' : '', row.className].filter(Boolean).join(' ') || undefined} onClick={() => choose(row)}>
+        {row.icon && <svg className="icon menu-icon" aria-hidden="true"><use href={`#${row.icon}`} /></svg>}
         <span>{row.label}</span>
         {row.key && <kbd>{row.key}</kbd>}
         {row.hint && <small>{row.hint}</small>}
@@ -247,43 +259,59 @@ export function ArrangeMenu() {
  return <Dropdown id="arrangeMenu" label={t('Arrange')} rows={useArrangeRows()} />;
 }
 
-/** At phone widths the top bar keeps only Menu, the name, undo, redo and Export, so every other command is listed here: New
- * design, the File commands (save, open, import, the save status), Edit, Arrange, the shortcut sheet and Settings. Each row runs
- * the same command as its top-bar button had, which is hidden at these widths (styles.css). */
+/** The phone Menu (issue #474, spec sections 2, 5 and 7 of #470): an icon button in the top bar opens a full-height sheet. It has a
+ * Command palette search field, then four groups in order, each row with an icon and a short label: File, Edit, View, and Settings
+ * and Help. Keyboard shortcuts are not listed on phones. Every row runs the same command as its desktop counterpart. */
 const VIEW_ROWS = [
- {id: 'design', label: '2D'},
- {id: 'stitches', label: 'Stitches'},
- {id: 'preview', label: '3D'},
+ {id: 'design', label: '2D', icon: 'i-rect'},
+ {id: 'stitches', label: 'Stitches', icon: 'i-run'},
+ {id: 'preview', label: '3D', icon: 'i-spiral'},
 ] as const;
 
+/** The Edit rows a phone lists: the desktop Edit menu's rows minus Delete and the palette (which the search field opens). */
+const PHONE_EDIT_ICONS: Record<string, string> = {
+ menuUndo: 'i-undo', menuRedo: 'i-redo', menuCut: 'i-cut', menuCopy: 'i-copy', menuPaste: 'i-paste', menuDuplicate: 'i-dup',
+ menuSelectAll: 'i-select-all', menuRepeat: 'i-repeat',
+};
+
+/** Where Help goes. The editor has no help pages of its own, so it opens the project's README. */
+const HELP_URL = 'https://github.com/josei/welcome-embroidery#readme';
+
 export function PhoneMenu() {
- const edit = useEditRows();
- const arrange = useArrangeRows();
+ const edit = useEditRows()
+  .filter((r): r is Entry => typeof r === 'object' && 'id' in r && r.id in PHONE_EDIT_ICONS)
+  .map(r => ({...r, key: undefined, icon: PHONE_EDIT_ICONS[r.id]}));
  const view = useSyncExternalStore(viewMode.subscribe, viewMode.get);
- const viewRows: Row[] = VIEW_ROWS.map(v => ({
-  id: `menuView-${v.id}`, label: t(v.label), hint: view === v.id ? t('Shown now') : undefined, run: () => viewActions.choose(v.id),
- }));
- const {dirty} = useSyncExternalStore(documentState.subscribe, documentState.get);
- const {savedAt, savedFileName} = useSyncExternalStore(saveState.subscribe, saveState.get);
+ const snapOn = useSyncExternalStore(gridSnapState.subscribe, gridSnapState.get);
+ const grid = useSyncExternalStore(gridState.subscribe, gridState.get);
  const agent = useSyncExternalStore(agentLinkState.subscribe, agentLinkState.get);
- // The save status is a line of text, not a command: it shows here because the bar has no room for it at phone widths.
+ const viewRows: Row[] = VIEW_ROWS.map(v => ({
+  id: `menuView-${v.id}`, label: t(v.label), icon: v.icon, hint: view === v.id ? t('Shown now') : undefined, run: () => viewActions.choose(v.id),
+ }));
  const settingsHint = agent.active ? t('Settings: agent connected') : agent.waiting ? t('Settings: waiting for agent') : undefined;
- // New design leads the list: the top bar hides its New button at phone widths, and it runs the same newProject as that button.
+ const spacings = GRID_SPACINGS;
  const rows: Row[] = [
-  {id: 'menuNew', label: t('New design'), key: shortcutForCommand('new'), run: () => newProject()},
-  '-',
+  {id: 'menuCommandPalette', label: t('Command palette'), icon: 'i-search', className: 'menu-search', run: () => setPaletteOpen(true)},
   {heading: t('File')},
-  ...saveRows(),
+  {id: 'menuNew', label: t('New'), icon: 'i-new', run: () => newProject()},
   // The file inputs are hidden in the header; a click on them opens the same pickers as the Open and Import buttons did.
-  {id: 'menuOpen', label: t('Open project or SVG'), run: () => document.getElementById('file')?.click()},
-  {id: 'menuImport', label: t('Import JEF / VP3…'), run: () => document.getElementById('machineFile')?.click()},
-  {note: saveStatusWords(dirty, savedAt, savedFileName, t)},
-  '-',
-  {heading: t('Edit')}, ...edit, '-', {heading: t('Arrange')}, ...arrange, '-',
-  // Issue #457: at phone widths the 2D, Stitches and 3D tabs leave the canvas, so the View section here is their one home.
-  {heading: t('View')}, ...viewRows, '-',
-  {id: 'menuShortcuts', label: t('Keyboard shortcuts'), run: () => setShortcutsOpen(true)},
-  {id: 'menuSettings', label: t('Settings'), hint: settingsHint, run: () => setSettingsOpen(true)},
+  {id: 'menuOpen', label: t('Open'), icon: 'i-open', run: () => document.getElementById('file')?.click()},
+  {id: 'menuImport', label: t('Import'), icon: 'i-import', run: () => document.getElementById('machineFile')?.click()},
+  ...saveRows().filter((r): r is Entry => typeof r === 'object' && 'id' in r)
+   .map(r => ({...r, label: r.id === 'menuSave' ? t('Save') : t('Save As'), icon: 'i-save', hint: undefined})),
+  {id: 'menuExport', label: t('Export'), icon: 'i-export', run: () => openExportDialog()},
+  {heading: t('Edit')}, ...edit,
+  {heading: t('View')}, ...viewRows,
+  {id: 'menuGrid', label: t('Grid'), icon: 'i-grid', hint: `${grid.value} mm`, run: () => {
+    const next = spacings[(spacings.indexOf(grid.value) + 1) % spacings.length];
+    gridActions.choose(next);
+  }},
+  {id: 'menuSnap', label: t('Snap to grid'), icon: 'i-snap', hint: snapOn ? t('On') : t('Off'), run: () => gridSnapActions.toggle()},
+  {id: 'menuFitHoop', label: t('Fit hoop'), icon: 'i-fit', run: () => zoomActions.fitHoop()},
+  {heading: t('Settings and Help')},
+  {id: 'menuSettings', label: t('Settings'), icon: 'i-gear', hint: settingsHint, run: () => setSettingsOpen(true)},
+  {id: 'menuMessages', label: t('Messages'), icon: 'i-msg', run: () => toastActions.setLogOpen(true)},
+  {id: 'menuHelp', label: t('Help'), icon: 'i-help', run: () => window.open(HELP_URL, '_blank', 'noopener')},
  ];
- return <Dropdown id="phoneMenu" label={t('Menu')} rows={rows} />;
+ return <Dropdown id="phoneMenu" label={t('Menu')} iconOnly rows={rows} />;
 }

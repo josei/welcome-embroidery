@@ -13,7 +13,6 @@ const LAYOUTS=[
 ];
 
 // The Menu button: the phone Menu in portrait; a landscape phone has the top bar's own menus, and File stands in for Menu there.
-const menuSelector=layout=>layout.height>=layout.width?'#phoneMenu':'.top .file-menu > button';
 
 const sheetOf=page=>page.locator('.layout>aside.panel.sheet-open');
 const scrim=page=>page.locator('.sheet-scrim');
@@ -52,19 +51,18 @@ for(const layout of LAYOUTS){
  test.describe(layout.name,()=>{
   test.use({viewport:{width:layout.width,height:layout.height},...layout.options});
 
-  test('Menu, Layers and Properties open in turn; a tap outside each closes it',async({page})=>{
+  test('Menu, Layers and Properties open in turn; each closes by its close control or a tap outside',async({page})=>{
    const errors=[];page.on('pageerror',e=>errors.push(e.message));
    for(const lang of ['en','es']){
     await page.goto(`/?lang=${lang}`);
     await expect(page.locator('#layersBtn')).toBeVisible();
     // No large mode buttons: the old bar under the canvas is gone.
     await expect(page.locator('.sheet-bar')).toHaveCount(0);
-    // Menu opens, then a tap outside it closes it.
-    // The phone Menu shows at phone width (portrait); a landscape phone has the top bar's own menus, and File stands in for it here.
-    const menu=page.locator(menuSelector(layout)).first();
+    // Menu opens. The sheet fills the window, so there is no outside to tap: its Close button dismisses it.
+    const menu=page.locator('#phoneMenu');
     await menu.click();
     await expect(menu).toHaveAttribute('aria-expanded','true');
-    await page.mouse.click(layout.width-8,layout.height-8);
+    await page.locator('#phoneMenuList .menu-close').click();
     await expect(menu).toHaveAttribute('aria-expanded','false');
     // Layers: a tap on the dimmed area closes it.
     await page.locator('#layersBtn').click();
@@ -105,8 +103,8 @@ for(const layout of LAYOUTS){
    await expect(sheetOf(page)).toHaveCount(1);
    await expect(sheetOf(page)).toHaveAttribute('id','inspector');
    await expect(page.locator('#layersBtn')).toHaveAttribute('aria-expanded','false');
-   // Opening Menu closes whichever sheet is open (the phone Menu at portrait; the File menu on a landscape phone).
-   await page.locator(menuSelector(layout)).first().click();
+   // Opening Menu closes whichever sheet is open.
+   await page.locator('#phoneMenu').click();
    await expect(sheetOf(page)).toHaveCount(0);
    await page.keyboard.press('Escape');
   });
