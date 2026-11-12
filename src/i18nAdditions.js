@@ -86,4 +86,13 @@ export const ES_ADDITIONS={
 '{n} stitches in the {f} export':'{n} puntadas en la exportación {f}',
 '{m} m estimated thread · {c} thread colors':'{m} m de hilo estimado · {c} colores de hilo',
 '{m} m estimated thread · {c} thread color':'{m} m de hilo estimado · {c} color de hilo',
+'Path':'Trazo',
+'Pen':'Pluma',
+'Photo':'Foto',
+'More':'Más',
+'Shape':'Forma',
+'Inspector':'Inspector',
+'Collapse inspector':'Contraer inspector',
+'Expand inspector':'Desplegar inspector',
+'Choose':'Elegir',
 };

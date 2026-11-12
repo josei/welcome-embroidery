@@ -1,5 +1,6 @@
 import {layoutState} from '../layoutState.js';
 import {inspectorOpenState, toggleInspectorOpen, TABLET_DRAWER_QUERY} from '../inspectorOpenState.js';
+import {inspectorTabState, selectInspectorTab, useTabletPortrait} from '../tabletLayoutState.js';
 import {closePhoneSheet, isPhoneSheetLayout, phoneSheetDetent, phoneSheetState, togglePhoneSheet} from '../phoneSheetState.js';
 import {attachSheetDrag, firstSheetControl} from '../phoneSheetDrag.js';
 import {selectionLabelsState} from '../selectionLabelsState.js';
@@ -80,6 +81,8 @@ export function EditorLayout() {
  const canvasCounts = useSyncExternalStore(sewingCountsState.subscribe, sewingCountsState.get);
  const layout = useSyncExternalStore(layoutState.subscribe, layoutState.get);
  const inspectorOpen = useSyncExternalStore(inspectorOpenState.subscribe, inspectorOpenState.get);
+ const inspectorTab = useSyncExternalStore(inspectorTabState.subscribe, inspectorTabState.get);
+ const tablet = useTabletPortrait();
  const phoneSheet = useSyncExternalStore(phoneSheetState.subscribe, phoneSheetState.get);
  const detent = useSyncExternalStore(phoneSheetDetent.subscribe, phoneSheetDetent.get);
  const selectionLabels = useSyncExternalStore(selectionLabelsState.subscribe, selectionLabelsState.get);
@@ -115,7 +118,7 @@ export function EditorLayout() {
   <>
     <div className={"layout"}>
       {phoneSheet === 'none' ? null : <div className={"sheet-scrim"} aria-hidden={"true"} onClick={closePhoneSheet} />}
-      <aside ref={layersSheet} className={phoneSheet === 'layers' ? "panel sheet-open" : "panel"} data-detent={detent} id={"layersSheet"} aria-label={t('Objects')}>
+      <aside ref={layersSheet} className={[phoneSheet === 'layers' ? "panel sheet-open" : "panel", tablet && inspectorOpen && inspectorTab === 'layers' && 'tab-active'].filter(Boolean).join(' ')} data-detent={detent} id={"layersSheet"} aria-label={t('Objects')}>
         <div className={"sheet-grip"} data-sheet-drag={""} aria-hidden={"true"} />
         <ObjectListHead />
         <label className={"sides-row"} hidden={true}>
@@ -125,6 +128,17 @@ export function EditorLayout() {
         <ObjectList />
         <HoopFields />
       </aside>
+      {/* Issue #475: on a portrait tablet the Layers and Properties tabs sit at the top of the inspector column; the panels below them switch. */}
+      <div className={"inspector-tabs"} role={"tablist"} aria-label={t('Inspector')}>
+        <button type={"button"} role={"tab"} className={"inspector-tab"} data-tab={"layers"} id={"tabLayers"} aria-selected={inspectorTab === 'layers'}
+         aria-controls={"layersSheet"} onClick={() => selectInspectorTab('layers')}>{t('Layers')}</button>
+        <button type={"button"} role={"tab"} className={"inspector-tab"} data-tab={"properties"} id={"tabProperties"} aria-selected={inspectorTab === 'properties'}
+         aria-controls={"inspector"} onClick={() => selectInspectorTab('properties')}>{t('Properties')}</button>
+        <button type={"button"} className={"inspector-collapse"} aria-expanded={inspectorOpen} aria-label={inspectorOpen ? t('Collapse inspector') : t('Expand inspector')}
+         title={inspectorOpen ? t('Collapse inspector') : t('Expand inspector')} data-tooltip={inspectorOpen ? t('Collapse inspector') : t('Expand inspector')} onClick={toggleInspectorOpen}>
+          <span className={"collapse-glyph"} aria-hidden={"true"}>{inspectorOpen ? '›' : '‹'}</span>
+        </button>
+      </div>
       <main className={view === 'design' ? 'design-view' : undefined}>
         <div className={canvasClass} onClick={(e) => {
           // Issue #455: on a portrait tablet a tap on the canvas closes the Properties drawer (controls inside the canvas keep it open).
@@ -141,10 +155,10 @@ export function EditorLayout() {
              <svg className={"icon"}><use href={"#i-sliders"} /></svg>
             </button>
             <SelectTool />
-            <AddShapeButton kind={"rect"} id={"rect"} label={"Add rectangle"} icon={"rect"} tip={t('Add rectangle ({shortcut})', {shortcut: shortcutFor('rect')})} />
-            <AddShapeButton kind={"ellipse"} id={"ellipse"} label={"Add ellipse"} icon={"ellipse"} tip={t('Add ellipse ({shortcut})', {shortcut: shortcutFor('ellipse')})} />
+            <AddShapeButton kind={"rect"} id={"rect"} label={"Add rectangle"} icon={"rect"} tip={t('Add rectangle ({shortcut})', {shortcut: shortcutFor('rect')})} short={t('Shape')} />
+            <AddShapeButton kind={"ellipse"} id={"ellipse"} label={"Add ellipse"} icon={"ellipse"} tip={t('Add ellipse ({shortcut})', {shortcut: shortcutFor('ellipse')})} short={t('Ellipse')} />
             <PathTool />
-            <AddShapeButton kind={"text"} id={"letter"} label={"Add lettering"} icon={"text"} tip={t('Add lettering ({shortcut})', {shortcut: shortcutFor('letter')})} />
+            <AddShapeButton kind={"text"} id={"letter"} label={"Add lettering"} icon={"text"} tip={t('Add lettering ({shortcut})', {shortcut: shortcutFor('letter')})} short={t('Text')} />
             <ToolButtons />
             <button
               className={"icon-button"}
@@ -156,7 +170,7 @@ export function EditorLayout() {
             >
               <svg className={"icon"}>
                 <use href={"#i-trace"} />
-              </svg>
+              </svg><span className={"rail-label"}>{t('Trace')}</span>
             </button>
             <PhotoStitch />
             <PenTool />
@@ -173,11 +187,12 @@ export function EditorLayout() {
           >
             <svg className={"icon"}>
               <use href={"#i-chevron"} />
-            </svg>
+            </svg><span className={"rail-label"}>{t('More')}</span>
           </button>
-          <div className={"canvas-views"}>
+          {/* Issue #475: on a portrait tablet the 2D / Stitches / 3D switch is in the top bar, not over the canvas. */}
+          {tablet ? null : <div className={"canvas-views"}>
             <ViewSwitch />
-          </div>
+          </div>}
           <canvas id={"rulerTop"} aria-hidden={"true"}>
           </canvas>
           <canvas id={"rulerLeft"} aria-hidden={"true"}>
@@ -306,11 +321,8 @@ export function EditorLayout() {
           <StatusRun />
         </footer>
       </main>
-      <aside ref={inspectorSheet} className={[inspectorOpen ? "panel" : "panel inspector-collapsed", phoneSheet === 'properties' && 'sheet-open'].filter(Boolean).join(' ')} id={"inspector"} data-detent={detent} aria-label={t('Properties')}>
+      <aside ref={inspectorSheet} className={[inspectorOpen ? "panel" : "panel inspector-collapsed", phoneSheet === 'properties' && 'sheet-open', tablet && inspectorOpen && inspectorTab === 'properties' && 'tab-active'].filter(Boolean).join(' ')} id={"inspector"} data-detent={detent} aria-label={t('Properties')}>
         <div className={"sheet-grip"} data-sheet-drag={""} aria-hidden={"true"} />
-        <div className={"drawer-head"}>
-          <button type="button" className={"drawer-close"} onClick={toggleInspectorOpen}>{t('Close')}</button>
-        </div>
         <div className={"sheet-head"} data-sheet-drag={""}>
           <h2 className={"sheet-title"}>{t('Properties')}</h2>
         </div>

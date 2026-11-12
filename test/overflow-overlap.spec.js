@@ -50,13 +50,14 @@ for(const [w,h] of viewports){
    const errors=[];page.on('pageerror',e=>errors.push(e.message));page.on('dialog',d=>d.accept());
    await page.setViewportSize({width:w,height:h});
    await page.goto(`/?lang=${lang}`);
-   await page.locator('#new').click();
+   // A portrait tablet keeps New design in the Menu (#475), so the top bar's New button is used only where it is shown.
+   if(await page.locator('#new').isVisible())await page.locator('#new').click();else{await page.locator('#phoneMenu').click();await page.locator('#menuNew').click();}
    if(await page.locator('#discardDialog[open]').count())await page.locator('#discardDiscard').click();
    // Layers is the object list, always open at this width. Selecting an object opens Properties in the inspector.
    await expect(page.locator('#objects')).toBeVisible();
    await page.locator('#rect').click();
    // A portrait tablet folds Properties away when it starts (#455): open it from the Properties button, which swaps with the object list.
-   if(await page.locator('#inspector').isHidden())await page.locator('.inspector-toggle').click();
+   if(await page.locator('.inspector-tab[data-tab=properties]').isVisible())await page.locator('.inspector-tab[data-tab=properties]').click();
    await expect(page.locator('#stats')).toBeVisible();
    const o=await overflowOf(page);
    expect(o.scrollWidth,`scrollWidth with Layers and Properties open at ${w}x${h} ${lang}: ${o.out.join('; ')}`).toBeLessThanOrEqual(o.innerWidth);

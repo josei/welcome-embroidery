@@ -1,4 +1,5 @@
 import {useRef} from 'react';
+import {t} from '../i18n.js';
 import {addPhoto} from '../photoCommands.js';
 // The Photo stitch button on the tool rail and the picture input it opens. The picture is read by photoCommands.
 export function PhotoStitch() {
@@ -13,7 +14,7 @@ export function PhotoStitch() {
     data-tooltip="Photo stitch from a picture"
     onClick={() => input.current?.click()}
    >
-    <svg className="icon"><use href="#i-photo" /></svg>
+    <svg className="icon"><use href="#i-photo" /></svg><span className="rail-label">{t('Photo')}</span>
    </button>
    <input
     id="photoFile"

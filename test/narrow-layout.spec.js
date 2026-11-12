@@ -2,7 +2,8 @@ import {test,expect} from '@playwright/test';
 
 // Issue #208 (from audit #162, finding 9): at narrow widths the top bar stays on one row with its controls whole, and every
 // panel header lines up with the body it heads, at 1920, 1024 and 760px.
-const newDesign=async page=>{await page.locator('#new').click();if(await page.locator('#discardDialog[open]').count())await page.locator('#discardDiscard').click();};
+// A portrait tablet (#475) keeps New design in the Menu, so the top bar's New button is used only where it is shown.
+const newDesign=async page=>{if(await page.locator('#new').isVisible())await page.locator('#new').click();else{await page.locator('#phoneMenu').click();await page.locator('#menuNew').click();}if(await page.locator('#discardDialog[open]').count())await page.locator('#discardDiscard').click();};
 
 test.beforeEach(async({page})=>{await page.addInitScript(()=>{delete window.showSaveFilePicker;});});
 
@@ -21,7 +22,7 @@ for(const width of [1920,1024,760]){
   // The object list heading and the list below it.
   await expectAligned(page.locator('.layers-head'),page.locator('#objects'),`layers head at ${width}px`);
   // The inspector: its heading and the Sewing order fold line up with the inspector's body text. A portrait tablet starts with it closed (#455), so open it first.
-  if(await page.locator('#inspector').isHidden())await page.locator('.inspector-toggle').click();
+  if(await page.locator('.inspector-tab[data-tab=properties]').isVisible())await page.locator('.inspector-tab[data-tab=properties]').click();
   await expectAligned(page.locator('#selected'),page.locator('#stats'),`inspector heading at ${width}px`);
   await expectAligned(page.locator('#secOrder > summary'),page.locator('#stats'),`sewing order header at ${width}px`);
   expect(errors).toEqual([]);
