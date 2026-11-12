@@ -9,6 +9,7 @@ import {wheelZoomFactor,wheelZooms} from './wheelZoom.js';
 import {createCanvasEditing} from './canvasEditing.js';
 import {createCanvasTools} from './canvasTools.js';
 import {toolbarInset} from './floatingToolbar.js';
+import {multiSelectState} from './multiSelectState.js';
 import {deletingGuideState,handModeState,panningState} from './canvasModeState.js';
 
 const SVG='http://www.w3.org/2000/svg',PX_PER_MM=96/25.4;
@@ -317,7 +318,8 @@ export function createCanvas(/** @type {any} */ api){
     const now=performance.now(),dbl=Boolean(lastClick&&now-lastClick.t<380&&lastClick.id===o.id&&Math.hypot(p[0]-lastClick.p[0],p[1]-lastClick.p[1])*vp.s<8);
     lastClick=dbl?null:{t:now,id:o.id,p};
     const group=tools.withGroup(o.id),cur=new Set(api.ids());
-    if(e.shiftKey){const next=new Set(cur);if([...group].every(id=>cur.has(id))&&cur.size>group.size)for(const id of group)next.delete(id);
+    // The Select toggle on the selection bar (spec section 7) makes a plain tap add or remove an object, as Shift+click does.
+    if(e.shiftKey||multiSelectState.get()){const next=new Set(cur);if([...group].every(id=>cur.has(id))&&cur.size>group.size)for(const id of group)next.delete(id);
       else for(const id of group)next.add(id);api.select([...next],[...next].includes(o.id)?o.id:[...next].at(-1));return;}
     const wasSelected=cur.has(o.id);if(!wasSelected)api.select([...group],o.id);
     const ids=api.ids(),f=/** @type {any} */(frame()),box=f?.oriented?objectBounds(api.doc().objects.find((/** @type {any} */ v)=>v.id===ids[0])):f.b;

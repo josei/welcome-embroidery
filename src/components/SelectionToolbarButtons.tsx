@@ -1,5 +1,7 @@
 import {useSyncExternalStore} from 'react';
 import {selectionToolbarActions, selectionToolbarState} from '../selectionToolbarState.js';
+import {multiSelectState} from '../multiSelectState.js';
+import {t} from '../i18n.js';
 
 // The subtract, union and intersect buttons. Which are hidden comes from selectionToolbarState: they need two or more objects.
 export function BooleanButtons() {
@@ -61,5 +63,23 @@ export function FlipButtons() {
     onClick={() => selectionToolbarActions.press('flipV')}
    ><svg className="icon"><use href="#i-flip-v"/></svg></button>
   </>
+ );
+}
+
+// The Select toggle (spec section 7): on, a plain tap adds an object to the selection, or removes it when it is already selected.
+export function SelectToggleButton() {
+ const on = useSyncExternalStore(multiSelectState.subscribe, multiSelectState.get);
+ const label = t('Select: tap objects to add them to the selection');
+ return (
+  <button
+   type="button"
+   className={on ? "icon-button tb-start active-tool" : "icon-button tb-start"}
+   id="selectToggle"
+   aria-pressed={on}
+   aria-label={label}
+   title={label}
+   data-tooltip={label}
+   onClick={() => multiSelectState.set(!on)}
+  ><svg className="icon"><use href="#i-select"/></svg></button>
  );
 }

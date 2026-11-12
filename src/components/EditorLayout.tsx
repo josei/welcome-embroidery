@@ -28,7 +28,8 @@ import {PathPanel} from './PathPanel';
 import {selectionToolbarActions} from '../selectionToolbarState.js';
 import {ReferenceLayer, referenceCanvasHandlers} from './ReferenceLayer';
 import {ReferencePicture} from './ReferencePicture';
-import {BooleanButtons, FlipButtons} from './SelectionToolbarButtons';
+import {BooleanButtons, FlipButtons, SelectToggleButton} from './SelectionToolbarButtons';
+import {ArrangeSheet} from './ArrangeSheet';
 import {SewingOrder} from './SewingOrder';
 import {SnapObjectButton} from './SnapObjectButton';
 import {StatusRun} from './StatusRun';
@@ -62,6 +63,16 @@ import {deletingGuideState, handModeState, panningState} from '../canvasModeStat
 import {setTraceDialogOpen} from '../traceDialogState.js';
 const groupLabel = t('Group ({shortcut})', {shortcut: shortcutLabel([{mod: true, key: 'G'}])});
 const ungroupLabel = t('Ungroup ({shortcut})', {shortcut: shortcutLabel([{mod: true, shift: true, key: 'G'}])});
+// Landscape phones (the bar is 52 px tall there). Tablets keep the bar, which also holds the grid chip, without a selection.
+const NARROW_QUERY = '(max-height: 500px)';
+const subscribeNarrow = (listen: () => void) => {
+ const media = window.matchMedia(NARROW_QUERY);
+ media.addEventListener('change', listen);
+ return () => media.removeEventListener('change', listen);
+};
+const narrowNow = () => window.matchMedia(NARROW_QUERY).matches;
+const duplicateLabel = t('Duplicate selected object');
+const deleteLabel = t('Delete selected object');
 
 // The editor layout: the object list, the canvas and the inspector. Rendered by React; ids match the markup it
 // replaced, because the keyboard shortcuts and tests address them.
@@ -90,6 +101,8 @@ export function EditorLayout() {
  const phone = usePhonePortrait();
  const selection = useSyncExternalStore(selectionState.subscribe, selectionState.get);
  const hasSelection = selection.selected !== null || selection.multi.size > 0;
+ // Issue #489 (spec section 2): on a landscape phone the selection bar is contextual, so it is shown only with a selection.
+ const narrow = useSyncExternalStore(subscribeNarrow, narrowNow);
  const selectionLabels = useSyncExternalStore(selectionLabelsState.subscribe, selectionLabelsState.get);
  const view = useSyncExternalStore(viewMode.subscribe, viewMode.get);
  const snapping = useSyncExternalStore(gridSnapState.subscribe, gridSnapState.get);
@@ -200,12 +213,30 @@ export function EditorLayout() {
   );
  const toolRail = phone ? phoneDock : deskToolRail;
  const floatingBar = (
-             <div className={"floating"} role={"toolbar"} aria-label={"Canvas tools"} hidden={phone && (view !== 'design' || !hasSelection)}>
+             <div className={"floating"} role={"toolbar"} aria-label={"Canvas tools"} hidden={phone ? (view !== 'design' || !hasSelection) : (narrow && !hasSelection)}>
+               {/* Specs #468 sections 1, 2 and 7: Select, Duplicate, Delete and Arrange lead the bar, so they stay in view at phone widths. */}
+               <SelectToggleButton />
+               <ActionButton flag="duplicate" className={"icon-button bar-edit"} id={"barDuplicate"} aria-label={duplicateLabel} title={duplicateLabel}
+                 data-tooltip={duplicateLabel} onClick={() => toolbarActions.duplicate()}>
+                 <svg className={"icon"}>
+                   <use href={"#i-copy"} />
+                 </svg>
+               </ActionButton>
+               <ActionButton flag="remove" className={"icon-button bar-edit"} id={"barDelete"} aria-label={deleteLabel} title={deleteLabel}
+                 data-tooltip={deleteLabel} onClick={() => toolbarActions.remove()}>
+                 <svg className={"icon"}>
+                   <use href={"#i-delete"} />
+                 </svg>
+               </ActionButton>
+               <ArrangeSheet />
+               {/* The Arrange sheet holds these at every size. From 1025px the bar also keeps them as direct buttons, where it has room. */}
                <GridSnapButton />
                <SnapObjectButton />
                <GridControl />
-               <AlignButtons />
-               <FlipButtons />
+               <span className={"bar-direct"}>
+                 <AlignButtons />
+                 <FlipButtons />
+               </span>
                <ActionButton flag="group" hideWhenDisabled className={"icon-button"} aria-label={groupLabel} title={groupLabel}
                  data-tooltip={groupLabel} id={"group"} onClick={(
                  ) => toolbarActions.group()}>
@@ -225,7 +256,9 @@ export function EditorLayout() {
                    <use href={"#i-ungroup"} />
                  </svg>
                </ActionButton>
-               <BooleanButtons />
+               <span className={"bar-direct"}>
+                 <BooleanButtons />
+               </span>
                <ActionButton flag="clip" hideWhenDisabled
                  className={"icon-button tb-start"}
                  aria-label={"Clip: use the top selected shape as a mask for the other selected objects"}
