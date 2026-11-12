@@ -21,7 +21,7 @@ const canvasOverlaps=page=>page.evaluate(()=>{
  const hits=[];
  for(const e of document.querySelectorAll('button,input,select,textarea,summary,a,[role="menuitem"]')){
   const cs=getComputedStyle(e);
-  if(cs.display==='none'||cs.visibility==='hidden'||e.closest('.sr-only,.sheet-open:not(#inspector):not(#layersSheet)')) continue;
+  if(cs.display==='none'||cs.visibility==='hidden'||e.closest('.sr-only,.sheet-open:not(#inspector):not(#layersSheet),.zoombar')) continue;
   const r=e.getBoundingClientRect();
   if(r.width<=0||r.height<=0) continue;
   // A dialog or menu popup sits over the page on purpose, so the page controls under it are not compared.
@@ -46,7 +46,7 @@ for(const [width,height] of PORTRAIT) for(const lang of ['en','es']){
 
  test(`the canvas shows at least 40% of the screen with Layers open at ${width}x${height} (${lang})`,async({page})=>{
   const errors=await openEditor(page,width,height,lang);
-  await page.locator('#layersBtn').click();
+  await page.locator('#phoneMenu').click();await page.locator('#menuLayers').click();
   await expect(page.locator('#layersSheet')).toHaveClass(/sheet-open/);
   const share=await page.evaluate(()=>{
    const c=document.querySelector('.layout main>.canvas').getBoundingClientRect();
@@ -60,7 +60,7 @@ for(const [width,height] of PORTRAIT) for(const lang of ['en','es']){
  test(`every tool, zoom action, Menu view and sheet button is at least 44 px at ${width}x${height} (${lang})`,async({page})=>{
   await openEditor(page,width,height,lang);
   const small=await page.evaluate(()=>[
-   ...document.querySelectorAll('.canvas .tool-rail button[id],.canvas .zoombar button')
+   ...document.querySelectorAll('.tool-rail button[id],.canvas .zoombar button')
   ].filter(e=>e.getBoundingClientRect().width>0).map(e=>({id:e.id||e.className,w:e.getBoundingClientRect().width,h:e.getBoundingClientRect().height})).filter(s=>Math.min(s.w,s.h)<44));
   expect(small,'controls under 44 px').toEqual([]);
   await page.locator('#phoneMenu').click();

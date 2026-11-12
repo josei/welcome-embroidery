@@ -1,14 +1,14 @@
 import {test,expect} from '@playwright/test';
 
-// Issue #461: at 390x844 with Layers open, a transient toast does not cover the Layers and Properties buttons.
-// The toast sits above the sheet bar and stays readable and dismisses on its own.
+// Issue #461: at 390x844 with Layers open, a transient toast does not cover the Menu button or the Layers header's Properties button.
+// The toast sits above the status line and stays readable and dismisses on its own. Issue #471 moved Layers into the Menu.
 test.beforeEach(async({page})=>{await page.addInitScript(()=>{delete window.showSaveFilePicker;});});
 
-test('a toast does not cover the Layers and Properties buttons at 390x844 with Layers open (en)',async({page})=>{
+test('a toast does not cover the Menu or the Properties button at 390x844 with Layers open (en)',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));
  await page.setViewportSize({width:390,height:844});
  await page.goto('/?lang=en');
- await page.locator('#layersBtn').click();
+ await page.locator('#phoneMenu').click();await page.locator('#menuLayers').click();
  await expect(page.locator('#layersSheet')).toHaveClass(/sheet-open/);
  // An invalid machine file raises an error toast.
  await page.locator('#machineFile').setInputFiles({name:'broken.jef',mimeType:'application/octet-stream',buffer:Buffer.from([1,2,3])});
@@ -17,12 +17,12 @@ test('a toast does not cover the Layers and Properties buttons at 390x844 with L
  const tb=await toast.boundingBox();
  expect(tb,'toast box').not.toBeNull();
  // Every sheet button is laid out; none may intersect the toast box.
- const buttons=page.locator('.phone-sheet-btn');
+ const buttons=page.locator('#phoneMenu, .layers-head .inspector-toggle').filter({visible:true});
  for(let i=0;i<await buttons.count();i++){
   const b=await buttons.nth(i).boundingBox();
   const ox=Math.min(tb.x+tb.width,b.x+b.width)-Math.max(tb.x,b.x);
   const oy=Math.min(tb.y+tb.height,b.y+b.height)-Math.max(tb.y,b.y);
-  expect(ox>0&&oy>0,`sheet button ${i} clear of the toast`).toBe(false);
+  expect(ox>0&&oy>0,`control ${i} clear of the toast`).toBe(false);
  }
  // The toast is painted above the open Layers panel. The toast is pointer-events:none, and elementFromPoint skips those,
  // so enable pointer events on it for this one hit test: the topmost element at its centre must be the toast.

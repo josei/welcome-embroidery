@@ -4,7 +4,8 @@ import {test,expect} from '@playwright/test';
 // clipped in English or Spanish. Each readout's text fits its box (no sideways overflow), the thread length stays visible in Spanish,
 // and the full status line is in the DOM. Each language gets a fresh browser context, because the compiled counts of a restored
 // design are kept per page.
-const READOUTS=['count','playbackProgress','playbackStitches','playbackTime','playbackSummary','messagesBtn'];
+// Issue #471: the status line holds only the count; the playback readouts sit in the row above the dock, and Messages is in the Menu.
+const READOUTS=['count','playbackStitches','playbackTime','playbackSummary'];
 
 test('phone readouts are not clipped at 390x844 with 466 stitches, in English and Spanish',async({browser})=>{
  test.setTimeout(120000);

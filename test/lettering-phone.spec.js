@@ -12,7 +12,7 @@ async function addLettering(page,width,height,lang){
  const errors=[];page.on('pageerror',e=>errors.push(e.message));page.on('dialog',d=>d.accept());
  await page.setViewportSize({width,height});
  await page.goto(lang==='en'?'/':`/?lang=${lang}`);
- await page.locator('.canvas .tool-rail #letter').click();
+ await page.locator('.tool-rail #letter').click();
  await expect(page.locator('#canvasText'),'text box opens').toBeVisible();
  return errors;
 }

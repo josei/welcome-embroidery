@@ -36,8 +36,9 @@ export function ZoomBar() {
     <svg className="icon"><use href="#i-hand"/></svg>
    </button>
    <span className="sep"></span>
-   <button type="button" id="zoomFit" className="zoom-text" title={fitHoopLabel} onClick={() => zoomActions.fitHoop()}>
+   <button type="button" id="zoomFit" className="zoom-text" title={fitHoopLabel} aria-label={fitHoopLabel} onClick={() => zoomActions.fitHoop()}>
     {fitHoopLabel}
+    <svg className="icon zoom-fit-icon" aria-hidden="true"><use href="#i-fit"/></svg>
    </button>
    <button type="button" id="zoomAll" className="zoom-text" title={fitAllLabel} onClick={() => zoomActions.fitAll()}>
     All

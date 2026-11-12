@@ -420,6 +420,9 @@ export function EditorIcons() {
           <path d={"M3 12h18M7 8l5-5 5 5zM7 16l5 5 5-5z"} />
         </symbol>
         {" "}
+        <symbol id={"i-fit"} viewBox={"0 0 24 24"}>
+          <path d={"M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5"} />
+        </symbol>
         <symbol id={"i-hand"} viewBox={"0 0 24 24"}>
           <path
             d={"M18 11V6a2 2 0 0 0-4 0M14 10V4a2 2 0 0 0-4 0v7M10 10.5V6a2 2 0 0 0-4 0v9l-2.5-2.5a2 2 0 0 0-3 2.6L6.5 21h10a4 4 0 0 0 4-4v-4a2 2 0 0 0-4 0"}

@@ -1,5 +1,5 @@
 import {useEffect, useRef, useState, useSyncExternalStore} from 'react';
-import {closePhoneSheet} from '../phoneSheetState.js';
+import {closePhoneSheet, phoneSheetState, togglePhoneSheet} from '../phoneSheetState.js';
 import {flushSync} from 'react-dom';
 import type {KeyboardEvent as ReactKeyboardEvent} from 'react';
 import {actionState} from '../actionState.js';
@@ -17,6 +17,8 @@ import {gridActions, gridState, GRID_SPACINGS} from '../gridState.js';
 import {gridSnapActions, gridSnapState} from '../gridSnapState.js';
 import {zoomActions} from '../zoomState';
 import {toastActions} from '../toastState.js';
+import {snapObjActions, snapObjState} from '../snapObjState.js';
+import {statusActions, statusState} from '../statusState.js';
 import {openExportDialog} from '../exportCommands';
 import {setSettingsOpen} from '../settingsState';
 import {agentLinkState} from '../agentLinkState';
@@ -135,7 +137,8 @@ function Dropdown({id, label, rows, iconOnly}: {id: string; label: string; rows:
     onClick={e => {
      // A click with no pointer (detail 0) came from the keyboard: Enter or Space opens the menu and focuses its first item.
      const keyboard = e.detail === 0;
-     if (open) setOpen(false); else openWith(keyboard ? 'first' : null);
+     // Issue #471: opening the phone Menu closes any Layers or Properties sheet (spec section 4), so the list is not under a sheet.
+     if (open) setOpen(false); else { if (id === 'phoneMenu') closePhoneSheet(); openWith(keyboard ? 'first' : null); }
     }}>{iconOnly ? <svg className="icon" aria-hidden="true"><use href="#i-menu" /></svg> : label}</button>
    {open && (
     <div role="menu" id={`${id}List`} className="file-menu-list">
@@ -284,6 +287,9 @@ export function PhoneMenu() {
  const view = useSyncExternalStore(viewMode.subscribe, viewMode.get);
  const snapOn = useSyncExternalStore(gridSnapState.subscribe, gridSnapState.get);
  const grid = useSyncExternalStore(gridState.subscribe, gridState.get);
+ const snapObjects = useSyncExternalStore(snapObjState.subscribe, snapObjState.get);
+ const sheet = useSyncExternalStore(phoneSheetState.subscribe, phoneSheetState.get);
+ const status = useSyncExternalStore(statusState.subscribe, statusState.get);
  const agent = useSyncExternalStore(agentLinkState.subscribe, agentLinkState.get);
  const viewRows: Row[] = VIEW_ROWS.map(v => ({
   id: `menuView-${v.id}`, label: t(v.label), icon: v.icon, hint: view === v.id ? t('Shown now') : undefined, run: () => viewActions.choose(v.id),
@@ -307,10 +313,14 @@ export function PhoneMenu() {
     gridActions.choose(next);
   }},
   {id: 'menuSnap', label: t('Snap to grid'), icon: 'i-snap', hint: snapOn ? t('On') : t('Off'), run: () => gridSnapActions.toggle()},
+  {id: 'menuSnapObjects', label: t('Snap to other objects'), icon: 'i-snap-obj', hint: snapObjects ? t('On') : t('Off'), run: () => snapObjActions.toggle()},
+  {id: 'menuLayers', label: t('Layers'), icon: 'i-layers', hint: sheet === 'layers' ? t('Shown now') : undefined, run: () => togglePhoneSheet('layers')},
+  {id: 'menuProperties', label: t('Properties'), icon: 'i-sliders', hint: sheet === 'properties' ? t('Shown now') : undefined, run: () => togglePhoneSheet('properties')},
   {id: 'menuFitHoop', label: t('Fit hoop'), icon: 'i-fit', run: () => zoomActions.fitHoop()},
   {heading: t('Settings and Help')},
   {id: 'menuSettings', label: t('Settings'), icon: 'i-gear', hint: settingsHint, run: () => setSettingsOpen(true)},
   {id: 'menuMessages', label: t('Messages'), icon: 'i-msg', run: () => toastActions.setLogOpen(true)},
+  ...(status.issuesHidden ? [] : [{id: 'menuIssues', label: status.issuesText, icon: 'i-msg', run: () => statusActions.issues()}]),
   {id: 'menuHelp', label: t('Help'), icon: 'i-help', run: () => window.open(HELP_URL, '_blank', 'noopener')},
  ];
  return <Dropdown id="phoneMenu" label={t('Menu')} iconOnly rows={rows} />;

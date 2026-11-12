@@ -1,7 +1,8 @@
 import {layoutState} from '../layoutState.js';
 import {inspectorOpenState, toggleInspectorOpen, TABLET_DRAWER_QUERY} from '../inspectorOpenState.js';
 import {inspectorTabState, selectInspectorTab, useTabletPortrait} from '../tabletLayoutState.js';
-import {closePhoneSheet, isPhoneSheetLayout, phoneSheetDetent, phoneSheetState, togglePhoneSheet} from '../phoneSheetState.js';
+import {closePhoneSheet, isPhoneSheetLayout, phoneSheetDetent, phoneSheetState, togglePhoneSheet, usePhonePortrait} from '../phoneSheetState.js';
+import {selectionState} from '../selectionState.js';
 import {attachSheetDrag, firstSheetControl} from '../phoneSheetDrag.js';
 import {selectionLabelsState} from '../selectionLabelsState.js';
 import {t} from '../i18n.js';
@@ -85,6 +86,9 @@ export function EditorLayout() {
  const tablet = useTabletPortrait();
  const phoneSheet = useSyncExternalStore(phoneSheetState.subscribe, phoneSheetState.get);
  const detent = useSyncExternalStore(phoneSheetDetent.subscribe, phoneSheetDetent.get);
+ const phone = usePhonePortrait();
+ const selection = useSyncExternalStore(selectionState.subscribe, selectionState.get);
+ const hasSelection = selection.selected !== null || selection.multi.size > 0;
  const selectionLabels = useSyncExternalStore(selectionLabelsState.subscribe, selectionLabelsState.get);
  const view = useSyncExternalStore(viewMode.subscribe, viewMode.get);
  const snapping = useSyncExternalStore(gridSnapState.subscribe, gridSnapState.get);
@@ -114,6 +118,147 @@ export function EditorLayout() {
  }, [phoneSheet]);
  const canvasClass = ['canvas', hand && 'hand', snapping && 'snapping', view === 'preview' && 'preview-mode', panning && 'panning',
   deletingGuide && 'deleting-guide'].filter(Boolean).join(' ');
+ const toolRail = (
+   <>
+             <div className={"tool-row tool-rail"} aria-label={"Tools"} ref={toolRailRef}>
+               {phone ? null : <>
+               {/* Issue #473: on a phone the dock (portrait) or rail (landscape) opens Layers and Properties as sheets. */}
+               <button type="button" className={"icon-button phone-sheet-btn"} id={"layersBtn"} aria-label={t('Layers')} title={t('Layers')} data-tooltip={t('Layers')}
+                aria-expanded={phoneSheet === 'layers'} aria-controls={"layersSheet"} onClick={() => togglePhoneSheet('layers')}>
+                <svg className={"icon"}><use href={"#i-layers"} /></svg>
+               </button>
+               <button type="button" className={"icon-button phone-sheet-btn"} id={"propertiesBtn"} aria-label={t('Properties')} title={t('Properties')} data-tooltip={t('Properties')}
+                aria-expanded={phoneSheet === 'properties'} aria-controls={"inspector"} onClick={() => togglePhoneSheet('properties')}>
+                <svg className={"icon"}><use href={"#i-sliders"} /></svg>
+               </button>
+               </>}
+               <SelectTool />
+               <AddShapeButton kind={"rect"} id={"rect"} label={"Add rectangle"} icon={"rect"} tip={t('Add rectangle ({shortcut})', {shortcut: shortcutFor('rect')})} short={t('Shape')} />
+               <AddShapeButton kind={"ellipse"} id={"ellipse"} label={"Add ellipse"} icon={"ellipse"} tip={t('Add ellipse ({shortcut})', {shortcut: shortcutFor('ellipse')})} short={t('Ellipse')} />
+               <PathTool />
+               <AddShapeButton kind={"text"} id={"letter"} label={"Add lettering"} icon={"text"} tip={t('Add lettering ({shortcut})', {shortcut: shortcutFor('letter')})} short={t('Text')} />
+               <ToolButtons />
+               <button
+                 className={"icon-button"}
+                 id={"traceBtn"}
+                 aria-label={"Trace a picture into filled shapes"}
+                 title={"Trace a picture into filled shapes"}
+                 data-tooltip={"Trace a picture into filled shapes"}
+                 onClick={() => setTraceDialogOpen(true)}
+               >
+                 <svg className={"icon"}>
+                   <use href={"#i-trace"} />
+                 </svg><span className={"rail-label"}>{t('Trace')}</span>
+               </button>
+               <PhotoStitch />
+               <PenTool />
+             </div>
+             <button
+               type={"button"}
+               className={"icon-button tool-more"}
+               id={"toolMore"}
+               aria-label={t('More tools')}
+               aria-expanded={moreToolsOpen}
+               title={t('More tools')}
+               data-tooltip={t('More tools')}
+               onClick={toggleMoreTools}
+             >
+               <svg className={"icon"}>
+                 <use href={"#i-chevron"} />
+               </svg><span className={"rail-label"}>{t('More')}</span>
+             </button>
+   </>
+  );
+ const floatingBar = (
+             <div className={"floating"} role={"toolbar"} aria-label={"Canvas tools"} hidden={phone && (view !== 'design' || !hasSelection)}>
+               <GridSnapButton />
+               <SnapObjectButton />
+               <GridControl />
+               <AlignButtons />
+               <FlipButtons />
+               <ActionButton flag="group" hideWhenDisabled className={"icon-button"} aria-label={groupLabel} title={groupLabel}
+                 data-tooltip={groupLabel} id={"group"} onClick={(
+                 ) => toolbarActions.group()}>
+                 <svg className={"icon"}>
+                   <use href={"#i-group"} />
+                 </svg>
+               </ActionButton>
+               <ActionButton flag="ungroup" hideWhenDisabled
+                 className={"icon-button"}
+                 aria-label={ungroupLabel}
+                 title={ungroupLabel}
+                 data-tooltip={ungroupLabel}
+                 id={"ungroup"}
+                 onClick={() => toolbarActions.ungroup()}
+               >
+                 <svg className={"icon"}>
+                   <use href={"#i-ungroup"} />
+                 </svg>
+               </ActionButton>
+               <BooleanButtons />
+               <ActionButton flag="clip" hideWhenDisabled
+                 className={"icon-button tb-start"}
+                 aria-label={"Clip: use the top selected shape as a mask for the other selected objects"}
+                 title={"Clip: use the top selected shape as a mask for the other selected objects"}
+                 data-tooltip={"Clip: use the top selected shape as a mask for the other selected objects"}
+                 id={"clipBtn"}
+                 onClick={() => selectionToolbarActions.clip()}
+               >
+                 <svg className={"icon"}>
+                   <use href={"#i-clip"} />
+                 </svg>
+               </ActionButton>
+               <ActionButton flag="unclip" hideWhenDisabled
+                 className={"icon-button"}
+                 aria-label={"Release the clipping mask"}
+                 title={"Release the clipping mask"}
+                 data-tooltip={"Release the clipping mask"}
+                 id={"unclipBtn"}
+                 onClick={() => selectionToolbarActions.unclip()}
+               >
+                 <svg className={"icon"}>
+                   <use href={"#i-unclip"} />
+                 </svg>
+               </ActionButton>
+               <ActionButton flag="textOnPath" hideWhenDisabled
+                 className={"icon-button tb-start"}
+                 aria-label={"Put the selected text on the selected path"}
+                 title={"Put the selected text on the selected path"}
+                 data-tooltip={"Put the selected text on the selected path"}
+                 id={"textOnPath"}
+                 onClick={() => selectionToolbarActions.textOnPath()}
+               >
+                 <svg className={"icon"}>
+                   <use href={"#i-text-path"} />
+                 </svg>
+               </ActionButton>
+               <ActionButton flag="textOffPath" hideWhenDisabled
+                 className={"icon-button"}
+                 aria-label={"Detach text from its path"}
+                 title={"Detach text from its path"}
+                 data-tooltip={"Detach text from its path"}
+                 id={"textOffPath"}
+                 onClick={() => selectionToolbarActions.textOffPath()}
+               >
+                 <svg className={"icon"}>
+                   <use href={"#i-text-detach"} />
+                 </svg>
+               </ActionButton>
+               <ActionButton flag="editNodes" hideWhenDisabled
+                 className={editing ? "icon-button tb-start active-tool" : "icon-button tb-start"}
+                 aria-label={"Edit nodes (Enter) — converts rectangles and ellipses to paths"}
+                 title={"Edit nodes (Enter) — converts rectangles and ellipses to paths"}
+                 data-tooltip={"Edit nodes (Enter) — converts rectangles and ellipses to paths"}
+                 id={"editNodes"}
+                 onClick={() => toolbarActions.editNodes()}
+               >
+                 <svg className={"icon"}>
+                   <use href={"#i-node-edit"} />
+                 </svg>
+               </ActionButton>
+               <PathNodeButtons />
+             </div>
+  );
  return (
   <>
     <div className={"layout"}>
@@ -144,51 +289,7 @@ export function EditorLayout() {
           // Issue #455: on a portrait tablet a tap on the canvas closes the Properties drawer (controls inside the canvas keep it open).
           if (inspectorOpen && window.matchMedia(TABLET_DRAWER_QUERY).matches && !(e.target as Element).closest('button,input,select,textarea,label,a')) toggleInspectorOpen();
         }}>
-          <div className={"tool-row tool-rail"} aria-label={"Tools"} ref={toolRailRef}>
-            {/* Issue #473: on a phone the dock (portrait) or rail (landscape) opens Layers and Properties as sheets. */}
-            <button type="button" className={"icon-button phone-sheet-btn"} id={"layersBtn"} aria-label={t('Layers')} title={t('Layers')} data-tooltip={t('Layers')}
-             aria-expanded={phoneSheet === 'layers'} aria-controls={"layersSheet"} onClick={() => togglePhoneSheet('layers')}>
-             <svg className={"icon"}><use href={"#i-layers"} /></svg>
-            </button>
-            <button type="button" className={"icon-button phone-sheet-btn"} id={"propertiesBtn"} aria-label={t('Properties')} title={t('Properties')} data-tooltip={t('Properties')}
-             aria-expanded={phoneSheet === 'properties'} aria-controls={"inspector"} onClick={() => togglePhoneSheet('properties')}>
-             <svg className={"icon"}><use href={"#i-sliders"} /></svg>
-            </button>
-            <SelectTool />
-            <AddShapeButton kind={"rect"} id={"rect"} label={"Add rectangle"} icon={"rect"} tip={t('Add rectangle ({shortcut})', {shortcut: shortcutFor('rect')})} short={t('Shape')} />
-            <AddShapeButton kind={"ellipse"} id={"ellipse"} label={"Add ellipse"} icon={"ellipse"} tip={t('Add ellipse ({shortcut})', {shortcut: shortcutFor('ellipse')})} short={t('Ellipse')} />
-            <PathTool />
-            <AddShapeButton kind={"text"} id={"letter"} label={"Add lettering"} icon={"text"} tip={t('Add lettering ({shortcut})', {shortcut: shortcutFor('letter')})} short={t('Text')} />
-            <ToolButtons />
-            <button
-              className={"icon-button"}
-              id={"traceBtn"}
-              aria-label={"Trace a picture into filled shapes"}
-              title={"Trace a picture into filled shapes"}
-              data-tooltip={"Trace a picture into filled shapes"}
-              onClick={() => setTraceDialogOpen(true)}
-            >
-              <svg className={"icon"}>
-                <use href={"#i-trace"} />
-              </svg><span className={"rail-label"}>{t('Trace')}</span>
-            </button>
-            <PhotoStitch />
-            <PenTool />
-          </div>
-          <button
-            type={"button"}
-            className={"icon-button tool-more"}
-            id={"toolMore"}
-            aria-label={t('More tools')}
-            aria-expanded={moreToolsOpen}
-            title={t('More tools')}
-            data-tooltip={t('More tools')}
-            onClick={toggleMoreTools}
-          >
-            <svg className={"icon"}>
-              <use href={"#i-chevron"} />
-            </svg><span className={"rail-label"}>{t('More')}</span>
-          </button>
+          {phone ? null : toolRail}
           {/* Issue #475: on a portrait tablet the 2D / Stitches / 3D switch is in the top bar, not over the canvas. */}
           {tablet ? null : <div className={"canvas-views"}>
             <ViewSwitch />
@@ -204,94 +305,7 @@ export function EditorLayout() {
           <CanvasHint />
           <ZoomBar />
           <PreviewPanel />
-          <div className={"floating"} role={"toolbar"} aria-label={"Canvas tools"}>
-            <GridSnapButton />
-            <SnapObjectButton />
-            <GridControl />
-            <AlignButtons />
-            <FlipButtons />
-            <ActionButton flag="group" hideWhenDisabled className={"icon-button"} aria-label={groupLabel} title={groupLabel}
-              data-tooltip={groupLabel} id={"group"} onClick={(
-              ) => toolbarActions.group()}>
-              <svg className={"icon"}>
-                <use href={"#i-group"} />
-              </svg>
-            </ActionButton>
-            <ActionButton flag="ungroup" hideWhenDisabled
-              className={"icon-button"}
-              aria-label={ungroupLabel}
-              title={ungroupLabel}
-              data-tooltip={ungroupLabel}
-              id={"ungroup"}
-              onClick={() => toolbarActions.ungroup()}
-            >
-              <svg className={"icon"}>
-                <use href={"#i-ungroup"} />
-              </svg>
-            </ActionButton>
-            <BooleanButtons />
-            <ActionButton flag="clip" hideWhenDisabled
-              className={"icon-button tb-start"}
-              aria-label={"Clip: use the top selected shape as a mask for the other selected objects"}
-              title={"Clip: use the top selected shape as a mask for the other selected objects"}
-              data-tooltip={"Clip: use the top selected shape as a mask for the other selected objects"}
-              id={"clipBtn"}
-              onClick={() => selectionToolbarActions.clip()}
-            >
-              <svg className={"icon"}>
-                <use href={"#i-clip"} />
-              </svg>
-            </ActionButton>
-            <ActionButton flag="unclip" hideWhenDisabled
-              className={"icon-button"}
-              aria-label={"Release the clipping mask"}
-              title={"Release the clipping mask"}
-              data-tooltip={"Release the clipping mask"}
-              id={"unclipBtn"}
-              onClick={() => selectionToolbarActions.unclip()}
-            >
-              <svg className={"icon"}>
-                <use href={"#i-unclip"} />
-              </svg>
-            </ActionButton>
-            <ActionButton flag="textOnPath" hideWhenDisabled
-              className={"icon-button tb-start"}
-              aria-label={"Put the selected text on the selected path"}
-              title={"Put the selected text on the selected path"}
-              data-tooltip={"Put the selected text on the selected path"}
-              id={"textOnPath"}
-              onClick={() => selectionToolbarActions.textOnPath()}
-            >
-              <svg className={"icon"}>
-                <use href={"#i-text-path"} />
-              </svg>
-            </ActionButton>
-            <ActionButton flag="textOffPath" hideWhenDisabled
-              className={"icon-button"}
-              aria-label={"Detach text from its path"}
-              title={"Detach text from its path"}
-              data-tooltip={"Detach text from its path"}
-              id={"textOffPath"}
-              onClick={() => selectionToolbarActions.textOffPath()}
-            >
-              <svg className={"icon"}>
-                <use href={"#i-text-detach"} />
-              </svg>
-            </ActionButton>
-            <ActionButton flag="editNodes" hideWhenDisabled
-              className={editing ? "icon-button tb-start active-tool" : "icon-button tb-start"}
-              aria-label={"Edit nodes (Enter) — converts rectangles and ellipses to paths"}
-              title={"Edit nodes (Enter) — converts rectangles and ellipses to paths"}
-              data-tooltip={"Edit nodes (Enter) — converts rectangles and ellipses to paths"}
-              id={"editNodes"}
-              onClick={() => toolbarActions.editNodes()}
-            >
-              <svg className={"icon"}>
-                <use href={"#i-node-edit"} />
-              </svg>
-            </ActionButton>
-            <PathNodeButtons />
-          </div>
+          {phone ? null : floatingBar}
           <svg id={"art"} viewBox={"-60 -60 120 120"} tabIndex={0} role={"application"} aria-label={designName(canvasDoc.doc.objects ?? [], canvasCounts)} {...referenceCanvasHandlers}>
             <defs>
               <pattern id={"linen"} width={"2.6"} height={"2.6"} patternUnits={"userSpaceOnUse"}>
@@ -315,9 +329,12 @@ export function EditorLayout() {
           </svg>
           <CanvasTextEditor />
         </div>
+        {phone && view !== 'design' ? <div className={"phone-playback"}><PlaybackBar /></div> : null}
+        {phone ? floatingBar : null}
+        {phone ? toolRail : null}
         <footer>
           <ToastStack />
-          <PlaybackBar />
+          {phone ? null : <PlaybackBar />}
           <StatusRun />
         </footer>
       </main>

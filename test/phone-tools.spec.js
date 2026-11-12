@@ -19,7 +19,7 @@ for(const [width,height] of PHONES) for(const lang of ['en','es']){
   const errors=await openEditor(page,width,height,lang);
   // The page itself never scrolls sideways.
   expect(await page.evaluate(()=>document.documentElement.scrollWidth-innerWidth),'no page overflow').toBeLessThanOrEqual(0);
-  const rail=page.locator('.canvas .tool-rail');
+  const rail=page.locator('.tool-rail');
   const box=await rail.boundingBox();
   const canvas=await page.locator('.canvas').boundingBox();
   // The strip sits inside the canvas and inside the window.
@@ -34,7 +34,7 @@ for(const [width,height] of PHONES) for(const lang of ['en','es']){
 
  test(`every tool and top-bar control is at least 24 px across at ${width}x${height} (${lang})`,async({page})=>{
   await openEditor(page,width,height,lang);
-  const sizes=await page.evaluate(()=>[...document.querySelectorAll('.canvas .tool-rail button, header.top button, header.top .file-menu > button')]
+  const sizes=await page.evaluate(()=>[...document.querySelectorAll('.tool-rail button, header.top button, header.top .file-menu > button')]
    .filter(e=>e.getBoundingClientRect().width>0).map(e=>({id:e.id||e.className,w:e.getBoundingClientRect().width,h:e.getBoundingClientRect().height})));
   expect(sizes.length,'controls were found').toBeGreaterThan(10);
   for(const s of sizes) expect(Math.min(s.w,s.h),`touch target ${s.id}`).toBeGreaterThanOrEqual(24);
@@ -43,7 +43,7 @@ for(const [width,height] of PHONES) for(const lang of ['en','es']){
 
 test('every tool in the strip is reachable and becomes active at 375px',async({page})=>{
  const errors=await openEditor(page,375,667);
- const rail=page.locator('.canvas .tool-rail');
+ const rail=page.locator('.tool-rail');
  // Tool modes: each one is armed, so its button reports aria-pressed="true".
  for(const id of ['select','line','measure','polygon','star','path','pen']){
   const btn=rail.locator(`#${id}`);
@@ -147,7 +147,8 @@ for(const [width,height] of [[390,844],[360,740]]) for(const lang of ['en','es']
 // Issue #460, changed by #457: at 390x844 and 360x740 every tool in the desktop tool list is one scroll away on a single row. The
 // rail scrolls sideways inside its own box (the page never does), so a tool is brought into view, then it is inside the rail, unclipped
 // in the rail, at least 44 px square, and receives a tap.
-const toolIds=page=>page.locator('.canvas .tool-rail button[id]').evaluateAll(els=>els.map(e=>e.id).sort());
+// The Layers and Properties openers (.phone-sheet-btn) are not drawing tools: portrait moves them to Menu > View, so they are left out.
+const toolIds=page=>page.locator('.tool-rail button[id]:not(.phone-sheet-btn)').evaluateAll(els=>els.map(e=>e.id).sort());
 for(const [width,height] of [[390,844],[360,740]]) test(`every desktop tool is reachable with one tap at ${width}x${height}`,async({page})=>{
  await page.setViewportSize({width:1024,height:768});
  await page.goto('/');
@@ -156,7 +157,7 @@ for(const [width,height] of [[390,844],[360,740]]) test(`every desktop tool is r
  const errors=await openEditor(page,width,height);
  expect(await toolIds(page),'phone tool set equals the desktop tool set').toEqual(desktop);
  expect(await page.evaluate(()=>document.documentElement.scrollWidth-innerWidth),'no page overflow').toBeLessThanOrEqual(0);
- const rail=page.locator('.canvas .tool-rail');
+ const rail=page.locator('.tool-rail');
  expect(await rail.evaluate(e=>getComputedStyle(e).overflowX),'the rail scrolls sideways inside its box').toMatch(/auto|scroll/);
  const railBox=await rail.boundingBox();
  expect(railBox.width,'the rail is inside the window').toBeLessThanOrEqual(width);

@@ -8,7 +8,7 @@ b,strong,th,h1,h2,h3,h4,h5,h6{font-weight:var(--fw-emphasis)}
 :root{font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;color:#252c29;background:#f5f4f0;font-size:var(--fs-body);font-synthesis:none}*{box-sizing:border-box}body{margin:0;height:100vh;min-height:620px;overflow:hidden}.top{height:58px;background:#fff;border-bottom:1px solid #e6e6e1;display:flex;align-items:center;gap:14px;padding:0 18px}.top>b{font-size:var(--fs-large);letter-spacing:-.5px;color:#284c40;margin-right:16px}.top input{border:0;font:inherit;font-weight:var(--fw-emphasis);width:180px}.top button,button{font:inherit;color:inherit;border:1px solid var(--field-line);background:#fff;border-radius:6px;padding:7px 11px;cursor:pointer}.top button:hover,button:hover{border-color:#7b9a89}.top #export{margin-left:auto;background:var(--teal);color:white;border-color:var(--teal);padding:9px 17px}.layout{height:calc(100vh - 58px);display:grid;grid-template-columns:230px minmax(420px,1fr) 265px}.panel{background:#fff;padding:18px 15px;overflow:auto}.layout>.panel:first-child{border-right:1px solid #e6e6e1}.layout>.panel:last-child{border-left:1px solid #e6e6e1}.panel h3{font-size:var(--fs-body);margin:0 0 16px}.panel>button{display:inline-block;padding:6px 8px;margin:0 3px 10px 0}.canvas{height:calc(100% - 112px);min-height:360px;display:grid;place-items:center;overflow:hidden;background-color:#f2f1ed;background-image:radial-gradient(#c8cbc5 .7px,transparent .7px);background-size:18px 18px}.layout main{min-width:0;display:flex;flex-direction:column}nav{height:54px;background:#fff;border-bottom:1px solid #e6e6e1;display:flex;align-items:center;padding:0 14px;gap:7px}nav button[data-view]{border:0}.hoop{fill:#fff;stroke:#c9cec8;stroke-width:.45;stroke-dasharray:1.2 1.2}#art{width:min(72vh,76%);height:min(72vh,76%);background:#fff;box-shadow:0 2px 18px #3331}.shape{cursor:move;stroke-width:.45;vector-effect:non-scaling-stroke}.shape.selected{stroke:#1c8069!important;stroke-width:.8}.stitch-path{fill:none;stroke-width:.16;stroke-linecap:round;opacity:.84;pointer-events:none}.stitch-path.jump{stroke:#d05f44;stroke-dasharray:.8 .8;opacity:.65}#objects{margin-top:10px}.object-row{display:flex;width:100%;align-items:center;gap:8px;border:0;text-align:left;padding:9px 7px}.object-row.selected{background:#eaf2ed}.swatch{width:10px;height:10px;border-radius:50%}.footer{position:absolute;bottom:24px;font-size:var(--fs-caption);color:#888}.layout main>footer{height:58px;display:flex;align-items:center;gap:12px;padding:0 16px;background:#fff;border-top:1px solid #e6e6e1;font-size:var(--fs-caption)}#seek{flex:1}.panel label{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:12px 0;color:#606863}.panel input:not([type=checkbox]),.panel select,dialog select{width:120px;border:1px solid var(--field-line);border-radius:5px;padding:7px;font:inherit;background:#fff}.panel input[type=checkbox]{accent-color:var(--teal)}
 /* WCAG 2.5.8: 24px minimum target. Selects (visually hidden ones excluded) and checkbox rows, where the whole label is the target. */
 select:not(.sr-only){min-height:24px}label:has(input[type=checkbox]){min-height:24px}.panel #stats{border-top:1px solid #eee;padding-top:13px;color:#65716b;line-height:1.6}dialog{width:340px;border:0;border-radius:12px;box-shadow:0 10px 50px #0003}dialog::backdrop{background:#202a2580}dialog form{display:grid;gap:12px;padding:12px}
-#exportDialog select{width:100%}#exportDialog .export-error{color:#9b2c1f;font-size:var(--fs-body);margin:0}#download:disabled{opacity:.5;cursor:default}dialog h2{margin:0;font-size:var(--fs-large)}dialog p{font-size:var(--fs-body);color:#64706a}#download{background:var(--primary-fill);color:#fff;border:0;padding:10px;border-radius:6px;cursor:pointer}.timeline-block{display:inline-block;height:7px;margin-right:3px;border-radius:5px}/* The stack hangs above the status bar, so it never covers the bar or the sidebars; the footer is its anchor. */.layout main>footer{position:relative}#toast{position:absolute;bottom:100%;left:50%;transform:translateX(-50%);margin-bottom:10px;z-index:30;display:flex;flex-direction:column;align-items:center;gap:6px;width:max-content;max-width:min(400px,calc(100vw - 32px));pointer-events:none}#toast .toast-item{display:flex;align-items:center;gap:10px;max-width:100%;background:#243b32;color:white;padding:10px 15px;border-radius:7px;font-size:var(--fs-body);line-height:1.4;box-shadow:0 5px 20px #1d292522}#toast .toast-item.error{background:#7a2a1f;padding-right:8px}#toast .toast-action{pointer-events:auto;background:none;border:1px solid #ffffff66;color:inherit;font:inherit;font-weight:var(--fw-emphasis);padding:2px 9px;border-radius:5px;cursor:pointer}#toast .toast-action:hover{background:#ffffff22}#toast .toast-action:focus-visible{outline:2px solid #fff}#toast .toast-close{pointer-events:auto;margin-left:auto;background:none;border:0;color:inherit;font-size:var(--fs-large);line-height:1;padding:2px 6px;border-radius:4px;cursor:pointer}#toast .toast-close:hover{background:#ffffff22}#toast .toast-close:focus-visible{outline:2px solid #fff}.messages-btn{border:1px solid var(--field-line);background:#f6f7f5;color:#42504a;font-size:var(--fs-caption);padding:3px 9px;min-height:24px;border-radius:99px;cursor:pointer}#messagesDialog .messages-list{list-style:none;margin:0 0 14px;padding:0;max-height:50vh;overflow-y:auto;font-size:var(--fs-body)}#messagesDialog .messages-list li{display:grid;grid-template-columns:auto 1fr;gap:12px;padding:7px 0;border-bottom:1px solid #eef0ec}#messagesDialog .messages-list time{color:#66726c;font-variant-numeric:tabular-nums;white-space:nowrap}#messagesDialog .messages-list li.error span{color:#9b2c1f}#openElsewhere{position:fixed;top:64px;left:50%;transform:translateX(-50%);background:#fff4d6;color:#5a4300;border:1px solid #e0c46b;padding:8px 14px;border-radius:7px;font-size:var(--fs-body);z-index:20;box-shadow:0 4px 14px #5a430022}@media(max-width:900px){.layout{grid-template-columns:175px 1fr}.layout>.panel:last-child{display:none}.top{gap:7px;padding:0 9px}.top>b{margin-right:2px}.top input{width:110px}.footer{position:static;margin-top:30px}}
+#exportDialog select{width:100%}#exportDialog .export-error{color:#9b2c1f;font-size:var(--fs-body);margin:0}#download:disabled{opacity:.5;cursor:default}dialog h2{margin:0;font-size:var(--fs-large)}dialog p{font-size:var(--fs-body);color:#64706a}#download{background:var(--primary-fill);color:#fff;border:0;padding:10px;border-radius:6px;cursor:pointer}.timeline-block{display:inline-block;height:7px;margin-right:3px;border-radius:5px}/* The stack hangs above the status bar, so it never covers the bar or the sidebars; the footer is its anchor. */.layout main>footer{position:relative}#toast{position:absolute;bottom:100%;left:50%;transform:translateX(-50%);margin-bottom:10px;z-index:30;display:flex;flex-direction:column;align-items:center;gap:6px;width:max-content;max-width:min(400px,calc(100vw - 32px));pointer-events:none}#toast .toast-item{display:flex;align-items:center;gap:10px;max-width:100%;background:#243b32;color:white;padding:10px 15px;border-radius:7px;font-size:var(--fs-body);line-height:1.4;box-shadow:0 5px 20px #1d292522}#toast .toast-item.error{background:#7a2a1f;padding-right:8px}#toast .toast-action{pointer-events:auto;background:none;border:1px solid #ffffff66;color:inherit;font:inherit;font-weight:var(--fw-emphasis);padding:2px 9px;border-radius:5px;cursor:pointer}#toast .toast-action:hover{background:#ffffff22}#toast .toast-action:focus-visible{outline:2px solid #fff}#toast .toast-close{pointer-events:auto;margin-left:auto;background:none;border:0;color:inherit;font-size:var(--fs-large);line-height:1;padding:2px 6px;border-radius:4px;cursor:pointer}#toast .toast-close:hover{background:#ffffff22}#toast .toast-close:focus-visible{outline:2px solid #fff}.messages-btn{border:1px solid var(--field-line);background:#f6f7f5;color:#42504a;font-size:var(--fs-caption);padding:3px 9px;min-height:24px;border-radius:99px;cursor:pointer}#messagesDialog .messages-list{list-style:none;margin:0 0 14px;padding:0;max-height:50vh;overflow-y:auto;font-size:var(--fs-body)}#messagesDialog .messages-list li{display:grid;grid-template-columns:auto 1fr;gap:12px;padding:7px 0;border-bottom:1px solid #eef0ec}#messagesDialog .messages-list time{color:#66726c;font-variant-numeric:tabular-nums;white-space:nowrap}#messagesDialog .messages-list li.error span{color:#9b2c1f}#openElsewhere{position:fixed;top:64px;left:50%;transform:translateX(-50%);background:#fff4d6;color:#5a4300;border:1px solid #e0c46b;padding:8px 14px;border-radius:7px;font-size:var(--fs-body);z-index:20;box-shadow:0 4px 14px #5a430022}@media(min-width:601px) and (max-width:900px),(max-width:600px) and (orientation:landscape){.layout{grid-template-columns:175px 1fr}.layout>.panel:last-child{display:none}.top{gap:7px;padding:0 9px}.top>b{margin-right:2px}.top input{width:110px}.footer{position:static;margin-top:30px}}
 .xywh{display:grid;grid-template-columns:1fr;gap:6px}.xywh label{margin:0;padding:0;font-size:var(--fs-caption)}.xywh input{width:100%!important;min-width:0;text-align:right}.panel h4{font-size:var(--fs-caption);color:#6a746e;letter-spacing:.04em;text-transform:uppercase;margin:19px 0 9px}.panel label:has(input[type=checkbox]){justify-content:flex-start}.panel label:has(input[type=checkbox]) input{margin-left:auto}
 
 /* Refined linen workspace, aligned with design/index2.html's botanical direction. */
@@ -36,7 +36,7 @@ nav button[data-view]{padding:7px 13px;color:#66726c}nav button[data-view].activ
 #seek{accent-color:var(--teal)}#play,#resetPlayback{border-color:var(--field-line);color:#66726c}
 /* One field treatment for every editable text input and single-choice select in the panel (issue #324): same border, fill, radius and height. */
 .panel input:not([type=checkbox]),.panel select{border-color:var(--field-line);background:#f6f7f5;border-radius:6px;min-height:32px}
-@media(max-width:1100px){.layout{grid-template-columns:208px minmax(0,1fr) 208px}}
+@media(min-width:601px) and (max-width:1100px),(max-width:600px) and (orientation:landscape){.layout{grid-template-columns:208px minmax(0,1fr) 208px}}
 /* Issue #319: 901-1100px keeps the inspector beside the canvas. Its column is wide enough for the controls (about 30% of the window, 260-300px),
    so the fields, the Transform pairs and the corner radii fit without clipping; a folded inspector gives its column back to the canvas. */
 @media(min-width:901px) and (max-width:1100px){
@@ -75,7 +75,7 @@ nav .icon-button:first-of-type{margin-left:auto}
 #play.playing:hover{background:#176454;color:white}
 #seek{min-width:80px;accent-color:var(--teal)}
 #needleMarker{fill:var(--teal);stroke:#fff;stroke-width:.32;vector-effect:non-scaling-stroke;filter:drop-shadow(0 0 .35px #1d2925)}
-@media(max-width:1000px){#playbackProgress{min-width:82px}#needlePosition{display:none}.top .icon-button{width:32px;min-width:32px;height:32px}}
+@media(min-width:601px) and (max-width:1000px),(max-width:600px) and (orientation:landscape){#playbackProgress{min-width:82px}#needlePosition{display:none}.top .icon-button{width:32px;min-width:32px;height:32px}}
 @media(prefers-reduced-motion:reduce){.icon-button[data-tooltip]::after{transition:none}}
 .top .icon-button[data-tooltip]::after{top:calc(100% + 7px);bottom:auto}
 .icon-button.active-tool{background:var(--teal-soft);border-color:var(--field-line);color:var(--teal);box-shadow:inset 3px 0 0 var(--teal)}
@@ -253,12 +253,21 @@ label[hidden],button[hidden],.sel-hint[hidden]{display:none!important}
 .floating .tb-start{position:relative}
 .floating .tb-start::before{content:'';position:absolute;left:-2px;top:5px;bottom:5px;width:1px;background:#e3e6e1}
 .floating #grid{grid-column:span 2;width:100%;height:30px;margin:0;padding:0 12px 0 2px;box-sizing:border-box;appearance:none;-webkit-appearance:none;text-align:center;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='5' viewBox='0 0 8 5'%3E%3Cpath d='M0 0h8L4 5z' fill='%2353635b'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 6px center}
-@media (max-width:1100px){.canvas .floating{grid-template-columns:repeat(14,26px);gap:6px 3px}.canvas .floating .icon-button{width:26px;min-width:26px;height:26px}.canvas .floating #grid{font-size:var(--fs-caption);height:26px}}
+@media (min-width:601px) and (max-width:1100px),(max-width:600px) and (orientation:landscape){.canvas .floating{grid-template-columns:repeat(14,26px);gap:6px 3px}.canvas .floating .icon-button{width:26px;min-width:26px;height:26px}.canvas .floating #grid{font-size:var(--fs-caption);height:26px}}
 .sew-tips{margin:0 0 12px;padding:8px 10px;border:1px solid #ecd9a1;border-radius:8px;background:#fff8e1;color:#6b5314;font-size:var(--fs-body);line-height:1.45}.sew-tips[hidden]{display:none}.sew-tips b{display:block;font-size:var(--fs-caption);letter-spacing:.07em;text-transform:uppercase;margin-bottom:3px}.sew-tips p{margin:0 0 4px}
 
 /* Phones and small tablets (900px and narrower): the canvas leads and the tool and inspector panels stack below it; the page scrolls instead of the panes.
    From 901 to 1100px the three columns stay, so the inspector sits beside the canvas (issue #319). */
+/* The Layers and Properties sheets and their hoop row keep these at every width they had them, phone portrait included (the sheets are the same there). */
 @media (max-width:900px),(max-height:500px) and (pointer:coarse){
+.layout>.panel:last-child{display:block;order:4;width:auto;overflow:visible;border-left:0;border-right:0;border-top:1px solid #e3e6e1}
+.layout>aside.panel:first-child{display:contents}
+.layout>aside.panel:first-child>h3{display:none}
+#objects{order:2;margin:0;padding:0 10px}
+.layout .hoop-edit{order:3;margin:0;padding:8px 10px 14px}
+.layout .footer.hoop-edit{position:static}
+}
+@media (min-width:601px) and (max-width:900px),(max-width:600px) and (orientation:landscape),(max-height:500px) and (pointer:coarse){
 body{height:auto;min-height:0;overflow-x:hidden;overflow-y:auto}
 .top{height:auto;flex-wrap:wrap;gap:6px 4px;padding:8px 10px}
 .top .logo{margin-right:0;order:0}
@@ -273,13 +282,7 @@ body{height:auto;min-height:0;overflow-x:hidden;overflow-y:auto}
 .edit-tools{gap:2px}
 .layout{height:auto;display:flex;flex-direction:column;grid-template-columns:none}
 .layout main{order:1}
-.layout>.panel:last-child{display:block;order:4;width:auto;overflow:visible;border-left:0;border-right:0;border-top:1px solid #e3e6e1}
-.layout>aside.panel:first-child{display:contents}
-.layout>aside.panel:first-child>h3{display:none}
 .layout .tool-row{order:0;display:grid;grid-auto-flow:column;grid-auto-columns:36px;justify-content:start;gap:4px;margin:0;padding:10px 10px 8px;background:#fff;border-top:1px solid #e3e6e1;overflow-x:auto;scrollbar-width:none}
-#objects{order:2;margin:0;padding:0 10px}
-.layout .hoop-edit{order:3;margin:0;padding:8px 10px 14px}
-.layout .footer.hoop-edit{position:static}
 .canvas{height:62vh;height:62dvh;min-height:340px}
 .canvas .floating{left:8px;right:8px;top:28px;width:auto;max-width:none;transform:none;justify-content:start;overflow-x:auto;scrollbar-width:none;grid-template-columns:repeat(14,30px);gap:6px 4px;padding:6px}
 @media (min-width:601px) and (max-width:1100px){.canvas .floating{display:flex;flex-wrap:wrap;justify-content:center;align-content:center;overflow-x:visible}.canvas .floating #grid{width:64px;grid-column:auto}}
@@ -319,7 +322,7 @@ input:not([type=checkbox]):not([type=range]),select,textarea,.panel textarea{fon
 /* Issue #443: at phone widths (600px and narrower) the tool rail sits along the bottom of the canvas, above the zoom bar.
    Issue #460: it wraps onto as many rows as it needs, so every tool is visible and one tap away with no sideways swipe.
    Each tool button is 44px, the touch target from #453. */
-@media (max-width:600px){
+@media (max-width:600px) and (orientation:landscape){
 .canvas .tool-rail{left:8px;right:8px;top:auto;bottom:50px;width:auto;max-width:none;max-height:none;flex-direction:row;flex-wrap:wrap;align-items:center;align-content:center;justify-content:center;gap:4px;padding:6px;border-radius:12px;overflow:visible}
 .canvas .tool-rail .icon-button{width:44px;min-width:44px;height:44px;flex:none}
 /* Issue #459: the hint sits above the tool strip (two rows of 44px buttons at most), wraps inside the canvas, and leaves the zoom bar uncovered. */
@@ -382,7 +385,8 @@ input:not([type=checkbox]):not([type=range]),select,textarea,.panel textarea{fon
 .list-warning{font-size:var(--fs-body);color:var(--warn);background:var(--warn-soft);border:1px solid var(--warn-line);border-radius:8px;padding:7px 9px;margin:0 0 6px;line-height:1.4}
 .row-warn{flex:none;color:var(--warn);font-size:var(--fs-body);line-height:1;cursor:help}
 .empty-hint{margin:4px 2px 0}
-.canvas-hint{position:absolute;left:50%;bottom:16px;transform:translateX(-50%);z-index:2;margin:0;padding:6px 12px;border-radius:99px;background:#fffe;box-shadow:0 2px 8px rgba(0,0,0,.08);font-size:var(--fs-body);color:#4f5a54;white-space:nowrap;pointer-events:none}@media(max-width:600px){.canvas-hint{white-space:normal;width:max-content;max-width:calc(100% - 40px);bottom:52px;text-align:center;line-height:1.3;border-radius:14px}}
+.canvas-hint{position:absolute;left:50%;bottom:16px;transform:translateX(-50%);z-index:2;margin:0;padding:6px 12px;border-radius:99px;background:#fffe;box-shadow:0 2px 8px rgba(0,0,0,.08);font-size:var(--fs-body);color:#4f5a54;white-space:nowrap;pointer-events:none}@media(max-width:600px){.canvas-hint{white-space:normal;width:max-content;max-width:calc(100% - 40px);text-align:center;line-height:1.3;border-radius:14px}}
+@media(max-width:600px) and (orientation:landscape){.canvas-hint{bottom:52px}}
 input[aria-invalid="true"]{border-color:var(--warn)!important;background:var(--warn-soft)}.field-range{color:#64706a;font-size:var(--fs-caption);margin-left:6px;white-space:nowrap}
 
 /* Blank design: the export split turns grey (white label still 5.3:1) and the button shows a not-allowed cursor. */
@@ -428,7 +432,7 @@ input[aria-invalid="true"]{border-color:var(--warn)!important;background:var(--w
 .playback-summary{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
 /* Issue #467: at phone widths (600px and narrower) the status and playback readouts wrap onto as many lines as they need, so the full
    stitch count, playback position and thread length are read rather than cut off. Wider screens keep the one-line slots above. */
-@media (max-width:600px){
+@media (max-width:600px) and (orientation:landscape){
 .layout main>footer>#count,.layout main>footer>#playbackProgress{width:auto;white-space:normal;overflow:visible;text-overflow:clip}
 .playback-bar .playback-time{width:auto;overflow:visible}
 .playback-bar .playback-time span{white-space:normal;overflow:visible;text-overflow:clip;overflow-wrap:anywhere}
@@ -471,7 +475,7 @@ input[aria-invalid="true"]{border-color:var(--warn)!important;background:var(--w
    Layers and Properties buttons at the start of the dock (portrait) or the rail (landscape), and only one is open at a time. Neither
    sheet has a Close button. A sheet closes by a downward drag on its grab handle or title row (portrait), a tap on the dimmed area,
    Escape, or the system back action (MenuBar opening closes them too; see phoneSheetState.ts). Portrait sheets have three detents:
-   peek (120 px), half (50%, where a dock open starts) and full (below the 48 px top bar). Landscape sheets are 320 px on the right.
+   peek (120 px), half (50%, where a dock open starts) and full (below the 52 px top bar). Landscape sheets are 320 px on the right.
    Desktop and tablet never show these parts. Undo: restore the Issue #441 block and the sheet-bar in EditorLayout. */
 .phone-sheet-btn,.sheet-grip,.sheet-head,.sheet-scrim{display:none}
 .sheet-title{margin:0;font-size:var(--fs-heading);font-weight:var(--fw-emphasis);color:#1d211f}
@@ -479,12 +483,12 @@ input[aria-invalid="true"]{border-color:var(--warn)!important;background:var(--w
 .phone-sheet-btn{display:inline-flex;align-items:center;justify-content:center;flex:none;width:44px;min-width:44px;height:44px;min-height:44px;padding:0;border:1px solid var(--field-line);border-radius:10px;background:#fff;color:#4d5a54;cursor:pointer}
 .phone-sheet-btn[aria-expanded=true]{background:var(--teal-soft);border-color:var(--teal);color:var(--teal-deep)}
 .phone-sheet-btn .icon{width:20px;height:20px}
-.sheet-scrim{display:block;position:fixed;left:0;right:0;bottom:0;top:48px;z-index:39;background:#1d292538}
+.sheet-scrim{display:block;position:fixed;left:0;right:0;bottom:0;top:52px;z-index:39;background:#1d292538}
 .layout>aside.panel:not(.sheet-open){display:none}
 .layout>aside.panel.sheet-open{display:flex;flex-direction:column;position:fixed;left:0;right:0;bottom:0;z-index:40;width:auto;height:50vh;height:50dvh;margin:0;padding:0 12px 16px;overflow-y:auto;overscroll-behavior:contain;background:#fff;border:0;border-radius:14px 14px 0 0;box-shadow:0 -6px 24px #1d292533;transition:height .2s ease,transform .2s ease}
 .layout>aside.panel.sheet-open[data-dragging]{transition:none}
 .layout>aside.panel.sheet-open[data-detent=peek]{height:120px}
-.layout>aside.panel.sheet-open[data-detent=full]{height:calc(100vh - 48px);height:calc(100dvh - 48px)}
+.layout>aside.panel.sheet-open[data-detent=full]{height:calc(100vh - 52px);height:calc(100dvh - 52px)}
 .sheet-grip{display:block;position:relative;flex:none;height:24px;margin:0 -12px;touch-action:none;cursor:grab}
 .sheet-grip::before{content:"";position:absolute;left:50%;top:9px;width:36px;height:5px;margin-left:-18px;border-radius:3px;background:#c4cbc6}
 .sheet-head,.layers-head[data-sheet-drag]{touch-action:none}
@@ -546,8 +550,9 @@ input[aria-invalid="true"]{border-color:var(--warn)!important;background:var(--w
    New, Open, Import, Save, Duplicate and Redo buttons leave the bar (their actions stay in the File, Edit and Arrange menus and the
    keyboard), the menu labels and icons tighten, and the design name takes what is left, down to nothing, so Undo, Delete, Export and
    Settings stay whole inside the window. The bar keeps the 58px row it has from 601px up. */
+@media (max-height:500px) and (pointer:coarse),(max-width:600px) and (orientation:landscape){.top{height:58px}}
 @media (max-width:600px),(max-height:500px) and (pointer:coarse){
-.top{flex-wrap:nowrap;gap:3px;padding:0 4px;height:58px}
+.top{flex-wrap:nowrap;gap:3px;padding:0 4px}
 .top .logo,.top #new,.top #open,.top #importMachine,.top #save,.top #duplicate{display:none}
 .top .file-menu>button{padding:6px 4px;font-size:var(--fs-caption)}
 /* Issue #443: the phone Menu holds Edit and Arrange, so its list scrolls inside the window instead of running off the bottom. */
@@ -564,8 +569,8 @@ input[aria-invalid="true"]{border-color:var(--warn)!important;background:var(--w
 }
 /* Issue #454: at phone widths (600 px and narrower, portrait) the top bar holds Menu, the design name, undo, redo and Export, at the
    desktop bar's 48 px. Every other command, the save status included, is listed in the phone Menu (MenuBar.tsx PhoneMenu). */
+@media (max-width:600px) and (orientation:landscape){.top{height:48px}}
 @media (max-width:600px){
-.top{height:48px}
 .top .sep,.top .logo,.top #new,.top #open,.top #importMachine,.top #save,.top #duplicate,.top #remove,.top #helpBtn,.top #settingsBtn,.top .save-status{display:none}
 .top .file-menu-list .menu-note{padding:8px 12px;font-size:var(--fs-caption);color:#5c625e;line-height:1.4;white-space:normal;overflow-wrap:anywhere}
 /* Issue #465: the blank-design reason takes no room in the bar, so the design name keeps its width beside Export. It hangs as a
@@ -616,19 +621,21 @@ input[type=checkbox]:not(.icon-check){width:24px;height:24px;min-width:24px;marg
 .top .export-split #export{min-height:44px;height:100%}
 .top #name{height:44px;min-height:44px}
 .top .name-field{min-height:44px;display:flex;align-items:center;flex:1 1 0;min-width:0;width:auto}
+@media (max-width:600px) and (orientation:landscape){
 .canvas .tool-rail{bottom:68px}
 .canvas #canvasHint{bottom:184px}
 .canvas .tool-rail .icon-button{width:44px;min-width:44px;height:44px}
 .canvas .zoombar{bottom:8px}
+}
 .canvas .zoombar .icon-button,.canvas .zoombar .zoom-pct,.canvas .zoombar .zoom-fit,.canvas .zoombar button{min-width:44px;width:auto;height:44px;min-height:44px;padding:0 6px}
+@media (max-width:600px) and (orientation:landscape){
 .canvas .floating{grid-template-columns:repeat(14,44px);gap:6px 4px}
 .canvas .floating .icon-button{width:44px;min-width:44px;height:44px}
 .canvas .floating #grid{grid-column:span 2;width:100%;height:44px}
+.canvas .floating .grid-chip{width:44px;min-width:44px;height:44px;min-height:44px;grid-column:span 2}
+}
 .messages-btn{min-height:44px;padding:0 12px}
 .segmented button[data-view]{min-height:44px}
-}
-@media (max-width:600px){
-.canvas .floating .grid-chip{width:44px;min-width:44px;height:44px;min-height:44px;grid-column:span 2}
 }
 @media (max-width:600px){
 .row-btn,.row-eye,.row-lock{width:44px;min-width:44px;height:44px;min-height:44px}
@@ -649,13 +656,13 @@ input[type=checkbox]:not(.icon-check){width:24px;height:24px;min-width:24px;marg
 .top .save-status{position:absolute;width:0;height:0;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;margin:0}
 }
 /* Issue #453: at 360 px and narrower the bar's gaps and the Export label tighten, so the design name keeps a 44 px box on a 360 px screen. */
-@media (max-width:360px){
+@media (max-width:360px) and (orientation:landscape){
 .top{gap:2px;padding:0 4px}
 .top .edit-tools{gap:0}
 .top .export-split{min-width:44px}
 .top .export-split #export{font-size:var(--fs-caption);padding:0 4px;min-width:44px}
 }
-@media (max-width:340px){
+@media (max-width:340px) and (orientation:landscape){
 .top{gap:1px;padding:0 3px}
 .top .export-split #export{padding:0 2px}
 }
@@ -716,27 +723,44 @@ input[type=checkbox]:not(.icon-check){width:24px;height:24px;min-width:24px;marg
 .canvas .floating{left:72px;top:28px}
 }
 
-/* Issue #457: at phone portrait (600 px wide and narrower, taller than wide) the canvas takes the full width between the top bar and a
-   bottom stack. From the top of the stack down: the Layers and Properties bar (52 px), the zoom bar (44 px), the canvas actions row
-   (44 px, scrolls sideways), the drawing tools row (52 px, scrolls sideways, every tool 44 px) and the status footer (56 px; 100 px
-   outside the design view, where the playback bar sits in it). Nothing sits over the canvas except the rulers, the hints and the drawing
-   itself. The 2D, Stitches and 3D tabs leave the canvas for the phone Menu's View section (MenuBar.tsx PhoneMenu). The stack is fixed,
-   so `main` is absolutely positioned (no stacking context): that keeps the toast stack above an open sheet. Landscape phones keep the
-   earlier layout. Undo: delete this block. */
+/* Issue #471: at phone portrait (600 px wide and narrower, taller than wide) the screen is fixed and the page never scrolls. From the
+   top: the top bar (52 px), the canvas (the rest; the only pannable and zoomable part), the contextual bar (52 px, shown only with a
+   selection in the design view), the tool dock (56 px and the bottom safe area) and the status line (28 px). Outside the design view
+   the stitch playback bar takes the contextual bar's row. The zoom buttons are a vertical stack at the canvas's bottom right. The grid,
+   snap, view and sheet commands, and Messages, open from the Menu (MenuBar.tsx PhoneMenu). Landscape phones and tablets keep their own
+   layouts. Undo: restore the Issue #457 stack from git history. */
+.zoom-fit-icon{display:none}
 @media (max-width:600px) and (orientation:portrait){
-.layout main{--phone-foot:56px;position:absolute;top:48px;left:0;right:0;bottom:0;display:flex;flex-direction:column;min-height:0;width:auto;order:0}
-.layout main:not(.design-view){--phone-foot:100px}
-.layout main>.canvas{flex:none;height:calc(100vh - 48px - var(--phone-foot) - 192px);height:calc(100dvh - 48px - var(--phone-foot) - 192px);min-height:0}
-.layout main>footer{position:relative;flex:none;margin-top:auto;height:var(--phone-foot);min-height:0;padding:6px 12px;align-content:center;align-items:center;overflow:visible}
-.layout main>footer>.playback-bar{flex:1 1 100%;height:48px}
-.canvas .zoombar{position:fixed;left:0;right:0;top:auto;bottom:calc(var(--phone-foot) + 96px);z-index:6;width:auto;height:44px;margin:0;padding:0 6px;justify-content:center;border:0;border-radius:0;box-shadow:none;background:#fff}
-.canvas .floating{position:fixed;top:auto;left:0;right:0;bottom:calc(var(--phone-foot) + 52px);z-index:6;display:flex;flex-direction:row;flex-wrap:nowrap;align-items:center;justify-content:flex-start;align-content:center;gap:4px;width:auto;height:44px;max-width:none;max-height:none;margin:0;padding:0 8px;transform:none;overflow-x:auto;overflow-y:hidden;background:#fff;grid-template-columns:none}
-.canvas .floating #grid,.canvas .floating .grid-chip{grid-column:auto;width:auto;flex:none}
-.canvas .tool-rail{position:fixed;left:0;right:0;top:auto;bottom:var(--phone-foot);z-index:6;width:auto;height:52px;max-height:none;margin:0;padding:4px 8px;flex-direction:row;flex-wrap:nowrap;justify-content:flex-start;align-items:center;align-content:center;gap:4px;border:0;border-radius:0;box-shadow:none;background:#fff;overflow-x:auto;overflow-y:hidden}
-.canvas .tool-rail .icon-button{flex:none}
-.canvas .canvas-views{display:none}
-.canvas .canvas-text-hint,.canvas #canvasHint,.canvas .canvas-hint{bottom:12px}
-#toast{margin-bottom:calc(var(--phone-foot) + 146px)}
+body{height:100vh;height:100dvh;min-height:0;overflow:hidden;overscroll-behavior:none}
+.top{height:52px;padding:0 6px;gap:4px;box-sizing:border-box;flex:none}
+.layout{display:flex;flex-direction:column;grid-template-columns:none;height:calc(100vh - 52px);height:calc(100dvh - 52px);min-height:0;overflow:hidden}
+.layout main{display:grid;grid-template-columns:minmax(0,1fr);grid-template-rows:minmax(0,1fr) auto auto auto;flex:1 1 0;order:0;width:100%;min-width:0;min-height:0;position:relative;overflow:hidden}
+.layout main>.canvas{grid-row:1;height:auto;min-height:0;position:relative;overflow:hidden;overscroll-behavior:none;touch-action:none}
+.canvas>#rulerTop,.canvas>#rulerLeft,.canvas>.ruler-corner,.canvas .canvas-views{display:none}
+.canvas .zoombar{position:absolute;left:auto;top:auto;right:12px;bottom:12px;z-index:5;display:flex;flex-direction:column;align-items:center;gap:6px;width:auto;height:auto;margin:0;padding:0;border:0;border-radius:0;background:none;box-shadow:none}
+.canvas .zoombar>button{width:44px;min-width:44px;height:44px;min-height:44px;padding:0;background:#fff;border:1px solid var(--field-line);border-radius:10px;box-shadow:0 4px 16px #1d292514}
+.canvas .zoombar #zoomIn{order:1}
+.canvas .zoombar #zoomOut{order:2}
+.canvas .zoombar #zoomFit{order:3}
+.canvas .zoombar #zoomPct,.canvas .zoombar #handTool,.canvas .zoombar #zoomAll,.canvas .zoombar .sep{display:none}
+.canvas .zoombar .zoom-text{font-size:0}
+.canvas .zoombar .zoom-fit-icon{display:inline-block;width:20px;height:20px}
+.canvas-hint{bottom:168px}
+.layout main>.floating{grid-row:2;position:static;top:auto;right:auto;bottom:auto;left:auto;transform:none;z-index:auto;display:flex;flex-direction:row;flex-wrap:nowrap;align-items:center;justify-content:flex-start;align-content:center;gap:4px;width:auto;height:52px;max-width:none;max-height:none;margin:0;padding:4px 6px;box-sizing:border-box;grid-template-columns:none;overflow-x:auto;overflow-y:hidden;scrollbar-width:none;border:0;border-top:1px solid #e3e6e1;border-radius:0;background:#fff;box-shadow:none}
+.layout main>.floating[hidden]{display:none}
+.layout main>.floating .icon-button{width:44px;min-width:44px;height:44px;flex:none}
+.layout main>.floating>#snap,.layout main>.floating>#snapObj,.layout main>.floating>#gridCycle,.layout main>.floating>#grid{display:none}
+.layout main>.phone-playback{grid-row:2;display:flex;align-items:center;height:52px;min-width:0;box-sizing:border-box;padding:4px 8px;border-top:1px solid #e3e6e1;background:#fff;overflow:hidden}
+.layout main>.phone-playback .playback-bar{width:100%;min-width:0}
+.layout main>.phone-playback .playback-time{width:auto;overflow:visible}
+.layout main>.phone-playback .playback-time span{white-space:normal;overflow:visible;text-overflow:clip;overflow-wrap:anywhere}
+.layout main>.phone-playback .playback-summary{white-space:normal;overflow:visible;text-overflow:clip}
+.layout main>.tool-rail{grid-row:3;position:static;inset:auto;z-index:auto;display:flex;flex-direction:row;flex-wrap:nowrap;align-items:center;justify-content:flex-start;align-content:center;gap:4px;width:auto;height:calc(56px + env(safe-area-inset-bottom));max-height:none;max-width:none;margin:0;padding:6px 8px calc(6px + env(safe-area-inset-bottom));box-sizing:border-box;overflow-x:auto;overflow-y:hidden;scrollbar-width:none;border:0;border-top:1px solid #e3e6e1;border-radius:0;background:#fff;box-shadow:none}
+.layout main>.tool-rail .icon-button{width:44px;min-width:44px;height:44px;flex:none}
+.layout main:has(.canvas.preview-mode)>.tool-rail{display:none}
+.layout main>footer{grid-row:4;position:relative;flex:none;height:28px;min-height:0;margin:0;padding:0 12px;box-sizing:border-box;display:flex;align-items:center;gap:8px;overflow:visible;background:#fff;border:0;border-top:1px solid #e3e6e1}
+.layout main>footer>:not(#count):not(#toast){display:none}
+.layout main>footer>#count{flex:1 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;line-height:26px;font-size:var(--fs-caption)}
 }
 
 .tool-more{display:none}

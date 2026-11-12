@@ -82,6 +82,13 @@ export function togglePhoneSheet(sheet: Exclude<PhoneSheet, 'none'>) {
   else openPhoneSheet(sheet);
 }
 
+// Focus goes back to the opener. A sheet opened from the Menu is opened by a Menu row, which is gone once the Menu closes, so focus
+// falls back to the Menu button (the phone Menu, in portrait).
+function restoreFocus(back: HTMLElement | null) {
+  if (back?.isConnected) back.focus();
+  else document.getElementById('phoneMenu')?.focus();
+}
+
 /** Closes any open sheet, puts focus back on the control that opened it, and removes the sheet's history entry. */
 export function closePhoneSheet() {
   if (phoneSheetState.get() === 'none') return;
@@ -92,7 +99,7 @@ export function closePhoneSheet() {
     ignoredPops++;
     window.history.back();
   }
-  if (back?.isConnected) back.focus();
+  restoreFocus(back);
 }
 
 // The system back action: it closes the open sheet first, and only then goes back in the app.
@@ -105,7 +112,7 @@ window.addEventListener('popstate', () => {
   const back = opener;
   opener = null;
   phoneSheetState.set('none');
-  if (back?.isConnected) back.focus();
+  restoreFocus(back);
 });
 
 /** Moves a sheet to the detent above it (peek, half, full). Full stays full. */
@@ -119,4 +126,20 @@ export function lowerPhoneSheet() {
   const detent = phoneSheetDetent.get();
   if (detent === 'peek') closePhoneSheet();
   else phoneSheetDetent.set(detent === 'full' ? 'half' : 'peek');
+}
+
+const PHONE_PORTRAIT_QUERY = '(max-width: 600px) and (orientation: portrait)';
+function subscribePhonePortrait(onChange: () => void) {
+  const query = window.matchMedia(PHONE_PORTRAIT_QUERY);
+  query.addEventListener('change', onChange);
+  return () => query.removeEventListener('change', onChange);
+}
+function isPhonePortrait(): boolean {
+  return window.matchMedia(PHONE_PORTRAIT_QUERY).matches;
+}
+
+/** Whether the window is a phone held upright (600 px wide and narrower, taller than wide). Only this screen has the fixed phone
+ * layout (styles.css, the phone portrait block); landscape phones keep the canvas with their tool strip inside it. */
+export function usePhonePortrait(): boolean {
+  return useSyncExternalStore(subscribePhonePortrait, isPhonePortrait);
 }

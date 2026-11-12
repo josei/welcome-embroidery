@@ -171,9 +171,9 @@ for(const width of [375,390]) for(const lang of ['en','es']){
    const kids=[...top.children].filter(e=>!e.classList.contains('sr-only')&&e.getBoundingClientRect().width>0);
    return {tops:kids.map(e=>e.getBoundingClientRect().top),height:top.getBoundingClientRect().height,overflow:top.scrollWidth-top.clientWidth};
   });
-  // One row, no taller than the desktop bar (48px, Issue #454), and nothing scrolls sideways inside the bar.
+  // One row, no taller than the phone top bar (52px, Issue #471), and nothing scrolls sideways inside the bar.
   for(const t of info.tops) expect(Math.abs(t-info.tops[0]),'child top within the bar row').toBeLessThan(12);
-  expect(info.height,'bar height is one row').toBeLessThanOrEqual(48);
+  expect(info.height,'bar height is one row').toBeLessThanOrEqual(52);
   expect(info.overflow,'no horizontal overflow in the bar').toBeLessThanOrEqual(0);
   // Undo, Redo and Export are inside the window and are the element at their own centre (nothing covers them). Delete moved to the Menu (Issue #454).
   for(const id of ['#undo','#redo','#export']){
