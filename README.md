@@ -51,6 +51,14 @@ docker run --rm -p 8787:8787 welcome-embroidery
 
 Static build (no server features such as MCP): `npm run build` creates a self-contained `dist/`.
 
+### Rebuild on new commits
+
+```sh
+npm run serve:watch   # serves http://127.0.0.1:8787/ and rebuilds when the checked-out commit changes
+```
+
+This starts the same server as `npm start` (`PORT` and `HOST` apply) and builds the editor once at startup if `dist/` is missing or was built from another commit. It then checks `git rev-parse HEAD` every 2 seconds. A new commit starts one build, about a second after the commits stop arriving. Each build goes into `.serve-watch/`, and `dist/` becomes a link to the newest one, so the server never sees a missing or half-written build. A failed build is logged and the previous build keeps serving. Only commits trigger a rebuild, not uncommitted edits. Running `npm run build` again replaces the link with a plain `dist/`.
+
 ## Desktop app
 
 The desktop app is a Tauri shell in `src-tauri/`. `npm run desktop:build` builds it.

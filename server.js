@@ -25,7 +25,7 @@ import {SERVED_NAME,exportRetentionDays,isExpiredExport,startExportSweep} from '
 //   previews) are deleted this many days after they were written. The sweep runs at startup and hourly. Saved
 //   documents (*.welcome from document_save) are never deleted. Change the default in server-artifacts.js.
 const env=name=>process.env[`WELCOME_${name}`];
-const root=path.dirname(fileURLToPath(import.meta.url)),distRoot=path.join(root,'dist'),dataDir=env('DATA_DIR')||path.join(root,'var'),anonymousDocs=new Map(),relay=createRelay({storePath:env('SESSION_FILE')===''?null:(env('SESSION_FILE')||path.join(dataDir,'sessions.json'))}),anonymousAllowed=env('ANONYMOUS_MCP')==='1',artifacts=path.join(dataDir,'artifacts'),mime={'.html':'text/html; charset=utf-8','.css':'text/css; charset=utf-8','.js':'text/javascript; charset=utf-8','.json':'application/json; charset=utf-8','.svg':'image/svg+xml','.png':'image/png','.woff2':'font/woff2'};
+const root=path.dirname(fileURLToPath(import.meta.url)),distRoot=env('DIST_DIR')||path.join(root,'dist'),dataDir=env('DATA_DIR')||path.join(root,'var'),anonymousDocs=new Map(),relay=createRelay({storePath:env('SESSION_FILE')===''?null:(env('SESSION_FILE')||path.join(dataDir,'sessions.json'))}),anonymousAllowed=env('ANONYMOUS_MCP')==='1',artifacts=path.join(dataDir,'artifacts'),mime={'.html':'text/html; charset=utf-8','.css':'text/css; charset=utf-8','.js':'text/javascript; charset=utf-8','.json':'application/json; charset=utf-8','.svg':'image/svg+xml','.png':'image/png','.woff2':'font/woff2'};
 await fs.mkdir(artifacts,{recursive:true});
 const retentionDays=exportRetentionDays(env('EXPORT_RETENTION_DAYS')),retentionMs=retentionDays*24*60*60*1000;
 await startExportSweep(artifacts,{days:retentionDays}).first;
