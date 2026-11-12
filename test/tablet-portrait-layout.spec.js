@@ -36,7 +36,8 @@ for(const lang of ['en','es']){
   const top=await rect(page,'.top');
   expect(Math.round(top.height)).toBe(56);
   const status=await rect(page,'.layout main>footer');
-  expect(Math.round(status.height)).toBe(28);
+  // Issue #480: the status line is 44 px so its Messages button is a 44 px target.
+  expect(Math.round(status.height)).toBe(44);
   const canvas=await rect(page,'.canvas');
   const rail=await rect(page,'.tool-rail');
   const art=await rect(page,'#art');

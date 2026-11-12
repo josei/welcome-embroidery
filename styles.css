@@ -721,6 +721,16 @@ input[type=checkbox]:not(.icon-check){width:24px;height:24px;min-width:24px;marg
 .canvas .zoombar button{min-width:44px;height:44px;min-height:44px}
 .canvas .zoombar .icon-button{width:44px}
 .canvas .floating{left:72px;top:28px}
+/* Issue #480 (spec #470 section 3): every inspector and status-line control is 44x44 px to tap at tablet portrait. The glyph inside may stay
+   small; the element's box is the hit area. The status line grows from 28 to 44 px so the Messages button fits its height. Undo: delete
+   this block and restore the 28 px status line in the #475 block. */
+.layout main>footer{height:44px;min-height:44px}
+.layout main>footer .messages-btn{height:44px;min-height:44px;min-width:44px;padding:0 12px}
+.row-btn,.row-eye,.row-lock{width:44px;min-width:44px;height:44px;min-height:44px}
+.layout .hoop-edit select,.layout .hoop-edit input:not([type=checkbox]),.layout .hoop-edit button,#hoopRotate{height:44px;min-height:44px;min-width:44px}
+.layout>#inspector button,.layout>#inspector select,.layout>#inspector input:not([type=checkbox]),.layout>#layersSheet button,.layout>#layersSheet select,.layout>#layersSheet input:not([type=checkbox]){min-height:44px}
+.layout>#inspector button,.layout>#layersSheet button{min-width:44px}
+.layout>#inspector .icon-check,.layout>#layersSheet .icon-check{width:44px!important;height:44px}
 }
 
 /* Issue #471: at phone portrait (600 px wide and narrower, taller than wide) the screen is fixed and the page never scrolls. From the
