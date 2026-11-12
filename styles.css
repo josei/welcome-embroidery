@@ -323,6 +323,8 @@ input:not([type=checkbox]):not([type=range]),select,textarea,.panel textarea{fon
 .canvas .tool-rail .icon-button{width:44px;min-width:44px;height:44px;flex:none}
 /* Issue #459: the hint sits above the tool strip (two rows of 44px buttons at most), wraps inside the canvas, and leaves the zoom bar uncovered. */
 .canvas .canvas-text-hint{bottom:162px;max-width:calc(100% - 16px);white-space:normal;text-align:center;line-height:1.3}
+/* Issue #466: the empty-design hint sits above the tool strip too, so the strip does not cover its text. */
+.canvas #canvasHint{bottom:162px}
 }
 
 .canvas .floating{top:56px;left:auto;right:12px;transform:none;display:flex;flex-direction:column;flex-wrap:wrap;align-items:center;align-content:flex-start;justify-content:flex-start;gap:2px;width:auto;max-width:none;max-height:calc(100% - 76px);padding:6px;overflow:visible;grid-template-columns:none}
@@ -379,7 +381,7 @@ input:not([type=checkbox]):not([type=range]),select,textarea,.panel textarea{fon
 .list-warning{font-size:var(--fs-body);color:var(--warn);background:var(--warn-soft);border:1px solid var(--warn-line);border-radius:8px;padding:7px 9px;margin:0 0 6px;line-height:1.4}
 .row-warn{flex:none;color:var(--warn);font-size:var(--fs-body);line-height:1;cursor:help}
 .empty-hint{margin:4px 2px 0}
-.canvas-hint{position:absolute;left:50%;bottom:16px;transform:translateX(-50%);z-index:2;margin:0;padding:6px 12px;border-radius:99px;background:#fffe;box-shadow:0 2px 8px rgba(0,0,0,.08);font-size:var(--fs-body);color:#4f5a54;white-space:nowrap;pointer-events:none}
+.canvas-hint{position:absolute;left:50%;bottom:16px;transform:translateX(-50%);z-index:2;margin:0;padding:6px 12px;border-radius:99px;background:#fffe;box-shadow:0 2px 8px rgba(0,0,0,.08);font-size:var(--fs-body);color:#4f5a54;white-space:nowrap;pointer-events:none}@media(max-width:600px){.canvas-hint{white-space:normal;width:max-content;max-width:calc(100% - 40px);bottom:52px;text-align:center;line-height:1.3;border-radius:14px}}
 input[aria-invalid="true"]{border-color:var(--warn)!important;background:var(--warn-soft)}.field-range{color:#64706a;font-size:var(--fs-caption);margin-left:6px;white-space:nowrap}
 
 /* Blank design: the export split turns grey (white label still 5.3:1) and the button shows a not-allowed cursor. */
