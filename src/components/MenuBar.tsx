@@ -18,6 +18,7 @@ import {agentLinkState} from '../agentLinkState';
 import {documentState} from '../documentState.js';
 import {saveState} from '../saveState.js';
 import {saveStatusWords} from '../saveMark.js';
+import {viewActions, viewMode} from '../viewMode.js';
 
 // The menu bar's dropdowns. Each item runs the same command as its toolbar button, context-menu row or keyboard shortcut,
 // and is disabled exactly when that command does not apply, using the same flags the toolbar uses. Nothing here is removed
@@ -247,9 +248,19 @@ export function ArrangeMenu() {
 /** At phone widths the top bar keeps only Menu, the name, undo, redo and Export, so every other command is listed here: New
  * design, the File commands (save, open, import, the save status), Edit, Arrange, the shortcut sheet and Settings. Each row runs
  * the same command as its top-bar button had, which is hidden at these widths (styles.css). */
+const VIEW_ROWS = [
+ {id: 'design', label: '2D'},
+ {id: 'stitches', label: 'Stitches'},
+ {id: 'preview', label: '3D'},
+] as const;
+
 export function PhoneMenu() {
  const edit = useEditRows();
  const arrange = useArrangeRows();
+ const view = useSyncExternalStore(viewMode.subscribe, viewMode.get);
+ const viewRows: Row[] = VIEW_ROWS.map(v => ({
+  id: `menuView-${v.id}`, label: t(v.label), hint: view === v.id ? t('Shown now') : undefined, run: () => viewActions.choose(v.id),
+ }));
  const {dirty} = useSyncExternalStore(documentState.subscribe, documentState.get);
  const {savedAt, savedFileName} = useSyncExternalStore(saveState.subscribe, saveState.get);
  const agent = useSyncExternalStore(agentLinkState.subscribe, agentLinkState.get);
@@ -267,6 +278,8 @@ export function PhoneMenu() {
   {note: saveStatusWords(dirty, savedAt, savedFileName, t)},
   '-',
   {heading: t('Edit')}, ...edit, '-', {heading: t('Arrange')}, ...arrange, '-',
+  // Issue #457: at phone widths the 2D, Stitches and 3D tabs leave the canvas, so the View section here is their one home.
+  {heading: t('View')}, ...viewRows, '-',
   {id: 'menuShortcuts', label: t('Keyboard shortcuts'), run: () => setShortcutsOpen(true)},
   {id: 'menuSettings', label: t('Settings'), hint: settingsHint, run: () => setSettingsOpen(true)},
  ];

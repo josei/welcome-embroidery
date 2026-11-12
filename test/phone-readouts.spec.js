@@ -20,7 +20,8 @@ test('phone readouts are not clipped at 390x844 with 466 stitches, in English an
   await page.evaluate(d=>localStorage.setItem('welcome.autosave:'+sessionStorage.getItem('welcome.tabId'),JSON.stringify({doc:d,clean:false,savedAt:Date.now()})),doc);
   await page.goto(lang==='en'?'/':`/?lang=${lang}`);
   await page.locator('#restoreYes').click();await expect(page.locator('.object-row')).toHaveCount(1);
-  await page.locator('button[data-view="stitches"]').click();await expect(page.locator('#play')).toBeVisible();
+  // Issue #457: at phone portrait the 2D, Stitches and 3D tabs leave the canvas, so the view is chosen from the Menu's View section.
+  await page.locator('#phoneMenu').click();await page.locator('#menuView-stitches').click();await expect(page.locator('#play')).toBeVisible();
   await expect(page.locator('#playbackStitches')).toContainText('466');
   await page.waitForTimeout(300);
 

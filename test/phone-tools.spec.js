@@ -81,7 +81,7 @@ test('the Menu button opens Edit and Arrange and every enabled item is clickable
  await menu.click();
  const list=page.locator('#phoneMenuList');
  await expect(list,'Menu opens').toBeVisible();
- await expect(list.locator('.menu-heading'),'Edit and Arrange headings').toHaveText(['File','Edit','Arrange']);
+ await expect(list.locator('.menu-heading'),'Edit and Arrange headings').toHaveText(['File','Edit','Arrange','View']);
  const ids=await list.locator('[role="menuitem"]').evaluateAll(els=>els.map(e=>e.id));
  expect(ids,'Edit items are in the menu').toEqual(expect.arrayContaining(['menuUndo','menuCopy','menuDelete']));
  expect(ids,'Arrange items are in the menu').toEqual(expect.arrayContaining(['menuAlignLeft','menuToFront','menuIntersect']));
@@ -143,8 +143,9 @@ for(const [width,height] of [[390,844],[360,740]]) for(const lang of ['en','es']
  });
 }
 
-// Issue #460: at 390x844 and 360x740 every tool in the desktop tool list is reachable with one tap and no sideways swipe. The rail
-// wraps onto more rows instead of scrolling, so each tool button is inside the window, unclipped, receives a tap, and is 44 px square.
+// Issue #460, changed by #457: at 390x844 and 360x740 every tool in the desktop tool list is one scroll away on a single row. The
+// rail scrolls sideways inside its own box (the page never does), so a tool is brought into view, then it is inside the rail, unclipped
+// in the rail, at least 44 px square, and receives a tap.
 const toolIds=page=>page.locator('.canvas .tool-rail button[id]').evaluateAll(els=>els.map(e=>e.id).sort());
 for(const [width,height] of [[390,844],[360,740]]) test(`every desktop tool is reachable with one tap at ${width}x${height}`,async({page})=>{
  await page.setViewportSize({width:1024,height:768});
@@ -155,15 +156,18 @@ for(const [width,height] of [[390,844],[360,740]]) test(`every desktop tool is r
  expect(await toolIds(page),'phone tool set equals the desktop tool set').toEqual(desktop);
  expect(await page.evaluate(()=>document.documentElement.scrollWidth-innerWidth),'no page overflow').toBeLessThanOrEqual(0);
  const rail=page.locator('.canvas .tool-rail');
- expect(await rail.evaluate(e=>e.scrollWidth-e.clientWidth),'the rail does not scroll sideways').toBeLessThanOrEqual(0);
+ expect(await rail.evaluate(e=>getComputedStyle(e).overflowX),'the rail scrolls sideways inside its box').toMatch(/auto|scroll/);
+ const railBox=await rail.boundingBox();
+ expect(railBox.width,'the rail is inside the window').toBeLessThanOrEqual(width);
  for(const id of desktop){
   const btn=rail.locator(`#${id}`);
+  await btn.scrollIntoViewIfNeeded();
   const box=await btn.boundingBox();
   expect(box,`${id} has a box`).not.toBeNull();
-  expect(box.x,`${id} is not clipped on the left`).toBeGreaterThanOrEqual(0);
-  expect(box.x+box.width,`${id} is not clipped on the right`).toBeLessThanOrEqual(width);
-  expect(box.y,`${id} is not clipped on the top`).toBeGreaterThanOrEqual(0);
-  expect(box.y+box.height,`${id} is not clipped on the bottom`).toBeLessThanOrEqual(height);
+  expect(box.x,`${id} is not clipped on the left`).toBeGreaterThanOrEqual(railBox.x-0.5);
+  expect(box.x+box.width,`${id} is not clipped on the right`).toBeLessThanOrEqual(railBox.x+railBox.width+0.5);
+  expect(box.y,`${id} is not clipped on the top`).toBeGreaterThanOrEqual(railBox.y-0.5);
+  expect(box.y+box.height,`${id} is not clipped on the bottom`).toBeLessThanOrEqual(railBox.y+railBox.height+0.5);
   expect(Math.min(box.width,box.height),`${id} touch target is at least 44 px`).toBeGreaterThanOrEqual(44);
   const hit=await btn.evaluate(e=>{const r=e.getBoundingClientRect();const top=document.elementFromPoint(r.x+r.width/2,r.y+r.height/2);return !!top&&e.contains(top);});
   expect(hit,`${id} receives a tap`).toBe(true);
