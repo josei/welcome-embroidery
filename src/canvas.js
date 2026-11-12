@@ -311,8 +311,20 @@ export function createCanvas(/** @type {any} */ api){
     closeMenu();
     const handle=e.target.closest?.('[data-handle],[data-hit]');if(handle){e.preventDefault();startHandle(e,handle.dataset.handle??handle.dataset.hit);return;}
     const p=coord(e),o=hit(p);
-    if(o){e.preventDefault();startMove(e,o,p);}else{startMarquee(e,p);if(document.getElementById('canvasText'))state.dismissesText=true;}
+    if(o){e.preventDefault();startMove(e,o,p);if(e.pointerType==='touch')armLongPress(e,o,p);}else{startMarquee(e,p);if(document.getElementById('canvasText'))state.dismissesText=true;}
   });
+  // Touch long-press (spec §7): holding a finger on an object for 500 ms opens its object menu. A move of 8 px or more, a
+  // second finger, or a lift before 500 ms cancels it. The press first runs as a plain move; the hold cancels that move
+  // (nothing changes) before the menu opens.
+  /** @type {{pid:number,x:number,y:number,timer:any}|null} */
+  let longPress=null;
+  function clearLongPress(){if(longPress)clearTimeout(longPress.timer);longPress=null;}
+  function armLongPress(/** @type {any} */ e,/** @type {any} */ o,/** @type {any} */ p){
+    clearLongPress();const pid=e.pointerId,x=e.clientX,y=e.clientY;
+    longPress={pid,x,y,timer:setTimeout(()=>{longPress=null;
+      if(touches.size>1||state?.type!=='move'||state.pid!==pid)return;
+      cancelState();openObjectMenu(x,y,o,p);},500)};
+  }
   function startMove(/** @type {any} */ e,/** @type {any} */ o,/** @type {any} */ p){
     // Double-click is decided on pointer-up (see the move branch), so a quick press-and-drag still moves.
     const now=performance.now(),dbl=Boolean(lastClick&&now-lastClick.t<380&&lastClick.id===o.id&&Math.hypot(p[0]-lastClick.p[0],p[1]-lastClick.p[1])*vp.s<8);
@@ -369,6 +381,7 @@ export function createCanvas(/** @type {any} */ api){
     e.preventDefault();e.stopPropagation();nudgeHandle(h.dataset.handle,e);
   });
   window.addEventListener('pointermove',e=>{
+    if(longPress&&e.pointerId===longPress.pid&&Math.hypot(e.clientX-longPress.x,e.clientY-longPress.y)>=8)clearLongPress();
     if(touches.has(e.pointerId))touches.set(e.pointerId,{x:e.clientX,y:e.clientY});
     if(state?.type==='pinch'){pinchTo(state);return;}
     if(!state){hoverHint(e);return;}
@@ -425,6 +438,7 @@ export function createCanvas(/** @type {any} */ api){
         overlay.querySelectorAll('.sel-handle').forEach(()=>{});}
   });
   window.addEventListener('pointerup',e=>{
+    if(longPress&&e.pointerId===longPress.pid)clearLongPress();
     if(touches.delete(e.pointerId)&&state?.type==='pinch'&&touches.size<2){state=null;panningState.set(false);}
     if(!state)return;const s=state;
     if(s.type==='pan'){state=null;panningState.set(false);return;}
@@ -455,7 +469,7 @@ export function createCanvas(/** @type {any} */ api){
       else refresh();return;}
     if(s.type==='resize'){restore(s.els);if(!s.anchor||(Math.abs(s.sx-1)<1e-4&&Math.abs(s.sy-1)<1e-4)){refresh();return;}commitResize(s);}
   });
-  window.addEventListener('pointercancel',e=>{touches.delete(e.pointerId);if(state?.type==='pinch'){state=null;panningState.set(false);return;}cancelState();});
+  window.addEventListener('pointercancel',e=>{if(longPress&&e.pointerId===longPress.pid)clearLongPress();touches.delete(e.pointerId);if(state?.type==='pinch'){state=null;panningState.set(false);return;}cancelState();});
   // Escape during an object move, rotate or resize (or a node drag) cancels that drag and nothing else: it is stopped in
   // the capture phase so the shortcut handler does not also clear the selection or switch tools. A press that never moved
   // is not a drag, so Escape there keeps its usual meaning.
@@ -469,8 +483,7 @@ export function createCanvas(/** @type {any} */ api){
   function closeMenu(){menu?.remove();menu=null;}
   document.addEventListener('pointerdown',e=>{if(menu&&!menu.contains(e.target))closeMenu();},true);
   document.addEventListener('keydown',e=>{if(e.key==='Escape')closeMenu();});
-  svg.addEventListener('contextmenu',(/** @type {any} */ e)=>{
-    if(api.tool()!=='select')return;e.preventDefault();const p=coord(e),o=hit(p);if(o&&!api.ids().includes(o.id))api.select([...tools.withGroup(o.id)],o.id);
+  function openObjectMenu(/** @type {number} */ x,/** @type {number} */ y,/** @type {any} */ o,/** @type {any} */ p){
     const items=api.menuItems(o,p);if(!items.length)return;closeMenu();
     menu=document.createElement('div');menu.id='ctxMenu';menu.setAttribute('role','menu');
     for(const it of items){if(it==='-'){menu.append(document.createElement('hr'));
@@ -489,9 +502,13 @@ export function createCanvas(/** @type {any} */ api){
     }
     document.body.append(menu);
     const r=menu.getBoundingClientRect();
-    menu.style.left=Math.min(e.clientX,innerWidth-r.width-8)+'px';
-    menu.style.top=Math.min(e.clientY,innerHeight-r.height-8)+'px';
+    menu.style.left=Math.min(x,innerWidth-r.width-8)+'px';
+    menu.style.top=Math.min(y,innerHeight-r.height-8)+'px';
     /** @type {HTMLElement|null} */(menu.querySelector('button:not(:disabled)'))?.focus();
+  }
+  svg.addEventListener('contextmenu',(/** @type {any} */ e)=>{
+    if(api.tool()!=='select')return;e.preventDefault();const p=coord(e),o=hit(p);if(o&&!api.ids().includes(o.id))api.select([...tools.withGroup(o.id)],o.id);
+    openObjectMenu(e.clientX,e.clientY,o,p);
   });
 
   api.zoomUi?.(zoomAt,fitHoop,fitAll,zoomTo100);
