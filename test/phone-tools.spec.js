@@ -41,30 +41,47 @@ for(const [width,height] of PHONES) for(const lang of ['en','es']){
  });
 }
 
-test('every tool in the strip is reachable and becomes active at 375px',async({page})=>{
+// Issue #479 (part of #468; spec #470 sections 1-2): at phone portrait the tool dock is seven buttons on one row, each with its label
+// under the icon. More tools opens one sheet with a Tools group and a Panels group, so every tool is one tap away with no sideways scroll.
+const DOCK=['select','rect','path','letter','line','measure','toolMore'];
+const SHEET_TOOLS=['ellipse','polygon','star','traceBtn','photo','pen'];
+const openMore=async page=>{
+ await page.locator('#toolMore').click();
+ await expect(page.locator('#moreToolsSheet')).toHaveClass(/sheet-open/);
+};
+test('the dock tools are reachable and become active at 375px, with More tools for the rest',async({page})=>{
  const errors=await openEditor(page,375,667);
  const rail=page.locator('.tool-rail');
- // Tool modes: each one is armed, so its button reports aria-pressed="true".
- for(const id of ['select','line','measure','polygon','star','path','pen']){
+ // Dock tools: each one is armed, so its button reports aria-pressed="true".
+ for(const id of ['select','line','measure','path']){
   const btn=rail.locator(`#${id}`);
   await btn.click();
   await expect(btn,`${id} becomes active`).toHaveAttribute('aria-pressed','true');
-  await expect(btn,`${id} is inside the strip`).toBeVisible();
  }
  // Add buttons place an object each time they are pressed.
- for(const id of ['rect','ellipse','letter']){
+ for(const id of ['rect','letter']){
   const before=await page.locator('.object-row').count();
   await rail.locator(`#${id}`).click();
   await expect.poll(()=>page.locator('.object-row').count(),`${id} adds an object`).toBeGreaterThan(before);
  }
- // Trace opens its dialog.
- await rail.locator('#traceBtn').click();
+ // The sheet's tools: each one is armed from More tools, and the sheet closes after the tap.
+ for(const id of ['polygon','star','pen']){
+  await openMore(page);
+  await page.locator(`#moreToolsSheet #${id}`).click();
+  await expect(page.locator('#moreToolsSheet'),`${id} closes the sheet`).not.toHaveClass(/sheet-open/);
+  await openMore(page);
+  await expect(page.locator(`#moreToolsSheet #${id}`),`${id} becomes active`).toHaveAttribute('aria-pressed','true');
+  await page.keyboard.press('Escape');
+ }
+ // Trace opens its dialog from the sheet.
+ await openMore(page);
+ await page.locator('#moreToolsSheet #traceBtn').click();
  await expect(page.locator('dialog[open]'),'trace opens its dialog').toHaveCount(1);
  await page.keyboard.press('Escape');
  await expect(page.locator('dialog[open]')).toHaveCount(0);
- // Photo stitch is reached and hit by a tap (it opens a file picker, so it is not pressed here).
- const photo=rail.locator('#photo');
- await photo.scrollIntoViewIfNeeded();
+ // Photo stitch is in the sheet and receives a tap (it opens a file picker, so it is not pressed here).
+ await openMore(page);
+ const photo=page.locator('#moreToolsSheet #photo');
  const hit=await photo.evaluate(e=>{const r=e.getBoundingClientRect();const top=document.elementFromPoint(r.x+r.width/2,r.y+r.height/2);return !!top&&e.contains(top);});
  expect(hit,'photo stitch receives a tap').toBe(true);
  expect(errors).toEqual([]);
@@ -144,35 +161,47 @@ for(const [width,height] of [[390,844],[360,740]]) for(const lang of ['en','es']
  });
 }
 
-// Issue #460, changed by #457: at 390x844 and 360x740 every tool in the desktop tool list is one scroll away on a single row. The
-// rail scrolls sideways inside its own box (the page never does), so a tool is brought into view, then it is inside the rail, unclipped
-// in the rail, at least 44 px square, and receives a tap.
-// The Layers and Properties openers (.phone-sheet-btn) are not drawing tools: portrait moves them to Menu > View, so they are left out.
-const toolIds=page=>page.locator('.tool-rail button[id]:not(.phone-sheet-btn)').evaluateAll(els=>els.map(e=>e.id).sort());
-for(const [width,height] of [[390,844],[360,740]]) test(`every desktop tool is reachable with one tap at ${width}x${height}`,async({page})=>{
- await page.setViewportSize({width:1024,height:768});
- await page.goto('/');
- const desktop=await toolIds(page);
- expect(desktop.length,'the desktop tool list was found').toBeGreaterThan(10);
- const errors=await openEditor(page,width,height);
- expect(await toolIds(page),'phone tool set equals the desktop tool set').toEqual(desktop);
- expect(await page.evaluate(()=>document.documentElement.scrollWidth-innerWidth),'no page overflow').toBeLessThanOrEqual(0);
+// Issue #479: at 390x844 and 360x740 the dock holds exactly the seven dock buttons on one row, with no sideways scroll, every one inside
+// the window at 44 px or more. More tools reaches the rest: the Tools group and the Panels group together hold every desktop tool.
+const dockIds=page=>page.locator('.tool-rail button[id]').evaluateAll(els=>els.map(e=>e.id));
+for(const [width,height] of [[390,844],[360,740]]) for(const lang of ['en','es']) test(`the dock holds seven buttons on one row and More tools reaches the rest at ${width}x${height} (${lang})`,async({page})=>{
+ const errors=await openEditor(page,width,height,lang);
+ expect(await dockIds(page),'dock buttons').toEqual(DOCK);
  const rail=page.locator('.tool-rail');
- expect(await rail.evaluate(e=>getComputedStyle(e).overflowX),'the rail scrolls sideways inside its box').toMatch(/auto|scroll/);
+ expect(await rail.evaluate(e=>e.scrollWidth<=e.clientWidth),'the dock does not scroll sideways').toBe(true);
+ expect(await page.evaluate(()=>document.documentElement.scrollWidth-innerWidth),'no page overflow').toBeLessThanOrEqual(0);
  const railBox=await rail.boundingBox();
- expect(railBox.width,'the rail is inside the window').toBeLessThanOrEqual(width);
- for(const id of desktop){
-  const btn=rail.locator(`#${id}`);
-  await btn.scrollIntoViewIfNeeded();
-  const box=await btn.boundingBox();
-  expect(box,`${id} has a box`).not.toBeNull();
-  expect(box.x,`${id} is not clipped on the left`).toBeGreaterThanOrEqual(railBox.x-0.5);
-  expect(box.x+box.width,`${id} is not clipped on the right`).toBeLessThanOrEqual(railBox.x+railBox.width+0.5);
-  expect(box.y,`${id} is not clipped on the top`).toBeGreaterThanOrEqual(railBox.y-0.5);
-  expect(box.y+box.height,`${id} is not clipped on the bottom`).toBeLessThanOrEqual(railBox.y+railBox.height+0.5);
-  expect(Math.min(box.width,box.height),`${id} touch target is at least 44 px`).toBeGreaterThanOrEqual(44);
-  const hit=await btn.evaluate(e=>{const r=e.getBoundingClientRect();const top=document.elementFromPoint(r.x+r.width/2,r.y+r.height/2);return !!top&&e.contains(top);});
-  expect(hit,`${id} receives a tap`).toBe(true);
+ for(const id of DOCK){
+  const box=await rail.locator(`#${id}`).boundingBox();
+  expect(box.x,`${id} inside the window`).toBeGreaterThanOrEqual(0);
+  expect(box.x+box.width,`${id} inside the window`).toBeLessThanOrEqual(width);
+  expect(Math.min(box.width,box.height),`${id} touch target`).toBeGreaterThanOrEqual(44);
+  expect(box.y,`${id} inside the dock`).toBeGreaterThanOrEqual(railBox.y-0.5);
  }
+ await openMore(page);
+ for(const id of SHEET_TOOLS) await expect(page.locator(`#moreToolsSheet #${id}`),`${id} in More tools`).toBeVisible();
+ // Every dock button has its label under the icon, and no label clips.
+ for(const id of DOCK){
+  const label=rail.locator(`#${id} .rail-label`);
+  await expect(label,`${id} label is shown`).toBeVisible();
+  expect(await label.evaluate(e=>e.scrollWidth<=e.clientWidth),`${id} label does not clip`).toBe(true);
+ }
+ await expect(page.locator('#moreToolsSheet #moreLayers'),'Layers in More tools').toBeVisible();
+ await expect(page.locator('#moreToolsSheet #moreProperties'),'Properties in More tools').toBeVisible();
+ // Layers opens as a bottom sheet from More tools, and replaces the More tools sheet.
+ await page.locator('#moreToolsSheet #moreLayers').click();
+ await expect(page.locator('#layersSheet')).toHaveClass(/sheet-open/);
+ await expect(page.locator('#moreToolsSheet')).not.toHaveClass(/sheet-open/);
+ expect(errors).toEqual([]);
+});
+
+// Issue #479: with More tools open the page still does not scroll, and every sheet control is at least 44 px.
+for(const lang of ['en','es']) test(`More tools keeps the page fixed at 390x844 (${lang})`,async({page})=>{
+ const errors=await openEditor(page,390,844,lang);
+ await openMore(page);
+ expect(await page.evaluate(()=>document.documentElement.scrollHeight-innerHeight),'no vertical page scroll').toBeLessThanOrEqual(0);
+ expect(await page.evaluate(()=>document.documentElement.scrollWidth-innerWidth),'no horizontal page scroll').toBeLessThanOrEqual(0);
+ const small=await page.locator('#moreToolsSheet button').evaluateAll(els=>els.map(e=>{const r=e.getBoundingClientRect();return `${e.id||e.className} ${Math.round(r.width)}x${Math.round(r.height)}`;}).filter(s=>{const [w,h]=s.split(' ').pop().split('x').map(Number);return w<44||h<44;}));
+ expect(small,'sheet controls under 44x44').toEqual([]);
  expect(errors).toEqual([]);
 });

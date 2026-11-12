@@ -758,6 +758,21 @@ body{height:100vh;height:100dvh;min-height:0;overflow:hidden;overscroll-behavior
 .layout main>.tool-rail{grid-row:3;position:static;inset:auto;z-index:auto;display:flex;flex-direction:row;flex-wrap:nowrap;align-items:center;justify-content:flex-start;align-content:center;gap:4px;width:auto;height:calc(56px + env(safe-area-inset-bottom));max-height:none;max-width:none;margin:0;padding:6px 8px calc(6px + env(safe-area-inset-bottom));box-sizing:border-box;overflow-x:auto;overflow-y:hidden;scrollbar-width:none;border:0;border-top:1px solid #e3e6e1;border-radius:0;background:#fff;box-shadow:none}
 .layout main>.tool-rail .icon-button{width:44px;min-width:44px;height:44px;flex:none}
 .layout main:has(.canvas.preview-mode)>.tool-rail{display:none}
+/* Issue #479 (part of #468; spec #470 sections 1-3): at phone portrait the dock is seven buttons on one row, each with its label under the
+   icon. The seven share the row at 44 px minimum, so the dock never scrolls sideways. More tools opens MoreToolsSheet, with Tools and Panels
+   groups. Undo: restore the #471 dock (icon-only, 44 px, overflow-x auto) and the phone sheet-btns in the dock. */
+.layout main>.tool-rail{overflow:hidden;gap:2px}
+.layout main>.tool-rail .icon-button{display:flex;flex:1 1 0;flex-direction:column;align-items:center;justify-content:center;gap:2px;width:auto;min-width:44px;height:44px;min-height:44px;padding:0;overflow:hidden}
+.layout main>.tool-rail .icon-button .icon{width:20px;height:20px;flex:none}
+.layout main>.tool-rail .rail-label{display:block;max-width:100%;overflow:hidden;white-space:nowrap;font-size:11px;line-height:1.1;color:#4d5a54}
+.layout main>.tool-rail .icon-button.active-tool .rail-label{color:var(--teal-deep)}
+.layout main>.tool-rail .tool-more{display:flex}
+.layout>#moreToolsSheet .more-heading{margin:8px 0 6px;font-size:13px;font-weight:600;line-height:1.2;color:#66726c;white-space:nowrap}
+.layout>#moreToolsSheet .more-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+.layout>#moreToolsSheet .more-grid .icon-button{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;width:auto;min-width:44px;height:64px;min-height:44px;padding:4px;background:#f6f7f5;border:1px solid var(--field-line);border-radius:10px;color:#3c423e}
+.layout>#moreToolsSheet .more-grid .icon-button .icon{width:20px;height:20px;flex:none}
+.layout>#moreToolsSheet .more-grid .icon-button.active-tool{background:var(--teal-soft);border-color:var(--teal);color:var(--teal-deep)}
+.layout>#moreToolsSheet .rail-label{display:block;max-width:100%;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;font-size:12px;line-height:1.1}
 .layout main>footer{grid-row:4;position:relative;flex:none;height:28px;min-height:0;margin:0;padding:0 12px;box-sizing:border-box;display:flex;align-items:center;gap:8px;overflow:visible;background:#fff;border:0;border-top:1px solid #e3e6e1}
 .layout main>footer>:not(#count):not(#toast){display:none}
 .layout main>footer>#count{flex:1 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;line-height:26px;font-size:var(--fs-caption)}

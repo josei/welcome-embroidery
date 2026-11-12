@@ -5,6 +5,7 @@ export const ES_ADDITIONS={
 'Shown now':'Vista actual',
 'Grid':'Cuadrícula',
 'Help':'Ayuda',
+'Panels':'Paneles',
 'Settings and Help':'Ajustes y ayuda',
 'On':'Activado',
 'Imported {name} as {article} {fmt} stitch layer. The design extends past the hoop: move it or choose a larger hoop.':'{name} importado como capa de puntadas {fmt}. El diseño se sale del bastidor: muévelo o elige un bastidor más grande.',

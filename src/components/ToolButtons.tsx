@@ -11,31 +11,35 @@ function toolClass(current: string, name: string) {
  return current === name ? 'icon-button active-tool' : 'icon-button';
 }
 
-export function ToolButtons() {
+// One drawing-tool button: it arms the tool, and shows as pressed while the tool is armed. Its tooltip names the key from the shortcut
+// table, the same value the shortcut sheet shows.
+type DrawToolName = Parameters<typeof toolActions.press>[0];
+function DrawTool({tool, id, icon, label, tip}: {tool: DrawToolName; id: string; icon: string; label: string; tip: string}) {
  const current = useSyncExternalStore(toolMode.subscribe, toolMode.get);
- // Each tooltip reads its key from the shortcut table, the same value the shortcut sheet shows.
- const lineTip = t('Line ({shortcut}, drag)', {shortcut: shortcutFor('line')});
- const measureTip = t('Measure ({shortcut})', {shortcut: shortcutFor('measure')});
- const polygonTip = t('Polygon ({shortcut}, drag from center)', {shortcut: shortcutFor('polygon')});
- const starTip = t('Star ({shortcut}, drag from center)', {shortcut: shortcutFor('star')});
  return (
-  <><button aria-pressed={current === 'line'} className={toolClass(current, 'line')} onClick={() =>
-    toolActions.press(
-    'line')} aria-label={lineTip} title={lineTip} data-tooltip={lineTip} id="line"><svg className="icon"><use
-      href="#i-line"/></svg><span className="rail-label">{t('Line')}</span></button><button aria-pressed={current === 'measure'} className={toolClass(
-    current, 'measure')} onClick={() =>
-    toolActions.press(
-    'measure')} id="measure" aria-label={measureTip} title={measureTip} data-tooltip={measureTip}><svg className="icon"><use
-      href="#i-measure"/></svg><span className="rail-label">{t('Measure')}</span></button><button aria-pressed={current === 'polygon'} className={toolClass(
-    current, 'polygon')} onClick={() =>
-    toolActions.press(
-    'polygon')} aria-label={polygonTip} title={polygonTip} data-tooltip={polygonTip}
-      id="polygon"><svg className="icon"><use href="#i-polygon"/></svg><span className="rail-label">{t('Polygon')}</span></button><button aria-pressed={current === 'star'} className={toolClass(
-    current, 'star')} onClick={() =>
-    toolActions.press(
-    'star')} aria-label={starTip} title={starTip} data-tooltip={starTip} id="star"><svg
-      className="icon"><use href="#i-star"/></svg><span className="rail-label">{t('Star')}</span></button></>
+  <button aria-pressed={current === tool} className={toolClass(current, tool)} onClick={() => toolActions.press(tool)}
+   id={id} aria-label={tip} title={tip} data-tooltip={tip}><svg className="icon"><use href={`#i-${icon}`}/></svg><span className="rail-label">{label}</span></button>
  );
+}
+
+export function LineTool() {
+ return <DrawTool tool="line" id="line" icon="line" label={t('Line')} tip={t('Line ({shortcut}, drag)', {shortcut: shortcutFor('line')})} />;
+}
+
+export function MeasureTool() {
+ return <DrawTool tool="measure" id="measure" icon="measure" label={t('Measure')} tip={t('Measure ({shortcut})', {shortcut: shortcutFor('measure')})} />;
+}
+
+export function PolygonTool() {
+ return <DrawTool tool="polygon" id="polygon" icon="polygon" label={t('Polygon')} tip={t('Polygon ({shortcut}, drag from center)', {shortcut: shortcutFor('polygon')})} />;
+}
+
+export function StarTool() {
+ return <DrawTool tool="star" id="star" icon="star" label={t('Star')} tip={t('Star ({shortcut}, drag from center)', {shortcut: shortcutFor('star')})} />;
+}
+
+export function ToolButtons() {
+ return <><LineTool /><MeasureTool /><PolygonTool /><StarTool /></>;
 }
 
 // The select and pen buttons, each in its place in the tool row. The active class comes from toolMode.

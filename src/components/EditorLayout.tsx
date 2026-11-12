@@ -43,7 +43,8 @@ import {StitchRunRows} from './StitchRunRows';
 import {StitchSatinEndRows} from './StitchSatinEndRows';
 import {StitchTypeRows} from './StitchTypeRows';
 import {ThreadPlan} from './ThreadPlan';
-import {PathTool, PenTool, SelectTool, ToolButtons} from './ToolButtons';
+import {LineTool, MeasureTool, PathTool, PenTool, SelectTool, ToolButtons} from './ToolButtons';
+import {MoreToolsSheet} from './MoreToolsSheet';
 import {TransformPanel} from './TransformPanel';
 import {ObjectList, ObjectListHead} from './ObjectList';
 import {PhotoStitch} from './PhotoStitch';
@@ -99,14 +100,15 @@ export function EditorLayout() {
  // The sheets' asides: a portrait sheet can be dragged by its grab handle or title row (phoneSheetDrag.ts).
  const layersSheet = useRef<HTMLElement>(null);
  const inspectorSheet = useRef<HTMLElement>(null);
+ const toolsSheet = useRef<HTMLElement>(null);
  useEffect(() => {
-  const detach = [layersSheet.current, inspectorSheet.current].map(el => el && attachSheetDrag(el));
+  const detach = [layersSheet.current, inspectorSheet.current, toolsSheet.current].map(el => el && attachSheetDrag(el));
   return () => detach.forEach(off => off?.());
  }, []);
  // Issue #473: an open sheet takes focus on its first control, and Escape closes it. Closing returns focus to the opener (closePhoneSheet).
  useEffect(() => {
   if (phoneSheet === 'none') return;
-  const sheet = document.getElementById(phoneSheet === 'layers' ? 'layersSheet' : 'inspector');
+  const sheet = document.getElementById(phoneSheet === 'layers' ? 'layersSheet' : phoneSheet === 'tools' ? 'moreToolsSheet' : 'inspector');
   if (sheet) firstSheetControl(sheet)?.focus();
   const escape = (e: KeyboardEvent) => {
    if (e.key !== 'Escape' || e.defaultPrevented || !isPhoneSheetLayout()) return;
@@ -118,7 +120,34 @@ export function EditorLayout() {
  }, [phoneSheet]);
  const canvasClass = ['canvas', hand && 'hand', snapping && 'snapping', view === 'preview' && 'preview-mode', panning && 'panning',
   deletingGuide && 'deleting-guide'].filter(Boolean).join(' ');
- const toolRail = (
+ // Issue #479 (spec #470 section 1): at phone portrait the dock is one row of seven buttons, each with its label under the icon. Pen,
+ // Polygon, Star, Trace, Photo stitch, Ellipse and the panels are in More tools (MoreToolsSheet), so nothing scrolls sideways.
+ const phoneDock = (
+   <div className={"tool-row tool-rail"} aria-label={"Tools"}>
+     <SelectTool />
+     <AddShapeButton kind={"rect"} id={"rect"} label={"Add rectangle"} icon={"rect"} tip={t('Add rectangle ({shortcut})', {shortcut: shortcutFor('rect')})} short={t('Shape')} />
+     <PathTool />
+     <AddShapeButton kind={"text"} id={"letter"} label={"Add lettering"} icon={"text"} tip={t('Add lettering ({shortcut})', {shortcut: shortcutFor('letter')})} short={t('Text')} />
+     <LineTool />
+     <MeasureTool />
+     <button
+       type={"button"}
+       className={"icon-button tool-more"}
+       id={"toolMore"}
+       aria-label={t('More tools')}
+       aria-expanded={phoneSheet === 'tools'}
+       aria-controls={"moreToolsSheet"}
+       title={t('More tools')}
+       data-tooltip={t('More tools')}
+       onClick={() => togglePhoneSheet('tools')}
+     >
+       <svg className={"icon"}>
+         <use href={"#i-chevron"} />
+       </svg><span className={"rail-label"}>{t('More')}</span>
+     </button>
+   </div>
+  );
+ const deskToolRail = (
    <>
              <div className={"tool-row tool-rail"} aria-label={"Tools"} ref={toolRailRef}>
                {phone ? null : <>
@@ -169,6 +198,7 @@ export function EditorLayout() {
              </button>
    </>
   );
+ const toolRail = phone ? phoneDock : deskToolRail;
  const floatingBar = (
              <div className={"floating"} role={"toolbar"} aria-label={"Canvas tools"} hidden={phone && (view !== 'design' || !hasSelection)}>
                <GridSnapButton />
@@ -284,6 +314,7 @@ export function EditorLayout() {
           <span className={"collapse-glyph"} aria-hidden={"true"}>{inspectorOpen ? '›' : '‹'}</span>
         </button>
       </div>
+      {phone ? <MoreToolsSheet asideRef={toolsSheet} open={phoneSheet === 'tools'} detent={detent} /> : null}
       <main className={view === 'design' ? 'design-view' : undefined}>
         <div className={canvasClass} onClick={(e) => {
           // Issue #455: on a portrait tablet a tap on the canvas closes the Properties drawer (controls inside the canvas keep it open).

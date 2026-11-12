@@ -5,7 +5,7 @@ import {createStore} from './store.js';
  * Which sheet is open at phone size: Layers, Properties, or neither. Only one sheet is open at a time, so opening one closes the
  * other. The sheets are hidden by CSS everywhere else, so this value has no effect there (issue #473).
  */
-export type PhoneSheet = 'none' | 'layers' | 'properties';
+export type PhoneSheet = 'none' | 'layers' | 'properties' | 'tools';
 export const phoneSheetState = createStore<PhoneSheet>('none');
 
 /**
