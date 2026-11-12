@@ -182,7 +182,8 @@ for(const layout of LAYOUTS){
    await page.goto('/?lang=en');
    await openSheet(page,'layers');
    const box=await sheetOf(page).boundingBox();
-   expect(Math.round(box.y+box.height),'sheet bottom edge').toBe(layout.height);
+   // A landscape sheet (#478) runs from the top bar to the status line, so it stops 44 px above the bottom edge.
+   expect(Math.round(box.y+box.height),'sheet bottom edge').toBe(layout.width>layout.height?layout.height-44:layout.height);
    expect(box.x,'sheet left edge').toBe(layout.width>layout.height?layout.width-320:0);
    expect(box.width).toBe(layout.width>layout.height?320:layout.width);
   });

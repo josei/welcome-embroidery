@@ -788,6 +788,10 @@ body{height:100vh;height:100dvh;min-height:0;overflow:hidden;overscroll-behavior
    Status line is 44 px, not the spec's 28 px: its Messages button is a 44 px control (section 3), so it cannot fit a 28 px row.
    Desktop and the portrait layouts do not match this query, so they are unchanged. Undo: delete this block. */
 @media (orientation:landscape) and (max-height:500px) and (max-width:1000px){
+/* Issue #478: the rail carries the Layers and Properties buttons on a landscape phone (spec #470 section 2, "Right sheet from rail"). */
+.canvas .tool-rail .icon-button.phone-sheet-btn{display:inline-flex}
+/* The sheets are #layersSheet and #inspector: their id rules (tablet and desktop) outrank the classes above, so the landscape sheet sets its box again here. */
+.layout>#layersSheet.sheet-open,.layout>#inspector.sheet-open{display:flex;flex-direction:column;position:fixed;top:44px;bottom:44px;left:auto;right:0;width:320px;height:auto;max-height:none;margin:0;padding:10px 12px 12px;overflow-y:auto;overscroll-behavior:contain;z-index:40;background:#fff;border:0;border-left:1px solid #e3e6e1;border-radius:0;box-shadow:-6px 0 24px #1d292533}
 body{height:100dvh;min-height:0;overflow:hidden}
 .tool-more{display:flex}
 .top{position:fixed;top:0;left:0;right:0;z-index:7;height:44px;min-height:44px;flex-wrap:nowrap;gap:4px;padding:0 6px;overflow:hidden}

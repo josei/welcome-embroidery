@@ -3,7 +3,7 @@ import {test,expect} from '@playwright/test';
 // Issue #451 (from audit #449): the standing overflow and overlap check. At each width and locale the page never scrolls sideways,
 // and the visible boxes in the top bar do not overlap. Checked on the first screen, and again with Layers and Properties open.
 // 768x1024 is the tablet width that scrolled sideways in Spanish (the top bar's name and save status squeezed the row 11 px too wide).
-const viewports=[[768,1024],[820,1180],[1024,768]];
+const viewports=[[768,1024],[820,1180],[1024,768],[390,844],[844,390]];
 const locales=['es','en'];
 
 test.beforeEach(async({page})=>{await page.addInitScript(()=>{delete window.showSaveFilePicker;});});
@@ -53,11 +53,21 @@ for(const [w,h] of viewports){
    // A portrait tablet keeps New design in the Menu (#475), so the top bar's New button is used only where it is shown.
    if(await page.locator('#new').isVisible())await page.locator('#new').click();else{await page.locator('#phoneMenu').click();await page.locator('#menuNew').click();}
    if(await page.locator('#discardDialog[open]').count())await page.locator('#discardDiscard').click();
-   // Layers is the object list, always open at this width. Selecting an object opens Properties in the inspector.
-   await expect(page.locator('#objects')).toBeVisible();
+   // Layers is the object list, always open at this width. On a phone it is a sheet: a portrait phone opens it from the Menu,
+   // a landscape phone from its rail button (#473, #474).
+   const portrait=await page.evaluate(()=>matchMedia('(max-width:600px) and (orientation:portrait)').matches);
+   const openSheet=async sheet=>{
+    if(portrait){await page.locator('#phoneMenu').click();await page.locator(sheet==='layers'?'#menuLayers':'#menuProperties').click();}
+    else if(await page.locator(sheet==='layers'?'#layersBtn':'#propertiesBtn').isVisible())await page.locator(sheet==='layers'?'#layersBtn':'#propertiesBtn').click();
+   };
+   // The Add rectangle button is in the dock, under an open sheet, so it is pressed first.
    await page.locator('#rect').click();
+   if(portrait||await page.locator('#layersBtn').isVisible())await openSheet('layers');
+   await expect(page.locator('#objects')).toBeVisible();
    // A portrait tablet folds Properties away when it starts (#455): open it from the Properties button, which swaps with the object list.
    if(await page.locator('.inspector-tab[data-tab=properties]').isVisible())await page.locator('.inspector-tab[data-tab=properties]').click();
+   // On a phone, selecting an object may already have opened Properties; if not, open it from its sheet.
+   else if(!(await page.locator('#stats').isVisible()))await openSheet('properties');
    await expect(page.locator('#stats')).toBeVisible();
    const o=await overflowOf(page);
    expect(o.scrollWidth,`scrollWidth with Layers and Properties open at ${w}x${h} ${lang}: ${o.out.join('; ')}`).toBeLessThanOrEqual(o.innerWidth);

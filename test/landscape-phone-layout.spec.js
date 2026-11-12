@@ -50,17 +50,17 @@ for(const lang of ['en','es']){
  test(`every visible control is at least 44x44 with Layers and Properties open (${lang})`,async({page})=>{
   await openEditor(page,...LANDSCAPE,lang);
   expect(await smallControls(page),'closed').toEqual([]);
-  await page.locator('.sheet-bar button').nth(0).click();
+  await page.locator('#layersBtn').click();
   await expect(page.locator('#layersSheet')).toHaveClass(/sheet-open/);
   expect(await smallControls(page),'Layers open').toEqual([]);
-  await page.locator('.sheet-bar button').nth(1).click();
+  await page.locator('#propertiesBtn').click();
   await expect(page.locator('#inspector')).toHaveClass(/sheet-open/);
   expect(await smallControls(page),'Properties open').toEqual([]);
  });
 
  test(`the Layers header wraps to at most two lines (${lang})`,async({page})=>{
   await openEditor(page,...LANDSCAPE,lang);
-  await page.locator('.sheet-bar button').nth(0).click();
+  await page.locator('#layersBtn').click();
   const lines=await page.evaluate(()=>{
    const h=document.querySelector('.layers-head');const r=h.getBoundingClientRect();
    const lh=parseFloat(getComputedStyle(h).lineHeight)||parseFloat(getComputedStyle(h).fontSize)*1.3;
@@ -93,10 +93,20 @@ for(const lang of ['en','es']){
 
  test(`Layers opens as a 320 px right-edge sheet clear of the rail (${lang})`,async({page})=>{
   await openEditor(page,...LANDSCAPE,lang);
-  await page.locator('.sheet-bar button').nth(0).click();
+  await page.locator('#layersBtn').click();
   const R=await regions(page);
   expect(Math.round(R.sheet.r-R.sheet.l)).toBe(320);
   expect(R.sheet.r).toBeCloseTo(844,0);
+  expect(overlaps(R.rail,R.sheet)).toBe(false);
+ });
+
+ test(`Properties opens as a 320 px right-edge sheet clear of the rail (${lang})`,async({page})=>{
+  await openEditor(page,...LANDSCAPE,lang);
+  await page.locator('#propertiesBtn').click();
+  const R=await regions(page);
+  expect(Math.round(R.sheet.r-R.sheet.l)).toBe(320);
+  expect(R.sheet.r).toBeCloseTo(844,0);
+  expect(R.sheet.t).toBeGreaterThanOrEqual(44);
   expect(overlaps(R.rail,R.sheet)).toBe(false);
  });
 }
