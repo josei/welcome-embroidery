@@ -142,12 +142,6 @@ function Dropdown({id, label, rows, iconOnly}: {id: string; label: string; rows:
     }}>{iconOnly ? <svg className="icon" aria-hidden="true"><use href="#i-menu" /></svg> : label}</button>
    {open && (
     <div role="menu" id={`${id}List`} className="file-menu-list">
-     {iconOnly && (
-      // The phone sheet fills the window, so a tap outside it cannot dismiss it: this button does, and Escape too.
-      <button type="button" className="menu-close" aria-label={t('Close')} title={t('Close')} onClick={() => { setOpen(false); trigger.current?.focus(); }}>
-       <svg className="icon" aria-hidden="true"><use href="#i-cross" /></svg>
-      </button>
-     )}
      {rows.map((row, i) => {
       if (row === '-') return <hr key={`sep${i}`} className="menu-sep" />;
       if ('heading' in row) return <div key={`head${i}`} role="presentation" className="menu-heading">{row.heading}</div>;

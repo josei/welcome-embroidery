@@ -37,7 +37,8 @@ for(const [width,height] of SIZES) for(const lang of ['en','es']){
   // The search field leads, and the sheet fills the window.
   await expect(list.locator('[role="menuitem"]').first()).toHaveAttribute('id','menuCommandPalette');
   const sheet=await list.boundingBox();
-  expect(sheet.height,'sheet fills the window height').toBeGreaterThanOrEqual(height-1);
+  // Issue #481: the Menu opens at full height below the top bar (52 px portrait, 44 px landscape), so a tap on the bar dismisses it.
+  expect(sheet.height,'sheet fills the window below the top bar').toBeGreaterThanOrEqual(height-(height>width?52:44)-1);
   // Every row: one line, an icon, at least 44 px tall.
   const rows=await list.locator('[role="menuitem"]').evaluateAll(els=>els.map(e=>{
    const r=e.getBoundingClientRect(), label=e.querySelector(':scope > span').getClientRects().length;

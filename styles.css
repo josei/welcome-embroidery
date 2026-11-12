@@ -871,10 +871,8 @@ body{height:100dvh;min-height:0;overflow:hidden}
 /* Issue #474 (spec #470 sections 3 and 5): the phone Menu is a 44 px icon button in the top bar. It opens a full-height sheet that
    scrolls inside itself, so the page never scrolls. Every row is one line, with an icon, and at least 44 px tall. */
 .top .file-menu>button.menu-trigger{width:44px;min-width:44px;height:44px;min-height:44px;padding:0;justify-content:center}
-#phoneMenuList{position:fixed;top:0;left:0;right:0;bottom:0;width:auto;min-width:0;max-height:none;height:100dvh;border:0;border-radius:0;box-shadow:none;padding:8px;overflow-y:auto;overscroll-behavior:contain;z-index:40}
+#phoneMenuList{position:fixed;top:52px;left:0;right:0;bottom:0;width:auto;min-width:0;max-height:none;height:auto;border:0;border-radius:0;box-shadow:none;padding:8px;overflow-y:auto;overscroll-behavior:contain;z-index:40}
 #phoneMenuList .menu-search{background:#f1f3ef}
-#phoneMenuList .menu-close{position:sticky;top:0;z-index:1;display:flex;align-items:center;justify-content:center;margin-left:auto;width:44px;height:44px;border:0;background:inherit;padding:0;cursor:pointer}
-#phoneMenuList .menu-close .icon{width:20px;height:20px}
 #phoneMenuList .menu-item{display:flex;align-items:center;justify-content:flex-start;gap:12px;min-height:44px;white-space:nowrap}
 #phoneMenuList .menu-item>span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 #phoneMenuList .menu-icon{flex:none;width:20px;height:20px}
@@ -888,4 +886,7 @@ body{height:100dvh;min-height:0;overflow:hidden}
 .top .logo,.top #new,.top #open,.top #importMachine,.top #save,.top #duplicate{display:none}
 /* Issue #483 (spec #470 section 5): on a landscape phone the Menu is one 320 px column of icon-and-label rows, not a full-width sheet. */
 #phoneMenuList{right:auto;width:320px;max-width:100vw}
+/* Issue #481: the Menu starts below the 44 px top bar, so a tap on the bar dismisses it, and the 2D / Stitches / 3D switch is in Menu > View only. */
+#phoneMenuList{top:44px}
+.canvas .canvas-views{display:none}
 }

@@ -74,11 +74,14 @@ for(const layout of LAYOUTS){
     await expect(page.locator(menuSelector()).first()).toBeVisible();
     // No large mode buttons: the old bar under the canvas is gone.
     await expect(page.locator('.sheet-bar')).toHaveCount(0);
-    // Menu opens. In portrait the sheet fills the window, so there is no outside to tap: its Close button dismisses it.
+    // Menu opens below the top bar, so a tap on the top bar (outside the sheet) dismisses it. No Close button (Issue #481).
     const menu=page.locator(menuSelector()).first();
     await menu.click();
     await expect(menu).toHaveAttribute('aria-expanded','true');
-    await page.locator('#phoneMenuList .menu-close').click();
+    await expect(page.locator('#phoneMenuList .menu-close')).toHaveCount(0);
+    const vw=page.viewportSize();
+    await page.mouse.click(Math.round(vw.width/2),22);
+    await expect(page.locator('#phoneMenuList')).toHaveCount(0);
     await expect(menu).toHaveAttribute('aria-expanded','false');
     // Layers: a tap on the dimmed area closes it.
     await openSheet(page,'layers');

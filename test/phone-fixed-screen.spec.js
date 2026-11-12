@@ -120,7 +120,7 @@ test('the portrait screenshots (EN and ES) are written to the artifacts folder',
   await page.locator('.object-line').first().click();
   // Opening the Menu closes the sheet (spec section 4); toggling the Menu shut leaves the selection on the canvas.
   await page.locator('#phoneMenu').click();
-  await page.locator('#phoneMenuList .menu-close').click();
+  await page.locator('#phoneMenu').click();
   await expect(page.locator('.layout main>.floating')).toBeVisible();
   await page.screenshot({path:`${ARTIFACTS}/phone-portrait-selected-${lang}.png`});
   // Menu open.
