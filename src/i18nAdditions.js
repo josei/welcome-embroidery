@@ -3,6 +3,8 @@
 // first, so an entry in i18n.js wins over one here with the same key.
 export const ES_ADDITIONS={
 'Shown now':'Vista actual',
+'Snap':'Ajustar',
+'Snap to objects':'Ajustar a objetos',
 'Grid':'Cuadrícula',
 'Help':'Ayuda',
 'Panels':'Paneles',

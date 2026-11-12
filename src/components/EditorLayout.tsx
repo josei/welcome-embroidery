@@ -58,6 +58,8 @@ import {AddShapeButton, GridSnapButton} from './ToolButtons';
 import {toolbarActions} from '../toolbarCommands.js';
 import {viewMode} from '../viewMode.js';
 import {gridSnapState} from '../gridSnapState.js';
+import {gridShownState} from '../gridState.js';
+import {useCompactLayout} from '../compactLayout';
 import {editModeState} from '../editModeState.js';
 import {deletingGuideState, handModeState, panningState} from '../canvasModeState.js';
 import {setTraceDialogOpen} from '../traceDialogState.js';
@@ -106,6 +108,9 @@ export function EditorLayout() {
  const selectionLabels = useSyncExternalStore(selectionLabelsState.subscribe, selectionLabelsState.get);
  const view = useSyncExternalStore(viewMode.subscribe, viewMode.get);
  const snapping = useSyncExternalStore(gridSnapState.subscribe, gridSnapState.get);
+ const gridShown = useSyncExternalStore(gridShownState.subscribe, gridShownState.get);
+ // Spec #468 section 2 and 6: at phone and tablet widths the grid and snap chips are not on the canvas; the View menu holds them.
+ const compact = useCompactLayout();
  const editing = useSyncExternalStore(editModeState.subscribe, editModeState.get);
  const hand = useSyncExternalStore(handModeState.subscribe, handModeState.get);
  const panning = useSyncExternalStore(panningState.subscribe, panningState.get);
@@ -131,7 +136,7 @@ export function EditorLayout() {
   document.addEventListener('keydown', escape);
   return () => document.removeEventListener('keydown', escape);
  }, [phoneSheet]);
- const canvasClass = ['canvas', hand && 'hand', snapping && 'snapping', view === 'preview' && 'preview-mode', panning && 'panning',
+ const canvasClass = ['canvas', hand && 'hand', snapping && 'snapping', (gridShown || snapping) && 'grid-shown', view === 'preview' && 'preview-mode', panning && 'panning',
   deletingGuide && 'deleting-guide'].filter(Boolean).join(' ');
  // Issue #479 (spec #470 section 1): at phone portrait the dock is one row of seven buttons, each with its label under the icon. Pen,
  // Polygon, Star, Trace, Photo stitch, Ellipse and the panels are in More tools (MoreToolsSheet), so nothing scrolls sideways.
@@ -230,9 +235,9 @@ export function EditorLayout() {
                </ActionButton>
                <ArrangeSheet />
                {/* The Arrange sheet holds these at every size. From 1025px the bar also keeps them as direct buttons, where it has room. */}
-               <GridSnapButton />
-               <SnapObjectButton />
-               <GridControl />
+               {compact ? null : <GridSnapButton />}
+               {compact ? null : <SnapObjectButton />}
+               {compact ? null : <GridControl />}
                <span className={"bar-direct"}>
                  <AlignButtons />
                  <FlipButtons />

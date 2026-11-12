@@ -31,3 +31,12 @@ export function configureGrid(next: GridApi) {
     api?.render();
   };
 }
+
+/** Whether the canvas draws the grid dots. The View menu's Grid item sets it on phones and tablets, where the grid chips are
+ * not on the canvas. Snapping also draws the grid (canvas.snapping), so the dots show when either is on. Off at start-up. */
+export const gridShownState = createStore(false);
+
+/** The View menu's Grid item flips the dots. Nothing else needs a redraw: the canvas class follows the store. */
+export function toggleGridShown() {
+  gridShownState.set(!gridShownState.get());
+}

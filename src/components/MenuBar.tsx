@@ -15,6 +15,7 @@ import {setPaletteOpen} from '../commandPaletteState';
 import {shortcutForCommand} from '../shortcutTable.js';
 import {gridActions, gridState, GRID_SPACINGS} from '../gridState.js';
 import {gridSnapActions, gridSnapState} from '../gridSnapState.js';
+import {gridShownState, toggleGridShown} from '../gridState.js';
 import {zoomActions} from '../zoomState';
 import {toastActions} from '../toastState.js';
 import {snapObjActions, snapObjState} from '../snapObjState.js';
@@ -39,6 +40,8 @@ interface Entry {
  key?: string;
  hint?: string;
  disabled?: boolean;
+ /** For a row that switches something on or off: whether it is on now (sets aria-pressed). */
+ pressed?: boolean;
  reason?: string;
  run: () => void;
 }
@@ -148,7 +151,7 @@ function Dropdown({id, label, rows, iconOnly}: {id: string; label: string; rows:
       if ('note' in row) return <div key={`note${i}`} role="status" className="menu-note">{row.note}</div>;
       return (
        <button key={row.id} type="button" role="menuitem" id={row.id} disabled={row.disabled}
-        className={[row.key || row.icon ? 'menu-item' : '', row.className].filter(Boolean).join(' ') || undefined} onClick={() => choose(row)}>
+        className={[row.key || row.icon ? 'menu-item' : '', row.className].filter(Boolean).join(' ') || undefined} aria-pressed={row.pressed} onClick={() => choose(row)}>
         {row.icon && <svg className="icon menu-icon" aria-hidden="true"><use href={`#${row.icon}`} /></svg>}
         <span>{row.label}</span>
         {row.key && <kbd>{row.key}</kbd>}
@@ -256,6 +259,29 @@ export function ArrangeMenu() {
  return <Dropdown id="arrangeMenu" label={t('Arrange')} rows={useArrangeRows()} />;
 }
 
+/** The View rows for grid and snap: Grid (dots on the canvas), the grid spacing, Snap and Snap to objects. The toggles carry
+ * aria-pressed, so a screen reader hears their state. Used by the phone Menu and the compact desktop View menu. */
+export function useGridSnapRows(): Row[] {
+ const shown = useSyncExternalStore(gridShownState.subscribe, gridShownState.get);
+ const snapOn = useSyncExternalStore(gridSnapState.subscribe, gridSnapState.get);
+ const grid = useSyncExternalStore(gridState.subscribe, gridState.get);
+ const snapObjects = useSyncExternalStore(snapObjState.subscribe, snapObjState.get);
+ return [
+  {id: 'menuGrid', label: t('Grid'), icon: 'i-grid', pressed: shown, run: toggleGridShown},
+  {id: 'menuGridSpacing', label: t('Grid spacing'), icon: 'i-grid', hint: `${grid.value} mm`, run: () => {
+    const spacings = GRID_SPACINGS;
+    gridActions.choose(spacings[(spacings.indexOf(grid.value) + 1) % spacings.length]);
+  }},
+  {id: 'menuSnap', label: t('Snap'), icon: 'i-snap', pressed: snapOn, run: () => gridSnapActions.toggle()},
+  {id: 'menuSnapObjects', label: t('Snap to objects'), icon: 'i-snap-obj', pressed: snapObjects, run: () => snapObjActions.toggle()},
+ ];
+}
+
+/** The desktop-menu View menu, shown at compact widths (see useCompactLayout) where the grid chips are not on the canvas. */
+export function ViewMenu() {
+ return <Dropdown id="viewMenu" label={t('View')} rows={useGridSnapRows()} />;
+}
+
 /** The phone Menu (issue #474, spec sections 2, 5 and 7 of #470): an icon button in the top bar opens a full-height sheet. It has a
  * Command palette search field, then four groups in order, each row with an icon and a short label: File, Edit, View, and Settings
  * and Help. Keyboard shortcuts are not listed on phones. Every row runs the same command as its desktop counterpart. */
@@ -279,9 +305,7 @@ export function PhoneMenu() {
   .filter((r): r is Entry => typeof r === 'object' && 'id' in r && r.id in PHONE_EDIT_ICONS)
   .map(r => ({...r, key: undefined, icon: PHONE_EDIT_ICONS[r.id]}));
  const view = useSyncExternalStore(viewMode.subscribe, viewMode.get);
- const snapOn = useSyncExternalStore(gridSnapState.subscribe, gridSnapState.get);
- const grid = useSyncExternalStore(gridState.subscribe, gridState.get);
- const snapObjects = useSyncExternalStore(snapObjState.subscribe, snapObjState.get);
+ const gridRows = useGridSnapRows();
  const sheet = useSyncExternalStore(phoneSheetState.subscribe, phoneSheetState.get);
  const status = useSyncExternalStore(statusState.subscribe, statusState.get);
  const agent = useSyncExternalStore(agentLinkState.subscribe, agentLinkState.get);
@@ -289,7 +313,6 @@ export function PhoneMenu() {
   id: `menuView-${v.id}`, label: t(v.label), icon: v.icon, hint: view === v.id ? t('Shown now') : undefined, run: () => viewActions.choose(v.id),
  }));
  const settingsHint = agent.active ? t('Settings: agent connected') : agent.waiting ? t('Settings: waiting for agent') : undefined;
- const spacings = GRID_SPACINGS;
  const rows: Row[] = [
   {id: 'menuCommandPalette', label: t('Command palette'), icon: 'i-search', className: 'menu-search', run: () => setPaletteOpen(true)},
   {heading: t('File')},
@@ -302,12 +325,7 @@ export function PhoneMenu() {
   {id: 'menuExport', label: t('Export'), icon: 'i-export', run: () => openExportDialog()},
   {heading: t('Edit')}, ...edit,
   {heading: t('View')}, ...viewRows,
-  {id: 'menuGrid', label: t('Grid'), icon: 'i-grid', hint: `${grid.value} mm`, run: () => {
-    const next = spacings[(spacings.indexOf(grid.value) + 1) % spacings.length];
-    gridActions.choose(next);
-  }},
-  {id: 'menuSnap', label: t('Snap to grid'), icon: 'i-snap', hint: snapOn ? t('On') : t('Off'), run: () => gridSnapActions.toggle()},
-  {id: 'menuSnapObjects', label: t('Snap to other objects'), icon: 'i-snap-obj', hint: snapObjects ? t('On') : t('Off'), run: () => snapObjActions.toggle()},
+  ...gridRows,
   {id: 'menuLayers', label: t('Layers'), icon: 'i-layers', hint: sheet === 'layers' ? t('Shown now') : undefined, run: () => togglePhoneSheet('layers')},
   {id: 'menuProperties', label: t('Properties'), icon: 'i-sliders', hint: sheet === 'properties' ? t('Shown now') : undefined, run: () => togglePhoneSheet('properties')},
   {id: 'menuFitHoop', label: t('Fit hoop'), icon: 'i-fit', run: () => zoomActions.fitHoop()},

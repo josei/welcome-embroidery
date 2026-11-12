@@ -107,7 +107,7 @@ nav .icon-button:first-of-type{margin-left:auto}
 .floating .icon-button[data-tooltip]::after{top:calc(100% + 7px);bottom:auto}
 .floating .icon-button.active-tool{background:var(--teal-soft);color:var(--teal)}
 .floating select{border:1px solid var(--field-line);border-radius:6px;font:inherit;font-size:var(--fs-caption);padding:4px;background:#f6f7f5;color:#53635b;margin-left:2px}
-.canvas.snapping{background-image:radial-gradient(#1c7a6755 1px,transparent 1.2px)}
+.canvas.snapping,.canvas.grid-shown{background-image:radial-gradient(#1c7a6755 1px,transparent 1.2px)}
 .path-node.selected-node{fill:var(--teal);stroke:#fff}
 .shape.multi{stroke:var(--teal)!important;stroke-width:.45;stroke-dasharray:1.2 .8}
 #pathProps[hidden]{display:none}
