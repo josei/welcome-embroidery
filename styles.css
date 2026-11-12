@@ -423,7 +423,8 @@ input[aria-invalid="true"]{border-color:var(--warn)!important;background:var(--w
 .layout main>footer>.playback-bar{flex:1 1 100%;min-width:0}
 .layout main>footer>#cursorPosition,.layout main>footer>#count,.layout main>footer>#playbackProgress,.layout main>footer>#needlePosition,.layout main>footer>#messagesBtn{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-variant-numeric:tabular-nums}
 #cursorPosition{width:15.5em;max-width:100%}
-#count{width:15em;max-width:100%}
+/* Issue #482: the count is a 15em slot that grows to its text, so the Spanish status ("N puntadas · listo para bordar") is not cut off on landscape and tablet. */
+#count{min-width:15em;width:auto;max-width:100%}
 #playbackProgress{width:14em;min-width:0;max-width:100%}
 #needlePosition{width:14em;min-width:0;max-width:100%}
 .playback-bar .playback-time{width:10.5em;min-width:0;overflow:hidden}
