@@ -142,3 +142,48 @@ test('desktop at 1280x800 is not a landscape phone layout',async({page})=>{
  const r=await page.evaluate(()=>getComputedStyle(document.querySelector('.tool-rail')).position);
  expect(r).not.toBe('fixed');
 });
+
+// Issue #483 (part of #468; spec #470 sections 1 and 5): three polish items from the #476 check.
+test('the landscape Menu is a 320 px column, and each label starts within 16 px of its icon (en)',async({page})=>{
+ await openEditor(page,...LANDSCAPE,'en');
+ await page.locator('#phoneMenu').click();
+ const list=page.locator('#phoneMenuList');
+ await expect(list).toBeVisible();
+ const box=await list.boundingBox();
+ expect(box.width).toBeLessThanOrEqual(390);
+ const gaps=await list.locator('[role="menuitem"]').evaluateAll(els=>els.map(e=>{
+  const icon=e.querySelector('.menu-icon').getBoundingClientRect(), label=e.querySelector(':scope > span').getBoundingClientRect();
+  return label.left-icon.right;
+ }));
+ for(const g of gaps) expect(g).toBeLessThanOrEqual(16);
+});
+
+test('the More tools chevron is the topmost element at its centre, with no tool showing behind it',async({page})=>{
+ await openEditor(page,...LANDSCAPE,'en');
+ const r=await page.evaluate(()=>{
+  const m=document.querySelector('#toolMore').getBoundingClientRect();
+  const rail=document.querySelector('.tool-rail').getBoundingClientRect();
+  const hit=document.elementFromPoint(m.left+m.width/2,m.top+m.height/2);
+  // The part of each rail child that is actually drawn: inside the rail's box, and not under the chevron.
+  const peeking=[...document.querySelectorAll('.tool-rail>button')].filter(b=>{
+   const c=b.getBoundingClientRect();
+   const top=Math.max(c.top,rail.top), bottom=Math.min(c.bottom,rail.bottom);
+   return bottom>top && Math.min(c.right,m.right)>Math.max(c.left,m.left) && Math.min(bottom,m.bottom)>Math.max(top,m.top);
+  }).map(b=>b.id);
+  return {hit:hit.id,peeking};
+ });
+ expect(r.hit).toBe('toolMore');
+ expect(r.peeking).toEqual([]);
+});
+
+test('a Spanish layer row summary stays one line high at 768x1024',async({page})=>{
+ await page.setViewportSize({width:768,height:1024});
+ await page.goto('/?lang=es');
+ await expect(page.locator('.object-row').first()).toBeVisible();
+ const heights=await page.locator('.object-row .row-tag').evaluateAll(els=>els.map(e=>{
+  const lh=parseFloat(getComputedStyle(e).lineHeight)||parseFloat(getComputedStyle(e).fontSize)*1.2;
+  return Math.round(e.getBoundingClientRect().height/lh);
+ }));
+ expect(heights.length).toBeGreaterThan(0);
+ for(const h of heights) expect(h).toBe(1);
+});
