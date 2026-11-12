@@ -682,3 +682,76 @@ input[type=checkbox]:not(.icon-check){width:24px;height:24px;min-width:24px;marg
 .canvas .canvas-text-hint,.canvas #canvasHint,.canvas .canvas-hint{bottom:12px}
 #toast{margin-bottom:calc(var(--phone-foot) + 146px)}
 }
+
+.tool-more{display:none}
+/* Issue #472 (part of #468; spec docs/mobile-editor-design.md sections 1, 2 and 6): a landscape phone (844x390, any landscape
+   window 500 px tall or less and 1000 px wide or less) uses fixed regions and never scrolls the page. From the top: the top bar
+   (44 px), then the middle band between the top bar and the status line. In the band: a 56 px tool rail on the left, full height,
+   and the canvas on the right. The status line is the bottom 44 px. Layers and Properties open as 320 px right-edge sheets over
+   the canvas, from the buttons at the canvas's top-right, and never overlap the rail. Every visible control is 44 px square or
+   more. The rulers, the 2D / Stitches / 3D switch (Menu > View on phones) and the zoom and canvas toolbars move as the spec says.
+   Status line is 44 px, not the spec's 28 px: its Messages button is a 44 px control (section 3), so it cannot fit a 28 px row.
+   Desktop and the portrait layouts do not match this query, so they are unchanged. Undo: delete this block. */
+@media (orientation:landscape) and (max-height:500px) and (max-width:1000px){
+body{height:100dvh;min-height:0;overflow:hidden}
+.tool-more{display:flex}
+.top{position:fixed;top:0;left:0;right:0;z-index:7;height:44px;min-height:44px;flex-wrap:nowrap;gap:4px;padding:0 6px;overflow:hidden}
+.top .logo,.top .sep,.top #new,.top #open,.top #importMachine,.top #save,.top #duplicate,.top #remove,.top #helpBtn,.top #settingsBtn,.top .save-status,.top .unsaved-marker{display:none}
+.top .file-menu>button,.top .icon-button,.top #undo,.top #redo,.top #settingsBtn,.top #export{min-width:44px;height:44px;min-height:44px}
+.top .icon-button{width:44px}
+.top .file-menu>button{padding:6px 6px}
+.top .export-split{height:44px}
+.top .export-split #export{min-height:44px;height:100%}
+.top .name-field{display:flex;align-items:center;flex:1 1 0;min-width:0;height:44px}
+.top #name{flex:1 1 0;min-width:0;height:44px;min-height:44px}
+.top .export-reason{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;margin:0}
+.layout{display:block;height:auto;grid-template-columns:none;position:fixed;top:44px;left:0;right:0;bottom:0;overflow:hidden}
+.layout>aside.panel:first-child{display:none}
+.layout>aside.panel:first-child.sheet-open{display:flex;flex-direction:column;position:fixed;top:44px;bottom:44px;right:0;left:auto;z-index:40;width:320px;height:auto;max-height:none;margin:0;padding:10px 12px 12px;overflow-y:auto;overscroll-behavior:contain;background:#fff;border:0;border-left:1px solid #e3e6e1;border-radius:0;box-shadow:-6px 0 24px #1d292533}
+.layout>.panel:last-child{display:none}
+.layout>.panel:last-child.sheet-open{display:flex;flex-direction:column;position:fixed;top:44px;bottom:44px;right:0;left:auto;z-index:40;width:320px;height:auto;max-height:none;margin:0;padding:10px 12px 12px;overflow-y:auto;overscroll-behavior:contain;background:#fff;border:0;border-left:1px solid #e3e6e1;border-radius:0;box-shadow:-6px 0 24px #1d292533}
+.layout>.panel.inspector-collapsed:last-child{display:none}
+.layout>aside.panel:first-child.sheet-open>.layers-head,.layout>aside.panel:first-child.sheet-open>.sheet-head{flex-wrap:nowrap}
+.layers-head{flex-wrap:nowrap;gap:8px;min-width:0}
+.layers-head span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.layers-head h2{white-space:nowrap}
+.layers-head .inspector-toggle{display:none}
+/* The Layers and Properties buttons sit in the status line, at its right end, so an open sheet (which stops above the status line) never covers them. */
+.sheet-bar{display:flex;position:absolute;top:auto;bottom:0;right:0;height:44px;z-index:6;gap:6px;margin:0;padding:0 8px 0 0;background:#fff;border:0}
+.sheet-bar button{min-width:44px;min-height:44px;height:44px;padding:0 10px;border:1px solid var(--field-line);border-radius:10px;background:#fff;color:#3c423e;font:inherit;font-size:var(--fs-body);font-weight:var(--fw-emphasis);cursor:pointer;white-space:nowrap}
+.sheet-bar button[aria-expanded=true]{background:var(--teal-soft);border-color:var(--teal);color:var(--teal-deep)}
+.sheet-bar button:focus-visible{outline:2px solid var(--teal);outline-offset:2px}
+.sheet-close,.sheet-switch{min-height:44px;min-width:44px}
+.sheet-head,.drawer-head{display:flex;justify-content:flex-end;gap:8px;margin:0 0 4px}
+.drawer-head{display:none}
+.layout>.panel:last-child.sheet-open .drawer-head{display:none}
+.layout main{position:absolute;top:0;left:0;right:0;bottom:0;display:flex;flex-direction:column;min-height:0;width:auto;margin:0;order:0}
+.canvas{position:relative;flex:1 1 0;height:auto;min-height:0;margin-left:56px;overflow:hidden}
+.canvas #rulerTop,.canvas #rulerLeft,.canvas .ruler-corner{display:none}
+.canvas .canvas-views{display:none}
+.canvas .tool-rail{position:fixed;left:0;top:44px;bottom:88px;right:auto;z-index:6;width:56px;height:auto;max-height:none;margin:0;padding:4px 6px;flex-direction:column;flex-wrap:nowrap;justify-content:flex-start;align-items:center;gap:0;border:0;border-radius:0;box-shadow:2px 0 8px rgba(0,0,0,.08);background:#fff;overflow-y:auto;overflow-x:hidden;transform:none;order:0}
+.canvas .tool-rail .icon-button{width:44px;min-width:44px;height:44px;min-height:44px;flex:none}
+.tool-more{position:fixed;left:6px;bottom:44px;z-index:6;align-items:center;justify-content:center;width:44px;min-width:44px;height:44px;min-height:44px;margin:0;padding:0;border:1px solid var(--field-line);border-radius:10px;background:#fff;color:#3c423e;cursor:pointer}
+.tool-more .icon{transition:transform .15s}
+.tool-more[aria-expanded=true] .icon{transform:rotate(180deg)}
+.tool-more:focus-visible{outline:2px solid var(--teal);outline-offset:2px}
+.canvas .floating{position:absolute;top:6px;left:8px;right:auto;bottom:auto;z-index:5;display:flex;flex-direction:row;flex-wrap:nowrap;align-items:center;justify-content:flex-start;align-content:center;gap:4px;width:auto;max-width:calc(100% - 120px);height:44px;max-height:none;margin:0;padding:0 6px;transform:none;overflow-x:auto;overflow-y:hidden;background:#fff;border:1px solid var(--field-line);border-radius:10px;grid-template-columns:none;scrollbar-width:none}
+.canvas .floating .icon-button{width:44px;min-width:44px;height:44px;min-height:44px;flex:none}
+.canvas .floating #grid,.canvas .floating .grid-chip{grid-column:auto;width:auto;height:44px;min-height:44px;min-width:44px;flex:none}
+.canvas .floating .tb-start::before{display:none}
+.canvas .zoombar{position:absolute;left:auto;right:8px;top:auto;bottom:8px;z-index:5;width:auto;height:44px;margin:0;padding:0 4px;justify-content:center;border:1px solid var(--field-line);border-radius:10px;box-shadow:none;background:#fff}
+.canvas .zoombar .icon-button,.canvas .zoombar .zoom-pct,.canvas .zoombar .zoom-fit,.canvas .zoombar button{min-width:44px;width:auto;height:44px;min-height:44px;padding:0 6px}
+.canvas .zoombar .icon-button{width:44px}
+.canvas .canvas-text-hint,.canvas #canvasHint,.canvas .canvas-hint{bottom:56px;left:8px;right:auto;max-width:calc(100% - 140px)}
+.layout main>footer{position:relative;flex:none;height:44px;min-height:44px;margin:0;padding:0 196px 0 8px;display:flex;flex-wrap:nowrap;align-items:center;gap:8px;overflow:hidden;border-top:1px solid #e3e6e1;background:#fff}
+.layout main>footer .messages-btn{min-height:44px;min-width:44px;padding:0 12px}
+.layout main>footer>.playback-bar{flex:1 1 auto;min-width:0;height:44px}
+#toast{margin-bottom:52px;z-index:50}
+.row-btn,.row-eye,.row-lock{width:44px;min-width:44px;height:44px;min-height:44px}
+.layout>aside input:not([type=checkbox]):not([type=range]):not(.sr-only),.layout>.panel input:not([type=checkbox]):not([type=range]):not(.sr-only),.layout .hoop-edit input,.layout>aside select,.layout>.panel select,.layout .hoop-edit select{min-height:44px}
+.layout .hoop-edit button,.layout>aside button.inspector-toggle,.layout .footer.hoop-edit button{min-height:44px;min-width:44px}
+#layersSheet .hoop-edit input,#layersSheet .hoop-edit select{width:auto;min-width:0}
+#hoopRotate{min-height:44px}
+.layout>.panel:last-child.sheet-open summary,.layout>.panel:last-child.sheet-open input[type=range]{min-height:44px}
+.layout>.panel:last-child.sheet-open .sec-fold>summary,.layout>.panel:last-child.sheet-open .doc-settings>summary{display:flex;align-items:center}
+}

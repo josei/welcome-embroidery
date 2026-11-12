@@ -10,7 +10,7 @@ import {shortcutLabel} from '../shortcutLabels.js';
 import {shortcutFor} from '../shortcutTable.js';
 import {CanvasTextEditor} from './CanvasTextEditor';
 import {PreviewPanel} from './PreviewPanel';
-import {useSyncExternalStore} from 'react';
+import {useRef, useState, useSyncExternalStore} from 'react';
 import {SelectionHint} from './SelectionHint';
 import {CanvasHint} from './CanvasHint';
 import {ActionButton} from './ActionButton';
@@ -62,6 +62,19 @@ const ungroupLabel = t('Ungroup ({shortcut})', {shortcut: shortcutLabel([{mod: t
 // The editor layout: the object list, the canvas and the inspector. Rendered by React; ids match the markup it
 // replaced, because the keyboard shortcuts and tests address them.
 export function EditorLayout() {
+ // Issue #472: on a landscape phone the tool rail scrolls inside itself. "More tools" (pinned under the rail) pages through it one
+ // visible screen at a time, overlapping by one tool so none is skipped, and goes back to the top after the last page.
+ const toolRailRef = useRef<HTMLDivElement>(null);
+ const [moreToolsOpen, setMoreToolsOpen] = useState(false);
+ const toggleMoreTools = () => {
+  const rail = toolRailRef.current;
+  if (!rail) return;
+  const maxTop = rail.scrollHeight - rail.clientHeight;
+  const atEnd = rail.scrollTop >= maxTop - 1;
+  const next = atEnd ? 0 : Math.min(maxTop, rail.scrollTop + rail.clientHeight - 44);
+  rail.scrollTo({top: next});
+  setMoreToolsOpen(next > 0);
+ };
  const canvasDoc = useSyncExternalStore(documentState.subscribe, documentState.get);
  const canvasCounts = useSyncExternalStore(sewingCountsState.subscribe, sewingCountsState.get);
  const layout = useSyncExternalStore(layoutState.subscribe, layoutState.get);
@@ -93,7 +106,7 @@ export function EditorLayout() {
           // Issue #455: on a portrait tablet a tap on the canvas closes the Properties drawer (controls inside the canvas keep it open).
           if (inspectorOpen && window.matchMedia(TABLET_DRAWER_QUERY).matches && !(e.target as Element).closest('button,input,select,textarea,label,a')) toggleInspectorOpen();
         }}>
-          <div className={"tool-row tool-rail"} aria-label={"Tools"}>
+          <div className={"tool-row tool-rail"} aria-label={"Tools"} ref={toolRailRef}>
             <SelectTool />
             <AddShapeButton kind={"rect"} id={"rect"} label={"Add rectangle"} icon={"rect"} tip={t('Add rectangle ({shortcut})', {shortcut: shortcutFor('rect')})} />
             <AddShapeButton kind={"ellipse"} id={"ellipse"} label={"Add ellipse"} icon={"ellipse"} tip={t('Add ellipse ({shortcut})', {shortcut: shortcutFor('ellipse')})} />
@@ -115,6 +128,20 @@ export function EditorLayout() {
             <PhotoStitch />
             <PenTool />
           </div>
+          <button
+            type={"button"}
+            className={"icon-button tool-more"}
+            id={"toolMore"}
+            aria-label={t('More tools')}
+            aria-expanded={moreToolsOpen}
+            title={t('More tools')}
+            data-tooltip={t('More tools')}
+            onClick={toggleMoreTools}
+          >
+            <svg className={"icon"}>
+              <use href={"#i-chevron"} />
+            </svg>
+          </button>
           <div className={"canvas-views"}>
             <ViewSwitch />
           </div>

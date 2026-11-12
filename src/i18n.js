@@ -300,7 +300,7 @@ export const ES={...ES_ADDITIONS,
   'Arrastra en el lienzo para mover la imagen. Pulsa de nuevo el botón para volver a dibujar.','Color regions (filled shapes)':
   'Regiones de color (formas rellenas)','Line art (strokes)':'Dibujo lineal (trazos)','Nothing to trace: no dark strokes were found.':
   'Nada que vectorizar: no se encontraron trazos oscuros.','Traced {n} strokes.':'Se vectorizaron {n} trazos.','Trace a picture into filled shapes':
-  'Vectorizar una imagen en formas rellenas','Trace a picture':'Vectorizar una imagen',
+  'Vectorizar una imagen en formas rellenas','Trace a picture':'Vectorizar una imagen','More tools':'Más herramientas',
   'Turns a logo, drawing or clip art into filled shapes, one per color region. For photographs use the photo stitch tool instead.':
   'Convierte un logotipo, dibujo o clip art en formas rellenas, una por región de color. Para fotografías usa la herramienta de punto foto.','Picture':'Imagen',
   'Colors':'Colores','Detail':'Detalle','Fine':'Fino','Normal':'Normal','Smooth':'Suave','Width (mm)':'Ancho (mm)','Skip the background color':

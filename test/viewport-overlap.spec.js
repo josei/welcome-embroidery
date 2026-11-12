@@ -48,12 +48,23 @@ const measure=scope=>{
  };
  // A control covered by an open sheet or dialog is not on top, so it is not counted in an overlap.
  const covered=e=>{const r=e.getBoundingClientRect();const cx=r.left+r.width/2,cy=r.top+r.height/2;if(cx<0||cy<0||cx>innerWidth||cy>innerHeight)return false;const top=document.elementFromPoint(cx,cy);return !top||!(top===e||e.contains(top));};
- const controls=[...(document.querySelector(scope)||document).querySelectorAll(CONTROL)].filter(e=>isVisible(e)&&!covered(e));
+ // The part of a control that is drawn: its box cut to every clipping ancestor (a rail or list that scrolls hides what is past its edge).
+ const drawnRect=e=>{
+  let r=e.getBoundingClientRect();
+  for(let p=e.parentElement;p&&p!==document.body;p=p.parentElement){
+   const cs=getComputedStyle(p);
+   if(!/(hidden|auto|scroll|clip)/.test(cs.overflowX+cs.overflowY))continue;
+   const q=p.getBoundingClientRect();
+   r={left:Math.max(r.left,q.left),top:Math.max(r.top,q.top),right:Math.min(r.right,q.right),bottom:Math.min(r.bottom,q.bottom)};
+  }
+  return r;
+ };
+ const controls=[...(document.querySelector(scope)||document).querySelectorAll(CONTROL)].filter(e=>isVisible(e)&&!covered(e)&&drawnRect(e).right-drawnRect(e).left>0&&drawnRect(e).bottom-drawnRect(e).top>0);
  const hits=[];
  for(let i=0;i<controls.length;i++)for(let j=i+1;j<controls.length;j++){
   const a=controls[i],b=controls[j];
   if(a.contains(b)||b.contains(a))continue;
-  const A=a.getBoundingClientRect(),B=b.getBoundingClientRect();
+  const A=drawnRect(a),B=drawnRect(b);
   const ox=Math.min(A.right,B.right)-Math.max(A.left,B.left),oy=Math.min(A.bottom,B.bottom)-Math.max(A.top,B.top);
   if(ox>1&&oy>1)hits.push(`${a.tagName}#${a.id||''} "${(a.textContent||a.getAttribute('aria-label')||'').trim().slice(0,24)}" / ${b.tagName}#${b.id||''} "${(b.textContent||b.getAttribute('aria-label')||'').trim().slice(0,24)}"`);
  }
