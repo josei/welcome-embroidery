@@ -21,7 +21,7 @@ import {DesignSummary, SelectionHeading, SourceInfo} from './InspectorText';
 import {AlignButtons} from './AlignButtons';
 import {ArrayPanel} from './ArrayPanel';
 import {DocumentSettings, FabricSection} from './DocumentSettings';
-import {HoopFields} from './HoopFields';
+import {HoopFields, useHoopInProperties} from './HoopFields';
 import {LetteringPanel} from './LetteringPanel';
 import {PathNodeButtons} from './PathNodeButtons';
 import {PathPanel} from './PathPanel';
@@ -98,6 +98,8 @@ export function EditorLayout() {
  const inspectorOpen = useSyncExternalStore(inspectorOpenState.subscribe, inspectorOpenState.get);
  const inspectorTab = useSyncExternalStore(inspectorTabState.subscribe, inspectorTabState.get);
  const tablet = useTabletPortrait();
+ // Phones and tablets stack the panels, so the hoop size and rotation move into Properties; desktop keeps them under Layers.
+ const hoopInProperties = useHoopInProperties();
  const phoneSheet = useSyncExternalStore(phoneSheetState.subscribe, phoneSheetState.get);
  const detent = useSyncExternalStore(phoneSheetDetent.subscribe, phoneSheetDetent.get);
  const phone = usePhonePortrait();
@@ -339,7 +341,7 @@ export function EditorLayout() {
           <input id={"sides"} type={"number"} min={"3"} max={"12"} defaultValue={"5"} />
         </label>
         <ObjectList />
-        <HoopFields />
+        {hoopInProperties ? null : <HoopFields />}
       </aside>
       {/* Issue #475: on a portrait tablet the Layers and Properties tabs sit at the top of the inspector column; the panels below them switch. */}
       <div className={"inspector-tabs"} role={"tablist"} aria-label={t('Inspector')}>
@@ -447,6 +449,7 @@ export function EditorLayout() {
           <h3 className={"section-heading scope-heading"}>
             {"Document"}
           </h3>
+          {hoopInProperties ? <HoopFields /> : null}
           {selectionLabels.hintHidden ? <DocumentSettings /> : null}
           <DesignSummary />
           <FabricSection />

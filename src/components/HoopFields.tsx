@@ -2,7 +2,19 @@ import {useSyncExternalStore} from 'react';
 import {hoopActions, hoopState} from '../hoopState.js';
 import {useDecimalNumber} from './useDecimalInput';
 import {HOOP_SIDE_RANGE} from '../fieldRanges.js';
-// The hoop row under the objects list, rendered by React. Ids and labels match the markup it replaced, because app.js wires them by id.
+// The stacked layout, where Layers and Properties panels stack: the same condition styles.css uses for them.
+const STACKED_LAYOUT_QUERY = '(max-width: 900px), (max-height: 500px) and (pointer: coarse)';
+function subscribeStacked(onChange: () => void) {
+ const query = window.matchMedia(STACKED_LAYOUT_QUERY);
+ query.addEventListener('change', onChange);
+ return () => query.removeEventListener('change', onChange);
+}
+/** Whether the hoop row belongs in Properties (stacked phone and tablet layouts) rather than under the Layers list (desktop). */
+export function useHoopInProperties(): boolean {
+ return useSyncExternalStore(subscribeStacked, () => window.matchMedia(STACKED_LAYOUT_QUERY).matches);
+}
+
+// The hoop row under the objects list on desktop, or at the top of Properties on phones and tablets, rendered by React. Ids and labels match the markup it replaced, because app.js wires them by id.
 export function HoopFields() {
  const hoop = useSyncExternalStore(hoopState.subscribe, hoopState.get);
  const width = useDecimalNumber(hoop.hoopW, text => hoopActions.commit('hoopW', text), HOOP_SIDE_RANGE);
