@@ -475,6 +475,10 @@ input[aria-invalid="true"]{border-color:var(--warn)!important;background:var(--w
 .sheet-bar{display:flex;gap:8px;padding:8px 10px;background:#fff;border-top:1px solid #e3e6e1}
 .sheet-bar button{flex:1 1 0;min-height:40px;border:1px solid var(--field-line);border-radius:8px;background:#fff;color:#3c423e;font:inherit;font-size:var(--fs-body);font-weight:var(--fw-emphasis);cursor:pointer}
 .sheet-bar button[aria-expanded=true]{background:var(--teal-soft);border-color:var(--teal);color:var(--teal-deep)}
+/* Issue #461: the sheet bar (57px: 40px buttons, 8px padding, 1px border) sits directly above the footer, so the toast stack clears it
+   by that height plus its 10px gap. The toast then never covers Layers or Properties. The open sheet is z-index 40, so the toast
+   lifts above it (50) to stay readable while a sheet is open. */
+#toast{margin-bottom:67px;z-index:50}
 .sheet-bar button:focus-visible,.sheet-close:focus-visible,.sheet-switch:focus-visible{outline:2px solid var(--teal);outline-offset:2px}
 .sheet-close{display:inline-flex;align-items:center;justify-content:center;flex:none;min-width:40px;min-height:40px;padding:0 12px;margin-left:0;border:1px solid var(--field-line);border-radius:8px;background:#fff;color:#3c423e;font:inherit;font-size:var(--fs-body);cursor:pointer}
 .sheet-head{display:flex;justify-content:flex-end;gap:8px;margin:0 0 4px}
