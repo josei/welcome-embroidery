@@ -808,8 +808,8 @@ body{height:100vh;height:100dvh;min-height:0;overflow:hidden;overscroll-behavior
 .canvas .tool-rail .icon-button.phone-sheet-btn{display:inline-flex}
 /* The sheets are #layersSheet and #inspector: their id rules (tablet and desktop) outrank the classes above, so the landscape sheet sets its box again here. */
 .layout>#layersSheet.sheet-open,.layout>#inspector.sheet-open{display:flex;flex-direction:column;position:fixed;top:44px;bottom:44px;left:auto;right:0;width:320px;height:auto;max-height:none;margin:0;padding:10px 12px 12px;overflow-y:auto;overscroll-behavior:contain;z-index:40;background:#fff;border:0;border-left:1px solid #e3e6e1;border-radius:0;box-shadow:-6px 0 24px #1d292533}
-/* Issue #488: the scrim starts past the 64 px rail, so the rail's Layers and Properties buttons stay tappable while a sheet is open (tapping Layers swaps the sheet). */
-.sheet-scrim{left:64px}
+/* Issue #488: the scrim starts past the 64 px rail and below the 44 px top bar, so the rail's Layers and Properties buttons stay tappable while a sheet is open (tapping Layers swaps the sheet). */
+.sheet-scrim{display:block;position:fixed;left:64px;right:0;bottom:0;top:44px;z-index:39;background:#1d292538}
 .layout>aside.panel.sheet-open [data-sheet-drag]{touch-action:pan-y}
 body{height:100dvh;min-height:0;overflow:hidden}
 .tool-more{display:flex}

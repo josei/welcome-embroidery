@@ -187,3 +187,34 @@ test('a Spanish layer row summary stays one line high at 768x1024',async({page})
  expect(heights.length).toBeGreaterThan(0);
  for(const h of heights) expect(h).toBe(1);
 });
+
+// Issue #493 (spec #470 section 4): a landscape right sheet closes on a tap on the canvas outside it. The scrim covers that area while
+// the sheet is open, is hidden from assistive tech (aria-hidden), and a tap on it closes the sheet. Run with a fine pointer, as on the
+// desktop-sized check of the sheet layout (the scrim used to show only with a coarse pointer).
+const CANVAS_TAPS=[[200,150],[300,250],[420,120]];
+for(const [opener,sheetId] of [['#layersBtn','#layersSheet'],['#propertiesBtn','#inspector']]){
+ test(`a tap on the canvas outside the landscape ${opener.slice(1)} sheet closes it (en)`,async({page})=>{
+  await openEditor(page,...LANDSCAPE,'en');
+  for(const [x,y] of CANVAS_TAPS){
+   await page.locator(opener).click();
+   await expect(page.locator(sheetId)).toHaveClass(/sheet-open/);
+   const scrim=page.locator('.sheet-scrim');
+   await expect(scrim).toBeVisible();
+   await expect(scrim).toHaveAttribute('aria-hidden','true');
+   await page.mouse.click(x,y);
+   await expect(page.locator(`.layout>${sheetId}.sheet-open`)).toHaveCount(0);
+   await expect(scrim).toHaveCount(0);
+  }
+ });
+}
+
+test('the landscape scrim covers the canvas beside an open sheet and closes it when tapped',async({page})=>{
+ await openEditor(page,...LANDSCAPE,'en');
+ await page.locator('#layersBtn').click();
+ await expect(page.locator('#layersSheet')).toHaveClass(/sheet-open/);
+ const box=await page.locator('.sheet-scrim').boundingBox();
+ expect(box.x).toBe(64);
+ expect(box.x+box.width).toBeCloseTo(LANDSCAPE[0],0);
+ await page.locator('.sheet-scrim').click({position:{x:200,y:150}});
+ await expect(page.locator('.layout>#layersSheet.sheet-open')).toHaveCount(0);
+});
