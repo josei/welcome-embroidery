@@ -1,6 +1,7 @@
 import {layoutState} from '../layoutState.js';
 import {inspectorOpenState, toggleInspectorOpen, TABLET_DRAWER_QUERY} from '../inspectorOpenState.js';
-import {closePhoneSheet, phoneSheetState, togglePhoneSheet} from '../phoneSheetState.js';
+import {closePhoneSheet, isPhoneSheetLayout, phoneSheetDetent, phoneSheetState, togglePhoneSheet} from '../phoneSheetState.js';
+import {attachSheetDrag, firstSheetControl} from '../phoneSheetDrag.js';
 import {selectionLabelsState} from '../selectionLabelsState.js';
 import {t} from '../i18n.js';
 import {designName} from '../designName.js';
@@ -10,7 +11,7 @@ import {shortcutLabel} from '../shortcutLabels.js';
 import {shortcutFor} from '../shortcutTable.js';
 import {CanvasTextEditor} from './CanvasTextEditor';
 import {PreviewPanel} from './PreviewPanel';
-import {useRef, useState, useSyncExternalStore} from 'react';
+import {useEffect, useRef, useState, useSyncExternalStore} from 'react';
 import {SelectionHint} from './SelectionHint';
 import {CanvasHint} from './CanvasHint';
 import {ActionButton} from './ActionButton';
@@ -80,6 +81,7 @@ export function EditorLayout() {
  const layout = useSyncExternalStore(layoutState.subscribe, layoutState.get);
  const inspectorOpen = useSyncExternalStore(inspectorOpenState.subscribe, inspectorOpenState.get);
  const phoneSheet = useSyncExternalStore(phoneSheetState.subscribe, phoneSheetState.get);
+ const detent = useSyncExternalStore(phoneSheetDetent.subscribe, phoneSheetDetent.get);
  const selectionLabels = useSyncExternalStore(selectionLabelsState.subscribe, selectionLabelsState.get);
  const view = useSyncExternalStore(viewMode.subscribe, viewMode.get);
  const snapping = useSyncExternalStore(gridSnapState.subscribe, gridSnapState.get);
@@ -87,12 +89,34 @@ export function EditorLayout() {
  const hand = useSyncExternalStore(handModeState.subscribe, handModeState.get);
  const panning = useSyncExternalStore(panningState.subscribe, panningState.get);
  const deletingGuide = useSyncExternalStore(deletingGuideState.subscribe, deletingGuideState.get);
+ // The sheets' asides: a portrait sheet can be dragged by its grab handle or title row (phoneSheetDrag.ts).
+ const layersSheet = useRef<HTMLElement>(null);
+ const inspectorSheet = useRef<HTMLElement>(null);
+ useEffect(() => {
+  const detach = [layersSheet.current, inspectorSheet.current].map(el => el && attachSheetDrag(el));
+  return () => detach.forEach(off => off?.());
+ }, []);
+ // Issue #473: an open sheet takes focus on its first control, and Escape closes it. Closing returns focus to the opener (closePhoneSheet).
+ useEffect(() => {
+  if (phoneSheet === 'none') return;
+  const sheet = document.getElementById(phoneSheet === 'layers' ? 'layersSheet' : 'inspector');
+  if (sheet) firstSheetControl(sheet)?.focus();
+  const escape = (e: KeyboardEvent) => {
+   if (e.key !== 'Escape' || e.defaultPrevented || !isPhoneSheetLayout()) return;
+   e.preventDefault();
+   closePhoneSheet();
+  };
+  document.addEventListener('keydown', escape);
+  return () => document.removeEventListener('keydown', escape);
+ }, [phoneSheet]);
  const canvasClass = ['canvas', hand && 'hand', snapping && 'snapping', view === 'preview' && 'preview-mode', panning && 'panning',
   deletingGuide && 'deleting-guide'].filter(Boolean).join(' ');
  return (
   <>
     <div className={"layout"}>
-      <aside className={phoneSheet === 'layers' ? "panel sheet-open" : "panel"} id={"layersSheet"} aria-label={t('Objects')}>
+      {phoneSheet === 'none' ? null : <div className={"sheet-scrim"} aria-hidden={"true"} onClick={closePhoneSheet} />}
+      <aside ref={layersSheet} className={phoneSheet === 'layers' ? "panel sheet-open" : "panel"} data-detent={detent} id={"layersSheet"} aria-label={t('Objects')}>
+        <div className={"sheet-grip"} data-sheet-drag={""} aria-hidden={"true"} />
         <ObjectListHead />
         <label className={"sides-row"} hidden={true}>
           {"Sides / star points "}
@@ -107,6 +131,15 @@ export function EditorLayout() {
           if (inspectorOpen && window.matchMedia(TABLET_DRAWER_QUERY).matches && !(e.target as Element).closest('button,input,select,textarea,label,a')) toggleInspectorOpen();
         }}>
           <div className={"tool-row tool-rail"} aria-label={"Tools"} ref={toolRailRef}>
+            {/* Issue #473: on a phone the dock (portrait) or rail (landscape) opens Layers and Properties as sheets. */}
+            <button type="button" className={"icon-button phone-sheet-btn"} id={"layersBtn"} aria-label={t('Layers')} title={t('Layers')} data-tooltip={t('Layers')}
+             aria-expanded={phoneSheet === 'layers'} aria-controls={"layersSheet"} onClick={() => togglePhoneSheet('layers')}>
+             <svg className={"icon"}><use href={"#i-layers"} /></svg>
+            </button>
+            <button type="button" className={"icon-button phone-sheet-btn"} id={"propertiesBtn"} aria-label={t('Properties')} title={t('Properties')} data-tooltip={t('Properties')}
+             aria-expanded={phoneSheet === 'properties'} aria-controls={"inspector"} onClick={() => togglePhoneSheet('properties')}>
+             <svg className={"icon"}><use href={"#i-sliders"} /></svg>
+            </button>
             <SelectTool />
             <AddShapeButton kind={"rect"} id={"rect"} label={"Add rectangle"} icon={"rect"} tip={t('Add rectangle ({shortcut})', {shortcut: shortcutFor('rect')})} />
             <AddShapeButton kind={"ellipse"} id={"ellipse"} label={"Add ellipse"} icon={"ellipse"} tip={t('Add ellipse ({shortcut})', {shortcut: shortcutFor('ellipse')})} />
@@ -267,23 +300,19 @@ export function EditorLayout() {
           </svg>
           <CanvasTextEditor />
         </div>
-        <div className={"sheet-bar"}>
-          <button type="button" aria-expanded={phoneSheet === 'layers'} aria-controls={"layersSheet"} onClick={() => togglePhoneSheet('layers')}>{t('Layers')}</button>
-          <button type="button" aria-expanded={phoneSheet === 'properties'} aria-controls={"inspector"} onClick={() => togglePhoneSheet('properties')}>{t('Properties')}</button>
-        </div>
         <footer>
           <ToastStack />
           <PlaybackBar />
           <StatusRun />
         </footer>
       </main>
-      <aside className={[inspectorOpen ? "panel" : "panel inspector-collapsed", phoneSheet === 'properties' && 'sheet-open'].filter(Boolean).join(' ')} id={"inspector"} aria-label={t('Properties')}>
+      <aside ref={inspectorSheet} className={[inspectorOpen ? "panel" : "panel inspector-collapsed", phoneSheet === 'properties' && 'sheet-open'].filter(Boolean).join(' ')} id={"inspector"} data-detent={detent} aria-label={t('Properties')}>
+        <div className={"sheet-grip"} data-sheet-drag={""} aria-hidden={"true"} />
         <div className={"drawer-head"}>
           <button type="button" className={"drawer-close"} onClick={toggleInspectorOpen}>{t('Close')}</button>
         </div>
-        <div className={"sheet-head"}>
-          <button type="button" className={"sheet-switch"} onClick={() => togglePhoneSheet('layers')}>{t('Layers')}</button>
-          <button type="button" className={"sheet-close"} onClick={closePhoneSheet}>{t('Close')}</button>
+        <div className={"sheet-head"} data-sheet-drag={""}>
+          <h2 className={"sheet-title"}>{t('Properties')}</h2>
         </div>
         <SelectionHeading />
         <TipCard />

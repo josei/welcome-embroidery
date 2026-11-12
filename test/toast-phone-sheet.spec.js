@@ -8,7 +8,7 @@ test('a toast does not cover the Layers and Properties buttons at 390x844 with L
  const errors=[];page.on('pageerror',e=>errors.push(e.message));
  await page.setViewportSize({width:390,height:844});
  await page.goto('/?lang=en');
- await page.locator('.sheet-bar button').nth(0).click();
+ await page.locator('#layersBtn').click();
  await expect(page.locator('#layersSheet')).toHaveClass(/sheet-open/);
  // An invalid machine file raises an error toast.
  await page.locator('#machineFile').setInputFiles({name:'broken.jef',mimeType:'application/octet-stream',buffer:Buffer.from([1,2,3])});
@@ -17,7 +17,7 @@ test('a toast does not cover the Layers and Properties buttons at 390x844 with L
  const tb=await toast.boundingBox();
  expect(tb,'toast box').not.toBeNull();
  // Every sheet button is laid out; none may intersect the toast box.
- const buttons=page.locator('.sheet-bar button');
+ const buttons=page.locator('.phone-sheet-btn');
  for(let i=0;i<await buttons.count();i++){
   const b=await buttons.nth(i).boundingBox();
   const ox=Math.min(tb.x+tb.width,b.x+b.width)-Math.max(tb.x,b.x);

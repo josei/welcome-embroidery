@@ -1,4 +1,5 @@
 import {useEffect, useRef, useState, useSyncExternalStore} from 'react';
+import {closePhoneSheet} from '../phoneSheetState.js';
 import {flushSync} from 'react-dom';
 import type {KeyboardEvent as ReactKeyboardEvent} from 'react';
 import {actionState} from '../actionState.js';
@@ -72,7 +73,8 @@ function Dropdown({id, label, rows}: {id: string; label: string; rows: Row[]}) {
   document.addEventListener('keydown', escape);
   return () => { document.removeEventListener('pointerdown', away); document.removeEventListener('keydown', escape); };
  }, [open]);
- const openWith = (where: 'first' | 'last' | null) => { focusOnOpen.current = where; setOpen(true); };
+ // Issue #473: opening a menu closes any phone sheet (Layers or Properties), so only one of them is ever open.
+ const openWith = (where: 'first' | 'last' | null) => { closePhoneSheet(); focusOnOpen.current = where; setOpen(true); };
  // Runs an item: the menu closes and focus goes back to the header, so keyboard users stay where they were.
  const choose = (row: Entry) => { setOpen(false); trigger.current?.focus(); row.run(); };
  function onKeyDown(e: ReactKeyboardEvent) {

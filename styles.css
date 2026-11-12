@@ -467,28 +467,57 @@ input[aria-invalid="true"]{border-color:var(--warn)!important;background:var(--w
 .layout>aside.panel:first-child>.layers-head{padding:0 10px}
 }
 
-/* Issue #441: at phone widths (600px and narrower) Layers and Properties are bottom sheets, each 50% of the screen tall, opened from the
-   Layers and Properties buttons under the canvas. Only one is open at a time, and the canvas stays visible above it (at least 30% of the
-   screen). The sheets scroll inside themselves and have a Close button. The sheet buttons and close buttons are hidden at wider widths. */
-.sheet-bar,.sheet-head,.sheet-close,.sheet-switch{display:none}
-@media (max-width:600px){
-.sheet-bar{display:flex;gap:8px;padding:8px 10px;background:#fff;border-top:1px solid #e3e6e1}
-.sheet-bar button{flex:1 1 0;min-height:40px;border:1px solid var(--field-line);border-radius:8px;background:#fff;color:#3c423e;font:inherit;font-size:var(--fs-body);font-weight:var(--fw-emphasis);cursor:pointer}
-.sheet-bar button[aria-expanded=true]{background:var(--teal-soft);border-color:var(--teal);color:var(--teal-deep)}
-/* Issue #461: the sheet bar (57px: 40px buttons, 8px padding, 1px border) sits directly above the footer, so the toast stack clears it
-   by that height plus its 10px gap. The toast then never covers Layers or Properties. The open sheet is z-index 40, so the toast
-   lifts above it (50) to stay readable while a sheet is open. */
-#toast{margin-bottom:67px;z-index:50}
-.sheet-bar button:focus-visible,.sheet-close:focus-visible,.sheet-switch:focus-visible{outline:2px solid var(--teal);outline-offset:2px}
-.sheet-close{display:inline-flex;align-items:center;justify-content:center;flex:none;min-width:40px;min-height:40px;padding:0 12px;margin-left:0;border:1px solid var(--field-line);border-radius:8px;background:#fff;color:#3c423e;font:inherit;font-size:var(--fs-body);cursor:pointer}
-.sheet-head{display:flex;justify-content:flex-end;gap:8px;margin:0 0 4px}
-.sheet-head .sheet-switch{margin-left:auto}
-.layers-head .sheet-close{margin-left:0}
-.sheet-switch{display:inline-flex;align-items:center;justify-content:center;min-height:40px;padding:0 12px;border:1px solid var(--field-line);border-radius:8px;background:#fff;color:#3c423e;font:inherit;font-size:var(--fs-body);font-weight:var(--fw-emphasis);cursor:pointer}
-.sheet-switch:focus-visible{outline:2px solid var(--teal);outline-offset:2px}
-.layout>aside.panel:first-child,.layout>.panel:last-child{display:none}
-.layout>aside.panel:first-child.sheet-open,.layout>.panel:last-child.sheet-open{display:flex;flex-direction:column;position:fixed;left:0;right:0;bottom:0;z-index:40;width:auto;height:50vh;height:50dvh;margin:0;padding:10px 12px 16px;overflow-y:auto;overscroll-behavior:contain;background:#fff;border:0;border-radius:14px 14px 0 0;box-shadow:0 -6px 24px #1d292533}
-.layout>.panel.sheet-open.inspector-collapsed:last-child{display:flex}
+/* Issue #473: at phone size (portrait 600 px and narrower, or a landscape phone) Layers and Properties are sheets. They open from the
+   Layers and Properties buttons at the start of the dock (portrait) or the rail (landscape), and only one is open at a time. Neither
+   sheet has a Close button. A sheet closes by a downward drag on its grab handle or title row (portrait), a tap on the dimmed area,
+   Escape, or the system back action (MenuBar opening closes them too; see phoneSheetState.ts). Portrait sheets have three detents:
+   peek (120 px), half (50%, where a dock open starts) and full (below the 48 px top bar). Landscape sheets are 320 px on the right.
+   Desktop and tablet never show these parts. Undo: restore the Issue #441 block and the sheet-bar in EditorLayout. */
+.phone-sheet-btn,.sheet-grip,.sheet-head,.sheet-scrim{display:none}
+.sheet-title{margin:0;font-size:var(--fs-heading);font-weight:var(--fw-emphasis);color:#1d211f}
+@media (max-width:600px) and (orientation:portrait){
+.phone-sheet-btn{display:inline-flex;align-items:center;justify-content:center;flex:none;width:44px;min-width:44px;height:44px;min-height:44px;padding:0;border:1px solid var(--field-line);border-radius:10px;background:#fff;color:#4d5a54;cursor:pointer}
+.phone-sheet-btn[aria-expanded=true]{background:var(--teal-soft);border-color:var(--teal);color:var(--teal-deep)}
+.phone-sheet-btn .icon{width:20px;height:20px}
+.sheet-scrim{display:block;position:fixed;left:0;right:0;bottom:0;top:48px;z-index:39;background:#1d292538}
+.layout>aside.panel:not(.sheet-open){display:none}
+.layout>aside.panel.sheet-open{display:flex;flex-direction:column;position:fixed;left:0;right:0;bottom:0;z-index:40;width:auto;height:50vh;height:50dvh;margin:0;padding:0 12px 16px;overflow-y:auto;overscroll-behavior:contain;background:#fff;border:0;border-radius:14px 14px 0 0;box-shadow:0 -6px 24px #1d292533;transition:height .2s ease,transform .2s ease}
+.layout>aside.panel.sheet-open[data-dragging]{transition:none}
+.layout>aside.panel.sheet-open[data-detent=peek]{height:120px}
+.layout>aside.panel.sheet-open[data-detent=full]{height:calc(100vh - 48px);height:calc(100dvh - 48px)}
+.sheet-grip{display:block;position:relative;flex:none;height:24px;margin:0 -12px;touch-action:none;cursor:grab}
+.sheet-grip::before{content:"";position:absolute;left:50%;top:9px;width:36px;height:5px;margin-left:-18px;border-radius:3px;background:#c4cbc6}
+.sheet-head,.layers-head[data-sheet-drag]{touch-action:none}
+.sheet-head{display:flex;align-items:center;min-height:44px;margin:0 0 4px}
+.layout .layers-head .inspector-toggle{display:none}
+.layout>.panel.sheet-open.inspector-collapsed{display:flex}
+.phone-sheet-btn:focus-visible,.sheet-title:focus-visible{outline:2px solid var(--teal);outline-offset:2px}
+#toast{z-index:50}
+}
+/* Issue #473: every control in an open phone sheet is at least 44x44 CSS px (the touch target size). A checkbox keeps its 24 px box
+   inside its 44 px label row, which is the control that is pressed (the same rule as #453 uses for the page). */
+@media (max-width:600px) and (orientation:portrait),(max-height:500px) and (pointer:coarse){
+.layout>aside.panel.sheet-open button,.layout>aside.panel.sheet-open .row-btn,.layout>aside.panel.sheet-open .row-eye,.layout>aside.panel.sheet-open .row-lock{min-width:44px;min-height:44px!important}
+.layout>aside.panel.sheet-open .row-btn,.layout>aside.panel.sheet-open .row-eye,.layout>aside.panel.sheet-open .row-lock{width:44px;height:44px}
+.layout>aside.panel.sheet-open select,.layout>aside.panel.sheet-open input:not([type=checkbox]):not(.sr-only){min-height:44px}
+.layout>aside.panel.sheet-open summary{min-height:44px;display:flex;align-items:center}
+.layout>aside.panel.sheet-open label:has(>input[type=checkbox]){min-height:44px;display:flex;align-items:center}
+.layout>aside.panel.sheet-open .reset-default{width:44px;height:44px}
+}
+/* Landscape phones (a coarse pointer, 500 px tall or less): the dock's buttons sit in the rail, and each sheet is 320 px wide on the
+   right of the screen with no grab handle. The canvas keeps the rest of the width until a sheet is open. */
+@media (max-height:500px) and (pointer:coarse){
+.phone-sheet-btn{display:inline-flex;align-items:center;justify-content:center;flex:none;width:44px;min-width:44px;height:44px;min-height:44px;padding:0;border:1px solid var(--field-line);border-radius:10px;background:#fff;color:#4d5a54;cursor:pointer}
+.phone-sheet-btn[aria-expanded=true]{background:var(--teal-soft);border-color:var(--teal);color:var(--teal-deep)}
+.phone-sheet-btn .icon{width:20px;height:20px}
+.sheet-scrim{display:block;position:fixed;left:0;right:0;bottom:0;top:58px;z-index:39;background:#1d292538}
+.layout{grid-template-columns:minmax(0,1fr)}
+.layout>aside.panel:not(.sheet-open){display:none}
+.layout>aside.panel.sheet-open{display:flex;flex-direction:column;position:fixed;top:0;bottom:0;left:auto;right:0;z-index:40;width:320px;height:auto;margin:0;padding:6px 12px 12px;overflow-y:auto;overscroll-behavior:contain;background:#fff;border:0;border-left:1px solid #e3e6e1;border-radius:0;box-shadow:-6px 0 24px #1d292533}
+.layout>aside.panel.sheet-open.inspector-collapsed{display:flex}
+.sheet-head{display:flex;align-items:center;min-height:44px;margin:0 0 4px}
+.layout .layers-head .inspector-toggle{display:none}
+.phone-sheet-btn:focus-visible,.sheet-title:focus-visible{outline:2px solid var(--teal);outline-offset:2px}
 }
 
 .field-note{display:block;font-size:var(--fs-caption);line-height:1.4;color:var(--mute-text)}
@@ -597,8 +626,6 @@ input[type=checkbox]:not(.icon-check){width:24px;height:24px;min-width:24px;marg
 .canvas .floating #grid{grid-column:span 2;width:100%;height:44px}
 .messages-btn{min-height:44px;padding:0 12px}
 .segmented button[data-view]{min-height:44px}
-.sheet-bar button,.sheet-switch,.sheet-close{min-height:44px}
-.sheet-close{min-width:44px}
 }
 @media (max-width:600px){
 .canvas .floating .grid-chip{width:44px;min-width:44px;height:44px;min-height:44px;grid-column:span 2}
@@ -670,7 +697,6 @@ input[type=checkbox]:not(.icon-check){width:24px;height:24px;min-width:24px;marg
 .layout main{--phone-foot:56px;position:absolute;top:48px;left:0;right:0;bottom:0;display:flex;flex-direction:column;min-height:0;width:auto;order:0}
 .layout main:not(.design-view){--phone-foot:100px}
 .layout main>.canvas{flex:none;height:calc(100vh - 48px - var(--phone-foot) - 192px);height:calc(100dvh - 48px - var(--phone-foot) - 192px);min-height:0}
-.layout main>.sheet-bar{position:fixed;left:0;right:0;bottom:calc(var(--phone-foot) + 140px);z-index:6;display:flex;height:52px;margin:0;padding:4px 8px;gap:8px;border-top:1px solid #e3e6e1;background:#fff}
 .layout main>footer{position:relative;flex:none;margin-top:auto;height:var(--phone-foot);min-height:0;padding:6px 12px;align-content:center;align-items:center;overflow:visible}
 .layout main>footer>.playback-bar{flex:1 1 100%;height:48px}
 .canvas .zoombar{position:fixed;left:0;right:0;top:auto;bottom:calc(var(--phone-foot) + 96px);z-index:6;width:auto;height:44px;margin:0;padding:0 6px;justify-content:center;border:0;border-radius:0;box-shadow:none;background:#fff}

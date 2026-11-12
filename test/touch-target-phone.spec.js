@@ -76,9 +76,9 @@ for(const [w,h] of dims){
    }
    // Layers sheet, then Properties sheet (opened by selecting an object)
    await page.locator('#rect').click({timeout:5000});
-   await page.locator('.sheet-bar button').nth(0).click({timeout:5000}).catch(()=>{});
+   await page.locator('#layersBtn').click({timeout:5000}).catch(()=>{});
    if(await page.locator('.layout>aside.sheet-open').count())await check(page,`${where} sheet open`,w);
-   await page.locator('.sheet-bar button').nth(1).click({timeout:5000}).catch(()=>{});
+   await page.locator('#propertiesBtn').click({timeout:5000}).catch(()=>{});
    if(await page.locator('.layout>aside.sheet-open').count())await check(page,`${where} properties sheet open`,w);
    await check(page,`${where} canvas with a selection`,w);
    expect(errors).toEqual([]);

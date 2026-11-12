@@ -352,6 +352,17 @@ export function EditorIcons() {
           <circle cx={"12"} cy={"12"} r={"1.600"} fill={"currentColor"} />
         </symbol>
         {" "}
+        <symbol id={"i-layers"} viewBox={"0 0 24 24"}>
+          <path d={"M12 3 3 8l9 5 9-5zM3 12.5l9 5 9-5M3 17l9 5 9-5"} />
+        </symbol>
+        {" "}
+        <symbol id={"i-sliders"} viewBox={"0 0 24 24"}>
+          <path d={"M4 6h10M18 6h2M4 12h2M10 12h10M4 18h12M20 18h0"} />
+          <circle cx={"16"} cy={"6"} r={"2"} />
+          <circle cx={"8"} cy={"12"} r={"2"} />
+          <circle cx={"18"} cy={"18"} r={"2"} />
+        </symbol>
+        {" "}
         <symbol id={"i-keys"} viewBox={"0 0 24 24"}>
           <rect x={"3"} y={"6"} width={"18"} height={"12"} rx={"2"} />
           <path d={"M7 10h.01M11 10h.01M15 10h.01M7 14h10"} />

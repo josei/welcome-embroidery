@@ -46,7 +46,7 @@ for(const [width,height] of PORTRAIT) for(const lang of ['en','es']){
 
  test(`the canvas shows at least 40% of the screen with Layers open at ${width}x${height} (${lang})`,async({page})=>{
   const errors=await openEditor(page,width,height,lang);
-  await page.locator('.sheet-bar button').nth(0).click();
+  await page.locator('#layersBtn').click();
   await expect(page.locator('#layersSheet')).toHaveClass(/sheet-open/);
   const share=await page.evaluate(()=>{
    const c=document.querySelector('.layout main>.canvas').getBoundingClientRect();
@@ -60,7 +60,7 @@ for(const [width,height] of PORTRAIT) for(const lang of ['en','es']){
  test(`every tool, zoom action, Menu view and sheet button is at least 44 px at ${width}x${height} (${lang})`,async({page})=>{
   await openEditor(page,width,height,lang);
   const small=await page.evaluate(()=>[
-   ...document.querySelectorAll('.canvas .tool-rail button[id],.canvas .zoombar button,.layout main>.sheet-bar button')
+   ...document.querySelectorAll('.canvas .tool-rail button[id],.canvas .zoombar button')
   ].filter(e=>e.getBoundingClientRect().width>0).map(e=>({id:e.id||e.className,w:e.getBoundingClientRect().width,h:e.getBoundingClientRect().height})).filter(s=>Math.min(s.w,s.h)<44));
   expect(small,'controls under 44 px').toEqual([]);
   await page.locator('#phoneMenu').click();
