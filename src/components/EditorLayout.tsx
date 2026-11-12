@@ -1,5 +1,5 @@
 import {layoutState} from '../layoutState.js';
-import {inspectorOpenState} from '../inspectorOpenState.js';
+import {inspectorOpenState, toggleInspectorOpen, TABLET_DRAWER_QUERY} from '../inspectorOpenState.js';
 import {closePhoneSheet, phoneSheetState, togglePhoneSheet} from '../phoneSheetState.js';
 import {selectionLabelsState} from '../selectionLabelsState.js';
 import {t} from '../i18n.js';
@@ -89,7 +89,10 @@ export function EditorLayout() {
         <HoopFields />
       </aside>
       <main className={view === 'design' ? 'design-view' : undefined}>
-        <div className={canvasClass}>
+        <div className={canvasClass} onClick={(e) => {
+          // Issue #455: on a portrait tablet a tap on the canvas closes the Properties drawer (controls inside the canvas keep it open).
+          if (inspectorOpen && window.matchMedia(TABLET_DRAWER_QUERY).matches && !(e.target as Element).closest('button,input,select,textarea,label,a')) toggleInspectorOpen();
+        }}>
           <div className={"tool-row tool-rail"} aria-label={"Tools"}>
             <SelectTool />
             <AddShapeButton kind={"rect"} id={"rect"} label={"Add rectangle"} icon={"rect"} tip={t('Add rectangle ({shortcut})', {shortcut: shortcutFor('rect')})} />
@@ -248,6 +251,9 @@ export function EditorLayout() {
         </footer>
       </main>
       <aside className={[inspectorOpen ? "panel" : "panel inspector-collapsed", phoneSheet === 'properties' && 'sheet-open'].filter(Boolean).join(' ')} id={"inspector"} aria-label={t('Properties')}>
+        <div className={"drawer-head"}>
+          <button type="button" className={"drawer-close"} onClick={toggleInspectorOpen}>{t('Close')}</button>
+        </div>
         <div className={"sheet-head"}>
           <button type="button" className={"sheet-switch"} onClick={() => togglePhoneSheet('layers')}>{t('Layers')}</button>
           <button type="button" className={"sheet-close"} onClick={closePhoneSheet}>{t('Close')}</button>

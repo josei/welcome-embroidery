@@ -20,7 +20,8 @@ for(const width of [1920,1024,760]){
   };
   // The object list heading and the list below it.
   await expectAligned(page.locator('.layers-head'),page.locator('#objects'),`layers head at ${width}px`);
-  // The inspector: its heading and the Sewing order fold line up with the inspector's body text.
+  // The inspector: its heading and the Sewing order fold line up with the inspector's body text. A portrait tablet starts with it closed (#455), so open it first.
+  if(await page.locator('#inspector').isHidden())await page.locator('.inspector-toggle').click();
   await expectAligned(page.locator('#selected'),page.locator('#stats'),`inspector heading at ${width}px`);
   await expectAligned(page.locator('#secOrder > summary'),page.locator('#stats'),`sewing order header at ${width}px`);
   expect(errors).toEqual([]);

@@ -55,6 +55,8 @@ for(const [w,h] of viewports){
    // Layers is the object list, always open at this width. Selecting an object opens Properties in the inspector.
    await expect(page.locator('#objects')).toBeVisible();
    await page.locator('#rect').click();
+   // A portrait tablet folds Properties away when it starts (#455): open it from the Properties button, which swaps with the object list.
+   if(await page.locator('#inspector').isHidden())await page.locator('.inspector-toggle').click();
    await expect(page.locator('#stats')).toBeVisible();
    const o=await overflowOf(page);
    expect(o.scrollWidth,`scrollWidth with Layers and Properties open at ${w}x${h} ${lang}: ${o.out.join('; ')}`).toBeLessThanOrEqual(o.innerWidth);
