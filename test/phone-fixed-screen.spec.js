@@ -2,7 +2,7 @@ import {test,expect} from '@playwright/test';
 
 // At phone portrait (390x844) the screen is one fixed layout. The page never
 // scrolls; the top bar is 52 px; the canvas fills the rest and is the only pannable part; the contextual bar (52 px) shows only with a
-// selection; the tool dock is 56 px; the status line is 28 px; the zoom buttons are a vertical stack inside the canvas's bottom right.
+// selection; the tool dock is 56 px; the status line is 28 px; the zoom bar is the desktop's horizontal bar at the canvas's bottom left.
 // Every visible control is at least 44x44 CSS px, and no two of the screen's regions overlap. The screenshots go to the artifacts
 // folder of the turn when ARTIFACTS is set.
 const SCREEN=[390,844];
@@ -82,14 +82,16 @@ for(const lang of ['en','es']){
   expect(errors).toEqual([]);
  });
 
- test(`the zoom buttons are a vertical stack at the canvas's bottom right at 390x844 (${lang})`,async({page})=>{
+ test(`the zoom bar is the desktop's horizontal bar at the canvas's bottom left at 390x844 (${lang})`,async({page})=>{
   await openEditor(page,lang);
   const g=await regions(page);
-  const ids=['zoomIn','zoomOut','zoomFit'];
+  const ids=['zoomOut','zoomPct','zoomIn','handTool','zoomFit','zoomAll'];
   const boxes=await Promise.all(ids.map(id=>page.locator(`#${id}`).boundingBox()));
-  for(let i=1;i<3;i++){expect(Math.abs(boxes[i].x-boxes[0].x),'stacked in one column').toBeLessThan(1);expect(boxes[i].y,'stacked downward').toBeGreaterThan(boxes[i-1].y);}
-  expect(boxes[2].x+boxes[2].width,'right edge 12 px from the canvas').toBeCloseTo(g.canvas.r-12,0);
-  expect(boxes[2].y+boxes[2].height,'bottom edge 12 px from the canvas').toBeCloseTo(g.canvas.b-12,0);
+  for(let i=1;i<ids.length;i++){expect(Math.abs(boxes[i].y-boxes[0].y),`${ids[i]} on the same row`).toBeLessThan(1);expect(boxes[i].x,`${ids[i]} after ${ids[i-1]}`).toBeGreaterThan(boxes[i-1].x);}
+  const bar=await page.locator('.canvas .zoombar').boundingBox();
+  expect(bar.x,'bar left edge 8 px from the canvas').toBeCloseTo(g.canvas.x+8,0);
+  expect(bar.y+bar.height,'bar bottom edge 8 px from the canvas').toBeCloseTo(g.canvas.b-8,0);
+  for(const b of boxes) expect(b.height,'zoom button is 44 px tall').toBeGreaterThanOrEqual(44);
  });
 }
 

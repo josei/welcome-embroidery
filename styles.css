@@ -946,3 +946,22 @@ body{height:100dvh;min-height:0;overflow:hidden}
 .arrange-item .icon{flex:none;width:20px;height:20px}
 /* The contextual bar stays hidden without a selection at every size below desktop. */
 .canvas .floating[hidden]{display:none}
+
+/* Phone and tablet use the desktop's Export split, zoom bar and dialog controls rather than a stack of large white squares or a
+   separate filled button. Touch sizes stay at 44 px: the Export pill keeps its 44 px header height and the desktop's radius,
+   type and padding; the zoom bar is the desktop's horizontal bar, with its own border, radius and type, and every button in it
+   is 44 px tall. Below 1025 px wide only. */
+@media (max-width:1024px){
+.top .export-split>#export{padding:0 14px;font-size:var(--fs-body);font-weight:var(--fw-emphasis)}
+.canvas .zoombar{left:8px;right:auto;top:auto;bottom:8px;display:flex;flex-direction:row;align-items:center;justify-content:flex-start;gap:2px;width:auto;height:auto;margin:0;padding:0 4px;border:1px solid var(--field-line);border-radius:10px;background:#fff;box-shadow:0 4px 16px #1d292514}
+.canvas .zoombar>button{width:auto;min-width:44px;height:44px;min-height:44px;padding:0 7px;border:0;border-radius:8px;background:transparent;box-shadow:none;font-size:var(--fs-caption);color:#53635b}
+.canvas .zoombar .icon-button{width:44px;min-width:44px;padding:0}
+.canvas .zoombar #zoomAll{min-width:44px}
+.canvas .zoombar #zoomPct,.canvas .zoombar #handTool,.canvas .zoombar #zoomAll,.canvas .zoombar .sep{display:revert}
+.canvas .zoombar #zoomIn,.canvas .zoombar #zoomOut,.canvas .zoombar #zoomFit{order:0}
+.canvas .zoombar .sep{width:1px;height:18px;background:#e3e6e1;margin:0 2px;padding:0}
+.canvas .zoombar .zoom-text{font-size:var(--fs-caption)}
+.canvas .zoombar .zoom-fit-icon{display:none}
+/* On a tablet the tool rail sits over the canvas's left edge, so the zoom bar starts to its right, as it does on desktop. */
+@media (min-width:601px){.canvas .zoombar{left:72px}}
+}
