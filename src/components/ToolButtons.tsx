@@ -22,6 +22,16 @@ function DrawTool({tool, id, icon, label, tip}: {tool: DrawToolName; id: string;
  );
 }
 
+// A tool-row button that opens a panel or dialog rather than arming a drawing tool. It is the same icon-button the tool rows use, so it
+// takes the same colours, hover and focus styles wherever it is shown.
+export function RailButton({id, icon, label, tip, onClick, pressed}: {id: string; icon: string; label: string; tip: string; onClick: () => void; pressed?: boolean}) {
+ return (
+  <button type={"button"} className={"icon-button"} id={id} aria-label={tip} title={tip} data-tooltip={tip} aria-pressed={pressed} onClick={onClick}>
+   <svg className={"icon"}><use href={`#i-${icon}`}/></svg><span className={"rail-label"}>{label}</span>
+  </button>
+ );
+}
+
 export function LineTool() {
  return <DrawTool tool="line" id="line" icon="line" label={t('Line')} tip={t('Line ({shortcut}, drag)', {shortcut: shortcutFor('line')})} />;
 }

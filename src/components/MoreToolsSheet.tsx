@@ -4,12 +4,13 @@ import {closePhoneSheet, openPhoneSheet, type SheetDetent} from '../phoneSheetSt
 import {setTraceDialogOpen} from '../traceDialogState.js';
 import {shortcutFor} from '../shortcutTable.js';
 import {PhotoStitch} from './PhotoStitch';
-import {AddShapeButton, PenTool, PolygonTool, StarTool} from './ToolButtons';
+import {AddShapeButton, PenTool, PolygonTool, RailButton, StarTool} from './ToolButtons';
 
 // At phone portrait the tool dock holds seven buttons on one row, and More tools
-// opens this one sheet. Its two groups are Tools (the drawing and tracing tools that do not fit the dock) and Panels (Layers and
-// Properties, which are sheets of their own). A tool closes the sheet when it is pressed; a panel swaps the sheet for its own.
-// Rendered only at phone portrait, where styles.css shows it as a bottom sheet.
+// opens this one panel. Its two groups are Tools (the drawing and tracing tools that do not fit the dock) and Panels (Layers and
+// Properties, which are panels of their own). A tool closes the panel when it is pressed; a panel swaps it for its own.
+// It has the product panel's header and a Close button, not a native-style grab handle. Rendered only at phone portrait and
+// landscape, where styles.css shows it over the dimmed canvas.
 export function MoreToolsSheet({asideRef, open, detent}: {asideRef: RefObject<HTMLElement | null>; open: boolean; detent: SheetDetent}) {
  // A tool button inside the Tools group closes the sheet after its own click handler has run.
  const closeAfterTool = (event: MouseEvent<HTMLDivElement>) => {
@@ -17,30 +18,23 @@ export function MoreToolsSheet({asideRef, open, detent}: {asideRef: RefObject<HT
  };
  return (
   <aside ref={asideRef} id={"moreToolsSheet"} className={open ? "panel sheet-open" : "panel"} data-detent={detent} aria-label={t('More tools')}>
-   <div className={"sheet-grip"} data-sheet-drag={""} aria-hidden={"true"} />
-   <div className={"sheet-head"} data-sheet-drag={""}>
+   <div className={"sheet-head"}>
     <h2 className={"sheet-title"}>{t('More tools')}</h2>
+    <button type={"button"} className={"sheet-close"} id={"moreToolsClose"} onClick={closePhoneSheet}>{t('Close')}</button>
    </div>
    <h3 className={"more-heading"}>{t('Tools')}</h3>
    <div className={"more-grid"} onClick={closeAfterTool}>
     <AddShapeButton kind={"ellipse"} id={"ellipse"} label={"Add ellipse"} icon={"ellipse"} tip={t('Add ellipse ({shortcut})', {shortcut: shortcutFor('ellipse')})} short={t('Ellipse')} />
     <PolygonTool />
     <StarTool />
-    <button type={"button"} className={"icon-button"} id={"traceBtn"} aria-label={"Trace a picture into filled shapes"} title={"Trace a picture into filled shapes"}
-     data-tooltip={"Trace a picture into filled shapes"} onClick={() => setTraceDialogOpen(true)}>
-     <svg className={"icon"}><use href={"#i-trace"} /></svg><span className={"rail-label"}>{t('Trace')}</span>
-    </button>
+    <RailButton id={"traceBtn"} icon={"trace"} label={t('Trace')} tip={t('Trace a picture into filled shapes')} onClick={() => setTraceDialogOpen(true)} />
     <PhotoStitch />
     <PenTool />
    </div>
    <h3 className={"more-heading"}>{t('Panels')}</h3>
    <div className={"more-grid"}>
-    <button type={"button"} className={"icon-button"} id={"moreLayers"} aria-label={t('Layers')} title={t('Layers')} onClick={() => openPhoneSheet('layers')}>
-     <svg className={"icon"}><use href={"#i-layers"} /></svg><span className={"rail-label"}>{t('Layers')}</span>
-    </button>
-    <button type={"button"} className={"icon-button"} id={"moreProperties"} aria-label={t('Properties')} title={t('Properties')} onClick={() => openPhoneSheet('properties')}>
-     <svg className={"icon"}><use href={"#i-sliders"} /></svg><span className={"rail-label"}>{t('Properties')}</span>
-    </button>
+    <RailButton id={"moreLayers"} icon={"layers"} label={t('Layers')} tip={t('Layers')} onClick={() => openPhoneSheet('layers')} />
+    <RailButton id={"moreProperties"} icon={"sliders"} label={t('Properties')} tip={t('Properties')} onClick={() => openPhoneSheet('properties')} />
    </div>
   </aside>
  );

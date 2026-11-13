@@ -489,7 +489,7 @@ input[aria-invalid="true"]{border-color:var(--warn)!important;background:var(--w
 .phone-sheet-btn .icon{width:20px;height:20px}
 .sheet-scrim{display:block;position:fixed;left:0;right:0;bottom:0;top:52px;z-index:39;background:#1d292538}
 .layout>aside.panel:not(.sheet-open){display:none}
-.layout>aside.panel.sheet-open{display:flex;flex-direction:column;position:fixed;left:0;right:0;bottom:0;z-index:40;width:auto;height:50vh;height:50dvh;margin:0;padding:0 12px 16px;overflow-y:auto;overscroll-behavior:contain;background:#fff;border:0;border-radius:14px 14px 0 0;box-shadow:0 -6px 24px #1d292533;transition:height .2s ease,transform .2s ease}
+.layout>aside.panel.sheet-open{display:flex;flex-direction:column;position:fixed;left:0;right:0;bottom:0;z-index:40;width:auto;height:50vh;height:50dvh;margin:0;padding:0 12px 16px;overflow-y:auto;overscroll-behavior:contain;background:#fff;border:0;border-radius:0;box-shadow:0 -6px 24px #1d292533;transition:height .2s ease,transform .2s ease}
 .layout>aside.panel.sheet-open[data-dragging]{transition:none}
 .layout>aside.panel.sheet-open[data-detent=peek]{height:120px}
 .layout>aside.panel.sheet-open[data-detent=full]{height:calc(100vh - 52px);height:calc(100dvh - 52px)}
@@ -800,9 +800,12 @@ body{height:100vh;height:100dvh;min-height:0;overflow:hidden;overscroll-behavior
 .layout main>.tool-rail .tool-more{display:flex}
 .layout>#moreToolsSheet .more-heading{margin:8px 0 6px;font-size:13px;font-weight:600;line-height:1.2;color:#66726c;white-space:nowrap}
 .layout>#moreToolsSheet .more-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
-.layout>#moreToolsSheet .more-grid .icon-button{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;width:auto;min-width:44px;height:64px;min-height:44px;padding:4px;background:#f6f7f5;border:1px solid var(--field-line);border-radius:10px;color:#3c423e}
+.layout>#moreToolsSheet .more-grid .icon-button{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;width:auto;min-width:44px;height:64px;min-height:44px;padding:4px;background:#f6f7f5;border:1px solid transparent;border-radius:8px;color:#53635b}
 .layout>#moreToolsSheet .more-grid .icon-button .icon{width:20px;height:20px;flex:none}
 .layout>#moreToolsSheet .more-grid .icon-button.active-tool{background:var(--teal-soft);border-color:var(--teal);color:var(--teal-deep)}
+#moreToolsSheet .sheet-head{justify-content:space-between}
+#moreToolsSheet .sheet-close{display:inline-flex;align-items:center;flex:0 0 auto;min-height:44px;min-width:44px;padding:3px 12px;border:1px solid var(--field-line);border-radius:6px;background:#fff;color:#4d5a54;font:inherit;font-size:var(--fs-body);cursor:pointer}
+#moreToolsSheet .sheet-close:hover{background:#eef1ec;color:var(--teal)}
 .layout>#moreToolsSheet .rail-label{display:block;max-width:100%;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;font-size:12px;line-height:1.1}
 .layout main>footer{grid-row:4;position:relative;flex:none;height:28px;min-height:0;margin:0;padding:0 12px;box-sizing:border-box;display:flex;align-items:center;gap:8px;overflow:visible;background:#fff;border:0;border-top:1px solid #e3e6e1}
 .layout main>footer>:not(#count):not(#toast){display:none}
@@ -829,7 +832,7 @@ body{height:100vh;height:100dvh;min-height:0;overflow:hidden;overscroll-behavior
 /* The More tools sheet's grid is styled for portrait (above); a landscape sheet is 320 px wide, so its tools take three columns. */
 .layout>#moreToolsSheet .more-heading{margin:8px 0 6px;font-size:13px;font-weight:600;line-height:1.2;color:#66726c;white-space:nowrap}
 .layout>#moreToolsSheet .more-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
-.layout>#moreToolsSheet .more-grid .icon-button{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;width:auto;min-width:44px;height:64px;min-height:44px;padding:4px;background:#f6f7f5;border:1px solid var(--field-line);border-radius:10px;color:#3c423e}
+.layout>#moreToolsSheet .more-grid .icon-button{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;width:auto;min-width:44px;height:64px;min-height:44px;padding:4px;background:#f6f7f5;border:1px solid transparent;border-radius:8px;color:#53635b}
 .layout>#moreToolsSheet .more-grid .icon-button .icon{width:20px;height:20px;flex:none}
 .layout>#moreToolsSheet .more-grid .icon-button.active-tool{background:var(--teal-soft);border-color:var(--teal);color:var(--teal-deep)}
 .layout>#moreToolsSheet .rail-label{display:block;max-width:100%;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;font-size:12px;line-height:1.1}
