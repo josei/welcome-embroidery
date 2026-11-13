@@ -747,6 +747,20 @@ body{height:100vh;height:100dvh;min-height:0;overflow:hidden}
    small; the element's box is the hit area. The status line grows from 28 to 44 px so the Messages button fits its height. */
 .layout main>footer{height:44px;min-height:44px}
 .layout main>footer .messages-btn{height:44px;min-height:44px;min-width:44px;padding:0 12px}
+/* In the Stitches and 3D views the playback bar takes a row of its own above the status line, so the play button, the
+   colour strip and the stitch count never sit over the zoom bar or the status text. The zoom bar stays inside the canvas,
+   whose bottom edge is now the top of the playback row. The status row keeps its 44 px height and its Messages button; a
+   long status is cut with an ellipsis inside the row instead of running past the window edge. The design view keeps its
+   single 44 px status line. */
+.layout main:not(.design-view)>footer{height:90px;min-height:90px;flex-wrap:wrap;align-content:flex-start;row-gap:0}
+.layout main:not(.design-view)>footer>.playback-bar{order:-1;flex:1 1 100%;height:45px;min-height:45px}
+/* The Messages button keeps its width on the status row, so a long status can only shrink the text beside it. */
+.layout main:not(.design-view)>footer>#messagesBtn{flex:0 0 auto;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;height:44px;min-height:44px}
+.layout main:not(.design-view)>footer>#count,.layout main:not(.design-view)>footer>#playbackProgress{flex:1 1 0;min-width:0;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+/* The time and the stitch label beside the play button are read whole rather than cut: they take their text width, and the
+   track beside them gives up the room. */
+.layout main:not(.design-view) .playback-bar .playback-time{width:auto;flex:none;overflow:visible}
+.layout main:not(.design-view) .playback-bar .playback-time span{white-space:nowrap;overflow:visible;text-overflow:clip}
 .row-btn,.row-eye,.row-lock{width:44px;min-width:44px;height:44px;min-height:44px}
 .layout .hoop-edit select,.layout .hoop-edit input:not([type=checkbox]),.layout .hoop-edit button,#hoopRotate{height:44px;min-height:44px;min-width:44px}
 .layout>#inspector button,.layout>#inspector select,.layout>#inspector input:not([type=checkbox]),.layout>#layersSheet button,.layout>#layersSheet select,.layout>#layersSheet input:not([type=checkbox]){min-height:44px}
