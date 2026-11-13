@@ -48,7 +48,7 @@ test('each command that left the bar is one tap to open the Menu and one to choo
  for(const id of ['menuCommandPalette','menuNew','menuSave','menuSaveAs','menuOpen','menuImport','menuExport','menuSettings','menuDuplicate']){
   await expect(list.locator(`#${id}`),`${id} is in the Menu`).toBeVisible();
  }
- await expect(list.locator('.menu-heading')).toHaveText(['File','Edit','View','Settings and Help']);
+ await expect(list.locator('.menu-heading')).toHaveText(['File','Edit','Arrange','View','Settings and Help']);
 
  // Open: a file chooser opens.
  await open();

@@ -98,7 +98,7 @@ test('the Menu button opens File, Edit, View and Settings and Help, and every en
  await menu.click();
  const list=page.locator('#phoneMenuList');
  await expect(list,'Menu opens').toBeVisible();
- await expect(list.locator('.menu-heading'),'the four groups').toHaveText(['File','Edit','View','Settings and Help']);
+ await expect(list.locator('.menu-heading'),'the five groups').toHaveText(['File','Edit','Arrange','View','Settings and Help']);
  const ids=await list.locator('[role="menuitem"]').evaluateAll(els=>els.map(e=>e.id));
  expect(ids,'Edit items are in the menu').toEqual(expect.arrayContaining(['menuUndo','menuCopy','menuDuplicate','menuSelectAll','menuRepeat']));
  expect(ids,'Delete and keyboard shortcuts are not listed on a phone').not.toEqual(expect.arrayContaining(['menuDelete','menuShortcuts']));

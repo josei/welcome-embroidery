@@ -303,18 +303,26 @@ export function ViewMenu() {
 }
 
 /** The phone Menu: an icon button in the top bar opens a full-height sheet. It has a
- * Command palette search field, then four groups in order, each row with an icon and a short label: File, Edit, View, and Settings
- * and Help. Keyboard shortcuts are not listed on phones. Every row runs the same command as its desktop counterpart. */
+ * Command palette search field, then the desktop menu groups in the desktop order (File, Edit, Arrange), then View, then Settings
+ * and Help. Each row has an icon and a short label. Keyboard shortcuts are not listed on phones. Every row runs the same command as its desktop counterpart. */
 const VIEW_ROWS = [
  {id: 'design', label: '2D', icon: 'i-rect'},
  {id: 'stitches', label: 'Stitches', icon: 'i-run'},
  {id: 'preview', label: '3D', icon: 'i-spiral'},
 ] as const;
 
-/** The Edit rows a phone lists: the desktop Edit menu's rows minus Delete and the palette (which the search field opens). */
+/** The Edit rows a phone lists: the desktop Edit menu's rows minus the palette (which the search field opens). */
 const PHONE_EDIT_ICONS: Record<string, string> = {
  menuUndo: 'i-undo', menuRedo: 'i-redo', menuCut: 'i-cut', menuCopy: 'i-copy', menuPaste: 'i-paste', menuDuplicate: 'i-dup',
- menuSelectAll: 'i-select-all', menuRepeat: 'i-repeat',
+ menuSelectAll: 'i-select-all', menuRepeat: 'i-repeat', menuDelete: 'i-delete',
+};
+
+/** The icon each Arrange row shows on a phone. Front and back have no sprite of their own, so they share the Arrange icon. */
+const PHONE_ARRANGE_ICONS: Record<string, string> = {
+ menuAlignLeft: 'i-al-left', menuAlignHCenter: 'i-al-hcenter', menuAlignRight: 'i-al-right', menuAlignTop: 'i-al-top',
+ menuAlignVCenter: 'i-al-vcenter', menuAlignBottom: 'i-al-bottom', menuDistributeH: 'i-dist-h', menuDistributeV: 'i-dist-v',
+ menuFlipH: 'i-flip-h', menuFlipV: 'i-flip-v', menuToFront: 'i-arrange', menuToBack: 'i-arrange',
+ menuSubtract: 'i-subtract', menuUnion: 'i-union', menuIntersect: 'i-intersect',
 };
 
 /** Where Help goes. The editor has no help pages of its own, so it opens the project's README. */
@@ -324,6 +332,8 @@ export function PhoneMenu() {
  const edit = useEditRows()
   .filter((r): r is Entry => typeof r === 'object' && 'id' in r && r.id in PHONE_EDIT_ICONS)
   .map(r => ({...r, key: undefined, icon: PHONE_EDIT_ICONS[r.id]}));
+ const arrange = useArrangeRows()
+  .map(r => typeof r === 'object' && 'id' in r ? {...r, key: undefined, icon: PHONE_ARRANGE_ICONS[r.id]} : r);
  const view = useSyncExternalStore(viewMode.subscribe, viewMode.get);
  const gridRows = useGridSnapRows();
  const sheet = useSyncExternalStore(phoneSheetState.subscribe, phoneSheetState.get);
@@ -344,6 +354,7 @@ export function PhoneMenu() {
    .map(r => ({...r, label: r.id === 'menuSave' ? t('Save') : t('Save As'), icon: 'i-save', hint: undefined})),
   {id: 'menuExport', label: t('Export'), icon: 'i-export', run: () => openExportDialog()},
   {heading: t('Edit')}, ...edit,
+  {heading: t('Arrange')}, ...arrange,
   {heading: t('View')}, ...viewRows,
   ...gridRows,
   {id: 'menuLayers', label: t('Layers'), icon: 'i-layers', hint: sheet === 'layers' ? t('Shown now') : undefined, run: () => togglePhoneSheet('layers')},

@@ -300,3 +300,12 @@ for(const lang of ['en','es']){
   expect(await row.evaluate(e=>e.scrollWidth<=e.clientWidth),`row clipped: "${await row.textContent()}"`).toBe(true);
  });
 }
+
+// The canvas gets more than half of the 390 px height, so the header, rail and status line do not take most of the screen.
+for(const lang of ['en','es']){
+ test(`the canvas takes at least half the height at 844x390 (${lang})`,async({page})=>{
+  await openEditor(page,...LANDSCAPE,lang);
+  const canvas=await page.locator('.layout main>.canvas').boundingBox();
+  expect(canvas.height/LANDSCAPE[1]).toBeGreaterThanOrEqual(0.5);
+ });
+}

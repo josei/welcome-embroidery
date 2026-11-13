@@ -1,7 +1,7 @@
 import {test,expect} from '@playwright/test';
 
 // The phone Menu is a three-line icon button in the top bar, and it opens a
-// full-height sheet with a Command palette search field and four groups (File, Edit, View, Settings and Help). Each row has an icon
+// full-height sheet with a Command palette search field and five groups (File, Edit, Arrange, View, Settings and Help). Each row has an icon
 // and a short label that stays on one line in English and Spanish, and each row is at least 44 px tall. The sheet scrolls inside
 // itself; the page does not scroll.
 const SIZES=[[390,844],[844,390]];
@@ -17,7 +17,7 @@ async function openEditor(page,width,height,lang){
 }
 
 for(const [width,height] of SIZES) for(const lang of ['en','es']){
- test(`the phone Menu is an icon button and its sheet lists the four groups at ${width}x${height} (${lang})`,async({page})=>{
+ test(`the phone Menu is an icon button and its sheet lists the five groups at ${width}x${height} (${lang})`,async({page})=>{
   const errors=await openEditor(page,width,height,lang);
   const menu=page.locator('#phoneMenu');
   await expect(menu,'the Menu control has an accessible name').toHaveAttribute('aria-label',lang==='es'?/.+/:'Menu');
@@ -32,8 +32,8 @@ for(const [width,height] of SIZES) for(const lang of ['en','es']){
   const list=page.locator('#phoneMenuList');
   await expect(list).toBeVisible();
   await expect(list.locator('.menu-heading')).toHaveText(lang==='es'
-   ? ['Archivo','Editar','Vista','Ajustes y ayuda']
-   : ['File','Edit','View','Settings and Help']);
+   ? ['Archivo','Editar','Organizar','Vista','Ajustes y ayuda']
+   : ['File','Edit','Arrange','View','Settings and Help']);
   // The search field leads, and the sheet fills the window.
   await expect(list.locator('[role="menuitem"]').first()).toHaveAttribute('id','menuCommandPalette');
   const sheet=await list.boundingBox();
@@ -50,7 +50,7 @@ for(const [width,height] of SIZES) for(const lang of ['en','es']){
    expect(row.h,`${row.id} is at least 44 px tall`).toBeGreaterThanOrEqual(44);
    expect(row.lines,`${row.id} label is one box`).toBe(1);
   }
-  for(const id of ['menuNew','menuOpen','menuImport','menuSave','menuSaveAs','menuExport','menuUndo','menuRedo','menuCut','menuCopy','menuPaste','menuDuplicate','menuSelectAll','menuRepeat','menuGrid','menuSnap','menuFitHoop','menuSettings','menuMessages','menuHelp'])
+  for(const id of ['menuNew','menuOpen','menuImport','menuSave','menuSaveAs','menuExport','menuUndo','menuRedo','menuCut','menuCopy','menuPaste','menuDuplicate','menuSelectAll','menuRepeat','menuGrid','menuSnap','menuFitHoop','menuSettings','menuMessages','menuHelp','menuAlignLeft','menuFlipH','menuToFront','menuUnion','menuDelete'])
    expect(rows.map(r=>r.id),`${id} is listed`).toContain(id);
   expect(rows.map(r=>r.id),'no keyboard-shortcut sheet row on a phone').not.toContain('menuShortcuts');
   // The sheet scrolls inside itself; the page never does.
