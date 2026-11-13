@@ -4177,12 +4177,12 @@ test('1024 px: Properties opens and folds the inspector without moving the canva
  expect(await geo()).toEqual(before);
 });
 
-test('inspector: stitch types lay out 4 + 3 and every field starts on one left edge at 1440 px',async({page})=>{
+test('inspector: stitch types lay out 3 + 3 + 1 and every field starts on one left edge at 1440 px',async({page})=>{
  await page.setViewportSize({width:1440,height:900});await page.goto('/');await newDesign(page);
  await page.locator('#rect').click();const b=await page.locator('.canvas').boundingBox();
  await page.mouse.move(b.x+b.width*.4,b.y+b.height*.4);await page.mouse.down();await page.mouse.move(b.x+b.width*.6,b.y+b.height*.6,{steps:5});await page.mouse.up();
  const buttons=await page.locator('.icon-seg.labelled button').evaluateAll(els=>els.map(e=>Math.round(e.getBoundingClientRect().top)));
- expect(buttons).toHaveLength(7);expect(new Set(buttons.slice(0,4)).size).toBe(1);expect(new Set(buttons.slice(4)).size).toBe(1);expect(new Set(buttons).size).toBe(2);
+ expect(buttons).toHaveLength(7);expect(new Set(buttons.slice(0,3)).size).toBe(1);expect(new Set(buttons.slice(3,6)).size).toBe(1);expect(new Set(buttons).size).toBe(3);
  // Every single-value field in the inspector: a label, then one input or select. Exempt by design, named here: sub-grids (corners, colours, underlay details, blend ranges) keep their own layout, and Position X/Y/W/H is included in the shared column; the stitch-type pill group is a segmented control, not a field; the underlay type select is widened so its longest value shows in full; the thread and pattern pickers (including Blend into thread), the Fabric section and the worksheet format are wide pickers outside the inspector's field rows.
  const exempt=['type','thread','fillMethod','borderThread','blendThread','fabric','worksheetFormat','underlayType'];
  const fields=await page.locator('.panel label:not(.block)').evaluateAll((ls,exempt)=>ls.filter(l=>!l.closest('.corner-radii,.underlay-details,#blendRange,#blendPaletteRow')&&!/^Color /.test(l.textContent.trim())&&!l.hidden&&!l.closest('[hidden]')).map(l=>l.querySelector(':scope>input:not([type=checkbox]),:scope>select')).filter(f=>f&&f.offsetParent&&!exempt.includes(f.id)).map(f=>{const r=f.getBoundingClientRect();return {left:Math.round(r.left),width:Math.round(r.width),label:f.closest('label').textContent.trim().slice(0,30)};}),[...exempt]);
