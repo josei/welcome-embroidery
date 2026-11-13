@@ -218,3 +218,56 @@ test('the landscape scrim covers the canvas beside an open sheet and closes it w
  await page.locator('.sheet-scrim').click({position:{x:200,y:150}});
  await expect(page.locator('.layout>#layersSheet.sheet-open')).toHaveCount(0);
 });
+
+// The phone playback counter and the landscape layer row each stay on one line.
+// A satin-stitched rectangle restored from the autosave gives a Layers row ("satin · N stitches") and a compiled count to read.
+async function openSatinDesign(page,width,height,lang){
+ const {initialDocument,applyOperations,validateDocument}=await import('../src/engine.js');
+ const doc=initialDocument();doc.objects=[];doc.hoop=400;doc.name='Probe';doc.revision=1;
+ applyOperations(doc,[{op:'add_path',id:'s0',x:0,y:0,points:[[-190,0],[190,0]],thread:'#cc3333',stitch:'satin',satinWidth:4}]);validateDocument(doc);
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));page.on('dialog',d=>d.accept());
+ await page.setViewportSize({width,height});
+ await page.goto(lang==='en'?'/':`/?lang=${lang}`);
+ await page.evaluate(d=>localStorage.setItem('welcome.autosave:'+sessionStorage.getItem('welcome.tabId'),JSON.stringify({doc:d,clean:false,savedAt:Date.now()})),doc);
+ await page.reload();
+ await page.locator('#restoreYes').click();
+ await expect(page.locator('.object-row')).toHaveCount(1);
+ return errors;
+}
+
+// Lines of text in an element: its box height over its line height (1 for a single line).
+const linesOf=(page,selector)=>page.evaluate(sel=>{
+ const e=document.querySelector(sel);const cs=getComputedStyle(e);
+ const lh=parseFloat(cs.lineHeight)||parseFloat(cs.fontSize)*1.2;
+ return Math.round(e.getBoundingClientRect().height/lh);
+},selector);
+
+for(const [w,h] of [[390,844]]) for(const lang of ['en','es']) for(const view of ['stitches','preview']){
+ test(`the portrait playback counter is one line, ${view} view (${lang})`,async({page})=>{
+  test.setTimeout(120000);
+  const errors=await openSatinDesign(page,w,h,lang);
+  await page.locator('#phoneMenu').click();await page.locator(`#menuView-${view}`).click();
+  await expect(page.locator('#play')).toBeVisible();
+  await expect(page.locator('#playbackStitches')).toBeVisible();
+  // A long satin gives a four-digit total (over 3,000), so the label is near its widest.
+  await expect(page.locator('#playbackStitches')).toHaveText(/\d,\d{3}$/);
+  expect(await linesOf(page,'#playbackStitches'),`counter: "${await page.locator('#playbackStitches').textContent()}"`).toBe(1);
+  // The dock clips overflow, so the counter's right edge must sit inside the viewport.
+  expect(await page.locator('#playbackStitches').evaluate(e=>e.getBoundingClientRect().right<=window.innerWidth),`counter clipped: "${await page.locator('#playbackStitches').textContent()}"`).toBe(true);
+  expect(errors).toEqual([]);
+ });
+}
+
+for(const lang of ['en','es']){
+ test(`a landscape Layers row is one line for "satin · stitches" at 844x390 (${lang})`,async({page})=>{
+  test.setTimeout(120000);
+  await openSatinDesign(page,...LANDSCAPE,lang);
+  await page.locator('#layersBtn').click();
+  await expect(page.locator('#layersSheet')).toHaveClass(/sheet-open/);
+  const row=page.locator('.object-row .row-tag').first();
+  await expect(row).toBeVisible();
+  expect(await linesOf(page,'.object-row .row-tag'),`row: "${await row.textContent()}"`).toBe(1);
+  // One line but cut with an ellipsis would still hide words, so the whole label must fit its box.
+  expect(await row.evaluate(e=>e.scrollWidth<=e.clientWidth),`row clipped: "${await row.textContent()}"`).toBe(true);
+ });
+}

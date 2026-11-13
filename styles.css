@@ -655,6 +655,8 @@ input[type=checkbox]:not(.icon-check){width:24px;height:24px;min-width:24px;marg
    the design name takes the room, so the name field keeps a 44 px box in the top bar. */
 @media (max-width:600px){
 .top .save-status{position:absolute;width:0;height:0;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;margin:0}
+/* The saved and unsaved dots (more specific rules above) are hidden too: the phone top bar has no save status. */
+.top .save-status.autosaved,.top .save-status.unsaved{display:none}
 }
 /* Issue #453: at 360 px and narrower the bar's gaps and the Export label tighten, so the design name keeps a 44 px box on a 360 px screen. */
 @media (max-width:360px) and (orientation:landscape){
@@ -768,9 +770,14 @@ body{height:100vh;height:100dvh;min-height:0;overflow:hidden;overscroll-behavior
 .layout main>.floating>#snap,.layout main>.floating>#snapObj,.layout main>.floating>#gridCycle,.layout main>.floating>#grid{display:none}
 .layout main>.phone-playback{grid-row:2;display:flex;align-items:center;height:52px;min-width:0;box-sizing:border-box;padding:4px 8px;border-top:1px solid #e3e6e1;background:#fff;overflow:hidden}
 .layout main>.phone-playback .playback-bar{width:100%;min-width:0}
-.layout main>.phone-playback .playback-time{width:auto;overflow:visible}
-.layout main>.phone-playback .playback-time span{white-space:normal;overflow:visible;text-overflow:clip;overflow-wrap:anywhere}
+/* The counter stays on one line; the track beside it gives up the room. */
+.layout main>.phone-playback .playback-time{width:auto;flex:none;overflow:visible}
+.layout main>.phone-playback .playback-time span{white-space:nowrap;overflow:visible;text-overflow:clip}
 .layout main>.phone-playback .playback-summary{white-space:normal;overflow:visible;text-overflow:clip}
+/* A landscape phone's layer row keeps its "type · count" summary on one line. */
+@media (max-width:900px) and (orientation:landscape){
+.object-row .row-tag{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+}
 .layout main>.tool-rail{grid-row:3;position:static;inset:auto;z-index:auto;display:flex;flex-direction:row;flex-wrap:nowrap;align-items:center;justify-content:flex-start;align-content:center;gap:4px;width:auto;height:calc(56px + env(safe-area-inset-bottom));max-height:none;max-width:none;margin:0;padding:6px 8px calc(6px + env(safe-area-inset-bottom));box-sizing:border-box;overflow-x:auto;overflow-y:hidden;scrollbar-width:none;border:0;border-top:1px solid #e3e6e1;border-radius:0;background:#fff;box-shadow:none}
 .layout main>.tool-rail .icon-button{width:44px;min-width:44px;height:44px;flex:none}
 .layout main:has(.canvas.preview-mode)>.tool-rail{display:none}
