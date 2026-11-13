@@ -309,10 +309,22 @@ export function createCanvas(/** @type {any} */ api){
     if(api.pickPivot?.(coord(e))){e.preventDefault();e.stopPropagation();return;}
     if(e.target.closest?.('.path-node,.path-handle'))return;
     closeMenu();
-    const handle=e.target.closest?.('[data-handle],[data-hit]');if(handle){e.preventDefault();startHandle(e,handle.dataset.handle??handle.dataset.hit);return;}
     const p=coord(e),o=hit(p);
+    const handle=e.target.closest?.('[data-handle],[data-hit]'),name=handle?.dataset.handle??handle?.dataset.hit;
+    if(handle&&!bodyMoves(name,o,p)){e.preventDefault();startHandle(e,name);return;}
     if(o){e.preventDefault();startMove(e,o,p);if(e.pointerType==='touch')armLongPress(e,o,p);}else{startMarquee(e,p);if(document.getElementById('canvasText'))state.dismissesText=true;}
   });
+  // A resize handle's hit area is 44 screen px square, the touch target. On a small object at low zoom that square reaches over
+  // the object's body, and a press on the body would resize from the handle under it instead of moving the object. So a handle
+  // claims a press only within handleClaim screen px of its centre; further out on the body of a selected object, the press
+  // moves it. The rotate and fill-angle handles sit outside the frame, never over the body, so they keep their whole square.
+  const handleClaim=(/** @type {any} */ f)=>Math.min(22,.3*Math.min(f.W,f.H)*vp.s);
+  function bodyMoves(/** @type {string} */ name,/** @type {any} */ o,/** @type {any} */ p){
+    const spec=HANDLES.find(([n])=>n===name),f=frame();
+    if(!spec||!f||!o||!api.ids().includes(o.id))return false;
+    const [hx,hy]=toWorld(f,(spec[1]-.5)*f.W,(spec[2]-.5)*f.H);
+    return Math.hypot(p[0]-hx,p[1]-hy)*vp.s>handleClaim(f);
+  }
   // Touch long-press: holding a finger on an object for 500 ms opens its object menu. A move of 8 px or more, a
   // second finger, or a lift before 500 ms cancels it. The press first runs as a plain move; the hold cancels that move
   // (nothing changes) before the menu opens.
