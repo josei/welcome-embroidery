@@ -66,10 +66,11 @@ export function FlipButtons() {
  );
 }
 
-// The Select toggle: on, a plain tap adds an object to the selection, or removes it when it is already selected.
+// The multi-select toggle: on, a plain tap adds an object to the selection, or removes it when it is already selected. Its name
+// and icon differ from the Select tool in the tool row, so the screen has one Select control.
 export function SelectToggleButton() {
  const on = useSyncExternalStore(multiSelectState.subscribe, multiSelectState.get);
- const label = t('Select: tap objects to add them to the selection');
+ const label = t('Tap objects to add them to the selection');
  return (
   <button
    type="button"
@@ -80,6 +81,6 @@ export function SelectToggleButton() {
    title={label}
    data-tooltip={label}
    onClick={() => multiSelectState.set(!on)}
-  ><svg className="icon"><use href="#i-select"/></svg></button>
+  ><svg className="icon"><use href="#i-select-add"/></svg></button>
  );
 }

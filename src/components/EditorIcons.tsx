@@ -196,6 +196,10 @@ export function EditorIcons() {
           <path d={"M6 3l12 8-5.5 1.5L10 18z"} />
         </symbol>
         {" "}
+        <symbol id={"i-select-add"} viewBox={"0 0 24 24"}>
+          <path d={"M6 3l12 8-5.5 1.5L10 18z"} /><path d={"M18 14v7M14.5 17.5h7"} />
+        </symbol>
+        {" "}
         <symbol id={"i-line"} viewBox={"0 0 24 24"}>
           <path d={"M5 19 19 5"} />
         </symbol>

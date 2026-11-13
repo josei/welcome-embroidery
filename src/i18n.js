@@ -11,7 +11,7 @@ export const ES={...ES_ADDITIONS,
   'Elige un archivo .jef, .vp3, .dst, .sew, .pec, .pes, .exp, .hus, .xxx, .dsb, .dsz, .tap, .tbf, .pcs, .shv, .stx, .bro, .emd, .ksm o .10o.','Drop an SVG, or use Trace for a picture':'Suelta un SVG, o usa Trazar para una imagen.','Drop an SVG, .welcome, .dxf or JSON file to open it.':'Suelta un archivo SVG, .welcome, .dxf o JSON para abrirlo.','Drop one file at a time.':'Suelta un archivo a la vez.','Drop an SVG file to import it':'Suelta un archivo SVG para importarlo',
 'Settings':'Ajustes',
 'Save As':'Guardar como','File name':'Nombre del archivo',
-'Arrange':'Organizar','Align':'Alinear','Flip':'Voltear','Order':'Orden','Boolean':'Booleano','Select: tap objects to add them to the selection':'Seleccionar: toca objetos para añadirlos a la selección','Menu':'Menú','Bring to front':'Traer al frente','Send to back':'Enviar al fondo','Subtract':'Restar','Union':'Unión','Intersect':'Intersecar',
+'Arrange':'Organizar','Align':'Alinear','Flip':'Voltear','Order':'Orden','Boolean':'Booleano','Tap objects to add them to the selection':'Toca objetos para añadirlos a la selección','Menu':'Menú','Bring to front':'Traer al frente','Send to back':'Enviar al fondo','Subtract':'Restar','Union':'Unión','Intersect':'Intersecar',
 'Autosaved in this browser':'Autoguardado en este navegador','Saved {time}':'Guardado {time}','Saved {time} to {file}':'Guardado {time} en {file}','Unsaved':'Sin guardar','Unsaved changes':'Cambios sin guardar',
 'This design is too large to autosave, so this browser does not keep a copy. Save the project file to keep your work.':'Este diseño es demasiado grande para el autoguardado, así que este navegador no guarda una copia. Guarda el archivo del proyecto para conservar tu trabajo.',
 'Stitch length':'Largo de puntada','Row spacing':'Separación de filas','Border width':'Ancho del borde','The document':'El documento',
@@ -69,7 +69,7 @@ export const ES={...ES_ADDITIONS,
   'Intersection of selected shapes':'Intersección de las formas seleccionadas',
 'Put the selected text on the selected path':'Poner el texto seleccionado sobre el trazado seleccionado','Detach text from its path':
   'Separar el texto de su trazado','Flip horizontally':'Voltear horizontalmente','Flip vertically':'Voltear verticalmente',
-'Edit nodes (Enter) — converts rectangles and ellipses to paths':'Editar nodos (Enter) — convierte rectángulos y elipses en trazados',
+'Edit nodes (Enter) — converts rectangles and ellipses to paths':'Editar nodos (Enter) — convierte rectángulos y elipses en trazados','Edit nodes (Enter)':'Editar nodos (Enter)',
   'Paired loops across the width (uses Satin width)':'Bucles en pareja a lo ancho (usa el ancho de satén)','Spacing (mm)':'Separación (mm)',
   '{perHoop} copies fit one {hoop} mm hoop ({cols} × {rows}). {copies} copies need {hoops} hoop(s).':
   '{perHoop} copias caben en un bastidor de {hoop} mm ({cols} × {rows}). {copies} copias necesitan {hoops} bastidores.','{perHoop} copies fit one {hoop} mm hoop ({cols} × {rows}). {copies} copies need 1 hoop.':'{perHoop} copias caben en un bastidor de {hoop} mm ({cols} × {rows}). {copies} copias necesitan 1 bastidor.','{n} {fmt} files exported, one per hoop.':
