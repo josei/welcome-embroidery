@@ -343,6 +343,9 @@ input:not([type=checkbox]):not([type=range]),select,textarea,.panel textarea{fon
    The field column is 100px, which leaves the label column about 118px in the 256px inspector: wide enough for "Pull compensation" on one line. */
 .panel label:not(.block):not(#blendPaletteRow>label){display:grid;grid-template-columns:minmax(0,1fr) 100px;align-items:center;column-gap:6px}
 .panel label:not(.block)>input:not([type=checkbox]),.panel label:not(.block)>select{grid-column:2;width:100%;min-width:0}
+/* The underlay select's longest option, "Auto (según tamaño)", needs about 120px of text plus the arrow, so this one field column is wider than the others. */
+#underlayRow{grid-template-columns:minmax(0,1fr) 160px!important}
+#underlayRow>select{width:100%!important}
 .panel label:not(.block)>input[type=checkbox]{grid-column:2;justify-self:start;margin:0}
 .panel label:not(.block)>.field-range{grid-column:2;justify-self:start;margin:0}
 .panel label:not(.block)>.thread-btn{grid-column:2;width:100%;min-width:0}
@@ -683,8 +686,9 @@ input[type=checkbox]:not(.icon-check){width:24px;height:24px;min-width:24px;marg
 body{height:100vh;height:100dvh;min-height:0;overflow:hidden}
 /* The inspector is the containing block of its hidden selects (.sr-only is absolute), so they scroll with its body and not past the page. */
 .layout>#inspector{position:relative}
-/* A layer row's summary stays one line high. The type label is the part that gives way; the stitch count is never cut. */
-.object-row .row-tag{display:flex;min-width:0;white-space:nowrap}.object-row .row-kind{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.object-row .row-sep,.object-row .row-count{flex:none;white-space:nowrap}
+/* A layer row's summary stays one line high. The type label is the part that gives way; the stitch count is never cut.
+   The row's stitch icon repeats the type word beside it, so the narrow rows drop it to leave the word room in Spanish. */
+.object-row .row-tag{display:flex;min-width:0;white-space:nowrap}.object-row .row-kind{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.object-row .row-sep,.object-row .row-count{flex:none;white-space:nowrap}.object-row .row-icon{display:none}
 /* The Layers column stays 300px. Its rows give the two 44px row buttons less room, so the stitch count keeps its full width. */
 @media (min-width:601px) and (max-width:1024px) and (orientation:portrait){.layout>#layersSheet{padding-left:8px;padding-right:8px}.layout>#layersSheet #objects{padding-left:4px;padding-right:4px}.object-row{gap:6px;padding-left:6px;padding-right:4px}.object-line{gap:4px}}
 /* A tablet's Properties disclosure rows get the 44 px touch height that phone sheets already use. */
@@ -752,6 +756,10 @@ body{height:100vh;height:100dvh;min-height:0;overflow:hidden}
    snap, view and sheet commands, and Messages, open from the Menu (MenuBar.tsx PhoneMenu). Landscape phones and tablets keep their own
    layouts. */
 .zoom-fit-icon{display:none}
+/* A landscape phone's layer row keeps its "type · count" summary on one line. */
+@media (max-width:900px) and (orientation:landscape){
+.object-row .row-tag{display:flex;min-width:0;white-space:nowrap}.object-row .row-kind{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.object-row .row-sep,.object-row .row-count{flex:none;white-space:nowrap}.object-row .row-icon{display:none}
+}
 @media (max-width:600px) and (orientation:portrait){
 body{height:100vh;height:100dvh;min-height:0;overflow:hidden;overscroll-behavior:none}
 .top{height:52px;padding:0 6px;gap:4px;box-sizing:border-box;flex:none}
@@ -778,10 +786,6 @@ body{height:100vh;height:100dvh;min-height:0;overflow:hidden;overscroll-behavior
 .layout main>.phone-playback .playback-time{width:auto;flex:none;overflow:visible}
 .layout main>.phone-playback .playback-time span{white-space:nowrap;overflow:visible;text-overflow:clip}
 .layout main>.phone-playback .playback-summary{white-space:normal;overflow:visible;text-overflow:clip}
-/* A landscape phone's layer row keeps its "type · count" summary on one line. */
-@media (max-width:900px) and (orientation:landscape){
-.object-row .row-tag{display:flex;min-width:0;white-space:nowrap}.object-row .row-kind{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.object-row .row-sep,.object-row .row-count{flex:none;white-space:nowrap}
-}
 .layout main>.tool-rail{grid-row:3;position:static;inset:auto;z-index:auto;display:flex;flex-direction:row;flex-wrap:nowrap;align-items:center;justify-content:flex-start;align-content:center;gap:4px;width:auto;height:calc(56px + env(safe-area-inset-bottom));max-height:none;max-width:none;margin:0;padding:6px 8px calc(6px + env(safe-area-inset-bottom));box-sizing:border-box;overflow-x:auto;overflow-y:hidden;scrollbar-width:none;border:0;border-top:1px solid #e3e6e1;border-radius:0;background:#fff;box-shadow:none}
 .layout main>.tool-rail .icon-button{width:44px;min-width:44px;height:44px;flex:none}
 .layout main:has(.canvas.preview-mode)>.tool-rail{display:none}
