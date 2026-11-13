@@ -89,3 +89,26 @@ for(const [w,h] of SIZES){
   });
  }
 }
+
+// Each disclosure row in the Properties panel (Document stitch settings, Reference image, Thread plan and the rest) is a summary
+// element. They show only with nothing selected, so this test opens the Properties tab on a clean canvas before measuring.
+const disclosureRows=page=>page.evaluate(()=>[...document.querySelectorAll('#inspector summary')]
+ .filter(e=>!e.closest('.sr-only,[hidden],[inert]'))
+ .map(e=>({name:e.textContent.trim().replace(/\s+/g,' ').slice(0,40),r:e.getBoundingClientRect()}))
+ .filter(c=>c.r.width>1&&c.r.height>1)
+ .map(c=>({name:c.name,w:Math.round(c.r.width*10)/10,h:Math.round(c.r.height*10)/10})));
+
+for(const lang of ['en','es']){
+ test(`tablet property disclosure rows are at least 44 px tall (768x1024, ${lang})`,async({page})=>{
+  const errors=[];page.on('pageerror',e=>errors.push(e.message));page.on('dialog',d=>d.accept());
+  await page.setViewportSize({width:768,height:1024});
+  await page.goto(`/?lang=${lang}`);
+  await expect(page.locator('.canvas')).toBeVisible();
+  await page.locator('.inspector-tab[data-tab=properties]').click({timeout:5000});
+  const rows=await disclosureRows(page);
+  expect(rows.length,`768x1024 ${lang}: disclosure rows found`).toBeGreaterThanOrEqual(3);
+  const bad=rows.filter(c=>c.w<44||c.h<44).map(c=>`${c.name} ${c.w}x${c.h}`);
+  expect(bad,`768x1024 ${lang}: disclosure rows under 44x44`).toEqual([]);
+  expect(errors).toEqual([]);
+ });
+}

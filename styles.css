@@ -687,6 +687,8 @@ body{height:100vh;height:100dvh;min-height:0;overflow:hidden}
 .object-row .row-tag{display:flex;min-width:0;white-space:nowrap}.object-row .row-kind{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.object-row .row-sep,.object-row .row-count{flex:none;white-space:nowrap}
 /* The Layers column stays 300px. Its rows give the two 44px row buttons less room, so the stitch count keeps its full width. */
 @media (min-width:601px) and (max-width:1024px) and (orientation:portrait){.layout>#layersSheet{padding-left:8px;padding-right:8px}.layout>#layersSheet #objects{padding-left:4px;padding-right:4px}.object-row{gap:6px;padding-left:6px;padding-right:4px}.object-line{gap:4px}}
+/* A tablet's Properties disclosure rows get the 44 px touch height that phone sheets already use. */
+@media (min-width:601px) and (max-width:1024px) and (orientation:portrait){.layout>#inspector .sec-fold>summary,.layout>#inspector .doc-settings>summary{min-height:44px;display:flex;align-items:center}}
 .top{height:56px;padding:0 8px;gap:6px}
 .top .logo,.top .sep,.top #new,.top #open,.top #importMachine,.top #duplicate,.top #remove,.top #helpBtn,.top #settingsBtn,
 .top .export-reason{display:none}
