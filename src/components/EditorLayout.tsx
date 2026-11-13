@@ -129,7 +129,7 @@ export function EditorLayout() {
   const sheet = document.getElementById(phoneSheet === 'layers' ? 'layersSheet' : phoneSheet === 'tools' ? 'moreToolsSheet' : 'inspector');
   if (sheet) firstSheetControl(sheet)?.focus();
   const escape = (e: KeyboardEvent) => {
-   if (e.key !== 'Escape' || e.defaultPrevented || !isPhoneSheetLayout()) return;
+   if (e.key !== 'Escape' || e.defaultPrevented || !isPhoneSheetLayout() || document.querySelector('dialog[open]')) return;
    e.preventDefault();
    closePhoneSheet();
   };

@@ -9,6 +9,9 @@ import {inspectorOpenState, toggleInspectorOpen, TABLET_DRAWER_QUERY} from './in
 export function watchTabletDrawerEscape(): () => void {
  const onKeyDown = (e: KeyboardEvent) => {
   if (e.key !== 'Escape' || e.defaultPrevented || !inspectorOpenState.get()) return;
+  // An open modal dialog closes on Escape by its own default action. Preventing that here would keep it open, and the drawer
+  // could not take focus anyway, since a modal makes everything outside it inert.
+  if (document.querySelector('dialog[open]')) return;
   if (!window.matchMedia(TABLET_DRAWER_QUERY).matches) return;
   e.preventDefault();
   toggleInspectorOpen();
