@@ -3,6 +3,7 @@ import {inspectorOpenState, toggleInspectorOpen, TABLET_DRAWER_QUERY} from '../i
 import {inspectorTabState, selectInspectorTab, useTabletPortrait} from '../tabletLayoutState.js';
 import {closePhoneSheet, isPhoneSheetLayout, phoneSheetDetent, phoneSheetState, togglePhoneSheet, usePhonePortrait} from '../phoneSheetState.js';
 import {selectionState} from '../selectionState.js';
+import {watchTabletDrawerEscape} from '../tabletDrawerEscape.js';
 import {attachSheetDrag, firstSheetControl} from '../phoneSheetDrag.js';
 import {selectionLabelsState} from '../selectionLabelsState.js';
 import {t} from '../i18n.js';
@@ -135,6 +136,8 @@ export function EditorLayout() {
   document.addEventListener('keydown', escape);
   return () => document.removeEventListener('keydown', escape);
  }, [phoneSheet]);
+ // Escape folds the portrait tablet's inspector drawer too, and focuses its collapse strip (tabletDrawerEscape.ts).
+ useEffect(() => watchTabletDrawerEscape(), []);
  const canvasClass = ['canvas', hand && 'hand', snapping && 'snapping', (gridShown || snapping) && 'grid-shown', view === 'preview' && 'preview-mode', panning && 'panning',
   deletingGuide && 'deleting-guide'].filter(Boolean).join(' ');
  // At phone portrait the dock is one row of seven buttons, each with its label under the icon. Pen,
