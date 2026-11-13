@@ -676,8 +676,8 @@ input[type=checkbox]:not(.icon-check){width:24px;height:24px;min-width:24px;marg
 .top .unsaved-marker:not([hidden]){align-self:flex-start;margin-top:6px}
 
 /* Portrait tablets (601-1024 px wide, taller than wide) lay out as one screen with no page scroll:
-   a 56 px top bar (Menu, title, Undo, Redo, Save, Export, and the 2D / Stitches / 3D switch); a 64 px tool rail on the canvas's left edge with a
-   label under each icon; the canvas; a 28 px status line; and a 300 px right inspector with Layers and Properties tabs at its top. The inspector
+   a 56 px top bar (Menu, title, Undo, Redo, Save, Export, and the 2D / Stitches / 3D switch); a 64 px tool rail on the canvas's left edge that shows
+   the desktop's icons alone, each in a 44 px button; the canvas; a 28 px status line; and a 300 px right inspector with Layers and Properties tabs at its top. The inspector
    never overlays the canvas, and its body scrolls inside itself. Collapsing it leaves a 44 px strip with the expand button. The zoom control
    floats bottom-right in the canvas. */
 .inspector-tabs{display:none}
@@ -728,10 +728,10 @@ body{height:100vh;height:100dvh;min-height:0;overflow:hidden}
 .layout>#inspector.inspector-collapsed,.layout>#layersSheet.inspector-collapsed{display:none}
 .canvas{flex:1 1 0;height:auto;min-height:0}
 .canvas .tool-rail{position:absolute;left:0;top:0;bottom:0;width:64px;max-height:none;z-index:4;display:flex;flex-direction:column;align-items:stretch;gap:4px;padding:6px 4px;overflow-y:auto;overscroll-behavior:contain;background:#fff;border-right:1px solid #e3e6e1}
-.canvas .tool-rail>button.icon-button,.canvas .tool-rail>.icon-button{width:56px;min-width:56px;height:56px;min-height:56px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;padding:4px 0}
+.canvas .tool-rail>button.icon-button,.canvas .tool-rail>.icon-button{width:44px;min-width:44px;height:44px;min-height:44px;align-self:center;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;padding:0}
 .canvas .tool-rail .icon-button.phone-sheet-btn{display:none}
-.canvas .tool-rail .rail-label{display:block;max-width:100%;overflow:hidden;white-space:nowrap;font-size:11px;line-height:1.1;color:#4d5a54}
-.canvas .tool-rail .icon-button.active-tool .rail-label{color:var(--teal-deep)}
+.canvas .tool-rail .rail-label{display:none}
+.canvas .tool-rail .icon-button.active-tool{background:var(--teal-soft);color:var(--teal)}
 .canvas #art{inset:0 0 0 64px;width:calc(100% - 64px)!important}
 .canvas #rulerTop,.canvas #rulerLeft,.canvas .ruler-corner{left:64px}
 .canvas .zoombar{left:auto;right:12px;bottom:12px;top:auto}

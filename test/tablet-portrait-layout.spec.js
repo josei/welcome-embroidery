@@ -1,8 +1,8 @@
 import {test,expect} from '@playwright/test';
 
-// Tablet portrait at 768x1024 has a 56 px top bar, a 64 px labelled tool rail,
+// Tablet portrait at 768x1024 has a 56 px top bar, a 64 px icon-only tool rail,
 // the canvas, and a 300 px collapsible inspector with Layers and Properties tabs. The page never scrolls, every control is 44 px or
-// more, rail labels fit their 64 px column in Spanish, and the inspector never overlaps the canvas. Desktop at 1280 px is unchanged.
+// more, the tool rail shows no text labels, and the inspector never overlaps the canvas. Desktop at 1280 px is unchanged.
 
 test.beforeEach(async({page})=>{await page.addInitScript(()=>{delete window.showSaveFilePicker;});});
 
@@ -10,7 +10,7 @@ const rect=(page,sel)=>page.locator(sel).first().evaluate(e=>{const r=e.getBound
 const intersects=(a,b)=>a.left<b.right-0.5&&b.left<a.right-0.5&&a.top<b.bottom-0.5&&b.top<a.bottom-0.5;
 
 for(const lang of ['en','es']){
- test(`tablet portrait 768x1024 ${lang}: page does not scroll, targets 44px, rail labels fit`,async({page})=>{
+ test(`tablet portrait 768x1024 ${lang}: page does not scroll, targets 44px, rail is icon-only`,async({page})=>{
   const errors=[];page.on('pageerror',e=>errors.push(e.message));
   await page.setViewportSize({width:768,height:1024});
   await page.goto(`/?lang=${lang}`);
@@ -21,9 +21,8 @@ for(const lang of ['en','es']){
   const small=await page.evaluate(()=>{const sel='.top button, .top input, .top .segmented button, .tool-rail button, .canvas .floating button, .canvas .zoombar button, .inspector-tabs button, .layers-head button, .drawer-close, .inspector-toggle';
    return [...document.querySelectorAll(sel)].filter(e=>{const r=e.getBoundingClientRect();return r.width>0&&r.height>0&&getComputedStyle(e).display!=='none'&&(r.width<43.5||r.height<43.5)}).map(e=>(e.id||e.className||e.tagName)+' '+Math.round(e.getBoundingClientRect().width)+'x'+Math.round(e.getBoundingClientRect().height));});
   expect(small,'controls under 44x44').toEqual([]);
-  const labels=await page.evaluate(()=>[...document.querySelectorAll('.tool-rail .rail-label')].map(e=>({t:e.textContent,fits:e.scrollWidth<=e.clientWidth})));
-  expect(labels.length).toBeGreaterThan(0);
-  for(const l of labels) expect(l.fits,`rail label "${l.t}" fits 64px`).toBe(true);
+  const labels=await page.evaluate(()=>[...document.querySelectorAll('.tool-rail .rail-label')].filter(e=>getComputedStyle(e).display!=='none').map(e=>e.textContent));
+  expect(labels,'the tool rail shows no text labels').toEqual([]);
   const rail=await rect(page,'.tool-rail');
   expect(Math.round(rail.width)).toBe(64);
   expect(errors).toEqual([]);
