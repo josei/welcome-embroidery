@@ -683,8 +683,10 @@ input[type=checkbox]:not(.icon-check){width:24px;height:24px;min-width:24px;marg
 body{height:100vh;height:100dvh;min-height:0;overflow:hidden}
 /* The inspector is the containing block of its hidden selects (.sr-only is absolute), so they scroll with its body and not past the page. */
 .layout>#inspector{position:relative}
-/* A layer row's summary ("relleno · 1,102 puntadas") stays one line high, cut with an ellipsis, so it does not wrap in the narrow row. */
-.object-row .row-tag{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+/* A layer row's summary stays one line high. The type label is the part that gives way; the stitch count is never cut. */
+.object-row .row-tag{display:flex;min-width:0;white-space:nowrap}.object-row .row-kind{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.object-row .row-sep,.object-row .row-count{flex:none;white-space:nowrap}
+/* The Layers column stays 300px. Its rows give the two 44px row buttons less room, so the stitch count keeps its full width. */
+@media (min-width:601px) and (max-width:1024px) and (orientation:portrait){.layout>#layersSheet{padding-left:8px;padding-right:8px}.layout>#layersSheet #objects{padding-left:4px;padding-right:4px}.object-row{gap:6px;padding-left:6px;padding-right:4px}.object-line{gap:4px}}
 .top{height:56px;padding:0 8px;gap:6px}
 .top .logo,.top .sep,.top #new,.top #open,.top #importMachine,.top #duplicate,.top #remove,.top #helpBtn,.top #settingsBtn,
 .top .export-reason{display:none}
@@ -776,7 +778,7 @@ body{height:100vh;height:100dvh;min-height:0;overflow:hidden;overscroll-behavior
 .layout main>.phone-playback .playback-summary{white-space:normal;overflow:visible;text-overflow:clip}
 /* A landscape phone's layer row keeps its "type · count" summary on one line. */
 @media (max-width:900px) and (orientation:landscape){
-.object-row .row-tag{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.object-row .row-tag{display:flex;min-width:0;white-space:nowrap}.object-row .row-kind{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.object-row .row-sep,.object-row .row-count{flex:none;white-space:nowrap}
 }
 .layout main>.tool-rail{grid-row:3;position:static;inset:auto;z-index:auto;display:flex;flex-direction:row;flex-wrap:nowrap;align-items:center;justify-content:flex-start;align-content:center;gap:4px;width:auto;height:calc(56px + env(safe-area-inset-bottom));max-height:none;max-width:none;margin:0;padding:6px 8px calc(6px + env(safe-area-inset-bottom));box-sizing:border-box;overflow-x:auto;overflow-y:hidden;scrollbar-width:none;border:0;border-top:1px solid #e3e6e1;border-radius:0;background:#fff;box-shadow:none}
 .layout main>.tool-rail .icon-button{width:44px;min-width:44px;height:44px;flex:none}

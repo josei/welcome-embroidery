@@ -154,6 +154,8 @@ function ObjectRow({o, depth, selected, dropping, renaming, count, warning, onRe
  const drop = dropping && (dropping.after ? 'drop-after' : 'drop-before');
  const cls = ['object-row', selected && 'selected', hidden && 'is-hidden', locked && 'is-locked', drop].filter(Boolean).join(' ');
  const stitchIcon = o.kind === 'stitch_layer' ? undefined : STITCH_ICON[o.stitch ?? ''];
+ const kindText = (o.kind === 'stitch_layer' ? t('stitch layer') : t(o.stitch)) || '';
+ const countLabel = countText(count, warning);
  // Hide and Lock are siblings of the row, not descendants: a list item may hold buttons, a button may not hold buttons. The row
  // takes its name from its visible text (name, stitch type and count), so the spoken name matches what is on screen.
  return (
@@ -179,7 +181,10 @@ function ObjectRow({o, depth, selected, dropping, renaming, count, warning, onRe
     <span className="row-text">
      {renaming ? <RenameField name={o.name || ''} onDone={onRenameDone} /> : <span className="row-name">{name}</span>}
      <span className="row-tag">
-      {[o.kind === 'stitch_layer' ? t('stitch layer') : t(o.stitch), countText(count, warning)].filter(Boolean).join(' · ')}
+      {/* The type label may shorten; the count is its own box and never does, so a long label cannot cut the number. */}
+      {kindText && <span className="row-kind">{kindText}</span>}
+      {kindText && countLabel && <span className="row-sep"> · </span>}
+      {countLabel && <span className="row-count">{countLabel}</span>}
      </span>
     </span>
     {warning && <span className="row-warn" role="img" aria-label={warning} title={warning}>⚠</span>}
