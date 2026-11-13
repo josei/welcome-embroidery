@@ -73,25 +73,21 @@ const subscribeNarrow = (listen: () => void) => {
  return () => media.removeEventListener('change', listen);
 };
 const narrowNow = () => window.matchMedia(NARROW_QUERY).matches;
+// Issue #494 (spec #470 sections 1 and 2): a landscape phone, where the tool rail is a two-column grid inside the window and More tools
+// opens the More tools sheet. Same window as the landscape block in styles.css.
+const LANDSCAPE_PHONE_QUERY = '(orientation: landscape) and (max-height: 500px) and (max-width: 1000px)';
+const subscribeLandscapePhone = (listen: () => void) => {
+ const media = window.matchMedia(LANDSCAPE_PHONE_QUERY);
+ media.addEventListener('change', listen);
+ return () => media.removeEventListener('change', listen);
+};
+const landscapePhoneNow = () => window.matchMedia(LANDSCAPE_PHONE_QUERY).matches;
 const duplicateLabel = t('Duplicate selected object');
 const deleteLabel = t('Delete selected object');
 
 // The editor layout: the object list, the canvas and the inspector. Rendered by React; ids match the markup it
 // replaced, because the keyboard shortcuts and tests address them.
 export function EditorLayout() {
- // Issue #472: on a landscape phone the tool rail scrolls inside itself. "More tools" (pinned under the rail) pages through it one
- // visible screen at a time, overlapping by one tool so none is skipped, and goes back to the top after the last page.
- const toolRailRef = useRef<HTMLDivElement>(null);
- const [moreToolsOpen, setMoreToolsOpen] = useState(false);
- const toggleMoreTools = () => {
-  const rail = toolRailRef.current;
-  if (!rail) return;
-  const maxTop = rail.scrollHeight - rail.clientHeight;
-  const atEnd = rail.scrollTop >= maxTop - 1;
-  const next = atEnd ? 0 : Math.min(maxTop, rail.scrollTop + rail.clientHeight - 44);
-  rail.scrollTo({top: next});
-  setMoreToolsOpen(next > 0);
- };
  const canvasDoc = useSyncExternalStore(documentState.subscribe, documentState.get);
  const canvasCounts = useSyncExternalStore(sewingCountsState.subscribe, sewingCountsState.get);
  const layout = useSyncExternalStore(layoutState.subscribe, layoutState.get);
@@ -103,6 +99,7 @@ export function EditorLayout() {
  const phoneSheet = useSyncExternalStore(phoneSheetState.subscribe, phoneSheetState.get);
  const detent = useSyncExternalStore(phoneSheetDetent.subscribe, phoneSheetDetent.get);
  const phone = usePhonePortrait();
+ const landscapePhone = useSyncExternalStore(subscribeLandscapePhone, landscapePhoneNow);
  const selection = useSyncExternalStore(selectionState.subscribe, selectionState.get);
  const hasSelection = selection.selected !== null || selection.multi.size > 0;
  // Issue #489 (spec section 2): on a landscape phone the selection bar is contextual, so it is shown only with a selection.
@@ -169,7 +166,7 @@ export function EditorLayout() {
   );
  const deskToolRail = (
    <>
-             <div className={"tool-row tool-rail"} aria-label={"Tools"} ref={toolRailRef}>
+             <div className={"tool-row tool-rail"} aria-label={"Tools"}>
                {phone ? null : <>
                {/* Issue #473: on a phone the dock (portrait) or rail (landscape) opens Layers and Properties as sheets. */}
                <button type="button" className={"icon-button phone-sheet-btn"} id={"layersBtn"} aria-label={t('Layers')} title={t('Layers')} data-tooltip={t('Layers')}
@@ -183,11 +180,11 @@ export function EditorLayout() {
                </>}
                <SelectTool />
                <AddShapeButton kind={"rect"} id={"rect"} label={"Add rectangle"} icon={"rect"} tip={t('Add rectangle ({shortcut})', {shortcut: shortcutFor('rect')})} short={t('Shape')} />
-               <AddShapeButton kind={"ellipse"} id={"ellipse"} label={"Add ellipse"} icon={"ellipse"} tip={t('Add ellipse ({shortcut})', {shortcut: shortcutFor('ellipse')})} short={t('Ellipse')} />
+               {landscapePhone ? null : <AddShapeButton kind={"ellipse"} id={"ellipse"} label={"Add ellipse"} icon={"ellipse"} tip={t('Add ellipse ({shortcut})', {shortcut: shortcutFor('ellipse')})} short={t('Ellipse')} />}
                <PathTool />
                <AddShapeButton kind={"text"} id={"letter"} label={"Add lettering"} icon={"text"} tip={t('Add lettering ({shortcut})', {shortcut: shortcutFor('letter')})} short={t('Text')} />
-               <ToolButtons />
-               <button
+               {landscapePhone ? <><LineTool /><MeasureTool /></> : <ToolButtons />}
+               {landscapePhone ? null : <button
                  className={"icon-button"}
                  id={"traceBtn"}
                  aria-label={"Trace a picture into filled shapes"}
@@ -198,24 +195,26 @@ export function EditorLayout() {
                  <svg className={"icon"}>
                    <use href={"#i-trace"} />
                  </svg><span className={"rail-label"}>{t('Trace')}</span>
-               </button>
-               <PhotoStitch />
-               <PenTool />
+               </button>}
+               {landscapePhone ? null : <PhotoStitch />}
+               {landscapePhone ? null : <PenTool />}
+               {/* Issue #494: on a landscape phone More tools is the last cell of the rail, and opens the More tools sheet with the tools that do not fit. */}
+               {landscapePhone ? <button
+                 type={"button"}
+                 className={"icon-button tool-more"}
+                 id={"toolMore"}
+                 aria-label={t('More tools')}
+                 aria-expanded={phoneSheet === 'tools'}
+                 aria-controls={"moreToolsSheet"}
+                 title={t('More tools')}
+                 data-tooltip={t('More tools')}
+                 onClick={() => togglePhoneSheet('tools')}
+               >
+                 <svg className={"icon"}>
+                   <use href={"#i-chevron"} />
+                 </svg><span className={"rail-label"}>{t('More')}</span>
+               </button> : null}
              </div>
-             <button
-               type={"button"}
-               className={"icon-button tool-more"}
-               id={"toolMore"}
-               aria-label={t('More tools')}
-               aria-expanded={moreToolsOpen}
-               title={t('More tools')}
-               data-tooltip={t('More tools')}
-               onClick={toggleMoreTools}
-             >
-               <svg className={"icon"}>
-                 <use href={"#i-chevron"} />
-               </svg><span className={"rail-label"}>{t('More')}</span>
-             </button>
    </>
   );
  const toolRail = phone ? phoneDock : deskToolRail;
@@ -354,7 +353,7 @@ export function EditorLayout() {
           <span className={"collapse-glyph"} aria-hidden={"true"}>{inspectorOpen ? '›' : '‹'}</span>
         </button>
       </div>
-      {phone ? <MoreToolsSheet asideRef={toolsSheet} open={phoneSheet === 'tools'} detent={detent} /> : null}
+      {phone || landscapePhone ? <MoreToolsSheet asideRef={toolsSheet} open={phoneSheet === 'tools'} detent={detent} /> : null}
       <main className={view === 'design' ? 'design-view' : undefined}>
         <div className={canvasClass} onClick={(e) => {
           // Issue #455: on a portrait tablet a tap on the canvas closes the Properties drawer (controls inside the canvas keep it open).

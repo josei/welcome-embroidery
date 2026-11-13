@@ -817,9 +817,17 @@ body{height:100vh;height:100dvh;min-height:0;overflow:hidden;overscroll-behavior
 /* Issue #478: the rail carries the Layers and Properties buttons on a landscape phone (spec #470 section 2, "Right sheet from rail"). */
 .canvas .tool-rail .icon-button.phone-sheet-btn{display:inline-flex}
 /* The sheets are #layersSheet and #inspector: their id rules (tablet and desktop) outrank the classes above, so the landscape sheet sets its box again here. */
-.layout>#layersSheet.sheet-open,.layout>#inspector.sheet-open{display:flex;flex-direction:column;position:fixed;top:44px;bottom:44px;left:auto;right:0;width:320px;height:auto;max-height:none;margin:0;padding:10px 12px 12px;overflow-y:auto;overscroll-behavior:contain;z-index:40;background:#fff;border:0;border-left:1px solid #e3e6e1;border-radius:0;box-shadow:-6px 0 24px #1d292533}
-/* Issue #488: the scrim starts past the 64 px rail and below the 44 px top bar, so the rail's Layers and Properties buttons stay tappable while a sheet is open (tapping Layers swaps the sheet). */
-.sheet-scrim{display:block;position:fixed;left:64px;right:0;bottom:0;top:44px;z-index:39;background:#1d292538}
+.layout>#moreToolsSheet{display:none}
+/* Issue #494: the More tools sheet's grid is styled for portrait (above); a landscape sheet is 320 px wide, so its tools take three columns. */
+.layout>#moreToolsSheet .more-heading{margin:8px 0 6px;font-size:13px;font-weight:600;line-height:1.2;color:#66726c;white-space:nowrap}
+.layout>#moreToolsSheet .more-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.layout>#moreToolsSheet .more-grid .icon-button{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;width:auto;min-width:44px;height:64px;min-height:44px;padding:4px;background:#f6f7f5;border:1px solid var(--field-line);border-radius:10px;color:#3c423e}
+.layout>#moreToolsSheet .more-grid .icon-button .icon{width:20px;height:20px;flex:none}
+.layout>#moreToolsSheet .more-grid .icon-button.active-tool{background:var(--teal-soft);border-color:var(--teal);color:var(--teal-deep)}
+.layout>#moreToolsSheet .rail-label{display:block;max-width:100%;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;font-size:12px;line-height:1.1}
+.layout>#layersSheet.sheet-open,.layout>#inspector.sheet-open,.layout>#moreToolsSheet.sheet-open{display:flex;flex-direction:column;position:fixed;top:44px;bottom:44px;left:auto;right:0;width:320px;height:auto;max-height:none;margin:0;padding:10px 12px 12px;overflow-y:auto;overscroll-behavior:contain;z-index:40;background:#fff;border:0;border-left:1px solid #e3e6e1;border-radius:0;box-shadow:-6px 0 24px #1d292533}
+/* Issue #488: the scrim starts past the 104 px rail (Issue #494 two-column rail) and below the 44 px top bar, so the rail's Layers and Properties buttons stay tappable while a sheet is open. */
+.sheet-scrim{display:block;position:fixed;left:104px;right:0;bottom:0;top:44px;z-index:39;background:#1d292538}
 .layout>aside.panel.sheet-open [data-sheet-drag]{touch-action:pan-y}
 body{height:100dvh;min-height:0;overflow:hidden}
 .tool-more{display:flex}
@@ -854,12 +862,16 @@ body{height:100dvh;min-height:0;overflow:hidden}
 .drawer-head{display:none}
 .layout>.panel:last-child.sheet-open .drawer-head{display:none}
 .layout main{position:absolute;top:0;left:0;right:0;bottom:0;display:flex;flex-direction:column;min-height:0;width:auto;margin:0;order:0}
-.canvas{position:relative;flex:1 1 0;height:auto;min-height:0;margin-left:56px;overflow:hidden}
+.canvas{position:relative;flex:1 1 0;height:auto;min-height:0;margin-left:104px;overflow:hidden}
 .canvas #rulerTop,.canvas #rulerLeft,.canvas .ruler-corner{display:none}
 .canvas .canvas-views{display:none}
-.canvas .tool-rail{position:fixed;left:0;top:44px;bottom:96px;right:auto;z-index:6;width:56px;height:auto;max-height:none;margin:0;padding:4px 6px;flex-direction:column;flex-wrap:nowrap;justify-content:flex-start;align-items:center;gap:0;border:0;border-radius:0;box-shadow:2px 0 8px rgba(0,0,0,.08);background:#fff;overflow-y:auto;overflow-x:hidden;transform:none;order:0}
+.canvas .tool-rail{position:fixed;left:0;top:44px;bottom:44px;right:auto;z-index:6;width:104px;height:auto;max-height:none;margin:0;padding:6px;display:grid;grid-template-columns:44px 44px;grid-auto-rows:44px;grid-auto-flow:row;align-content:start;justify-content:center;gap:4px;border:0;border-radius:0;box-shadow:2px 0 8px rgba(0,0,0,.08);background:#fff;overflow:hidden;transform:none;order:0}
+/* Issue #494 (spec #470 sections 1, 2 and 6): the rail holds Layers, Properties, Choose, Shape, Path, Text, Line, Measure and More: nine
+   44 px cells in two columns, five rows, which fit the 302 px between the top bar and the status line with no scroll. Ellipse, Polygon,
+   Star, Trace, Photo stitch and Pen are in More tools. Rail labels are hidden here: the icons are the cells, and each keeps its name. */
+.canvas .tool-rail .rail-label{display:none}
 .canvas .tool-rail .icon-button{width:44px;min-width:44px;height:44px;min-height:44px;flex:none}
-.tool-more{position:fixed;left:6px;bottom:44px;z-index:6;align-items:center;justify-content:center;width:44px;min-width:44px;height:44px;min-height:44px;margin:0;padding:0;border:1px solid var(--field-line);border-radius:10px;background:#fff;color:#3c423e;cursor:pointer}
+.tool-more{position:static;align-items:center;justify-content:center;width:44px;min-width:44px;height:44px;min-height:44px;margin:0;padding:0;border:1px solid var(--field-line);border-radius:10px;background:#fff;color:#3c423e;cursor:pointer}
 .tool-more .icon{transition:transform .15s}
 .tool-more[aria-expanded=true] .icon{transform:rotate(180deg)}
 .tool-more:focus-visible{outline:2px solid var(--teal);outline-offset:2px}

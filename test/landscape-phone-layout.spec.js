@@ -33,7 +33,7 @@ const smallControls=page=>page.evaluate(()=>{
 const regions=page=>page.evaluate(()=>{
  const b=s=>{const e=document.querySelector(s);if(!e)return null;const r=e.getBoundingClientRect();return {l:r.left,t:r.top,r:r.right,b:r.bottom};};
  return {top:b('.top'),rail:b('.tool-rail'),canvas:b('.layout main>.canvas'),footer:b('.layout main>footer'),
-  sheet:b('#layersSheet.sheet-open')||b('#inspector.sheet-open')};
+  sheet:b('#layersSheet.sheet-open')||b('#inspector.sheet-open')||b('#moreToolsSheet.sheet-open')};
 });
 
 const overlaps=(a,b)=>a&&b&&Math.min(a.r,b.r)-Math.max(a.l,b.l)>0.5&&Math.min(a.b,b.b)-Math.max(a.t,b.t)>0.5;
@@ -111,29 +111,57 @@ for(const lang of ['en','es']){
  });
 }
 
+// Issue #494 (spec #470 sections 1, 2 and 6): the rail fills the window between the top bar and the status line, every cell is at
+// least 44 px, and at rest the nine cells fit with no scroll. More tools is the last cell and opens the sheet with the tools that do not fit.
 for(const lang of ['en','es']){
- test(`every tool is reachable from the rail or More tools (${lang})`,async({page})=>{
+ test(`the rail fills the height below the top bar, fits without scrolling, and has no overlapping cells (${lang})`,async({page})=>{
   await openEditor(page,...LANDSCAPE,lang);
-  const more=page.locator('#toolMore');
-  await expect(more).toBeVisible();
-  // The rail scrolls inside itself. Pressing More tools pages through it; across the pages every tool is fully visible at least once.
-  const inView=()=>page.evaluate(()=>{
-   const rail=document.querySelector('.tool-rail').getBoundingClientRect();
-   return [...document.querySelectorAll('.tool-rail button')].map(b=>{const r=b.getBoundingClientRect();return r.top>=rail.top-0.5&&r.bottom<=rail.bottom+0.5;});
+  const r=await page.evaluate(()=>{
+   const rail=document.querySelector('.tool-rail');
+   const rb=rail.getBoundingClientRect();
+   const cells=[...rail.querySelectorAll(':scope>button')].filter(b=>getComputedStyle(b).display!=='none').map(b=>{const c=b.getBoundingClientRect();return {id:b.id,l:c.left,t:c.top,r:c.right,b:c.bottom,w:c.width,h:c.height};});
+   return {top:rb.top,bottom:rb.bottom,sh:rail.scrollHeight,ch:rail.clientHeight,sw:rail.scrollWidth,cw:rail.clientWidth,cells,
+    footerTop:document.querySelector('.layout main>footer').getBoundingClientRect().top,
+    topBar:document.querySelector('.top').getBoundingClientRect().bottom};
   });
-  const seen=(await inView()).map(()=>false);
-  const note=async()=>(await inView()).forEach((v,i)=>{if(v)seen[i]=true;});
-  await note();
-  for(let n=0;n<4&&seen.some(v=>!v);n++){
-   await more.click();
-   await page.waitForTimeout(150);
-   await note();
+  expect(Math.round(r.top)).toBe(Math.round(r.topBar));
+  expect(Math.round(r.bottom)).toBe(Math.round(r.footerTop));
+  expect(r.sh).toBeLessThanOrEqual(r.ch);
+  expect(r.sw).toBeLessThanOrEqual(r.cw);
+  const ids=r.cells.map(c=>c.id);
+  for(const id of ['layersBtn','propertiesBtn','select','rect','path','letter','line','measure','toolMore']) expect(ids).toContain(id);
+  for(const c of r.cells){
+   expect(Math.min(c.w,c.h),c.id).toBeGreaterThanOrEqual(44);
+   expect(c.t,c.id).toBeGreaterThanOrEqual(r.top-0.5);
+   expect(c.b,c.id).toBeLessThanOrEqual(r.bottom+0.5);
   }
-  expect(seen.filter(v=>!v)).toEqual([]);
-  // Pressing on past the last page goes back to the top of the rail.
-  for(let n=0;n<5&&(await more.getAttribute('aria-expanded'))==='true';n++){await more.click();await page.waitForTimeout(150);}
-  await expect(more).toHaveAttribute('aria-expanded','false');
-  expect(await page.evaluate(()=>document.querySelector('.tool-rail').scrollTop)).toBe(0);
+  for(let i=0;i<r.cells.length;i++) for(let j=i+1;j<r.cells.length;j++){
+   const a=r.cells[i],b=r.cells[j];
+   const hit=Math.min(a.r,b.r)-Math.max(a.l,b.l)>0.5&&Math.min(a.b,b.b)-Math.max(a.t,b.t)>0.5;
+   expect(hit,`${a.id} and ${b.id}`).toBe(false);
+  }
+  expect(await smallControls(page)).toEqual([]);
+ });
+
+ test(`More tools opens the sheet with the tools the rail leaves out (${lang})`,async({page})=>{
+  await openEditor(page,...LANDSCAPE,lang);
+  await expect(page.locator('#toolMore')).toHaveAttribute('aria-expanded','false');
+  await page.locator('#toolMore').click();
+  const sheet=page.locator('#moreToolsSheet');
+  await expect(sheet).toHaveClass(/sheet-open/);
+  await expect(page.locator('#toolMore')).toHaveAttribute('aria-expanded','true');
+  for(const id of ['ellipse','polygon','star','traceBtn','photoStitch','pen']){
+   const el=sheet.locator(`#${id}`);
+   if(await el.count()) await expect(el.first()).toBeVisible();
+  }
+  for(const id of ['ellipse','polygon','star','traceBtn','pen']) await expect(sheet.locator(`#${id}`)).toHaveCount(1);
+  const R=await regions(page);
+  expect(overlaps(R.rail,R.sheet)).toBe(false);
+  expect(await smallControls(page),'More tools open').toEqual([]);
+  // Pressing More tools again closes the sheet (togglePhoneSheet). Tap-outside dismissal in landscape is not checked here.
+  await page.locator('#toolMore').click();
+  await expect(page.locator('#toolMore')).toHaveAttribute('aria-expanded','false');
+  await expect(sheet).not.toHaveClass(/sheet-open/);
  });
 }
 
@@ -166,6 +194,7 @@ test('the More tools chevron is the topmost element at its centre, with no tool 
   const hit=document.elementFromPoint(m.left+m.width/2,m.top+m.height/2);
   // The part of each rail child that is actually drawn: inside the rail's box, and not under the chevron.
   const peeking=[...document.querySelectorAll('.tool-rail>button')].filter(b=>{
+   if(b.id==='toolMore') return false; // More is the cell that covers the rest; it is not a tool behind itself
    const c=b.getBoundingClientRect();
    const top=Math.max(c.top,rail.top), bottom=Math.min(c.bottom,rail.bottom);
    return bottom>top && Math.min(c.right,m.right)>Math.max(c.left,m.left) && Math.min(bottom,m.bottom)>Math.max(top,m.top);
@@ -213,7 +242,7 @@ test('the landscape scrim covers the canvas beside an open sheet and closes it w
  await page.locator('#layersBtn').click();
  await expect(page.locator('#layersSheet')).toHaveClass(/sheet-open/);
  const box=await page.locator('.sheet-scrim').boundingBox();
- expect(box.x).toBe(64);
+ expect(box.x).toBe(104);
  expect(box.x+box.width).toBeCloseTo(LANDSCAPE[0],0);
  await page.locator('.sheet-scrim').click({position:{x:200,y:150}});
  await expect(page.locator('.layout>#layersSheet.sheet-open')).toHaveCount(0);
