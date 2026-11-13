@@ -5,6 +5,7 @@ import {decodeEmbroidery} from '../src/readers.js';
 import {withPesMetadata} from './pes-with-metadata.js';
 import {initialDocument,importStitchLayer,applyOperations,compile,geometry} from '../src/engine.js';
 import {ES} from '../src/i18n.js';
+import {startServer} from './server-process.js';
 
 // New over a design with unsaved objects opens the in-app discard dialog. Scenarios that start over discard it; the tests that
 // check the dialog itself click #new directly.
@@ -208,10 +209,9 @@ test('the last hoop size is remembered for new documents and reloads',async({pag
 });
 
 test('agent relay: the Agent dialog creates a private link and an MCP client edits the open document live; revoke locks it out',async({page})=>{
- const {spawn}=await import('node:child_process'),{Client}=await import('@modelcontextprotocol/sdk/client/index.js'),{StreamableHTTPClientTransport}=await import('@modelcontextprotocol/sdk/client/streamableHttp.js');
- const port=18794,origin=`http://127.0.0.1:${port}`,child=spawn(process.execPath,['server.js'],{env:{...process.env,HOST:'127.0.0.1',PORT:String(port),WELCOME_SESSION_FILE:''},stdio:'ignore'});
+ const {Client}=await import('@modelcontextprotocol/sdk/client/index.js'),{StreamableHTTPClientTransport}=await import('@modelcontextprotocol/sdk/client/streamableHttp.js');
+ const {child,origin}=await startServer();
  try{
-  for(let i=0;i<100;i++){try{if((await fetch(origin+'/health')).ok)break;}catch{}await new Promise(r=>setTimeout(r,100));}
   const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto(origin+'/');page.on('dialog',d=>d.accept());await newDesign(page);
   await page.locator('#settingsBtn').click();await page.locator('#copyEndpoint').click();await expect(page.locator('#agentDialog')).toBeVisible();await expect(page.locator('#agentUrl')).toHaveValue(/\/mcp\/[A-Za-z0-9_-]{32,}$/);await expect(page.locator('#agentStatus')).toContainText('Waiting for an agent');
   const link=await page.locator('#agentUrl').inputValue();await page.locator('#agentDialog button:not([type=button])').click();await expect(page.locator('#copyEndpoint')).toHaveClass(/agent-on/);
@@ -229,10 +229,8 @@ test('agent relay: the Agent dialog creates a private link and an MCP client edi
  }finally{child.kill('SIGTERM');}
 });
 test('agent relay: a failed revoke keeps the owner key and the link, and says so; a retry that succeeds clears both',async({page})=>{
- const {spawn}=await import('node:child_process');
- const port=18795,origin=`http://127.0.0.1:${port}`,child=spawn(process.execPath,['server.js'],{env:{...process.env,HOST:'127.0.0.1',PORT:String(port),WELCOME_SESSION_FILE:''},stdio:'ignore'});
+ const {child,origin}=await startServer();
  try{
-  for(let i=0;i<100;i++){try{if((await fetch(origin+'/health')).ok)break;}catch{}await new Promise(r=>setTimeout(r,100));}
   await page.goto(origin+'/');page.on('dialog',d=>d.accept());await newDesign(page);
   await page.locator('#settingsBtn').click();await page.locator('#copyEndpoint').click();await expect(page.locator('#agentUrl')).toHaveValue(/\/mcp\/[A-Za-z0-9_-]{32,}$/);
   const link=await page.locator('#agentUrl').inputValue();
@@ -1152,10 +1150,9 @@ test('reference image: load a picture, draw on top of it, adjust, move, hide, re
 });
 
 test('agents can see the reference picture: annotated view with grid, hoop and shapes, raw view, and its placement',async({page})=>{
- const {spawn}=await import('node:child_process'),{Client}=await import('@modelcontextprotocol/sdk/client/index.js'),{StreamableHTTPClientTransport}=await import('@modelcontextprotocol/sdk/client/streamableHttp.js');
- const port=18795,origin=`http://127.0.0.1:${port}`,child=spawn(process.execPath,['server.js'],{env:{...process.env,HOST:'127.0.0.1',PORT:String(port),WELCOME_SESSION_FILE:''},stdio:'ignore'});
+ const {Client}=await import('@modelcontextprotocol/sdk/client/index.js'),{StreamableHTTPClientTransport}=await import('@modelcontextprotocol/sdk/client/streamableHttp.js');
+ const {child,origin}=await startServer();
  try{
-  for(let i=0;i<100;i++){try{if((await fetch(origin+'/health')).ok)break;}catch{}await new Promise(r=>setTimeout(r,100));}
   const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto(origin+'/');page.on('dialog',d=>d.accept());await newDesign(page);
   await page.locator('#settingsBtn').click();await page.locator('#copyEndpoint').click();await expect(page.locator('#agentUrl')).toHaveValue(/\/mcp\/[A-Za-z0-9_-]{32,}$/);const link=await page.locator('#agentUrl').inputValue();await page.locator('#agentDialog button:not([type=button])').click();
   await expect(page.locator('#agentState')).toHaveText('Waiting for agent');await expect(page.locator('#settingsBtn')).toHaveClass(/agent-on/);
@@ -1184,10 +1181,9 @@ test('DST files import as stitch layers (a DST written by Welcome comes back)',a
 });
 
 test('agent experience on the live document: summaries, render, clear, snapshot and restore, push a headless design to the browser (undoable)',async({page})=>{
- const {spawn}=await import('node:child_process'),{Client}=await import('@modelcontextprotocol/sdk/client/index.js'),{StreamableHTTPClientTransport}=await import('@modelcontextprotocol/sdk/client/streamableHttp.js');
- const port=18796,origin=`http://127.0.0.1:${port}`,child=spawn(process.execPath,['server.js'],{env:{...process.env,HOST:'127.0.0.1',PORT:String(port),WELCOME_SESSION_FILE:''},stdio:'ignore'});
+ const {Client}=await import('@modelcontextprotocol/sdk/client/index.js'),{StreamableHTTPClientTransport}=await import('@modelcontextprotocol/sdk/client/streamableHttp.js');
+ const {child,origin}=await startServer();
  try{
-  for(let i=0;i<100;i++){try{if((await fetch(origin+'/health')).ok)break;}catch{}await new Promise(r=>setTimeout(r,100));}
   const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto(origin+'/');page.on('dialog',d=>d.accept());await newDesign(page);
   await page.locator('#settingsBtn').click();await page.locator('#copyEndpoint').click();await expect(page.locator('#agentUrl')).toHaveValue(/\/mcp\/[A-Za-z0-9_-]{32,}$/);const link=await page.locator('#agentUrl').inputValue();await page.locator('#agentDialog button:not([type=button])').click();
   const client=new Client({name:'ux-agent',version:'1'});await client.connect(new StreamableHTTPClientTransport(new URL(link)));const call=(name,args)=>client.callTool({name,arguments:args});
