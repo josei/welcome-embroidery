@@ -897,6 +897,17 @@ body{height:100dvh;min-height:0;overflow:hidden}
 .layout main>footer{position:relative;flex:none;height:44px;min-height:44px;margin:0;padding:0 196px 0 8px;display:flex;flex-wrap:nowrap;align-items:center;gap:8px;overflow:hidden;border-top:1px solid #e3e6e1;background:#fff}
 .layout main>footer .messages-btn{min-height:44px;min-width:44px;padding:0 12px}
 .layout main>footer>.playback-bar{flex:1 1 auto;min-width:0;height:44px}
+/* In the Stitches and 3D views the playback bar takes a row of its own above the status row, so the colour strip and the
+   play button never sit over the status text. The rail and the right-edge sheets stop at the top of that row. The status row
+   keeps its 44 px height, and a long status (an issue such as a design past the hoop) is cut with an ellipsis inside the row
+   rather than running past the right edge. The design view keeps its single 44 px status line. */
+.layout main:not(.design-view)>footer{height:90px;min-height:90px;flex-wrap:wrap;align-content:flex-start;row-gap:0}
+.layout main:not(.design-view)>footer>.playback-bar{order:-1;flex:1 1 100%;height:45px;min-height:45px}
+/* The Messages and Issues buttons keep their width and stay on the status row, so a long status text can only shrink the count. */
+.layout main:not(.design-view)>footer>#issuesBtn,.layout main:not(.design-view)>footer>#messagesBtn{flex:0 0 auto;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;height:44px;min-height:44px}
+.layout main:not(.design-view)>footer>#count,.layout main:not(.design-view)>footer>#playbackProgress{flex:1 1 0;min-width:0;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.layout main:not(.design-view) .canvas .tool-rail{bottom:90px}
+
 #toast{margin-bottom:52px;z-index:50}
 .row-btn,.row-eye,.row-lock{width:44px;min-width:44px;height:44px;min-height:44px}
 .layout>aside input:not([type=checkbox]):not([type=range]):not(.sr-only),.layout>.panel input:not([type=checkbox]):not([type=range]):not(.sr-only),.layout .hoop-edit input,.layout>aside select,.layout>.panel select,.layout .hoop-edit select{min-height:44px}
@@ -905,6 +916,11 @@ body{height:100dvh;min-height:0;overflow:hidden}
 #hoopRotate{min-height:44px}
 .layout>.panel:last-child.sheet-open summary,.layout>.panel:last-child.sheet-open input[type=range]{min-height:44px}
 .layout>.panel:last-child.sheet-open .sec-fold>summary,.layout>.panel:last-child.sheet-open .doc-settings>summary{display:flex;align-items:center}
+}
+
+/* On phones and tablets the stitch play and reset buttons are 44 px touch targets. The desktop keeps its 40 px play button. */
+@media (max-width:1024px){
+.layout main .playback-bar #play,.layout main .playback-bar #resetPlayback{width:44px;min-width:44px;height:44px;min-height:44px}
 }
 
 /* The phone Menu is a 44 px icon button in the top bar. It opens a full-height sheet that
