@@ -59,8 +59,13 @@ export function createCanvas(/** @type {any} */ api){
   window.addEventListener('pointerup',()=>editing.showSnap(null));
 
   // ---- viewport ---------------------------------------------------------------------------------------------
+  // The drawing area is #art itself: on a portrait tablet the tool rail takes the canvas's left 64 px, and #art is set
+  // beside it. Mapping the scene across the container instead would squeeze it sideways by the rail's share, and a
+  // wider container (a folded panel) would stretch it again, so the scene is laid out across #art's own box.
+  function drawArea(){const r=svg.getBoundingClientRect(),c=container.getBoundingClientRect();
+    return {w:Math.max(1,r.width),h:Math.max(1,r.height),x:r.left-c.left,y:r.top-c.top};}
   function toScreen(/** @type {any} */ x,/** @type {any} */ y){const {w,h}=size();return [(x-vp.cx)*vp.s+w/2,(y-vp.cy)*vp.s+h/2];}
-  function apply(){const {w,h}=size();svg.setAttribute('viewBox',`${vp.cx-w/(2*vp.s)} ${vp.cy-h/(2*vp.s)} ${w/vp.s} ${h/vp.s}`);
+  function apply(){const {w,h}=drawArea();svg.setAttribute('viewBox',`${vp.cx-w/(2*vp.s)} ${vp.cy-h/(2*vp.s)} ${w/vp.s} ${h/vp.s}`);
     svg.setAttribute('preserveAspectRatio','none');api.onViewport?.(vp);drawRulers();refresh();}
   function fitRect(/** @type {any} */ x0,/** @type {any} */ y0,/** @type {any} */ x1,/** @type {any} */ y1,margin=48,inset={top:0,right:0}){const {w,h}=size();
   vp.cx=(x0+x1)/2;
@@ -88,7 +93,21 @@ export function createCanvas(/** @type {any} */ api){
   container.addEventListener('wheel',(/** @type {any} */ e)=>{if(e.target.closest?.('#preview3d,.floating,.zoombar,#ctxMenu'))return;e.preventDefault();
     if(wheelZooms(e))zoomAt(wheelZoomFactor(e),e.clientX,e.clientY);
       else{vp.cx+=e.deltaX/vp.s;vp.cy+=e.deltaY/vp.s;apply();}},{passive:false});
-  new ResizeObserver(()=>apply()).observe(container);
+  // A panel that opens, folds or swaps tabs resizes the drawing area but leaves its origin and the window alone. The scene
+  // keeps its place on screen through that, so the object under the finger stays under it and the next tap lands in the
+  // same spot: the viewBox's top-left corner is held, which moves the view centre by half the size change. When the window
+  // changes shape instead (a rotation or a resized desktop window), the drawing area's origin moves or the viewport
+  // changes; holding a corner there would leave part of the drawing outside the new area, so the scene is centred in it.
+  let drawAreaBox=drawArea(),windowBox={w:innerWidth,h:innerHeight};
+  new ResizeObserver(()=>{const next=drawArea();
+    const measured=drawAreaBox.w>1&&drawAreaBox.h>1;
+    const resized=next.w!==drawAreaBox.w||next.h!==drawAreaBox.h;
+    const originHeld=Math.abs(next.x-drawAreaBox.x)<.5&&Math.abs(next.y-drawAreaBox.y)<.5;
+    const windowHeld=innerWidth===windowBox.w&&innerHeight===windowBox.h;
+    if(measured&&resized&&originHeld&&windowHeld){vp.cx+=(next.w-drawAreaBox.w)/(2*vp.s);vp.cy+=(next.h-drawAreaBox.h)/(2*vp.s);}
+    drawAreaBox=next;windowBox={w:innerWidth,h:innerHeight};
+    apply();
+  }).observe(container);
   document.addEventListener('keydown',e=>
     {if(e.code==='Space'&&!inField(e)){spaceDown=true;panningState.set(true);if(e.target===document.body)e.preventDefault();}});
   document.addEventListener('keyup',e=>{if(e.code==='Space'){spaceDown=false;panningState.set(false);}});
