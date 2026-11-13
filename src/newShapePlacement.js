@@ -1,5 +1,5 @@
 // @ts-check
-// Where a newly added rectangle or ellipse goes. Placement rule (issue #280): the first shape sits at the hoop centre, as before.
+// Where a newly added rectangle or ellipse goes. Placement rule: the first shape sits at the hoop centre, as before.
 // Each further shape takes the nearest free slot on a grid around the centre, stepping by its own size plus a 4 mm gap
 // (so the slots are 28 mm apart horizontally and 20 mm vertically for the 24 × 16 mm default). Slots are tried in order of
 // their grid distance from the centre, ties broken left before right and up before down, and a slot counts as free when

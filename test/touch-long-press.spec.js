@@ -1,6 +1,6 @@
 import {test,expect} from '@playwright/test';
 
-// Issue #490 (spec §7): a touch long-press on an object opens the object menu (Duplicate, Delete, ...). Chromium's CDP touch
+// A touch long-press on an object opens the object menu (Duplicate, Delete, ...). Chromium's CDP touch
 // hold fires no native contextmenu, so the press itself is what must open the menu. The mouse right-click keeps working.
 test.describe('touch long-press opens the object menu',()=>{
  test.use({hasTouch:true});

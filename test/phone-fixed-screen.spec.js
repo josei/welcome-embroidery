@@ -1,10 +1,10 @@
 import {test,expect} from '@playwright/test';
 
-// Issue #471 (part of #468, spec section 1, 2 and 6): at phone portrait (390x844) the screen is one fixed layout. The page never
+// At phone portrait (390x844) the screen is one fixed layout. The page never
 // scrolls; the top bar is 52 px; the canvas fills the rest and is the only pannable part; the contextual bar (52 px) shows only with a
 // selection; the tool dock is 56 px; the status line is 28 px; the zoom buttons are a vertical stack inside the canvas's bottom right.
 // Every visible control is at least 44x44 CSS px, and no two of the screen's regions overlap. The screenshots go to the artifacts
-// folder of the turn when ARTIFACTS is set (see the issue report).
+// folder of the turn when ARTIFACTS is set.
 const SCREEN=[390,844];
 const ARTIFACTS=process.env.ARTIFACTS||'';
 
@@ -50,7 +50,7 @@ for(const lang of ['en','es']){
   expect(errors).toEqual([]);
  });
 
- test(`the regions have the spec heights and the controls are at least 44x44 at 390x844 (${lang})`,async({page})=>{
+ test(`the regions have their designed heights and the controls are at least 44x44 at 390x844 (${lang})`,async({page})=>{
   const errors=await openEditor(page,lang);
   const g=await regions(page);
   expect(Math.round(g.top.h),'top bar height').toBe(52);
@@ -118,7 +118,7 @@ test('the portrait screenshots (EN and ES) are written to the artifacts folder',
   await page.locator('#phoneMenu').click();
   await page.locator('#menuLayers').click();
   await page.locator('.object-line').first().click();
-  // Opening the Menu closes the sheet (spec section 4); toggling the Menu shut leaves the selection on the canvas.
+  // Opening the Menu closes the sheet; toggling the Menu shut leaves the selection on the canvas.
   await page.locator('#phoneMenu').click();
   await page.locator('#phoneMenu').click();
   await expect(page.locator('.layout main>.floating')).toBeVisible();

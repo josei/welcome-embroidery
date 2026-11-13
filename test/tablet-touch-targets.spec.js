@@ -1,6 +1,6 @@
 import {test,expect} from '@playwright/test';
 
-// Issue #480 (part of #468, spec #470 section 3): no button, input, select or tab in the inspector or the status line is smaller than
+// No button, input, select or tab in the inspector or the status line is smaller than
 // 44x44 CSS px. Measured at 768x1024 (tablet portrait), in English and Spanish, and at the phone sizes 390x844 and 844x390 so the phone
 // sheets stay covered. The visible glyph may stay small; the element's box is the hit area, so it must be 44 px or more.
 const SIZES=[[768,1024],[390,844],[844,390]];

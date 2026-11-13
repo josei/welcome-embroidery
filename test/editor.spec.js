@@ -11,7 +11,7 @@ import {ES} from '../src/i18n.js';
 const EXPORT_FORMAT_COUNT=17;
 const pickFormat=async(page,fmt)=>{if(!(await page.locator(`#format option[value="${fmt}"]`).count()))await page.locator('#allFormats').check();await page.locator('#format').selectOption(fmt);};
 const newDesign=async page=>{await page.locator('#new').click();if(await page.locator('#discardDialog[open]').count())await page.locator('#discardDiscard').click();};
-// Moves the second object onto the first, so two shapes added with no drag overlap. Adds now land in separate slots (#280).
+// Moves the second object onto the first, so two shapes added with no drag overlap. Adds now land in separate slots.
 const stackOnFirst=async page=>{const rows=page.locator('.object-row');await rows.nth(0).click();const x=await page.locator('#posX').inputValue(),y=await page.locator('#posY').inputValue();
  await rows.nth(1).click();await page.locator('#posX').fill(x);await page.locator('#posX').press('Tab');await page.locator('#posY').fill(y);await page.locator('#posY').press('Tab');
  await rows.nth(0).click();await rows.nth(1).click({modifiers:['Shift']});};
@@ -104,7 +104,7 @@ test('browser VP3 import round-trips supported files and names unsupported trave
  const errors=[];page.on('pageerror',e=>errors.push(e.message));page.on('dialog',dialog=>dialog.accept());const supported=pinnedMachineFixture('vp3');await page.goto('/');await newDesign(page);await page.locator('#importMachine').click();await page.locator('#machineFile').setInputFiles({name:'sample.vp3',mimeType:'application/octet-stream',buffer:Buffer.from(supported.bytes)});await expect(page.locator('#sourceInfo')).toContainText('80 commands');
  const original=page.waitForEvent('download');await page.locator('#export').click();await pickFormat(page,'vp3');await page.locator('#download').click();const rawExport=await original,rawPath='/tmp/welcome-import-original.vp3';await rawExport.saveAs(rawPath);expect(Buffer.compare(await (await import('node:fs/promises')).readFile(rawPath),Buffer.from(supported.bytes))).toBe(0);
  const x=Number(await page.locator('#posX').inputValue());await page.locator('#posX').fill(String(x+1));await page.locator('#posX').press('Tab');const changed=page.waitForEvent('download');await page.locator('#export').click();await page.locator('#download').click();const changedExport=await changed,changedPath='/tmp/welcome-import-edited.vp3';await changedExport.saveAs(changedPath);const edited=decodeEmbroidery(new Uint8Array(await (await import('node:fs/promises')).readFile(changedPath)),'vp3').stitches;
- // VP3 export splits moves longer than 12.7 mm (see #356), so the file holds at least the 60 source needles and no move is longer than that.
+ // VP3 export splits moves longer than 12.7 mm, so the file holds at least the 60 source needles and no move is longer than that.
  const editedNeedles=edited.filter(s=>s.cmd==='stitch');expect(editedNeedles.length).toBeGreaterThanOrEqual(60);
  {let prev=null,worst=0;for(const s of edited){if(s.cmd==='stitch'&&prev)worst=Math.max(worst,Math.hypot(s.x-prev.x,s.y-prev.y));if(s.cmd!=='end')prev=s;}expect(worst).toBeLessThanOrEqual(12.7+1e-6);}
  await newDesign(page);const unsupported=[...readMachineFixtures()].find(([name])=>name.endsWith('/random1.vp3'));await page.locator('#importMachine').click();await page.locator('#machineFile').setInputFiles({name:'travel.vp3',mimeType:'application/octet-stream',buffer:Buffer.from(unsupported[1])});await expect(page.locator('#sourceInfo')).toContainText('51 commands');const moved=Number(await page.locator('#posX').inputValue());await page.locator('#posX').fill(String(moved+1));await page.locator('#posX').press('Tab');let downloaded=false;page.on('download',()=>{downloaded=true;});await page.locator('#export').click();await pickFormat(page,'vp3');await page.locator('#download').click();await expect.poll(()=>downloaded).toBe(true);await expect(page.locator('#exportError')).toBeHidden();expect(errors).toEqual([]);
@@ -3201,7 +3201,7 @@ test('Edit and Arrange menus run the same commands as their shortcuts and disabl
  expect(await rows.allTextContents()).toEqual(frontFromMenu);
  await page.keyboard.press('Control+z');await expect(rows).toHaveText(before);
  // Union from the menu matches the toolbar's union button; both leave one object.
- // Two shapes added with no drag are apart (#280); stack them so the union has something to merge.
+ // Two shapes added with no drag are apart; stack them so the union has something to merge.
  await stackOnFirst(page);await rows.nth(0).click();await rows.nth(1).click({modifiers:['Shift']});
  await run('arrangeMenu','menuUnion');await expect(rows).toHaveCount(1);
  const unionFromMenu=await rows.allTextContents();
@@ -3574,7 +3574,7 @@ test('autosave: a dirty design asks before the page closes; a clean one leaves w
  expect(errors).toEqual([]);
 });
 
-// #284: the starter design has no edits, so clicking the logo right after load must not raise the leave-page prompt.
+// The starter design has no edits, so clicking the logo right after load must not raise the leave-page prompt.
 test('autosave: the starter design leaves at once with no prompt; an edited design still asks',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));
  const dialogs=[];page.on('dialog',d=>{dialogs.push(d.type());d.accept();});
@@ -3722,7 +3722,7 @@ test('add rectangle and add ellipse select the new shape and say where it went',
  expect(errors).toEqual([]);
 });
 
-// Successive adds with no drag (issue #280): each new shape gets its own free slot near the hoop centre, so three adds
+// Successive adds with no drag: each new shape gets its own free slot near the hoop centre, so three adds
 // leave three shapes on screen that do not overlap, and the toast on the second add says it went beside the others.
 test('three adds with no drag leave three shapes that do not overlap',async({page})=>{page.on('dialog',d=>d.accept());const errors=[];page.on('pageerror',e=>errors.push(e.message));
  await page.goto('/');await newDesign(page);
@@ -3907,7 +3907,7 @@ test('design canvas is a Tab stop: an object selected by keyboard focus moves wi
  expect(errors).toEqual([]);
 });
 
-// Tab from the top of the page reaches the first drawing tool within one stop: the skip link (issue #261). Before it, Tab passed
+// Tab from the top of the page reaches the first drawing tool within one stop: the skip link. Before it, Tab passed
 // about 28 stops through the object list and the hoop fields. The agreed limit is one stop before the tool.
 test('Tab reaches the first drawing tool within one stop of the top of the page, via the skip link',async({page})=>{const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');
  const AGREED_MAX_STOPS_BEFORE_TOOL=1;
@@ -3946,7 +3946,7 @@ test('a keyboard user Tabs from Add lettering to the lettering object, Enter ope
  expect(errors).toEqual([]);
 });
 
-// Focus after adding a shape from the keyboard (issue #281). Add rectangle is a Tab stop; the first Stitch type control is the
+// Focus after adding a shape from the keyboard. Add rectangle is a Tab stop; the first Stitch type control is the
 // first enabled radio in the Stitch type group. Tab stops counted from Add rectangle are measured below; the target in the issue
 // was 8, and the path from the tool row is not that short, so the I shortcut is the documented short path.
 test('keyboard add moves focus to the new shape\'s Stitch type control; I focuses it; the toast is a polite live region',async({page})=>{
@@ -4145,7 +4145,7 @@ test('command palette: opens with its key, filters, runs into Recent, and repeat
  expect(errors).toEqual([]);
 });
 
-// Issue #205: a 40-character lettering stays clear of the floating toolbar, its font preview is in the field colour,
+// A 40-character lettering stays clear of the floating toolbar, its font preview is in the field colour,
 // and the Text box shows the start of the string until it is focused.
 test('long lettering stays clear of the floating toolbar and the Text box shows its start',async({page})=>{page.on('dialog',d=>d.accept());const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');await newDesign(page);await page.locator('#letter').click();
  const long='ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789ABCDEF';await page.locator('#font').selectOption('inkstitch/allegria20');await page.locator('#letteringText').fill(long);await page.locator('#letteringText').press('Tab');

@@ -1,6 +1,6 @@
 import {test,expect} from '@playwright/test';
 
-// Issue #455, updated for #475: portrait tablets (601-1024 px wide) keep Properties beside the canvas, never over it. The inspector has
+// Portrait tablets (601-1024 px wide) keep Properties beside the canvas, never over it. The inspector has
 // Layers and Properties tabs; a tap on the canvas folds it, and the collapse button opens it again. Every control is 44 px or more.
 // Desktop at 1024x768 keeps its three columns.
 

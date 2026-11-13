@@ -2,7 +2,7 @@ import {useSyncExternalStore} from 'react';
 import {createStore} from './store.js';
 import {inspectorOpenState, TABLET_DRAWER_QUERY, toggleInspectorOpen} from './inspectorOpenState.js';
 
-/** The tab shown at the top of the portrait-tablet inspector (issue #475): the object list, or Properties. */
+/** The tab shown at the top of the portrait-tablet inspector: the object list, or Properties. */
 export type InspectorTab = 'layers' | 'properties';
 export const inspectorTabState = createStore<InspectorTab>('layers');
 

@@ -1,6 +1,6 @@
 import {test,expect} from '@playwright/test';
 
-// Issue #475 (part of #468, spec #470 section 1-3, 7): tablet portrait at 768x1024 has a 56 px top bar, a 64 px labelled tool rail,
+// Tablet portrait at 768x1024 has a 56 px top bar, a 64 px labelled tool rail,
 // the canvas, and a 300 px collapsible inspector with Layers and Properties tabs. The page never scrolls, every control is 44 px or
 // more, rail labels fit their 64 px column in Spanish, and the inspector never overlaps the canvas. Desktop at 1280 px is unchanged.
 
@@ -36,7 +36,7 @@ for(const lang of ['en','es']){
   const top=await rect(page,'.top');
   expect(Math.round(top.height)).toBe(56);
   const status=await rect(page,'.layout main>footer');
-  // Issue #480: the status line is 44 px so its Messages button is a 44 px target.
+  // The status line is 44 px so its Messages button is a 44 px target.
   expect(Math.round(status.height)).toBe(44);
   const canvas=await rect(page,'.canvas');
   const rail=await rect(page,'.tool-rail');
@@ -69,7 +69,7 @@ test('desktop layout at 1280x800 keeps its three columns',async({page})=>{
  await page.goto('/?lang=en');
  await expect(page.locator('#objects')).toBeVisible();
  const cols=await page.evaluate(()=>getComputedStyle(document.querySelector('.layout')).gridTemplateColumns);
- // Measured on the branch before #475 and after it: the desktop grid is 256 px, a flexible centre, and 256 px.
+ // The desktop grid is 256 px, a flexible centre, and 256 px.
  expect(cols).toBe('256px 768px 256px');
  expect(await page.locator('.tool-rail').isVisible()).toBe(true);
  expect(Math.round((await rect(page,'.canvas')).left)).toBeGreaterThan(200);

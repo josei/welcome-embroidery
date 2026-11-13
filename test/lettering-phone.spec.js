@@ -1,6 +1,6 @@
 import {test,expect} from '@playwright/test';
 
-// Issue #459: on a phone, the lettering text box opens inside the viewport (its right edge is never cut off), its Save
+// On a phone, the lettering text box opens inside the viewport (its right edge is never cut off), its Save
 // control is a 44 px touch target, and the hint toast does not cover the zoom bar.
 test.use({hasTouch:true});
 

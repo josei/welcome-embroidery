@@ -153,7 +153,7 @@ test.describe('Corner radius and rows, English UI on a Spanish browser',()=>{
  });
 });
 
-// Dialog and document-settings decimal fields (#292): Trim jumps and Pull compensation, Trace width, and the reference picture's X, Y, W, H.
+// Dialog and document-settings decimal fields: Trim jumps and Pull compensation, Trace width, and the reference picture's X, Y, W, H.
 // Each is a text field with inputmode="decimal" that shows the UI language's separator and reads either separator.
 for(const [locale,lang,sep,other] of [['en-US','en','.',','],['es-ES','es',',','.']]){
  test.describe(`dialog decimal fields (${locale})`,()=>{

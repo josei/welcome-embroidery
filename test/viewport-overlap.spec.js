@@ -1,6 +1,6 @@
 import {test,expect} from '@playwright/test';
 
-// Issue #452: a standing check across widths. At every viewport below, in English and Spanish, the page never scrolls sideways
+// A standing check across widths. At every viewport below, in English and Spanish, the page never scrolls sideways
 // on the first screen or with a sheet, the menu or a dialog open, and no two visible controls have intersecting boxes. The
 // number of visible controls outside the window is reported (split into "inside a scrolling container" and "not") but not
 // asserted, so the count can be read as a trend. The touch-target size check is not part of this spec.

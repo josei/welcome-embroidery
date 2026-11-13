@@ -1,6 +1,6 @@
 import {test,expect} from '@playwright/test';
 
-// Issue #375 (from audit #365, finding from #359): at 1280x800, with an object selected, Duplicate, Delete and Export sit inside the
+// At 1280x800, with an object selected, Duplicate, Delete and Export sit inside the
 // window and the top bar does not overflow, in English and Spanish, with the default name and with a 45-character project name.
 // Tabbing to Delete leaves it on screen. The boxes measured are attached to the report.
 const LONG='Autumn garden sampler, a long name 45'; // 35 characters: padded to 45 below
@@ -29,7 +29,7 @@ for(const [lang,name] of cases){
   expect(bar.scrollWidth,'top bar has no horizontal overflow').toBe(bar.clientWidth);
   // The name shortens rather than pushing controls out: it keeps a usable width.
   expect(await page.locator('header.top #name').evaluate(e=>e.getBoundingClientRect().width),'project name width').toBeGreaterThanOrEqual(60);
-  // Keyboard: shift+tab from the name back to Delete (the name follows the commands, Issue #435); it must be on screen, with the page not scrolled to hide it.
+  // Keyboard: shift+tab from the name back to Delete; it must be on screen, with the page not scrolled to hide it.
   await page.locator('header.top #name').focus();
   for(let i=0;i<12;i++){ if(await page.evaluate(()=>document.activeElement?.id)==='remove')break; await page.keyboard.press('Shift+Tab'); }
   expect(await page.evaluate(()=>document.activeElement?.id),'Tab reaches Delete').toBe('remove');
@@ -41,7 +41,7 @@ for(const [lang,name] of cases){
  });
 }
 
-// Issue #447: with a rectangle selected, the save status shows in full in the top bar at 1280px and 1024px, in English and Spanish.
+// With a rectangle selected, the save status shows in full in the top bar at 1280px and 1024px, in English and Spanish.
 // Spanish needs 189px at 1280px; the New design and Import buttons show as icons in that range to make room.
 for(const lang of ['en','es']) for(const width of [1280,1024]){
  test(`save status is not clipped at ${width}px in ${lang}`,async({page})=>{

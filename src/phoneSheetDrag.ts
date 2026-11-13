@@ -1,10 +1,10 @@
 import {closePhoneSheet, isPhoneSheetLayout, isPortraitSheetLayout, lowerPhoneSheet, raisePhoneSheet} from './phoneSheetState.js';
 
-// Issue #473: a portrait bottom sheet follows a downward drag that starts on its grab handle or its title row (any element marked
+// A portrait bottom sheet follows a downward drag that starts on its grab handle or its title row (any element marked
 // data-sheet-drag). Released after at least 60 px down, it moves one detent lower (or closes from peek); after 60 px up, one detent
 // higher. A shorter drag snaps back. Controls in the title row (buttons, fields) keep their own clicks and do not start a drag.
 const STEP_PX = 60;
-// Issue #488: on a landscape phone the sheets are right-edge side sheets. An open sheet closes after a rightward swipe of at least
+// On a landscape phone the sheets are right-edge side sheets. An open sheet closes after a rightward swipe of at least
 // 80 px on its head (the same head that starts a portrait drag). The sheet follows the finger to the right while it is dragged.
 const SWIPE_CLOSE_PX = 80;
 const CONTROL = 'button,input,select,textarea,a,label,summary';

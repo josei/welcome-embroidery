@@ -313,7 +313,7 @@ export function createCanvas(/** @type {any} */ api){
     const p=coord(e),o=hit(p);
     if(o){e.preventDefault();startMove(e,o,p);if(e.pointerType==='touch')armLongPress(e,o,p);}else{startMarquee(e,p);if(document.getElementById('canvasText'))state.dismissesText=true;}
   });
-  // Touch long-press (spec §7): holding a finger on an object for 500 ms opens its object menu. A move of 8 px or more, a
+  // Touch long-press: holding a finger on an object for 500 ms opens its object menu. A move of 8 px or more, a
   // second finger, or a lift before 500 ms cancels it. The press first runs as a plain move; the hold cancels that move
   // (nothing changes) before the menu opens.
   /** @type {{pid:number,x:number,y:number,timer:any}|null} */
@@ -330,7 +330,7 @@ export function createCanvas(/** @type {any} */ api){
     const now=performance.now(),dbl=Boolean(lastClick&&now-lastClick.t<380&&lastClick.id===o.id&&Math.hypot(p[0]-lastClick.p[0],p[1]-lastClick.p[1])*vp.s<8);
     lastClick=dbl?null:{t:now,id:o.id,p};
     const group=tools.withGroup(o.id),cur=new Set(api.ids());
-    // The Select toggle on the selection bar (spec section 7) makes a plain tap add or remove an object, as Shift+click does.
+    // The Select toggle on the selection bar makes a plain tap add or remove an object, as Shift+click does.
     if(e.shiftKey||multiSelectState.get()){const next=new Set(cur);if([...group].every(id=>cur.has(id))&&cur.size>group.size)for(const id of group)next.delete(id);
       else for(const id of group)next.add(id);api.select([...next],[...next].includes(o.id)?o.id:[...next].at(-1));return;}
     const wasSelected=cur.has(o.id);if(!wasSelected)api.select([...group],o.id);

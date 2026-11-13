@@ -4,7 +4,7 @@ The written spec for the editor's top bar (`src/components/Header.tsx`, with the
 
 **Rule:** any change to the top bar updates this table and `test/top-bar.spec.js` in the same commit. A row that is added, removed, or changed in kind, label rule, or width must have the matching assertion in the spec, and the spec's `GROUP_OF` map and group order must match the table below.
 
-## Group order and dividers (#433)
+## Group order and dividers
 
 Left to right, the bar is one row of five groups:
 

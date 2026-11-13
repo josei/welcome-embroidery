@@ -1,6 +1,6 @@
 import {test,expect} from '@playwright/test';
 
-// Issue #434: translated labels must fit their controls. Every visible control's own text must not overflow its box
+// Translated labels must fit their controls. Every visible control's own text must not overflow its box
 // (scrollWidth <= clientWidth), in English and Spanish, at 1280 and 1024 px, with no selection and with a rectangle selected.
 // Measured regions: the top bar, the floating canvas toolbar, the canvas tool rail, both sidebars, and the footer (status bar).
 // Ignored: .sr-only text, and width-1 .icon-label text (visually hidden labels). Inline elements are skipped: they have no clientWidth to clip.

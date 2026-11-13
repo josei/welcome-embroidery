@@ -1,6 +1,6 @@
 import {test,expect} from '@playwright/test';
 
-// Issue #489 (spec #468 sections 1, 2 and 7): the selection bar holds Duplicate, Delete and Arrange at phone sizes, Arrange opens one sheet with
+// The selection bar holds Duplicate, Delete and Arrange at phone sizes, Arrange opens one sheet with
 // four groups, and the Select toggle makes a tap add an object to the selection. Checked in English and Spanish.
 const SIZES=[[390,844],[844,390]];
 

@@ -1,6 +1,6 @@
 import {createStore} from './store.js';
 
-/** Portrait tablets (601-1024 px wide): Properties is a drawer in its own column on the right, and a tap on the canvas closes it (issue #455). */
+/** Portrait tablets (601-1024 px wide): Properties is a drawer in its own column on the right, and a tap on the canvas closes it. */
 export const TABLET_DRAWER_QUERY = '(min-width: 601px) and (max-width: 1024px) and (orientation: portrait)';
 
 /** Whether the window is a portrait tablet right now. The drawer starts closed there, so the object list is what a tablet shows first. */

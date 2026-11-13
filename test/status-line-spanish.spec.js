@@ -1,6 +1,6 @@
 import {test,expect} from '@playwright/test';
 
-// Issue #482: the status line below the canvas holds its full Spanish text on landscape phones (844x390) and tablets (768x1024), and
+// The status line below the canvas holds its full Spanish text on landscape phones (844x390) and tablets (768x1024), and
 // stays unclipped at phone portrait (390x844). The count text is the whole status string ("N puntadas · listo para bordar"), so its box
 // must be wide enough that scrollWidth <= clientWidth (the ellipsis style stays set, so the width check is the real test). The English string is checked the same way.
 const VIEWPORTS=[

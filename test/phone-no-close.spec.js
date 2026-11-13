@@ -1,6 +1,6 @@
 import {test,expect} from '@playwright/test';
 
-// Issue #481 (part of #468; spec #470 sections 2 and 4): the phone Menu, Layers and Properties have no Close or × control. Menu > View
+// The phone Menu, Layers and Properties have no Close or × control. Menu > View
 // holds the 2D / Stitches / 3D switch on a landscape phone, and the canvas has none. On a landscape phone, choosing Menu > Layers or
 // Menu > Properties closes the Menu and opens the sheet. A tap outside each closes it.
 const SIZES=[[390,844],[844,390]];

@@ -1,6 +1,6 @@
 import {test,expect} from '@playwright/test';
 
-// Issue #262 (from audit #170, finding 10): no visible text is below 11px. This walks every visible element that holds its
+// No visible text is below 11px. This walks every visible element that holds its
 // own text and reads its computed font size, so a new 8px label or 10px heading fails here instead of in a manual audit.
 const FLOOR=11;
 const newDesign=async page=>{await page.locator('#new').click();if(await page.locator('#discardDialog[open]').count())await page.locator('#discardDiscard').click();};
@@ -21,7 +21,7 @@ const smallText=page=>page.evaluate(FLOOR=>{
  return out;
 },FLOOR);
 
-test('visible text is at least 11px (audit #170 finding 10)',async({page})=>{
+test('visible text is at least 11px',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));page.on('dialog',d=>d.accept());
  await page.goto('/');await newDesign(page);await page.locator('#rect').click();
  // Open the sections that hold the labels this issue names: document stitch settings, object settings, the grid chip.

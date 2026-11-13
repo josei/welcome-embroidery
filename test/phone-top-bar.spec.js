@@ -1,7 +1,7 @@
 import {test,expect} from '@playwright/test';
 
-// Issue #454: at phone widths (375x667 and 390x844, portrait) the top bar holds only Menu, the design name, undo, redo and Export,
-// at a 52 px bar (the spec's phone top bar). Every command that left the bar is one tap to open the Menu and one tap to choose, and the save status
+// At phone widths (375x667 and 390x844, portrait) the top bar holds only Menu, the design name, undo, redo and Export,
+// at a 52 px bar. Every command that left the bar is one tap to open the Menu and one tap to choose, and the save status
 // is a line of text in the Menu. At desktop widths nothing leaves the bar.
 const PHONES=[[375,667],[390,844]];
 const BAR_CONTROLS=['#phoneMenu','#name','#undo','#redo','#export'];
@@ -84,7 +84,7 @@ test('each command that left the bar is one tap to open the Menu and one to choo
  expect(errors).toEqual([]);
 });
 
-// Issue #465: after New on a phone, the blank-design hint "Add an object to export" must not take the design name's row. The name keeps
+// After New on a phone, the blank-design hint "Add an object to export" must not take the design name's row. The name keeps
 // at least 8 characters of width, and the hint and the name, and the hint and Export, do not overlap.
 for(const [width,height] of PHONES) for(const lang of ['en','es']){
  test(`after New the name keeps its width and the export hint overlaps neither name nor Export at ${width}x${height} (${lang})`,async({page})=>{

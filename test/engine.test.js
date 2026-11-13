@@ -1897,7 +1897,7 @@ test('JEF and DST export bytes are unchanged for a fixed design (regression for 
  applyOperations(d,[{op:'add_shape',id:'box',kind:'rect',x:-30,y:-20,width:60,height:40,thread:'#527461'},{op:'add_shape',id:'dot',kind:'ellipse',x:10,y:10,width:24,height:24,thread:'#b5462f'}]);
  const sha=format=>createHash('sha256').update(encode(compile(d),format,'#527461',d.hoop,d)).digest('hex');
  assert.equal(sha('jef'),'c3639e7472879131982a69c2f38281de49bf7e6a80c87277dba0b594a5b936b7');
- // DST carries the document name in its label, so this hash moved when the starter design stopped being named after the sample (#308).
+ // DST carries the document name in its label, so this hash moved when the starter design stopped being named after the sample.
 // The DST header also carries the WE:CENTRE line (the stream starts at the hoop centre), so this hash moved; the stitch records are unchanged.
 assert.equal(sha('dst'),'33c14b3006452638de197b4396421b9f9c97874b8b37ead272505fcbb8d2ad71');
 });

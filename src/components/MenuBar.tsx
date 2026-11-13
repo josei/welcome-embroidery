@@ -60,7 +60,7 @@ type Row = Entry | Heading | Note | '-';
 // go to the first and last; Enter runs an item and closes the menu; Escape closes it and returns focus to the header; Tab
 // closes it and moves on; ArrowLeft and ArrowRight move to the neighbouring header, opening its menu if this one was open.
 // Closes on an outside press, Escape, or after an entry runs.
-// Issue #495: the phone Menu also closes on a downward swipe of at least TITLE_SWIPE_PX on its title row.
+// The phone Menu also closes on a downward swipe of at least TITLE_SWIPE_PX on its title row.
 const TITLE_SWIPE_PX = 60;
 function Dropdown({id, label, rows, iconOnly}: {id: string; label: string; rows: Row[]; iconOnly?: boolean}) {
  const [open, setOpen] = useState(false);
@@ -84,7 +84,7 @@ function Dropdown({id, label, rows, iconOnly}: {id: string; label: string; rows:
   document.addEventListener('keydown', escape);
   return () => { document.removeEventListener('pointerdown', away); document.removeEventListener('keydown', escape); };
  }, [open]);
- // Issue #495: the phone Menu is full height with no grab handle, so a downward drag on its title row closes it (spec #470 section 4).
+ // The phone Menu is full height with no grab handle, so a downward drag on its title row closes it.
  // A drag from the list or the search field scrolls or does nothing. The row captures the pointer so the release is seen wherever it lands.
  const titleDrag = useRef<{id: number; y: number} | null>(null);
  const titleDown = (e: ReactPointerEvent<HTMLDivElement>) => {
@@ -99,7 +99,7 @@ function Dropdown({id, label, rows, iconOnly}: {id: string; label: string; rows:
   setOpen(false);
   trigger.current?.focus();
  };
- // Issue #473: opening a menu closes any phone sheet (Layers or Properties), so only one of them is ever open.
+ // Opening a menu closes any phone sheet (Layers or Properties), so only one of them is ever open.
  const openWith = (where: 'first' | 'last' | null) => { closePhoneSheet(); focusOnOpen.current = where; setOpen(true); };
  // Runs an item: the menu closes and focus goes back to the header, so keyboard users stay where they were.
  const choose = (row: Entry) => { setOpen(false); trigger.current?.focus(); row.run(); };
@@ -157,7 +157,7 @@ function Dropdown({id, label, rows, iconOnly}: {id: string; label: string; rows:
     onClick={e => {
      // A click with no pointer (detail 0) came from the keyboard: Enter or Space opens the menu and focuses its first item.
      const keyboard = e.detail === 0;
-     // Issue #471: opening the phone Menu closes any Layers or Properties sheet (spec section 4), so the list is not under a sheet.
+     // Opening the phone Menu closes any Layers or Properties sheet, so the list is not under a sheet.
      if (open) setOpen(false); else { if (id === 'phoneMenu') closePhoneSheet(); openWith(keyboard ? 'first' : null); }
     }}>{iconOnly ? <svg className="icon" aria-hidden="true"><use href="#i-menu" /></svg> : label}</button>
    {open && (
@@ -302,7 +302,7 @@ export function ViewMenu() {
  return <Dropdown id="viewMenu" label={t('View')} rows={useGridSnapRows()} />;
 }
 
-/** The phone Menu (issue #474, spec sections 2, 5 and 7 of #470): an icon button in the top bar opens a full-height sheet. It has a
+/** The phone Menu: an icon button in the top bar opens a full-height sheet. It has a
  * Command palette search field, then four groups in order, each row with an icon and a short label: File, Edit, View, and Settings
  * and Help. Keyboard shortcuts are not listed on phones. Every row runs the same command as its desktop counterpart. */
 const VIEW_ROWS = [

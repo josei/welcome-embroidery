@@ -1,6 +1,6 @@
 import {test,expect} from '@playwright/test';
 
-// Issue #466: on a phone, the empty-design canvas hint wraps to the screen width instead of running off both edges,
+// On a phone, the empty-design canvas hint wraps to the screen width instead of running off both edges,
 // in English and Spanish, and its full text stays in the DOM.
 const PHONE=[390,844];
 

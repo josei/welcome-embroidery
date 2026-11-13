@@ -1,6 +1,6 @@
 import {test,expect} from '@playwright/test';
 
-// Issue #474 (part of #468; spec #470 sections 2, 3 and 5): the phone Menu is a three-line icon button in the top bar, and it opens a
+// The phone Menu is a three-line icon button in the top bar, and it opens a
 // full-height sheet with a Command palette search field and four groups (File, Edit, View, Settings and Help). Each row has an icon
 // and a short label that stays on one line in English and Spanish, and each row is at least 44 px tall. The sheet scrolls inside
 // itself; the page does not scroll.
@@ -37,7 +37,7 @@ for(const [width,height] of SIZES) for(const lang of ['en','es']){
   // The search field leads, and the sheet fills the window.
   await expect(list.locator('[role="menuitem"]').first()).toHaveAttribute('id','menuCommandPalette');
   const sheet=await list.boundingBox();
-  // Issue #481: the Menu opens at full height below the top bar (52 px portrait, 44 px landscape), so a tap on the bar dismisses it.
+  // The Menu opens at full height below the top bar (52 px portrait, 44 px landscape), so a tap on the bar dismisses it.
   expect(sheet.height,'sheet fills the window below the top bar').toBeGreaterThanOrEqual(height-(height>width?52:44)-1);
   // Every row: one line, an icon, at least 44 px tall.
   const rows=await list.locator('[role="menuitem"]').evaluateAll(els=>els.map(e=>{

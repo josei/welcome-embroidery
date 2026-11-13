@@ -3,7 +3,7 @@
 // not stop a large payload being parsed. `bounded()` adds a pre-check that cuts
 // the array before its items are parsed; strings are cheap to check
 // (length is known up front), so `z.string().max(...)` is enough for them.
-// Zod stays on 3.x for this batch; see the zod advisory issue (#330).
+// Zod is pinned to 3.x; the schemas here use its 3.x API.
 import {z} from 'zod';
 
 // Every size limit on a tool input (string length or array item count) is set

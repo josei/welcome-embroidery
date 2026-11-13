@@ -1,4 +1,4 @@
-// The Arrange button on the selection bar and its one sheet (spec sections 1 and 2). The sheet has four groups: Align (with Distribute),
+// The Arrange button on the selection bar and its one sheet. The sheet has four groups: Align (with Distribute),
 // Flip, Order and Boolean. It is portalled to the body, because the bar scrolls sideways and would clip a sheet inside it.
 import {useEffect, useRef, useState, useSyncExternalStore} from 'react';
 import type {ReactNode} from 'react';

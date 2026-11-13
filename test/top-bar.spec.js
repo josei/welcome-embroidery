@@ -1,7 +1,7 @@
 import {test,expect} from '@playwright/test';
 import {mkdirSync} from 'node:fs';
 
-// Issue #433: the top bar reads as one row of controls. Every command except Export is icon-only with a tooltip (and an accessible
+// The top bar reads as one row of controls. Every command except Export is icon-only with a tooltip (and an accessible
 // name); every control is 36 px tall and centred on the menus' line; one divider sits between each group, in the layout order
 // logo and menus | file | edit | name | export, help and settings. Screenshots of the bar at each width and language go to
 // test-results/top-bar, and the report links them.
@@ -94,7 +94,7 @@ for(const width of WIDTHS){
  }
 }
 
-// Issue #435: the save status has a fixed slot, so the bar keeps its shape when the save state changes, and the design name takes the spare
+// The save status has a fixed slot, so the bar keeps its shape when the save state changes, and the design name takes the spare
 // width so no empty stretch sits between the menus and the commands. Clean is a saved design (Saved HH:MM); dirty is the same design with a
 // new change (Unsaved, once the design has a file). Both have an object, so the blank-design Export reason does not change the bar between them.
 for(const width of WIDTHS){
@@ -133,7 +133,7 @@ for(const width of WIDTHS){
    expect(dirty.status,'status box is the same in both states').toEqual(clean.status);
    expect(dirty.commands.length,'commands found').toBeGreaterThanOrEqual(9);
    expect(dirty.commands,'command x positions are the same in both states').toEqual(clean.commands);
-   // The menus and the first command read as one strip: the name group sits after the commands (Issue #435 call), so only the divider sits between them.
+   // The menus and the first command read as one strip: the name group sits after the commands, so only the divider sits between them.
    expect(clean.firstCommand-clean.menuRight,'menus to first command, clean').toBeLessThanOrEqual(16);
    expect(dirty.firstCommand-dirty.menuRight,'menus to first command, dirty').toBeLessThanOrEqual(16);
    expect(dirty.bar.scrollWidth,'top bar has no horizontal overflow').toBe(dirty.bar.clientWidth);

@@ -5,7 +5,7 @@ import {decodeEmbroidery} from '../src/readers.js';
 import {compile,encode,importStitchLayer,initialDocument,applyOperations,validateDocument,batchDocuments,makeStitchLayer} from '../src/engine.js';
 import {pinnedMachineFixture,readMachineFixtures} from './fixture-archive.js';
 
-// Pinned VP3 and PEC files carry non-jump moves longer than 12.7 mm, so they are re-encoded rather than passed through (see #356).
+// Pinned VP3 and PEC files carry non-jump moves longer than 12.7 mm, so they are re-encoded rather than passed through.
 const LONG_LIMIT=12.7+1e-6;
 const longestStitchMove=d=>{let prev=null,worst=0;for(const s of d.stitches){if(s.cmd==='stitch'&&prev)worst=Math.max(worst,Math.hypot(s.x-prev.x,s.y-prev.y));if(s.cmd!=='end')prev=s;}return worst;};
 
@@ -241,7 +241,7 @@ test('pinned SEW imports with its thread-chart colors, exports the untouched sou
   assert.equal(next,want.length,'every planned needle point is written, in order');
 });
 
-// An imported design whose first stitch is away from the writers' origin opens with a jump to that stitch, so no format sews a lead-in from (0, 0) (#376).
+// An imported design whose first stitch is away from the writers' origin opens with a jump to that stitch, so no format sews a lead-in from (0, 0).
 test('an imported design that opens away from the origin starts with a jump, not a lead-in stitch',()=>{
   const source=[[-400,-300],[-380,-300],[-360,-290],[-340,-290]];
   const decoded={stitches:[...source.map(([x,y])=>({x,y,cmd:'stitch',thread:0})),{x:-340,y:-290,cmd:'end',thread:0}],threads:[{index:0,color:'#527461'}],bounds:[-400,-300,-340,-290]};
@@ -260,7 +260,7 @@ test('an imported design that opens away from the origin starts with a jump, not
   }
 });
 
-// U01 (Barudan) files the reader accepts: the ten that decode, including the ones written with a 0x80-coded header. The five "-me" files the reader refuses are out of scope (#314).
+// U01 (Barudan) files the reader accepts: the ten that decode, including the ones written with a 0x80-coded header. The five "-me" files the reader refuses are out of scope.
 test('every U01 file the reader accepts imports, validates and exports to the other machine formats',()=>{
   const accepted=[];
   for(const [name,bytes] of readMachineFixtures(/\.u01$/i)){

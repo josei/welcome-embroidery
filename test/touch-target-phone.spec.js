@@ -1,6 +1,6 @@
 import {test,expect} from '@playwright/test';
 
-// Issue #453 (from audit #449): every visible control at phone widths is at least 44x44 CSS px, the touch target size, in English and
+// Every visible control at phone widths is at least 44x44 CSS px, the touch target size, in English and
 // Spanish, portrait and landscape, on the first screen, with the Layers and Properties sheets open, and with the Menu open. No
 // control is under 24 px at all. An exception must be named in EXCEPTIONS with its size and the reason it cannot grow.
 const PHONES=[[320,568],[360,740],[375,667],[390,844],[414,896]];

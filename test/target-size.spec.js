@@ -1,6 +1,6 @@
 import {test,expect} from '@playwright/test';
 
-// WCAG 2.5.8 (issue #259, from audit #170): pointer targets are at least 24x24 CSS px. This file measures the row, header and
+// WCAG 2.5.8: pointer targets are at least 24x24 CSS px. This file measures the row, header and
 // checkbox controls that used to be smaller, so a regression fails here rather than in a manual audit.
 const newDesign=async page=>{await page.locator('#new').click();if(await page.locator('#discardDialog[open]').count())await page.locator('#discardDiscard').click();};
 
@@ -44,7 +44,7 @@ test('checkboxes draw a 24px box at 1280 and 1024 px wide',async({page})=>{
  expect(errors).toEqual([]);
 });
 
-// Issue #379 (from bet #372): the document name field and the logo link are at least 24px tall at 1280 and 1024 px, and the top bar
+// The document name field and the logo link are at least 24px tall at 1280 and 1024 px, and the top bar
 // still fits inside 1280 px. The measured heights are attached to the test report.
 test('document name field and logo link are 24px tall at 1280 and 1024 px',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));page.on('dialog',d=>d.accept());

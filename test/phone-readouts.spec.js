@@ -1,10 +1,10 @@
 import {test,expect} from '@playwright/test';
 
-// Issue #467: at a phone (390x844, touch) with the stitch preview open at 466 stitches, the status and playback readouts are not
+// At a phone (390x844, touch) with the stitch preview open at 466 stitches, the status and playback readouts are not
 // clipped in English or Spanish. Each readout's text fits its box (no sideways overflow), the thread length stays visible in Spanish,
 // and the full status line is in the DOM. Each language gets a fresh browser context, because the compiled counts of a restored
 // design are kept per page.
-// Issue #471: the status line holds only the count; the playback readouts sit in the row above the dock, and Messages is in the Menu.
+// The status line holds only the count; the playback readouts sit in the row above the dock, and Messages is in the Menu.
 const READOUTS=['count','playbackStitches','playbackTime','playbackSummary'];
 
 test('phone readouts are not clipped at 390x844 with 466 stitches, in English and Spanish',async({browser})=>{
@@ -21,7 +21,7 @@ test('phone readouts are not clipped at 390x844 with 466 stitches, in English an
   await page.evaluate(d=>localStorage.setItem('welcome.autosave:'+sessionStorage.getItem('welcome.tabId'),JSON.stringify({doc:d,clean:false,savedAt:Date.now()})),doc);
   await page.goto(lang==='en'?'/':`/?lang=${lang}`);
   await page.locator('#restoreYes').click();await expect(page.locator('.object-row')).toHaveCount(1);
-  // Issue #457: at phone portrait the 2D, Stitches and 3D tabs leave the canvas, so the view is chosen from the Menu's View section.
+  // At phone portrait the 2D, Stitches and 3D tabs leave the canvas, so the view is chosen from the Menu's View section.
   await page.locator('#phoneMenu').click();await page.locator('#menuView-stitches').click();await expect(page.locator('#play')).toBeVisible();
   await expect(page.locator('#playbackStitches')).toContainText('466');
   await page.waitForTimeout(300);

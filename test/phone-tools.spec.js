@@ -1,6 +1,6 @@
 import {test,expect} from '@playwright/test';
 
-// Issue #443: at phone widths (600px and narrower) the tool strip scrolls sideways inside its own box, the page never scrolls,
+// At phone widths (600px and narrower) the tool strip scrolls sideways inside its own box, the page never scrolls,
 // every tool can be selected, and Edit and Arrange sit behind one Menu button whose items can all be reached and clicked.
 const PHONES=[[375,667],[390,844]];
 
@@ -41,7 +41,7 @@ for(const [width,height] of PHONES) for(const lang of ['en','es']){
  });
 }
 
-// Issue #479 (part of #468; spec #470 sections 1-2): at phone portrait the tool dock is seven buttons on one row, each with its label
+// At phone portrait the tool dock is seven buttons on one row, each with its label
 // under the icon. More tools opens one sheet with a Tools group and a Panels group, so every tool is one tap away with no sideways scroll.
 const DOCK=['select','rect','path','letter','line','measure','toolMore'];
 const SHEET_TOOLS=['ellipse','polygon','star','traceBtn','photo','pen'];
@@ -127,7 +127,7 @@ test('Edit and Arrange keep their own buttons above the phone width',async({page
  expect(errors).toEqual([]);
 });
 
-// Issue #458: a phone has no visible New button, so New design leads the phone Menu. At 390x844 and 360x740, in English and
+// A phone has no visible New button, so New design leads the phone Menu. At 390x844 and 360x740, in English and
 // Spanish, it is the first row, sits inside the window without scrolling the list, is at least 44 px tall, and starts a new design.
 for(const [width,height] of [[390,844],[360,740]]) for(const lang of ['en','es']){
  test(`New design is the first Menu row and starts a new design at ${width}x${height} (${lang})`,async({page})=>{
@@ -161,7 +161,7 @@ for(const [width,height] of [[390,844],[360,740]]) for(const lang of ['en','es']
  });
 }
 
-// Issue #479: at 390x844 and 360x740 the dock holds exactly the seven dock buttons on one row, with no sideways scroll, every one inside
+// At 390x844 and 360x740 the dock holds exactly the seven dock buttons on one row, with no sideways scroll, every one inside
 // the window at 44 px or more. More tools reaches the rest: the Tools group and the Panels group together hold every desktop tool.
 const dockIds=page=>page.locator('.tool-rail button[id]').evaluateAll(els=>els.map(e=>e.id));
 for(const [width,height] of [[390,844],[360,740]]) for(const lang of ['en','es']) test(`the dock holds seven buttons on one row and More tools reaches the rest at ${width}x${height} (${lang})`,async({page})=>{
@@ -195,7 +195,7 @@ for(const [width,height] of [[390,844],[360,740]]) for(const lang of ['en','es']
  expect(errors).toEqual([]);
 });
 
-// Issue #479: with More tools open the page still does not scroll, and every sheet control is at least 44 px.
+// With More tools open the page still does not scroll, and every sheet control is at least 44 px.
 for(const lang of ['en','es']) test(`More tools keeps the page fixed at 390x844 (${lang})`,async({page})=>{
  const errors=await openEditor(page,390,844,lang);
  await openMore(page);

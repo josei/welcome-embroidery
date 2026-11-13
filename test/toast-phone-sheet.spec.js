@@ -1,7 +1,7 @@
 import {test,expect} from '@playwright/test';
 
-// Issue #461: at 390x844 with Layers open, a transient toast does not cover the Menu button or the Layers header's Properties button.
-// The toast sits above the status line and stays readable and dismisses on its own. Issue #471 moved Layers into the Menu.
+// At 390x844 with Layers open, a transient toast does not cover the Menu button or the Layers header's Properties button.
+// The toast sits above the status line and stays readable and dismisses on its own. At phone widths Layers lives in the Menu.
 test.beforeEach(async({page})=>{await page.addInitScript(()=>{delete window.showSaveFilePicker;});});
 
 test('a toast does not cover the Menu or the Properties button at 390x844 with Layers open (en)',async({page})=>{

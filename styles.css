@@ -1,6 +1,6 @@
 @font-face{font-family:Inter;font-style:normal;font-weight:100 900;font-display:swap;src:url(src/assets/fonts/inter-latin-wght-normal.woff2) format("woff2")}
 :root{--mute-text:#5f6b65;--field-line:#7d8781;--teal:#1c7a67;--teal-deep:#0f5a4b;--teal-soft:#e1f1ec;--coral:#d4776a;--coral-soft:#fbe6e1;--gold:#dba944;--gold-soft:#fbf0d3;--gold-deep:#8f6410;--warn:#b4452f;--warn-soft:#fff6f3;--warn-line:#f0c9be;--primary-fill:#3a3f3c;--primary-fill-hover:#252a28;--primary-fill-press:#161a18}
-/* Type scale (issue #210): four sizes and two weights, defined once here and used everywhere else. Caption is the smallest size
+/* Type scale: four sizes and two weights, defined once here and used everywhere else. Caption is the smallest size
    and the least readable, so controls such as the grid chip use it and nothing goes below it. */
 :root{--fs-caption:11px;--fs-body:12px;--fs-heading:14px;--fs-large:16px;--fw-regular:400;--fw-emphasis:600}
 /* Browser defaults for headings and bold text are 700; fold them into the emphasis weight. */
@@ -34,10 +34,10 @@ nav button[data-view]{padding:7px 13px;color:#66726c}nav button[data-view].activ
 .shape{stroke-width:.28}.shape.selected{stroke:var(--teal)!important;stroke-width:.55}
 .layout main>footer{height:92px;background:#fff;border-color:#e3e6e1;gap:16px;padding:0 18px;color:#66726c}
 #seek{accent-color:var(--teal)}#play,#resetPlayback{border-color:var(--field-line);color:#66726c}
-/* One field treatment for every editable text input and single-choice select in the panel (issue #324): same border, fill, radius and height. */
+/* One field treatment for every editable text input and single-choice select in the panel: same border, fill, radius and height. */
 .panel input:not([type=checkbox]),.panel select{border-color:var(--field-line);background:#f6f7f5;border-radius:6px;min-height:32px}
 @media(min-width:601px) and (max-width:1100px),(max-width:600px) and (orientation:landscape){.layout{grid-template-columns:208px minmax(0,1fr) 208px}}
-/* Issue #319: 901-1100px keeps the inspector beside the canvas. Its column is wide enough for the controls (about 30% of the window, 260-300px),
+/* 901-1100px keeps the inspector beside the canvas. Its column is wide enough for the controls (about 30% of the window, 260-300px),
    so the fields, the Transform pairs and the corner radii fit without clipping; a folded inspector gives its column back to the canvas. */
 @media(min-width:901px) and (max-width:1100px){
 .layout{grid-template-columns:208px minmax(0,1fr) clamp(260px,30vw,300px)}
@@ -91,10 +91,10 @@ nav .icon-button:first-of-type{margin-left:auto}
 /* Delete sits apart from Duplicate and turns red only on hover, so a slip is less likely; its focus ring is the shared one. */
 /* Delete sits apart from Duplicate and turns red only on hover, so a slip is less likely; its focus ring is the shared one. */
 .edit-tools #remove{margin-left:8px}.edit-tools #remove:hover:not(:disabled){color:#9b2c1f;border-color:#d9a79e;background:#fbeeea}
-/* Issue #379: the title field is at least 24px tall, so its click and Tab target meets the minimum. The field has no border, so only its hit area grows. */
+/* The title field is at least 24px tall, so its click and Tab target meets the minimum. The field has no border, so only its hit area grows. */
 .top #name{min-width:80px;flex:1 1 0;width:auto;min-height:24px}
 .top .name-field{display:contents}
-/* Issue #435: the design name takes the bar's spare width, so no empty stretch sits between the menus and the commands. The save status
+/* The design name takes the bar's spare width, so no empty stretch sits between the menus and the commands. The save status
    has a fixed slot beside it, always rendered, so the clean and dirty states draw the same box; its words are cut with an ellipsis. */
 @media (min-width:1101px){
 .top .save-status{flex:0 0 200px;width:200px;overflow:hidden;text-overflow:ellipsis}
@@ -160,7 +160,7 @@ section[data-sec][hidden]{display:none}
 .doc-settings{margin-top:16px;border-top:1px solid #eef0ec;padding-top:8px}.doc-settings>summary{cursor:pointer;font-size:var(--fs-caption);letter-spacing:.07em;text-transform:uppercase;color:#66726c;padding:6px 0}.doc-settings[open]>summary{margin-bottom:4px}
 
 /* Infinite canvas, selection handles, zoom bar, context menu, layers */
-/* Issue #238: a drag that starts on the canvas or a ruler (or in the corner between them) must not select the page text around it, such as the zoom bar and status line. Fields inside the canvas keep their own selection. */
+/* A drag that starts on the canvas or a ruler (or in the corner between them) must not select the page text around it, such as the zoom bar and status line. Fields inside the canvas keep their own selection. */
 .canvas{user-select:none;-webkit-user-select:none}
 .canvas textarea,.canvas input,.canvas [contenteditable]{user-select:text;-webkit-user-select:text}
 .canvas{display:block!important;overflow:hidden}#art{position:absolute;inset:0;width:100%!important;height:100%!important;overflow:hidden;cursor:default;touch-action:none;background:none}#art.drawing{cursor:crosshair}.canvas.panning #art,.canvas.hand #art{cursor:grab}.canvas.hand #art{touch-action:none}
@@ -257,7 +257,7 @@ label[hidden],button[hidden],.sel-hint[hidden]{display:none!important}
 .sew-tips{margin:0 0 12px;padding:8px 10px;border:1px solid #ecd9a1;border-radius:8px;background:#fff8e1;color:#6b5314;font-size:var(--fs-body);line-height:1.45}.sew-tips[hidden]{display:none}.sew-tips b{display:block;font-size:var(--fs-caption);letter-spacing:.07em;text-transform:uppercase;margin-bottom:3px}.sew-tips p{margin:0 0 4px}
 
 /* Phones and small tablets (900px and narrower): the canvas leads and the tool and inspector panels stack below it; the page scrolls instead of the panes.
-   From 901 to 1100px the three columns stay, so the inspector sits beside the canvas (issue #319). */
+   From 901 to 1100px the three columns stay, so the inspector sits beside the canvas. */
 /* The Layers and Properties sheets and their hoop row keep these at every width they had them, phone portrait included (the sheets are the same there). */
 @media (max-width:900px),(max-height:500px) and (pointer:coarse){
 .layout>.panel:last-child{display:block;order:4;width:auto;overflow:visible;border-left:0;border-right:0;border-top:1px solid #e3e6e1}
@@ -319,15 +319,15 @@ input:not([type=checkbox]):not([type=range]),select,textarea,.panel textarea{fon
 .canvas .tool-rail{position:absolute;left:28px;top:28px;z-index:6;display:flex;flex-direction:column;gap:2px;margin:0;padding:6px;background:#fff;border:0;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,.08);max-height:calc(100% - 56px);overflow:auto;order:0}
 .canvas .tool-rail .icon-button{width:36px;height:36px;min-width:36px}
 .canvas.preview-mode .tool-rail{display:none}
-/* Issue #443: at phone widths (600px and narrower) the tool rail sits along the bottom of the canvas, above the zoom bar.
-   Issue #460: it wraps onto as many rows as it needs, so every tool is visible and one tap away with no sideways swipe.
-   Each tool button is 44px, the touch target from #453. */
+/* At phone widths (600px and narrower) the tool rail sits along the bottom of the canvas, above the zoom bar.
+   It wraps onto as many rows as it needs, so every tool is visible and one tap away with no sideways swipe.
+   Each tool button is 44px, the minimum touch target. */
 @media (max-width:600px) and (orientation:landscape){
 .canvas .tool-rail{left:8px;right:8px;top:auto;bottom:50px;width:auto;max-width:none;max-height:none;flex-direction:row;flex-wrap:wrap;align-items:center;align-content:center;justify-content:center;gap:4px;padding:6px;border-radius:12px;overflow:visible}
 .canvas .tool-rail .icon-button{width:44px;min-width:44px;height:44px;flex:none}
-/* Issue #459: the hint sits above the tool strip (two rows of 44px buttons at most), wraps inside the canvas, and leaves the zoom bar uncovered. */
+/* The hint sits above the tool strip (two rows of 44px buttons at most), wraps inside the canvas, and leaves the zoom bar uncovered. */
 .canvas .canvas-text-hint{bottom:162px;max-width:calc(100% - 16px);white-space:normal;text-align:center;line-height:1.3}
-/* Issue #466: the empty-design hint sits above the tool strip too, so the strip does not cover its text. */
+/* The empty-design hint sits above the tool strip too, so the strip does not cover its text. */
 .canvas #canvasHint{bottom:162px}
 }
 
@@ -340,7 +340,7 @@ input:not([type=checkbox]):not([type=range]),select,textarea,.panel textarea{fon
 
 .icon-seg.labelled .stitch-thumb{width:40px;height:24px;display:block;color:#4f5551}.icon-seg.labelled button[aria-pressed=true] .stitch-thumb{color:var(--teal)}
 /* Inspector rows: one label column and one field column, so every field starts at the same left edge and has the same width. Labels wrap inside their column and never push the field.
-   The field column is 100px (issue #326), which leaves the label column about 118px in the 256px inspector: wide enough for "Pull compensation" on one line. */
+   The field column is 100px, which leaves the label column about 118px in the 256px inspector: wide enough for "Pull compensation" on one line. */
 .panel label:not(.block):not(#blendPaletteRow>label){display:grid;grid-template-columns:minmax(0,1fr) 100px;align-items:center;column-gap:6px}
 .panel label:not(.block)>input:not([type=checkbox]),.panel label:not(.block)>select{grid-column:2;width:100%;min-width:0}
 .panel label:not(.block)>input[type=checkbox]{grid-column:2;justify-self:start;margin:0}
@@ -416,14 +416,14 @@ input[aria-invalid="true"]{border-color:var(--warn)!important;background:var(--w
 .palette-row kbd{font:var(--fw-emphasis) var(--fs-caption) ui-monospace,monospace;background:#f1f3ef;border:1px solid #d8ddd6;border-radius:4px;padding:2px 6px;white-space:nowrap}
 .palette-empty{padding:12px 9px;color:#66726c}
 
-/* Status bar (#207): the bar's items each stay on one line. The simulation bar takes a full row so its track keeps its width, and the
+/* Status bar: the bar's items each stay on one line. The simulation bar takes a full row so its track keeps its width, and the
    status items wrap to the row below as whole items. Coordinates, counts and the progress text sit in fixed-width slots, so their width
    does not change as the values change; text that is too long is cut off with an ellipsis, not wrapped. */
 .layout main>footer>*{flex:none}
 .layout main>footer>.playback-bar{flex:1 1 100%;min-width:0}
 .layout main>footer>#cursorPosition,.layout main>footer>#count,.layout main>footer>#playbackProgress,.layout main>footer>#needlePosition,.layout main>footer>#messagesBtn{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-variant-numeric:tabular-nums}
 #cursorPosition{width:15.5em;max-width:100%}
-/* Issue #482: the count is a 15em slot that grows to its text, so the Spanish status ("N puntadas · listo para bordar") is not cut off on landscape and tablet. */
+/* The count is a 15em slot that grows to its text, so the Spanish status ("N puntadas · listo para bordar") is not cut off on landscape and tablet. */
 #count{min-width:15em;width:auto;max-width:100%}
 #playbackProgress{width:14em;min-width:0;max-width:100%}
 #needlePosition{width:14em;min-width:0;max-width:100%}
@@ -431,7 +431,7 @@ input[aria-invalid="true"]{border-color:var(--warn)!important;background:var(--w
 .playback-bar .playback-time span{overflow:hidden;text-overflow:ellipsis}
 .playback-track{flex:1 1 240px;min-width:160px}
 .playback-summary{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
-/* Issue #467: at phone widths (600px and narrower) the status and playback readouts wrap onto as many lines as they need, so the full
+/* At phone widths (600px and narrower) the status and playback readouts wrap onto as many lines as they need, so the full
    stitch count, playback position and thread length are read rather than cut off. Wider screens keep the one-line slots above. */
 @media (max-width:600px) and (orientation:landscape){
 .layout main>footer>#count,.layout main>footer>#playbackProgress{width:auto;white-space:normal;overflow:visible;text-overflow:clip}
@@ -441,12 +441,12 @@ input[aria-invalid="true"]{border-color:var(--warn)!important;background:var(--w
 }
 .timeline-marker{width:8px;height:8px;margin-left:-4px;border-width:1.5px}
 .layout main>footer{flex-wrap:wrap;align-content:center;row-gap:6px;padding-top:6px;padding-bottom:6px}
-/* Issue #208: from 601px to 1100px the top bar stays on one row (the title shrinks first, the controls stay whole; the blank-design reason is kept for screen readers only), and the
+/* From 601px to 1100px the top bar stays on one row (the title shrinks first, the controls stay whole; the blank-design reason is kept for screen readers only), and the
    object list heading lines up with the 10px padding of the object list below it. Below 601px the bar still wraps. */
 @media (min-width:601px) and (max-width:1100px){
 .top{flex-wrap:nowrap;gap:4px;padding:0 6px}
 .top .logo-mark{height:18px}
-/* Issue #379: the logo link is at least 24px tall (its SVG stays 18px, centred), so its click target meets the minimum. */
+/* The logo link is at least 24px tall (its SVG stays 18px, centred), so its click target meets the minimum. */
 .top .logo{min-height:24px}
 .top .icon-button{width:30px;min-width:30px;height:30px}
 .top .name-field{display:flex;position:relative;flex:1 1 0;min-width:48px}
@@ -457,7 +457,7 @@ input[aria-invalid="true"]{border-color:var(--warn)!important;background:var(--w
 .top .name-field::after{content:attr(data-shown);position:absolute;top:50%;left:0;right:0;transform:translateY(-50%);padding:0 8px;font-family:inherit;font-size:var(--fs-heading);font-weight:var(--fw-emphasis);line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;pointer-events:none}
 .top .name-field:focus-within::after{display:none}
 .top #savedStatus{min-width:0;overflow:hidden;text-overflow:ellipsis}
-/* Issue #452: a short landscape phone 601–900px wide (667 and 740, and 844 by 390) cannot fit the nowrap top bar in Spanish, whose file
+/* A short landscape phone 601–900px wide (667 and 740, and 844 by 390) cannot fit the nowrap top bar in Spanish, whose file
    menu labels are about 44px wider, so Settings ran off the right edge. These windows take the phone's wrapping top bar (see the 900px rule). */
 @media (min-width:601px) and (max-width:900px) and (max-height:500px){.top{flex-wrap:wrap;height:auto;gap:6px 4px;padding:8px 10px}}
 /* The unsaved marker keeps its word for screen readers, and shows as an amber dot here, so the title keeps its width. */
@@ -472,12 +472,12 @@ input[aria-invalid="true"]{border-color:var(--warn)!important;background:var(--w
 .layout>aside.panel:first-child>.layers-head{padding:0 10px}
 }
 
-/* Issue #473: at phone size (portrait 600 px and narrower, or a landscape phone) Layers and Properties are sheets. They open from the
+/* At phone size (portrait 600 px and narrower, or a landscape phone) Layers and Properties are sheets. They open from the
    Layers and Properties buttons at the start of the dock (portrait) or the rail (landscape), and only one is open at a time. Neither
    sheet has a Close button. A sheet closes by a downward drag on its grab handle or title row (portrait), a tap on the dimmed area,
    Escape, or the system back action (MenuBar opening closes them too; see phoneSheetState.ts). Portrait sheets have three detents:
    peek (120 px), half (50%, where a dock open starts) and full (below the 52 px top bar). Landscape sheets are 320 px on the right.
-   Desktop and tablet never show these parts. Undo: restore the Issue #441 block and the sheet-bar in EditorLayout. */
+   Desktop and tablet never show these parts. */
 .phone-sheet-btn,.sheet-grip,.sheet-head,.sheet-scrim{display:none}
 .sheet-title{margin:0;font-size:var(--fs-heading);font-weight:var(--fw-emphasis);color:#1d211f}
 @media (max-width:600px) and (orientation:portrait){
@@ -499,8 +499,8 @@ input[aria-invalid="true"]{border-color:var(--warn)!important;background:var(--w
 .phone-sheet-btn:focus-visible,.sheet-title:focus-visible{outline:2px solid var(--teal);outline-offset:2px}
 #toast{z-index:50}
 }
-/* Issue #473: every control in an open phone sheet is at least 44x44 CSS px (the touch target size). A checkbox keeps its 24 px box
-   inside its 44 px label row, which is the control that is pressed (the same rule as #453 uses for the page). */
+/* Every control in an open phone sheet is at least 44x44 CSS px (the touch target size). A checkbox keeps its 24 px box
+   inside its 44 px label row, which is the control that is pressed. */
 @media (max-width:600px) and (orientation:portrait),(max-height:500px) and (pointer:coarse){
 .layout>aside.panel.sheet-open button,.layout>aside.panel.sheet-open .row-btn,.layout>aside.panel.sheet-open .row-eye,.layout>aside.panel.sheet-open .row-lock{min-width:44px;min-height:44px!important}
 .layout>aside.panel.sheet-open .row-btn,.layout>aside.panel.sheet-open .row-eye,.layout>aside.panel.sheet-open .row-lock{width:44px;height:44px}
@@ -533,7 +533,7 @@ input[aria-invalid="true"]{border-color:var(--warn)!important;background:var(--w
 .reset-default{flex:none;width:28px;height:28px;padding:0;display:inline-flex;align-items:center;justify-content:center;border:1px solid var(--field-line);border-radius:6px;background:#fff;color:#4f5551;cursor:pointer}
 .reset-default[hidden]{display:none!important}.reset-default .icon{width:16px;height:16px}.reset-default:hover{border-color:#7b9a89;color:var(--teal)}.reset-default:focus-visible{outline:2px solid var(--teal);outline-offset:1px}
 
-/* One section heading style for the inspector and side panels (#323): every heading and every collapsible summary
+/* One section heading style for the inspector and side panels: every heading and every collapsible summary
    shares this case, tracking, size, weight and colour. Collapsible sections (<details class="sec-fold|doc-settings">) get a
    disclosure triangle; plain headings get none. */
 .panel .section-heading,.panel .sec-fold>summary,.panel .doc-settings>summary{font-size:var(--fs-caption);font-weight:var(--fw-emphasis);letter-spacing:.07em;text-transform:uppercase;color:#66726c}
@@ -542,12 +542,12 @@ input[aria-invalid="true"]{border-color:var(--warn)!important;background:var(--w
 .panel .sec-fold>summary::before,.panel .doc-settings>summary::before{content:"";position:absolute;left:2px;top:50%;margin-top:-4px;border-style:solid;border-width:4px 0 4px 5px;border-color:transparent transparent transparent currentColor;transition:transform .12s}
 .panel .sec-fold[open]>summary::before,.panel .doc-settings[open]>summary::before{transform:rotate(90deg)}
 .panel .sec-fold[open]>summary,.panel .doc-settings[open]>summary{margin-bottom:4px}
-/* Issue #438: a closed inspector section takes no room. Its controls are not drawn, but Chromium still lays them out, so their
+/* A closed inspector section takes no room. Its controls are not drawn, but Chromium still lays them out, so their
    boxes would sit on top of the visible controls below (Trim long jumps over Row spacing, and so on). */
 .panel details:not([open])>:not(summary){display:none!important}
-/* Keyboard focus (issue #364): disclosure summaries and layer rows get the same 2 px teal ring as other controls. */
+/* Keyboard focus: disclosure summaries and layer rows get the same 2 px teal ring as other controls. */
 .sec-fold>summary:focus-visible,.doc-settings>summary:focus-visible,.object-row:focus-visible,.group-row:focus-visible{outline:2px solid var(--teal);outline-offset:2px}
-/* Issue #437: at phone widths (600px and narrower) the top bar stays on one row, so the page never scrolls sideways. The logo, the
+/* At phone widths (600px and narrower) the top bar stays on one row, so the page never scrolls sideways. The logo, the
    New, Open, Import, Save, Duplicate and Redo buttons leave the bar (their actions stay in the File, Edit and Arrange menus and the
    keyboard), the menu labels and icons tighten, and the design name takes what is left, down to nothing, so Undo, Delete, Export and
    Settings stay whole inside the window. The bar keeps the 58px row it has from 601px up. */
@@ -556,9 +556,9 @@ input[aria-invalid="true"]{border-color:var(--warn)!important;background:var(--w
 .top{flex-wrap:nowrap;gap:3px;padding:0 4px}
 .top .logo,.top #new,.top #open,.top #importMachine,.top #save,.top #duplicate{display:none}
 .top .file-menu>button{padding:6px 4px;font-size:var(--fs-caption)}
-/* Issue #443: the phone Menu holds Edit and Arrange, so its list scrolls inside the window instead of running off the bottom. */
+/* The phone Menu holds Edit and Arrange, so its list scrolls inside the window instead of running off the bottom. */
 .file-menu-list{max-height:calc(100dvh - 76px);overflow-y:auto;overscroll-behavior:contain}
-/* Issue #458: every phone Menu row is at least 44 px tall, the touch target from #453. */
+/* Every phone Menu row is at least 44 px tall, the minimum touch target. */
 .top .file-menu-list button{min-height:44px}
 .top .edit-tools{gap:2px}.top .edit-tools #remove{margin-left:0}
 .top .icon-button.labelled{width:30px;min-width:30px;padding:0;justify-content:center}
@@ -568,18 +568,18 @@ input[aria-invalid="true"]{border-color:var(--warn)!important;background:var(--w
 .top .save-status{flex:0 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .top .export-split #export{padding:0 6px}
 }
-/* Issue #454: at phone widths (600 px and narrower, portrait) the top bar holds Menu, the design name, undo, redo and Export, at the
+/* At phone widths (600 px and narrower, portrait) the top bar holds Menu, the design name, undo, redo and Export, at the
    desktop bar's 48 px. Every other command, the save status included, is listed in the phone Menu (MenuBar.tsx PhoneMenu). */
 @media (max-width:600px) and (orientation:landscape){.top{height:48px}}
 @media (max-width:600px){
 .top .sep,.top .logo,.top #new,.top #open,.top #importMachine,.top #save,.top #duplicate,.top #remove,.top #helpBtn,.top #settingsBtn,.top .save-status{display:none}
 .top .file-menu-list .menu-note{padding:8px 12px;font-size:var(--fs-caption);color:#5c625e;line-height:1.4;white-space:normal;overflow-wrap:anywhere}
-/* Issue #465: the blank-design reason takes no room in the bar, so the design name keeps its width beside Export. It hangs as a
+/* The blank-design reason takes no room in the bar, so the design name keeps its width beside Export. It hangs as a
    small caption under the bar (outside its box, so it never overlaps the name or Export), and screen readers still get it. */
 .top{position:relative;z-index:7}
 .top .export-reason{position:absolute;top:100%;right:4px;width:auto;height:auto;clip:auto;overflow:visible;margin:2px 0 0;padding:4px 8px;background:#fff;border:1px solid #e3e6e1;border-radius:4px;font-size:var(--fs-caption);line-height:1.3;white-space:normal;max-width:calc(100vw - 16px);text-align:right}
 }
-/* Issue #375: between 1101 px and 1439 px the top bar fits on one row in Spanish and with a long project name. The gaps tighten, and the
+/* Between 1101 px and 1439 px the top bar fits on one row in Spanish and with a long project name. The gaps tighten, and the
    project name and the save status give way (the name first, down to its minimum; the status then shrinks to an ellipsis) so the
    controls to their right keep their full width. From 1440 px the bar is unchanged. */
 @media (min-width:1101px) and (max-width:1439px){
@@ -587,10 +587,10 @@ input[aria-invalid="true"]{border-color:var(--warn)!important;background:var(--w
 .top #name{flex:1 1 0;min-width:64px;width:auto}
 .top #savedStatus,.top #unsavedMark{flex:0 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 }
-/* Issue #433: one control style across the top bar. Every command is an icon-only 36 px button with a tooltip (the shortcut is
+/* One control style across the top bar. Every command is an icon-only 36 px button with a tooltip (the shortcut is
    in it where one exists); Export is the only text button. The menus are text, centred on the same line. One divider sits between
    each group: menus | file | edit | name | export, help and settings. The name takes the free width, so the right-hand group sits flush.
-   Issue #435: the dividers keep 1 px margins, so the menus and the first command sit 15 px apart and read as one strip. */
+   The dividers keep 1 px margins, so the menus and the first command sit 15 px apart and read as one strip. */
 @media (min-width:1101px){
 .top{gap:6px}
 .top .sep{margin:0 1px}
@@ -604,13 +604,13 @@ input[aria-invalid="true"]{border-color:var(--warn)!important;background:var(--w
 .top #duplicate,.top #remove,.top #new,.top #importMachine{width:36px;min-width:36px;padding:0}.top #duplicate .icon-label,.top #remove .icon-label,.top #new .icon-label,.top #importMachine .icon-label{display:none}
 /* Checkboxes show a 24px box, the WCAG 2.5.8 minimum for the visible control, not just its label row. Icon checkboxes keep their own size. */
 input[type=checkbox]:not(.icon-check){width:24px;height:24px;min-width:24px;margin:0;flex:none}
-/* Issue #440: on a landscape phone (height 500 px or less, touch) the tool column is icons only. The grid chip keeps its drawn grid
+/* On a landscape phone (height 500 px or less, touch) the tool column is icons only. The grid chip keeps its drawn grid
    tile and loses its visible "1 mm" text; its name stays on the button as aria-label, so a screen reader still announces it. */
 @media (max-height:500px) and (pointer:coarse){
 .canvas .floating .grid-chip .grid-label{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;margin:0}
 }
 
-/* Issue #453 (from audit #449): at phone widths (600px and narrower) every visible control is at least 44x44 CSS px, the touch target
+/* At phone widths (600px and narrower) every visible control is at least 44x44 CSS px, the touch target
    size. The top bar, tool strip, zoom bar, canvas grid row, view switch, Messages button and the Layers and Properties sheets all grow
    to 44 px; the top bar's design name keeps the free width and takes its full 44 px height. */
 @media (max-width:600px){
@@ -651,14 +651,14 @@ input[type=checkbox]:not(.icon-check){width:24px;height:24px;min-width:24px;marg
 @media (max-width:600px){
 .top .name-field #name{width:100%;flex:1 1 auto;min-width:0;height:44px}
 }
-/* Issue #453: at phone widths the save status leaves the bar's row (it stays in the DOM, so screen readers still get it as a status), and
+/* At phone widths the save status leaves the bar's row (it stays in the DOM, so screen readers still get it as a status), and
    the design name takes the room, so the name field keeps a 44 px box in the top bar. */
 @media (max-width:600px){
 .top .save-status{position:absolute;width:0;height:0;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;margin:0}
 /* The saved and unsaved dots (more specific rules above) are hidden too: the phone top bar has no save status. */
 .top .save-status.autosaved,.top .save-status.unsaved{display:none}
 }
-/* Issue #453: at 360 px and narrower the bar's gaps and the Export label tighten, so the design name keeps a 44 px box on a 360 px screen. */
+/* At 360 px and narrower the bar's gaps and the Export label tighten, so the design name keeps a 44 px box on a 360 px screen. */
 @media (max-width:360px) and (orientation:landscape){
 .top{gap:2px;padding:0 4px}
 .top .edit-tools{gap:0}
@@ -669,21 +669,21 @@ input[type=checkbox]:not(.icon-check){width:24px;height:24px;min-width:24px;marg
 .top{gap:1px;padding:0 3px}
 .top .export-split #export{padding:0 2px}
 }
-/* Issue #453: the unsaved dot sits at the top of the name field, not centred in the bar, so it stays in the field's row. */
+/* The unsaved dot sits at the top of the name field, not centred in the bar, so it stays in the field's row. */
 .top .unsaved-marker:not([hidden]){align-self:flex-start;margin-top:6px}
 
-/* Issue #475 (spec #470 sections 1-3, 6-7): portrait tablets (601-1024 px wide, taller than wide) lay out as one screen with no page scroll:
+/* Portrait tablets (601-1024 px wide, taller than wide) lay out as one screen with no page scroll:
    a 56 px top bar (Menu, title, Undo, Redo, Save, Export, and the 2D / Stitches / 3D switch); a 64 px tool rail on the canvas's left edge with a
    label under each icon; the canvas; a 28 px status line; and a 300 px right inspector with Layers and Properties tabs at its top. The inspector
    never overlays the canvas, and its body scrolls inside itself. Collapsing it leaves a 44 px strip with the expand button. The zoom control
-   floats bottom-right in the canvas. Replaces the #455 drawer. Undo: restore the #455 block. */
+   floats bottom-right in the canvas. */
 .inspector-tabs{display:none}
 .rail-label{display:none}
 @media (min-width:601px) and (max-width:1024px) and (orientation:portrait){
 body{height:100vh;height:100dvh;min-height:0;overflow:hidden}
 /* The inspector is the containing block of its hidden selects (.sr-only is absolute), so they scroll with its body and not past the page. */
 .layout>#inspector{position:relative}
-/* Issue #483 (spec #470 section 5): a layer row's summary ("relleno · 1,102 puntadas") stays one line high, cut with an ellipsis, so it does not wrap in the narrow row. */
+/* A layer row's summary ("relleno · 1,102 puntadas") stays one line high, cut with an ellipsis, so it does not wrap in the narrow row. */
 .object-row .row-tag{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
 .top{height:56px;padding:0 8px;gap:6px}
 .top .logo,.top .sep,.top #new,.top #open,.top #importMachine,.top #duplicate,.top #remove,.top #helpBtn,.top #settingsBtn,
@@ -729,9 +729,8 @@ body{height:100vh;height:100dvh;min-height:0;overflow:hidden}
 .canvas .zoombar button{min-width:44px;height:44px;min-height:44px}
 .canvas .zoombar .icon-button{width:44px}
 .canvas .floating{left:72px;top:28px}
-/* Issue #480 (spec #470 section 3): every inspector and status-line control is 44x44 px to tap at tablet portrait. The glyph inside may stay
-   small; the element's box is the hit area. The status line grows from 28 to 44 px so the Messages button fits its height. Undo: delete
-   this block and restore the 28 px status line in the #475 block. */
+/* Every inspector and status-line control is 44x44 px to tap at tablet portrait. The glyph inside may stay
+   small; the element's box is the hit area. The status line grows from 28 to 44 px so the Messages button fits its height. */
 .layout main>footer{height:44px;min-height:44px}
 .layout main>footer .messages-btn{height:44px;min-height:44px;min-width:44px;padding:0 12px}
 .row-btn,.row-eye,.row-lock{width:44px;min-width:44px;height:44px;min-height:44px}
@@ -741,12 +740,12 @@ body{height:100vh;height:100dvh;min-height:0;overflow:hidden}
 .layout>#inspector .icon-check,.layout>#layersSheet .icon-check{width:44px!important;height:44px}
 }
 
-/* Issue #471: at phone portrait (600 px wide and narrower, taller than wide) the screen is fixed and the page never scrolls. From the
+/* At phone portrait (600 px wide and narrower, taller than wide) the screen is fixed and the page never scrolls. From the
    top: the top bar (52 px), the canvas (the rest; the only pannable and zoomable part), the contextual bar (52 px, shown only with a
    selection in the design view), the tool dock (56 px and the bottom safe area) and the status line (28 px). Outside the design view
    the stitch playback bar takes the contextual bar's row. The zoom buttons are a vertical stack at the canvas's bottom right. The grid,
    snap, view and sheet commands, and Messages, open from the Menu (MenuBar.tsx PhoneMenu). Landscape phones and tablets keep their own
-   layouts. Undo: restore the Issue #457 stack from git history. */
+   layouts. */
 .zoom-fit-icon{display:none}
 @media (max-width:600px) and (orientation:portrait){
 body{height:100vh;height:100dvh;min-height:0;overflow:hidden;overscroll-behavior:none}
@@ -781,9 +780,9 @@ body{height:100vh;height:100dvh;min-height:0;overflow:hidden;overscroll-behavior
 .layout main>.tool-rail{grid-row:3;position:static;inset:auto;z-index:auto;display:flex;flex-direction:row;flex-wrap:nowrap;align-items:center;justify-content:flex-start;align-content:center;gap:4px;width:auto;height:calc(56px + env(safe-area-inset-bottom));max-height:none;max-width:none;margin:0;padding:6px 8px calc(6px + env(safe-area-inset-bottom));box-sizing:border-box;overflow-x:auto;overflow-y:hidden;scrollbar-width:none;border:0;border-top:1px solid #e3e6e1;border-radius:0;background:#fff;box-shadow:none}
 .layout main>.tool-rail .icon-button{width:44px;min-width:44px;height:44px;flex:none}
 .layout main:has(.canvas.preview-mode)>.tool-rail{display:none}
-/* Issue #479 (part of #468; spec #470 sections 1-3): at phone portrait the dock is seven buttons on one row, each with its label under the
+/* At phone portrait the dock is seven buttons on one row, each with its label under the
    icon. The seven share the row at 44 px minimum, so the dock never scrolls sideways. More tools opens MoreToolsSheet, with Tools and Panels
-   groups. Undo: restore the #471 dock (icon-only, 44 px, overflow-x auto) and the phone sheet-btns in the dock. */
+   groups. */
 .layout main>.tool-rail{overflow:hidden;gap:2px}
 .layout main>.tool-rail .icon-button{display:flex;flex:1 1 0;flex-direction:column;align-items:center;justify-content:center;gap:2px;width:auto;min-width:44px;height:44px;min-height:44px;padding:0;overflow:hidden}
 .layout main>.tool-rail .icon-button .icon{width:20px;height:20px;flex:none}
@@ -799,26 +798,26 @@ body{height:100vh;height:100dvh;min-height:0;overflow:hidden;overscroll-behavior
 .layout main>footer{grid-row:4;position:relative;flex:none;height:28px;min-height:0;margin:0;padding:0 12px;box-sizing:border-box;display:flex;align-items:center;gap:8px;overflow:visible;background:#fff;border:0;border-top:1px solid #e3e6e1}
 .layout main>footer>:not(#count):not(#toast){display:none}
 .layout main>footer>#count{flex:1 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;line-height:26px;font-size:var(--fs-caption)}
-/* Issue #495 (spec #470 sections 1 and 6): toasts stack above the contextual bar, so they never cover the dock (56 px) or the bar (52 px)
+/* Toasts stack above the contextual bar, so they never cover the dock (56 px) or the bar (52 px)
    and the status line (28 px) stays the anchor: 28 + 56 + 52 + an 8 px gap. The dock and the bar never move. */
 #toast{bottom:144px;margin-bottom:0}
 }
 
 .tool-more{display:none}
-/* Issue #472 (part of #468; spec docs/mobile-editor-design.md sections 1, 2 and 6): a landscape phone (844x390, any landscape
+/* A landscape phone (844x390, any landscape
    window 500 px tall or less and 1000 px wide or less) uses fixed regions and never scrolls the page. From the top: the top bar
    (44 px), then the middle band between the top bar and the status line. In the band: a 56 px tool rail on the left, full height,
    and the canvas on the right. The status line is the bottom 44 px. Layers and Properties open as 320 px right-edge sheets over
    the canvas, from the buttons at the canvas's top-right, and never overlap the rail. Every visible control is 44 px square or
-   more. The rulers, the 2D / Stitches / 3D switch (Menu > View on phones) and the zoom and canvas toolbars move as the spec says.
-   Status line is 44 px, not the spec's 28 px: its Messages button is a 44 px control (section 3), so it cannot fit a 28 px row.
-   Desktop and the portrait layouts do not match this query, so they are unchanged. Undo: delete this block. */
+   more. The rulers, the 2D / Stitches / 3D switch (Menu > View on phones) and the zoom and canvas toolbars move with the layout.
+   Status line is 44 px, not 28 px: its Messages button is a 44 px control, so it cannot fit a 28 px row.
+   Desktop and the portrait layouts do not match this query, so they are unchanged. */
 @media (orientation:landscape) and (max-height:500px) and (max-width:1000px){
-/* Issue #478: the rail carries the Layers and Properties buttons on a landscape phone (spec #470 section 2, "Right sheet from rail"). */
+/* The rail carries the Layers and Properties buttons on a landscape phone. */
 .canvas .tool-rail .icon-button.phone-sheet-btn{display:inline-flex}
 /* The sheets are #layersSheet and #inspector: their id rules (tablet and desktop) outrank the classes above, so the landscape sheet sets its box again here. */
 .layout>#moreToolsSheet{display:none}
-/* Issue #494: the More tools sheet's grid is styled for portrait (above); a landscape sheet is 320 px wide, so its tools take three columns. */
+/* The More tools sheet's grid is styled for portrait (above); a landscape sheet is 320 px wide, so its tools take three columns. */
 .layout>#moreToolsSheet .more-heading{margin:8px 0 6px;font-size:13px;font-weight:600;line-height:1.2;color:#66726c;white-space:nowrap}
 .layout>#moreToolsSheet .more-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
 .layout>#moreToolsSheet .more-grid .icon-button{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;width:auto;min-width:44px;height:64px;min-height:44px;padding:4px;background:#f6f7f5;border:1px solid var(--field-line);border-radius:10px;color:#3c423e}
@@ -826,7 +825,7 @@ body{height:100vh;height:100dvh;min-height:0;overflow:hidden;overscroll-behavior
 .layout>#moreToolsSheet .more-grid .icon-button.active-tool{background:var(--teal-soft);border-color:var(--teal);color:var(--teal-deep)}
 .layout>#moreToolsSheet .rail-label{display:block;max-width:100%;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;font-size:12px;line-height:1.1}
 .layout>#layersSheet.sheet-open,.layout>#inspector.sheet-open,.layout>#moreToolsSheet.sheet-open{display:flex;flex-direction:column;position:fixed;top:44px;bottom:44px;left:auto;right:0;width:320px;height:auto;max-height:none;margin:0;padding:10px 12px 12px;overflow-y:auto;overscroll-behavior:contain;z-index:40;background:#fff;border:0;border-left:1px solid #e3e6e1;border-radius:0;box-shadow:-6px 0 24px #1d292533}
-/* Issue #488: the scrim starts past the 104 px rail (Issue #494 two-column rail) and below the 44 px top bar, so the rail's Layers and Properties buttons stay tappable while a sheet is open. */
+/* The scrim starts past the 104 px two-column rail and below the 44 px top bar, so the rail's Layers and Properties buttons stay tappable while a sheet is open. */
 .sheet-scrim{display:block;position:fixed;left:104px;right:0;bottom:0;top:44px;z-index:39;background:#1d292538}
 .layout>aside.panel.sheet-open [data-sheet-drag]{touch-action:pan-y}
 body{height:100dvh;min-height:0;overflow:hidden}
@@ -866,7 +865,7 @@ body{height:100dvh;min-height:0;overflow:hidden}
 .canvas #rulerTop,.canvas #rulerLeft,.canvas .ruler-corner{display:none}
 .canvas .canvas-views{display:none}
 .canvas .tool-rail{position:fixed;left:0;top:44px;bottom:44px;right:auto;z-index:6;width:104px;height:auto;max-height:none;margin:0;padding:6px;display:grid;grid-template-columns:44px 44px;grid-auto-rows:44px;grid-auto-flow:row;align-content:start;justify-content:center;gap:4px;border:0;border-radius:0;box-shadow:2px 0 8px rgba(0,0,0,.08);background:#fff;overflow:hidden;transform:none;order:0}
-/* Issue #494 (spec #470 sections 1, 2 and 6): the rail holds Layers, Properties, Choose, Shape, Path, Text, Line, Measure and More: nine
+/* On a landscape phone the rail holds Layers, Properties, Choose, Shape, Path, Text, Line, Measure and More: nine
    44 px cells in two columns, five rows, which fit the 302 px between the top bar and the status line with no scroll. Ellipse, Polygon,
    Star, Trace, Photo stitch and Pen are in More tools. Rail labels are hidden here: the icons are the cells, and each keeps its name. */
 .canvas .tool-rail .rail-label{display:none}
@@ -896,7 +895,7 @@ body{height:100dvh;min-height:0;overflow:hidden}
 .layout>.panel:last-child.sheet-open .sec-fold>summary,.layout>.panel:last-child.sheet-open .doc-settings>summary{display:flex;align-items:center}
 }
 
-/* Issue #474 (spec #470 sections 3 and 5): the phone Menu is a 44 px icon button in the top bar. It opens a full-height sheet that
+/* The phone Menu is a 44 px icon button in the top bar. It opens a full-height sheet that
    scrolls inside itself, so the page never scrolls. Every row is one line, with an icon, and at least 44 px tall. */
 .top .file-menu>button.menu-trigger{width:44px;min-width:44px;height:44px;min-height:44px;padding:0;justify-content:center}
 #phoneMenuList{position:fixed;top:52px;left:0;right:0;bottom:0;width:auto;min-width:0;max-height:none;height:auto;border:0;border-radius:0;box-shadow:none;padding:8px;overflow-y:auto;overscroll-behavior:contain;z-index:40}
@@ -906,22 +905,22 @@ body{height:100dvh;min-height:0;overflow:hidden}
 #phoneMenuList .menu-icon{flex:none;width:20px;height:20px}
 #phoneMenuList .menu-item small{flex:none;margin-left:auto;white-space:nowrap}
 #phoneMenuList .menu-heading{white-space:nowrap;padding:12px 10px 4px}
-/* Issue #495: the title row stays at the top of the list and takes a downward swipe that closes the Menu (MenuBar.tsx Dropdown). */
+/* The title row stays at the top of the list and takes a downward swipe that closes the Menu (MenuBar.tsx Dropdown). */
 #phoneMenuList .menu-title{position:sticky;top:-8px;z-index:1;display:flex;align-items:center;min-height:44px;margin:-8px -8px 4px;padding:0 18px;background:#fff;font-size:var(--fs-large);font-weight:var(--fw-emphasis);color:#243b32;touch-action:none;user-select:none;cursor:default}
 
-/* Issue #474: a landscape phone (height 500 px or less, up to 900 px wide, such as 844x390) shows the phone Menu too. Its top bar
+/* A landscape phone (height 500 px or less, up to 900 px wide, such as 844x390) shows the phone Menu too. Its top bar
    keeps Menu, the design name, Undo, Redo and Export, as the phone portrait bar does; New, Open, Import, Save and Duplicate are
    in the Menu's File and Edit groups. */
 @media (max-height:500px) and (max-width:900px){
 .top .logo,.top #new,.top #open,.top #importMachine,.top #save,.top #duplicate{display:none}
-/* Issue #483 (spec #470 section 5): on a landscape phone the Menu is one 320 px column of icon-and-label rows, not a full-width sheet. */
+/* On a landscape phone the Menu is one 320 px column of icon-and-label rows, not a full-width sheet. */
 #phoneMenuList{right:auto;width:320px;max-width:100vw}
-/* Issue #481: the Menu starts below the 44 px top bar, so a tap on the bar dismisses it, and the 2D / Stitches / 3D switch is in Menu > View only. */
+/* The Menu starts below the 44 px top bar, so a tap on the bar dismisses it, and the 2D / Stitches / 3D switch is in Menu > View only. */
 #phoneMenuList{top:44px}
 .canvas .canvas-views{display:none}
 }
 
-/* Issue #468 (spec sections 1, 2 and 7): the selection bar holds Select, Duplicate, Delete and Arrange at every size. Duplicate and Delete
+/* The selection bar holds Select, Duplicate, Delete and Arrange at every size. Duplicate and Delete
    sit in the bar up to 1024px, where the top bar hides them; from 1025px they stay in the top bar. The direct Align, Flip and Boolean
    buttons stay in the bar from 1025px; below that the Arrange sheet holds them. */
 .floating .bar-edit{display:none}
@@ -936,5 +935,5 @@ body{height:100dvh;min-height:0;overflow:hidden}
 .arrange-item:hover:not(:disabled),.arrange-item:focus-visible{background:var(--teal-soft);color:var(--teal-deep);outline:none}
 .arrange-item:disabled{color:#a3ada7;cursor:default}
 .arrange-item .icon{flex:none;width:20px;height:20px}
-/* Issue #489: the contextual bar stays hidden without a selection at every size below desktop. */
+/* The contextual bar stays hidden without a selection at every size below desktop. */
 .canvas .floating[hidden]{display:none}

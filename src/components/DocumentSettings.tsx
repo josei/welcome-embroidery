@@ -5,7 +5,7 @@ import {FABRIC_PROFILES} from '../engine.js';
 import {setFontsDialogOpen} from '../fontsDialogState.js';
 import {rangeText} from '../fieldRanges.js';
 
-// The units of these two fields are shown under them, not in the label, so the label fits the inspector's label column (issue #326).
+// The units of these two fields are shown under them, not in the label, so the label fits the inspector's label column.
 const TRIM_RANGE = {min: 2, max: 30};
 const COMP_RANGE = {min: 0, max: 2};
 // The document stitch settings panel, rendered by React. Ids match the markup it replaced, because app.js wires them by id.

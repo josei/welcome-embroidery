@@ -1,6 +1,6 @@
 import {test,expect} from '@playwright/test';
 
-// Issue #226: Up and Down step a numeric field by its own step, Shift is 10 times that and Alt a tenth, Ctrl does nothing,
+// Up and Down step a numeric field by its own step, Shift is 10 times that and Alt a tenth, Ctrl does nothing,
 // and dragging a field's label scrubs it. A scrub or a typed value commits once, so one Undo reverts it.
 const newDesign=async page=>{await page.locator('#new').click();if(await page.locator('#discardDialog[open]').count())await page.locator('#discardDiscard').click();};
 

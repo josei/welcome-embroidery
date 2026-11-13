@@ -3,7 +3,7 @@ import {createStore} from './store.js';
 
 /**
  * Which sheet is open at phone size: Layers, Properties, or neither. Only one sheet is open at a time, so opening one closes the
- * other. The sheets are hidden by CSS everywhere else, so this value has no effect there (issue #473).
+ * other. The sheets are hidden by CSS everywhere else, so this value has no effect there.
  */
 export type PhoneSheet = 'none' | 'layers' | 'properties' | 'tools';
 export const phoneSheetState = createStore<PhoneSheet>('none');
@@ -42,7 +42,7 @@ function subscribePhone(onChange: () => void) {
   return () => query.removeEventListener('change', onChange);
 }
 
-/** Issue #474: the phone Menu shows at phone widths and on a landscape phone (height 500 px or less, up to 900 px wide, such as
+/** The phone Menu shows at phone widths and on a landscape phone (height 500 px or less, up to 900 px wide, such as
  * 844x390). Layers and Properties keep the 600 px breakpoint above. */
 const PHONE_MENU_QUERY = '(max-width: 600px), (max-height: 500px) and (max-width: 900px)';
 function subscribePhoneMenu(onChange: () => void) {

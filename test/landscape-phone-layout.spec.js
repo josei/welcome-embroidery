@@ -1,6 +1,6 @@
 import {test,expect} from '@playwright/test';
 
-// Issue #472 (spec docs/mobile-editor-design.md sections 1, 2 and 6): at 844x390 landscape the page never scrolls, every visible
+// At 844x390 landscape the page never scrolls, every visible
 // control is at least 44x44, the Layers header stays within two lines, and the regions (top bar, tool rail, canvas, status line,
 // right-edge sheets) do not overlap each other or the canvas controls. Desktop at 1280 px is not affected.
 const LANDSCAPE=[844,390];
@@ -111,7 +111,7 @@ for(const lang of ['en','es']){
  });
 }
 
-// Issue #494 (spec #470 sections 1, 2 and 6): the rail fills the window between the top bar and the status line, every cell is at
+// On a landscape phone the rail fills the window between the top bar and the status line, every cell is at
 // least 44 px, and at rest the nine cells fit with no scroll. More tools is the last cell and opens the sheet with the tools that do not fit.
 for(const lang of ['en','es']){
  test(`the rail fills the height below the top bar, fits without scrolling, and has no overlapping cells (${lang})`,async({page})=>{
@@ -171,7 +171,7 @@ test('desktop at 1280x800 is not a landscape phone layout',async({page})=>{
  expect(r).not.toBe('fixed');
 });
 
-// Issue #483 (part of #468; spec #470 sections 1 and 5): three polish items from the #476 check.
+// Landscape phone Menu and sheet details, checked together.
 test('the landscape Menu is a 320 px column, and each label starts within 16 px of its icon (en)',async({page})=>{
  await openEditor(page,...LANDSCAPE,'en');
  await page.locator('#phoneMenu').click();
@@ -217,7 +217,7 @@ test('a Spanish layer row summary stays one line high at 768x1024',async({page})
  for(const h of heights) expect(h).toBe(1);
 });
 
-// Issue #493 (spec #470 section 4): a landscape right sheet closes on a tap on the canvas outside it. The scrim covers that area while
+// A landscape right sheet closes on a tap on the canvas outside it. The scrim covers that area while
 // the sheet is open, is hidden from assistive tech (aria-hidden), and a tap on it closes the sheet. Run with a fine pointer, as on the
 // desktop-sized check of the sheet layout (the scrim used to show only with a coarse pointer).
 const CANVAS_TAPS=[[200,150],[300,250],[420,120]];

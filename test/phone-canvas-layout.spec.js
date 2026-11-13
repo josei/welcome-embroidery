@@ -1,6 +1,6 @@
 import {test,expect} from '@playwright/test';
 
-// Issue #457: at phone portrait (600 px wide and narrower) the canvas takes the full width and at least 55% of the height with no
+// At phone portrait (600 px wide and narrower) the canvas takes the full width and at least 55% of the height with no
 // sheet open, and no control sits over it. The tools, the zoom bar, the canvas actions and the Layers and Properties bar sit in a
 // stack under the canvas, and the 2D, Stitches and 3D tabs move to the Menu's View section. With Layers open the canvas still shows
 // at least 40% of the screen. Every tool, zoom action, tab and sheet button is at least 44 px square.

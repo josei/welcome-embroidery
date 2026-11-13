@@ -91,7 +91,7 @@ export function createCanvasTools(api){
       return;
     }
     // Selected in both fields, as lettering is: the inspector reads the multi-selection, so the thread and stitch controls show.
-    // Placement: see newShapePlacement.js (issue #280). Successive adds take the next free slot beside the others.
+    // Placement: see newShapePlacement.js. Successive adds take the next free slot beside the others.
     const doc=documentNow().doc;
     const spot=newShapeSpot(doc.objects,hoopSize(doc),24,16);
     api.commit([{op:'add_shape',id,kind,name:kind==='ellipse'?'Ellipse':'Rectangle',x:spot.x,y:spot.y,width:24,height:16,

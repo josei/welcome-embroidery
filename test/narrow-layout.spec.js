@@ -1,8 +1,8 @@
 import {test,expect} from '@playwright/test';
 
-// Issue #208 (from audit #162, finding 9): at narrow widths the top bar stays on one row with its controls whole, and every
+// At narrow widths the top bar stays on one row with its controls whole, and every
 // panel header lines up with the body it heads, at 1920, 1024 and 760px.
-// A portrait tablet (#475) keeps New design in the Menu, so the top bar's New button is used only where it is shown.
+// A portrait tablet keeps New design in the Menu, so the top bar's New button is used only where it is shown.
 const newDesign=async page=>{if(await page.locator('#new').isVisible())await page.locator('#new').click();else{await page.locator('#phoneMenu').click();await page.locator('#menuNew').click();}if(await page.locator('#discardDialog[open]').count())await page.locator('#discardDiscard').click();};
 
 test.beforeEach(async({page})=>{await page.addInitScript(()=>{delete window.showSaveFilePicker;});});
@@ -21,7 +21,7 @@ for(const width of [1920,1024,760]){
   };
   // The object list heading and the list below it.
   await expectAligned(page.locator('.layers-head'),page.locator('#objects'),`layers head at ${width}px`);
-  // The inspector: its heading and the Sewing order fold line up with the inspector's body text. A portrait tablet starts with it closed (#455), so open it first.
+  // The inspector: its heading and the Sewing order fold line up with the inspector's body text. A portrait tablet starts with it closed, so open it first.
   if(await page.locator('.inspector-tab[data-tab=properties]').isVisible())await page.locator('.inspector-tab[data-tab=properties]').click();
   await expectAligned(page.locator('#selected'),page.locator('#stats'),`inspector heading at ${width}px`);
   await expectAligned(page.locator('#secOrder > summary'),page.locator('#stats'),`sewing order header at ${width}px`);
@@ -66,7 +66,7 @@ test('the top bar stays on one row at 760px and the title gives way first',async
  expect(errors).toEqual([]);
 });
 
-// Issue #238 (from audit #167 finding 4): a drag that starts on the canvas or a ruler, from any edge, does not select the page text
+// A drag that starts on the canvas or a ruler, from any edge, does not select the page text
 // around it (the zoom bar and the status line). The drag still runs on the canvas, so the marquee is not the thing being tested.
 test('a drag from any canvas or ruler edge does not select page text',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));
@@ -86,7 +86,7 @@ test('a drag from any canvas or ruler edge does not select page text',async({pag
  expect(errors).toEqual([]);
 });
 
-// Issue #238 (from audit #167 finding 3 and audit #277 finding 7): with a 100-object design at 1440x900, the status bar's readouts
+// With a 100-object design at 1440x900, the status bar's readouts
 // do not overlap one another or the simulation summary, in the stitch view and the 3D view, in English and Spanish.
 test('status bar readouts do not overlap at 1440x900 with 100 objects, in stitch and 3D views',async({page})=>{
  test.setTimeout(120000);
@@ -121,7 +121,7 @@ test('status bar readouts do not overlap at 1440x900 with 100 objects, in stitch
  expect(errors).toEqual([]);
 });
 
-// Issue #319: with an object selected, an inspector field is reachable without scrolling the page past the canvas. At 1024x700 the
+// With an object selected, an inspector field is reachable without scrolling the page past the canvas. At 1024x700 the
 // inspector is a column beside the canvas (the page does not scroll); at 1440x900 it stays the desktop column.
 for(const [width,height] of [[1024,700],[1440,900]]){
  test(`an inspector field is in view without page scroll at ${width}x${height}`,async({page})=>{
@@ -156,7 +156,7 @@ for(const [width,height] of [[1024,700],[1440,900]]){
  });
 }
 
-// Issue #437: on a phone (375 and 390px, portrait, touch) the page fits the window in English and Spanish, the top bar stays on one row,
+// On a phone (375 and 390px, portrait, touch) the page fits the window in English and Spanish, the top bar stays on one row,
 // and the Undo, Redo and Export controls are inside the window and clickable.
 for(const width of [375,390]) for(const lang of ['en','es']){
  test(`the phone top bar fits on one row at ${width}px in ${lang}`,async({page})=>{
@@ -171,11 +171,11 @@ for(const width of [375,390]) for(const lang of ['en','es']){
    const kids=[...top.children].filter(e=>!e.classList.contains('sr-only')&&e.getBoundingClientRect().width>0);
    return {tops:kids.map(e=>e.getBoundingClientRect().top),height:top.getBoundingClientRect().height,overflow:top.scrollWidth-top.clientWidth};
   });
-  // One row, no taller than the phone top bar (52px, Issue #471), and nothing scrolls sideways inside the bar.
+  // One row, no taller than the phone top bar, and nothing scrolls sideways inside the bar.
   for(const t of info.tops) expect(Math.abs(t-info.tops[0]),'child top within the bar row').toBeLessThan(12);
   expect(info.height,'bar height is one row').toBeLessThanOrEqual(52);
   expect(info.overflow,'no horizontal overflow in the bar').toBeLessThanOrEqual(0);
-  // Undo, Redo and Export are inside the window and are the element at their own centre (nothing covers them). Delete moved to the Menu (Issue #454).
+  // Undo, Redo and Export are inside the window and are the element at their own centre (nothing covers them). Delete moved to the Menu.
   for(const id of ['#undo','#redo','#export']){
    const box=await page.locator(id).boundingBox();expect(box,id).not.toBeNull();
    expect(box.x,`${id} left edge inside the window`).toBeGreaterThanOrEqual(0);
@@ -187,7 +187,7 @@ for(const width of [375,390]) for(const lang of ['en','es']){
  });
 }
 
-// Issue #438 (from #430): at 1024x768 no two inspector controls sit on top of each other, in English or Spanish. Closed sections
+// At 1024x768 no two inspector controls sit on top of each other, in English or Spanish. Closed sections
 // (Document stitch settings, Thread plan) take no room, so the controls below them are not pushed onto their hidden boxes.
 const boxIn=(page,sel)=>page.evaluate(s=>{const e=document.querySelector(s);if(!e)return null;const sc=document.getElementById('inspector');const b=sc.getBoundingClientRect();const r=e.getBoundingClientRect();if(!r.width||!r.height)return null;return {l:r.left,t:r.top-b.top+sc.scrollTop,r:r.right,b:r.bottom-b.top+sc.scrollTop};},sel);
 const meets=(a,b)=>a.l<b.r&&b.l<a.r&&a.t<b.b&&b.t<a.b;
@@ -227,7 +227,7 @@ for(const lang of ['en','es']){
   expect(errors).toEqual([]);
  });
 }
-// Issue #440: on a landscape phone (667x375 and 844x390, touch) the page fits the window in English and Spanish, the top bar stays on one
+// On a landscape phone (667x375 and 844x390, touch) the page fits the window in English and Spanish, the top bar stays on one
 // row, and the tool column is icons only. Each tool keeps its accessible name, so a screen reader still announces it.
 test.describe('landscape phone',()=>{
 test.use({isMobile:true,hasTouch:true});

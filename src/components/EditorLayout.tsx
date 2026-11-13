@@ -73,7 +73,7 @@ const subscribeNarrow = (listen: () => void) => {
  return () => media.removeEventListener('change', listen);
 };
 const narrowNow = () => window.matchMedia(NARROW_QUERY).matches;
-// Issue #494 (spec #470 sections 1 and 2): a landscape phone, where the tool rail is a two-column grid inside the window and More tools
+// A landscape phone, where the tool rail is a two-column grid inside the window and More tools
 // opens the More tools sheet. Same window as the landscape block in styles.css.
 const LANDSCAPE_PHONE_QUERY = '(orientation: landscape) and (max-height: 500px) and (max-width: 1000px)';
 const subscribeLandscapePhone = (listen: () => void) => {
@@ -102,13 +102,13 @@ export function EditorLayout() {
  const landscapePhone = useSyncExternalStore(subscribeLandscapePhone, landscapePhoneNow);
  const selection = useSyncExternalStore(selectionState.subscribe, selectionState.get);
  const hasSelection = selection.selected !== null || selection.multi.size > 0;
- // Issue #489 (spec section 2): on a landscape phone the selection bar is contextual, so it is shown only with a selection.
+ // On a landscape phone the selection bar is contextual, so it is shown only with a selection.
  const narrow = useSyncExternalStore(subscribeNarrow, narrowNow);
  const selectionLabels = useSyncExternalStore(selectionLabelsState.subscribe, selectionLabelsState.get);
  const view = useSyncExternalStore(viewMode.subscribe, viewMode.get);
  const snapping = useSyncExternalStore(gridSnapState.subscribe, gridSnapState.get);
  const gridShown = useSyncExternalStore(gridShownState.subscribe, gridShownState.get);
- // Spec #468 section 2 and 6: at phone and tablet widths the grid and snap chips are not on the canvas; the View menu holds them.
+ // At phone and tablet widths the grid and snap chips are not on the canvas; the View menu holds them.
  const compact = useCompactLayout();
  const editing = useSyncExternalStore(editModeState.subscribe, editModeState.get);
  const hand = useSyncExternalStore(handModeState.subscribe, handModeState.get);
@@ -122,7 +122,7 @@ export function EditorLayout() {
   const detach = [layersSheet.current, inspectorSheet.current, toolsSheet.current].map(el => el && attachSheetDrag(el));
   return () => detach.forEach(off => off?.());
  }, []);
- // Issue #473: an open sheet takes focus on its first control, and Escape closes it. Closing returns focus to the opener (closePhoneSheet).
+ // An open sheet takes focus on its first control, and Escape closes it. Closing returns focus to the opener (closePhoneSheet).
  useEffect(() => {
   if (phoneSheet === 'none') return;
   const sheet = document.getElementById(phoneSheet === 'layers' ? 'layersSheet' : phoneSheet === 'tools' ? 'moreToolsSheet' : 'inspector');
@@ -137,7 +137,7 @@ export function EditorLayout() {
  }, [phoneSheet]);
  const canvasClass = ['canvas', hand && 'hand', snapping && 'snapping', (gridShown || snapping) && 'grid-shown', view === 'preview' && 'preview-mode', panning && 'panning',
   deletingGuide && 'deleting-guide'].filter(Boolean).join(' ');
- // Issue #479 (spec #470 section 1): at phone portrait the dock is one row of seven buttons, each with its label under the icon. Pen,
+ // At phone portrait the dock is one row of seven buttons, each with its label under the icon. Pen,
  // Polygon, Star, Trace, Photo stitch, Ellipse and the panels are in More tools (MoreToolsSheet), so nothing scrolls sideways.
  const phoneDock = (
    <div className={"tool-row tool-rail"} aria-label={"Tools"}>
@@ -168,7 +168,7 @@ export function EditorLayout() {
    <>
              <div className={"tool-row tool-rail"} aria-label={"Tools"}>
                {phone ? null : <>
-               {/* Issue #473: on a phone the dock (portrait) or rail (landscape) opens Layers and Properties as sheets. */}
+               {/* On a phone the dock (portrait) or rail (landscape) opens Layers and Properties as sheets. */}
                <button type="button" className={"icon-button phone-sheet-btn"} id={"layersBtn"} aria-label={t('Layers')} title={t('Layers')} data-tooltip={t('Layers')}
                 aria-expanded={phoneSheet === 'layers'} aria-controls={"layersSheet"} onClick={() => togglePhoneSheet('layers')}>
                 <svg className={"icon"}><use href={"#i-layers"} /></svg>
@@ -198,7 +198,7 @@ export function EditorLayout() {
                </button>}
                {landscapePhone ? null : <PhotoStitch />}
                {landscapePhone ? null : <PenTool />}
-               {/* Issue #494: on a landscape phone More tools is the last cell of the rail, and opens the More tools sheet with the tools that do not fit. */}
+               {/* On a landscape phone More tools is the last cell of the rail, and opens the More tools sheet with the tools that do not fit. */}
                {landscapePhone ? <button
                  type={"button"}
                  className={"icon-button tool-more"}
@@ -220,7 +220,7 @@ export function EditorLayout() {
  const toolRail = phone ? phoneDock : deskToolRail;
  const floatingBar = (
              <div className={"floating"} role={"toolbar"} aria-label={"Canvas tools"} hidden={phone ? (view !== 'design' || !hasSelection) : (narrow && !hasSelection)}>
-               {/* Specs #468 sections 1, 2 and 7: Select, Duplicate, Delete and Arrange lead the bar, so they stay in view at phone widths. */}
+               {/* Select, Duplicate, Delete and Arrange lead the bar, so they stay in view at phone widths. */}
                <SelectToggleButton />
                <ActionButton flag="duplicate" className={"icon-button bar-edit"} id={"barDuplicate"} aria-label={duplicateLabel} title={duplicateLabel}
                  data-tooltip={duplicateLabel} onClick={() => toolbarActions.duplicate()}>
@@ -342,7 +342,7 @@ export function EditorLayout() {
         <ObjectList />
         {hoopInProperties ? null : <HoopFields />}
       </aside>
-      {/* Issue #475: on a portrait tablet the Layers and Properties tabs sit at the top of the inspector column; the panels below them switch. */}
+      {/* On a portrait tablet the Layers and Properties tabs sit at the top of the inspector column; the panels below them switch. */}
       <div className={"inspector-tabs"} role={"tablist"} aria-label={t('Inspector')}>
         <button type={"button"} role={"tab"} className={"inspector-tab"} data-tab={"layers"} id={"tabLayers"} aria-selected={inspectorTab === 'layers'}
          aria-controls={"layersSheet"} onClick={() => selectInspectorTab('layers')}>{t('Layers')}</button>
@@ -356,11 +356,11 @@ export function EditorLayout() {
       {phone || landscapePhone ? <MoreToolsSheet asideRef={toolsSheet} open={phoneSheet === 'tools'} detent={detent} /> : null}
       <main className={view === 'design' ? 'design-view' : undefined}>
         <div className={canvasClass} onClick={(e) => {
-          // Issue #455: on a portrait tablet a tap on the canvas closes the Properties drawer (controls inside the canvas keep it open).
+          // On a portrait tablet a tap on the canvas closes the Properties drawer (controls inside the canvas keep it open).
           if (inspectorOpen && window.matchMedia(TABLET_DRAWER_QUERY).matches && !(e.target as Element).closest('button,input,select,textarea,label,a')) toggleInspectorOpen();
         }}>
           {phone ? null : toolRail}
-          {/* Issue #475: on a portrait tablet the 2D / Stitches / 3D switch is in the top bar, not over the canvas. */}
+          {/* On a portrait tablet the 2D / Stitches / 3D switch is in the top bar, not over the canvas. */}
           {tablet ? null : <div className={"canvas-views"}>
             <ViewSwitch />
           </div>}

@@ -6,7 +6,7 @@ import {shortcutFor} from '../shortcutTable.js';
 import {PhotoStitch} from './PhotoStitch';
 import {AddShapeButton, PenTool, PolygonTool, StarTool} from './ToolButtons';
 
-// Issue #479 (part of #468, spec #470 sections 1 and 2): at phone portrait the tool dock holds seven buttons on one row, and More tools
+// At phone portrait the tool dock holds seven buttons on one row, and More tools
 // opens this one sheet. Its two groups are Tools (the drawing and tracing tools that do not fit the dock) and Panels (Layers and
 // Properties, which are sheets of their own). A tool closes the sheet when it is pressed; a panel swaps the sheet for its own.
 // Rendered only at phone portrait, where styles.css shows it as a bottom sheet.

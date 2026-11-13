@@ -1,6 +1,6 @@
 import {test,expect} from '@playwright/test';
 
-// Type scale (issue #210, from audit #162): the editor uses a small set of named font sizes and two weights, all defined once
+// Type scale: the editor uses a small set of named font sizes and two weights, all defined once
 // as CSS variables in styles.css. This counts what the main screen actually computes, so a stray size fails here.
 const newDesign=async page=>{await page.locator('#new').click();if(await page.locator('#discardDialog[open]').count())await page.locator('#discardDiscard').click();};
 

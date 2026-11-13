@@ -1,6 +1,6 @@
 import {test,expect} from '@playwright/test';
 
-// Issue #492 (spec #468 sections 2 and 6): at phone and tablet widths the grid and snap chips are not on the canvas. Grid, Snap and
+// At phone and tablet widths the grid and snap chips are not on the canvas. Grid, Snap and
 // Snap to objects are in the View menu (the phone Menu, or the View menu on a desktop-style header), and each toggle reports its
 // state with aria-pressed. At 1280 px the desktop toolbar keeps its chips.
 const SIZES=[{width:844,height:390},{width:768,height:1024}];

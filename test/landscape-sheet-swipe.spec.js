@@ -1,6 +1,6 @@
 import {test,expect} from '@playwright/test';
 
-// Issue #488 (part of #468, section 4): on a landscape phone (844x390) a right-edge sheet closes on a rightward swipe of at least
+// On a landscape phone (844x390) a right-edge sheet closes on a rightward swipe of at least
 // 80 px on its head, and on a tap on the dimmed area. With Properties open, the rail's Layers button is reachable and swaps the sheet.
 test.beforeEach(async({page})=>{await page.addInitScript(()=>{delete window.showSaveFilePicker;});});
 test.use({viewport:{width:844,height:390},hasTouch:true});
@@ -77,7 +77,7 @@ test('tapping the dimmed area closes the open sheet',async({page})=>{
  await expect(sheetOf(page)).toHaveCount(0);
 });
 
-// Issue #488 regression guard: the landscape-only scrim offset must not reach portrait, where the scrim has to cover the full
+// Regression guard: the landscape-only scrim offset must not reach portrait, where the scrim has to cover the full
 // width so a tap on its left strip still dismisses the open bottom sheet.
 test.describe('portrait phone',()=>{
  test.use({viewport:{width:390,height:844},hasTouch:true});

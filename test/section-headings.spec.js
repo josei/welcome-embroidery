@@ -1,6 +1,6 @@
 import {test,expect} from '@playwright/test';
 
-// Issue #323: every section heading in the inspector and side panels uses one text style, and collapsible sections show a
+// Every section heading in the inspector and side panels uses one text style, and collapsible sections show a
 // disclosure triangle while plain headings show none. This lists each visible heading with its computed style and fails when
 // one differs from the shared style, so a new heading in a different treatment fails here.
 // The selected object's name (#selected) is the inspector title, not a section heading, so it is left out.
@@ -26,7 +26,7 @@ const headings=page=>page.evaluate(()=>{
  return out;
 });
 
-test('section headings share one style and only collapsible ones show a triangle (#323)',async({page})=>{
+test('section headings share one style and only collapsible ones show a triangle',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));page.on('dialog',d=>d.accept());
  await page.goto('/');await newDesign(page);await page.locator('#rect').click();
  for(const sum of await page.locator('details > summary:visible').all())await sum.click().catch(()=>{});

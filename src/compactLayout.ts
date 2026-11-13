@@ -1,7 +1,7 @@
 import {useSyncExternalStore} from 'react';
 
 // Phone and tablet widths, landscape phones included (a 932x430 phone is wider than the phone-menu breakpoint). At these widths the
-// grid and snap controls leave the canvas and live in the View menu (spec #468 sections 2 and 6).
+// grid and snap controls leave the canvas and live in the View menu.
 const COMPACT_QUERY = '(max-width: 1100px)';
 
 function subscribe(onChange: () => void) {

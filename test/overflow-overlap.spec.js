@@ -1,6 +1,6 @@
 import {test,expect} from '@playwright/test';
 
-// Issue #451 (from audit #449): the standing overflow and overlap check. At each width and locale the page never scrolls sideways,
+// The standing overflow and overlap check. At each width and locale the page never scrolls sideways,
 // and the visible boxes in the top bar do not overlap. Checked on the first screen, and again with Layers and Properties open.
 // 768x1024 is the tablet width that scrolled sideways in Spanish (the top bar's name and save status squeezed the row 11 px too wide).
 const viewports=[[768,1024],[820,1180],[1024,768],[390,844],[844,390]];
@@ -33,9 +33,9 @@ const topBarOverlaps=page=>page.evaluate(()=>{
  return bad;
 });
 
-// Issue #487 (spec #470 sections 1 and 6): on a tablet the page never scrolls. Only the canvas and the inspector body scroll, so the
+// On a tablet the page never scrolls. Only the canvas and the inspector body scroll, so the
 // document is exactly one window tall and wide, and a scroll request leaves it at the top. Every inspector section (Stitch too) sits
-// inside the inspector's own scroll range, so it can be reached by scrolling the inspector body. Checked on portrait tablets (#475 layout);
+// inside the inspector's own scroll range, so it can be reached by scrolling the inspector body. Checked on portrait tablets;
 // a landscape tablet keeps its three columns and is not part of this rule yet.
 const expectNoPageScroll=async(page,where,w,h)=>{
  if(!(w>600&&w<=1024&&h>w))return;
@@ -73,11 +73,11 @@ for(const [w,h] of viewports){
    const errors=[];page.on('pageerror',e=>errors.push(e.message));page.on('dialog',d=>d.accept());
    await page.setViewportSize({width:w,height:h});
    await page.goto(`/?lang=${lang}`);
-   // A portrait tablet keeps New design in the Menu (#475), so the top bar's New button is used only where it is shown.
+   // A portrait tablet keeps New design in the Menu, so the top bar's New button is used only where it is shown.
    if(await page.locator('#new').isVisible())await page.locator('#new').click();else{await page.locator('#phoneMenu').click();await page.locator('#menuNew').click();}
    if(await page.locator('#discardDialog[open]').count())await page.locator('#discardDiscard').click();
    // Layers is the object list, always open at this width. On a phone it is a sheet: a portrait phone opens it from the Menu,
-   // a landscape phone from its rail button (#473, #474).
+   // a landscape phone from its rail button.
    const portrait=await page.evaluate(()=>matchMedia('(max-width:600px) and (orientation:portrait)').matches);
    const openSheet=async sheet=>{
     if(portrait){await page.locator('#phoneMenu').click();await page.locator(sheet==='layers'?'#menuLayers':'#menuProperties').click();}
@@ -87,7 +87,7 @@ for(const [w,h] of viewports){
    await page.locator('#rect').click();
    if(portrait||await page.locator('#layersBtn').isVisible())await openSheet('layers');
    await expect(page.locator('#objects')).toBeVisible();
-   // A portrait tablet folds Properties away when it starts (#455): open it from the Properties button, which swaps with the object list.
+   // A portrait tablet folds Properties away when it starts: open it from the Properties button, which swaps with the object list.
    if(await page.locator('.inspector-tab[data-tab=properties]').isVisible())await page.locator('.inspector-tab[data-tab=properties]').click();
    // On a phone, selecting an object may already have opened Properties; if not, open it from its sheet.
    else if(!(await page.locator('#stats').isVisible()))await openSheet('properties');

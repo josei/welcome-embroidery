@@ -36,7 +36,7 @@ const KNOWN_FAILING={
 
 const base=()=>{const d=initialDocument();d.objects=[];return d;};
 
-// The four fixed designs from the round-trip audit (#294).
+// The four fixed designs from the round-trip audit.
 const DESIGNS={
   'path monogram':()=>{const d=base();d.objects=[{id:'m1',name:'M',kind:'path',closed:false,smooth:false,x:0,y:0,w:0,h:0,points:[[-20,-20],[-20,20],[0,0],[20,-20],[20,20]],thread:RED,stitch:'run'}];return d;},
   'fill plus satin':()=>{const d=base();d.objects=[{id:'f',name:'F',kind:'rect',x:-30,y:-15,w:25,h:30,thread:RED,stitch:'fill'},{id:'s',name:'S',kind:'path',closed:false,x:0,y:0,w:0,h:0,points:[[5,-15],[35,15]],thread:ROSE,stitch:'satin'}];return d;},

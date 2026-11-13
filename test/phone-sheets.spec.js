@@ -1,6 +1,6 @@
 import {test,expect} from '@playwright/test';
 
-// Issue #473 (part of #468, section 4 of docs/mobile-editor-design.md): at phone size Layers and Properties open as sheets from the
+// At phone size Layers and Properties open as sheets from the
 // dock (portrait) or the rail (landscape). No large mode buttons remain. A sheet has no Close button: it closes by a downward drag on
 // its grab handle or title row, a tap on the dimmed area, Escape, or the system back action. Portrait sheets have three detents
 // (peek 120 px, half 50%, full below the top bar), and a dock open starts at half. Only one sheet is open at a time, and opening Menu
@@ -74,7 +74,7 @@ for(const layout of LAYOUTS){
     await expect(page.locator(menuSelector()).first()).toBeVisible();
     // No large mode buttons: the old bar under the canvas is gone.
     await expect(page.locator('.sheet-bar')).toHaveCount(0);
-    // Menu opens below the top bar, so a tap on the top bar (outside the sheet) dismisses it. No Close button (Issue #481).
+    // Menu opens below the top bar, so a tap on the top bar (outside the sheet) dismisses it. No Close button.
     const menu=page.locator(menuSelector()).first();
     await menu.click();
     await expect(menu).toHaveAttribute('aria-expanded','true');
@@ -185,7 +185,7 @@ for(const layout of LAYOUTS){
    await page.goto('/?lang=en');
    await openSheet(page,'layers');
    const box=await sheetOf(page).boundingBox();
-   // A landscape sheet (#478) runs from the top bar to the status line, so it stops 44 px above the bottom edge.
+   // A landscape sheet runs from the top bar to the status line, so it stops 44 px above the bottom edge.
    expect(Math.round(box.y+box.height),'sheet bottom edge').toBe(layout.width>layout.height?layout.height-44:layout.height);
    expect(box.x,'sheet left edge').toBe(layout.width>layout.height?layout.width-320:0);
    expect(box.width).toBe(layout.width>layout.height?320:layout.width);
@@ -227,7 +227,7 @@ test.describe('portrait detents and swipe',()=>{
  });
 });
 
-// Issue #495 (spec #470 sections 1, 4 and 6): the phone Menu is full height with no grab handle, so a downward swipe on its title row
+// The phone Menu is full height with no grab handle, so a downward swipe on its title row
 // closes it, at both phone sizes. A swipe from the list or the search field scrolls or does nothing. Escape and the Menu button still close it.
 // A toast at 390x844 stacks above the contextual bar, so it never covers the dock or the bar.
 for(const layout of LAYOUTS){

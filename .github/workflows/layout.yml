@@ -1,6 +1,6 @@
 name: Layout
 
-# Issue #437: the narrow-layout browser tests (including the phone-width top bar check) run on every pull request and on pushes to main.
+# The narrow-layout browser tests (including the phone-width top bar check) run on every pull request and on pushes to main.
 
 on:
   push:

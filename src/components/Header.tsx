@@ -58,7 +58,7 @@ function HistoryButton({undo = false}: {undo?: boolean}) {
 function SaveStatus() {
  const {dirty} = useSyncExternalStore(documentState.subscribe, documentState.get);
  const {savedAt, savedFileName} = useSyncExternalStore(saveState.subscribe, saveState.get);
- // The status slot is always rendered (issue #435), so the bar keeps its shape as the state changes: a clean design that has not been saved
+ // The status slot is always rendered, so the bar keeps its shape as the state changes: a clean design that has not been saved
  // shows the same autosave words as a dirty one, with no unsaved marker.
  const text = saveStatusWords(dirty, savedAt, savedFileName, t);
  if (dirty) {
@@ -102,9 +102,9 @@ function withKeys(name: string, command: string) {
 // because app.js wires its controls by id.
 export function Header() {
  const phone = usePhoneMenu();
- // Issue #475: a portrait tablet gets the phone Menu (one Menu button, not the three desktop menus) and the view switch in the top bar.
+ // A portrait tablet gets the phone Menu (one Menu button, not the three desktop menus) and the view switch in the top bar.
  const tablet = useTabletPortrait();
- // Grid and snap leave the canvas at compact widths, so the desktop menus gain a View menu for them (spec #468 section 6).
+ // Grid and snap leave the canvas at compact widths, so the desktop menus gain a View menu for them.
  const compact = useCompactLayout();
  // The toolbar Save names the action and its shortcut, the same label the File menu and shortcut sheet use.
  const saveLabel = `${t('Save')} (${shortcutLabel([{mod: true, key: 'S'}])})`;
