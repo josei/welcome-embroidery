@@ -41,10 +41,10 @@ test('the top bar stays on one row at 760px and the title gives way first',async
  const info=await bar.evaluate(top=>{
   // The visually hidden page title (sr-only) is not part of the visible row.
   const kids=[...top.children].filter(e=>!e.classList.contains('sr-only')&&e.getBoundingClientRect().width>0);
-  return {tops:kids.map(e=>e.getBoundingClientRect().top),height:top.getBoundingClientRect().height,overflow:top.scrollWidth-top.clientWidth};
+  return {tops:kids.map(e=>{const r=e.getBoundingClientRect();return r.top+r.height/2;}),height:top.getBoundingClientRect().height,overflow:top.scrollWidth-top.clientWidth};
  });
- // One row: every visible child sits on the same line (a wrapped row would sit lower).
- for(const t of info.tops) expect(Math.abs(t-info.tops[0]),'child top within the bar row').toBeLessThan(12);
+ // One row: every visible child is centred on the same line (a wrapped row would sit lower).
+ for(const t of info.tops) expect(Math.abs(t-info.tops[0]),'child centre within the bar row').toBeLessThan(12);
  expect(info.height,'bar height is one row').toBeLessThanOrEqual(58);
  expect(info.overflow,'no horizontal overflow').toBeLessThanOrEqual(0);
  // The title is the element that gives way, and it shows an ellipsis rather than clipping the text.

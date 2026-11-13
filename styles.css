@@ -689,7 +689,8 @@ body{height:100vh;height:100dvh;min-height:0;overflow:hidden}
 .top .logo,.top .sep,.top #new,.top #open,.top #importMachine,.top #duplicate,.top #remove,.top #helpBtn,.top #settingsBtn,
 .top .export-reason{display:none}
 .top .unsaved-marker{display:none}
-.top .save-status{align-self:stretch;display:flex;align-items:center;margin-top:0}
+/* The save status is centred on the bar's text row. A fixed-height dot cannot stretch, so it must be centred explicitly, or it hugs the top edge. */
+.top .save-status{align-self:center;display:flex;align-items:center;margin-top:0}
 .top .icon-button{width:44px;min-width:44px;height:44px;min-height:44px}
 .top .export-split button,.top #export{width:auto;min-width:44px;height:44px;min-height:44px;padding:0 10px}
 .top .name-field{display:flex;flex:1 1 0;min-width:0}
