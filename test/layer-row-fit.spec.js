@@ -3,6 +3,7 @@ import {test,expect} from '@playwright/test';
 // Spanish labels are wider than the English ones, so the narrow layouts must still fit them:
 // in the Layers list, the stitch type word stays whole, and a row keeps the height English rows have (no extra wrapped line);
 // in the Properties panel, the underlay select shows its longest value in full.
+// The desktop Layers column is wide enough for the longest translated name, so a Spanish layer name is shown whole there too.
 
 test.beforeEach(async({page})=>{
  await page.addInitScript(()=>{delete window.showSaveFilePicker;});
@@ -98,3 +99,40 @@ for(const [w,h] of SIZES){
   });
  }
 }
+
+// Measures each visible layer row: whether its name is cut off, whether the name box stays inside the row, and how tall that box is
+// (one line per wrapped line).
+function measureNames(){
+ return [...document.querySelectorAll('.object-row')].filter(r=>r.offsetParent).map(r=>{
+  const name=r.querySelector('.row-name'),rowBox=r.getBoundingClientRect(),nameBox=name.getBoundingClientRect();
+  return {
+   name:name.textContent,
+   rowHeight:Math.round(rowBox.height),
+   nameHeight:Math.round(nameBox.height),
+   cutOff:name.scrollWidth>name.clientWidth,
+   inside:nameBox.top>=rowBox.top-0.5&&nameBox.bottom<=rowBox.bottom+0.5,
+  };
+ });
+}
+
+test('desktop 1440x900 shows the long Spanish layer name whole without growing the English rows',async({page})=>{
+ await page.setViewportSize({width:1440,height:900});
+ const measured={};
+ for(const lang of ['en','es']){
+  await drawAndSelect(page,lang);
+  measured[lang]=await page.evaluate(measureNames);
+  expect(measured[lang].length,`${lang} rows`).toBeGreaterThan(0);
+  for(const row of measured[lang]){
+   expect(row.cutOff,`"${row.name}" is cut off in ${lang}`).toBe(false);
+   expect(row.inside,`"${row.name}" is outside its row in ${lang}`).toBe(true);
+  }
+ }
+ // Every English name stays on one line, so none of the English rows grows to make room for it.
+ const englishNameHeights=[...new Set(measured.en.map(r=>r.nameHeight))];
+ expect(englishNameHeights,`English name line heights`).toHaveLength(1);
+ // The long Spanish name is in the list, takes a second line, and its row is tall enough to show both.
+ const longName=measured.es.find(r=>r.name==='Centro de la flor');
+ expect(longName,'the long Spanish layer name is in the list').toBeTruthy();
+ expect(longName.nameHeight,`"Centro de la flor" wraps to a second line`).toBeGreaterThan(englishNameHeights[0]);
+ expect(longName.rowHeight,`the row holding "Centro de la flor" grows with it`).toBeGreaterThan(longName.nameHeight);
+});

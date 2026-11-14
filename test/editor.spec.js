@@ -857,10 +857,13 @@ test('mixed selection: type and thread say Mixed when objects differ, and a type
  await page.goto('/');page.on('dialog',d=>d.accept());await newDesign(page);
  await page.locator('#file').setInputFiles({name:'mixed.svg',mimeType:'image/svg+xml',buffer:Buffer.from('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect x="10" y="10" width="40" height="30" fill="#527461"/><path d="M20 70 C30 50 40 90 80 60" stroke="#d9897e" fill="none"/></svg>')});
  const rows=page.locator('.object-row'),rect=rows.filter({hasText:'Imported rect'}),path=rows.filter({hasText:'Imported path'});
+ // Click the swatch rather than the row's centre: a long name fills the middle of a row, and two clicks there in quick succession
+ // open the rename field instead of selecting. This test is about selection, so it aims at the row's colour chip.
+ const at=row=>row.locator('.swatch');
  await expect(rows).toHaveCount(2);
  const checked=name=>page.getByRole('radio',{name,exact:true});
  // A fill and a satin column with different threads: no type button is active, and both controls say Mixed.
- await rect.click();await path.click({modifiers:['Shift']});
+ await at(rect).click();await at(path).click({modifiers:['Shift']});
  await expect(page.locator('#typeMixedHint')).toBeVisible();await expect(page.locator('#typeMixedHint')).toContainText('Mixed');
  await expect(page.locator('[role="radiogroup"][aria-label="Stitch type"] button[aria-checked="true"]')).toHaveCount(0);
  await expect(page.locator('#thread')).toHaveValue('');
@@ -868,12 +871,12 @@ test('mixed selection: type and thread say Mixed when objects differ, and a type
  await expect(page.locator('#thread').locator('xpath=following-sibling::button[contains(@class,"thread-btn")]').locator('.nm')).toHaveText('Mixed');
  // A type click on the mixed selection changes only the last-clicked object (the path), not the fill.
  await checked('Running stitch').click();
- await rect.click();await expect(checked('Fill')).toHaveAttribute('aria-checked','true');await expect(page.locator('#typeMixedHint')).toHaveCount(0);
- await path.click();await expect(checked('Running stitch')).toHaveAttribute('aria-checked','true');
+ await at(rect).click();await expect(checked('Fill')).toHaveAttribute('aria-checked','true');await expect(page.locator('#typeMixedHint')).toHaveCount(0);
+ await at(path).click();await expect(checked('Running stitch')).toHaveAttribute('aria-checked','true');
  // Same thread on both: the thread shows that colour, and the type stays Mixed while the types differ.
- await rect.click();await page.locator('#thread').selectOption('#d9897e');
- await path.click();await page.locator('#thread').selectOption('#d9897e');
- await rect.click();await path.click({modifiers:['Shift']});
+ await at(rect).click();await page.locator('#thread').selectOption('#d9897e');
+ await at(path).click();await page.locator('#thread').selectOption('#d9897e');
+ await at(rect).click();await at(path).click({modifiers:['Shift']});
  await expect(page.locator('#thread')).toHaveValue('#d9897e');
  await expect(page.locator('#thread').locator('xpath=following-sibling::button[contains(@class,"thread-btn")]').locator('.nm')).toHaveText('Coral');
  await expect(page.locator('#typeMixedHint')).toBeVisible();
