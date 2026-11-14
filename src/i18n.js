@@ -494,6 +494,6 @@ if(lang==='es'&&typeof document!=='undefined'){
  };
  if(document.body)start();else addEventListener('DOMContentLoaded',start);
 }
-/** Saves the language the user picks and reloads, so the whole page is drawn in it. */
+/** Saves the language the user picks and reloads, so the whole page is drawn in it. A ?lang= in the address outranks the saved choice, so it is dropped first. */
 /** @param {string} code */
-export function setLanguage(code){if(code===lang||(code!=='en'&&code!=='es'))return;try{localStorage.setItem('welcome.lang',code);}catch{}location.reload();}
+export function setLanguage(code){if(code===lang||(code!=='en'&&code!=='es'))return;try{localStorage.setItem('welcome.lang',code);}catch{}try{const u=new URL(location.href);if(u.searchParams.has('lang')){u.searchParams.delete('lang');history.replaceState(history.state,'',u.pathname+u.search+u.hash);}}catch{}location.reload();}
