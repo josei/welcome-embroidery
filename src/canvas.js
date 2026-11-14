@@ -11,6 +11,7 @@ import {createCanvasTools} from './canvasTools.js';
 import {toolbarInset} from './floatingToolbar.js';
 import {clampMoveDelta,visibleCanvasRect} from './moveClamp.js';
 import {pressClaimedByHandle} from './handleClaim.js';
+import {clampResizeScale} from './resizeLimit.js';
 import {multiSelectState} from './multiSelectState.js';
 import {deletingGuideState,handModeState,panningState} from './canvasModeState.js';
 import {formatNumber} from './decimalText.js';
@@ -404,9 +405,9 @@ export function createCanvas(/** @type {any} */ api){
     svg.setPointerCapture?.(e.pointerId);
   }
   function commitResize(/** @type {any} */ s){
-    if(!s.f.oriented){api.commit([{op:'scale',ids:s.ids,sx:s.sx,sy:s.sy,ox:s.anchor[0],oy:s.anchor[1]}]);return;}
+    if(!s.f.oriented){api.commit([{op:'scale',ids:s.ids,sx:s.sx,sy:s.sy,ox:s.anchor[0],oy:s.anchor[1]}],undefined,t('resize'));return;}
     const f=s.f,[ax,ay]=s.local,nc=toWorld(f,ax*(1-s.sx),ay*(1-s.sy)),W=f.W*s.sx,H=f.H*s.sy;
-    api.commit([{op:'transform',id:f.id,x:nc[0]-W/2,y:nc[1]-H/2,width:W,height:H}]);
+    api.commit([{op:'transform',id:f.id,x:nc[0]-W/2,y:nc[1]-H/2,width:W,height:H}],undefined,t('resize'));
   }
   function nudgeHandle(/** @type {any} */ name,/** @type {any} */ e){
     const f=frame();if(!f)return;const ids=api.ids(),step=e.shiftKey?10:1;
@@ -421,7 +422,7 @@ export function createCanvas(/** @type {any} */ api){
     const co=Math.cos(f.rot),si=Math.sin(f.rot),lx=dx*co+dy*si,ly=-dx*si+dy*co;
     const fx=name.includes('e')?1:name.includes('w')?0:.5,fy=name.includes('s')?1:name.includes('n')?0:.5;
     const hx=(fx-.5)*f.W,hy=(fy-.5)*f.H,ax=-hx,ay=-hy;
-    const sx=name==='n'||name==='s'?1:Math.max(.02,(hx+lx-ax)/(hx-ax)),sy=name==='e'||name==='w'?1:Math.max(.02,(hy+ly-ay)/(hy-ay));
+    const sx=name==='n'||name==='s'?1:clampResizeScale((hx+lx-ax)/(hx-ax),f.W),sy=name==='e'||name==='w'?1:clampResizeScale((hy+ly-ay)/(hy-ay),f.H);
     if(Math.abs(sx-1)<1e-4&&Math.abs(sy-1)<1e-4)return;
     keyFocus=name;commitResize({f,ids,sx,sy,anchor:toWorld(f,ax,ay),local:[ax,ay]});
   }
@@ -477,8 +478,10 @@ export function createCanvas(/** @type {any} */ api){
       snapPoint(p,state.ids);
       const l=toLocal(f,p),fx=n.includes('e')?1:n.includes('w')?0:.5,fy=n.includes('s')?1:n.includes('n')?0:.5,hx=(fx-.5)*f.W,hy=(fy-.5)*f.H;
       const alt=e.altKey,ax=alt?0:-hx,ay=alt?0:-hy;
-      let sx=n==='n'||n==='s'?1:(l[0]-ax)/((hx-ax)||1),sy=n==='e'||n==='w'?1:(l[1]-ay)/((hy-ay)||1);sx=Math.max(.02,sx);sy=Math.max(.02,sy);
-      if(e.shiftKey){const s=n==='n'||n==='s'?sy:n==='e'||n==='w'?sx:Math.max(sx,sy);sx=s;sy=s;}
+      let sx=n==='n'||n==='s'?1:(l[0]-ax)/((hx-ax)||1),sy=n==='e'||n==='w'?1:(l[1]-ay)/((hy-ay)||1);
+      // An axis the handle does not move keeps its scale of 1, so only the moving axes are clamped.
+      if(e.shiftKey){const s=clampResizeScale(n==='n'||n==='s'?sy:n==='e'||n==='w'?sx:Math.max(sx,sy),Math.min(f.W,f.H));sx=s;sy=s;}
+      else{if(n!=='n'&&n!=='s')sx=clampResizeScale(sx,f.W);if(n!=='e'&&n!=='w')sy=clampResizeScale(sy,f.H);}
       const A=toWorld(f,ax,ay);state.sx=sx;state.sy=sy;state.anchor=A;state.local=[ax,ay];
       const r=deg(f.rot),tr=
         f.rot?`translate(${A[0]} ${A[1]}) rotate(${r}) scale(${sx} ${sy}) rotate(${-r}) translate(${-A[0]} ` +

@@ -121,7 +121,7 @@ test.describe('a drag on the body of a small object moves it at low zoom',()=>{
   const after=await box(shape);
   expect(after.height,'the bottom handle grows the object').toBeGreaterThan(before.height+10);
   expect(Math.abs(after.x-before.x),'the anchored side stays put').toBeLessThan(1.5);
-  await expect(page.locator('#undo')).toHaveAttribute('aria-label','Undo change');
+  await expect(page.locator('#undo')).toHaveAttribute('aria-label','Undo resize');
   expect(errors).toEqual([]);
  });
 
@@ -136,7 +136,7 @@ test.describe('a drag on the body of a small object moves it at low zoom',()=>{
   const after=await box(shape);
   expect(after.width,'the corner handle widens the object').toBeGreaterThan(before.width+10);
   expect(after.height,'the corner handle heightens the object').toBeGreaterThan(before.height+10);
-  await expect(page.locator('#undo')).toHaveAttribute('aria-label','Undo change');
+  await expect(page.locator('#undo')).toHaveAttribute('aria-label','Undo resize');
   expect(errors).toEqual([]);
  });
 });
@@ -187,7 +187,7 @@ test.describe('touch on a small square-ish object: body moves, handles resize',(
    expect(after.width,'the corner handle widens the object').toBeGreaterThan(before.width+5);
    expect(after.height,'the corner handle heightens the object').toBeGreaterThan(before.height+5);
    expect(Math.abs(after.x-before.x),'the anchored side stays put').toBeLessThan(1.5);
-   await expect(page.locator('#undo')).toHaveAttribute('aria-label','Undo change');
+   await expect(page.locator('#undo')).toHaveAttribute('aria-label','Undo resize');
    expect(errors).toEqual([]);
   });
  }
