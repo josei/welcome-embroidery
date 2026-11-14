@@ -78,10 +78,11 @@ export function syncPlaybackControls() {
     spans: cache.spans, colourChanges: cache.changes, trims: cache.trims, metres: cache.metres,
   });
   if (!plan) { setStatus({playback: 'Ready to simulate', needle: ''}); return; }
-  if (ready) { setStatus({playback: t('Ready · {n} stitches', {n: plan.count.toLocaleString()}), needle: ''}); return; }
+  // The count is in the playback bar's readout, so the status line shows only the state here.
+  if (ready) { setStatus({playback: t('Ready to simulate'), needle: ''}); return; }
   const percent = length ? Math.floor(limit / length * 100) : 0;
   setStatus({
-    playback: `${sewn.toLocaleString()} / ${plan.count.toLocaleString()} stitches · ${percent}%`,
+    playback: `${percent}%`,
     needle: current ? `Needle ${current.x.toFixed(1)}, ${current.y.toFixed(1)} mm` : 'Needle at start',
   });
 }

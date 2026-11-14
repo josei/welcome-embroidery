@@ -4,7 +4,7 @@ import {test,expect} from '@playwright/test';
 // clipped in English or Spanish. Each readout's text fits its box (no sideways overflow), the thread length stays visible in Spanish,
 // and the full status line is in the DOM. Each language gets a fresh browser context, because the compiled counts of a restored
 // design are kept per page.
-// The status line holds only the count; the playback readouts sit in the row above the dock, and Messages is in the Menu.
+// The status line holds the state; the playback readouts, with the stitch count, sit in the row above the dock, and Messages is in the Menu.
 const READOUTS=['count','playbackStitches','playbackTime','playbackSummary'];
 
 test('phone readouts are not clipped at 390x844 with 466 stitches, in English and Spanish',async({browser})=>{
@@ -33,8 +33,6 @@ test('phone readouts are not clipped at 390x844 with 466 stitches, in English an
   }),READOUTS);
 
   for(const b of boxes) if(b.shown) expect(b.scrollWidth,`${b.id} is not clipped (${lang}): "${b.text}"`).toBeLessThanOrEqual(b.clientWidth);
-
-  if(lang==='es') expect(boxes.find(b=>b.id==='count').text,'status line in Spanish').toContain('466 puntadas · listo para bordar');
 
   // The thread length is visible: the summary's text has a non-empty box inside the 390 px viewport.
   const thread=await page.evaluate(()=>{

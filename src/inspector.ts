@@ -13,6 +13,7 @@ import {syncTextInspector} from './letteringFonts.js';
 import {sewTime} from './appHelpers.js';
 import {t, lang} from './i18n.js';
 import {formatCount} from './decimalText.js';
+import {viewMode} from './viewMode.js';
 
 /** One object of the engine's document, typed with the fields the inspector reads. */
 interface InspectorObject {
@@ -130,7 +131,10 @@ export function syncInspector({plan, compileError, tips}: {plan: PlanInfo | null
     count: compileError
       ? t('⚠ Can\'t compile: {e}', {e: t(compileError)})
       : plan
-        ? `${countLabel(plan, formatCount(plan.count, lang))} · ${plan.errors.length ? plan.errors[0] : t('compiled')}`
+        ? viewMode.get() === 'design'
+          ? `${countLabel(plan, formatCount(plan.count, lang))} · ${plan.errors.length ? plan.errors[0] : t('compiled')}`
+          // The stitch and 3D views show the count in the playback readout, so the status line gives only the state there.
+          : plan.errors.length ? plan.errors[0] : t('compiled')
         : documentNow().doc.objects.length
           ? 'Compiling…'
           : 'Nothing to sew yet',

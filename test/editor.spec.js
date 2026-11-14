@@ -43,7 +43,7 @@ test('browser design, settings, history, local project and offline compilation/e
  await expect(page.locator('#selected')).toContainText('WELCOME');
  {const m0=await ctm(page),empty=toScreen(m0,60,60);await page.mouse.click(empty.x,empty.y);}await page.locator('#spacing').fill('0.35');await page.locator('#spacing').press('Tab');
  await page.locator('#name').fill('Garden badge');await page.locator('#name').press('Tab');
- await page.locator('button[data-view="stitches"]').click();await expect(page.locator('#count')).toContainText('stitches');
+ await page.locator('button[data-view="stitches"]').click();await expect(page.locator('#playbackStitches')).toContainText('Stitch');
  await page.locator('button[data-view=design]').click();await page.screenshot({path:'/tmp/welcome-browser-workspace.png'});
  const projectDownload=page.waitForEvent('download');await page.locator('#save').click();const saved=await projectDownload;const projectPath='/tmp/welcome-browser-project.welcome';await saved.saveAs(projectPath);
  const source=JSON.parse(await (await import('node:fs/promises')).readFile(projectPath,'utf8'));expect(source.schema).toBe('welcome/1');expect(source.name).toBe('Garden badge');expect(source.objects.length).toBe(7);
@@ -69,10 +69,10 @@ test('row spacing default is labelled as a default, inherited objects show it, o
 });
 test('stitch simulation is visible, scrubbable, replayable, and stops on edits',async({page})=>{
  await page.goto('/');await expect(page.locator('#play')).toBeHidden();await expect(page.locator('#seek')).toBeHidden();await page.locator('button[data-view="stitches"]').click();await expect(page.locator('#play')).toBeVisible();await page.locator('#play').click();await expect(page.locator('button[data-view="stitches"]')).toHaveAttribute('aria-pressed','true');await expect(page.locator('#play')).toHaveAccessibleName('Pause stitch simulation');await expect(page.locator('#play')).toHaveClass(/playing/);
- await expect(page.locator('#stitches path')).not.toHaveCount(0,{timeout:5000});await expect(page.locator('#needleMarker')).toBeVisible();await expect(page.locator('#playbackProgress')).toContainText('/');await expect(page.locator('#needlePosition')).toContainText('Needle');
+ await expect(page.locator('#stitches path')).not.toHaveCount(0,{timeout:5000});await expect(page.locator('#needleMarker')).toBeVisible();await expect(page.locator('#playbackStitches')).toContainText(' of ');await expect(page.locator('#needlePosition')).toContainText('Needle');
  await page.locator('#play').click();await expect(page.locator('#play')).toHaveAccessibleName('Play stitch simulation');const paused=await page.locator('#playbackProgress').textContent();await page.waitForTimeout(150);expect(await page.locator('#playbackProgress').textContent()).toBe(paused);
  await page.locator('#seek').evaluate(el=>{el.value='60';el.dispatchEvent(new Event('input',{bubbles:true}));});await expect(page.locator('#seek')).toHaveValue('60');await expect(page.locator('#needleMarker')).toBeVisible();await expect(page.locator('#needlePosition')).toContainText('Needle');
- await page.locator('#resetPlayback').click();await expect(page.locator('#seek')).toHaveValue('0');await expect(page.locator('#playbackProgress')).toContainText('0 /');await expect(page.locator('#needleMarker')).toHaveCount(0);
+ await page.locator('#resetPlayback').click();await expect(page.locator('#seek')).toHaveValue('0');await expect(page.locator('#playbackStitches')).toContainText('Stitch 0 of');await expect(page.locator('#needleMarker')).toHaveCount(0);
  const maximum=await page.locator('#seek').getAttribute('max');await page.locator('#seek').evaluate((el,n)=>{el.value=n;el.dispatchEvent(new Event('input',{bubbles:true}));},maximum);await expect(page.locator('#playbackProgress')).toContainText('100%');await page.locator('#play').click();await expect(page.locator('#seek')).toHaveValue('0');await expect(page.locator('#play')).toHaveAccessibleName('Pause stitch simulation');
  await page.locator('#rect').click();await expect(page.locator('#play')).not.toHaveClass(/playing/);await expect(page.locator('#play')).toHaveAccessibleName('Compile and play stitch simulation');await expect(page.locator('#playbackProgress')).toHaveText('Ready to simulate');await expect(page.locator('#stitches')).toBeEmpty();await page.waitForTimeout(150);await expect(page.locator('#playbackProgress')).toHaveText('Ready to simulate');
 });
@@ -253,7 +253,7 @@ test('satin column: path stitch type, width control, thick design stroke and com
  await page.mouse.move(a.x,a.y);await page.mouse.down();await page.mouse.move(b.x,b.y,{steps:4});await page.mouse.up();
  await expect(page.locator('#satinRow')).toBeHidden();await expect(page.locator('#satinOffHint')).toBeHidden();await expect(page.locator('#type ~ .icon-seg button[data-value=satin]')).toBeEnabled();await page.locator('#type').selectOption('satin');await expect(page.locator('#satinRow')).toBeVisible();await page.locator('#satinWidth').fill('6');await page.locator('#satinWidth').press('Tab');
  expect(await page.locator('#shapes polyline.shape').evaluate(el=>getComputedStyle(el).strokeWidth)).toBe('6px');
- await page.locator('button[data-view="stitches"]').click();await expect(page.locator('#count')).toContainText('stitches');const count=Number((await page.locator('#count').textContent()).replace(/,/g,'').match(/(\d+) stitches/)[1]);expect(count).toBeGreaterThan(90);
+ await page.locator('button[data-view="stitches"]').click();await expect.poll(async()=>Number(((await page.locator('#playbackStitches').textContent())||'').replace(/,/g,'').match(/ of (\d+)/)?.[1]||0)).toBeGreaterThan(90);
  await page.locator('#rect').click();expect(await page.locator('#type option[value=satin]').evaluate(o=>o.disabled)).toBe(true);await expect(page.locator('#type ~ .icon-seg button[data-value=satin]')).toBeDisabled();await expect(page.locator('#satinOffHint')).toContainText('Convert to path first');await page.locator('#type ~ .icon-seg button[data-value=satin]').click({force:true});await expect(page.locator('#type ~ .icon-seg button[data-value=fill]')).toHaveAttribute('aria-pressed','true');await expect(page.locator('#toast')).not.toContainText('Invalid Welcome project');await expect(page.locator('#toast')).not.toContainText(/[0-9a-f]{8}-[0-9a-f]{4}/);expect(errors).toEqual([]);
 });
 
@@ -273,7 +273,7 @@ test('satin width reset: shown off default, one click restores 3 mm as one undo 
 });
 
 test('subtract makes a hole (even-odd render, fewer stitches) and ties add lock stitches',async({page})=>{
- const n=async()=>Number(((await page.locator('#count').textContent())||'').replace(/,/g,'').match(/(\d+) stitches/)?.[1]||0);
+ const n=async()=>Number(((await page.locator('#playbackStitches').textContent())||'').replace(/,/g,'').match(/ of (\d+)/)?.[1]||0);
  const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());await newDesign(page);
  await page.locator('#rect').click();await page.locator('#posX').fill('-20');await page.locator('#posX').press('Tab');await page.locator('#posY').fill('-20');await page.locator('#posY').press('Tab');await page.locator('#sizeW').fill('40');await page.locator('#sizeW').press('Tab');await page.locator('#sizeH').fill('40');await page.locator('#sizeH').press('Tab');
  await page.locator('#ellipse').click();await page.locator('#posX').fill('-8');await page.locator('#posX').press('Tab');await page.locator('#posY').fill('-8');await page.locator('#posY').press('Tab');await page.locator('#sizeW').fill('16');await page.locator('#sizeW').press('Tab');await page.locator('#sizeH').fill('16');await page.locator('#sizeH').press('Tab');
@@ -387,7 +387,7 @@ test('font picker: searchable list with live previews, categories, keyboard, tex
  await page.locator('#textItalic').click();await expect(page.locator('#textItalic')).toHaveAttribute('aria-pressed','true');await page.locator('#textBold').click();await expect(page.locator('#textBold')).toHaveAttribute('aria-pressed','true');
  const bh=async()=>(await page.locator('#shapes g.shape').first().boundingBox()).height,h0=await bh();await page.locator('#letteringText').fill('Fox\nJump');await page.locator('#letteringText').press('Tab');await expect.poll(bh).toBeGreaterThan(h0*1.5);
  await page.locator('#alignCenter').click();await expect(page.locator('#alignCenter')).toHaveAttribute('aria-pressed','true');await page.locator('#lineHeight').fill('1.4');await page.locator('#lineHeight').press('Tab');
- await page.locator('button[data-view="stitches"]').click();await expect.poll(async()=>Number(((await page.locator('#count').textContent())||'').replace(/,/g,'').match(/(\d+) stitches/)?.[1]||0),{timeout:15000}).toBeGreaterThan(300);
+ await page.locator('button[data-view="stitches"]').click();await expect.poll(async()=>Number(((await page.locator('#playbackStitches').textContent())||'').replace(/,/g,'').match(/ of (\d+)/)?.[1]||0),{timeout:15000}).toBeGreaterThan(300);
  await page.locator('#textStitch').selectOption('run');await expect(page.locator('#textStitch')).toHaveValue('run');
  // a Ink/Stitch satin font, switched through the picker with the keyboard
  await page.locator('#fontButton').click();await page.locator('#fontSearch').fill('emilio');await page.locator('#fontSearch').press('ArrowDown');await page.locator('#fontSearch').press('ArrowUp');await page.locator('#fontSearch').press('Enter');await expect(page.locator('#font')).toHaveValue(/inkstitch\/emilio_20/);
