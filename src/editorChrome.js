@@ -69,7 +69,7 @@ function mountTooltip() {
   window.addEventListener('blur', hide);
   document.addEventListener('focusin', e => {
     const target = /** @type {any} */ (e.target);
-    if (inputMode.get() !== 'touch' && target.matches?.('[data-tooltip]:focus-visible')) show(target);
+    if (inputMode.get() !== 'touch' && target.matches?.('[data-tooltip]:focus-visible:not([data-quiet-focus])')) show(target);
   });
   document.addEventListener('focusout', hide);
   document.addEventListener('keydown', e => { if (e.key === 'Escape') hide(); });

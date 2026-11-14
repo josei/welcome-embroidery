@@ -1114,8 +1114,9 @@ body{height:100dvh;min-height:0;overflow:hidden}
    drawn on a control that is not armed. A control that has keyboard focus after its box closed shows no ring or tooltip
    (data-quiet-focus, set by focusQuietly in CanvasTextEditor.tsx). The 3D hint stays on one line at phone widths. */
 html[data-input="touch"] .icon-button:not(.active-tool):hover{background:transparent;border-color:transparent;color:#66726c}
-html[data-input="touch"] .tool-row .icon-button:not(.active-tool):hover{background:#f6f7f5;border-color:transparent;color:#53635b}
+html[data-input="touch"] .tool-row .icon-button:not(.active-tool):hover{background:transparent;border-color:transparent;color:#66726c}
 [data-quiet-focus]:focus-visible{outline:none}
+.icon-button[data-quiet-focus]:not(.active-tool):focus-visible{background:transparent;border-color:transparent;box-shadow:none;color:#66726c}
 [data-quiet-focus]::after{display:none!important}
 #previewHint{white-space:nowrap;max-width:calc(100% - 24px);overflow:hidden;text-overflow:ellipsis}
 
