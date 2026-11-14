@@ -408,8 +408,14 @@ input[aria-invalid="true"]{border-color:var(--warn)!important;background:var(--w
 
 .canvas-text-hint{z-index:10;color:var(--teal-deep);font-weight:var(--fw-regular)}
 
-/* The design canvas takes keyboard focus for arrow-key nudges; show the ring only for keyboard focus. */
+/* The design canvas takes keyboard focus for arrow-key nudges; show the ring only for keyboard focus. The browser's own
+   default ring (blue, 5 px) must not show on it, and a mouse or pen press on it draws none. */
+#art:focus{outline:none}
 #art:focus-visible{outline:2px solid var(--teal);outline-offset:-2px}
+
+/* A tap on a tool button leaves no focus ring: the press already showed what the button did. Keyboard focus keeps its ring,
+   because data-input is "keyboard" after any key press (see inputMode.js). */
+html[data-input="touch"] button:focus-visible,html[data-input="touch"] #art:focus-visible{outline:none}
 
 /* Skip link: off-screen until focused, so it adds no visual change to the layout. */
 .skip-link{position:absolute;left:8px;top:8px;z-index:100;padding:8px 12px;background:#fff;color:#284c40;border:2px solid #1c8069;border-radius:6px;font-weight:var(--fw-emphasis);text-decoration:none;transform:translateY(-200%)}
@@ -893,6 +899,8 @@ body{height:100dvh;min-height:0;overflow:hidden}
 .canvas .zoombar .icon-button,.canvas .zoombar .zoom-pct,.canvas .zoombar .zoom-fit,.canvas .zoombar button{min-width:44px;width:auto;height:44px;min-height:44px;padding:0 6px}
 .canvas .zoombar .icon-button{width:44px}
 .canvas .canvas-text-hint,.canvas #canvasHint,.canvas .canvas-hint{bottom:56px;left:8px;right:auto;max-width:calc(100% - 140px)}
+/* The lettering caption is anchored at the left edge, so it must not keep the centring shift of .canvas-hint: that pushed it under the tool rail. */
+.canvas .canvas-text-hint{transform:none}
 .layout main>footer{position:relative;flex:none;height:44px;min-height:44px;margin:0;padding:0 196px 0 8px;display:flex;flex-wrap:nowrap;align-items:center;gap:8px;overflow:hidden;border-top:1px solid #e3e6e1;background:#fff}
 .layout main>footer .messages-btn{min-height:44px;min-width:44px;padding:0 12px}
 .layout main>footer>.playback-bar{flex:1 1 auto;min-width:0;height:44px}

@@ -3,6 +3,7 @@ import type {FormEvent, KeyboardEvent} from 'react';
 import {interactionState} from '../interactionState.js';
 import {finishCanvasText, liveCanvasText} from '../canvasText.js';
 import {t} from '../i18n.js';
+import {inputMode} from '../inputMode.js';
 import {selectAllInField} from './selectAllKey';
 
 // The lettering text box over the canvas. interactionState.canvasText says which object is being edited and where its
@@ -30,6 +31,8 @@ function fitInCanvas(c: {left: number; top: number; width: number; height: numbe
 
 export function CanvasTextEditor() {
   const {canvasText} = useSyncExternalStore(interactionState.subscribe, interactionState.get);
+  // A phone has no Enter or Escape key, so after a tap the caption names the tap that saves the text instead.
+  const touch = useSyncExternalStore(inputMode.subscribe, inputMode.get) === 'touch';
   const box = useRef<HTMLTextAreaElement>(null);
   const finished = useRef(false);
   useEffect(() => {
@@ -110,7 +113,7 @@ export function CanvasTextEditor() {
         onBlur={e => finish(true, e.currentTarget.value)}
       />
       <p id="canvasTextHint" className="canvas-hint canvas-text-hint">
-        {t('Enter or clicking outside saves the text. Escape cancels.')}
+        {touch ? t('Tap outside the box to save the text.') : t('Enter or clicking outside saves the text. Escape cancels.')}
       </p>
     </>
   );

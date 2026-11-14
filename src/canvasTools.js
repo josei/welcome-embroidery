@@ -12,6 +12,7 @@ import {stitchChoicesState} from './stitchChoicesState.js';
 import {measureState} from './measureState.js';
 import {knifeState} from './knifeState.js';
 import {t} from './i18n.js';
+import {inputMode} from './inputMode.js';
 import {addLabel} from './addLabel.js';
 import {enterEdit} from './canvasText.js';
 import {setEditMode} from './editModeState.js';
@@ -33,6 +34,15 @@ const TOOL_HINTS={
   polygon:'Drag from the center to size and rotate. Sides come from the sidebar.',
   star:'Drag from the center to size and rotate. Points come from the sidebar.',
 };
+// Hints for a touch screen, which has no Enter key: the ways to finish a path are taps. Other tools keep TOOL_HINTS.
+/** @type {Record<string, string>} */
+const TOUCH_HINTS={
+  path:'Tap to add points. Tap the first point to close, or tap Path again to finish.',
+};
+// The hint for a tool, in the wording the last input suggests.
+function toolHintText(/** @type {string} */ tool){
+  return (inputMode.get()==='touch'&&TOUCH_HINTS[tool])||TOOL_HINTS[tool];
+}
 
 /**
  * @param {any} api
@@ -171,7 +181,7 @@ export function createCanvasTools(api){
     if(toolMode.get()!=='select'&&toolMode.get()!=='knife'&&selState().selected){
       setSelection({selected: null});setSelection({multi: new Set()});setSelection({selNode: null});api.render();
     }
-    if(toolMode.get()!=='select')api.hint(t(TOOL_HINTS[toolMode.get()]));
+    if(toolMode.get()!=='select')api.hint(t(toolHintText(toolMode.get())));
   }
 
   // Continue an existing path with the pen: its points become the draft, so Enter or the first point finishes it.

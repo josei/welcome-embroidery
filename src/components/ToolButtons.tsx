@@ -1,6 +1,7 @@
 // The line, measure, polygon and star tool buttons, rendered by React. The active tool comes from toolMode.
 import {useSyncExternalStore} from 'react';
 import {toolActions, toolMode} from '../toolMode.js';
+import {inputMode} from '../inputMode.js';
 import {gridSnapActions, gridSnapState} from '../gridSnapState.js';
 import {toolbarActions} from '../toolbarCommands.js';
 import {focusStitchType} from '../focusStitchType.js';
@@ -74,14 +75,18 @@ export function PenTool() {
  );
 }
 
-// The draw path button. Its label follows the tool: while a path is being drawn it says how to finish it.
+// The draw path button. Its label follows the tool: while a path is being drawn it says how to finish it. On a touch
+// screen that is "Done", since tapping the button again is the way to finish; the keyboard and mouse labels are unchanged.
 export function PathTool() {
  const current = useSyncExternalStore(toolMode.subscribe, toolMode.get);
+ const touch = useSyncExternalStore(inputMode.subscribe, inputMode.get) === 'touch';
+ const touchDone = touch && current === 'path';
  const label = current === 'path' ? 'Finish path (Enter · click first point to close · Esc cancels)'
    : t('Draw path ({shortcut})', {shortcut: shortcutFor('path')});
  return (
   <button aria-pressed={current === 'path'} className={toolClass(current, 'path')} onClick={() =>
-    toolActions.press('path')} aria-label={label} title={label} data-tooltip={label} id="path"><svg className="icon"><use href="#i-path"/></svg><span className="rail-label">{t('Path')}</span></button>
+    toolActions.press('path')} aria-label={touchDone ? t('Finish path') : label}
+    title={touchDone ? t('Finish path') : label} data-tooltip={label} id="path"><svg className="icon"><use href="#i-path"/></svg><span className="rail-label">{touchDone ? t('Done') : t('Path')}</span></button>
  );
 }
 

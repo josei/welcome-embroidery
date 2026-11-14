@@ -99,4 +99,8 @@ export const ES_ADDITIONS={
 'Shape':'Forma',
 'Choose':'Elegir',
 'add {name}':'añadir {name}','text':'texto',
+'Tap to add points. Tap the first point to close, or tap Path again to finish.':'Toca para añadir puntos. Toca el primer punto para cerrar, o toca Trazo otra vez para terminar.',
+'Done':'Listo',
+'Finish path':'Terminar trazado',
+'Tap outside the box to save the text.':'Toca fuera del cuadro para guardar el texto.',
 };

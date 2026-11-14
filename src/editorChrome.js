@@ -4,6 +4,7 @@
 import {setShortcutsOpen} from './shortcutsState.js';
 import {toastActions} from './toastState.js';
 import {selectionState, selState} from './selectionState.js';
+import {inputMode} from './inputMode.js';
 
 /**
  * Shows a message in the toast stack and keeps it in the log. An error stays until the user dismisses it.
@@ -55,9 +56,11 @@ function mountTooltip() {
     tip.style.top = Math.round(top) + 'px';
     tip.classList.add('show');
   };
+  // A tap has no hover, so a touch never raises the tooltip: it would stay up over the tool it was for, and its
+  // keyboard shortcut means nothing on a phone.
   document.addEventListener('pointerover', e => {
     const target = /** @type {any} */ (e.target);
-    const el = target.closest?.('[data-tooltip]');
+    const el = e.pointerType !== 'touch' ? target.closest?.('[data-tooltip]') : null;
     if (el) show(el); else if (current) hide();
   });
   document.addEventListener('pointerleave', hide, true);
@@ -66,7 +69,7 @@ function mountTooltip() {
   window.addEventListener('blur', hide);
   document.addEventListener('focusin', e => {
     const target = /** @type {any} */ (e.target);
-    if (target.matches?.('[data-tooltip]:focus-visible')) show(target);
+    if (inputMode.get() !== 'touch' && target.matches?.('[data-tooltip]:focus-visible')) show(target);
   });
   document.addEventListener('focusout', hide);
   document.addEventListener('keydown', e => { if (e.key === 'Escape') hide(); });
