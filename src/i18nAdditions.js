@@ -105,4 +105,9 @@ export const ES_ADDITIONS={
 'Tap outside the box to save the text.':'Toca fuera del cuadro para guardar el texto.',
 'Grid and zoom':'Cuadrícula y zoom',
 'Selected object':'Objeto seleccionado',
+'Nodes':'Nodos','Not a group':'No es un grupo','Not clipped':'No tiene máscara','Not text on a path':'No es texto sobre trazado',
+'Not a path':'No es un trazado','Select a node first':'Selecciona primero un nodo','This node is already a corner':'Este nodo ya es una esquina',
+'Select one text and one path':'Selecciona un texto y un trazado','Select one object to edit its nodes':'Selecciona un objeto para editar sus nodos',
+'Stitch layers have no nodes':'Las capas de puntadas no tienen nodos',
+'The top object must be a rectangle, ellipse or closed path':'El objeto de arriba debe ser un rectángulo, una elipse o un trazado cerrado',
 };

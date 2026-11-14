@@ -25,7 +25,7 @@ for(const size of [PHONE,TABLET]) test(`the Menu at ${size[0]}x${size[1]} lists 
  await page.locator('#phoneMenu').click();
  const headings=await page.locator('#phoneMenuList .menu-heading').allTextContents();
  // View leads, so Layers, Properties and the view switch need no scrolling; the desktop groups follow it in order.
- expect(headings.slice(0,4)).toEqual(['View','File','Edit','Arrange']);
+ expect(headings.slice(0,6)).toEqual(['View','File','Edit','Tools','Nodes','Arrange']);
 });
 
 // Command ids under each desktop menu, keyed by the menu's button id.
@@ -46,11 +46,11 @@ async function phoneGroups(page){
 // The phone Menu shows the command palette once, at the top, instead of in the File and Edit groups. The phone File group
 // also holds the New, Open, Import and Export rows, which the desktop keeps in its toolbar rather than in the File menu.
 const PALETTE='menuCommandPalette';
-// The phone Edit group also holds the drawing tools and node commands that the canvas bar and More tools held on a phone, and the
-// Arrange group holds the group, clip and text-on-path commands of that bar. The desktop keeps them on its toolbars.
+// The drawing tools and node commands sit under their own Tools and Nodes headings, so the Edit group is the desktop Edit menu.
+// The Arrange group holds the group, clip and text-on-path commands of the canvas bar. The desktop keeps them on its toolbars.
 const PHONE_ONLY={
  File:['menuNew','menuOpen','menuImport','menuExport'],
- Edit:['menuEllipse','menuPolygon','menuStar','menuPen','menuTrace','menuPhoto','menuSelectAdd','menuEditNodes','menuNodeAdd','menuNodeDelete','menuNodeSmooth','menuNodeCorner'],
+ Edit:[],
  Arrange:['menuGroup','menuUngroup','menuClip','menuUnclip','menuTextOnPath','menuTextOffPath'],
 };
 

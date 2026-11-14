@@ -30,6 +30,8 @@ import {openExportDialog} from '../exportCommands';
 import {setSettingsOpen} from '../settingsState';
 import {agentLinkState} from '../agentLinkState';
 import {viewActions, viewMode} from '../viewMode.js';
+import {documentState, documentNow} from '../documentState.js';
+import {menuReason, NEEDS_ONE, NEEDS_TWO, NEEDS_THREE} from '../menuReasons.js';
 
 // The menu bar's dropdowns. Each item runs the same command as its toolbar button, context-menu row or keyboard shortcut,
 // and is disabled exactly when that command does not apply, using the same flags the toolbar uses. Nothing here is removed
@@ -212,10 +214,16 @@ export function FileMenu() {
  return <Dropdown id="fileMenu" label={t('File')} rows={rows} />;
 }
 
-// Reasons for disabled rows. The selection-count ones match the thresholds toolbarSync uses for the toolbar buttons.
-const NEEDS_ONE = 'Select an object first';
-const NEEDS_TWO = 'Select two or more objects';
-const NEEDS_THREE = 'Select three or more objects';
+/** What the reason lookups need from the selection and the document. Re-renders when either changes. */
+function useReasonContext() {
+ const selection = useSyncExternalStore(selectionState.subscribe, selectionState.get);
+ useSyncExternalStore(documentState.subscribe, documentState.get);
+ const objects = (documentNow().doc.objects ?? []) as ReasonObjects;
+ const picked = [...selection.multi].map(id => objects.find(o => o.id === id)).filter((o): o is ReasonObjects[number] => Boolean(o));
+ const ordered = picked.slice().sort((a, b) => objects.indexOf(a) - objects.indexOf(b));
+ return {count: selection.multi.size, selNode: selection.selNode, primary: objects.find(o => o.id === selection.selected), top: ordered.at(-1), picked};
+}
+type ReasonObjects = Array<{id?: string; kind?: string; groupId?: unknown; clipId?: unknown; mask?: unknown; along?: unknown; closed?: boolean; handles?: unknown[]}>;
 
 /** The Edit menu's rows: history, the clipboard, duplicate, select all and delete. */
 export function useEditRows(): Row[] {
@@ -285,6 +293,11 @@ export function ArrangeMenu() {
  return <Dropdown id="arrangeMenu" label={t('Arrange')} rows={useArrangeRows()} />;
 }
 
+/** The state word a toggle row shows, so its on or off state is visible text as well as the pressed flag. */
+function onOff(on: boolean): string {
+ return on ? t('On') : t('Off');
+}
+
 /** The View rows for grid and snap: Grid (dots on the canvas), the grid spacing, Snap and Snap to objects. The toggles carry
  * aria-pressed, so a screen reader hears their state. Used by the phone Menu and the compact desktop View menu. */
 export function useGridSnapRows(): Row[] {
@@ -293,13 +306,13 @@ export function useGridSnapRows(): Row[] {
  const grid = useSyncExternalStore(gridState.subscribe, gridState.get);
  const snapObjects = useSyncExternalStore(snapObjState.subscribe, snapObjState.get);
  return [
-  {id: 'menuGrid', label: t('Grid'), icon: 'i-grid', pressed: shown, run: toggleGridShown},
-  {id: 'menuGridSpacing', label: t('Grid spacing'), icon: 'i-grid', hint: `${grid.value} mm`, run: () => {
+  {id: 'menuGrid', label: t('Grid'), icon: 'i-grid', hint: onOff(shown), pressed: shown, run: toggleGridShown},
+  {id: 'menuGridSpacing', label: t('Grid spacing'), icon: 'i-grid-space', hint: `${grid.value} mm`, run: () => {
     const spacings = GRID_SPACINGS;
     gridActions.choose(spacings[(spacings.indexOf(grid.value) + 1) % spacings.length]);
   }},
-  {id: 'menuSnap', label: t('Snap'), icon: 'i-snap', pressed: snapOn, run: () => gridSnapActions.toggle()},
-  {id: 'menuSnapObjects', label: t('Snap to objects'), icon: 'i-snap-obj', pressed: snapObjects, run: () => snapObjActions.toggle()},
+  {id: 'menuSnap', label: t('Snap'), icon: 'i-magnet', hint: onOff(snapOn), pressed: snapOn, run: () => gridSnapActions.toggle()},
+  {id: 'menuSnapObjects', label: t('Snap to objects'), icon: 'i-snap-obj', hint: onOff(snapObjects), pressed: snapObjects, run: () => snapObjActions.toggle()},
  ];
 }
 
@@ -351,11 +364,15 @@ export function PhoneMenu() {
  const toolbar = useSyncExternalStore(selectionToolbarState.subscribe, selectionToolbarState.get);
  const nodes = useSyncExternalStore(nodeButtonsState.subscribe, nodeButtonsState.get);
  const selectAdd = useSyncExternalStore(multiSelectState.subscribe, multiSelectState.get);
+ const reasonCtx = useReasonContext();
+ // The reason a disabled row gives. Every disabled row has one; the generic line is only a fallback.
+ const why = (id: string) => menuReason(id, reasonCtx) ?? t(NEEDS_ONE);
  const viewRows: Row[] = VIEW_ROWS.map(v => ({
   id: `menuView-${v.id}`, label: t(v.label), icon: v.icon, hint: view === v.id ? t('Shown now') : undefined, run: () => viewActions.choose(v.id),
  }));
- // The rows that the canvas bar and the More tools panel used to hold on a phone. They run the same commands as those controls.
- const addRows: Entry[] = [
+ // The drawing tools the canvas bar and More tools panel held on a phone. They run the same commands as those controls.
+ const toolRows: Entry[] = [
+  {id: 'menuSelectAdd', label: t('Tap to add to selection'), icon: 'i-select-add', pressed: selectAdd, hint: onOff(selectAdd), run: () => multiSelectState.set(!selectAdd)},
   {id: 'menuEllipse', label: t('Ellipse'), icon: 'i-ellipse', run: () => { toolActions.press('select'); toolbarActions.addShape('ellipse'); }},
   {id: 'menuPolygon', label: t('Polygon'), icon: 'i-polygon', run: () => toolActions.press('polygon')},
   {id: 'menuStar', label: t('Star'), icon: 'i-star', run: () => toolActions.press('star')},
@@ -363,21 +380,21 @@ export function PhoneMenu() {
   {id: 'menuTrace', label: t('Trace'), icon: 'i-trace', run: () => setTraceDialogOpen(true)},
   {id: 'menuPhoto', label: t('Photo stitch'), icon: 'i-photo', run: () => photoInput.current?.click()},
  ];
- const barRows: Entry[] = [
-  {id: 'menuSelectAdd', label: t('Tap to add to selection'), icon: 'i-select-add', pressed: selectAdd, run: () => multiSelectState.set(!selectAdd)},
-  {id: 'menuEditNodes', label: t('Edit nodes'), icon: 'i-node-edit', disabled: actions.editNodes, reason: t(NEEDS_ONE), run: () => toolbarActions.editNodes()},
-  {id: 'menuNodeAdd', label: t('Add node'), icon: 'i-node-add', disabled: nodes.add, reason: t(NEEDS_ONE), run: () => nodeActions.add()},
-  {id: 'menuNodeDelete', label: t('Delete node'), icon: 'i-node-del', disabled: nodes.del, reason: t(NEEDS_ONE), run: () => nodeActions.del()},
-  {id: 'menuNodeSmooth', label: t('Smooth node'), icon: 'i-node-smooth', disabled: nodes.smooth, reason: t(NEEDS_ONE), run: () => nodeActions.smooth()},
-  {id: 'menuNodeCorner', label: t('Corner node'), icon: 'i-node-corner', disabled: nodes.corner, reason: t(NEEDS_ONE), run: () => nodeActions.corner()},
+ // Path-node commands. Each one needs a path with a node selected, and says which of those is missing.
+ const nodeRows: Entry[] = [
+  {id: 'menuEditNodes', label: t('Edit nodes'), icon: 'i-node-edit', disabled: actions.editNodes, reason: why('menuEditNodes'), run: () => toolbarActions.editNodes()},
+  {id: 'menuNodeAdd', label: t('Add node'), icon: 'i-node-add', disabled: nodes.add, reason: why('menuNodeAdd'), run: () => nodeActions.add()},
+  {id: 'menuNodeDelete', label: t('Delete node'), icon: 'i-node-del', disabled: nodes.del, reason: why('menuNodeDelete'), run: () => nodeActions.del()},
+  {id: 'menuNodeSmooth', label: t('Smooth node'), icon: 'i-node-smooth', disabled: nodes.smooth, reason: why('menuNodeSmooth'), run: () => nodeActions.smooth()},
+  {id: 'menuNodeCorner', label: t('Corner node'), icon: 'i-node-corner', disabled: nodes.corner, reason: why('menuNodeCorner'), run: () => nodeActions.corner()},
  ];
  const arrangeBarRows: Entry[] = [
-  {id: 'menuGroup', label: t('Group'), icon: 'i-group', disabled: actions.group, reason: t(NEEDS_TWO), run: () => toolbarActions.group()},
-  {id: 'menuUngroup', label: t('Ungroup'), icon: 'i-ungroup', disabled: actions.ungroup, reason: t(NEEDS_ONE), run: () => toolbarActions.ungroup()},
-  {id: 'menuClip', label: t('Clip'), icon: 'i-clip', disabled: actions.clip, reason: t(NEEDS_TWO), run: () => selectionToolbarActions.clip()},
-  {id: 'menuUnclip', label: t('Release clip'), icon: 'i-unclip', disabled: actions.unclip, reason: t(NEEDS_ONE), run: () => selectionToolbarActions.unclip()},
-  {id: 'menuTextOnPath', label: t('Text on path'), icon: 'i-text-path', disabled: actions.textOnPath, reason: t(NEEDS_TWO), run: () => selectionToolbarActions.textOnPath()},
-  {id: 'menuTextOffPath', label: t('Detach text'), icon: 'i-text-detach', disabled: actions.textOffPath, reason: t(NEEDS_ONE), run: () => selectionToolbarActions.textOffPath()},
+  {id: 'menuGroup', label: t('Group'), icon: 'i-group', disabled: actions.group, reason: why('menuGroup'), run: () => toolbarActions.group()},
+  {id: 'menuUngroup', label: t('Ungroup'), icon: 'i-ungroup', disabled: actions.ungroup, reason: why('menuUngroup'), run: () => toolbarActions.ungroup()},
+  {id: 'menuClip', label: t('Clip'), icon: 'i-clip', disabled: actions.clip, reason: why('menuClip'), run: () => selectionToolbarActions.clip()},
+  {id: 'menuUnclip', label: t('Release clip'), icon: 'i-unclip', disabled: actions.unclip, reason: why('menuUnclip'), run: () => selectionToolbarActions.unclip()},
+  {id: 'menuTextOnPath', label: t('Text on path'), icon: 'i-text-path', disabled: actions.textOnPath, reason: why('menuTextOnPath'), run: () => selectionToolbarActions.textOnPath()},
+  {id: 'menuTextOffPath', label: t('Detach text'), icon: 'i-text-detach', disabled: actions.textOffPath, reason: why('menuTextOffPath'), run: () => selectionToolbarActions.textOffPath()},
  ];
  const settingsHint = agent.active ? t('Settings: agent connected') : agent.waiting ? t('Settings: waiting for agent') : undefined;
  const rows: Row[] = [
@@ -394,7 +411,9 @@ export function PhoneMenu() {
   ...saveRows().filter((r): r is Entry => typeof r === 'object' && 'id' in r)
    .map(r => ({...r, label: r.id === 'menuSave' ? t('Save') : t('Save As'), icon: 'i-save', hint: undefined})),
   {id: 'menuExport', label: t('Export'), icon: 'i-export', run: () => openExportDialog()},
-  {heading: t('Edit')}, ...edit, ...addRows, ...barRows,
+  {heading: t('Edit')}, ...edit,
+  {heading: t('Tools')}, ...toolRows,
+  {heading: t('Nodes')}, ...nodeRows,
   {heading: t('Arrange')}, ...arrange, ...arrangeBarRows,
   {heading: t('Grid and zoom')},
   ...gridRows,

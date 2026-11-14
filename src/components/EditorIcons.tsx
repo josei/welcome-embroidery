@@ -41,6 +41,10 @@ export function EditorIcons() {
           <path d={"M4 4h16v16H4zM4 12h16M12 4v16"} />
         </symbol>
         {" "}
+        <symbol id={"i-grid-space"} viewBox={"0 0 24 24"}>
+          <path d={"M4 4h2v2H4zM11 4h2v2h-2zM18 4h2v2h-2zM4 11h2v2H4zM11 11h2v2h-2zM18 11h2v2h-2zM4 18h2v2H4zM11 18h2v2h-2zM18 18h2v2h-2z"} />
+        </symbol>
+        {" "}
         <symbol id={"i-fit"} viewBox={"0 0 24 24"}>
           <path d={"M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"} />
         </symbol>
@@ -350,6 +354,10 @@ export function EditorIcons() {
           <circle cx={"12"} cy={"12"} r={"3"} />
           <path d={"M12 3v4M12 17v4M3 12h4M17 12h4"} />
           <rect x={"15"} y={"15"} width={"6"} height={"6"} rx={"1"} strokeDasharray={"2 1.500"} />
+        </symbol>
+        {" "}
+        <symbol id={"i-magnet"} viewBox={"0 0 24 24"}>
+          <path d={"M5 3v8a7 7 0 0 0 14 0V3h-4v8a3 3 0 0 1-6 0V3zM5 7h4M15 7h4"} />
         </symbol>
         {" "}
         <symbol id={"i-cap-butt"} viewBox={"0 0 24 24"}>

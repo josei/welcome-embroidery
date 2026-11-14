@@ -32,8 +32,8 @@ for(const [width,height] of SIZES) for(const lang of ['en','es']){
   const list=page.locator('#phoneMenuList');
   await expect(list).toBeVisible();
   await expect(list.locator('.menu-heading')).toHaveText(lang==='es'
-   ? ['Vista','Archivo','Editar','Organizar','Cuadrícula y zoom','Ajustes y ayuda']
-   : ['View','File','Edit','Arrange','Grid and zoom','Settings and Help']);
+   ? ['Vista','Archivo','Editar','Herramientas','Nodos','Organizar','Cuadrícula y zoom','Ajustes y ayuda']
+   : ['View','File','Edit','Tools','Nodes','Arrange','Grid and zoom','Settings and Help']);
   // The search field leads, and the sheet fills the window. On a phone the Menu is the only navigation: the canvas bar and the More
   // tools panel are gone, and their commands are rows in the groups above.
   await expect(list.locator('[role="menuitem"]').first()).toHaveAttribute('id','menuCommandPalette');

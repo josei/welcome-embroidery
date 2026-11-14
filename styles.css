@@ -950,7 +950,7 @@ body{height:100dvh;min-height:0;overflow:hidden}
 #phoneMenuList .menu-item{display:flex;align-items:center;justify-content:flex-start;gap:12px;min-height:44px;white-space:nowrap}
 #phoneMenuList .menu-item>span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 #phoneMenuList .menu-icon{flex:none;width:20px;height:20px}
-#phoneMenuList .menu-item small{flex:none;margin-left:auto;white-space:nowrap}
+#phoneMenuList .menu-item small{flex:0 1 auto;min-width:0;margin-left:auto;text-align:right;white-space:normal;overflow-wrap:anywhere}
 #phoneMenuList .menu-heading{white-space:nowrap;padding:12px 10px 4px}
 /* A landscape phone is only 390 px tall: the tighter heading and title spacing lets the first Menu section (View: Layers, Properties and
    the 2D, Stitches and 3D rows) sit in the list with no scrolling. */
@@ -970,6 +970,9 @@ body{height:100dvh;min-height:0;overflow:hidden}
 .canvas .canvas-views{display:none}
 }
 
+/* A tablet (wider than a phone, taller than a landscape phone) gets a column about as wide as the desktop menus, not a full-width sheet
+   stretched across the portrait screen. 420 px leaves room for a label and its reason side by side, in Spanish too. */
+@media (min-width:601px) and (max-width:1024px){#phoneMenuList{right:auto;width:420px;max-width:100vw}}
 /* The selection bar holds Select, Duplicate, Delete and Arrange at every size. Duplicate and Delete
    sit in the bar up to 1024px, where the top bar hides them; from 1025px they stay in the top bar. The direct Align, Flip and Boolean
    buttons stay in the bar from 1025px; below that the Arrange sheet holds them. */
