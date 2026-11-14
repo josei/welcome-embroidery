@@ -73,12 +73,12 @@ export function createCanvas(/** @type {any} */ api){
   function toScreen(/** @type {any} */ x,/** @type {any} */ y){const {x:ox,y:oy,w,h}=drawArea();return [(x-vp.cx)*vp.s+ox+w/2,(y-vp.cy)*vp.s+oy+h/2];}
   function apply(){const {w,h}=drawArea();svg.setAttribute('viewBox',`${vp.cx-w/(2*vp.s)} ${vp.cy-h/(2*vp.s)} ${w/vp.s} ${h/vp.s}`);
     svg.setAttribute('preserveAspectRatio','none');api.onViewport?.(vp);drawRulers();refresh();}
-  function fitRect(/** @type {any} */ x0,/** @type {any} */ y0,/** @type {any} */ x1,/** @type {any} */ y1,margin=48,inset={top:0,right:0}){const {w,h}=size();
+  function fitRect(/** @type {any} */ x0,/** @type {any} */ y0,/** @type {any} */ x1,/** @type {any} */ y1,margin=48,inset={top:0,right:0,bottom:0}){const {w,h}=size();
   vp.cx=(x0+x1)/2;
   vp.cy=(y0+y1)/2;
-  vp.s=Math.max(.4,Math.min(120,Math.min((w-margin*2-RULER-inset.right)/Math.max(1,x1-x0),(h-margin*2-RULER-inset.top)/Math.max(1,y1-y0))));
+  vp.s=Math.max(.4,Math.min(120,Math.min((w-margin*2-RULER-inset.right)/Math.max(1,x1-x0),(h-margin*2-RULER-inset.top-inset.bottom)/Math.max(1,y1-y0))));
   vp.cx-=(RULER-inset.right)/2/vp.s;
-  vp.cy-=(RULER+inset.top)/2/vp.s;
+  vp.cy-=(RULER+inset.top-inset.bottom)/2/vp.s;
   apply();
   }
   // Whether the hoop's outer frame lies wholly inside the drawing area at the current zoom.
@@ -92,7 +92,7 @@ export function createCanvas(/** @type {any} */ api){
   return ids&&bs.length?union(bs):union([[-hs.w/2,-hs.h/2,hs.w/2,hs.h/2],...bs]);
   }
   function fitAll(){const b=contentBounds();fitRect(b[0],b[1],b[2],b[3],56);}
-  function fitSelection(){const ids=api.ids();if(!ids.length)return fitAll();{const b=contentBounds(ids);fitRect(b[0],b[1],b[2],b[3],90,toolbarInset(container));}}function revealSelection(){const ids=api.ids();if(!ids.length)return;const b=contentBounds(ids),ins=toolbarInset(container),{w,h}=size(),[x0,y0]=toScreen(b[0],b[1]),[x1,y1]=toScreen(b[2],b[3]);if(!(x0<RULER||y0<RULER+ins.top||x1>w-ins.right||y1>h))return;fitRect(b[0],b[1],b[2],b[3],90,ins);}
+  function fitSelection(){const ids=api.ids();if(!ids.length)return fitAll();{const b=contentBounds(ids);fitRect(b[0],b[1],b[2],b[3],90,toolbarInset(container));}}function revealSelection(){const ids=api.ids();if(!ids.length)return;const b=contentBounds(ids),ins=toolbarInset(container),{w,h}=size(),[x0,y0]=toScreen(b[0],b[1]),[x1,y1]=toScreen(b[2],b[3]);if(!(x0<RULER||y0<RULER+ins.top||x1>w-ins.right||y1>h-ins.bottom))return;fitRect(b[0],b[1],b[2],b[3],90,ins);}
   /**
    * @param {number} factor
    * @param {number} [clientX]
@@ -372,8 +372,11 @@ export function createCanvas(/** @type {any} */ api){
   function keepMoveOnCanvas(/** @type {number[]} */ box,/** @type {number} */ dx,/** @type {number} */ dy){
     if(!globalThis.matchMedia?.('(pointer: coarse)').matches)return [dx,dy];
     const sr=svg.getBoundingClientRect();
-    const bars=[...document.querySelectorAll('.tool-rail')].map(n=>n.getBoundingClientRect()).filter(r=>r.width&&r.height);
-    return clampMoveDelta({box,delta:[dx,dy],scale:vp.s,center:[vp.cx,vp.cy],svgRect:sr,visible:visibleCanvasRect(sr,bars)});
+    const bars=[...document.querySelectorAll('.tool-rail,.zoombar,.phone-selection')].map(n=>n.getBoundingClientRect()).filter(r=>r.width&&r.height);
+    // The frame's handles and rotate stem reach about 27 px past the bounding box, so the box is kept this far inside the
+    // visible area; otherwise the bottom handles would be clipped at the edge.
+    const m=30,v=visibleCanvasRect(sr,bars),visible={left:v.left+m,top:v.top+m,right:v.right-m,bottom:v.bottom-m};
+    return clampMoveDelta({box,delta:[dx,dy],scale:vp.s,center:[vp.cx,vp.cy],svgRect:sr,visible});
   }
   function startMove(/** @type {any} */ e,/** @type {any} */ o,/** @type {any} */ p){
     // Double-click is decided on pointer-up (see the move branch), so a quick press-and-drag still moves.

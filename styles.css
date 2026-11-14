@@ -1075,6 +1075,8 @@ body{height:100dvh;min-height:0;overflow:hidden}
 .layout>aside.panel.sheet-open>.sheet-head .sheet-title{flex:1 1 auto}
 .layout>aside.panel.sheet-open .sheet-close{display:inline-flex;align-items:center;justify-content:center;flex:none;min-width:44px;min-height:44px!important;margin-left:auto;padding:0 12px;border:1px solid var(--field-line);border-radius:10px;background:#fff;color:#3c423e;font:inherit;font-size:var(--fs-body);font-weight:var(--fw-emphasis);cursor:pointer}
 .layout>aside.panel.sheet-open .sheet-close:focus-visible{outline:2px solid var(--teal);outline-offset:2px}
+/* The heading row (title and Close) stays at the top of an open phone panel while its contents scroll. */
+.layout>aside.panel.sheet-open>.sheet-head{position:sticky;top:0;z-index:1;background:#fff}
 
 /* A landscape phone (844x390) keeps the zoom bar in the canvas's right-hand column, as a vertical stack of 44 px buttons, not
    the bottom-left bar. The bar then sits clear of the hoop at the default fit, and in the Stitches view it no longer covers

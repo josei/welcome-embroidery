@@ -2,6 +2,7 @@
 // The editor bootstrap: it creates the document, wires the stores and command callbacks, mounts the modules that own
 // the DOM and starts the first render and compile. Nothing here looks up, writes to or listens on the DOM.
 import {editor} from './editorContext.js';
+import {phoneSheetState} from './phoneSheetState.js';
 import {initializeDocument, edit, transact} from './documentCommands.js';
 import {compile, configureCompile, compileNow, scheduleCompile, settleCompile} from './compileService.js';
 import {resetPlayback, resetPlaybackIndex, stopPlayback, mountSimulation} from './simulation.js';
@@ -63,6 +64,11 @@ configureShapePathActions({edit, toast, render});
 configureSelectionToolbarActions({edit});
 configureSewingOrder({edit});
 configureLettering({edit, transact, toast, render, reveal: () => editor.canvas?.revealSelection()});
+// Opening Properties on a phone covers the lower part of the canvas, so the selection is brought into the part above the sheet.
+// Waits a frame so the sheet is laid out before the canvas measures it.
+phoneSheetState.subscribe(() => {
+  if (phoneSheetState.get() === 'properties') requestAnimationFrame(() => editor.canvas?.revealSelection());
+});
 configureFontsDialog({edit, toast});
 configureProjectIO({
   clearComputed: compile.clearComputed,
