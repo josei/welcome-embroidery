@@ -1,8 +1,7 @@
 import {layoutState} from '../layoutState.js';
 import {inspectorOpenState} from '../inspectorOpenState.js';
 import {useTabletPortrait} from '../tabletLayoutState.js';
-import {closePhoneSheet, isPhoneSheetLayout, phoneSheetDetent, phoneSheetState, togglePhoneSheet, usePhonePortrait} from '../phoneSheetState.js';
-import {attachSheetDrag, firstSheetControl} from '../phoneSheetDrag.js';
+import {closePhoneSheet, isPhoneSheetLayout, phoneSheetState, togglePhoneSheet, usePhonePortrait} from '../phoneSheetState.js';
 import {selectionState} from '../selectionState.js';
 import {selectionLabelsState} from '../selectionLabelsState.js';
 import {t} from '../i18n.js';
@@ -96,7 +95,6 @@ export function EditorLayout() {
  // Phones and tablets stack the panels, so the hoop size and rotation move into Properties; desktop keeps them under Layers.
  const hoopInProperties = useHoopInProperties();
  const phoneSheet = useSyncExternalStore(phoneSheetState.subscribe, phoneSheetState.get);
- const detent = useSyncExternalStore(phoneSheetDetent.subscribe, phoneSheetDetent.get);
  const phone = usePhonePortrait();
  const landscapePhone = useSyncExternalStore(subscribeLandscapePhone, landscapePhoneNow);
  const selection = useSyncExternalStore(selectionState.subscribe, selectionState.get);
@@ -114,18 +112,12 @@ export function EditorLayout() {
  const hand = useSyncExternalStore(handModeState.subscribe, handModeState.get);
  const panning = useSyncExternalStore(panningState.subscribe, panningState.get);
  const deletingGuide = useSyncExternalStore(deletingGuideState.subscribe, deletingGuideState.get);
- // The sheets' asides: a portrait sheet can be dragged by its grab handle or title row (phoneSheetDrag.ts).
- const layersSheet = useRef<HTMLElement>(null);
- const inspectorSheet = useRef<HTMLElement>(null);
- useEffect(() => {
-  const detach = [layersSheet.current, inspectorSheet.current].map(el => el && attachSheetDrag(el));
-  return () => detach.forEach(off => off?.());
- }, []);
- // An open sheet takes focus on its first control, and Escape closes it. Closing returns focus to the opener (closePhoneSheet).
+ // An open sheet puts focus on its heading (not a field, so no keyboard opens on a phone), and Escape closes it.
+ // Closing returns focus to the opener (closePhoneSheet).
  useEffect(() => {
   if (phoneSheet === 'none') return;
   const sheet = document.getElementById(phoneSheet === 'layers' ? 'layersSheet' : 'inspector');
-  if (sheet) firstSheetControl(sheet)?.focus();
+  sheet?.querySelector<HTMLElement>('.sheet-title')?.focus();
   const escape = (e: KeyboardEvent) => {
    if (e.key !== 'Escape' || e.defaultPrevented || !isPhoneSheetLayout() || document.querySelector('dialog[open]')) return;
    e.preventDefault();
@@ -312,9 +304,7 @@ export function EditorLayout() {
  return (
   <>
     <div className={"layout"}>
-      {phoneSheet === 'none' ? null : <div className={"sheet-scrim"} aria-hidden={"true"} onClick={closePhoneSheet} />}
-      <aside ref={layersSheet} className={phoneSheet === 'layers' ? "panel sheet-open" : "panel"} data-detent={detent} id={"layersSheet"} aria-label={t('Objects')}>
-        <div className={"sheet-grip"} data-sheet-drag={""} aria-hidden={"true"} />
+      <aside className={phoneSheet === 'layers' ? "panel sheet-open" : "panel"} id={"layersSheet"} aria-label={t('Objects')}>
         <ObjectListHead />
         <label className={"sides-row"} hidden={true}>
           {"Sides / star points "}
@@ -376,10 +366,10 @@ export function EditorLayout() {
           <StatusRun />
         </footer>
       </main>
-      <aside ref={inspectorSheet} className={[inspectorOpen || tablet ? "panel" : "panel inspector-collapsed", phoneSheet === 'properties' && 'sheet-open'].filter(Boolean).join(' ')} id={"inspector"} data-detent={detent} aria-label={t('Properties')}>
-        <div className={"sheet-grip"} data-sheet-drag={""} aria-hidden={"true"} />
-        <div className={"sheet-head"} data-sheet-drag={""}>
-          <h2 className={"sheet-title"}>{t('Properties')}</h2>
+      <aside className={[inspectorOpen || tablet ? "panel" : "panel inspector-collapsed", phoneSheet === 'properties' && 'sheet-open'].filter(Boolean).join(' ')} id={"inspector"} aria-label={t('Properties')}>
+        <div className={"sheet-head"}>
+          <h2 className={"section-heading sheet-title"} tabIndex={-1}>{t('Properties')}</h2>
+          <button type={"button"} className={"sheet-close"} onClick={closePhoneSheet}>{t('Close')}</button>
         </div>
         <SelectionHeading />
         <TipCard />

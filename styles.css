@@ -225,6 +225,7 @@ label[hidden],button[hidden],.sel-hint[hidden]{display:none!important}
 .switch-input:checked{background:var(--teal)}.switch-input:checked::before{transform:translateX(14px)}
 .switch-input:hover{filter:brightness(.95)}.switch-input:focus-visible{outline:2px solid var(--teal);outline-offset:2px}
 .switch-input:disabled{opacity:.45;cursor:default}
+.press-toggle{appearance:none;display:inline-flex;align-items:center;gap:6px;min-height:30px;padding:0 2px;border:0;background:none;font:inherit;color:inherit;cursor:pointer}.press-toggle .switch-track{position:relative;display:block;width:30px;height:16px;border-radius:8px;background:#c9d0cb;transition:background .15s}.press-toggle .switch-track::before{content:"";position:absolute;top:2px;left:2px;width:12px;height:12px;border-radius:50%;background:#fff;box-shadow:0 1px 2px #0003;transition:transform .15s}.press-toggle[aria-pressed=true] .switch-track{background:var(--teal)}.press-toggle[aria-pressed=true] .switch-track::before{transform:translateX(14px)}.press-toggle:hover .switch-track{filter:brightness(.95)}.press-toggle:focus-visible{outline:2px solid var(--teal);outline-offset:2px}.press-toggle:disabled{opacity:.45;cursor:default}.press-toggle[aria-pressed=true] .switch-state{color:var(--teal-deep);font-weight:var(--fw-emphasis)}
 .switch-state{min-width:20px;font-size:var(--fs-caption);color:#5c625e}.switch-row:has(.switch-input:checked) .switch-state{color:var(--teal-deep);font-weight:var(--fw-emphasis)}
 .icon-check[data-icon="border"]{--ic:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22black%22 stroke-width=%221.8%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22%3E%3Crect x=%224%22 y=%224%22 width=%2216%22 height=%2216%22 rx=%222%22/%3E%3Crect x=%228%22 y=%228%22 width=%228%22 height=%228%22 fill=%22black%22/%3E%3C/svg%3E")}
 .icon-check[data-icon="closed"]{--ic:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22black%22 stroke-width=%221.8%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22%3E%3Cpath d=%22M5 19 9 5l11 6-4 8z%22/%3E%3C/svg%3E")}
@@ -311,6 +312,10 @@ input:not([type=checkbox]):not([type=range]),select,textarea,.panel textarea{fon
 .icon-seg.labelled{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
 .icon-seg.labelled button{width:auto;height:auto;padding:9px 4px 7px;display:flex;flex-direction:column;align-items:center;gap:5px;border:1px solid var(--field-line);border-radius:10px;background:#fff;font-size:var(--fs-caption);font-weight:var(--fw-regular);color:#3c423e}
 .icon-seg.labelled button[aria-pressed=true]{padding:8px 3px 6px;border:2px solid var(--teal);background:var(--teal-soft);color:var(--teal-deep);font-weight:var(--fw-emphasis)}
+.icon-seg.labelled[data-select="fillMethod"]{grid-template-columns:minmax(0,1fr)}.icon-seg.labelled[data-select="fillMethod"] button span{white-space:normal;text-align:center;line-height:1.25}
+/* On a phone the pattern cards take two columns: a 366 px panel leaves room for the full names, which a single tall column does not need. */
+@media (max-width:600px) and (orientation:portrait),(max-height:500px) and (pointer:coarse){.icon-seg.labelled[data-select="fillMethod"]{grid-template-columns:repeat(2,minmax(0,1fr))}}
+#methodRow[hidden]{display:none!important}
 .slider-field{margin:-4px 0 10px}.slider-field label{margin:0 0 6px}.slider-field input[type=range]{width:100%;margin:0;accent-color:var(--teal)}
 
 .inspector-toggle{display:none}
@@ -500,24 +505,17 @@ html[data-input="touch"] button:focus-visible,html[data-input="touch"] #art:focu
 .layout>aside.panel:first-child>.layers-head{padding:0 10px}
 }
 
-/* At phone size (portrait 600 px and narrower, or a landscape phone) Layers and Properties are sheets. They open from the
-   Layers and Properties rows of the Menu, and only one is open at a time. Neither
-   sheet has a Close button. A sheet closes by a downward drag on its grab handle or title row (portrait), a tap on the dimmed area,
-   Escape, or the system back action (MenuBar opening closes them too; see phoneSheetState.ts). Portrait sheets have three detents:
-   peek (120 px), half (50%, where an open from the Menu starts) and full (below the 52 px top bar). Landscape sheets are 320 px on the right.
+/* At phone size (portrait 600 px and narrower, or a landscape phone) Layers and Properties are plain panels, not sheets with
+   handles. They open from the Layers and Properties rows of the Menu, and only one is open at a time. Each has a Close button
+   in its heading row, in the same button style as the status bar buttons, and closes with Escape or the system back action
+   (MenuBar opening closes them too; see phoneSheetState.ts). They take no drag, dim nothing, and take focus on the heading,
+   never on a field, so the phone keyboard stays down. Portrait panels stand at half the screen; landscape panels are 320 px on the right.
    Desktop and tablet never show these parts. */
-.sheet-grip,.sheet-head,.sheet-scrim{display:none}
+.sheet-head{display:none}
 .sheet-title{margin:0;font-size:var(--fs-heading);font-weight:var(--fw-emphasis);color:#1d211f}
 @media (max-width:600px) and (orientation:portrait){
-.sheet-scrim{display:block;position:fixed;left:0;right:0;bottom:0;top:52px;z-index:39;background:#1d292538}
 .layout>aside.panel:not(.sheet-open){display:none}
 .layout>aside.panel.sheet-open{display:flex;flex-direction:column;position:fixed;left:0;right:0;bottom:0;z-index:40;width:auto;height:50vh;height:50dvh;margin:0;padding:0 12px 16px;overflow-y:auto;overscroll-behavior:contain;background:#fff;border:0;border-radius:0;box-shadow:0 -6px 24px #1d292533;transition:height .2s ease,transform .2s ease}
-.layout>aside.panel.sheet-open[data-dragging]{transition:none}
-.layout>aside.panel.sheet-open[data-detent=peek]{height:120px}
-.layout>aside.panel.sheet-open[data-detent=full]{height:calc(100vh - 52px);height:calc(100dvh - 52px)}
-.sheet-grip{display:block;position:relative;flex:none;height:24px;margin:0 -12px;touch-action:none;cursor:grab}
-.sheet-grip::before{content:"";position:absolute;left:50%;top:9px;width:36px;height:5px;margin-left:-18px;border-radius:3px;background:#c4cbc6}
-.sheet-head,.layers-head[data-sheet-drag]{touch-action:none}
 .sheet-head{display:flex;align-items:center;min-height:44px;margin:0 0 4px}
 .layout .layers-head .inspector-toggle{display:none}
 .layout>.panel.sheet-open.inspector-collapsed{display:flex}
@@ -537,7 +535,6 @@ html[data-input="touch"] button:focus-visible,html[data-input="touch"] #art:focu
 /* Landscape phones (a coarse pointer, 500 px tall or less): the dock's buttons sit in the rail, and each sheet is 320 px wide on the
    right of the screen with no grab handle. The canvas keeps the rest of the width until a sheet is open. */
 @media (max-height:500px) and (pointer:coarse){
-.sheet-scrim{display:block;position:fixed;left:0;right:0;bottom:0;top:58px;z-index:39;background:#1d292538}
 .layout{grid-template-columns:minmax(0,1fr)}
 .layout>aside.panel:not(.sheet-open){display:none}
 .layout>aside.panel.sheet-open{display:flex;flex-direction:column;position:fixed;top:0;bottom:0;left:auto;right:0;z-index:40;width:320px;height:auto;margin:0;padding:6px 12px 12px;overflow-y:auto;overscroll-behavior:contain;background:#fff;border:0;border-left:1px solid #e3e6e1;border-radius:0;box-shadow:-6px 0 24px #1d292533}
@@ -749,7 +746,7 @@ body{height:100vh;height:100dvh;min-height:0;overflow:hidden}
 .layout>#layersSheet,.layout>#inspector{display:block;min-height:0;min-width:0;overflow-y:auto;overscroll-behavior:contain;padding:12px 12px 16px;background:#fff;border:0;border-left:1px solid #e3e6e1;width:auto}
 .layout>#layersSheet{grid-column:2;grid-row:1}
 .layout>#inspector{grid-column:2;grid-row:2;border-top:1px solid #e3e6e1}
-.layout>#layersSheet .layers-head .inspector-toggle,.layout>#inspector .sheet-grip,.layout>#inspector .drawer-head{display:none}
+.layout>#layersSheet .layers-head .inspector-toggle,.layout>#inspector .drawer-head{display:none}
 .canvas{flex:1 1 0;height:auto;min-height:0}
 .canvas .tool-rail{position:absolute;left:0;top:0;bottom:0;width:64px;max-height:none;z-index:4;display:flex;flex-direction:column;align-items:stretch;gap:4px;padding:6px 4px;overflow-y:auto;overscroll-behavior:contain;background:#fff;border-right:1px solid #e3e6e1}
 .canvas .tool-rail>button.icon-button,.canvas .tool-rail>.icon-button{width:44px;min-width:44px;height:44px;min-height:44px;align-self:center;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;padding:0}
@@ -866,8 +863,6 @@ body{height:100vh;height:100dvh;min-height:0;overflow:hidden;overscroll-behavior
 @media (orientation:landscape) and (max-height:500px) and (max-width:1000px){
 /* The sheets are #layersSheet and #inspector: their id rules (tablet and desktop) outrank the classes above, so the landscape sheet sets its box again here. */
 .layout>#layersSheet.sheet-open,.layout>#inspector.sheet-open{display:flex;flex-direction:column;position:fixed;top:44px;bottom:44px;left:auto;right:0;width:320px;height:auto;max-height:none;margin:0;padding:10px 12px 12px;overflow-y:auto;overscroll-behavior:contain;z-index:40;background:#fff;border:0;border-left:1px solid #e3e6e1;border-radius:0;box-shadow:-6px 0 24px #1d292533}
-.sheet-scrim{display:block;position:fixed;left:104px;right:0;bottom:0;top:44px;z-index:39;background:#1d292538}
-.layout>aside.panel.sheet-open [data-sheet-drag]{touch-action:pan-y}
 body{height:100dvh;min-height:0;overflow:hidden}
 .top{position:fixed;top:0;left:0;right:0;z-index:7;height:44px;min-height:44px;flex-wrap:nowrap;gap:4px;padding:0 6px;overflow:hidden}
 .top .logo,.top .sep,.top #new,.top #open,.top #importMachine,.top #save,.top #duplicate,.top #remove,.top #helpBtn,.top #settingsBtn,.top .save-status,.top .unsaved-marker{display:none}
@@ -886,7 +881,7 @@ body{height:100dvh;min-height:0;overflow:hidden}
 .layout>.panel:last-child.sheet-open{display:flex;flex-direction:column;position:fixed;top:44px;bottom:44px;right:0;left:auto;z-index:40;width:320px;height:auto;max-height:none;margin:0;padding:10px 12px 12px;overflow-y:auto;overscroll-behavior:contain;background:#fff;border:0;border-left:1px solid #e3e6e1;border-radius:0;box-shadow:-6px 0 24px #1d292533}
 .layout>.panel.inspector-collapsed:last-child{display:none}
 .layout>aside.panel:first-child.sheet-open>.layers-head,.layout>aside.panel:first-child.sheet-open>.sheet-head{flex-wrap:nowrap}
-.layers-head{flex-wrap:nowrap;gap:8px;min-width:0}
+.layers-head{flex-wrap:nowrap;align-items:center;gap:8px;min-width:0}
 .layers-head span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
 .layers-head h2{white-space:nowrap}
 .layers-head .inspector-toggle{display:none}
@@ -895,7 +890,6 @@ body{height:100dvh;min-height:0;overflow:hidden}
 .sheet-bar button{min-width:44px;min-height:44px;height:44px;padding:0 10px;border:1px solid var(--field-line);border-radius:10px;background:#fff;color:#3c423e;font:inherit;font-size:var(--fs-body);font-weight:var(--fw-emphasis);cursor:pointer;white-space:nowrap}
 .sheet-bar button[aria-expanded=true]{background:var(--teal-soft);border-color:var(--teal);color:var(--teal-deep)}
 .sheet-bar button:focus-visible{outline:2px solid var(--teal);outline-offset:2px}
-.sheet-close,.sheet-switch{min-height:44px;min-width:44px}
 .sheet-head,.drawer-head{display:flex;justify-content:flex-end;gap:8px;margin:0 0 4px}
 .drawer-head{display:none}
 .layout>.panel:last-child.sheet-open .drawer-head{display:none}
@@ -1080,6 +1074,11 @@ body{height:100dvh;min-height:0;overflow:hidden}
 @media (max-width:1024px) and (orientation:landscape) and (max-height:500px){
 .layout main>footer{border-top:0;box-shadow:inset 0 1px 0 #e3e6e1}
 }
+/* The panels' Close button and title flex, outside the phone media blocks, so they hold at every size a panel can open at (the Menu opens them at 844x390 with a mouse too). */
+.sheet-close{display:none}
+.layout>aside.panel.sheet-open>.sheet-head .sheet-title{flex:1 1 auto}
+.layout>aside.panel.sheet-open .sheet-close{display:inline-flex;align-items:center;justify-content:center;flex:none;min-width:44px;min-height:44px!important;margin-left:auto;padding:0 12px;border:1px solid var(--field-line);border-radius:10px;background:#fff;color:#3c423e;font:inherit;font-size:var(--fs-body);font-weight:var(--fw-emphasis);cursor:pointer}
+.layout>aside.panel.sheet-open .sheet-close:focus-visible{outline:2px solid var(--teal);outline-offset:2px}
 
 /* A landscape phone (844x390) keeps the zoom bar in the canvas's right-hand column, as a vertical stack of 44 px buttons, not
    the bottom-left bar. The bar then sits clear of the hoop at the default fit, and in the Stitches view it no longer covers

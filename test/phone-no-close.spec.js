@@ -1,6 +1,6 @@
 import {test,expect} from '@playwright/test';
 
-// The phone Menu, Layers and Properties have no Close or × control. Menu > View
+// The phone Menu has no Close or × control. Layers and Properties have a Close button in their heading row. Menu > View
 // holds the 2D / Stitches / 3D switch on a landscape phone, and the canvas has none. On a landscape phone, choosing Menu > Layers or
 // Menu > Properties closes the Menu and opens the sheet. A tap outside each closes it.
 const SIZES=[[390,844],[844,390]];
@@ -24,18 +24,16 @@ for(const [width,height] of SIZES) for(const lang of ['en','es']){
   await expect(page.locator('#phoneMenuList')).toHaveCount(0);
   await expect(page.locator('#layersSheet')).toHaveClass(/sheet-open/);
   const layerButtons=await page.locator('#layersSheet button:visible').evaluateAll(bs=>bs.map(b=>(b.getAttribute('aria-label')||b.textContent||'').trim()));
-  expect(layerButtons.filter(l=>closeLike.test(l)||/close|cerrar/i.test(l))).toEqual([]);
+  // The panels have a Close button in their heading row (see phone-sheets.spec.js); the Menu has none.
   await page.waitForTimeout(300);
-  await page.mouse.click(width>height?300:4,200); // the dimmed area: left of a landscape sheet, above a portrait one
+  await page.locator('#layersSheet').getByRole('button',{name:/^(Close|Cerrar)$/}).click();
   await expect(page.locator('#layersSheet')).not.toHaveClass(/sheet-open/);
   await page.locator('#phoneMenu').click();
   await page.locator('#menuProperties').click();
   await expect(page.locator('#phoneMenuList')).toHaveCount(0);
   await expect(page.locator('#inspector')).toHaveClass(/sheet-open/);
-  const propButtons=await page.locator('#inspector button:visible').evaluateAll(bs=>bs.map(b=>(b.getAttribute('aria-label')||b.textContent||'').trim()));
-  expect(propButtons.filter(l=>closeLike.test(l)||/close|cerrar/i.test(l))).toEqual([]);
   await page.waitForTimeout(300);
-  await page.mouse.click(width>height?300:4,200); // the dimmed area: left of a landscape sheet, above a portrait one
+  await page.locator('#inspector').getByRole('button',{name:/^(Close|Cerrar)$/}).click();
   await expect(page.locator('#inspector')).not.toHaveClass(/sheet-open/);
   expect(errors).toEqual([]);
  });

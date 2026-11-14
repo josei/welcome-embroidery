@@ -6,6 +6,7 @@ import {layersActions} from '../layersState.js';
 import {sewingCountsState} from '../sewingCountsState.js';
 import {compileIssueState} from '../compileIssueState.js';
 import {inspectorOpenState, toggleInspectorOpen} from '../inspectorOpenState.js';
+import {closePhoneSheet} from '../phoneSheetState.js';
 import {t} from '../i18n.js';
 import {selectionChange} from '../objectListSelection.js';
 import type {Click} from '../objectListSelection.js';
@@ -91,10 +92,11 @@ export function ObjectListHead() {
   });
  };
  return (
-  <div className="layers-head" data-sheet-drag="">
-   <h2 className="section-heading">{t('Layers')}</h2>
+  <div className="layers-head">
+   <h2 className="section-heading sheet-title" tabIndex={-1}>{t('Layers')}</h2>
    <span>{`${objectsText} · ${threadsText}`}</span>
    <button type="button" className="inspector-toggle" aria-expanded={open} aria-controls="inspector" onClick={toggle}>{t('Properties')}</button>
+   <button type="button" className="sheet-close" onClick={closePhoneSheet}>{t('Close')}</button>
   </div>
  );
 }

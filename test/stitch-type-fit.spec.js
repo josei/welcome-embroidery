@@ -23,12 +23,12 @@ async function drawAndSelect(page,lang){
  await expect(page.locator('#remove')).toBeEnabled();
  await page.locator('.object-row').first().click();
  await expect(page.locator('#type')).toBeAttached();
- await expect(page.locator('.icon-seg.labelled button').first()).toBeVisible();
+ await expect(page.locator('.icon-seg.labelled[data-select="type"] button').first()).toBeVisible();
 }
 
 // Measures each visible stitch-type card: the width of its rendered text against the card's inner box.
 function measureCards(){
- return [...document.querySelectorAll('.icon-seg.labelled button')].filter(b=>b.offsetParent).map(b=>{
+ return [...document.querySelectorAll('.icon-seg.labelled[data-select="type"] button')].filter(b=>b.offsetParent).map(b=>{
   const label=b.querySelector('span');
   const box=b.getBoundingClientRect();
   const cs=getComputedStyle(b);
@@ -58,8 +58,8 @@ for(const lang of ['en','es']){
   const broken=cards.filter(c=>!c.fits||!c.scrollFits).map(c=>`"${c.label}" (${c.textWidth}px text, ${c.boxWidth}px box)`);
   expect(broken,`stitch-type labels wider than their cards in ${lang}`).toEqual([]);
   if(lang==='es'){
-   await page.locator('.icon-seg.labelled').first().scrollIntoViewIfNeeded();
-   await page.locator('.icon-seg.labelled').first().screenshot({path:'test-results/stitch-type-es-1440.png'});
+   await page.locator('.icon-seg.labelled[data-select="type"]').first().scrollIntoViewIfNeeded();
+   await page.locator('.icon-seg.labelled[data-select="type"]').first().screenshot({path:'test-results/stitch-type-es-1440.png'});
   }
  });
 }

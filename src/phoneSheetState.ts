@@ -8,26 +8,13 @@ import {createStore} from './store.js';
 export type PhoneSheet = 'none' | 'layers' | 'properties';
 export const phoneSheetState = createStore<PhoneSheet>('none');
 
-/**
- * The detent of a bottom sheet in portrait: peek (about 120 px, the title row and a little more), half (50% of the screen), or full
- * (below the top bar). A sheet opened from the Menu starts at half. Landscape sheets are side sheets and ignore the detent.
- */
-export type SheetDetent = 'peek' | 'half' | 'full';
-export const phoneSheetDetent = createStore<SheetDetent>('half');
-
 // The phone layouts in which Layers and Properties are sheets: a portrait phone (bottom sheets), or a landscape phone (side sheets).
 // styles.css uses the same two conditions.
 const PHONE_SHEET_QUERY = '(max-width: 600px) and (orientation: portrait), (max-height: 500px) and (pointer: coarse)';
-const PORTRAIT_SHEET_QUERY = '(max-width: 600px) and (orientation: portrait)';
 
 /** Whether Layers and Properties are sheets right now (a phone in either orientation). */
 export function isPhoneSheetLayout(): boolean {
   return window.matchMedia(PHONE_SHEET_QUERY).matches;
-}
-
-/** Whether the sheets are bottom sheets with detents (a portrait phone). */
-export function isPortraitSheetLayout(): boolean {
-  return window.matchMedia(PORTRAIT_SHEET_QUERY).matches;
 }
 
 /** The phone width at which the Header picks its phone layout (the same breakpoint as the CSS). */
@@ -72,7 +59,6 @@ export function openPhoneSheet(sheet: Exclude<PhoneSheet, 'none'>) {
     opener = document.activeElement instanceof HTMLElement ? document.activeElement : null;
     window.history.pushState({phoneSheet: true}, '');
   }
-  phoneSheetDetent.set('half');
   phoneSheetState.set(sheet);
 }
 
@@ -114,19 +100,6 @@ window.addEventListener('popstate', () => {
   phoneSheetState.set('none');
   restoreFocus(back);
 });
-
-/** Moves a sheet to the detent above it (peek, half, full). Full stays full. */
-export function raisePhoneSheet() {
-  const next: Record<SheetDetent, SheetDetent> = {peek: 'half', half: 'full', full: 'full'};
-  phoneSheetDetent.set(next[phoneSheetDetent.get()]);
-}
-
-/** Moves a sheet to the detent below it. From peek, the sheet closes. */
-export function lowerPhoneSheet() {
-  const detent = phoneSheetDetent.get();
-  if (detent === 'peek') closePhoneSheet();
-  else phoneSheetDetent.set(detent === 'full' ? 'half' : 'peek');
-}
 
 const PHONE_PORTRAIT_QUERY = '(max-width: 600px) and (orientation: portrait)';
 function subscribePhonePortrait(onChange: () => void) {

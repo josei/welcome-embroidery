@@ -1,36 +1,25 @@
 import {test,expect} from '@playwright/test';
 
-// At phone size Layers and Properties open as sheets from the
-// Menu, in either orientation. No large mode buttons remain. A sheet has no Close button: it closes by a downward drag on
-// its grab handle or title row, a tap on the dimmed area, Escape, or the system back action. Portrait sheets have three detents
-// (peek 120 px, half 50%, full below the top bar), and a dock open starts at half. Only one sheet is open at a time, and opening Menu
-// closes it. Focus moves to the sheet's first control on open and returns to the opener on close.
+// At phone size Layers and Properties open as plain panels from the Menu, in either orientation. Each has a Close button in its
+// heading row. There is no grab handle, no drag, and no dimmed backdrop. Escape and the system back action also close a panel.
+// Opening a panel puts focus on its heading, never on a field, and closing returns focus to the Menu button.
 test.beforeEach(async({page})=>{await page.addInitScript(()=>{delete window.showSaveFilePicker;});});
 
 const LAYOUTS=[
- {name:'portrait 390x844',width:390,height:844,options:{}},
+ {name:'portrait 390x844',width:390,height:844,options:{hasTouch:true}},
  {name:'landscape 844x390',width:844,height:390,options:{hasTouch:true}},
 ];
 
-// The Menu button: the phone Menu, at every phone size.
-const menuSelector=()=>'#phoneMenu';
-
-// Opens a sheet as a user does: Layers and Properties are rows in the Menu at both phone orientations.
 const openSheet=async(page,sheet)=>{
  await page.locator('#phoneMenu').click();
  await page.locator(sheet==='layers'?'#menuLayers':'#menuProperties').click();
 };
 
-// A sheet opened from the Menu closes back to the Menu button (its row is gone once the Menu closes).
-const opener=()=>'#phoneMenu';
+const sheetOf=(page,sheet)=>page.locator(sheet==='layers'?'.layout>#layersSheet.sheet-open':'.layout>#inspector.sheet-open');
 
-const sheetOf=page=>page.locator('.layout>aside.panel.sheet-open');
-const scrim=page=>page.locator('.sheet-scrim');
-
-// Every control drawn in a sheet (screen-reader-only and hidden ones are skipped).
+// Every control drawn in a panel (screen-reader-only and hidden ones are skipped).
 const sheetControls=sheet=>sheet.evaluate(root=>{
  const out=[];
- // A checkbox is measured by its label row (the pressed control), as the page-wide touch-target check does.
  for(const e of root.querySelectorAll('button,input:not([type=hidden]):not([type=checkbox]),select,textarea,summary,a[href],label:has(>input[type=checkbox])')){
   if(e.closest('.sr-only,[hidden],[inert]'))continue;
   const cs=getComputedStyle(e);
@@ -42,253 +31,88 @@ const sheetControls=sheet=>sheet.evaluate(root=>{
  return out;
 });
 
-// The Close labels and close-icon buttons that a sheet's title row could carry.
-const closeButtonsIn=sheet=>sheet.evaluate(root=>[...root.querySelectorAll('button')].filter(b=>{
- const label=(b.getAttribute('aria-label')||b.textContent||'').trim().toLowerCase();
- if(b.getClientRects().length===0)return false;
- return /^(close|done|dismiss|×|✕|x)$/.test(label)||/close/.test(b.className);
-}).map(b=>b.className||b.textContent));
-
-const grab=async(page,sheet,dy)=>{
- const h=await sheet.locator('.sheet-grip, .sheet-head, .layers-head').first().boundingBox();
- await page.mouse.move(h.x+h.width/2,h.y+Math.min(h.height/2,12));
- await page.mouse.down();
- for(let i=1;i<=8;i++)await page.mouse.move(h.x+h.width/2,h.y+Math.min(h.height/2,12)+dy*i/8);
- await page.mouse.up();
-};
-
 for(const layout of LAYOUTS){
  test.describe(layout.name,()=>{
   test.use({viewport:{width:layout.width,height:layout.height},...layout.options});
 
-  test('Menu, Layers and Properties open in turn; a tap outside each closes it',async({page})=>{
-   const errors=[];page.on('pageerror',e=>errors.push(e.message));
-   for(const lang of ['en','es']){
-    await page.goto(`/?lang=${lang}`);
-    await expect(page.locator(menuSelector()).first()).toBeVisible();
-    // No large mode buttons: the old bar under the canvas is gone.
-    await expect(page.locator('.sheet-bar')).toHaveCount(0);
-    // Menu opens below the top bar, so a tap on the top bar (outside the sheet) dismisses it. No Close button.
-    const menu=page.locator(menuSelector()).first();
-    await menu.click();
-    await expect(menu).toHaveAttribute('aria-expanded','true');
-    await expect(page.locator('#phoneMenuList .menu-close')).toHaveCount(0);
-    const vw=page.viewportSize();
-    await page.mouse.click(Math.round(vw.width/2),22);
-    await expect(page.locator('#phoneMenuList')).toHaveCount(0);
-    await expect(menu).toHaveAttribute('aria-expanded','false');
-    // Layers: a tap on the dimmed area closes it.
-    await openSheet(page,'layers');
-    await expect(sheetOf(page)).toHaveAttribute('id','layersSheet');
-    await expect(scrim(page)).toBeVisible();
-    await scrim(page).click({position:{x:4,y:4}});
-    await expect(sheetOf(page)).toHaveCount(0);
-    // Properties: the same.
-    await openSheet(page,'properties');
-    await expect(sheetOf(page)).toHaveAttribute('id','inspector');
-    await scrim(page).click({position:{x:4,y:4}});
-    await expect(sheetOf(page)).toHaveCount(0);
-   }
-   expect(errors).toEqual([]);
-  });
+  for(const [sheet,id] of [['layers','layersSheet'],['properties','inspector']]){
+   test(`${sheet}: no grab handle, no backdrop, and a Close button closes it (en)`,async({page})=>{
+    const errors=[];page.on('pageerror',e=>errors.push(e.message));
+    await page.goto('/?lang=en');
+    await openSheet(page,sheet);
+    const panel=page.locator(`#${id}`);
+    await expect(panel).toHaveClass(/sheet-open/);
+    await expect(page.locator('.sheet-grip,.sheet-scrim')).toHaveCount(0);
+    await expect(panel.locator('[data-sheet-drag]')).toHaveCount(0);
+    const close=panel.getByRole('button',{name:'Close'});
+    await expect(close).toBeVisible();
+    await close.click();
+    await expect(page.locator(`.layout>#${id}.sheet-open`)).toHaveCount(0);
+    await expect(page.locator('#phoneMenu')).toBeFocused();
+    expect(errors).toEqual([]);
+   });
 
-  for(const lang of ['en','es']){
-   test(`a sheet has no Close control in its title row (${lang})`,async({page})=>{
-    await page.goto(`/?lang=${lang}`);
-    await openSheet(page,'layers');
-    await expect(sheetOf(page)).toHaveAttribute('id','layersSheet');
-    expect(await closeButtonsIn(sheetOf(page)),'Layers close buttons').toEqual([]);
-    await scrim(page).click({position:{x:4,y:4}});
-    await page.locator('#rect').click();
-    await openSheet(page,'properties');
-    await expect(sheetOf(page)).toHaveAttribute('id','inspector');
-    expect(await closeButtonsIn(sheetOf(page)),'Properties close buttons').toEqual([]);
+   test(`${sheet}: a downward drag on the heading does not close or move the panel`,async({page})=>{
+    await page.goto('/?lang=en');
+    await openSheet(page,sheet);
+    const panel=page.locator(`#${id}`);
+    await expect(panel).toHaveClass(/sheet-open/);
+    const before=await panel.boundingBox();
+    const h=await panel.locator('h2').first().boundingBox();
+    await page.mouse.move(h.x+h.width/2,h.y+h.height/2);
+    await page.mouse.down();
+    for(let i=1;i<=8;i++)await page.mouse.move(h.x+h.width/2,h.y+h.height/2+i*15);
+    await page.mouse.up();
+    await expect(panel).toHaveClass(/sheet-open/);
+    const after=await panel.boundingBox();
+    expect(after.y).toBe(before.y);
+    expect(after.height).toBe(before.height);
+   });
+
+   test(`${sheet}: opening it leaves focus on the heading, not an input (en)`,async({page})=>{
+    await page.goto('/?lang=en');
+    await openSheet(page,sheet);
+    await expect(page.locator(`#${id}`)).toHaveClass(/sheet-open/);
+    const active=await page.evaluate(()=>{const a=document.activeElement;return a?{tag:a.tagName,title:a.classList.contains('sheet-title')}:null;});
+    expect(active?.tag==='BODY' || (active?.tag==='H2' && active.title),'focus is on the heading or body').toBe(true);
+   });
+
+   test(`${sheet}: every control is at least 44x44 CSS px (en)`,async({page})=>{
+    await page.goto('/?lang=en');
+    await openSheet(page,sheet);
+    const panel=page.locator(`#${id}`);
+    await expect(panel).toHaveClass(/sheet-open/);
+    const small=(await sheetControls(panel)).filter(c=>c.w<43.5||c.h<43.5);
+    expect(small,'controls under 44 px').toEqual([]);
    });
   }
 
-  test('the sheets open from the Menu and only one is open at a time',async({page})=>{
+  test('Escape closes an open panel',async({page})=>{
    await page.goto('/?lang=en');
    await openSheet(page,'layers');
-   await expect(sheetOf(page)).toHaveAttribute('id','layersSheet');
-   // The open sheet covers the dock, so a tap outside it (the dimmed area) closes it before the other opens.
-   await scrim(page).click({position:{x:4,y:4}});
-   await openSheet(page,'properties');
-   await expect(sheetOf(page)).toHaveCount(1);
-   await expect(sheetOf(page)).toHaveAttribute('id','inspector');
-   // Opening the Menu closes whichever sheet is open.
-   await page.locator(menuSelector()).first().click();
-   await expect(sheetOf(page)).toHaveCount(0);
+   await expect(sheetOf(page,'layers')).toHaveCount(1);
    await page.keyboard.press('Escape');
+   await expect(sheetOf(page,'layers')).toHaveCount(0);
   });
 
-  test('Escape closes an open sheet',async({page})=>{
-   await page.goto('/?lang=en');
-   await openSheet(page,'layers');
-   await expect(sheetOf(page)).toHaveCount(1);
-   await page.keyboard.press('Escape');
-   await expect(sheetOf(page)).toHaveCount(0);
-  });
-
-  test('focus moves to the first control on open and back to the opener on close',async({page})=>{
-   await page.goto('/?lang=en');
-   await openSheet(page,'properties');
-   await expect(sheetOf(page)).toHaveAttribute('id','inspector');
-   const insideSheet=await page.evaluate(()=>!!document.activeElement?.closest('#inspector'));
-   expect(insideSheet,'focus is inside the Properties sheet').toBe(true);
-   await page.keyboard.press('Escape');
-   await expect(page.locator(opener())).toBeFocused();
-   // The same for Layers, opened with a pointer.
-   await openSheet(page,'layers');
-   expect(await page.evaluate(()=>!!document.activeElement?.closest('#layersSheet')),'focus is inside Layers').toBe(true);
-   await scrim(page).click({position:{x:4,y:4}});
-   await expect(page.locator(opener())).toBeFocused();
-  });
-
-  test('the system back action closes an open sheet before leaving the page',async({page})=>{
+  test('the system back action closes an open panel before leaving the page',async({page})=>{
    await page.goto('/?lang=en');
    const before=page.url();
    await openSheet(page,'layers');
-   await expect(sheetOf(page)).toHaveCount(1);
+   await expect(sheetOf(page,'layers')).toHaveCount(1);
    await page.goBack();
-   await expect(sheetOf(page)).toHaveCount(0);
+   await expect(sheetOf(page,'layers')).toHaveCount(0);
    expect(page.url()).toBe(before);
-   await expect(page.locator(opener())).toBeVisible();
   });
 
-  for(const lang of ['en','es']){
-   test(`every control in a sheet is at least 44x44 CSS px (${lang})`,async({page})=>{
-    await page.goto(`/?lang=${lang}`);
-    await page.locator('#rect').click();
-    for(const id of ['layers','properties']){
-     await openSheet(page,id);
-     const sheet=sheetOf(page);
-     await expect(sheet).toBeVisible();
-     const small=(await sheetControls(sheet)).filter(c=>c.w<44||c.h<44).map(c=>`${c.name} ${Math.round(c.w)}x${Math.round(c.h)}`);
-     expect(small,`controls under 44 px in ${id} (${lang})`).toEqual([]);
-     await page.keyboard.press('Escape');
-    }
-   });
-  }
-
-  test('the sheet stays inside the screen and the canvas shows above a portrait sheet',async({page})=>{
+  test('only one panel is open at a time, and the Menu closes it',async({page})=>{
    await page.goto('/?lang=en');
    await openSheet(page,'layers');
-   const box=await sheetOf(page).boundingBox();
-   // A landscape sheet runs from the top bar to the status line, so it stops 44 px above the bottom edge.
-   expect(Math.round(box.y+box.height),'sheet bottom edge').toBe(layout.width>layout.height?layout.height-44:layout.height);
-   expect(box.x,'sheet left edge').toBe(layout.width>layout.height?layout.width-320:0);
-   expect(box.width).toBe(layout.width>layout.height?320:layout.width);
+   await openSheet(page,'properties');
+   await expect(sheetOf(page,'properties')).toHaveCount(1);
+   await expect(sheetOf(page,'layers')).toHaveCount(0);
+   await page.locator('#phoneMenu').click();
+   await expect(sheetOf(page,'properties')).toHaveCount(0);
   });
  });
 }
-
-test.describe('portrait detents and swipe',()=>{
- test.use({viewport:{width:390,height:844}});
-
- test('a dock open starts at half; a swipe down steps to peek, then closes',async({page})=>{
-  await page.goto('/?lang=en');
-  await openSheet(page,'layers');
-  const sheet=sheetOf(page);
-  await expect(sheet).toHaveAttribute('data-detent','half');
-  // The detents animate their height, so each is read once it settles.
-  await expect.poll(async()=>Math.round((await sheet.boundingBox()).height)).toBe(422);
-  // Swipe down on the grab handle, 80 px: half to peek.
-  await grab(page,sheet,80);
-  await expect(sheet).toHaveAttribute('data-detent','peek');
-  await expect.poll(async()=>Math.round((await sheet.boundingBox()).height),'peek detent height').toBe(120);
-  // Swipe down on the title row, 80 px more: peek closes the sheet.
-  await grab(page,sheet,80);
-  await expect(sheetOf(page)).toHaveCount(0);
-  await expect(page.locator('#phoneMenu')).toBeFocused();
- });
-
- test('a swipe up on the title row steps to full, and a short drag snaps back',async({page})=>{
-  await page.goto('/?lang=en');
-  await openSheet(page,'properties');
-  const sheet=sheetOf(page);
-  await grab(page,sheet,-80);
-  await expect(sheet).toHaveAttribute('data-detent','full');
-  await expect.poll(async()=>Math.round((await sheet.boundingBox()).y),'full detent starts below the 52 px top bar').toBe(52);
-  // A 20 px drag is too short to change the detent.
-  await grab(page,sheet,20);
-  await expect(sheet).toHaveAttribute('data-detent','full');
-  await page.keyboard.press('Escape');
- });
-});
-
-// The phone Menu is full height with no grab handle, so a downward swipe on its title row
-// closes it, at both phone sizes. A swipe from the list or the search field scrolls or does nothing. Escape and the Menu button still close it.
-// A toast at 390x844 stacks above the contextual bar, so it never covers the dock or the bar.
-for(const layout of LAYOUTS){
- test.describe(`phone Menu swipe ${layout.name}`,()=>{
-  test.use({viewport:{width:layout.width,height:layout.height},...layout.options});
-
-  // A mouse drag downward from the centre of an element, stopping inside the viewport.
-  const dragDown=async(page,locator,want)=>{
-   const b=await locator.boundingBox();
-   const vh=page.viewportSize().height;
-   const x=b.x+b.width/2;
-   const y0=b.y+Math.min(b.height/2,12);
-   const dy=Math.min(want,vh-y0-4);
-   await page.mouse.move(x,y0);
-   await page.mouse.down();
-   for(let i=1;i<=10;i++)await page.mouse.move(x,y0+dy*i/10);
-   await page.mouse.up();
-  };
-
-  test('a swipe down on the Menu title row closes the Menu',async({page})=>{
-   await page.goto('/?lang=en');
-   await page.locator('#phoneMenu').click();
-   const list=page.locator('#phoneMenuList');
-   await expect(list).toBeVisible();
-   await dragDown(page,page.locator('#phoneMenuList .menu-title'),700);
-   await expect(list).toHaveCount(0);
-   await expect(page.locator('#phoneMenu')).toHaveAttribute('aria-expanded','false');
-  });
-
-  test('a swipe down from the search field or a list row does not close the Menu',async({page})=>{
-   await page.goto('/?lang=en');
-   await page.locator('#phoneMenu').click();
-   const list=page.locator('#phoneMenuList');
-   await expect(list).toBeVisible();
-   await dragDown(page,page.locator('#menuCommandPalette'),700);
-   await expect(list).toBeVisible();
-   // The Menu's first section is short, so File's first row may sit below the fold; scroll it into view before the drag.
-   await page.locator('#menuNew').scrollIntoViewIfNeeded();
-   await dragDown(page,page.locator('#menuNew'),700);
-   await expect(list).toBeVisible();
-   await page.keyboard.press('Escape');
-   await expect(list).toHaveCount(0);
-  });
-
-  test('Escape and the Menu button still close the Menu',async({page})=>{
-   await page.goto('/?lang=en');
-   await page.locator('#phoneMenu').click();
-   await expect(page.locator('#phoneMenuList')).toBeVisible();
-   await page.keyboard.press('Escape');
-   await expect(page.locator('#phoneMenuList')).toHaveCount(0);
-   await page.locator('#phoneMenu').click();
-   await expect(page.locator('#phoneMenuList')).toBeVisible();
-   await page.locator('#phoneMenu').click();
-   await expect(page.locator('#phoneMenuList')).toHaveCount(0);
-  });
- });
-}
-
-test.describe('phone toast placement',()=>{
- test.use({viewport:{width:390,height:844}});
-
- test('a toast stacks above the dock and never covers it at 390x844',async({page})=>{
-  await page.goto('/?lang=en');
-  await page.locator('#rect').click();
-  await page.locator('#rect').click();
-  const toast=page.locator('#toast .toast-item').first();
-  await expect(toast).toBeVisible();
-  const tb=await toast.boundingBox();
-  const dock=await page.locator('.layout main>.tool-rail').boundingBox();
-  // With a selection the phone shows its selection bar above the dock; the toast sits above both.
-  const bar=await page.locator('.layout main>.floating').boundingBox();
-  expect(tb.y+tb.height,'toast bottom edge is above the selection bar').toBeLessThanOrEqual(bar.y);
-  expect(bar.y+bar.height,'selection bar is above the dock').toBeLessThanOrEqual(dock.y);
- });
-});

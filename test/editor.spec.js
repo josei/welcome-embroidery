@@ -142,7 +142,7 @@ test('single top bar and vector editing: polygon, nodes, snap, align, distribute
  await page.locator('#path').click();for(const [x,y] of [[-20,-20],[20.4,-20.3],[0,20]]){const p=at(x,y);await page.mouse.click(p.x,p.y);}const first=at(-20,-20);await page.mouse.click(first.x,first.y);
  await expect(page.locator('.object-row')).toHaveCount(1);await expect(page.locator('#pathClosed')).toBeChecked();await expect(page.locator('#type')).toHaveValue('fill');
  const polyPoints=await page.locator('#shapes polyline.shape').getAttribute('points');expect(polyPoints.split(' ').length).toBe(4);expect(polyPoints).toContain('20,-20');
- await page.locator('#border').check();await page.locator('#pathSmooth').check();expect((await page.locator('#shapes polyline.shape').getAttribute('points')).split(' ').length).toBeGreaterThan(20);
+ await page.locator('#border').click();await page.locator('#pathSmooth').check();expect((await page.locator('#shapes polyline.shape').getAttribute('points')).split(' ').length).toBeGreaterThan(20);
  await page.locator('#pathSmooth').uncheck();
  const mid=at(0,-20);await page.mouse.dblclick(mid.x,mid.y);
  await expect(page.locator('.path-node')).toHaveCount(4);await page.locator('#nodeDel').click();await expect(page.locator('.path-node')).toHaveCount(3);
@@ -929,7 +929,7 @@ test('vector basics in the sidebar: corner radius, round corners, border width, 
  await page.locator('#rect').click();await expect(page.locator('#radiusRow')).toBeVisible();
  await page.locator('#radius').fill('4');await page.locator('#radius').press('Tab');
  const id=await page.locator('.object-row.selected').getAttribute('data-id');await expect(page.locator(`#shapes [data-id="${id}"]`)).toHaveAttribute('rx','4');
- await page.locator('#border').check();await expect(page.locator('#borderWidthRow')).toBeVisible();await expect(page.locator('#count')).toContainText('stitches');
+ await page.locator('#border').click();await expect(page.locator('#borderWidthRow')).toBeVisible();await expect(page.locator('#count')).toContainText('stitches');
  const n=async()=>Number(((await page.locator('#count').textContent()).match(/^([\d,]+) stitches/)||[,'0'])[1].replace(/,/g,''));
  await expect.poll(n).toBeGreaterThan(0);const plain=await n();
  await page.locator('#borderWidth').fill('2');await page.locator('#borderWidth').press('Tab');await expect.poll(n).toBeGreaterThan(plain+100);
@@ -1348,12 +1348,12 @@ test('copy and paste style between objects',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));
  await page.goto('/');page.on('dialog',d=>d.accept());await newDesign(page);
  await page.locator('#rect').click();const a=await page.locator('.object-row.selected').getAttribute('data-id');
- await page.locator('#thread').selectOption('#d9897e');await page.locator('#border').check();await page.locator('#spacing').fill('0.6');await page.locator('#spacing').press('Tab');await page.locator('#angle').fill('10');await page.locator('#angle').press('Tab');
- await page.locator('#ellipse').click();const b=await page.locator('.object-row.selected').getAttribute('data-id');await page.locator('#thread').selectOption('#527461');await page.locator('#border').uncheck().catch(()=>{});await page.locator('#spacing').fill('0.4');await page.locator('#spacing').press('Tab');await page.locator('#angle').fill('32');await page.locator('#angle').press('Tab');await expect(page.locator('#thread')).toHaveValue('#527461');
+ await page.locator('#thread').selectOption('#d9897e');await page.locator('#border').click();await page.locator('#spacing').fill('0.6');await page.locator('#spacing').press('Tab');await page.locator('#angle').fill('10');await page.locator('#angle').press('Tab');
+ await page.locator('#ellipse').click();const b=await page.locator('.object-row.selected').getAttribute('data-id');await page.locator('#thread').selectOption('#527461');if(await page.locator('#border').getAttribute('aria-pressed')==='true')await page.locator('#border').click();await page.locator('#spacing').fill('0.4');await page.locator('#spacing').press('Tab');await page.locator('#angle').fill('32');await page.locator('#angle').press('Tab');await expect(page.locator('#thread')).toHaveValue('#527461');
  await page.keyboard.press('Control+Alt+V');await expect(page.locator('#toast')).toContainText('Copy a style first');
  await page.locator(`.object-row[data-id="${a}"]`).click();await page.keyboard.press('Control+Alt+C');await expect(page.locator('#toast')).toContainText('Style copied');
  await page.locator(`.object-row[data-id="${b}"]`).click();await page.keyboard.press('Control+Alt+V');
- await expect(page.locator('#thread')).toHaveValue('#d9897e');await expect(page.locator('#border')).toBeChecked();await expect(page.locator('#spacing')).toHaveValue('0.6');await expect(page.locator('#angle')).toHaveValue('10');await expect(page.locator(`#shapes [data-id="${b}"]`)).toHaveAttribute('fill','#d9897e');
+ await expect(page.locator('#thread')).toHaveValue('#d9897e');await expect(page.locator('#border')).toHaveAttribute('aria-pressed','true');await expect(page.locator('#spacing')).toHaveValue('0.6');await expect(page.locator('#angle')).toHaveValue('10');await expect(page.locator(`#shapes [data-id="${b}"]`)).toHaveAttribute('fill','#d9897e');
  // via the context menu
  const box=await page.locator(`#shapes [data-id="${a}"]`).boundingBox();await page.mouse.click(box.x+box.width/2,box.y+box.height/2,{button:'right'});await expect(page.locator('#ctxMenu')).toContainText('Copy style');await expect(page.locator('#ctxMenu')).toContainText('Paste style');await page.keyboard.press('Escape');
  expect(errors).toEqual([]);
@@ -1707,7 +1707,7 @@ test('raised fill checkbox shows for fills and adds an underlay',async({page})=>
  const count=async()=>Number(((await page.locator('#count').textContent()).match(/^([\d,]+) stitches/)||[,'0'])[1].replace(/,/g,''));
  await page.locator('#type').selectOption('fill');await expect(page.locator('#fillRaisedRow')).toBeVisible();await expect(page.locator('#satinRaisedRow')).toBeHidden();
  await page.locator('#underlayType').selectOption('none');await expect.poll(count).toBeGreaterThan(0);const flat=await count();
- await page.locator('#fillRaised').check();await expect.poll(count).toBeGreaterThan(flat);
+ await page.locator('#fillRaised').click();await expect.poll(count).toBeGreaterThan(flat);
  await expect(page.locator('#raisedSpacingRow')).toBeVisible();const raised2=await count();await page.locator('#raisedSpacing').fill('4');await page.locator('#raisedSpacing').press('Tab');await expect.poll(count).toBeLessThan(raised2);
  expect(errors).toEqual([]);
 });
@@ -2215,7 +2215,7 @@ test('laydown rows: the field appears for a laydown underlay, takes 6 mm and kee
 test('raised underlay turn: the field appears on a raised fill, takes 0 and keeps it when the object is reselected',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));page.on('dialog',d=>d.accept());
  await page.goto('/');await newDesign(page);await page.locator('#rect').click();
- await page.locator('#fillRaised').check();
+ await page.locator('#fillRaised').click();
  await expect(page.locator('#raisedAngleRow')).toBeVisible();
  await page.locator('#raisedAngle').fill('0');await page.locator('#raisedAngle').press('Enter');
  await page.locator('.object-row').first().click();
@@ -2558,8 +2558,8 @@ test('stitch type shows labelled cards, and the row spacing slider sets the same
  await page.goto('/');page.on('dialog',d=>d.accept());await expect(page.locator('#count')).toContainText('compiled');
  await newDesign(page);await page.locator('#path').click();const m=await ctm(page);for(const [x,y] of [[-20,-15],[20,-15],[20,15],[-20,15],[-20,-15]]){const s=toScreen(m,x,y);await page.mouse.click(s.x,s.y);}await page.keyboard.press('Enter');
  await page.locator('#type').selectOption('fill');
- const cards=page.locator('.icon-seg.labelled button');await expect(cards).toHaveCount(7);await expect(cards.first()).toContainText('Fill');
- await expect(page.locator('.icon-seg.labelled button[aria-pressed=true]')).toHaveText('Fill');
+ const cards=page.locator('.icon-seg.labelled[data-select="type"] button');await expect(cards).toHaveCount(7);await expect(cards.first()).toContainText('Fill');
+ await expect(page.locator('.icon-seg.labelled[data-select="type"] button[aria-pressed=true]')).toHaveText('Fill');
  const slider=page.locator('#spacingSlider');await expect(slider).toBeVisible();await expect(slider).toHaveValue('0.4');await expect(page.locator('#spacing')).toHaveValue('0.4');
  await slider.focus();await page.keyboard.press('ArrowRight');
  await expect(page.locator('#spacing')).toHaveValue('0.45');await expect(slider).toHaveValue('0.45');
@@ -2702,7 +2702,7 @@ test('stitch cards show a picture of each stitch, and the density swatch follows
  await page.goto('/');page.on('dialog',d=>d.accept());await expect(page.locator('#count')).toContainText('compiled');
  await newDesign(page);await page.locator('#rect').click();
  await expect(page.locator('.icon-seg.labelled .stitch-thumb')).toHaveCount(7);
- await expect(page.locator('.icon-seg.labelled button').first().locator('.stitch-thumb')).toHaveCount(1);
+ await expect(page.locator('.icon-seg.labelled[data-select="type"] button').first().locator('.stitch-thumb')).toHaveCount(1);
  const swatch=page.locator('.density-swatch');await expect(swatch).toBeVisible();await expect(swatch).toHaveAttribute('data-spacing','0.4');
  await page.locator('#spacingSlider').focus();await page.keyboard.press('ArrowRight');
  await expect(swatch).toHaveAttribute('data-spacing','0.45');
@@ -3379,7 +3379,7 @@ test('an out-of-range fill row spacing is clamped and noted, on Enter',async({pa
 
 test('an out-of-range fill border width is clamped and noted, on Enter',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));
- await openRectangle(page);await page.locator('#border').check();await expect(page.locator('#borderWidth')).toBeVisible();
+ await openRectangle(page);await page.locator('#border').click();await expect(page.locator('#borderWidth')).toBeVisible();
  await expectOutOfRangeClamp(page,{field:'#borderWidth',bad:'-5',keep:'0.0',range:'0–12 mm',note:'Min 0 mm',commitKey:'Enter'});
  expect(errors).toEqual([]);
 });
@@ -4184,7 +4184,7 @@ test('inspector: stitch types lay out 3 + 3 + 1 and every field starts on one le
  await page.setViewportSize({width:1440,height:900});await page.goto('/');await newDesign(page);
  await page.locator('#rect').click();const b=await page.locator('.canvas').boundingBox();
  await page.mouse.move(b.x+b.width*.4,b.y+b.height*.4);await page.mouse.down();await page.mouse.move(b.x+b.width*.6,b.y+b.height*.6,{steps:5});await page.mouse.up();
- const buttons=await page.locator('.icon-seg.labelled button').evaluateAll(els=>els.map(e=>Math.round(e.getBoundingClientRect().top)));
+ const buttons=await page.locator('.icon-seg.labelled[data-select="type"] button').evaluateAll(els=>els.map(e=>Math.round(e.getBoundingClientRect().top)));
  expect(buttons).toHaveLength(7);expect(new Set(buttons.slice(0,3)).size).toBe(1);expect(new Set(buttons.slice(3,6)).size).toBe(1);expect(new Set(buttons).size).toBe(3);
  // Every single-value field in the inspector: a label, then one input or select. Exempt by design, named here: sub-grids (corners, colours, underlay details, blend ranges) keep their own layout, and Position X/Y/W/H is included in the shared column; the stitch-type pill group is a segmented control, not a field; the underlay type select is widened so its longest value shows in full; the thread and pattern pickers (including Blend into thread), the Fabric section and the worksheet format are wide pickers outside the inspector's field rows.
  const exempt=['type','thread','fillMethod','borderThread','blendThread','fabric','worksheetFormat','underlayType'];

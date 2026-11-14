@@ -6,6 +6,7 @@ import {raisedRowsActions, raisedRowsState} from '../raisedRowsState.js';
 import {fillValuesActions, fillValuesState} from '../fillValuesState.js';
 import {useDecimalNumber} from './useDecimalInput';
 import {SliderField} from './SliderField';
+import {PressToggle} from './PressToggle';
 import {ANGLE_RANGE, ROW_SPACING_RANGE, SATIN_WIDTH_RANGE, rangeText} from '../fieldRanges.js';
 // Part of the stitch panel, rendered by React. Ids match the markup it replaced, because app.js wires them by id.
 export function StitchFillRows() {
@@ -25,10 +26,9 @@ export function StitchFillRows() {
     e.target.checked)} title="Buttonhole: a satin column with a bar tack across each end" /></label><label id="edgeCloseRow"
       hidden={rows.edgeCloseRow}>{"Close edges at the mask (back-stitch at cut ends)"}<input id="edgeClose" type="checkbox" className="icon-check" checked={raised.edgeClose} onChange={e =>
     raisedRowsActions.choose('edgeClose',
-    e.target.checked)} title="Edge closing: a short back-stitch at each place a run or satin is cut by a clipping mask" /></label><label
-      id="fillRaisedRow" hidden={rows.fillRaisedRow}>{"Raised fill (extra tatami underlay)"}<input id="fillRaised" type="checkbox" className="icon-check" checked={raised.fillRaised} onChange={e =>
-    raisedRowsActions.choose('fillRaised',
-    e.target.checked)} title="Raised fill: adds a second tatami underlay so the fill stands up" /></label><label id="raisedSpacingRow"
+    e.target.checked)} title="Edge closing: a short back-stitch at each place a run or satin is cut by a clipping mask" /></label><PressToggle
+      id="fillRaised" label="Raised fill (extra tatami underlay)" hidden={rows.fillRaisedRow} pressed={raised.fillRaised}
+      title="Raised fill: adds a second tatami underlay so the fill stands up" onToggle={next => raisedRowsActions.choose('fillRaised', next)} /><label id="raisedSpacingRow"
       hidden={rows.raisedSpacingRow}>{"Raised spacing (mm)"}<input id="raisedSpacing" {...raisedSpacing.inputProps} type="text" inputMode="decimal" min="1" max="4" step="0.5" placeholder="2"
       title="Row spacing of the raised underlay (1-4 mm); empty uses 2 mm" />{raisedSpacing.note && <span className="clamp-note" role="status">{raisedSpacing.note}</span>}</label><label id="raisedAngleRow" hidden={rows.raisedAngleRow}>{"Raised underlay turn (° from the fill)"}<input id="raisedAngle" {...raisedAngle.inputProps} type="text" inputMode="decimal" min="-180" max="180" step="5" placeholder="90"
       title="Angle of the raised underlay from the fill angle; 90 is across the fill, the default" />{raisedAngle.note && <span className="clamp-note" role="status">{raisedAngle.note}</span>}</label><label id="satinRaisedRow"

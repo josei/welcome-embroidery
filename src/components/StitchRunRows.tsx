@@ -8,6 +8,7 @@ import {underlayActions, underlayState} from '../underlayState.js';
 import {stitchChoiceActions, stitchChoicesState} from '../stitchChoicesState.js';
 import {stitchPanelActions, stitchPanelState} from '../stitchPanelState.js';
 import {STITCH_LENGTH_RANGE, rangeText} from '../fieldRanges.js';
+import {PressToggle} from './PressToggle';
 // Part of the stitch panel, rendered by React. Ids match the markup it replaced, because app.js wires them by id.
 const RUN_STYLES = [
  {value: 'single', label: 'Single run', icon: 'i-run'},
@@ -45,8 +46,7 @@ export function StitchRunRows() {
       phases</option></select></label><label id="underlayRow" hidden={rows.underlayRow} title="Underlay: a first layer of stitches under the top stitches that holds the fabric flat. Automatic by default.">Underlay<select id="underlayType" value={underlay.value} onChange={e =>
     underlayActions.choose(e.target.value)}>{underlay.types.map(o => <option key={o.value} value={o.value} title={o.hint}>{o.label}</option>)}</select></label><div id="underlayDetails" className="underlay-details" hidden={rows.underlayDetails}><label>{"Inset (mm)"}<input id="underlayInset" {...underlayInset.inputProps} type="text" inputMode="decimal" min="0" max="3" step="0.1" />{underlayInset.note && <span className="clamp-note" role="status">{underlayInset.note}</span>}</label><label>{"Spacing (mm)"}<input id="underlaySpacing" {...underlaySpacing.inputProps} type="text" inputMode="decimal" min="0.5" max="8" step="0.1" />{underlaySpacing.note && <span className="clamp-note" role="status">{underlaySpacing.note}</span>}</label><label id="laydownSpacingRow"
       hidden={rows.laydownSpacingRow}>{"Laydown rows (mm)"}<input id="laydownSpacing" {...laydownSpacing.inputProps} type="text" inputMode="decimal" min="2" max="8" step="0.5" placeholder="4"
-      title="Row spacing of the laydown underlay (2-8 mm); empty uses 4 mm" />{laydownSpacing.note && <span className="clamp-note" role="status">{laydownSpacing.note}</span>}</label></div><label hidden={layout.borderHidden}>Border <input
-        id="border" type="checkbox" className="icon-check" data-icon="border" checked={run.border} disabled={run.borderDisabled} onChange={e =>
-    runRowsActions.choose('border', e.target.checked)} title="Border: sew an outline around the fill" /></label></>
+      title="Row spacing of the laydown underlay (2-8 mm); empty uses 4 mm" />{laydownSpacing.note && <span className="clamp-note" role="status">{laydownSpacing.note}</span>}</label></div><PressToggle id="border" label="Border" hidden={layout.borderHidden} pressed={run.border} disabled={run.borderDisabled} title="Border: sew an outline around the fill"
+      onToggle={next => runRowsActions.choose('border', next)} /></>
  );
 }
