@@ -14,6 +14,7 @@ import {knifeState} from './knifeState.js';
 import {t} from './i18n.js';
 import {addLabel} from './addLabel.js';
 import {enterEdit} from './canvasText.js';
+import {setEditMode} from './editModeState.js';
 import {applyOperations} from './operations.js';
 import {objectBounds} from './transforms.js';
 import {hoopSize} from './hoops.js';
@@ -63,6 +64,12 @@ export function createCanvasTools(api){
   // Placement is measured with the untranslated placeholder, so the Spanish "Texto" (wider) does not shift where the
   // lettering the user types lands. The displayed placeholder is still translated.
   const PLACEMENT_TEXT='Text';
+  // Selects a freshly added object with its normal frame and handles. Node editing of an earlier path is left first,
+  // otherwise the new object would inherit the path's node handles and show no frame.
+  function selectNew(/** @type {string} */ id){
+    setEditMode(false);setSelection({selNode: null});setSelection({selNodes: new Set()});
+    setSelection({selected: id});setSelection({multi: new Set([id])});
+  }
   // A new shape or lettering object goes in at the hoop's centre with the thread and stitch in the sidebar. Lettering's
   // box is centred there too (see below); a new shape is placed at the hoop centre by its x/y origin.
   async function add(/** @type {string} */ kind){
@@ -84,7 +91,7 @@ export function createCanvasTools(api){
       let dy=0;while(taken(dy))dy+=step;
       op.x=-cx; op.y=-cy+dy;
       api.commit([op],()=>{
-        setSelection({selected: id});setSelection({multi: new Set([id])});
+        selectNew(id);
         // The new object opens in the on-canvas text box with its placeholder selected, so typing replaces it. The box
         // takes the keystrokes, so letters never reach the tool shortcuts.
         enterEdit(documentNow().doc.objects.find((/** @type {any} */ o)=>o.id===id),true);
@@ -98,7 +105,7 @@ export function createCanvasTools(api){
     const shapeName=kind==='ellipse'?'Ellipse':'Rectangle';
     api.commit([{op:'add_shape',id,kind,name:shapeName,x:spot.x,y:spot.y,width:24,height:16,
       thread:$('#thread').value,stitch:(stitchChoicesState.get().type==='satin'?'fill':stitchChoicesState.get().type)}],()=>{
-      setSelection({selected: id});setSelection({multi: new Set([id])});
+      selectNew(id);
     }, addLabel({name: shapeName}));
     // The hint says where the shape went and its default size, in millimetres, and warns when it sits on another shape.
     const atCentre=spot.x===-12&&spot.y===-8;
@@ -220,14 +227,14 @@ export function createCanvasTools(api){
     const name=kind==='star'?`Star ${n}`:`Polygon ${n}`;
     api.commit([{op:'add_path',id,name,x:0,y:0,points:pts,closed:true,
       stitch:'fill',thread:$('#thread').value}],()=>{
-      setSelection({selected: id});setSelection({multi: new Set([id])});
+      selectNew(id);
     }, addLabel({name}));
   }
 
   function addLine(/** @type {any} */ a,/** @type {any} */ b){
     const id=crypto.randomUUID();
     api.commit([{op:'add_path',id,name:'Line',x:0,y:0,points:[a,b],thread:$('#thread').value}],()=>{
-      setSelection({selected: id});setSelection({multi: new Set([id])});
+      selectNew(id);
     }, addLabel({name:'Line'}));
   }
 
