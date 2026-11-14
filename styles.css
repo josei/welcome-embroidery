@@ -786,6 +786,14 @@ body{height:100vh;height:100dvh;min-height:0;overflow:hidden}
 @media (max-width:900px) and (orientation:landscape){
 .object-row .row-tag{display:flex;min-width:0;white-space:nowrap}.object-row .row-kind{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.object-row .row-sep,.object-row .row-count{flex:none;white-space:nowrap}.object-row .row-sep{white-space:pre}.object-row .row-icon{display:none}
 }
+/* On a tablet in portrait and a tablet or phone in landscape, a layer row's 44 px Hide and Lock buttons sit beside the row.
+   The selected highlight is drawn on the whole row (the line that holds the row and its buttons), not on the row alone.
+   The row also gives up 4 px of its gap, so the type word "relleno" stays whole at 844 px in Spanish. */
+@media (min-width:601px) and (max-width:1024px) and (orientation:portrait),(min-width:601px) and (max-width:900px) and (orientation:landscape){
+.object-row{gap:6px}
+.object-line:has(>.object-row.selected){background:var(--teal-soft);border-radius:10px;box-shadow:inset 0 0 0 1px var(--teal)}
+.object-line:has(>.object-row.selected)>.object-row{background:transparent;border-color:transparent}
+}
 @media (max-width:600px) and (orientation:portrait){
 body{height:100vh;height:100dvh;min-height:0;overflow:hidden;overscroll-behavior:none}
 .top{height:52px;padding:0 6px;gap:4px;box-sizing:border-box;flex:none}
