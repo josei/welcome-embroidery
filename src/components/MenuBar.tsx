@@ -1,8 +1,14 @@
 import {useEffect, useRef, useState, useSyncExternalStore} from 'react';
+import {toolActions} from '../toolMode.js';
+import {toolbarActions} from '../toolbarCommands';
+import {multiSelectState} from '../multiSelectState';
+import {nodeActions, nodeButtonsState} from '../nodeButtonsState.js';
+import {actionState} from '../actionState.js';
+import {addPhoto} from '../photoCommands';
+import {setTraceDialogOpen} from '../traceDialogState.js';
 import {closePhoneSheet, phoneSheetState, togglePhoneSheet} from '../phoneSheetState.js';
 import {flushSync} from 'react-dom';
 import type {KeyboardEvent as ReactKeyboardEvent, PointerEvent as ReactPointerEvent} from 'react';
-import {actionState} from '../actionState.js';
 import {alignActions, alignState} from '../alignState.js';
 import {clipboardState} from '../clipboardState.js';
 import {selectionState} from '../selectionState.js';
@@ -304,7 +310,8 @@ export function ViewMenu() {
 
 /** The phone Menu: an icon button in the top bar opens a full-height sheet. It has a
  * Command palette search field, then the desktop menu groups in the desktop order (File, Edit, Arrange), then View, then Settings
- * and Help. Each row has an icon and a short label. Keyboard shortcuts are not listed on phones. Every row runs the same command as its desktop counterpart. */
+ * and Help. Each row has an icon and a short label. Keyboard shortcuts are not listed on phones. Every row runs the same command as its desktop counterpart.
+ * On a phone the Menu is the only navigation: the canvas bar's commands and the More tools panel are listed here too. */
 const VIEW_ROWS = [
  {id: 'design', label: '2D', icon: 'i-rect'},
  {id: 'stitches', label: 'Stitches', icon: 'i-run'},
@@ -329,6 +336,7 @@ const PHONE_ARRANGE_ICONS: Record<string, string> = {
 const HELP_URL = 'https://github.com/josei/welcome-embroidery#readme';
 
 export function PhoneMenu() {
+ const photoInput = useRef<HTMLInputElement>(null);
  const edit = useEditRows()
   .filter((r): r is Entry => typeof r === 'object' && 'id' in r && r.id in PHONE_EDIT_ICONS)
   .map(r => ({...r, key: undefined, icon: PHONE_EDIT_ICONS[r.id]}));
@@ -339,9 +347,38 @@ export function PhoneMenu() {
  const sheet = useSyncExternalStore(phoneSheetState.subscribe, phoneSheetState.get);
  const status = useSyncExternalStore(statusState.subscribe, statusState.get);
  const agent = useSyncExternalStore(agentLinkState.subscribe, agentLinkState.get);
+ const actions = useSyncExternalStore(actionState.subscribe, actionState.get);
+ const toolbar = useSyncExternalStore(selectionToolbarState.subscribe, selectionToolbarState.get);
+ const nodes = useSyncExternalStore(nodeButtonsState.subscribe, nodeButtonsState.get);
+ const selectAdd = useSyncExternalStore(multiSelectState.subscribe, multiSelectState.get);
  const viewRows: Row[] = VIEW_ROWS.map(v => ({
   id: `menuView-${v.id}`, label: t(v.label), icon: v.icon, hint: view === v.id ? t('Shown now') : undefined, run: () => viewActions.choose(v.id),
  }));
+ // The rows that the canvas bar and the More tools panel used to hold on a phone. They run the same commands as those controls.
+ const addRows: Entry[] = [
+  {id: 'menuEllipse', label: t('Ellipse'), icon: 'i-ellipse', run: () => { toolActions.press('select'); toolbarActions.addShape('ellipse'); }},
+  {id: 'menuPolygon', label: t('Polygon'), icon: 'i-polygon', run: () => toolActions.press('polygon')},
+  {id: 'menuStar', label: t('Star'), icon: 'i-star', run: () => toolActions.press('star')},
+  {id: 'menuPen', label: t('Pen'), icon: 'i-pen', run: () => toolActions.press('pen')},
+  {id: 'menuTrace', label: t('Trace'), icon: 'i-trace', run: () => setTraceDialogOpen(true)},
+  {id: 'menuPhoto', label: t('Photo stitch'), icon: 'i-photo', run: () => photoInput.current?.click()},
+ ];
+ const barRows: Entry[] = [
+  {id: 'menuSelectAdd', label: t('Tap to add to selection'), icon: 'i-select-add', pressed: selectAdd, run: () => multiSelectState.set(!selectAdd)},
+  {id: 'menuEditNodes', label: t('Edit nodes'), icon: 'i-node-edit', disabled: actions.editNodes, reason: t(NEEDS_ONE), run: () => toolbarActions.editNodes()},
+  {id: 'menuNodeAdd', label: t('Add node'), icon: 'i-node-add', disabled: nodes.add, reason: t(NEEDS_ONE), run: () => nodeActions.add()},
+  {id: 'menuNodeDelete', label: t('Delete node'), icon: 'i-node-del', disabled: nodes.del, reason: t(NEEDS_ONE), run: () => nodeActions.del()},
+  {id: 'menuNodeSmooth', label: t('Smooth node'), icon: 'i-node-smooth', disabled: nodes.smooth, reason: t(NEEDS_ONE), run: () => nodeActions.smooth()},
+  {id: 'menuNodeCorner', label: t('Corner node'), icon: 'i-node-corner', disabled: nodes.corner, reason: t(NEEDS_ONE), run: () => nodeActions.corner()},
+ ];
+ const arrangeBarRows: Entry[] = [
+  {id: 'menuGroup', label: t('Group'), icon: 'i-group', disabled: actions.group, reason: t(NEEDS_TWO), run: () => toolbarActions.group()},
+  {id: 'menuUngroup', label: t('Ungroup'), icon: 'i-ungroup', disabled: actions.ungroup, reason: t(NEEDS_ONE), run: () => toolbarActions.ungroup()},
+  {id: 'menuClip', label: t('Clip'), icon: 'i-clip', disabled: actions.clip, reason: t(NEEDS_TWO), run: () => selectionToolbarActions.clip()},
+  {id: 'menuUnclip', label: t('Release clip'), icon: 'i-unclip', disabled: actions.unclip, reason: t(NEEDS_ONE), run: () => selectionToolbarActions.unclip()},
+  {id: 'menuTextOnPath', label: t('Text on path'), icon: 'i-text-path', disabled: actions.textOnPath, reason: t(NEEDS_TWO), run: () => selectionToolbarActions.textOnPath()},
+  {id: 'menuTextOffPath', label: t('Detach text'), icon: 'i-text-detach', disabled: actions.textOffPath, reason: t(NEEDS_ONE), run: () => selectionToolbarActions.textOffPath()},
+ ];
  const settingsHint = agent.active ? t('Settings: agent connected') : agent.waiting ? t('Settings: waiting for agent') : undefined;
  const rows: Row[] = [
   {id: 'menuCommandPalette', label: t('Command palette'), icon: 'i-search', className: 'menu-search', run: () => setPaletteOpen(true)},
@@ -353,8 +390,8 @@ export function PhoneMenu() {
   ...saveRows().filter((r): r is Entry => typeof r === 'object' && 'id' in r)
    .map(r => ({...r, label: r.id === 'menuSave' ? t('Save') : t('Save As'), icon: 'i-save', hint: undefined})),
   {id: 'menuExport', label: t('Export'), icon: 'i-export', run: () => openExportDialog()},
-  {heading: t('Edit')}, ...edit,
-  {heading: t('Arrange')}, ...arrange,
+  {heading: t('Edit')}, ...edit, ...addRows, ...barRows,
+  {heading: t('Arrange')}, ...arrange, ...arrangeBarRows,
   {heading: t('View')}, ...viewRows,
   ...gridRows,
   {id: 'menuLayers', label: t('Layers'), icon: 'i-layers', hint: sheet === 'layers' ? t('Shown now') : undefined, run: () => togglePhoneSheet('layers')},
@@ -366,5 +403,14 @@ export function PhoneMenu() {
   ...(status.issuesHidden ? [] : [{id: 'menuIssues', label: status.issuesText, icon: 'i-msg', run: () => statusActions.issues()}]),
   {id: 'menuHelp', label: t('Help'), icon: 'i-help', run: () => window.open(HELP_URL, '_blank', 'noopener')},
  ];
- return <Dropdown id="phoneMenu" label={t('Menu')} iconOnly rows={rows} />;
+ return (
+  <>
+   <Dropdown id="phoneMenu" label={t('Menu')} iconOnly rows={rows} />
+   <input ref={photoInput} type="file" accept="image/*" hidden id="menuPhotoFile" onChange={event => {
+    const file = event.target.files?.[0];
+    event.target.value = '';
+    if (file) void addPhoto(file);
+   }} />
+  </>
+ );
 }

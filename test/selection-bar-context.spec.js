@@ -1,8 +1,9 @@
 import {test,expect} from '@playwright/test';
 
-// Below desktop the selection bar is contextual: it appears with a selection and stays away otherwise. Its controls
-// keep the desktop bar's accessible names and sprite icons, and none of them draws a pointer arrow. English and Spanish.
-const SIZES=[[768,1024],[844,390]];
+// On a tablet the selection bar is contextual: it appears with a selection and stays away otherwise. A phone has no
+// selection bar at all; its selection commands are Menu rows. Bar controls keep the desktop bar's accessible names and
+// sprite icons, and none of them draws a pointer arrow. English and Spanish.
+const TABLETS=[[768,1024]];
 
 test.beforeEach(async({page})=>{await page.addInitScript(()=>{delete window.showSaveFilePicker;});});
 
@@ -32,7 +33,7 @@ async function barControls(page){
  })));
 }
 
-for(const [width,height] of SIZES) for(const lang of ['en','es']){
+for(const [width,height] of TABLETS) for(const lang of ['en','es']){
  test(`the selection bar is shown only with a selection at ${width}x${height} (${lang})`,async({page})=>{
   const errors=await openEditor(page,width,height,lang);
   const bar=page.locator('.floating');
@@ -60,7 +61,7 @@ for(const [width,height] of SIZES) for(const lang of ['en','es']){
  });
 }
 
-for(const [width,height] of SIZES) for(const lang of ['en','es']){
+for(const [width,height] of TABLETS) for(const lang of ['en','es']){
  test(`no pointer arrow is drawn in the bar at ${width}x${height} (${lang})`,async({page})=>{
   const errors=await openEditor(page,width,height,lang);
   await page.locator('#rect').click();
@@ -94,6 +95,20 @@ for(const [width,height] of SIZES) for(const lang of ['en','es']){
   });
   expect(toggle.href,'the toggle does not use the Select pointer').not.toBe('#i-select');
   expect(toggle.square&&toggle.strokes>0,'the toggle is a plus in a square').toBe(true);
+  expect(errors).toEqual([]);
+ });
+}
+
+for(const lang of ['en','es']){
+ test(`a landscape phone has no selection bar and keeps its selection commands in the Menu (${lang})`,async({page})=>{
+  const errors=await openEditor(page,844,390,lang);
+  await page.locator('#rect').click();
+  await expect(page.locator('.layout main>.floating'),'no bar on a phone').toHaveCount(0);
+
+  // The commands the bar carries below desktop are all reachable as Menu rows.
+  await page.locator('#phoneMenu').click();
+  for(const id of ['menuDuplicate','menuDelete','menuGroup','menuClip','menuSelectAdd'])
+   await expect(page.locator(`#${id}`),`${id} is a Menu row`).toHaveCount(1);
   expect(errors).toEqual([]);
  });
 }

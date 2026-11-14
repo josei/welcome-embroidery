@@ -34,7 +34,8 @@ for(const [width,height] of SIZES) for(const lang of ['en','es']){
   await expect(list.locator('.menu-heading')).toHaveText(lang==='es'
    ? ['Archivo','Editar','Organizar','Vista','Ajustes y ayuda']
    : ['File','Edit','Arrange','View','Settings and Help']);
-  // The search field leads, and the sheet fills the window.
+  // The search field leads, and the sheet fills the window. On a phone the Menu is the only navigation: the canvas bar and the More
+  // tools panel are gone, and their commands are rows in the groups above.
   await expect(list.locator('[role="menuitem"]').first()).toHaveAttribute('id','menuCommandPalette');
   const sheet=await list.boundingBox();
   // The Menu opens at full height below the top bar (52 px portrait, 44 px landscape), so a tap on the bar dismisses it.
@@ -50,7 +51,9 @@ for(const [width,height] of SIZES) for(const lang of ['en','es']){
    expect(row.h,`${row.id} is at least 44 px tall`).toBeGreaterThanOrEqual(44);
    expect(row.lines,`${row.id} label is one box`).toBe(1);
   }
-  for(const id of ['menuNew','menuOpen','menuImport','menuSave','menuSaveAs','menuExport','menuUndo','menuRedo','menuCut','menuCopy','menuPaste','menuDuplicate','menuSelectAll','menuRepeat','menuGrid','menuSnap','menuFitHoop','menuSettings','menuMessages','menuHelp','menuAlignLeft','menuFlipH','menuToFront','menuUnion','menuDelete'])
+  for(const id of ['menuNew','menuOpen','menuImport','menuSave','menuSaveAs','menuExport','menuUndo','menuRedo','menuCut','menuCopy','menuPaste','menuDuplicate','menuSelectAll','menuRepeat','menuGrid','menuSnap','menuFitHoop','menuSettings','menuMessages','menuHelp','menuAlignLeft','menuFlipH','menuToFront','menuUnion','menuDelete',
+   // The canvas bar and the More tools panel used to hold these on a phone; the Menu is their one home now.
+   'menuSelectAdd','menuEditNodes','menuNodeAdd','menuNodeDelete','menuNodeSmooth','menuNodeCorner','menuGroup','menuUngroup','menuClip','menuUnclip','menuTextOnPath','menuTextOffPath','menuEllipse','menuPolygon','menuStar','menuPen','menuTrace','menuPhoto','menuLayers','menuProperties'])
    expect(rows.map(r=>r.id),`${id} is listed`).toContain(id);
   expect(rows.map(r=>r.id),'no keyboard-shortcut sheet row on a phone').not.toContain('menuShortcuts');
   // The sheet scrolls inside itself; the page never does.

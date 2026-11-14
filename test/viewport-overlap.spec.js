@@ -101,14 +101,16 @@ for(const {name,width,height} of VIEWPORTS) for(const lang of LOCALES){
   await page.goto(lang==='en'?'/':`/?lang=${lang}`);
   await check(page,testInfo,'first screen');
 
-  // Layers sheet, when this size shows the sheet buttons (phone widths).
-  if(await open(page,page.locator('.phone-sheet-btn'))){
+  // Layers and Properties sheets, at phone sizes, open from the Menu.
+  if(await open(page,page.locator('#phoneMenu'))){
+   await page.locator('#menuLayers').click();
    await check(page,testInfo,'Layers sheet','aside.sheet-open');
-   // Properties sheet: select an object so Properties has its full set of controls, then open it.
+   // Properties sheet: select an object so Properties has its full set of controls, then open it. Opening the Menu closes the
+   // Layers sheet first.
    await page.locator('.object-row').first().click().catch(()=>{});
-   // The open sheet covers the dock, so it closes (Escape) before the Properties button is pressed.
-   await page.keyboard.press('Escape');
-   if(await open(page,page.locator('#propertiesBtn'))) await check(page,testInfo,'Properties sheet','aside.sheet-open');
+   await page.locator('#phoneMenu').click();
+   await page.locator('#menuProperties').click();
+   await check(page,testInfo,'Properties sheet','aside.sheet-open');
    await page.keyboard.press('Escape');
   }
 

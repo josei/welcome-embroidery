@@ -45,7 +45,13 @@ async function phoneGroups(page){
 // The phone Menu shows the command palette once, at the top, instead of in the File and Edit groups. The phone File group
 // also holds the New, Open, Import and Export rows, which the desktop keeps in its toolbar rather than in the File menu.
 const PALETTE='menuCommandPalette';
-const PHONE_ONLY={File:['menuNew','menuOpen','menuImport','menuExport'],Edit:[],Arrange:[]};
+// The phone Edit group also holds the drawing tools and node commands that the canvas bar and More tools held on a phone, and the
+// Arrange group holds the group, clip and text-on-path commands of that bar. The desktop keeps them on its toolbars.
+const PHONE_ONLY={
+ File:['menuNew','menuOpen','menuImport','menuExport'],
+ Edit:['menuEllipse','menuPolygon','menuStar','menuPen','menuTrace','menuPhoto','menuSelectAdd','menuEditNodes','menuNodeAdd','menuNodeDelete','menuNodeSmooth','menuNodeCorner'],
+ Arrange:['menuGroup','menuUngroup','menuClip','menuUnclip','menuTextOnPath','menuTextOffPath'],
+};
 
 for(const [group,button] of Object.entries(DESKTOP_MENUS)) test(`the ${group} commands match the desktop ${group} menu on a phone`,async({page})=>{
  await openEditor(page,DESKTOP);

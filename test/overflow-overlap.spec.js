@@ -76,16 +76,14 @@ for(const [w,h] of viewports){
    // A portrait tablet keeps New design in the Menu, so the top bar's New button is used only where it is shown.
    if(await page.locator('#new').isVisible())await page.locator('#new').click();else{await page.locator('#phoneMenu').click();await page.locator('#menuNew').click();}
    if(await page.locator('#discardDialog[open]').count())await page.locator('#discardDiscard').click();
-   // Layers is the object list, always open at this width. On a phone it is a sheet: a portrait phone opens it from the Menu,
-   // a landscape phone from its rail button.
-   const portrait=await page.evaluate(()=>matchMedia('(max-width:600px) and (orientation:portrait)').matches);
+   // Layers is the object list, always open at this width. On a phone it is a sheet, opened from the Menu at either orientation.
    const openSheet=async sheet=>{
-    if(portrait){await page.locator('#phoneMenu').click();await page.locator(sheet==='layers'?'#menuLayers':'#menuProperties').click();}
-    else if(await page.locator(sheet==='layers'?'#layersBtn':'#propertiesBtn').isVisible())await page.locator(sheet==='layers'?'#layersBtn':'#propertiesBtn').click();
+    await page.locator('#phoneMenu').click();
+    await page.locator(sheet==='layers'?'#menuLayers':'#menuProperties').click();
    };
    // The Add rectangle button is in the dock, under an open sheet, so it is pressed first.
    await page.locator('#rect').click();
-   if(portrait||await page.locator('#layersBtn').isVisible())await openSheet('layers');
+   if(await page.locator('#phoneMenu').isVisible())await openSheet('layers');
    await expect(page.locator('#objects')).toBeVisible();
    // Layers and Properties are both in the right-hand column on a portrait tablet, so no tap is needed there.
    // On a phone the panels are sheets: open Properties from its button when it is not already on screen.

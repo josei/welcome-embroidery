@@ -2,7 +2,8 @@ import {test,expect} from '@playwright/test';
 
 // At phone widths (375x667 and 390x844, portrait) the top bar holds only Menu, the design name, undo, redo and Export,
 // at a 52 px bar. Every command that left the bar is one tap to open the Menu and one tap to choose, and the save status
-// is a line of text in the Menu. At desktop widths nothing leaves the bar.
+// is a line of text in the Menu. The canvas bar and the More tools panel are gone on a phone: their commands are in the Menu too.
+// At desktop widths nothing leaves the bar.
 const PHONES=[[375,667],[390,844]];
 const BAR_CONTROLS=['#phoneMenu','#name','#undo','#redo','#export'];
 
@@ -70,10 +71,15 @@ test('each command that left the bar is one tap to open the Menu and one to choo
  await list.locator('#menuDuplicate').click();
  await expect.poll(objects).toBe(before+1);
 
- // Delete is not in the phone Menu (the selection bar deletes), so the duplicate is removed by undo.
+ // The duplicate is removed with Undo, from the keyboard, so the test checks the Menu's Duplicate row and not Delete.
  await page.keyboard.press('Control+z');
  await expect.poll(objects).toBe(before);
  await page.locator('#rect').click();
+
+ // Group and Clip, which the canvas bar used to hold, are Menu rows: disabled with nothing selected, with a visible reason.
+ await open();
+ await expect(list.locator('#menuGroup')).toBeDisabled();
+ await expect(list.locator('#menuGroup .menu-reason')).toHaveText('Select two or more objects');
 
  // Settings opens its dialog (keyboard shortcuts are not listed on phones).
  await open();

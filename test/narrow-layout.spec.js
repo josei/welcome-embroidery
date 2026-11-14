@@ -256,7 +256,7 @@ for(const [width,height] of [[667,375],[844,390]]) for(const lang of ['en','es']
    }
    return out;
   });
-  expect(tools.length,'tool buttons shown').toBeGreaterThan(10);
+  expect(tools.length,'tool buttons shown').toBe(6);
   for(const t of tools){
    expect(t.text,`${t.id} shows no visible text`).toBe('');
    expect(t.name,`${t.id} keeps an accessible name`).not.toBe('');

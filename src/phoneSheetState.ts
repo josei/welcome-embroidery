@@ -5,12 +5,12 @@ import {createStore} from './store.js';
  * Which sheet is open at phone size: Layers, Properties, or neither. Only one sheet is open at a time, so opening one closes the
  * other. The sheets are hidden by CSS everywhere else, so this value has no effect there.
  */
-export type PhoneSheet = 'none' | 'layers' | 'properties' | 'tools';
+export type PhoneSheet = 'none' | 'layers' | 'properties';
 export const phoneSheetState = createStore<PhoneSheet>('none');
 
 /**
  * The detent of a bottom sheet in portrait: peek (about 120 px, the title row and a little more), half (50% of the screen), or full
- * (below the top bar). A sheet opened from the dock starts at half. Landscape sheets are side sheets and ignore the detent.
+ * (below the top bar). A sheet opened from the Menu starts at half. Landscape sheets are side sheets and ignore the detent.
  */
 export type SheetDetent = 'peek' | 'half' | 'full';
 export const phoneSheetDetent = createStore<SheetDetent>('half');
@@ -65,7 +65,7 @@ let opener: HTMLElement | null = null;
 // popstate it causes is ignored, once per entry.
 let ignoredPops = 0;
 
-/** Opens a sheet (from the dock: at half height). Opening the other sheet swaps it. */
+/** Opens a sheet (from the Menu: at half height). Opening the other sheet swaps it. */
 export function openPhoneSheet(sheet: Exclude<PhoneSheet, 'none'>) {
   if (phoneSheetState.get() === sheet) return;
   if (phoneSheetState.get() === 'none') {

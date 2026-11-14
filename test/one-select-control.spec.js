@@ -23,9 +23,10 @@ for(const [width,height] of SIZES){
  });
 }
 
+// The canvas bar is the tablet's (a phone has no canvas bar; its commands are in the Menu).
 for(const lang of ['en','es']){
- test(`every icon in the selected-object bar has a name at 390x844 (${lang})`,async({page})=>{
-  const errors=await openEditor(page,390,844,lang);
+ test(`every icon in the selected-object bar has a name at 768x1024 (${lang})`,async({page})=>{
+  const errors=await openEditor(page,768,1024,lang);
   await page.locator('#rect').click();
   await expect(page.locator('#barDuplicate'),'bar shown with a selection').toBeVisible();
   const bar=page.locator('.floating button');

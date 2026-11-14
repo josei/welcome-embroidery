@@ -1,7 +1,7 @@
 import {test,expect} from '@playwright/test';
 
 // Escape closes an open Layers or Properties panel at a landscape phone (844x390, where the panels are sheets over the
-// canvas). Focus goes back to the rail button that opened the sheet. With no panel open Escape changes nothing.
+// canvas). Focus goes back to the Menu button that opened the sheet. With no panel open Escape changes nothing.
 // A portrait tablet has no sheets: both panels stay in its right-hand column.
 
 test.beforeEach(async({page})=>{await page.addInitScript(()=>{delete window.showSaveFilePicker;});});
@@ -11,23 +11,25 @@ test.use({viewport:{width:844,height:390},hasTouch:true});
 test('Escape closes Layers with focus inside it, and focus goes back to its button',async({page})=>{
  await page.goto('/?lang=en');
  await expect(page.locator('.canvas')).toBeVisible();
- await page.locator('#layersBtn').click();
+ await page.locator('#phoneMenu').click();
+ await page.locator('#menuLayers').click();
  await expect(page.locator('#layersSheet')).toBeVisible();
  await page.locator('#layersSheet').locator('button,input,select,[tabindex]').first().focus();
  await page.keyboard.press('Escape');
  await expect(page.locator('#layersSheet')).toBeHidden();
- await expect(page.locator('#layersBtn')).toBeFocused();
+ await expect(page.locator('#phoneMenu')).toBeFocused();
 });
 
 test('Escape closes Properties with focus inside it, and focus goes back to its button',async({page})=>{
  await page.goto('/?lang=en');
  await expect(page.locator('.canvas')).toBeVisible();
- await page.locator('#propertiesBtn').click();
+ await page.locator('#phoneMenu').click();
+ await page.locator('#menuProperties').click();
  await expect(page.locator('#inspector')).toBeVisible();
  await page.locator('#inspector').locator('button,input,select,[tabindex]').first().focus();
  await page.keyboard.press('Escape');
  await expect(page.locator('#inspector')).toBeHidden();
- await expect(page.locator('#propertiesBtn')).toBeFocused();
+ await expect(page.locator('#phoneMenu')).toBeFocused();
 });
 
 test('Escape with no panel open leaves the selection alone',async({page})=>{

@@ -23,8 +23,8 @@ test('one confirmation stays clear of the zoom bar on a 390×844 phone in Spanis
  await newDesign(page);
  await page.locator('#rect').click();
  await page.keyboard.press('Escape');
- await page.locator('#toolMore').click();
- await page.locator('#ellipse').click();
+ await page.locator('#phoneMenu').click();
+ await page.locator('#menuEllipse').click();
  await page.keyboard.press('Escape');
  await openStitches(page);
  await expect(page.locator('button[data-view="stitches"]').first()).toHaveAttribute('aria-pressed','true');

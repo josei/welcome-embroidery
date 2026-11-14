@@ -33,10 +33,16 @@ const smallControls=page=>page.evaluate(()=>{
 const regions=page=>page.evaluate(()=>{
  const b=s=>{const e=document.querySelector(s);if(!e)return null;const r=e.getBoundingClientRect();return {l:r.left,t:r.top,r:r.right,b:r.bottom};};
  return {top:b('.top'),rail:b('.tool-rail'),canvas:b('.layout main>.canvas'),footer:b('.layout main>footer'),
-  sheet:b('#layersSheet.sheet-open')||b('#inspector.sheet-open')||b('#moreToolsSheet.sheet-open')};
+  sheet:b('#layersSheet.sheet-open')||b('#inspector.sheet-open')};
 });
 
 const overlaps=(a,b)=>a&&b&&Math.min(a.r,b.r)-Math.max(a.l,b.l)>0.5&&Math.min(a.b,b.b)-Math.max(a.t,b.t)>0.5;
+
+// Layers and Properties are Menu rows on a phone; the rail holds tools only.
+const openSheet=async(page,sheet)=>{
+ await page.locator('#phoneMenu').click();
+ await page.locator(sheet==='layers'?'#menuLayers':'#menuProperties').click();
+};
 
 for(const lang of ['en','es']){
  test(`the landscape page never scrolls at 844x390 (${lang})`,async({page})=>{
@@ -50,17 +56,17 @@ for(const lang of ['en','es']){
  test(`every visible control is at least 44x44 with Layers and Properties open (${lang})`,async({page})=>{
   await openEditor(page,...LANDSCAPE,lang);
   expect(await smallControls(page),'closed').toEqual([]);
-  await page.locator('#layersBtn').click();
+  await openSheet(page,'layers');
   await expect(page.locator('#layersSheet')).toHaveClass(/sheet-open/);
   expect(await smallControls(page),'Layers open').toEqual([]);
-  await page.locator('#propertiesBtn').click();
+  await openSheet(page,'properties');
   await expect(page.locator('#inspector')).toHaveClass(/sheet-open/);
   expect(await smallControls(page),'Properties open').toEqual([]);
  });
 
  test(`the Layers header wraps to at most two lines (${lang})`,async({page})=>{
   await openEditor(page,...LANDSCAPE,lang);
-  await page.locator('#layersBtn').click();
+  await openSheet(page,'layers');
   const lines=await page.evaluate(()=>{
    const h=document.querySelector('.layers-head');const r=h.getBoundingClientRect();
    const lh=parseFloat(getComputedStyle(h).lineHeight)||parseFloat(getComputedStyle(h).fontSize)*1.3;
@@ -93,7 +99,7 @@ for(const lang of ['en','es']){
 
  test(`Layers opens as a 320 px right-edge sheet clear of the rail (${lang})`,async({page})=>{
   await openEditor(page,...LANDSCAPE,lang);
-  await page.locator('#layersBtn').click();
+  await openSheet(page,'layers');
   const R=await regions(page);
   expect(Math.round(R.sheet.r-R.sheet.l)).toBe(320);
   expect(R.sheet.r).toBeCloseTo(844,0);
@@ -102,7 +108,7 @@ for(const lang of ['en','es']){
 
  test(`Properties opens as a 320 px right-edge sheet clear of the rail (${lang})`,async({page})=>{
   await openEditor(page,...LANDSCAPE,lang);
-  await page.locator('#propertiesBtn').click();
+  await openSheet(page,'properties');
   const R=await regions(page);
   expect(Math.round(R.sheet.r-R.sheet.l)).toBe(320);
   expect(R.sheet.r).toBeCloseTo(844,0);
@@ -111,8 +117,8 @@ for(const lang of ['en','es']){
  });
 }
 
-// On a landscape phone the rail fills the window between the top bar and the status line, every cell is at
-// least 44 px, and at rest the nine cells fit with no scroll. More tools is the last cell and opens the sheet with the tools that do not fit.
+// On a landscape phone the rail fills the window between the top bar and the status line with the six tools, every cell is at
+// least 44 px, and at rest the six cells fit with no scroll. Every other command is in the Menu.
 for(const lang of ['en','es']){
  test(`the rail fills the height below the top bar, fits without scrolling, and has no overlapping cells (${lang})`,async({page})=>{
   await openEditor(page,...LANDSCAPE,lang);
@@ -129,7 +135,10 @@ for(const lang of ['en','es']){
   expect(r.sh).toBeLessThanOrEqual(r.ch);
   expect(r.sw).toBeLessThanOrEqual(r.cw);
   const ids=r.cells.map(c=>c.id);
-  for(const id of ['layersBtn','propertiesBtn','select','rect','path','letter','line','measure','toolMore']) expect(ids).toContain(id);
+  for(const id of ['select','rect','path','letter','line','measure']) expect(ids).toContain(id);
+  const menu=await (async()=>{await page.locator('#phoneMenu').click();const list=page.locator('#phoneMenuList');await expect(list).toBeVisible();const rows=await list.locator('[role="menuitem"]').evaluateAll(els=>els.map(e=>e.id));await page.keyboard.press('Escape');return rows;})();
+  expect(ids.filter(id=>menu.includes(id)),'rail controls that also appear in the Menu').toEqual([]);
+  expect(ids,'the rail holds the six tools only').toHaveLength(6);
   for(const c of r.cells){
    expect(Math.min(c.w,c.h),c.id).toBeGreaterThanOrEqual(44);
    expect(c.t,c.id).toBeGreaterThanOrEqual(r.top-0.5);
@@ -143,25 +152,13 @@ for(const lang of ['en','es']){
   expect(await smallControls(page)).toEqual([]);
  });
 
- test(`More tools opens the sheet with the tools the rail leaves out (${lang})`,async({page})=>{
+ test(`the tools the rail leaves out are in the Menu, and no More tools sheet is rendered (${lang})`,async({page})=>{
   await openEditor(page,...LANDSCAPE,lang);
-  await expect(page.locator('#toolMore')).toHaveAttribute('aria-expanded','false');
-  await page.locator('#toolMore').click();
-  const sheet=page.locator('#moreToolsSheet');
-  await expect(sheet).toHaveClass(/sheet-open/);
-  await expect(page.locator('#toolMore')).toHaveAttribute('aria-expanded','true');
-  for(const id of ['ellipse','polygon','star','traceBtn','photoStitch','pen']){
-   const el=sheet.locator(`#${id}`);
-   if(await el.count()) await expect(el.first()).toBeVisible();
-  }
-  for(const id of ['ellipse','polygon','star','traceBtn','pen']) await expect(sheet.locator(`#${id}`)).toHaveCount(1);
-  const R=await regions(page);
-  expect(overlaps(R.rail,R.sheet)).toBe(false);
-  expect(await smallControls(page),'More tools open').toEqual([]);
-  // Pressing More tools again closes the sheet (togglePhoneSheet). Tap-outside dismissal in landscape is not checked here.
-  await page.locator('#toolMore').click();
-  await expect(page.locator('#toolMore')).toHaveAttribute('aria-expanded','false');
-  await expect(sheet).not.toHaveClass(/sheet-open/);
+  await expect(page.locator('#toolMore')).toHaveCount(0);
+  await expect(page.locator('#moreToolsSheet')).toHaveCount(0);
+  await page.locator('#phoneMenu').click();
+  for(const id of ['menuEllipse','menuPolygon','menuStar','menuTrace','menuPhoto','menuPen']) await expect(page.locator(`#phoneMenuList #${id}`)).toHaveCount(1);
+  await page.keyboard.press('Escape');
  });
 }
 
@@ -186,25 +183,6 @@ test('the landscape Menu is a 320 px column, and each label starts within 16 px 
  for(const g of gaps) expect(g).toBeLessThanOrEqual(16);
 });
 
-test('the More tools chevron is the topmost element at its centre, with no tool showing behind it',async({page})=>{
- await openEditor(page,...LANDSCAPE,'en');
- const r=await page.evaluate(()=>{
-  const m=document.querySelector('#toolMore').getBoundingClientRect();
-  const rail=document.querySelector('.tool-rail').getBoundingClientRect();
-  const hit=document.elementFromPoint(m.left+m.width/2,m.top+m.height/2);
-  // The part of each rail child that is actually drawn: inside the rail's box, and not under the chevron.
-  const peeking=[...document.querySelectorAll('.tool-rail>button')].filter(b=>{
-   if(b.id==='toolMore') return false; // More is the cell that covers the rest; it is not a tool behind itself
-   const c=b.getBoundingClientRect();
-   const top=Math.max(c.top,rail.top), bottom=Math.min(c.bottom,rail.bottom);
-   return bottom>top && Math.min(c.right,m.right)>Math.max(c.left,m.left) && Math.min(bottom,m.bottom)>Math.max(top,m.top);
-  }).map(b=>b.id);
-  return {hit:hit.id,peeking};
- });
- expect(r.hit).toBe('toolMore');
- expect(r.peeking).toEqual([]);
-});
-
 test('a Spanish layer row summary stays one line high at 768x1024',async({page})=>{
  await page.setViewportSize({width:768,height:1024});
  await page.goto('/?lang=es');
@@ -221,11 +199,11 @@ test('a Spanish layer row summary stays one line high at 768x1024',async({page})
 // the sheet is open, is hidden from assistive tech (aria-hidden), and a tap on it closes the sheet. Run with a fine pointer, as on the
 // desktop-sized check of the sheet layout (the scrim used to show only with a coarse pointer).
 const CANVAS_TAPS=[[200,150],[300,250],[420,120]];
-for(const [opener,sheetId] of [['#layersBtn','#layersSheet'],['#propertiesBtn','#inspector']]){
- test(`a tap on the canvas outside the landscape ${opener.slice(1)} sheet closes it (en)`,async({page})=>{
+for(const [sheet,sheetId] of [['layers','#layersSheet'],['properties','#inspector']]){
+ test(`a tap on the canvas outside the landscape ${sheet} sheet closes it (en)`,async({page})=>{
   await openEditor(page,...LANDSCAPE,'en');
   for(const [x,y] of CANVAS_TAPS){
-   await page.locator(opener).click();
+   await openSheet(page,sheet);
    await expect(page.locator(sheetId)).toHaveClass(/sheet-open/);
    const scrim=page.locator('.sheet-scrim');
    await expect(scrim).toBeVisible();
@@ -239,7 +217,7 @@ for(const [opener,sheetId] of [['#layersBtn','#layersSheet'],['#propertiesBtn','
 
 test('the landscape scrim covers the canvas beside an open sheet and closes it when tapped',async({page})=>{
  await openEditor(page,...LANDSCAPE,'en');
- await page.locator('#layersBtn').click();
+ await openSheet(page,'layers');
  await expect(page.locator('#layersSheet')).toHaveClass(/sheet-open/);
  const box=await page.locator('.sheet-scrim').boundingBox();
  expect(box.x).toBe(104);
@@ -291,7 +269,7 @@ for(const lang of ['en','es']){
  test(`a landscape Layers row is one line for "satin · stitches" at 844x390 (${lang})`,async({page})=>{
   test.setTimeout(120000);
   await openSatinDesign(page,...LANDSCAPE,lang);
-  await page.locator('#layersBtn').click();
+  await openSheet(page,'layers');
   await expect(page.locator('#layersSheet')).toHaveClass(/sheet-open/);
   const row=page.locator('.object-row .row-tag').first();
   await expect(row).toBeVisible();

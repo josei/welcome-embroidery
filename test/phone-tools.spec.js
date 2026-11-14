@@ -36,20 +36,22 @@ for(const [width,height] of PHONES) for(const lang of ['en','es']){
   await openEditor(page,width,height,lang);
   const sizes=await page.evaluate(()=>[...document.querySelectorAll('.tool-rail button, header.top button, header.top .file-menu > button')]
    .filter(e=>e.getBoundingClientRect().width>0).map(e=>({id:e.id||e.className,w:e.getBoundingClientRect().width,h:e.getBoundingClientRect().height})));
-  expect(sizes.length,'controls were found').toBeGreaterThan(10);
+  expect(sizes.length,'controls were found').toBeGreaterThan(8);
   for(const s of sizes) expect(Math.min(s.w,s.h),`touch target ${s.id}`).toBeGreaterThanOrEqual(24);
  });
 }
 
-// At phone portrait the tool dock is seven buttons on one row, each with its label
-// under the icon. More tools opens one sheet with a Tools group and a Panels group, so every tool is one tap away with no sideways scroll.
-const DOCK=['select','rect','path','letter','line','measure','toolMore'];
-const SHEET_TOOLS=['ellipse','polygon','star','traceBtn','photo','pen'];
-const openMore=async page=>{
- await page.locator('#toolMore').click();
- await expect(page.locator('#moreToolsSheet')).toHaveClass(/sheet-open/);
+// At phone portrait the tool dock is six buttons on one row, each with its label under the icon. Ellipse, Polygon, Star,
+// Trace, Photo stitch and Pen are in the Menu, with the canvas-bar commands, so nothing scrolls sideways and there is no More panel.
+const DOCK=['select','rect','path','letter','line','measure'];
+const MENU_TOOLS=['menuEllipse','menuPolygon','menuStar','menuPen','menuTrace','menuPhoto'];
+const openMenu=async page=>{
+ const list=page.locator('#phoneMenuList');
+ if(!(await list.isVisible())) await page.locator('#phoneMenu').click();
+ await expect(list).toBeVisible();
+ return list;
 };
-test('the dock tools are reachable and become active at 375px, with More tools for the rest',async({page})=>{
+test('the dock tools are reachable and become active at 375px, and the Menu arms the rest',async({page})=>{
  const errors=await openEditor(page,375,667);
  const rail=page.locator('.tool-rail');
  // Dock tools: each one is armed, so its button reports aria-pressed="true".
@@ -64,26 +66,51 @@ test('the dock tools are reachable and become active at 375px, with More tools f
   await rail.locator(`#${id}`).click();
   await expect.poll(()=>page.locator('.object-row').count(),`${id} adds an object`).toBeGreaterThan(before);
  }
- // The sheet's tools: each one is armed from More tools, and the sheet closes after the tap.
- for(const id of ['polygon','star','pen']){
-  await openMore(page);
-  await page.locator(`#moreToolsSheet #${id}`).click();
-  await expect(page.locator('#moreToolsSheet'),`${id} closes the sheet`).not.toHaveClass(/sheet-open/);
-  await openMore(page);
-  await expect(page.locator(`#moreToolsSheet #${id}`),`${id} becomes active`).toHaveAttribute('aria-pressed','true');
-  await page.keyboard.press('Escape');
+ // The Menu's drawing tools arm the tool, which takes the Select button off.
+ for(const id of ['menuPolygon','menuStar','menuPen']){
+  const list=await openMenu(page);
+  await list.locator(`#${id}`).click();
+  await expect(list,`${id} closes the menu`).toHaveCount(0);
+  await expect(rail.locator('#select'),`${id} arms its tool`).toHaveAttribute('aria-pressed','false');
+  await rail.locator('#select').click();
  }
- // Trace opens its dialog from the sheet.
- await openMore(page);
- await page.locator('#moreToolsSheet #traceBtn').click();
+ // Ellipse adds an object, and Trace opens its dialog.
+ const before=await page.locator('.object-row').count();
+ await (await openMenu(page)).locator('#menuEllipse').click();
+ await expect.poll(()=>page.locator('.object-row').count(),'Ellipse adds an object').toBeGreaterThan(before);
+ await (await openMenu(page)).locator('#menuTrace').click();
  await expect(page.locator('dialog[open]'),'trace opens its dialog').toHaveCount(1);
  await page.keyboard.press('Escape');
  await expect(page.locator('dialog[open]')).toHaveCount(0);
- // Photo stitch is in the sheet and receives a tap (it opens a file picker, so it is not pressed here).
- await openMore(page);
- const photo=page.locator('#moreToolsSheet #photo');
- const hit=await photo.evaluate(e=>{const r=e.getBoundingClientRect();const top=document.elementFromPoint(r.x+r.width/2,r.y+r.height/2);return !!top&&e.contains(top);});
- expect(hit,'photo stitch receives a tap').toBe(true);
+ // Photo stitch opens the picture picker (it is not used here).
+ const chooser=page.waitForEvent('filechooser');
+ await (await openMenu(page)).locator('#menuPhoto').click();
+ await chooser;
+ expect(errors).toEqual([]);
+});
+
+for(const [width,height] of [[390,844],[360,740]]) for(const lang of ['en','es']) test(`the dock holds six buttons on one row and the Menu holds the other tools at ${width}x${height} (${lang})`,async({page})=>{
+ const errors=await openEditor(page,width,height,lang);
+ expect(await page.locator('.tool-rail button[id]').evaluateAll(els=>els.map(e=>e.id)),'dock buttons').toEqual(DOCK);
+ const rail=page.locator('.tool-rail');
+ expect(await rail.evaluate(e=>e.scrollWidth<=e.clientWidth),'the dock does not scroll sideways').toBe(true);
+ expect(await page.evaluate(()=>document.documentElement.scrollWidth-innerWidth),'no page overflow').toBeLessThanOrEqual(0);
+ for(const id of DOCK){
+  const box=await rail.locator(`#${id}`).boundingBox();
+  expect(box.x,`${id} inside the window`).toBeGreaterThanOrEqual(0);
+  expect(box.x+box.width,`${id} inside the window`).toBeLessThanOrEqual(width);
+  expect(Math.min(box.width,box.height),`${id} touch target`).toBeGreaterThanOrEqual(44);
+ }
+ // Every dock button has its label under the icon, and no label clips.
+ for(const id of DOCK){
+  const label=rail.locator(`#${id} .rail-label`);
+  await expect(label,`${id} label is shown`).toBeVisible();
+  expect(await label.evaluate(e=>e.scrollWidth<=e.clientWidth),`${id} label does not clip`).toBe(true);
+ }
+ await expect(page.locator('#toolMore'),'no More tools button').toHaveCount(0);
+ await expect(page.locator('#moreToolsSheet'),'no More tools panel').toHaveCount(0);
+ const list=await openMenu(page);
+ for(const id of MENU_TOOLS) await expect(list.locator(`#${id}`),`${id} in the Menu`).toBeVisible();
  expect(errors).toEqual([]);
 });
 
@@ -160,48 +187,3 @@ for(const [width,height] of [[390,844],[360,740]]) for(const lang of ['en','es']
   expect(errors).toEqual([]);
  });
 }
-
-// At 390x844 and 360x740 the dock holds exactly the seven dock buttons on one row, with no sideways scroll, every one inside
-// the window at 44 px or more. More tools reaches the rest: the Tools group and the Panels group together hold every desktop tool.
-const dockIds=page=>page.locator('.tool-rail button[id]').evaluateAll(els=>els.map(e=>e.id));
-for(const [width,height] of [[390,844],[360,740]]) for(const lang of ['en','es']) test(`the dock holds seven buttons on one row and More tools reaches the rest at ${width}x${height} (${lang})`,async({page})=>{
- const errors=await openEditor(page,width,height,lang);
- expect(await dockIds(page),'dock buttons').toEqual(DOCK);
- const rail=page.locator('.tool-rail');
- expect(await rail.evaluate(e=>e.scrollWidth<=e.clientWidth),'the dock does not scroll sideways').toBe(true);
- expect(await page.evaluate(()=>document.documentElement.scrollWidth-innerWidth),'no page overflow').toBeLessThanOrEqual(0);
- const railBox=await rail.boundingBox();
- for(const id of DOCK){
-  const box=await rail.locator(`#${id}`).boundingBox();
-  expect(box.x,`${id} inside the window`).toBeGreaterThanOrEqual(0);
-  expect(box.x+box.width,`${id} inside the window`).toBeLessThanOrEqual(width);
-  expect(Math.min(box.width,box.height),`${id} touch target`).toBeGreaterThanOrEqual(44);
-  expect(box.y,`${id} inside the dock`).toBeGreaterThanOrEqual(railBox.y-0.5);
- }
- await openMore(page);
- for(const id of SHEET_TOOLS) await expect(page.locator(`#moreToolsSheet #${id}`),`${id} in More tools`).toBeVisible();
- // Every dock button has its label under the icon, and no label clips.
- for(const id of DOCK){
-  const label=rail.locator(`#${id} .rail-label`);
-  await expect(label,`${id} label is shown`).toBeVisible();
-  expect(await label.evaluate(e=>e.scrollWidth<=e.clientWidth),`${id} label does not clip`).toBe(true);
- }
- await expect(page.locator('#moreToolsSheet #moreLayers'),'Layers in More tools').toBeVisible();
- await expect(page.locator('#moreToolsSheet #moreProperties'),'Properties in More tools').toBeVisible();
- // Layers opens as a bottom sheet from More tools, and replaces the More tools sheet.
- await page.locator('#moreToolsSheet #moreLayers').click();
- await expect(page.locator('#layersSheet')).toHaveClass(/sheet-open/);
- await expect(page.locator('#moreToolsSheet')).not.toHaveClass(/sheet-open/);
- expect(errors).toEqual([]);
-});
-
-// With More tools open the page still does not scroll, and every sheet control is at least 44 px.
-for(const lang of ['en','es']) test(`More tools keeps the page fixed at 390x844 (${lang})`,async({page})=>{
- const errors=await openEditor(page,390,844,lang);
- await openMore(page);
- expect(await page.evaluate(()=>document.documentElement.scrollHeight-innerHeight),'no vertical page scroll').toBeLessThanOrEqual(0);
- expect(await page.evaluate(()=>document.documentElement.scrollWidth-innerWidth),'no horizontal page scroll').toBeLessThanOrEqual(0);
- const small=await page.locator('#moreToolsSheet button').evaluateAll(els=>els.map(e=>{const r=e.getBoundingClientRect();return `${e.id||e.className} ${Math.round(r.width)}x${Math.round(r.height)}`;}).filter(s=>{const [w,h]=s.split(' ').pop().split('x').map(Number);return w<44||h<44;}));
- expect(small,'sheet controls under 44x44').toEqual([]);
- expect(errors).toEqual([]);
-});

@@ -1,7 +1,7 @@
 import {test,expect} from '@playwright/test';
 
 // At phone size Layers and Properties open as sheets from the
-// dock (portrait) or the rail (landscape). No large mode buttons remain. A sheet has no Close button: it closes by a downward drag on
+// Menu, in either orientation. No large mode buttons remain. A sheet has no Close button: it closes by a downward drag on
 // its grab handle or title row, a tap on the dimmed area, Escape, or the system back action. Portrait sheets have three detents
 // (peek 120 px, half 50%, full below the top bar), and a dock open starts at half. Only one sheet is open at a time, and opening Menu
 // closes it. Focus moves to the sheet's first control on open and returns to the opener on close.
@@ -15,20 +15,14 @@ const LAYOUTS=[
 // The Menu button: the phone Menu, at every phone size.
 const menuSelector=()=>'#phoneMenu';
 
-// Opens a sheet as a user does: at portrait Layers and Properties are in Menu > View (the dock has no sheet buttons); a landscape
-// phone has them on the rail.
+// Opens a sheet as a user does: Layers and Properties are rows in the Menu at both phone orientations.
 const openSheet=async(page,sheet)=>{
- const portrait=await page.evaluate(()=>matchMedia('(max-width:600px) and (orientation:portrait)').matches);
- if(portrait){
-  await page.locator('#phoneMenu').click();
-  await page.locator(sheet==='layers'?'#menuLayers':'#menuProperties').click();
- }else{
-  await page.locator(sheet==='layers'?'#layersBtn':'#propertiesBtn').click();
- }
+ await page.locator('#phoneMenu').click();
+ await page.locator(sheet==='layers'?'#menuLayers':'#menuProperties').click();
 };
 
-// The control focus returns to when a sheet closes: the dock button on a landscape phone, the Menu button in portrait.
-const opener=(layout,sheet)=>layout.height>=layout.width?'#phoneMenu':(sheet==='layers'?'#layersBtn':'#propertiesBtn');
+// A sheet opened from the Menu closes back to the Menu button (its row is gone once the Menu closes).
+const opener=()=>'#phoneMenu';
 
 const sheetOf=page=>page.locator('.layout>aside.panel.sheet-open');
 const scrim=page=>page.locator('.sheet-scrim');
@@ -112,7 +106,7 @@ for(const layout of LAYOUTS){
    });
   }
 
-  test('the sheets open from the dock and only one is open at a time',async({page})=>{
+  test('the sheets open from the Menu and only one is open at a time',async({page})=>{
    await page.goto('/?lang=en');
    await openSheet(page,'layers');
    await expect(sheetOf(page)).toHaveAttribute('id','layersSheet');
@@ -121,7 +115,7 @@ for(const layout of LAYOUTS){
    await openSheet(page,'properties');
    await expect(sheetOf(page)).toHaveCount(1);
    await expect(sheetOf(page)).toHaveAttribute('id','inspector');
-   // Opening Menu closes whichever sheet is open (the phone Menu at portrait; the File menu on a landscape phone).
+   // Opening the Menu closes whichever sheet is open.
    await page.locator(menuSelector()).first().click();
    await expect(sheetOf(page)).toHaveCount(0);
    await page.keyboard.press('Escape');
@@ -137,22 +131,17 @@ for(const layout of LAYOUTS){
 
   test('focus moves to the first control on open and back to the opener on close',async({page})=>{
    await page.goto('/?lang=en');
-   if(layout.height>=layout.width){
-    await openSheet(page,'properties');
-   }else{
-    await page.locator('#propertiesBtn').focus();
-    await page.keyboard.press('Enter');
-   }
+   await openSheet(page,'properties');
    await expect(sheetOf(page)).toHaveAttribute('id','inspector');
    const insideSheet=await page.evaluate(()=>!!document.activeElement?.closest('#inspector'));
    expect(insideSheet,'focus is inside the Properties sheet').toBe(true);
    await page.keyboard.press('Escape');
-   await expect(page.locator(opener(layout,'properties'))).toBeFocused();
+   await expect(page.locator(opener())).toBeFocused();
    // The same for Layers, opened with a pointer.
    await openSheet(page,'layers');
    expect(await page.evaluate(()=>!!document.activeElement?.closest('#layersSheet')),'focus is inside Layers').toBe(true);
    await scrim(page).click({position:{x:4,y:4}});
-   await expect(page.locator(opener(layout,'layers'))).toBeFocused();
+   await expect(page.locator(opener())).toBeFocused();
   });
 
   test('the system back action closes an open sheet before leaving the page',async({page})=>{
@@ -163,7 +152,7 @@ for(const layout of LAYOUTS){
    await page.goBack();
    await expect(sheetOf(page)).toHaveCount(0);
    expect(page.url()).toBe(before);
-   await expect(page.locator(opener(layout,'layers'))).toBeVisible();
+   await expect(page.locator(opener())).toBeVisible();
   });
 
   for(const lang of ['en','es']){
@@ -287,7 +276,7 @@ for(const layout of LAYOUTS){
 test.describe('phone toast placement',()=>{
  test.use({viewport:{width:390,height:844}});
 
- test('a toast stacks above the contextual bar and never covers the dock at 390x844',async({page})=>{
+ test('a toast stacks above the dock and never covers it at 390x844',async({page})=>{
   await page.goto('/?lang=en');
   await page.locator('#rect').click();
   await page.locator('#rect').click();
@@ -295,9 +284,8 @@ test.describe('phone toast placement',()=>{
   await expect(toast).toBeVisible();
   const tb=await toast.boundingBox();
   const dock=await page.locator('.layout main>.tool-rail').boundingBox();
-  const bar=await page.locator('.layout main>.floating').boundingBox();
-  expect(bar,'contextual bar is shown with a selection').not.toBeNull();
-  expect(tb.y+tb.height,'toast bottom edge is above the contextual bar').toBeLessThanOrEqual(bar.y);
+  // With a selection the phone has no canvas bar: its commands are in the Menu, so the dock is the only bar under the canvas.
+  await expect(page.locator('.layout main>.floating'),'no canvas bar on a phone').toHaveCount(0);
   expect(tb.y+tb.height,'toast bottom edge is above the dock').toBeLessThanOrEqual(dock.y);
  });
 });

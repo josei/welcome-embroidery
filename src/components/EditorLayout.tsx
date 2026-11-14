@@ -1,9 +1,9 @@
 import {layoutState} from '../layoutState.js';
 import {inspectorOpenState} from '../inspectorOpenState.js';
 import {useTabletPortrait} from '../tabletLayoutState.js';
-import {closePhoneSheet, isPhoneSheetLayout, phoneSheetDetent, phoneSheetState, togglePhoneSheet, usePhonePortrait} from '../phoneSheetState.js';
-import {selectionState} from '../selectionState.js';
+import {closePhoneSheet, isPhoneSheetLayout, phoneSheetDetent, phoneSheetState, usePhonePortrait} from '../phoneSheetState.js';
 import {attachSheetDrag, firstSheetControl} from '../phoneSheetDrag.js';
+import {selectionState} from '../selectionState.js';
 import {selectionLabelsState} from '../selectionLabelsState.js';
 import {t} from '../i18n.js';
 import {designName} from '../designName.js';
@@ -45,7 +45,6 @@ import {StitchSatinEndRows} from './StitchSatinEndRows';
 import {StitchTypeRows} from './StitchTypeRows';
 import {ThreadPlan} from './ThreadPlan';
 import {LineTool, MeasureTool, PathTool, PenTool, SelectTool, ToolButtons} from './ToolButtons';
-import {MoreToolsSheet} from './MoreToolsSheet';
 import {TransformPanel} from './TransformPanel';
 import {ObjectList, ObjectListHead} from './ObjectList';
 import {PhotoStitch} from './PhotoStitch';
@@ -73,8 +72,7 @@ const subscribeNarrow = (listen: () => void) => {
  return () => media.removeEventListener('change', listen);
 };
 const narrowNow = () => window.matchMedia(NARROW_QUERY).matches;
-// A landscape phone, where the tool rail is a two-column grid inside the window and More tools
-// opens the More tools sheet. Same window as the landscape block in styles.css.
+// A landscape phone, where the tool rail is a two-column grid inside the window. Same window as the landscape block in styles.css.
 const LANDSCAPE_PHONE_QUERY = '(orientation: landscape) and (max-height: 500px) and (max-width: 1000px)';
 const subscribeLandscapePhone = (listen: () => void) => {
  const media = window.matchMedia(LANDSCAPE_PHONE_QUERY);
@@ -117,15 +115,14 @@ export function EditorLayout() {
  // The sheets' asides: a portrait sheet can be dragged by its grab handle or title row (phoneSheetDrag.ts).
  const layersSheet = useRef<HTMLElement>(null);
  const inspectorSheet = useRef<HTMLElement>(null);
- const toolsSheet = useRef<HTMLElement>(null);
  useEffect(() => {
-  const detach = [layersSheet.current, inspectorSheet.current, toolsSheet.current].map(el => el && attachSheetDrag(el));
+  const detach = [layersSheet.current, inspectorSheet.current].map(el => el && attachSheetDrag(el));
   return () => detach.forEach(off => off?.());
  }, []);
  // An open sheet takes focus on its first control, and Escape closes it. Closing returns focus to the opener (closePhoneSheet).
  useEffect(() => {
   if (phoneSheet === 'none') return;
-  const sheet = document.getElementById(phoneSheet === 'layers' ? 'layersSheet' : phoneSheet === 'tools' ? 'moreToolsSheet' : 'inspector');
+  const sheet = document.getElementById(phoneSheet === 'layers' ? 'layersSheet' : 'inspector');
   if (sheet) firstSheetControl(sheet)?.focus();
   const escape = (e: KeyboardEvent) => {
    if (e.key !== 'Escape' || e.defaultPrevented || !isPhoneSheetLayout() || document.querySelector('dialog[open]')) return;
@@ -137,8 +134,8 @@ export function EditorLayout() {
  }, [phoneSheet]);
  const canvasClass = ['canvas', hand && 'hand', snapping && 'snapping', (gridShown || snapping) && 'grid-shown', view === 'preview' && 'preview-mode', panning && 'panning',
   deletingGuide && 'deleting-guide'].filter(Boolean).join(' ');
- // At phone portrait the dock is one row of seven buttons, each with its label under the icon. Pen,
- // Polygon, Star, Trace, Photo stitch, Ellipse and the panels are in More tools (MoreToolsSheet), so nothing scrolls sideways.
+ // At phone portrait the dock is one row of six tool buttons, each with its label under the icon. The other drawing tools
+ // (Ellipse, Polygon, Star, Trace, Photo stitch, Pen) and the commands of the canvas bar are in the phone Menu (MenuBar.tsx).
  const phoneDock = (
    <div className={"tool-row tool-rail"} aria-label={"Tools"}>
      <SelectTool />
@@ -147,37 +144,11 @@ export function EditorLayout() {
      <AddShapeButton kind={"text"} id={"letter"} label={"Add lettering"} icon={"text"} tip={t('Add lettering ({shortcut})', {shortcut: shortcutFor('letter')})} short={t('Text')} />
      <LineTool />
      <MeasureTool />
-     <button
-       type={"button"}
-       className={"icon-button tool-more"}
-       id={"toolMore"}
-       aria-label={t('More tools')}
-       aria-expanded={phoneSheet === 'tools'}
-       aria-controls={"moreToolsSheet"}
-       title={t('More tools')}
-       data-tooltip={t('More tools')}
-       onClick={() => togglePhoneSheet('tools')}
-     >
-       <svg className={"icon"}>
-         <use href={"#i-chevron"} />
-       </svg><span className={"rail-label"}>{t('More')}</span>
-     </button>
    </div>
   );
  const deskToolRail = (
    <>
              <div className={"tool-row tool-rail"} aria-label={"Tools"}>
-               {phone ? null : <>
-               {/* On a phone the dock (portrait) or rail (landscape) opens Layers and Properties as sheets. */}
-               <button type="button" className={"icon-button phone-sheet-btn"} id={"layersBtn"} aria-label={t('Layers')} title={t('Layers')} data-tooltip={t('Layers')}
-                aria-expanded={phoneSheet === 'layers'} aria-controls={"layersSheet"} onClick={() => togglePhoneSheet('layers')}>
-                <svg className={"icon"}><use href={"#i-layers"} /></svg>
-               </button>
-               <button type="button" className={"icon-button phone-sheet-btn"} id={"propertiesBtn"} aria-label={t('Properties')} title={t('Properties')} data-tooltip={t('Properties')}
-                aria-expanded={phoneSheet === 'properties'} aria-controls={"inspector"} onClick={() => togglePhoneSheet('properties')}>
-                <svg className={"icon"}><use href={"#i-sliders"} /></svg>
-               </button>
-               </>}
                <SelectTool />
                <AddShapeButton kind={"rect"} id={"rect"} label={"Add rectangle"} icon={"rect"} tip={t('Add rectangle ({shortcut})', {shortcut: shortcutFor('rect')})} short={t('Shape')} />
                {landscapePhone ? null : <AddShapeButton kind={"ellipse"} id={"ellipse"} label={"Add ellipse"} icon={"ellipse"} tip={t('Add ellipse ({shortcut})', {shortcut: shortcutFor('ellipse')})} short={t('Ellipse')} />}
@@ -198,29 +169,13 @@ export function EditorLayout() {
                </button>}
                {landscapePhone ? null : <PhotoStitch />}
                {landscapePhone ? null : <PenTool />}
-               {/* On a landscape phone More tools is the last cell of the rail, and opens the More tools sheet with the tools that do not fit. */}
-               {landscapePhone ? <button
-                 type={"button"}
-                 className={"icon-button tool-more"}
-                 id={"toolMore"}
-                 aria-label={t('More tools')}
-                 aria-expanded={phoneSheet === 'tools'}
-                 aria-controls={"moreToolsSheet"}
-                 title={t('More tools')}
-                 data-tooltip={t('More tools')}
-                 onClick={() => togglePhoneSheet('tools')}
-               >
-                 <svg className={"icon"}>
-                   <use href={"#i-chevron"} />
-                 </svg><span className={"rail-label"}>{t('More')}</span>
-               </button> : null}
              </div>
    </>
   );
  const toolRail = phone ? phoneDock : deskToolRail;
  const floatingBar = (
              <div className={"floating"} role={"toolbar"} aria-label={"Canvas tools"} hidden={(compact || narrow || phone) && (!hasSelection || (phone && view !== 'design'))}>
-               {/* Select, Duplicate, Delete and Arrange lead the bar, so they stay in view at phone widths. */}
+               {/* Select, Duplicate, Delete and Arrange lead the bar. On phones the bar is not shown at all: its commands are in the Menu. */}
                <SelectToggleButton />
                <ActionButton flag="duplicate" className={"icon-button bar-edit"} id={"barDuplicate"} aria-label={duplicateLabel} title={duplicateLabel}
                  data-tooltip={duplicateLabel} onClick={() => toolbarActions.duplicate()}>
@@ -343,7 +298,6 @@ export function EditorLayout() {
         {hoopInProperties ? null : <HoopFields />}
       </aside>
       {/* A portrait tablet keeps Layers and Properties in one right-hand column, as the desktop does; the panels are always both open. */}
-      {phone || landscapePhone ? <MoreToolsSheet asideRef={toolsSheet} open={phoneSheet === 'tools'} detent={detent} /> : null}
       <main className={view === 'design' ? 'design-view' : undefined}>
         <div className={canvasClass}>
           {phone ? null : toolRail}
@@ -362,7 +316,7 @@ export function EditorLayout() {
           <CanvasHint />
           <ZoomBar />
           <PreviewPanel />
-          {phone ? null : floatingBar}
+          {phone || landscapePhone ? null : floatingBar}
           <svg id={"art"} viewBox={"-60 -60 120 120"} tabIndex={0} role={"application"} aria-label={designName(canvasDoc.doc.objects ?? [], canvasCounts)} {...referenceCanvasHandlers}>
             <defs>
               <pattern id={"linen"} width={"2.6"} height={"2.6"} patternUnits={"userSpaceOnUse"}>
@@ -387,7 +341,6 @@ export function EditorLayout() {
           <CanvasTextEditor />
         </div>
         {phone && view !== 'design' ? <div className={"phone-playback"}><PlaybackBar /></div> : null}
-        {phone ? floatingBar : null}
         {phone ? toolRail : null}
         <footer>
           <ToastStack />

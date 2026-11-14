@@ -26,9 +26,7 @@ async function drawAndSelect(page,lang){
  await page.mouse.move(c.x+c.width*0.6,c.y+c.height*0.6,{steps:5});
  await page.mouse.up();
  await expect(page.locator('#remove')).toBeEnabled();
- if(await page.locator('#layersBtn').isVisible()){
-  await page.locator('#layersBtn').click();
- }else if(await page.locator('#phoneMenu').isVisible() && !(await page.locator('#layersSheet').isVisible())){
+ if(await page.locator('#phoneMenu').isVisible()){
   await page.locator('#phoneMenu').click();
   await page.locator('#menuLayers').click();
  }

@@ -1,12 +1,17 @@
 import {test,expect} from '@playwright/test';
 
 // On a landscape phone (844x390) a right-edge sheet closes on a rightward swipe of at least
-// 80 px on its head, and on a tap on the dimmed area. With Properties open, the rail's Layers button is reachable and swaps the sheet.
+// 80 px on its head, and on a tap on the dimmed area. Layers and Properties open from the Menu, whose button stays reachable
+// while a sheet is open.
 test.beforeEach(async({page})=>{await page.addInitScript(()=>{delete window.showSaveFilePicker;});});
 test.use({viewport:{width:844,height:390},hasTouch:true});
 
 const sheetOf=page=>page.locator('.layout>aside.panel.sheet-open');
 const openedCount=page=>page.locator('.layout>aside.panel.sheet-open').count();
+const openSheet=async(page,sheet)=>{
+ await page.locator('#phoneMenu').click();
+ await page.locator(sheet==='layers'?'#menuLayers':'#menuProperties').click();
+};
 
 // A touch swipe along the sheet head, dispatched through CDP so the page sees real touch input.
 const touchSwipe=async(page,from,dx)=>{
@@ -28,7 +33,7 @@ const headCentre=async(page,sheet)=>{
 for(const lang of ['en','es']){
  test(`${lang}: a rightward swipe of 80 px closes an open Layers sheet`,async({page})=>{
   await page.goto(`/?lang=${lang}`);
-  await page.locator('#layersBtn').click();
+  await openSheet(page,'layers');
   const sheet=sheetOf(page);
   await expect(sheet).toHaveCount(1);
   await touchSwipe(page,await headCentre(page,sheet),90);
@@ -37,7 +42,7 @@ for(const lang of ['en','es']){
 
  test(`${lang}: a rightward swipe of 80 px closes an open Properties sheet`,async({page})=>{
   await page.goto(`/?lang=${lang}`);
-  await page.locator('#propertiesBtn').click();
+  await openSheet(page,'properties');
   const sheet=sheetOf(page);
   await expect(sheet).toHaveCount(1);
   await touchSwipe(page,await headCentre(page,sheet),90);
@@ -47,23 +52,23 @@ for(const lang of ['en','es']){
 
 test('a short rightward swipe leaves the sheet open',async({page})=>{
  await page.goto('/?lang=en');
- await page.locator('#layersBtn').click();
+ await openSheet(page,'layers');
  const sheet=sheetOf(page);
  await touchSwipe(page,await headCentre(page,sheet),40);
  await expect(sheetOf(page)).toHaveCount(1);
 });
 
-test('with Properties open, the rail Layers button is hit-testable and swaps the sheet',async({page})=>{
+test('with Properties open, the Menu button is hit-testable and opens Layers',async({page})=>{
  await page.goto('/?lang=en');
- await page.locator('#propertiesBtn').click();
+ await openSheet(page,'properties');
  await expect(sheetOf(page)).toHaveCount(1);
- const hit=await page.locator('#layersBtn').evaluate(el=>{
+ const hit=await page.locator('#phoneMenu').evaluate(el=>{
   const r=el.getBoundingClientRect();
   const top=document.elementFromPoint(r.x+r.width/2,r.y+r.height/2);
   return !!top&&(top===el||el.contains(top));
  });
- expect(hit,'Layers button is the element at its centre').toBe(true);
- await page.locator('#layersBtn').click();
+ expect(hit,'Menu button is the element at its centre').toBe(true);
+ await openSheet(page,'layers');
  await expect(page.locator('.layout>aside.panel.sheet-open')).toHaveCount(1);
  await expect(page.locator('#layersSheet.sheet-open')).toHaveCount(1);
  await expect(page.locator('#inspector.sheet-open')).toHaveCount(0);
@@ -71,7 +76,7 @@ test('with Properties open, the rail Layers button is hit-testable and swaps the
 
 test('tapping the dimmed area closes the open sheet',async({page})=>{
  await page.goto('/?lang=en');
- await page.locator('#layersBtn').click();
+ await openSheet(page,'layers');
  await expect(sheetOf(page)).toHaveCount(1);
  await page.locator('.sheet-scrim').click({position:{x:300,y:150}});
  await expect(sheetOf(page)).toHaveCount(0);

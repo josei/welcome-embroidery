@@ -485,17 +485,14 @@ input[aria-invalid="true"]{border-color:var(--warn)!important;background:var(--w
 }
 
 /* At phone size (portrait 600 px and narrower, or a landscape phone) Layers and Properties are sheets. They open from the
-   Layers and Properties buttons at the start of the dock (portrait) or the rail (landscape), and only one is open at a time. Neither
+   Layers and Properties rows of the Menu, and only one is open at a time. Neither
    sheet has a Close button. A sheet closes by a downward drag on its grab handle or title row (portrait), a tap on the dimmed area,
    Escape, or the system back action (MenuBar opening closes them too; see phoneSheetState.ts). Portrait sheets have three detents:
-   peek (120 px), half (50%, where a dock open starts) and full (below the 52 px top bar). Landscape sheets are 320 px on the right.
+   peek (120 px), half (50%, where an open from the Menu starts) and full (below the 52 px top bar). Landscape sheets are 320 px on the right.
    Desktop and tablet never show these parts. */
-.phone-sheet-btn,.sheet-grip,.sheet-head,.sheet-scrim{display:none}
+.sheet-grip,.sheet-head,.sheet-scrim{display:none}
 .sheet-title{margin:0;font-size:var(--fs-heading);font-weight:var(--fw-emphasis);color:#1d211f}
 @media (max-width:600px) and (orientation:portrait){
-.phone-sheet-btn{display:inline-flex;align-items:center;justify-content:center;flex:none;width:44px;min-width:44px;height:44px;min-height:44px;padding:0;border:1px solid var(--field-line);border-radius:10px;background:#fff;color:#4d5a54;cursor:pointer}
-.phone-sheet-btn[aria-expanded=true]{background:var(--teal-soft);border-color:var(--teal);color:var(--teal-deep)}
-.phone-sheet-btn .icon{width:20px;height:20px}
 .sheet-scrim{display:block;position:fixed;left:0;right:0;bottom:0;top:52px;z-index:39;background:#1d292538}
 .layout>aside.panel:not(.sheet-open){display:none}
 .layout>aside.panel.sheet-open{display:flex;flex-direction:column;position:fixed;left:0;right:0;bottom:0;z-index:40;width:auto;height:50vh;height:50dvh;margin:0;padding:0 12px 16px;overflow-y:auto;overscroll-behavior:contain;background:#fff;border:0;border-radius:0;box-shadow:0 -6px 24px #1d292533;transition:height .2s ease,transform .2s ease}
@@ -508,7 +505,7 @@ input[aria-invalid="true"]{border-color:var(--warn)!important;background:var(--w
 .sheet-head{display:flex;align-items:center;min-height:44px;margin:0 0 4px}
 .layout .layers-head .inspector-toggle{display:none}
 .layout>.panel.sheet-open.inspector-collapsed{display:flex}
-.phone-sheet-btn:focus-visible,.sheet-title:focus-visible{outline:2px solid var(--teal);outline-offset:2px}
+.sheet-title:focus-visible{outline:2px solid var(--teal);outline-offset:2px}
 #toast{z-index:50}
 }
 /* Every control in an open phone sheet is at least 44x44 CSS px (the touch target size). A checkbox keeps its 24 px box
@@ -524,9 +521,6 @@ input[aria-invalid="true"]{border-color:var(--warn)!important;background:var(--w
 /* Landscape phones (a coarse pointer, 500 px tall or less): the dock's buttons sit in the rail, and each sheet is 320 px wide on the
    right of the screen with no grab handle. The canvas keeps the rest of the width until a sheet is open. */
 @media (max-height:500px) and (pointer:coarse){
-.phone-sheet-btn{display:inline-flex;align-items:center;justify-content:center;flex:none;width:44px;min-width:44px;height:44px;min-height:44px;padding:0;border:1px solid var(--field-line);border-radius:10px;background:#fff;color:#4d5a54;cursor:pointer}
-.phone-sheet-btn[aria-expanded=true]{background:var(--teal-soft);border-color:var(--teal);color:var(--teal-deep)}
-.phone-sheet-btn .icon{width:20px;height:20px}
 .sheet-scrim{display:block;position:fixed;left:0;right:0;bottom:0;top:58px;z-index:39;background:#1d292538}
 .layout{grid-template-columns:minmax(0,1fr)}
 .layout>aside.panel:not(.sheet-open){display:none}
@@ -534,7 +528,7 @@ input[aria-invalid="true"]{border-color:var(--warn)!important;background:var(--w
 .layout>aside.panel.sheet-open.inspector-collapsed{display:flex}
 .sheet-head{display:flex;align-items:center;min-height:44px;margin:0 0 4px}
 .layout .layers-head .inspector-toggle{display:none}
-.phone-sheet-btn:focus-visible,.sheet-title:focus-visible{outline:2px solid var(--teal);outline-offset:2px}
+.sheet-title:focus-visible{outline:2px solid var(--teal);outline-offset:2px}
 }
 
 .field-note{display:block;font-size:var(--fs-caption);line-height:1.4;color:var(--mute-text)}
@@ -733,7 +727,6 @@ body{height:100vh;height:100dvh;min-height:0;overflow:hidden}
 .canvas{flex:1 1 0;height:auto;min-height:0}
 .canvas .tool-rail{position:absolute;left:0;top:0;bottom:0;width:64px;max-height:none;z-index:4;display:flex;flex-direction:column;align-items:stretch;gap:4px;padding:6px 4px;overflow-y:auto;overscroll-behavior:contain;background:#fff;border-right:1px solid #e3e6e1}
 .canvas .tool-rail>button.icon-button,.canvas .tool-rail>.icon-button{width:44px;min-width:44px;height:44px;min-height:44px;align-self:center;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;padding:0}
-.canvas .tool-rail .icon-button.phone-sheet-btn{display:none}
 .canvas .tool-rail .rail-label{display:none}
 .canvas .tool-rail .icon-button.active-tool{background:var(--teal-soft);color:var(--teal)}
 .canvas #art{inset:0 0 0 64px;width:calc(100% - 64px)!important}
@@ -808,24 +801,13 @@ body{height:100vh;height:100dvh;min-height:0;overflow:hidden;overscroll-behavior
 .layout main>.tool-rail{grid-row:3;position:static;inset:auto;z-index:auto;display:flex;flex-direction:row;flex-wrap:nowrap;align-items:center;justify-content:flex-start;align-content:center;gap:4px;width:auto;height:calc(56px + env(safe-area-inset-bottom));max-height:none;max-width:none;margin:0;padding:6px 8px calc(6px + env(safe-area-inset-bottom));box-sizing:border-box;overflow-x:auto;overflow-y:hidden;scrollbar-width:none;border:0;border-top:1px solid #e3e6e1;border-radius:0;background:#fff;box-shadow:none}
 .layout main>.tool-rail .icon-button{width:44px;min-width:44px;height:44px;flex:none}
 .layout main:has(.canvas.preview-mode)>.tool-rail{display:none}
-/* At phone portrait the dock is seven buttons on one row, each with its label under the
-   icon. The seven share the row at 44 px minimum, so the dock never scrolls sideways. More tools opens MoreToolsSheet, with Tools and Panels
-   groups. */
+/* At phone portrait the dock is six buttons on one row, each with its label under the
+   icon. The six share the row at 44 px minimum, so the dock never scrolls sideways. The other tools are in the Menu. */
 .layout main>.tool-rail{overflow:hidden;gap:2px}
 .layout main>.tool-rail .icon-button{display:flex;flex:1 1 0;flex-direction:column;align-items:center;justify-content:center;gap:2px;width:auto;min-width:44px;height:44px;min-height:44px;padding:0;overflow:hidden}
 .layout main>.tool-rail .icon-button .icon{width:20px;height:20px;flex:none}
 .layout main>.tool-rail .rail-label{display:block;max-width:100%;overflow:hidden;white-space:nowrap;font-size:11px;line-height:1.1;color:#4d5a54}
 .layout main>.tool-rail .icon-button.active-tool .rail-label{color:var(--teal-deep)}
-.layout main>.tool-rail .tool-more{display:flex}
-.layout>#moreToolsSheet .more-heading{margin:8px 0 6px;font-size:13px;font-weight:600;line-height:1.2;color:#66726c;white-space:nowrap}
-.layout>#moreToolsSheet .more-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
-.layout>#moreToolsSheet .more-grid .icon-button{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;width:auto;min-width:44px;height:64px;min-height:44px;padding:4px;background:#f6f7f5;border:1px solid transparent;border-radius:8px;color:#53635b}
-.layout>#moreToolsSheet .more-grid .icon-button .icon{width:20px;height:20px;flex:none}
-.layout>#moreToolsSheet .more-grid .icon-button.active-tool{background:var(--teal-soft);border-color:var(--teal);color:var(--teal-deep)}
-#moreToolsSheet .sheet-head{justify-content:space-between}
-#moreToolsSheet .sheet-close{display:inline-flex;align-items:center;flex:0 0 auto;min-height:44px;min-width:44px;padding:3px 12px;border:1px solid var(--field-line);border-radius:6px;background:#fff;color:#4d5a54;font:inherit;font-size:var(--fs-body);cursor:pointer}
-#moreToolsSheet .sheet-close:hover{background:#eef1ec;color:var(--teal)}
-.layout>#moreToolsSheet .rail-label{display:block;max-width:100%;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;font-size:12px;line-height:1.1}
 .layout main>footer{grid-row:4;position:relative;flex:none;height:28px;min-height:0;margin:0;padding:0 12px;box-sizing:border-box;display:flex;align-items:center;gap:8px;overflow:visible;background:#fff;border:0;border-top:1px solid #e3e6e1}
 .layout main>footer>:not(#count):not(#toast){display:none}
 .layout main>footer>#count{flex:1 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;line-height:26px;font-size:var(--fs-caption)}
@@ -837,33 +819,20 @@ body{height:100vh;height:100dvh;min-height:0;overflow:hidden;overscroll-behavior
 .layout main:not(.design-view)>footer>#toast{bottom:196px}
 }
 
-.tool-more{display:none}
 /* A landscape phone (844x390, any landscape
    window 500 px tall or less and 1000 px wide or less) uses fixed regions and never scrolls the page. From the top: the top bar
    (44 px), then the middle band between the top bar and the status line. In the band: a 56 px tool rail on the left, full height,
    and the canvas on the right. The status line is the bottom 44 px. Layers and Properties open as 320 px right-edge sheets over
-   the canvas, from the buttons at the canvas's top-right, and never overlap the rail. Every visible control is 44 px square or
+   the canvas, from the Menu, and never overlap the rail. Every visible control is 44 px square or
    more. The rulers, the 2D / Stitches / 3D switch (Menu > View on phones) and the zoom and canvas toolbars move with the layout.
    Status line is 44 px, not 28 px: its Messages button is a 44 px control, so it cannot fit a 28 px row.
    Desktop and the portrait layouts do not match this query, so they are unchanged. */
 @media (orientation:landscape) and (max-height:500px) and (max-width:1000px){
-/* The rail carries the Layers and Properties buttons on a landscape phone. */
-.canvas .tool-rail .icon-button.phone-sheet-btn{display:inline-flex}
 /* The sheets are #layersSheet and #inspector: their id rules (tablet and desktop) outrank the classes above, so the landscape sheet sets its box again here. */
-.layout>#moreToolsSheet{display:none}
-/* The More tools sheet's grid is styled for portrait (above); a landscape sheet is 320 px wide, so its tools take three columns. */
-.layout>#moreToolsSheet .more-heading{margin:8px 0 6px;font-size:13px;font-weight:600;line-height:1.2;color:#66726c;white-space:nowrap}
-.layout>#moreToolsSheet .more-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
-.layout>#moreToolsSheet .more-grid .icon-button{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;width:auto;min-width:44px;height:64px;min-height:44px;padding:4px;background:#f6f7f5;border:1px solid transparent;border-radius:8px;color:#53635b}
-.layout>#moreToolsSheet .more-grid .icon-button .icon{width:20px;height:20px;flex:none}
-.layout>#moreToolsSheet .more-grid .icon-button.active-tool{background:var(--teal-soft);border-color:var(--teal);color:var(--teal-deep)}
-.layout>#moreToolsSheet .rail-label{display:block;max-width:100%;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;font-size:12px;line-height:1.1}
-.layout>#layersSheet.sheet-open,.layout>#inspector.sheet-open,.layout>#moreToolsSheet.sheet-open{display:flex;flex-direction:column;position:fixed;top:44px;bottom:44px;left:auto;right:0;width:320px;height:auto;max-height:none;margin:0;padding:10px 12px 12px;overflow-y:auto;overscroll-behavior:contain;z-index:40;background:#fff;border:0;border-left:1px solid #e3e6e1;border-radius:0;box-shadow:-6px 0 24px #1d292533}
-/* The scrim starts past the 104 px two-column rail and below the 44 px top bar, so the rail's Layers and Properties buttons stay tappable while a sheet is open. */
+.layout>#layersSheet.sheet-open,.layout>#inspector.sheet-open{display:flex;flex-direction:column;position:fixed;top:44px;bottom:44px;left:auto;right:0;width:320px;height:auto;max-height:none;margin:0;padding:10px 12px 12px;overflow-y:auto;overscroll-behavior:contain;z-index:40;background:#fff;border:0;border-left:1px solid #e3e6e1;border-radius:0;box-shadow:-6px 0 24px #1d292533}
 .sheet-scrim{display:block;position:fixed;left:104px;right:0;bottom:0;top:44px;z-index:39;background:#1d292538}
 .layout>aside.panel.sheet-open [data-sheet-drag]{touch-action:pan-y}
 body{height:100dvh;min-height:0;overflow:hidden}
-.tool-more{display:flex}
 .top{position:fixed;top:0;left:0;right:0;z-index:7;height:44px;min-height:44px;flex-wrap:nowrap;gap:4px;padding:0 6px;overflow:hidden}
 .top .logo,.top .sep,.top #new,.top #open,.top #importMachine,.top #save,.top #duplicate,.top #remove,.top #helpBtn,.top #settingsBtn,.top .save-status,.top .unsaved-marker{display:none}
 .top .file-menu>button,.top .icon-button,.top #undo,.top #redo,.top #settingsBtn,.top #export{min-width:44px;height:44px;min-height:44px}
@@ -899,15 +868,11 @@ body{height:100dvh;min-height:0;overflow:hidden}
 .canvas #rulerTop,.canvas #rulerLeft,.canvas .ruler-corner{display:none}
 .canvas .canvas-views{display:none}
 .canvas .tool-rail{position:fixed;left:0;top:44px;bottom:44px;right:auto;z-index:6;width:104px;height:auto;max-height:none;margin:0;padding:6px;display:grid;grid-template-columns:44px 44px;grid-auto-rows:44px;grid-auto-flow:row;align-content:start;justify-content:center;gap:4px;border:0;border-radius:0;box-shadow:2px 0 8px rgba(0,0,0,.08);background:#fff;overflow:hidden;transform:none;order:0}
-/* On a landscape phone the rail holds Layers, Properties, Choose, Shape, Path, Text, Line, Measure and More: nine
-   44 px cells in two columns, five rows, which fit the 302 px between the top bar and the status line with no scroll. Ellipse, Polygon,
-   Star, Trace, Photo stitch and Pen are in More tools. Rail labels are hidden here: the icons are the cells, and each keeps its name. */
+/* On a landscape phone the rail holds Choose, Shape, Path, Text, Line and Measure: six
+   44 px cells in two columns, three rows, which fit the 302 px between the top bar and the status line with no scroll. The other
+   tools and the commands are in the Menu. Rail labels are hidden here: the icons are the cells, and each keeps its name. */
 .canvas .tool-rail .rail-label{display:none}
 .canvas .tool-rail .icon-button{width:44px;min-width:44px;height:44px;min-height:44px;flex:none}
-.tool-more{position:static;align-items:center;justify-content:center;width:44px;min-width:44px;height:44px;min-height:44px;margin:0;padding:0;border:1px solid var(--field-line);border-radius:10px;background:#fff;color:#3c423e;cursor:pointer}
-.tool-more .icon{transition:transform .15s}
-.tool-more[aria-expanded=true] .icon{transform:rotate(180deg)}
-.tool-more:focus-visible{outline:2px solid var(--teal);outline-offset:2px}
 .canvas .floating{position:absolute;top:6px;left:8px;right:auto;bottom:auto;z-index:5;display:flex;flex-direction:row;flex-wrap:nowrap;align-items:center;justify-content:flex-start;align-content:center;gap:4px;width:auto;max-width:calc(100% - 120px);height:44px;max-height:none;margin:0;padding:0 6px;transform:none;overflow-x:auto;overflow-y:hidden;background:#fff;border:1px solid var(--field-line);border-radius:10px;grid-template-columns:none;scrollbar-width:none}
 .canvas .floating .icon-button{width:44px;min-width:44px;height:44px;min-height:44px;flex:none}
 .canvas .floating #grid,.canvas .floating .grid-chip{grid-column:auto;width:auto;height:44px;min-height:44px;min-width:44px;flex:none}

@@ -74,11 +74,13 @@ for(const [w,h] of dims){
     await check(page,`${where} menu ${i} open`,w);
     await page.keyboard.press('Escape');
    }
-   // Layers sheet, then Properties sheet (opened by selecting an object)
+   // Layers sheet, then Properties sheet (opened by selecting an object). Both are rows in the Menu at phone sizes.
    await page.locator('#rect').click({timeout:5000});
-   await page.locator('#layersBtn').click({timeout:5000}).catch(()=>{});
+   await page.locator('#phoneMenu').click({timeout:5000});
+   await page.locator('#menuLayers').click({timeout:5000}).catch(()=>{});
    if(await page.locator('.layout>aside.sheet-open').count())await check(page,`${where} sheet open`,w);
-   await page.locator('#propertiesBtn').click({timeout:5000}).catch(()=>{});
+   await page.locator('#phoneMenu').click({timeout:5000}).catch(()=>{});
+   await page.locator('#menuProperties').click({timeout:5000}).catch(()=>{});
    if(await page.locator('.layout>aside.sheet-open').count())await check(page,`${where} properties sheet open`,w);
    await check(page,`${where} canvas with a selection`,w);
    expect(errors).toEqual([]);

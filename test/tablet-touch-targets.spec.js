@@ -56,10 +56,8 @@ for(const [w,h] of SIZES){
    else await smallStatus(page,where,'first screen');
    await page.locator('#rect').click({timeout:5000}).catch(()=>{});
    if(!tablet){
-    // Phone sheets: a portrait phone opens them from the Menu, a phone with a dock button from the status line. Each sheet is checked in
-    // a new browser context, so the autosave of the first page cannot open its restore dialog over the sheet. A layout with the
-    // inspector always on screen (844 px wide landscape) has no sheet to open and is checked as it is.
-    const portrait=await page.evaluate(()=>matchMedia('(max-width:600px) and (orientation:portrait)').matches);
+    // Phone sheets open from the Menu in either orientation. Each sheet is checked in a new browser context, so the autosave of the
+    // first page cannot open its restore dialog over the sheet.
     for(const sheet of ['layers','properties']){
      const ctx=await page.context().browser().newContext({viewport:{width:w,height:h}});
      const pg=await ctx.newPage();
@@ -68,17 +66,13 @@ for(const [w,h] of SIZES){
      await pg.goto(`/?lang=${lang}`);
      await expect(pg.locator('.canvas')).toBeVisible();
      await pg.locator('#rect').click({timeout:5000}).catch(()=>{});
-     const btn=portrait?'#phoneMenu':(sheet==='layers'?'#layersBtn':'#propertiesBtn');
-     if(portrait||await pg.locator(btn).isVisible()){
-      await pg.locator(btn).click({timeout:5000});
-      if(portrait)await pg.locator(sheet==='layers'?'#menuLayers':'#menuProperties').click({timeout:5000});
-      await expect(pg.locator('.layout>aside.panel.sheet-open')).toBeVisible();
-     }
+     await pg.locator('#phoneMenu').click({timeout:5000});
+     await pg.locator(sheet==='layers'?'#menuLayers':'#menuProperties').click({timeout:5000});
+     await expect(pg.locator('.layout>aside.panel.sheet-open')).toBeVisible();
      const list=await measure(pg);
      const bad=list.filter(c=>c.w<44||c.h<44).map(c=>`${c.name} ${c.w}x${c.h}`);
      expect(bad,`${where} ${sheet}: controls under 44x44`).toEqual([]);
      await ctx.close();
-     if(!portrait)break;
     }
    }else{
     await small('object selected');
