@@ -27,16 +27,10 @@ async function drawAndSelect(page,lang){
  await expect(page.locator('#remove')).toBeEnabled();
  if(await page.locator('#layersBtn').isVisible()){
   await page.locator('#layersBtn').click();
- }else if(await page.locator('#phoneMenu').isVisible()){
+ }else if(await page.locator('#phoneMenu').isVisible() && !(await page.locator('#layersSheet').isVisible())){
   await page.locator('#phoneMenu').click();
   await page.locator('#menuLayers').click();
  }
- if(!(await page.locator('#tabLayers').isVisible())){
-  const strip=page.locator('.inspector-collapse');
-  if(await strip.isVisible())await strip.click();
-  else if(await page.locator('.inspector-toggle').isVisible())await page.locator('.inspector-toggle').click();
- }
- if(await page.locator('#tabLayers').isVisible())await page.locator('#tabLayers').click();
  await expect(page.locator('.object-row').first()).toBeVisible();
  // The stitch count appears once the design has compiled; the rows are measured with it shown.
  await expect(page.locator('.row-count').first()).toBeVisible();
@@ -78,11 +72,11 @@ for(const [w,h] of SIZES){
    await page.setViewportSize({width:w,height:h});
    await drawAndSelect(page,lang);
    if(await page.locator('.object-row').first().isVisible())await page.locator('.object-row').first().click();
-   if(await page.locator('#tabProperties').isVisible())await page.locator('#tabProperties').click();
-   else if(await page.locator('.inspector-toggle').isVisible())await page.locator('.inspector-toggle').click();
-   else if(await page.locator('#phoneMenu').isVisible()){
+   if(!(await page.locator('#inspector').isVisible()) && await page.locator('#phoneMenu').isVisible()){
     await page.locator('#phoneMenu').click();
     await page.locator('#menuProperties').click();
+   }else if(!(await page.locator('#inspector').isVisible()) && await page.locator('#propertiesBtn').isVisible()){
+    await page.locator('#propertiesBtn').click();
    }
    const select=page.locator('#underlayType');
    await expect(select).toBeVisible();

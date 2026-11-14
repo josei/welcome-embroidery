@@ -21,8 +21,7 @@ for(const width of [1920,1024,760]){
   };
   // The object list heading and the list below it.
   await expectAligned(page.locator('.layers-head'),page.locator('#objects'),`layers head at ${width}px`);
-  // The inspector: its heading and the Sewing order fold line up with the inspector's body text. A portrait tablet starts with it closed, so open it first.
-  if(await page.locator('.inspector-tab[data-tab=properties]').isVisible())await page.locator('.inspector-tab[data-tab=properties]').click();
+  // The inspector: its heading and the Sewing order fold line up with the inspector's body text. A portrait tablet shows it in its own column.
   await expectAligned(page.locator('#selected'),page.locator('#stats'),`inspector heading at ${width}px`);
   await expectAligned(page.locator('#secOrder > summary'),page.locator('#stats'),`sewing order header at ${width}px`);
   expect(errors).toEqual([]);
@@ -34,7 +33,7 @@ test('the top bar stays on one row at 760px and the title gives way first',async
  await page.setViewportSize({width:760,height:900});
  await page.goto('/');await newDesign(page);
  // A long name and an unsaved design: the title is the element that gives way, and the unsaved marker stays visible.
- await page.locator('header.top #name').fill('A very long embroidery design name that keeps going');
+ await page.locator('header.top #name').fill('A very long embroidery design name that keeps going and long enough to run past the bar');
  await page.locator('header.top #name').press('Enter');
  await page.locator('header.top #name').blur();
  const bar=page.locator('header.top');

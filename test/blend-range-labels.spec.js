@@ -59,12 +59,11 @@ async function addRectangle(page){
  await expect(page.locator('.object-row.selected')).toHaveCount(1);
 }
 
-// Brings the Properties inspector on screen: always visible beside the canvas on desktop and tablet portrait, a tab on a tablet, and a
+// Brings the Properties inspector on screen: always visible beside the canvas on desktop and tablet portrait, and a
 // sheet opened from the Menu (portrait phone) or the Properties button (landscape phone).
 async function openProperties(page){
- if(await page.locator('.inspector-tab[data-tab=properties]').isVisible()){
-  await page.locator('.inspector-tab[data-tab=properties]').click();
- }else if(await page.locator('#phoneMenu').isVisible()){
+ if(await page.locator('#inspector').isVisible())return;
+ if(await page.locator('#phoneMenu').isVisible()){
   await page.locator('#phoneMenu').click();
   await page.locator('#menuProperties').click();
   await expect(page.locator('#inspector.sheet-open')).toBeVisible();
@@ -109,7 +108,7 @@ for(const lang of ['en','es']){
  });
 }
 
-// Phone and tablet show the blend fields in a sheet, a docked inspector or a tab; the fields there are touch targets like the rest.
+// Phone and tablet show the blend fields in a sheet or a docked inspector; the fields there are touch targets like the rest.
 const SIZES=[[390,844],[844,390],[768,1024]];
 for(const [w,h] of SIZES){
  test(`blend range fields are at least 44 px tall at ${w}x${h}`,async({page})=>{

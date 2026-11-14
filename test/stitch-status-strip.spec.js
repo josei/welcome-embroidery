@@ -18,7 +18,7 @@ async function openStitches(page,width,height,lang,{overrun=false}={}){
  await page.reload();
  await page.locator('#restoreYes').click();
  await expect(page.locator('.object-row')).toHaveCount(1);
- // The top bar's view switch shows on wide screens; phones reach Stitches through the Menu.
+ // The view switch shows on wide screens; phones reach Stitches through the Menu.
  if(await page.locator('[data-view=stitches]').isVisible()){
   await page.locator('[data-view=stitches]').click();
  }else{

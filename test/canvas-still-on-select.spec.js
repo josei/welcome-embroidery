@@ -1,8 +1,8 @@
 import {test,expect} from '@playwright/test';
 
-// Selecting an object resizes the canvas: on a portrait tablet a touch tap on the drawing folds the Layers column to its
-// 44 px rail, and on a phone the selection bar takes a row below the canvas. The drawing keeps its place on screen through
-// that resize, so the hoop does not slide away from the finger and the next tap lands on the same object.
+// Selecting an object changes the screen around the canvas: on a phone the selection bar takes a row below it, and the
+// selection handles are drawn over the object. The drawing keeps its place on screen through that change, so the hoop does
+// not slide away from the finger and the next tap lands on the same object.
 
 test.use({hasTouch:true});
 test.beforeEach(async({page})=>{await page.addInitScript(()=>{delete window.showSaveFilePicker;});});
@@ -55,10 +55,11 @@ test('768x1024: a second touch tap on the same point still hits the leaf',async(
  const hoop=await hoopBox(page),leaf=await leafBox(page);
  await page.touchscreen.tap(LEAF_POINT.x,LEAF_POINT.y);
  await expect.poll(()=>selectedIds(page)).toEqual(['leaf']);
- // The Layers column has folded to its rail, and the point is still on the leaf: its selection handles cover it, or the
- // leaf itself does, but never empty canvas, where a tap would clear the selection.
- await expect(page.locator('#layersSheet')).toBeHidden();
- expect(insideLeaf(await leafBox(page),LEAF_POINT),'the point is still on the leaf after the fold').toBe(true);
+ // Both inspector panels stay open, and the point is still on the leaf: its selection handles cover it, or the leaf itself
+ // does, but never empty canvas, where a tap would clear the selection.
+ await expect(page.locator('#layersSheet')).toBeVisible();
+ await expect(page.locator('#inspector')).toBeVisible();
+ expect(insideLeaf(await leafBox(page),LEAF_POINT),'the point is still on the leaf after the selection').toBe(true);
  await page.touchscreen.tap(LEAF_POINT.x,LEAF_POINT.y);
  await expect.poll(()=>selectedIds(page),'the second tap keeps the leaf selected').toEqual(['leaf']);
  await expect(page.locator('.marquee')).toHaveCount(0);

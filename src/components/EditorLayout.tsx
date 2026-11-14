@@ -1,9 +1,8 @@
 import {layoutState} from '../layoutState.js';
-import {inspectorOpenState, toggleInspectorOpen, TABLET_DRAWER_QUERY} from '../inspectorOpenState.js';
-import {inspectorTabState, selectInspectorTab, useTabletPortrait} from '../tabletLayoutState.js';
+import {inspectorOpenState} from '../inspectorOpenState.js';
+import {useTabletPortrait} from '../tabletLayoutState.js';
 import {closePhoneSheet, isPhoneSheetLayout, phoneSheetDetent, phoneSheetState, togglePhoneSheet, usePhonePortrait} from '../phoneSheetState.js';
 import {selectionState} from '../selectionState.js';
-import {watchTabletDrawerEscape} from '../tabletDrawerEscape.js';
 import {attachSheetDrag, firstSheetControl} from '../phoneSheetDrag.js';
 import {selectionLabelsState} from '../selectionLabelsState.js';
 import {t} from '../i18n.js';
@@ -93,7 +92,6 @@ export function EditorLayout() {
  const canvasCounts = useSyncExternalStore(sewingCountsState.subscribe, sewingCountsState.get);
  const layout = useSyncExternalStore(layoutState.subscribe, layoutState.get);
  const inspectorOpen = useSyncExternalStore(inspectorOpenState.subscribe, inspectorOpenState.get);
- const inspectorTab = useSyncExternalStore(inspectorTabState.subscribe, inspectorTabState.get);
  const tablet = useTabletPortrait();
  // Phones and tablets stack the panels, so the hoop size and rotation move into Properties; desktop keeps them under Layers.
  const hoopInProperties = useHoopInProperties();
@@ -136,8 +134,6 @@ export function EditorLayout() {
   document.addEventListener('keydown', escape);
   return () => document.removeEventListener('keydown', escape);
  }, [phoneSheet]);
- // Escape folds the portrait tablet's inspector drawer too, and focuses its collapse strip (tabletDrawerEscape.ts).
- useEffect(() => watchTabletDrawerEscape(), []);
  const canvasClass = ['canvas', hand && 'hand', snapping && 'snapping', (gridShown || snapping) && 'grid-shown', view === 'preview' && 'preview-mode', panning && 'panning',
   deletingGuide && 'deleting-guide'].filter(Boolean).join(' ');
  // At phone portrait the dock is one row of seven buttons, each with its label under the icon. Pen,
@@ -335,7 +331,7 @@ export function EditorLayout() {
   <>
     <div className={"layout"}>
       {phoneSheet === 'none' ? null : <div className={"sheet-scrim"} aria-hidden={"true"} onClick={closePhoneSheet} />}
-      <aside ref={layersSheet} className={[phoneSheet === 'layers' ? "panel sheet-open" : "panel", tablet && inspectorOpen && inspectorTab === 'layers' && 'tab-active'].filter(Boolean).join(' ')} data-detent={detent} id={"layersSheet"} aria-label={t('Objects')}>
+      <aside ref={layersSheet} className={phoneSheet === 'layers' ? "panel sheet-open" : "panel"} data-detent={detent} id={"layersSheet"} aria-label={t('Objects')}>
         <div className={"sheet-grip"} data-sheet-drag={""} aria-hidden={"true"} />
         <ObjectListHead />
         <label className={"sides-row"} hidden={true}>
@@ -345,28 +341,15 @@ export function EditorLayout() {
         <ObjectList />
         {hoopInProperties ? null : <HoopFields />}
       </aside>
-      {/* On a portrait tablet the Layers and Properties tabs sit at the top of the inspector column; the panels below them switch. */}
-      <div className={"inspector-tabs"} role={"tablist"} aria-label={t('Inspector')}>
-        <button type={"button"} role={"tab"} className={"inspector-tab"} data-tab={"layers"} id={"tabLayers"} aria-selected={inspectorTab === 'layers'}
-         aria-controls={"layersSheet"} onClick={() => selectInspectorTab('layers')}>{t('Layers')}</button>
-        <button type={"button"} role={"tab"} className={"inspector-tab"} data-tab={"properties"} id={"tabProperties"} aria-selected={inspectorTab === 'properties'}
-         aria-controls={"inspector"} onClick={() => selectInspectorTab('properties')}>{t('Properties')}</button>
-        <button type={"button"} className={"inspector-collapse"} aria-expanded={inspectorOpen} aria-label={inspectorOpen ? t('Collapse inspector') : t('Expand inspector')}
-         title={inspectorOpen ? t('Collapse inspector') : t('Expand inspector')} data-tooltip={inspectorOpen ? t('Collapse inspector') : t('Expand inspector')} onClick={toggleInspectorOpen}>
-          <span className={"collapse-glyph"} aria-hidden={"true"}>{inspectorOpen ? '›' : '‹'}</span>
-        </button>
-      </div>
+      {/* A portrait tablet keeps Layers and Properties in one right-hand column, as the desktop does; the panels are always both open. */}
       {phone || landscapePhone ? <MoreToolsSheet asideRef={toolsSheet} open={phoneSheet === 'tools'} detent={detent} /> : null}
       <main className={view === 'design' ? 'design-view' : undefined}>
-        <div className={canvasClass} onClick={(e) => {
-          // On a portrait tablet a tap on the canvas closes the Properties drawer (controls inside the canvas keep it open).
-          if (inspectorOpen && window.matchMedia(TABLET_DRAWER_QUERY).matches && !(e.target as Element).closest('button,input,select,textarea,label,a')) toggleInspectorOpen();
-        }}>
+        <div className={canvasClass}>
           {phone ? null : toolRail}
-          {/* On a portrait tablet the 2D / Stitches / 3D switch is in the top bar, not over the canvas. */}
-          {tablet ? null : <div className={"canvas-views"}>
+          {/* The 2D / Stitches / 3D switch sits over the canvas at every width that shows the canvas, as it does on the desktop. */}
+          <div className={"canvas-views"}>
             <ViewSwitch />
-          </div>}
+          </div>
           <canvas id={"rulerTop"} aria-hidden={"true"}>
           </canvas>
           <canvas id={"rulerLeft"} aria-hidden={"true"}>
@@ -411,7 +394,7 @@ export function EditorLayout() {
           <StatusRun />
         </footer>
       </main>
-      <aside ref={inspectorSheet} className={[inspectorOpen ? "panel" : "panel inspector-collapsed", phoneSheet === 'properties' && 'sheet-open', tablet && inspectorOpen && inspectorTab === 'properties' && 'tab-active'].filter(Boolean).join(' ')} id={"inspector"} data-detent={detent} aria-label={t('Properties')}>
+      <aside ref={inspectorSheet} className={[inspectorOpen || tablet ? "panel" : "panel inspector-collapsed", phoneSheet === 'properties' && 'sheet-open'].filter(Boolean).join(' ')} id={"inspector"} data-detent={detent} aria-label={t('Properties')}>
         <div className={"sheet-grip"} data-sheet-drag={""} aria-hidden={"true"} />
         <div className={"sheet-head"} data-sheet-drag={""}>
           <h2 className={"sheet-title"}>{t('Properties')}</h2>

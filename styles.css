@@ -682,11 +682,11 @@ input[type=checkbox]:not(.icon-check){width:24px;height:24px;min-width:24px;marg
 .top .unsaved-marker:not([hidden]){align-self:flex-start;margin-top:6px}
 
 /* Portrait tablets (601-1024 px wide, taller than wide) lay out as one screen with no page scroll:
-   a 56 px top bar (Menu, title, Undo, Redo, Save, Export, and the 2D / Stitches / 3D switch); a 64 px tool rail on the canvas's left edge that shows
-   the desktop's icons alone, each in a 44 px button; the canvas; a 28 px status line; and a 300 px right inspector with Layers and Properties tabs at its top. The inspector
-   never overlays the canvas, and its body scrolls inside itself. Collapsing it leaves a 44 px strip with the expand button. The zoom control
-   floats bottom-right in the canvas. */
-.inspector-tabs{display:none}
+   a 56 px top bar (Menu, title, Undo, Redo, Save and Export); a 64 px tool rail on the canvas's left edge that shows
+   the desktop's icons alone, each in a 44 px button; the canvas; a 44 px status line; and a 300 px right-hand column with
+   Layers on top and Properties below, both always open, as the desktop shows them side by side. The 2D / Stitches / 3D
+   switch sits over the canvas's top-right, as it does on the desktop. The inspector column never overlays the canvas, and
+   each panel scrolls inside itself. The zoom control floats bottom-right in the canvas. */
 .rail-label{display:none}
 @media (min-width:601px) and (max-width:1024px) and (orientation:portrait){
 body{height:100vh;height:100dvh;min-height:0;overflow:hidden}
@@ -709,29 +709,22 @@ body{height:100vh;height:100dvh;min-height:0;overflow:hidden}
 .top .export-split button,.top #export{width:auto;min-width:44px;height:44px;min-height:44px;padding:0 10px}
 .top .name-field{display:flex;flex:1 1 0;min-width:0}
 .top #phoneMenu{height:44px;min-height:44px;min-width:44px}
-.top .segmented{height:44px;display:flex;grid-template-columns:none;flex:0 0 auto;width:auto}.top .segmented button{width:auto;min-width:44px;height:44px;padding:0 10px;flex:0 0 auto;white-space:nowrap}
-.canvas .floating{top:8px;left:72px;right:auto;display:flex;flex-wrap:wrap;gap:4px;max-width:calc(100% - 96px);grid-template-columns:none}
+/* The 2D / Stitches / 3D switch keeps the desktop's canvas placement and grows to 44 px touch targets. */
+.canvas .canvas-views .segmented button[data-view]{min-height:44px;padding:0 12px}
+.canvas .floating{left:72px;right:auto;display:flex;flex-wrap:wrap;gap:4px;max-width:calc(100% - 96px);grid-template-columns:none}
 .canvas .floating .icon-button,.canvas .floating button{width:44px;min-width:44px;height:44px;min-height:44px}
 .top #name{min-height:44px;height:44px;width:100%;min-width:0}
 .top .export-split{height:44px}.top #export{height:44px;min-height:44px}
 .top .edit-tools{gap:0}
-.layout{display:grid;height:calc(100vh - 56px);height:calc(100dvh - 56px);grid-template-columns:minmax(0,1fr) 300px;grid-template-rows:44px minmax(0,1fr)}
-.layout:has(>.panel.inspector-collapsed:last-child){grid-template-columns:minmax(0,1fr) 44px}
+.layout{display:grid;height:calc(100vh - 56px);height:calc(100dvh - 56px);grid-template-columns:minmax(0,1fr) 300px;grid-template-rows:minmax(0,0.42fr) minmax(0,1fr)}
 .layout>main{grid-column:1;grid-row:1 / span 2;display:flex;flex-direction:column;min-width:0;min-height:0;order:0}
 .layout main>.canvas{flex:1 1 0;height:auto;min-height:0}
 .layout main>footer{flex:none;height:28px;min-height:0;padding:0 10px;gap:10px;overflow:hidden;align-items:center;font-size:var(--fs-caption)}
-.inspector-tabs{display:flex;grid-column:2;grid-row:1;align-items:stretch;background:#fff;border-left:1px solid #e3e6e1;border-bottom:1px solid #e3e6e1}
-.layout:has(>.panel.inspector-collapsed:last-child) .inspector-tabs{justify-content:center;border-left:0;box-shadow:inset 1px 0 0 #e3e6e1}
-.layout:has(>.panel.inspector-collapsed:last-child) .inspector-tab{display:none}
-.inspector-tab{flex:1 1 0;min-width:0;min-height:44px;padding:0 8px;border:0;border-bottom:2px solid transparent;background:none;color:#4d5a54;font:inherit;font-size:var(--fs-body);font-weight:var(--fw-emphasis);cursor:pointer;white-space:nowrap}
-.inspector-tab[aria-selected=true]{color:var(--teal-deep);border-bottom-color:var(--teal)}
-.inspector-collapse{flex:0 0 44px;width:44px;min-height:44px;padding:0;border:0;background:none;color:#4d5a54;font:inherit;cursor:pointer}
-.collapse-glyph{font-size:22px;line-height:1}
-.inspector-tab:focus-visible,.inspector-collapse:focus-visible{outline:2px solid var(--teal);outline-offset:-2px}
-.layout>#layersSheet,.layout>#inspector{grid-column:2;grid-row:2;display:none;min-height:0;min-width:0;overflow-y:auto;overscroll-behavior:contain;padding:12px 12px 16px;background:#fff;border:0;border-left:1px solid #e3e6e1;width:auto}
-.layout>#layersSheet.tab-active,.layout>#inspector.tab-active{display:block}
-.layout>#layersSheet .layers-head .inspector-toggle,.layout>#inspector .sheet-grip,.layout>#inspector .sheet-head,.layout>#inspector .drawer-head{display:none}
-.layout>#inspector.inspector-collapsed,.layout>#layersSheet.inspector-collapsed{display:none}
+/* Layers and Properties share the right-hand column, Layers on top. Both are always open, and each scrolls inside itself. */
+.layout>#layersSheet,.layout>#inspector{display:block;min-height:0;min-width:0;overflow-y:auto;overscroll-behavior:contain;padding:12px 12px 16px;background:#fff;border:0;border-left:1px solid #e3e6e1;width:auto}
+.layout>#layersSheet{grid-column:2;grid-row:1}
+.layout>#inspector{grid-column:2;grid-row:2;border-top:1px solid #e3e6e1}
+.layout>#layersSheet .layers-head .inspector-toggle,.layout>#inspector .sheet-grip,.layout>#inspector .drawer-head{display:none}
 .canvas{flex:1 1 0;height:auto;min-height:0}
 .canvas .tool-rail{position:absolute;left:0;top:0;bottom:0;width:64px;max-height:none;z-index:4;display:flex;flex-direction:column;align-items:stretch;gap:4px;padding:6px 4px;overflow-y:auto;overscroll-behavior:contain;background:#fff;border-right:1px solid #e3e6e1}
 .canvas .tool-rail>button.icon-button,.canvas .tool-rail>.icon-button{width:44px;min-width:44px;height:44px;min-height:44px;align-self:center;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;padding:0}
@@ -743,7 +736,8 @@ body{height:100vh;height:100dvh;min-height:0;overflow:hidden}
 .canvas .zoombar{left:auto;right:12px;bottom:12px;top:auto}
 .canvas .zoombar button{min-width:44px;height:44px;min-height:44px}
 .canvas .zoombar .icon-button{width:44px}
-.canvas .floating{left:72px;top:28px}
+.canvas .floating{left:72px;top:68px}
+.canvas #previewPull{top:68px}
 /* Every inspector and status-line control is 44x44 px to tap at tablet portrait. The glyph inside may stay
    small; the element's box is the hit area. The status line grows from 28 to 44 px so the Messages button fits its height. */
 .layout main>footer{height:44px;min-height:44px}

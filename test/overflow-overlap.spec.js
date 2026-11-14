@@ -87,10 +87,9 @@ for(const [w,h] of viewports){
    await page.locator('#rect').click();
    if(portrait||await page.locator('#layersBtn').isVisible())await openSheet('layers');
    await expect(page.locator('#objects')).toBeVisible();
-   // A portrait tablet folds Properties away when it starts: open it from the Properties button, which swaps with the object list.
-   if(await page.locator('.inspector-tab[data-tab=properties]').isVisible())await page.locator('.inspector-tab[data-tab=properties]').click();
-   // On a phone, selecting an object may already have opened Properties; if not, open it from its sheet.
-   else if(!(await page.locator('#stats').isVisible()))await openSheet('properties');
+   // Layers and Properties are both in the right-hand column on a portrait tablet, so no tap is needed there.
+   // On a phone the panels are sheets: open Properties from its button when it is not already on screen.
+   if(!(await page.locator('#inspector').isVisible()))await openSheet('properties');
    await expect(page.locator('#stats')).toBeVisible();
    const o=await overflowOf(page);
    expect(o.scrollWidth,`scrollWidth with Layers and Properties open at ${w}x${h} ${lang}: ${o.out.join('; ')}`).toBeLessThanOrEqual(o.innerWidth);

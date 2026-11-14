@@ -31,11 +31,10 @@ for(const lang of LANGS){
   expect(errors).toEqual([]);
  });
 
- test(`hoop controls sit in the Properties tab on a 768x1024 tablet (${lang})`,async({page})=>{
+ test(`hoop controls sit in Properties on a 768x1024 tablet (${lang})`,async({page})=>{
   const errors=[];page.on('pageerror',e=>errors.push(e.message));page.on('dialog',d=>d.dismiss());
   await page.setViewportSize({width:768,height:1024});
   await page.goto(q);
-  await page.locator('#tabProperties').click();
   for(const id of HOOP_IDS){
    const control=page.locator(`#inspector ${id}`);
    await expect(control).toHaveCount(1);

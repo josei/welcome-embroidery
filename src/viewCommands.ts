@@ -11,7 +11,7 @@ export interface ViewApi {
   render(): void;
 }
 
-/** Wires the header's view switch, once: it stops playback, compiles when needed and redraws. */
+/** Wires the view switch, once: it stops playback, compiles when needed and redraws. */
 export function configureViewCommands(next: ViewApi) {
   viewActions.choose = chosen => {
     viewMode.set(chosen);

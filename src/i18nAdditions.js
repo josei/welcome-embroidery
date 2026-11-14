@@ -94,8 +94,5 @@ export const ES_ADDITIONS={
 'Photo':'Foto',
 'More':'Más',
 'Shape':'Forma',
-'Inspector':'Inspector',
-'Collapse inspector':'Contraer inspector',
-'Expand inspector':'Desplegar inspector',
 'Choose':'Elegir',
 };

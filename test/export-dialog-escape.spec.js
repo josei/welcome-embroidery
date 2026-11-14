@@ -1,7 +1,7 @@
 import {test,expect} from '@playwright/test';
 
-// Escape closes the Export dialog at every layout, in English and Spanish. At the portrait tablet the inspector drawer also
-// answers Escape, so it must leave the dialog alone. Focus moves into the dialog on open and returns to Export on close.
+// Escape closes the Export dialog at every layout, in English and Spanish. Focus moves into the dialog on open and
+// returns to Export on close.
 
 test.beforeEach(async({page})=>{await page.addInitScript(()=>{delete window.showSaveFilePicker;});});
 

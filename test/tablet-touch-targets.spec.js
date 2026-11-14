@@ -8,10 +8,10 @@ const SIZES=[[768,1024],[390,844],[844,390]];
 test.setTimeout(240000);
 test.beforeEach(async({page})=>{await page.addInitScript(()=>{delete window.showSaveFilePicker;});});
 
-// Every visible control in the inspector (Layers and Properties panels, and the tab strip and collapse button) and the status line.
+// Every visible control in the inspector (the Layers and Properties panels) and the status line.
 const measure=page=>page.evaluate(()=>{
  const sel='button,input:not([type=hidden]),select,textarea,[role=tab],summary,a[href]';
- const roots=['#layersSheet','#inspector','.inspector-tabs','.layout main>footer'].map(s=>document.querySelector(s)).filter(Boolean);
+ const roots=['#layersSheet','#inspector','.layout main>footer'].map(s=>document.querySelector(s)).filter(Boolean);
  const out=[];const seen=new Set();
  for(const root of roots){
   for(const e of root.querySelectorAll(sel)){
@@ -22,7 +22,7 @@ const measure=page=>page.evaluate(()=>{
    const r=e.getBoundingClientRect();
    if(r.width<=1||r.height<=1)continue;
    if(r.right<=0||r.bottom<=0||r.left>=innerWidth||r.top>=innerHeight)continue;
-   // An inspector panel that is not the active tab has no visible box; skip anything under a hidden panel.
+   // An inspector panel that is hidden (a phone sheet, or Properties folded at a compact width) has no visible box; skip anything under it.
    const label=(e.getAttribute('aria-label')||e.textContent||e.id||e.className||e.tagName).trim().replace(/\s+/g,' ').slice(0,40);
    out.push({name:`${e.tagName.toLowerCase()}#${e.id||''} "${label}"`,w:Math.round(r.width*10)/10,h:Math.round(r.height*10)/10});
   }
@@ -82,8 +82,7 @@ for(const [w,h] of SIZES){
     }
    }else{
     await small('object selected');
-    await page.locator('.inspector-tab[data-tab=properties]').click({timeout:5000});
-    await small('properties tab');
+    await small('Layers and Properties open together');
    }
    expect(errors).toEqual([]);
   });
@@ -91,7 +90,8 @@ for(const [w,h] of SIZES){
 }
 
 // Each disclosure row in the Properties panel (Document stitch settings, Reference image, Thread plan and the rest) is a summary
-// element. They show only with nothing selected, so this test opens the Properties tab on a clean canvas before measuring.
+// element. They show only with nothing selected, so this test measures a clean canvas. A portrait tablet shows Properties all the
+// time, so no tap is needed to bring it on screen.
 const disclosureRows=page=>page.evaluate(()=>[...document.querySelectorAll('#inspector summary')]
  .filter(e=>!e.closest('.sr-only,[hidden],[inert]'))
  .map(e=>({name:e.textContent.trim().replace(/\s+/g,' ').slice(0,40),r:e.getBoundingClientRect()}))
@@ -104,7 +104,6 @@ for(const lang of ['en','es']){
   await page.setViewportSize({width:768,height:1024});
   await page.goto(`/?lang=${lang}`);
   await expect(page.locator('.canvas')).toBeVisible();
-  await page.locator('.inspector-tab[data-tab=properties]').click({timeout:5000});
   const rows=await disclosureRows(page);
   expect(rows.length,`768x1024 ${lang}: disclosure rows found`).toBeGreaterThanOrEqual(3);
   const bad=rows.filter(c=>c.w<44||c.h<44).map(c=>`${c.name} ${c.w}x${c.h}`);

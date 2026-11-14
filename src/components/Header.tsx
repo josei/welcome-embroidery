@@ -18,7 +18,6 @@ import {ArrangeMenu, EditMenu, FileMenu, PhoneMenu, ViewMenu} from './MenuBar';
 import {useCompactLayout} from '../compactLayout';
 import {usePhoneMenu} from '../phoneSheetState.js';
 import {useTabletPortrait} from '../tabletLayoutState.js';
-import {ViewSwitch} from './ViewSwitch';
 // The project name field: it shows the document name, and a committed change is an edit (see documentActions).
 function ProjectName() {
  const {doc, dirty} = useSyncExternalStore(documentState.subscribe, documentState.get);
@@ -102,7 +101,7 @@ function withKeys(name: string, command: string) {
 // because app.js wires its controls by id.
 export function Header() {
  const phone = usePhoneMenu();
- // A portrait tablet gets the phone Menu (one Menu button, not the three desktop menus) and the view switch in the top bar.
+ // A portrait tablet gets the phone Menu (one Menu button, not the three desktop menus).
  const tablet = useTabletPortrait();
  // Grid and snap leave the canvas at compact widths, so the desktop menus gain a View menu for them.
  const compact = useCompactLayout();
@@ -154,7 +153,7 @@ export function Header() {
       aria-label="Import JEF / VP3…" title="Import JEF / VP3…" data-tooltip="Import JEF / VP3…" onClick={() => machineFile.current?.click()}><svg className="icon"><use href="#i-import"/></svg></button><button className="icon-button" id="save" aria-label={saveLabel}
       title={saveLabel} data-tooltip={saveLabel} onClick={() => projectSave()}><svg className="icon"><use href="#i-save"/></svg></button><span className="sep" aria-hidden="true" /><div className="edit-tools"><HistoryButton undo /><HistoryButton /><ActionButton flag="duplicate" className="icon-button" id="duplicate"
       aria-label="Duplicate selected object" title={duplicateTip} data-tooltip={duplicateTip} onClick={() => toolbarActions.duplicate()}><svg className="icon"><use href="#i-copy"/></svg></ActionButton><ActionButton flag="remove" className="icon-button" id="remove"
-      aria-label="Delete selected object" title={deleteTip} data-tooltip={deleteTip} onClick={() => toolbarActions.remove()}><svg className="icon"><use href="#i-delete"/></svg></ActionButton></div><span className="sep" aria-hidden="true" /><ProjectName /><SaveStatus /><span className="sep" aria-hidden="true" /><ExportSplit />{tablet ? <ViewSwitch /> : null}<button className="icon-button" id="helpBtn" aria-label="Keyboard shortcuts (?)"
+      aria-label="Delete selected object" title={deleteTip} data-tooltip={deleteTip} onClick={() => toolbarActions.remove()}><svg className="icon"><use href="#i-delete"/></svg></ActionButton></div><span className="sep" aria-hidden="true" /><ProjectName /><SaveStatus /><span className="sep" aria-hidden="true" /><ExportSplit /><button className="icon-button" id="helpBtn" aria-label="Keyboard shortcuts (?)"
       title="Keyboard shortcuts (?)" data-tooltip="Keyboard shortcuts (?)"><svg className="icon"><use href="#i-keys"/></svg></button><button type="button" className={settingsButtonClass(agent)}
       id="settingsBtn" aria-label="Settings" title={settingsTip(agent)} data-tooltip="Settings" onClick={() => setSettingsOpen(true)}><svg className="icon"><use href="#i-gear"/></svg></button><input id="file" ref={projectFile} type="file"
       accept=".welcome,.welcome,.svg,.dxf,application/json,image/svg+xml" hidden onChange={async e =>
