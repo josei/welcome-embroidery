@@ -1075,3 +1075,17 @@ body{height:100dvh;min-height:0;overflow:hidden}
 @media (max-width:1024px) and (orientation:landscape) and (max-height:500px){
 .layout main>footer{border-top:0;box-shadow:inset 0 1px 0 #e3e6e1}
 }
+
+/* A landscape phone (844x390) keeps the zoom bar in the canvas's right-hand column, as a vertical stack of 44 px buttons, not
+   the bottom-left bar. The bar then sits clear of the hoop at the default fit, and in the Stitches view it no longer covers
+   the playback row. The percentage and hand tool stay; the Fit hoop label is an icon, as on a portrait phone. The stitch
+   readout in the playback row takes the width it needs, and the track beside it shrinks. */
+@media (orientation:landscape) and (max-height:500px) and (max-width:1000px){
+.canvas .zoombar{left:auto;right:8px;top:auto;bottom:8px;flex-direction:column;align-items:center;justify-content:flex-end;gap:6px;width:auto;height:auto;margin:0;padding:0;border:0;border-radius:0;background:none;box-shadow:none}
+.canvas .zoombar>button{width:44px;min-width:44px;height:44px;min-height:44px;padding:0;border:1px solid var(--field-line);border-radius:10px;background:#fff;box-shadow:0 4px 16px #1d292514;font-size:var(--fs-caption);color:#53635b}
+.canvas .zoombar .sep,.canvas .zoombar #zoomAll{display:none}
+.canvas .zoombar .zoom-text{font-size:0}
+.canvas .zoombar .zoom-fit-icon{display:inline-block;width:20px;height:20px}
+.layout main:not(.design-view) .playback-bar .playback-time{width:max-content;min-width:0;flex:none;overflow:visible}
+.layout main:not(.design-view) .playback-bar .playback-time span{overflow:visible;text-overflow:clip;white-space:nowrap}
+}
