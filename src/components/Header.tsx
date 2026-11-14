@@ -23,19 +23,17 @@ function ProjectName() {
  const {doc, dirty} = useSyncExternalStore(documentState.subscribe, documentState.get);
  const shown = t(doc.name ?? '');
  const field = useDraftInput(shown, text => documentActions.rename(text === shown ? (doc.name ?? '') : text));
- // The window title carries the same dot while there are unsaved changes (cleared by a successful .welcome save).
+ // The window title carries a dot while there are unsaved changes (cleared by a successful .welcome save). The save status
+ // beside the bar shows the unsaved words at every size, so the name itself never gains a mark that would move it.
  useEffect(() => {
   document.title = `${dirty ? '• ' : ''}${shown} — ${t('Welcome Embroidery')}`;
  }, [dirty, shown]);
- // The dot sits before the wrapper, so it lands at the start of the name at every width.
  // The wrapper carries the shown name for the narrow-width ellipsis (styles.css): an input cannot show one itself.
  return (
-  <>
-   <span id="unsavedMarker" className="unsaved-marker" role="img" aria-label={t('Unsaved changes')} title={t('Unsaved changes')} hidden={!dirty} />
-   <span className="name-field" data-shown={shown}><input id="name" aria-label={t('Design name')} {...field} /></span>
-  </>
+  <span className="name-field" data-shown={shown}><input id="name" aria-label={t('Design name')} {...field} /></span>
  );
 }
+
 // Undo and Redo: the name says which action the step takes back (or forward), e.g. "Undo delete Rectangle". With no
 // step on that side, the name says so and the button is disabled (actionState). Icon-only; the tooltip adds the shortcut.
 function HistoryButton({undo = false}: {undo?: boolean}) {
@@ -52,13 +50,14 @@ function HistoryButton({undo = false}: {undo?: boolean}) {
  );
 }
 
-// The save feedback: the unsaved marker while the design has changes ("Autosaved in this browser" until a file exists), then the time of the last save in this tab and the
-// file it wrote to. The words come from saveStatusWords, which the phone Menu shows too.
+// The save status: the same text line at every size. While the design has changes it reads "Unsaved" (or "Autosaved in this
+// browser" until a file exists); otherwise the time of the last save in this tab and the file it wrote to. The words come from
+// saveStatusWords, which the phone Menu shows too. Phones and tablets place this line under the bar (styles.css).
 function SaveStatus() {
  const {dirty} = useSyncExternalStore(documentState.subscribe, documentState.get);
  const {savedAt, savedFileName} = useSyncExternalStore(saveState.subscribe, saveState.get);
- // The status slot is always rendered, so the bar keeps its shape as the state changes: a clean design that has not been saved
- // shows the same autosave words as a dirty one, with no unsaved marker.
+ // The status is always rendered, so the bar keeps its shape as the state changes: a clean design that has not been saved
+ // shows the same autosave words as a dirty one.
  const text = saveStatusWords(dirty, savedAt, savedFileName, t);
  if (dirty) {
   const mark = dirtyMark(savedFileName, t);

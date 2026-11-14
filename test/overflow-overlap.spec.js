@@ -20,10 +20,10 @@ const overflowOf=page=>page.evaluate(()=>{
  return {scrollWidth:document.documentElement.scrollWidth,innerWidth:W,out:out.slice(0,10)};
 });
 
-// Visible top-bar children sit side by side: no two boxes share the same space. The unsaved dot is left out: it is placed on the
-// name's edge by design (the name's margin takes it), so it always touches the name field.
+// Visible top-bar children sit side by side: no two boxes share the same space. The save status is left out: on phones and
+// tablets it is a caption under the bar, out of the bar's row.
 const topBarOverlaps=page=>page.evaluate(()=>{
- const kids=[...document.querySelectorAll('header.top > *')].filter(e=>!e.classList.contains('sr-only')&&!e.classList.contains('unsaved-marker')&&!['file','machineFile'].includes(e.id));
+ const kids=[...document.querySelectorAll('header.top > *')].filter(e=>!e.classList.contains('sr-only')&&!e.classList.contains('save-status')&&!['file','machineFile'].includes(e.id));
  const boxes=kids.map(e=>({name:e.id||e.className,r:e.getBoundingClientRect()})).filter(b=>b.r.width>0&&b.r.height>0).sort((a,b)=>a.r.left-b.r.left);
  const bad=[];
  for(let i=1;i<boxes.length;i++){

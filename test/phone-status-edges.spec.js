@@ -32,17 +32,16 @@ for(const lang of ['en','es']){
   expect(pill.b-pill.t,'pill keeps its 44 px touch height').toBeCloseTo(44,0);
  });
 
- test(`portrait 390x844 ${lang}: the unsaved dot is whole and the name starts after it`,async({page})=>{
+ test(`portrait 390x844 ${lang}: the unsaved status shows as a caption and the name does not move`,async({page})=>{
   await page.setViewportSize({width:390,height:844});
   await page.goto(`/?lang=${lang}`);
   await expect(page.locator('.canvas')).toBeVisible();
+  const before=await rect(page,'#name');
   await makeDirty(page);
-  const dot=page.locator('#unsavedMarker');
-  await expect(dot,'the unsaved dot is shown').toBeVisible();
-  const d=await rect(page,'#unsavedMarker');
-  const name=await rect(page,'#name');
-  expect(Math.round(d.r-d.l),'dot is 8 px wide').toBe(8);
-  expect(Math.round(d.b-d.t),'dot is 8 px tall').toBe(8);
-  expect(d.r,'dot is not covered by the title field').toBeLessThanOrEqual(name.l);
+  await expect(page.locator('#unsavedMark'),'the unsaved status is shown').toBeVisible();
+  const after=await rect(page,'#name');
+  expect(after.l,'the name keeps its left edge').toBeCloseTo(before.l,0);
+  expect(after.t,'the name keeps its top edge').toBeCloseTo(before.t,0);
+  expect(after.r,'the name keeps its right edge').toBeCloseTo(before.r,0);
  });
 }

@@ -109,8 +109,6 @@ nav .icon-button:first-of-type{margin-left:auto}
 @media (min-width:1101px){
 .top .save-status{flex:0 0 200px;width:200px;overflow:hidden;text-overflow:ellipsis}
 }
-.unsaved-marker:not([hidden]){display:inline-block;flex:none;width:8px;height:8px;margin:0 -8px 0 2px;border-radius:50%;background:#8a5a00}
-.top .unsaved-marker{order:0}
 .canvas{position:relative;height:calc(100% - 92px)}
 .floating{position:absolute;top:12px;left:50%;transform:translateX(-50%);z-index:5;display:flex;align-items:center;gap:2px;padding:4px 6px;background:#fff;border:1px solid var(--field-line);border-radius:11px;box-shadow:0 4px 18px #1d292518}
 .floating .icon-button{width:30px;height:30px;min-width:30px}
@@ -493,10 +491,6 @@ html[data-input="touch"] button:focus-visible,html[data-input="touch"] #art:focu
 /* A short landscape phone 601–900px wide (667 and 740, and 844 by 390) cannot fit the nowrap top bar in Spanish, whose file
    menu labels are about 44px wider, so Settings ran off the right edge. These windows take the phone's wrapping top bar (see the 900px rule). */
 @media (min-width:601px) and (max-width:900px) and (max-height:500px){.top{flex-wrap:wrap;height:auto;gap:6px 4px;padding:8px 10px}}
-/* The unsaved marker keeps its word for screen readers, and shows as an amber dot here, so the title keeps its width. */
-.top .save-status.unsaved{flex:none;width:8px;height:8px;border-radius:50%;background:#8a5a00;color:transparent;font-size:0;overflow:hidden}
-/* The autosaved mark (no project file yet) is the same dot in grey-green: it is not a warning, and its words show as a tooltip. */
-.top .save-status.autosaved{flex:none;width:8px;height:8px;border-radius:50%;background:#66726c;color:transparent;font-size:0;overflow:hidden}
 .top #agentPill,.top .icon-button{flex:none}
 .top .agent-pill{padding:0 8px}
 .top .export-split #export{padding:0 10px}
@@ -620,8 +614,6 @@ html[data-input="touch"] button:focus-visible,html[data-input="touch"] #art:focu
 .top .file-menu>button{height:36px;display:inline-flex;align-items:center}
 .top #name{flex:1 1 0;min-width:64px;width:auto;height:36px}
 .top .export-split{margin-left:0}
-/* The unsaved dot sits 6px before the name: the gap alone spaces it, so its negative margin goes. */
-.top .unsaved-marker:not([hidden]){margin-right:0}
 }
 /* Duplicate, Delete, New and Import are icon-only at every width; their names stay on the buttons for screen readers and tooltips. */
 .top #duplicate,.top #remove,.top #new,.top #importMachine{width:36px;min-width:36px;padding:0}.top #duplicate .icon-label,.top #remove .icon-label,.top #new .icon-label,.top #importMachine .icon-label{display:none}
@@ -682,9 +674,6 @@ input[type=checkbox]{accent-color:var(--teal)}
 .top .save-status{position:absolute;width:0;height:0;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;margin:0}
 /* The saved and unsaved dots (more specific rules above) are hidden too: the phone top bar has no save status. */
 .top .save-status.autosaved,.top .save-status.unsaved{display:none}
-/* The unsaved dot is the bar's only save mark at phone widths. Its desktop overlap with the name (-8px) would cover half of it,
-   so at phone widths it keeps its full 8 px and the name starts after it. */
-.top .unsaved-marker:not([hidden]){margin-right:0}
 }
 /* At 360 px and narrower the bar's gaps and the Export label tighten, so the design name keeps a 44 px box on a 360 px screen. */
 @media (max-width:360px) and (orientation:landscape){
@@ -697,8 +686,6 @@ input[type=checkbox]{accent-color:var(--teal)}
 .top{gap:1px;padding:0 3px}
 .top .export-split #export{padding:0 2px}
 }
-/* The unsaved dot sits at the top of the name field, not centred in the bar, so it stays in the field's row. */
-.top .unsaved-marker:not([hidden]){align-self:flex-start;margin-top:6px}
 
 /* Portrait tablets (601-1024 px wide, taller than wide) lay out as one screen with no page scroll:
    a 56 px top bar (Menu, title, Undo, Redo, Save and Export); a 64 px tool rail on the canvas's left edge that shows
@@ -721,7 +708,6 @@ body{height:100vh;height:100dvh;min-height:0;overflow:hidden}
 .top{height:56px;padding:0 8px;gap:6px}
 .top .logo,.top .sep,.top #new,.top #open,.top #importMachine,.top #duplicate,.top #remove,.top #helpBtn,.top #settingsBtn,
 .top .export-reason{display:none}
-.top .unsaved-marker{display:none}
 /* The save status is centred on the bar's text row. A fixed-height dot cannot stretch, so it must be centred explicitly, or it hugs the top edge. */
 .top .save-status{align-self:center;display:flex;align-items:center;margin-top:0}
 .top .icon-button{width:44px;min-width:44px;height:44px;min-height:44px}
@@ -865,7 +851,7 @@ body{height:100vh;height:100dvh;min-height:0;overflow:hidden;overscroll-behavior
 .layout>#layersSheet.sheet-open,.layout>#inspector.sheet-open{display:flex;flex-direction:column;position:fixed;top:44px;bottom:44px;left:auto;right:0;width:320px;height:auto;max-height:none;margin:0;padding:10px 12px 12px;overflow-y:auto;overscroll-behavior:contain;z-index:40;background:#fff;border:0;border-left:1px solid #e3e6e1;border-radius:0;box-shadow:-6px 0 24px #1d292533}
 body{height:100dvh;min-height:0;overflow:hidden}
 .top{position:fixed;top:0;left:0;right:0;z-index:7;height:44px;min-height:44px;flex-wrap:nowrap;gap:4px;padding:0 6px;overflow:hidden}
-.top .logo,.top .sep,.top #new,.top #open,.top #importMachine,.top #save,.top #duplicate,.top #remove,.top #helpBtn,.top #settingsBtn,.top .save-status,.top .unsaved-marker{display:none}
+.top .logo,.top .sep,.top #new,.top #open,.top #importMachine,.top #save,.top #duplicate,.top #remove,.top #helpBtn,.top #settingsBtn,.top .save-status{display:none}
 .top .file-menu>button,.top .icon-button,.top #undo,.top #redo,.top #settingsBtn,.top #export{min-width:44px;height:44px;min-height:44px}
 .top .icon-button{width:44px}
 .top .file-menu>button{padding:6px 6px}
@@ -1144,4 +1130,13 @@ label:has(> input[type=checkbox]){display:flex;align-items:center;gap:8px}
 .layout main:not(.design-view)>footer{height:107px;min-height:107px}
 .layout main:not(.design-view)>footer>.playback-bar{height:62px;min-height:62px}
 .layout main:not(.design-view) .playback-bar .playback-summary{white-space:normal;overflow:visible;text-overflow:clip;line-height:1.25}
+}
+
+/* One save status at every size: the desktop's text line, in the same words. On phones and tablets it hangs under the bar as a
+   small caption, out of the bar's row, so the design name keeps its place and width whatever the state. Screen readers get the
+   same text at every size. */
+@media (max-width:1024px){
+.top{overflow:visible;position:relative;z-index:7}
+.top #savedStatus,.top #unsavedMark,.top #idleStatus{display:block;position:absolute;top:100%;left:0;right:0;width:auto;height:auto;margin:2px 0 0;padding:2px 12px;clip:auto;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:var(--fs-caption);line-height:1.3;background:#fff;color:#66726c}
+.top #unsavedMark{color:#8a5a00}
 }

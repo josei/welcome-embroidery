@@ -13,7 +13,7 @@ const SHOTS=process.env.TOP_BAR_SHOTS||'test-results/top-bar';
 const GROUP_OF=`(el => {
  if (el.matches('.sep')) return 'sep';
  if (el.matches('a.logo,.file-menu')) return 'brand';
- if (el.matches('#unsavedMarker,.name-field,.save-status')) return 'name';
+ if (el.matches('#unsavedMark,.name-field,.save-status')) return 'name';
  if (el.matches('#new,#open,#importMachine,#save')) return 'file';
  if (el.matches('.edit-tools')) return 'edit';
  if (el.matches('.export-split,.export-reason,#helpBtn,#settingsBtn')) return 'export';

@@ -29,8 +29,7 @@ Control rule: every control is 36 px tall and its centre is within 1 px of the m
 | Edit menu | Brand | menu | Visible text "Edit" (translated) | 1280, 1440, 1920 px |
 | Arrange menu | Brand | menu | Visible text "Arrange" (translated) | 1280, 1440, 1920 px |
 | Design name | Name | field (`#name`) | Input with accessible name "Design name" (translated). Shows the document name; no visible label. | 1280, 1440, 1920 px |
-| Unsaved marker | Name | status (`#unsavedMarker`) | Dot with accessible name and tooltip "Unsaved changes". Shown only while dirty. Not a control; the spec does not count it. | 1280, 1440, 1920 px when shown |
-| Save status | Name | status (`#unsavedMark` or `#savedStatus`) | Visible text: the autosave or unsaved message, or "Saved HH:MM" (with the file name if known). Hidden until a save or change. | 1280, 1440, 1920 px when shown (the spec does not check its text) |
+| Save status | Name | status (`#unsavedMark` or `#savedStatus`) | Visible text: the autosave or unsaved message, or "Saved HH:MM" (with the file name if known). Same words at every size; on phones and tablets it is a caption under the bar. The name never moves when it changes. | 1280, 1440, 1920 px when shown (the spec does not check its text) |
 | New | File | icon button (`#new`) | Icon only. Name and tooltip "New design (shortcut)". | 1280, 1440, 1920 px |
 | Open | File | icon button (`#open`) | Icon only. Name and tooltip "Open project or SVG (shortcut)". | 1280, 1440, 1920 px |
 | Import JEF / VP3 | File | icon button (`#importMachine`) | Icon only. Name and tooltip "Import JEF / VP3…". | 1280, 1440, 1920 px |

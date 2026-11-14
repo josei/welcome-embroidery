@@ -39,7 +39,7 @@ test('the top bar stays on one row at 760px and the title gives way first',async
  const bar=page.locator('header.top');
  const info=await bar.evaluate(top=>{
   // The visually hidden page title (sr-only) is not part of the visible row.
-  const kids=[...top.children].filter(e=>!e.classList.contains('sr-only')&&e.getBoundingClientRect().width>0);
+  const kids=[...top.children].filter(e=>!e.classList.contains('sr-only')&&!e.classList.contains('save-status')&&e.getBoundingClientRect().width>0);
   return {tops:kids.map(e=>{const r=e.getBoundingClientRect();return r.top+r.height/2;}),height:top.getBoundingClientRect().height,overflow:top.scrollWidth-top.clientWidth};
  });
  // One row: every visible child is centred on the same line (a wrapped row would sit lower).
@@ -167,7 +167,7 @@ for(const width of [375,390]) for(const lang of ['en','es']){
   expect(await page.evaluate(()=>document.documentElement.scrollWidth),'document width').toBe(width);
   const bar=page.locator('header.top');
   const info=await bar.evaluate(top=>{
-   const kids=[...top.children].filter(e=>!e.classList.contains('sr-only')&&e.getBoundingClientRect().width>0);
+   const kids=[...top.children].filter(e=>!e.classList.contains('sr-only')&&!e.classList.contains('save-status')&&e.getBoundingClientRect().width>0);
    return {tops:kids.map(e=>e.getBoundingClientRect().top),height:top.getBoundingClientRect().height,overflow:top.scrollWidth-top.clientWidth};
   });
   // One row, no taller than the phone top bar, and nothing scrolls sideways inside the bar.
@@ -238,7 +238,7 @@ for(const [width,height] of [[667,375],[844,390]]) for(const lang of ['en','es']
   // No horizontal overflow: the document is exactly as wide as the window.
   expect(await page.evaluate(()=>document.documentElement.scrollWidth),'document width').toBe(width);
   const info=await page.locator('header.top').evaluate(top=>{
-   const kids=[...top.children].filter(e=>!e.classList.contains('sr-only')&&e.getBoundingClientRect().width>0);
+   const kids=[...top.children].filter(e=>!e.classList.contains('sr-only')&&!e.classList.contains('save-status')&&e.getBoundingClientRect().width>0);
    return {tops:kids.map(e=>e.getBoundingClientRect().top),height:top.getBoundingClientRect().height,overflow:top.scrollWidth-top.clientWidth};
   });
   // One row, no taller than the single-row bar at 760px (58px).
