@@ -89,17 +89,15 @@ export function createCanvasTools(api){
       const f=getFont(api.textFont());
       const op={op:'add_text',id,text:NEW_TEXT,x:0,y:0,height:api.fitHeight(api.textFont(),PLACEMENT_TEXT),
         thread:$('#thread').value,font:api.textFont(),...(f?.kind==='outline'?{stitch:'fill'}:{})};
-      // Place the object so its bounding box is centred on the hoop centre (0, 0). The op is measured once at the origin,
-      // since the box offset depends on the glyphs and font. If another object's box is already centred there, the new
-      // one steps down by its own height plus 2 mm, so lettering never sits exactly on top of an earlier object.
+      // Placement: the same free-space search as new shapes (see newShapePlacement.js). The op is measured once at the
+      // origin, since the box size and offset depend on the glyphs and font; then the lettering's box is moved to the
+      // spot the search picks, so it lands beside existing artwork and only sits on top when no free spot exists.
       const probe={...documentNow().doc,objects:[]};
       applyOperations(probe,[{...op,text:PLACEMENT_TEXT}]);
       const [bx0,by0,bx1,by1]=objectBounds(probe.objects[0]);
-      const cx=(bx0+bx1)/2, cy=(by0+by1)/2, step=by1-by0+2;
-      // A box centre within 1 mm of (0, y) means that spot is taken; step down until a free spot is found.
-      const taken=(/** @type {number} */ y)=>documentNow().doc.objects.some((/** @type {any} */ o)=>{const [a,b,c,d]=objectBounds(o);return Math.abs((a+c)/2)<1&&Math.abs((b+d)/2-y)<1;});
-      let dy=0;while(taken(dy))dy+=step;
-      op.x=-cx; op.y=-cy+dy;
+      const doc=documentNow().doc;
+      const spot=newShapeSpot(doc.objects,hoopSize(doc),bx1-bx0,by1-by0);
+      op.x=spot.x-bx0; op.y=spot.y-by0;
       api.commit([op],()=>{
         selectNew(id);
         // The new object opens in the on-canvas text box with its placeholder selected, so typing replaces it. The box

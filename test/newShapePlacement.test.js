@@ -37,3 +37,19 @@ test('a new shape stays inside the hoop', () => {
   const s = newShapeSpot(objects, hoop, 24, 16);
   assert.ok(s.x >= -50 && s.y >= -50 && s.x + 24 <= 50 && s.y + 16 <= 50);
 });
+
+test('lettering-sized box with artwork at the centre lands in free space, not on it', () => {
+  const art = [rect('flower', -12, -8, 24, 16), rect('stem', -2, 8, 4, 20)];
+  const s = newShapeSpot(art, hoop, 30, 10);
+  assert.equal(s.overlaps, false);
+  const box = {x: s.x, y: s.y, w: 30, h: 10};
+  for (const o of art) assert.equal(overlap(box, o), false);
+});
+
+test('lettering with no free space reports overlap and goes back at the centre', () => {
+  const tight = {w: 40, h: 30};
+  const objects = [rect('a', -20, -15, 40, 30)];
+  const s = newShapeSpot(objects, tight, 30, 10);
+  assert.equal(s.overlaps, true);
+  assert.deepEqual([s.x, s.y], [-15, -5]);
+});
