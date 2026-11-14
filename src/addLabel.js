@@ -16,6 +16,15 @@ export function stepNoun(name, shown) {
 }
 
 /**
+ * The step label for changing the words of a lettering object, already translated: "edit text" (Spanish: "editar texto").
+ * It differs from the add step, so Undo after placing lettering and typing into it shows two distinct steps.
+ * @returns {string}
+ */
+export function editTextLabel() {
+  return t('edit text');
+}
+
+/**
  * The step label for adding an object, already translated, e.g. "add Rectangle" (Spanish: "añadir rectángulo").
  * @param {{name?: string, kind?: string}} o the object being added, with the name or kind it is created with
  * @returns {string}

@@ -6,7 +6,7 @@ import {documentNow} from './documentState.js';
 import {setSelection} from './selectionState.js';
 import {interactionNow, setInteraction} from './interactionState.js';
 import {isRegistryFont} from './fonts.js';
-import {addLabel} from './addLabel.js';
+import {addLabel, editTextLabel} from './addLabel.js';
 
 /** The part of a document object the canvas text editor reads and writes. */
 export interface EditableObject {
@@ -109,9 +109,9 @@ export function finishCanvasText(commit: boolean, value: string, keyboard = fals
   o.text = state.original;
   o.w = measureText(state.original, o.font || 'welcome-mono/1', o.h, o);
   const text = savedText(o.font, value);
-  // A box opened for a new object names its step as the add, so Undo reads "add Text" rather than a generic change.
+  // Typing into a box is its own step, "edit text", so it differs from the "add Text" step that placed the box.
   if (commit && text.trim() && text !== state.original) {
-    wired().edit([{op: 'set_object', id: state.id, text}], undefined, undefined, state.fresh ? addLabel({name: 'Text'}) : undefined);
+    wired().edit([{op: 'set_object', id: state.id, text}], undefined, undefined, editTextLabel());
   }
   else wired().render();
 }
