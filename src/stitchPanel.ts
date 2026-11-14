@@ -27,10 +27,11 @@ import {interactionNow, setInteraction} from './interactionState.js';
 import {underlayState} from './underlayState.js';
 import {cornerRadii, widthAt, nodeFraction} from './engine.js';
 import {getFont, isRegistryFont} from './fonts.js';
-import {t} from './i18n.js';
+import {lang, t} from './i18n.js';
 import {setStitchPanel, stitchPanelState} from './stitchPanelState.js';
 import type {PanelOption, StitchPanelState} from './stitchPanelState.js';
 import {configureStitchPanelActions} from './stitchPanelCommands.js';
+import {fieldText} from './decimalText.js';
 
 /** What the stitch panel needs from the editor: an undoable edit, the selected ids in order, and a toast. */
 export interface StitchPanelApi {
@@ -209,7 +210,7 @@ export function syncStitchPanel() {
       spacing: String(o.spacing ?? settings.spacing),
       angle: String(o.angle ?? settings.angle),
       spacingNote: o.spacing === undefined || o.spacing === null ?
-        t('Inherits {value} mm from document', {value: String(settings.spacing)}) : t('Set on this object'),
+        t('Inherits {value} mm from document', {value: fieldText(String(settings.spacing), lang)}) : t('Set on this object'),
     });
     setStitchRow('fillReset', o.spacing === undefined && o.angle === undefined && o.stitchLength === undefined &&
       o.stagger === undefined && o.underlayType === undefined && o.underlayInset === undefined &&

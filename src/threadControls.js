@@ -10,9 +10,10 @@ import {setStitchRow} from './stitchRowsState.js';
 import {nearestStockThread} from './threads.js';
 import {threadPlan, blockSeconds, blockTimeLabel, sewingWorksheet} from './engine.js';
 import {download, exportStem} from './appHelpers.js';
-import {t} from './i18n.js';
+import {lang, t} from './i18n.js';
 import {getPlan, getCompileError, compileNow} from './compileService.js';
 import {editor} from './editorContext.js';
+import {formatCount, formatNumber} from './decimalText.js';
 
 const THREAD_SELECT_IDS = ['#thread', '#blendThread', '#blendPalette0', '#blendPalette1', '#blendPalette2', '#blendPalette3'];
 /** @type {HTMLSelectElement[]} */
@@ -89,7 +90,7 @@ export function renderPlan() {
     name.textContent = `${i + 1}. ${threadName(block.thread)}`;
     const count = document.createElement('span');
     count.className = 'n';
-    count.textContent = `${t('{n} stitches', {n: block.stitches.toLocaleString()})} · ${(block.mm / 1000).toFixed(2)} m · ` +
+    count.textContent = `${t('{n} stitches', {n: formatCount(block.stitches, lang)})} · ${formatNumber(block.mm / 1000, lang, 2)} m · ` +
     `${blockTimeLabel(blockSeconds(block))}`;
     row.append(swatch, name, count);
     row.append(pick);

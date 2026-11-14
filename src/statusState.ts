@@ -1,4 +1,6 @@
 import {createStore} from './store.js';
+import {formatNumber} from './decimalText.js';
+import {lang} from './i18n.js';
 
 /** The status run below the canvas: cursor position, design count, issues button, and playback text. app.js changes it. */
 export interface StatusRun {
@@ -13,7 +15,7 @@ export interface StatusRun {
 }
 
 export const statusState = createStore<StatusRun>({
-  cursor: 'x 0.0 mm · y 0.0 mm',
+  cursor: `x ${formatNumber(0, lang, 1)} mm · y ${formatNumber(0, lang, 1)} mm`,
   count: 'Compile the design',
   countError: false,
   issuesHidden: true,

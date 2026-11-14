@@ -2,7 +2,8 @@
 // The one rule for committed numeric fields. A value outside the field's range is clamped to the nearest bound and a short
 // note says so. Empty or incomplete text is not a value: the field restores the last committed value, so nothing writes 0 by
 // accident. Nothing outside the range reaches the document. The React field is in components/useNumberInput.ts.
-import {t} from './i18n.js';
+import {lang, t} from './i18n.js';
+import {decimalText} from './decimalText.js';
 
 /**
  * @typedef {{min: number, max: number}} FieldRange  The bounds a field accepts. max may be Infinity when the field has no
@@ -50,8 +51,17 @@ export function inRange(text, range) {
  * @returns {string}
  */
 export function rangeText(range, unit = 'mm') {
-  if (range.max === Infinity) return t('Min {n}', {n: `${range.min}${unitSuffix(unit)}`});
-  return `${range.min}–${range.max}${unitSuffix(unit)}`;
+  if (range.max === Infinity) return t('Min {n}', {n: `${numText(range.min)}${unitSuffix(unit)}`});
+  return `${numText(range.min)}–${numText(range.max)}${unitSuffix(unit)}`;
+}
+
+/**
+ * A bound in the UI language's decimal separator, keeping its own places: 0.25 is "0.25" in English, "0,25" in Spanish.
+ * @param {number} v
+ * @returns {string}
+ */
+function numText(v) {
+  return decimalText(String(v), lang);
 }
 
 /**
@@ -71,6 +81,6 @@ function unitSuffix(unit) {
  * @returns {string}
  */
 export function rangeNote(kept, range, unit = 'mm') {
-  if (kept >= range.max) return t('Max {n}', {n: `${range.max}${unitSuffix(unit)}`});
-  return t('Min {n}', {n: `${range.min}${unitSuffix(unit)}`});
+  if (kept >= range.max) return t('Max {n}', {n: `${numText(range.max)}${unitSuffix(unit)}`});
+  return t('Min {n}', {n: `${numText(range.min)}${unitSuffix(unit)}`});
 }

@@ -38,11 +38,26 @@ export function fieldText(stored, language, unit = 'mm') {
 }
 
 /**
+ * A number with a fixed number of decimal places and thousands grouping in the UI language's style: "1,234.5" in English,
+ * "1.234,5" in Spanish. The grouping is always applied, so a four-digit count groups the same way in both languages.
+ * It never follows the browser's locale: the interface language decides the separators.
+ * @param {number} n
+ * @param {string} language  'en' or 'es'
+ * @param {number} [digits=0]  decimal places to show; the value is rounded to them
+ * @returns {string}
+ */
+export function formatNumber(n, language, digits = 0) {
+ // useGrouping 'always' keeps the separator on four-digit numbers, which Spanish otherwise leaves ungrouped.
+ const options = /** @type {any} */ ({minimumFractionDigits: digits, maximumFractionDigits: digits, useGrouping: 'always'});
+ return n.toLocaleString(language === 'es' ? 'es-ES' : 'en-US', options);
+}
+
+/**
  * A whole count with thousands grouping in the UI language's style, e.g. "1,234" in English and "1.234" in Spanish.
  * @param {number} n
  * @param {string} language  'en' or 'es'
  * @returns {string}
  */
 export function formatCount(n, language) {
- return n.toLocaleString(language === 'es' ? 'es-ES' : 'en-US');
+ return formatNumber(n, language, 0);
 }

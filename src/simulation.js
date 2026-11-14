@@ -8,10 +8,11 @@ import {setPlayback, playbackActions} from './playbackState.js';
 import {previewState, setPreviewState, previewActions} from './previewState.js';
 import {distortionGrid, hoopSize, threadPlan, threadSpans, sewingSeconds, sewingSecondsUpTo} from './engine.js';
 import {createThreadPreview} from './preview3d.js';
-import {t} from './i18n.js';
+import {lang, t} from './i18n.js';
 import {getPlan, getLastPlan, compileNow} from './compileService.js';
 import {editor} from './editorContext.js';
 import {buildThreadPaths} from './threadPaths.js';
+import {formatCount, formatNumber} from './decimalText.js';
 
 const SVG_NS = 'http://www.w3.org/2000/svg';
 /** @type {any} */
@@ -83,7 +84,7 @@ export function syncPlaybackControls() {
   const percent = length ? Math.floor(limit / length * 100) : 0;
   setStatus({
     playback: `${percent}%`,
-    needle: current ? `Needle ${current.x.toFixed(1)}, ${current.y.toFixed(1)} mm` : 'Needle at start',
+    needle: current ? `Needle ${formatNumber(current.x, lang, 1)}, ${formatNumber(current.y, lang, 1)} mm` : 'Needle at start',
   });
 }
 

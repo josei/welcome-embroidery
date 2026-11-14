@@ -12,7 +12,7 @@ import {setStatus} from './statusState.js';
 import {syncTextInspector} from './letteringFonts.js';
 import {sewTime} from './appHelpers.js';
 import {t, lang} from './i18n.js';
-import {formatCount} from './decimalText.js';
+import {fieldText, formatCount, formatNumber} from './decimalText.js';
 import {viewMode} from './viewMode.js';
 
 /** One object of the engine's document, typed with the fields the inspector reads. */
@@ -101,8 +101,8 @@ function sourceInfo(o: InspectorObject | undefined): SourceInfo | null {
       : '',
     details: [
       `${formatCount(o.stitches?.length ?? 0, lang)} commands · ${o.threads?.length} source threads`,
-      `${s.fileName} · ${(s.size / 1024).toFixed(1)} KiB`,
-      `Source bounds ${s.bounds.map(v => v.toFixed(1)).join(' × ')} mm`,
+      `${s.fileName} · ${formatNumber(s.size / 1024, lang, 1)} KiB`,
+      `Source bounds ${s.bounds.map(v => formatNumber(v, lang, 1)).join(' × ')} mm`,
     ],
     warnings: s.warnings,
   };
@@ -156,7 +156,7 @@ export function syncInspector({plan, compileError, tips}: {plan: PlanInfo | null
       ? countLabel(plan, formatCount(plan.count, lang)) +
           ' · ' +
           t(lang === 'es' && plan.colors.length === 1 ? '{m} m estimated thread · {c} thread color' : '{m} m estimated thread · {c} thread colors', {
-            m: (plan.threadLength / 1000).toFixed(1),
+            m: formatNumber(plan.threadLength / 1000, lang, 1),
             c: plan.colors.length,
           }) +
         ' · ' +

@@ -41,6 +41,8 @@ import {copyStyle, pasteStyle} from './styleClipboard.js';
 import {edit} from './documentCommands.js';
 import {editor} from './editorContext.js';
 import {toolHint, clearToolHints} from './editorChrome.js';
+import {lang} from './i18n.js';
+import {formatNumber} from './decimalText.js';
 
 /** Sends the plan and the sewing tips to the inspector. Also run when the export format changes, since an imported layer's count follows it. @returns {any} the sewing tips */
 function syncInspectorNow() {
@@ -153,7 +155,7 @@ export function mountCanvas() {
   const art = /** @type {HTMLElement} */ (document.getElementById('art'));
   art.addEventListener('pointermove', event => {
     const point = canvas.coord(event);
-    setStatus({cursor: `x ${point[0].toFixed(1)} mm · y ${point[1].toFixed(1)} mm`});
+    setStatus({cursor: `x ${formatNumber(point[0], lang, 1)} mm · y ${formatNumber(point[1], lang, 1)} mm`});
   });
 
   statusActions.compile = () => compileNow(true);

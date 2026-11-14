@@ -1,17 +1,18 @@
 import {useSyncExternalStore} from 'react';
 import {blockTimeLabel} from '../engine.js';
-import {t} from '../i18n.js';
+import {lang, t} from '../i18n.js';
 import {threadName} from '../threadPalette.js';
 import {playbackActions, playbackState} from '../playbackState.js';
+import {formatCount, formatNumber} from '../decimalText.js';
 // The simulation bar below the canvas, rendered by React: play and restart, the time and stitch count, the thread blocks as a
 // track with the seek position on it, and the summary. Ids match the markup it replaced, because app.js and the tests use them.
 export function PlaybackBar() {
  const p = useSyncExternalStore(playbackState.subscribe, playbackState.get);
  const playLabel = p.playing ? t('Pause stitch simulation') : p.hasPlan ? t('Play stitch simulation') : t('Compile and play stitch simulation');
- const sewnText = p.ready ? t('Ready to simulate') : t('{n} of {m} stitches', {n: p.sewn.toLocaleString(), m: p.count.toLocaleString()});
+ const sewnText = p.ready ? t('Ready to simulate') : t('{n} of {m} stitches', {n: formatCount(p.sewn, lang), m: formatCount(p.count, lang)});
  const changesText = p.colourChanges === 1 ? t('1 color change') : t('{n} color changes', {n: p.colourChanges});
  const trimsText = p.trims === 1 ? t('1 trim') : t('{n} trims', {n: p.trims});
- const metresText = t('{m} m thread', {m: p.metres.toFixed(1)});
+ const metresText = t('{m} m thread', {m: formatNumber(p.metres, lang, 1)});
  return (
   <div className="playback-bar">
    <button type="button" id="resetPlayback" className="icon-button playback-control" aria-label={t('Restart stitch simulation')} title={t(
@@ -25,7 +26,7 @@ export function PlaybackBar() {
    </button>
    <div className="playback-time">
     <span id="playbackTime">{`${blockTimeLabel(p.sewnSeconds)} / ${blockTimeLabel(p.totalSeconds)}`}</span>
-    <span id="playbackStitches">{t('Stitch {n} of {m}', {n: p.sewn.toLocaleString(), m: p.count.toLocaleString()})}</span>
+    <span id="playbackStitches">{t('Stitch {n} of {m}', {n: formatCount(p.sewn, lang), m: formatCount(p.count, lang)})}</span>
    </div>
    <div className="playback-track">
     <div className="playback-slider">

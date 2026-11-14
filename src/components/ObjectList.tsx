@@ -7,9 +7,10 @@ import {sewingCountsState} from '../sewingCountsState.js';
 import {compileIssueState} from '../compileIssueState.js';
 import {inspectorOpenState, toggleInspectorOpen} from '../inspectorOpenState.js';
 import {closePhoneSheet} from '../phoneSheetState.js';
-import {t} from '../i18n.js';
+import {lang, t} from '../i18n.js';
 import {selectionChange} from '../objectListSelection.js';
 import type {Click} from '../objectListSelection.js';
+import {formatCount} from '../decimalText.js';
 // The object list in sewing order, rendered by React. It is a listbox: each row is an option that a click, or Enter or Space,
 // selects (Shift selects a range from the anchor, Ctrl or Cmd adds or removes one row). Hide and Lock are their own buttons beside each row, not inside it. Groups collapse,
 // a double click renames, and rows drag to reorder. Ids and classes match the markup it replaced, because the styles and tests use them.
@@ -132,7 +133,7 @@ function RenameField({name, onDone}: {name: string; onDone: (text: string | null
 }
 
 // The stitch count as the row shows it. Before any count exists, a row the failed compile names says so instead of showing nothing.
-const stitchesText = (count: number) => (count === 1 ? t('1 stitch') : t('{n} stitches', {n: count.toLocaleString()}));
+const stitchesText = (count: number) => (count === 1 ? t('1 stitch') : t('{n} stitches', {n: formatCount(count, lang)}));
 const countText = (count: number | undefined, warning: string | undefined) => {
  if (count !== undefined) return stitchesText(count);
  return warning ? t('not compiled') : '';

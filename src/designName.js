@@ -2,7 +2,8 @@
 // The accessible name of the design canvas: "Design canvas, 1 object, 573 stitches", or "Design canvas, empty". It is built
 // from the same document objects and per-object stitch counts the object list shows, so the two cannot disagree. Stitches
 // are the sum of the counts that exist; they are left out until a compile has counted at least one object.
-import {t} from './i18n.js';
+import {lang, t} from './i18n.js';
+import {formatCount} from './decimalText.js';
 
 /**
  * @param {{id: string}[]} objects the document's objects, in sewing order
@@ -15,6 +16,6 @@ export function designName(objects, counts) {
   const objectsText = objects.length === 1 ? t('1 object') : t('{n} objects', {n: objects.length});
   if (!known.length) return `${base}, ${objectsText}`;
   const stitches = known.reduce((sum, n) => sum + n, 0);
-  const stitchesText = stitches === 1 ? t('1 stitch') : t('{n} stitches', {n: stitches.toLocaleString()});
+  const stitchesText = stitches === 1 ? t('1 stitch') : t('{n} stitches', {n: formatCount(stitches, lang)});
   return `${base}, ${objectsText}, ${stitchesText}`;
 }

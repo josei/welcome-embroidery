@@ -2,7 +2,7 @@
 // Canvas interaction layer: an infinite pan/zoom viewport with rulers and guides, geometric hit testing, selection with
 // resize/rotate handles (oriented for a single rotated shape), smart snapping, marquee selection and the context menu.
 // Document state stays in app.js; this module talks to it through `api`.
-import {t} from './i18n.js';
+import {lang, t} from './i18n.js';
 import {geometry,objectBounds,hoopSize} from './engine.js';
 import {drawScene} from './canvasScene.js';
 import {wheelZoomFactor,wheelZooms} from './wheelZoom.js';
@@ -13,6 +13,7 @@ import {clampMoveDelta,visibleCanvasRect} from './moveClamp.js';
 import {pressClaimedByHandle} from './handleClaim.js';
 import {multiSelectState} from './multiSelectState.js';
 import {deletingGuideState,handModeState,panningState} from './canvasModeState.js';
+import {formatNumber} from './decimalText.js';
 
 const SVG='http://www.w3.org/2000/svg',PX_PER_MM=96/25.4;
 const el=(/** @type {any} */ tag,attrs={})=>{const n=document.createElementNS(SVG,tag);for(const [k,v] of Object.entries(attrs))n.setAttribute(k,v);return n;};
@@ -251,7 +252,7 @@ export function createCanvas(/** @type {any} */ api){
     overlay.append(el('circle',{class:'sel-hit','data-hit':'angle',cx:hp[0],cy:hp[1],r:22*k}));
     overlay.append(el('circle',{
       class:'sel-angle','data-handle':'angle',tabindex:0,role:'button',
-      'aria-label':t('Fill angle {deg}°. Drag or use the arrow keys to turn the rows.',{deg:deg.toFixed(0)}),
+      'aria-label':t('Fill angle {deg}°. Drag or use the arrow keys to turn the rows.',{deg:formatNumber(deg, lang, 0)}),
       cx:hp[0],cy:hp[1],r:4*k,
     }));
     if(label){const t=el('text',{class:'sel-note',x:hp[0],y:hp[1]-9*k,'text-anchor':'middle','font-size':11*k});t.textContent=label;overlay.append(t);}
@@ -460,7 +461,7 @@ export function createCanvas(/** @type {any} */ api){
      let a=Math.atan2(q[1]-state.c[1],q[0]-state.c[0])*180/Math.PI;
      if(e.shiftKey)a=Math.round(a/15)*15;
      a=((a%180)+180)%180;state.next=Math.round(a*10)/10;
-     overlay.replaceChildren();drawAngle({c:state.c,dist:state.dist},state.next,`${state.next.toFixed(1)}°`);return;
+     overlay.replaceChildren();drawAngle({c:state.c,dist:state.dist},state.next,`${formatNumber(state.next, lang, 1)}°`);return;
     }
     if(state.type==='rotate'){const f=state.f;let a=Math.atan2(q[1]-f.c[1],q[0]-f.c[0])-state.a0;a=deg(a);if(e.shiftKey)a=Math.round(a/15)*15;
       a=((a+540)%360)-180;state.angle=a;const tr=`rotate(${a} ${f.c[0]} ${f.c[1]})`;setT(state.els,tr);previewMask(state.els,tr);
@@ -476,7 +477,7 @@ export function createCanvas(/** @type {any} */ api){
         f.rot?`translate(${A[0]} ${A[1]}) rotate(${r}) scale(${sx} ${sy}) rotate(${-r}) translate(${-A[0]} ` +
         `${-A[1]})`:`translate(${A[0]} ${A[1]}) scale(${sx} ${sy}) translate(${-A[0]} ${-A[1]})`;
         setT(state.els,tr);previewMask(state.els,tr);
-      refresh({...f,W:f.W*sx,H:f.H*sy,c:toWorld(f,ax+(-ax)*sx,ay+(-ay)*sy)},`${(f.W*sx).toFixed(1)} × ${(f.H*sy).toFixed(1)} mm`);
+      refresh({...f,W:f.W*sx,H:f.H*sy,c:toWorld(f,ax+(-ax)*sx,ay+(-ay)*sy)},`${formatNumber(f.W*sx, lang, 1)} × ${formatNumber(f.H*sy, lang, 1)} mm`);
         overlay.querySelectorAll('.sel-handle').forEach(()=>{});}
   });
   window.addEventListener('pointerup',e=>{
