@@ -14,6 +14,7 @@ import {pressClaimedByHandle} from './handleClaim.js';
 import {multiSelectState} from './multiSelectState.js';
 import {deletingGuideState,handModeState,panningState} from './canvasModeState.js';
 import {formatNumber} from './decimalText.js';
+import {currentFitMargin} from './fitMargin.js';
 
 const SVG='http://www.w3.org/2000/svg',PX_PER_MM=96/25.4;
 const el=(/** @type {any} */ tag,attrs={})=>{const n=document.createElementNS(SVG,tag);for(const [k,v] of Object.entries(attrs))n.setAttribute(k,v);return n;};
@@ -82,9 +83,9 @@ export function createCanvas(/** @type {any} */ api){
   // Whether the hoop's outer frame lies wholly inside the drawing area at the current zoom.
   function hoopInArea(){const hs=hoopSize(api.doc()),a=drawArea(),[x0,y0]=toScreen(-hs.w/2-4,-hs.h/2-4),[x1,y1]=toScreen(hs.w/2+4,hs.h/2+4);
     return x0>=a.x-.5&&y0>=a.y-.5&&x1<=a.x+a.w+.5&&y1<=a.y+a.h+.5;}
-  // The fit covers the hoop's outer frame, which is drawn 4 mm beyond the ring on each side. On a phone the margin is
-  // kept small (4 px, against the ruler's 18 px): a 56 px margin leaves the hoop about 70% of the width.
-  function fitHoop(){const hs=hoopSize(api.doc()),{w,h}=size(),margin=Math.min(w,h)<600?4:56,f=4;fitRect(-hs.w/2-f,-hs.h/2-f,hs.w/2+f,hs.h/2+f,margin);}
+  // The fit covers the hoop's outer frame, which is drawn 4 mm beyond the ring on each side. The margin depends on the
+  // pointer and layout (see fitMargin.js): a touch tablet keeps the full margin so the whole hoop shows.
+  function fitHoop(){const hs=hoopSize(api.doc()),{w,h}=size(),margin=currentFitMargin(Math.min(w,h)),f=4;fitRect(-hs.w/2-f,-hs.h/2-f,hs.w/2+f,hs.h/2+f,margin);}
   function contentBounds(ids=/** @type {any} */(undefined)){const d=api.doc(),hs=hoopSize(d),list=ids?
     d.objects.filter((/** @type {any} */ o)=>ids.includes(o.id)):d.objects,bs=list.filter((/** @type {any} */ o)=>o.visible!==false).map(objectBounds);
   return ids&&bs.length?union(bs):union([[-hs.w/2,-hs.h/2,hs.w/2,hs.h/2],...bs]);
