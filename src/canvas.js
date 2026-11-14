@@ -79,7 +79,12 @@ export function createCanvas(/** @type {any} */ api){
   vp.cy-=(RULER+inset.top)/2/vp.s;
   apply();
   }
-  function fitHoop(){const hs=hoopSize(api.doc());fitRect(-hs.w/2,-hs.h/2,hs.w/2,hs.h/2,56);}
+  // Whether the hoop's outer frame lies wholly inside the drawing area at the current zoom.
+  function hoopInArea(){const hs=hoopSize(api.doc()),a=drawArea(),[x0,y0]=toScreen(-hs.w/2-4,-hs.h/2-4),[x1,y1]=toScreen(hs.w/2+4,hs.h/2+4);
+    return x0>=a.x-.5&&y0>=a.y-.5&&x1<=a.x+a.w+.5&&y1<=a.y+a.h+.5;}
+  // The fit covers the hoop's outer frame, which is drawn 4 mm beyond the ring on each side. On a phone the margin is
+  // kept small (4 px, against the ruler's 18 px): a 56 px margin leaves the hoop about 70% of the width.
+  function fitHoop(){const hs=hoopSize(api.doc()),{w,h}=size(),margin=Math.min(w,h)<600?4:56,f=4;fitRect(-hs.w/2-f,-hs.h/2-f,hs.w/2+f,hs.h/2+f,margin);}
   function contentBounds(ids=/** @type {any} */(undefined)){const d=api.doc(),hs=hoopSize(d),list=ids?
     d.objects.filter((/** @type {any} */ o)=>ids.includes(o.id)):d.objects,bs=list.filter((/** @type {any} */ o)=>o.visible!==false).map(objectBounds);
   return ids&&bs.length?union(bs):union([[-hs.w/2,-hs.h/2,hs.w/2,hs.h/2],...bs]);
@@ -112,7 +117,8 @@ export function createCanvas(/** @type {any} */ api){
     const windowHeld=innerWidth===windowBox.w&&innerHeight===windowBox.h;
     if(measured&&resized&&originHeld&&windowHeld){vp.cx+=(next.w-drawAreaBox.w)/(2*vp.s);vp.cy+=(next.h-drawAreaBox.h)/(2*vp.s);}
     drawAreaBox=next;windowBox={w:innerWidth,h:innerHeight};
-    apply();
+    // A rotation keeps the zoom, so a hoop fitted to the old shape can be taller than the new area: fit it again then.
+    if(measured&&resized&&!windowHeld&&!hoopInArea())fitHoop();else apply();
   }).observe(container);
   document.addEventListener('keydown',e=>
     {if(e.code==='Space'&&!inField(e)){spaceDown=true;panningState.set(true);if(e.target===document.body)e.preventDefault();}});
