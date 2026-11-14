@@ -98,4 +98,5 @@ export const ES_ADDITIONS={
 'More':'Más',
 'Shape':'Forma',
 'Choose':'Elegir',
+'add {name}':'añadir {name}','text':'texto',
 };

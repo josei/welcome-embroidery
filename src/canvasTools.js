@@ -12,6 +12,7 @@ import {stitchChoicesState} from './stitchChoicesState.js';
 import {measureState} from './measureState.js';
 import {knifeState} from './knifeState.js';
 import {t} from './i18n.js';
+import {addLabel} from './addLabel.js';
 import {enterEdit} from './canvasText.js';
 import {applyOperations} from './operations.js';
 import {objectBounds} from './transforms.js';
@@ -35,7 +36,7 @@ const TOOL_HINTS={
 /**
  * @param {any} api
  *  canvas: refresh(), snapPt(p), showSnap(hit), px(n);
- *  edits: commit(ops, after), render(), toast(text), hint(text), clearHints(), setEditing(on), selectedObject();
+ *  edits: commit(ops, after, label), render(), toast(text), hint(text), clearHints(), setEditing(on), selectedObject();
  *  lettering: textFont(), ensureFontLoaded(id), fitHeight(fontId, text).
  */
 export function createCanvasTools(api){
@@ -87,17 +88,18 @@ export function createCanvasTools(api){
         // The new object opens in the on-canvas text box with its placeholder selected, so typing replaces it. The box
         // takes the keystrokes, so letters never reach the tool shortcuts.
         enterEdit(documentNow().doc.objects.find((/** @type {any} */ o)=>o.id===id),true);
-      });
+      }, addLabel({kind:'text'}));
       return;
     }
     // Selected in both fields, as lettering is: the inspector reads the multi-selection, so the thread and stitch controls show.
     // Placement: see newShapePlacement.js. Successive adds take the next free slot beside the others.
     const doc=documentNow().doc;
     const spot=newShapeSpot(doc.objects,hoopSize(doc),24,16);
-    api.commit([{op:'add_shape',id,kind,name:kind==='ellipse'?'Ellipse':'Rectangle',x:spot.x,y:spot.y,width:24,height:16,
+    const shapeName=kind==='ellipse'?'Ellipse':'Rectangle';
+    api.commit([{op:'add_shape',id,kind,name:shapeName,x:spot.x,y:spot.y,width:24,height:16,
       thread:$('#thread').value,stitch:(stitchChoicesState.get().type==='satin'?'fill':stitchChoicesState.get().type)}],()=>{
       setSelection({selected: id});setSelection({multi: new Set([id])});
-    });
+    }, addLabel({name: shapeName}));
     // The hint says where the shape went and its default size, in millimetres, and warns when it sits on another shape.
     const atCentre=spot.x===-12&&spot.y===-8;
     const ellipse=kind==='ellipse';
@@ -195,7 +197,7 @@ export function createCanvasTools(api){
         thread:$('#thread').value,...(penHandles?{handles:draft.pathPoints.map((_,i)=>penHandles[i]||null)}:{}),
         ...(closed?{closed:true,stitch:'fill'}:{})}],()=>{
         setSelection({selected: id});setSelection({multi: new Set([id])});api.setEditing(true);
-      });
+      }, addLabel({name: closed?'Polygon':'Drawn path'}));
     }
     setPathDraft({pathPoints: []});
     setPathDraft({pathHandles: []});
@@ -215,17 +217,18 @@ export function createCanvasTools(api){
       pts.push([+(center[0]+r*Math.cos(a)).toFixed(3),+(center[1]+r*Math.sin(a)).toFixed(3)]);
     }
     const id=crypto.randomUUID();
-    api.commit([{op:'add_path',id,name:kind==='star'?`Star ${n}`:`Polygon ${n}`,x:0,y:0,points:pts,closed:true,
+    const name=kind==='star'?`Star ${n}`:`Polygon ${n}`;
+    api.commit([{op:'add_path',id,name,x:0,y:0,points:pts,closed:true,
       stitch:'fill',thread:$('#thread').value}],()=>{
       setSelection({selected: id});setSelection({multi: new Set([id])});
-    });
+    }, addLabel({name}));
   }
 
   function addLine(/** @type {any} */ a,/** @type {any} */ b){
     const id=crypto.randomUUID();
     api.commit([{op:'add_path',id,name:'Line',x:0,y:0,points:[a,b],thread:$('#thread').value}],()=>{
       setSelection({selected: id});setSelection({multi: new Set([id])});
-    });
+    }, addLabel({name:'Line'}));
   }
 
   const pathPress=()=>{
