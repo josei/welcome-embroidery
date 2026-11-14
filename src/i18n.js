@@ -27,7 +27,7 @@ export const ES={...ES_ADDITIONS,
   'AI agent':'Agente de IA','Connect an AI agent':'Conectar un agente de IA',
 'View':'Vista','Design':'Diseño','Stitches':'Puntadas','Preview':'Vista previa','Undo':'Deshacer','Redo':'Rehacer','Duplicate selected object':
   'Duplicar el objeto seleccionado','Duplicate':'Duplicar','Delete selected object':'Eliminar el objeto seleccionado','Delete':'Eliminar','Export':'Exportar',
-'Objects':'Objetos','Tools':'Herramientas','Select (V)':'Seleccionar (V)',
+'Objects':'Objetos','Tools':'Herramientas','Insert':'Insertar','Select (V)':'Seleccionar (V)',
 'Select ({shortcut})':'Seleccionar ({shortcut})','Draw path ({shortcut})':'Dibujar trazado ({shortcut})','Measure ({shortcut})':'Medir ({shortcut})','Line ({shortcut}, drag)':'Línea ({shortcut}, arrastrar)','Polygon ({shortcut}, drag from center)':'Polígono ({shortcut}, arrastrar desde el centro)','Star ({shortcut}, drag from center)':'Estrella ({shortcut}, arrastrar desde el centro)','Pen with curves ({shortcut}, drag for handles)':'Pluma con curvas ({shortcut}, arrastrar para tiradores)','Add rectangle ({shortcut})':'Añadir rectángulo ({shortcut})','Add ellipse ({shortcut})':'Añadir elipse ({shortcut})','Add lettering ({shortcut})':'Añadir texto ({shortcut})','Export ({shortcut})':'Exportar ({shortcut})',
 'Add rectangle':'Añadir rectángulo','Skip to drawing tools':'Ir a las herramientas de dibujo','Add ellipse':'Añadir elipse','Draw path':
   'Dibujar trazado','Draw path (N)':'Dibujar trazado (N)','Add lettering':'Añadir texto',

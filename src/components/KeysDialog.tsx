@@ -10,9 +10,11 @@ export function KeysDialog() {
  useModalDialog(ref, open, '#helpBtn');
  return (
   <dialog id="keysDialog" ref={ref} onClose={() =>
-    setShortcutsOpen(false)}><form method="dialog"><h2>Keyboard shortcuts</h2><div id="keysList" className="keys-list">{SHORTCUTS.flatMap(([title, rows]) => [
-   <h4 key={title}>{t(title)}</h4>,
-   ...rows.flatMap(([key, desc]) => [<kbd key={'k' + key + desc}>{key}</kbd>, <span key={'d' + key + desc}>{t(desc, {shift: modifierName('shift'), alt: modifierName('alt')})}</span>]),
-  ])}</div><button>Close</button></form></dialog>
+    setShortcutsOpen(false)}><form method="dialog"><h2>Keyboard shortcuts</h2><div id="keysList" className="keys-list">{SHORTCUTS.map(([title, rows]) => (
+   <section className="keys-group" key={title}>
+    <h4>{t(title)}</h4>
+    {rows.flatMap(([key, desc]) => [<kbd key={'k' + key + desc}>{key}</kbd>, <span key={'d' + key + desc}>{t(desc, {shift: modifierName('shift'), alt: modifierName('alt')})}</span>])}
+   </section>
+  ))}</div><button>Close</button></form></dialog>
  );
 }

@@ -32,9 +32,6 @@ export const SHORTCUT_TABLE = [
   {section: 'File', keys: ['e'], label: [{...M, shift: true, key: 'E'}], desc: 'Export', button: 'export', command: 'export'},
 
   {section: 'Tools', keys: ['v'], label: 'V', desc: 'Select', press: 'select', command: 'tool:select'},
-  {section: 'Tools', keys: ['r'], label: 'R', desc: 'Rectangle', press: 'rect', command: 'tool:rect'},
-  {section: 'Tools', keys: ['o'], label: 'O', desc: 'Ellipse', press: 'ellipse', command: 'tool:ellipse'},
-  {section: 'Tools', keys: ['t'], label: 'T', desc: 'Lettering', press: 'letter', command: 'tool:letter'},
   {section: 'Tools', keys: ['n'], label: 'N', desc: 'Draw path', press: 'path', command: 'tool:path'},
   {section: 'Tools', keys: ['p'], label: 'P', desc: 'Pen with curves', press: 'pen', command: 'tool:pen'},
   {section: 'Tools', keys: ['l'], label: 'L', desc: 'Line', press: 'line', command: 'tool:line'},
@@ -46,6 +43,11 @@ export const SHORTCUT_TABLE = [
   {section: 'Tools', keys: ['Enter'], label: 'Enter', desc: 'Edit nodes / finish a path', command: 'editNodes'},
   {section: 'Tools', keys: ['Backspace'], label: 'Backspace', desc: 'Remove the last point while drawing a path'},
   {section: 'Tools', keys: ['Escape'], label: 'Esc', desc: 'Cancel, go back to select'},
+
+  // R, O and T insert an object at once and leave the tool on Select, so they sit apart from the keys that arm a tool.
+  {section: 'Insert', keys: ['r'], label: 'R', desc: 'Rectangle', press: 'rect', command: 'tool:rect'},
+  {section: 'Insert', keys: ['o'], label: 'O', desc: 'Ellipse', press: 'ellipse', command: 'tool:ellipse'},
+  {section: 'Insert', keys: ['t'], label: 'T', desc: 'Lettering', press: 'letter', command: 'tool:letter'},
 
   {section: 'Edit', keys: ['z'], label: [{...M, key: 'Z'}], desc: 'Undo', command: 'undo'},
   {section: 'Edit', keys: ['y'], label: [{...M, key: 'Y'}], desc: 'Redo', command: 'redo'},
