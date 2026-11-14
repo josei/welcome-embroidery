@@ -195,7 +195,7 @@ label[hidden],button[hidden],.sel-hint[hidden]{display:none!important}
 
 .underlay-details{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin:-4px 0 6px;font-size:var(--fs-caption)}.underlay-details label{margin:4px 0}.underlay-details input{width:100%!important;min-width:0}.underlay-details[hidden],#stitchLenRow[hidden],#staggerRow[hidden],#underlayRow[hidden]{display:none!important}
 
-.top .top .top .top .top .settings-choices{display:flex;gap:8px}.settings-choices button[aria-pressed=true]{border-color:var(--teal);box-shadow:0 0 0 1px var(--teal)}
+
 .unused-lang-select{border:1px solid var(--field-line);border-radius:6px;font:inherit;font-size:var(--fs-caption);padding:6px 4px;background:#fff;color:#53635b}
 
 .pin{stroke:#fff;stroke-width:.6;vector-effect:non-scaling-stroke;pointer-events:none}.pin.start{fill:#1c8069}.pin.end{fill:#c2453a}#pinRow button.armed{background:#e3f1ec;border-color:var(--teal)}.art-pin{cursor:crosshair}
@@ -1009,6 +1009,26 @@ body{height:100dvh;min-height:0;overflow:hidden}
 @media (max-width:1024px){
 #settingsDialog button{min-height:44px;min-width:44px}
 #settingsDialog .tips-list label{min-height:44px}
+}
+
+/* The Settings dialog uses the editor's own choice control and group border, on desktop and phone alike. The language pair is
+   the same segmented control as the view switch, and each group is outlined in the field line colour with the panel radius
+   rather than the browser's grooved fieldset border. */
+#settingsDialog .settings-group{min-width:0;margin:0;padding:8px 12px 12px;border:1px solid var(--field-line);border-radius:10px;background:#fff}
+#settingsDialog .settings-group>legend{padding:0 4px;margin-left:-4px;font-size:var(--fs-body);color:#66726c}
+#settingsDialog .settings-choices{display:inline-flex;gap:2px;padding:2px;background:#f1f3ef;border-radius:8px}
+#settingsDialog .settings-choices button{border:0;background:transparent;border-radius:6px;padding:6px 12px;color:#66726c;box-shadow:none}
+#settingsDialog .settings-choices button[aria-pressed=true]{background:#fff;color:var(--teal);font-weight:var(--fw-emphasis);box-shadow:0 1px 2px #1d29251f}
+
+/* The dialog keeps its title and Close row in view. Only the groups between them scroll, which matters on a phone held in
+   landscape, where the whole card is taller than the screen. In landscape on a phone or tablet the card is capped at 480 px
+   and centred. */
+#settingsDialog{max-height:calc(100dvh - 24px);padding:0}
+#settingsDialog form{grid-template-rows:auto minmax(0,1fr) auto;max-height:calc(100dvh - 24px);min-height:0}
+#settingsDialog .settings-body{display:grid;gap:12px;min-height:0;overflow-y:auto;overscroll-behavior:contain;padding:2px}
+#settingsDialog .settings-body:focus-visible{outline:none}
+@media (max-width:1024px) and (orientation:landscape){
+#settingsDialog{width:min(480px,calc(100vw - 24px));max-width:calc(100vw - 24px)}
 }
 
 /* Phone and tablet: the 3D overlay's four camera presets and the Show pull row are 44 px touch targets. The pull panel
