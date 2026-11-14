@@ -29,7 +29,8 @@ export function PlaybackBar() {
    </div>
    <div className="playback-track">
     <div className="playback-slider">
-    {/* A marker at each colour change, in the new thread's colour: clicking it seeks to that change. */}
+    {/* A marker at each colour change, in the new thread's colour: clicking it seeks to that change. The marker's place goes
+        through --marker-at, which the CSS clamps, so the dot stays inside the track at either end. */}
     {p.spans.slice(1).map(s => {
      const name = threadName(s.thread), when = blockTimeLabel(s.seconds);
      return (
@@ -38,7 +39,7 @@ export function PlaybackBar() {
        type="button"
        className="timeline-marker"
        data-index={s.start}
-       style={{left: `${(s.start / p.seekMax) * 100}%`, background: s.thread}}
+       style={{'--marker-at': `${(s.start / p.seekMax) * 100}%`, background: s.thread} as React.CSSProperties}
        title={t('Color change to {n} at {time}', {n: name, time: when})}
        aria-label={t('Color change to {n} at {time}', {n: name, time: when})}
        onClick={() => playbackActions.seek(s.start)}
