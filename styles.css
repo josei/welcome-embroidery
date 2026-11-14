@@ -44,6 +44,15 @@ nav button[data-view]{padding:7px 13px;color:#66726c}nav button[data-view].activ
 .layout{grid-template-columns:208px minmax(0,1fr) clamp(260px,30vw,300px)}
 .layout:has(>.panel.inspector-collapsed:last-child){grid-template-columns:208px minmax(0,1fr)}
 }
+/* 1024-1100px (tablet landscape and small laptop windows) has its own column widths. The Layers column is 240 px here instead of 208,
+   so object names break only between words, and the stats line sits on its own row under the heading with the Properties button beside it.
+   The inspector keeps 280 px for its fields. The 901-1023px and 1101px+ rules are unchanged. */
+@media(min-width:1024px) and (max-width:1100px){
+.layout{grid-template-columns:240px minmax(0,1fr) 280px}
+.layout:has(>.panel.inspector-collapsed:last-child){grid-template-columns:240px minmax(0,1fr)}
+.layers-head{flex-wrap:wrap;row-gap:4px}
+.layers-head span{order:1;flex:1 1 100%;white-space:nowrap}
+}
 .path-node{fill:#fff;stroke:var(--teal);stroke-width:.42;vector-effect:non-scaling-stroke;cursor:crosshair;pointer-events:all}.path-node:hover{fill:#d7eee7;stroke-width:.6}
 #sourceInfo{padding:10px;background:#f1f5f1;border-radius:8px;font-size:var(--fs-caption);line-height:1.55;color:#56645d}#sourceInfo[hidden]{display:none}#sourceInfo strong{color:#245d4d}#sourceInfo em{color:#826a42;font-style:normal}
 
@@ -599,6 +608,10 @@ html[data-input="touch"] button:focus-visible,html[data-input="touch"] #art:focu
 .top{gap:6px}
 .top #name{flex:1 1 0;min-width:64px;width:auto}
 .top #savedStatus,.top #unsavedMark{flex:0 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+}
+/* Below 1200px the save status gives up its fixed slot so the design name keeps its width ("Diseño sin título" in Spanish at 1180px). */
+@media (min-width:1101px) and (max-width:1199px){
+.top #unsavedMark{max-width:150px}
 }
 /* One control style across the top bar. Every command is an icon-only 36 px button with a tooltip (the shortcut is
    in it where one exists); Export is the only text button. The menus are text, centred on the same line. One divider sits between

@@ -54,7 +54,7 @@ for(const [w,h] of [[768,1024],[820,1180]]){
  }
 }
 
-test('desktop layout at 1024x768 keeps its three columns',async({page})=>{
+test('desktop layout at 1024x768 keeps its three columns in the 1024-1100px band',async({page})=>{
  await page.setViewportSize({width:1024,height:768});
  await page.goto('/?lang=en');
  await expect(page.locator('#objects')).toBeVisible();
@@ -62,8 +62,8 @@ test('desktop layout at 1024x768 keeps its three columns',async({page})=>{
  const canvas=await boxOf(page,'.canvas');
  const inspector=await boxOf(page,'#inspector');
  expect(Math.round(objects.left)).toBe(16);
- expect(Math.round(canvas.left)).toBe(208);
- expect(Math.round(inspector.width)).toBe(300);
+ expect(Math.round(canvas.left)).toBe(240);
+ expect(Math.round(inspector.width)).toBe(280);
  expect(inspector.left).toBeGreaterThanOrEqual(canvas.right-0.5);
  expect(await page.locator('.inspector-tabs, .inspector-collapse').count()).toBe(0);
 });
