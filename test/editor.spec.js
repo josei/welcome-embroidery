@@ -3702,19 +3702,19 @@ test('clicking the center of an outline glyph selects the lettering, counter inc
 });
 
 // Add rectangle and Add ellipse select the new shape, so the inspector shows its thread and stitch controls, and the hint
-// names the hoop-centre placement with the default 24 × 16 mm size.
+// names the default 24 × 16 mm size.
 test('add rectangle and add ellipse select the new shape and say where it went',async({page})=>{page.on('dialog',d=>d.accept());const errors=[];page.on('pageerror',e=>errors.push(e.message));
  await page.goto('/');await newDesign(page);
  await page.locator('#rect').click();
  await expect(page.locator('#selected')).toContainText('Rectangle');
  await expect(page.locator('#selHint')).toBeHidden();
  await expect(page.locator('#thread')).toBeVisible();
- await expect(page.locator('#toast')).toContainText('Rectangle added at hoop center, 24 × 16 mm');
+ await expect(page.locator('#toast')).toContainText('Rectangle added, 24 × 16 mm');
  await page.keyboard.press('Escape');await page.locator('#ellipse').click();
  await expect(page.locator('#selected')).toContainText('Ellipse');
  await expect(page.locator('#selHint')).toBeHidden();
  await expect(page.locator('#thread')).toBeVisible();
- await expect(page.locator('#toast')).toContainText('Ellipse added beside the others near hoop center, 24 × 16 mm');
+ await expect(page.locator('#toast')).toContainText('Ellipse added beside the others, 24 × 16 mm');
  expect(errors).toEqual([]);
 });
 
@@ -3724,9 +3724,9 @@ test('three adds with no drag leave three shapes that do not overlap',async({pag
  await page.goto('/');await newDesign(page);
  await page.locator('#rect').click();await page.keyboard.press('Escape');
  await page.locator('#ellipse').click();await page.keyboard.press('Escape');
- await expect(page.locator('#toast')).toContainText('Ellipse added beside the others near hoop center');
+ await expect(page.locator('#toast')).toContainText('Ellipse added beside the others');
  await page.locator('#rect').click();await page.keyboard.press('Escape');
- await expect(page.locator('#toast')).toContainText('Rectangle added beside the others near hoop center');
+ await expect(page.locator('#toast')).toContainText('Rectangle added beside the others');
  const boxes=await page.locator('#shapes [data-id]').evaluateAll(els=>els.map(el=>{const r=el.getBoundingClientRect();return {x0:r.left,y0:r.top,x1:r.right,y1:r.bottom};}));
  expect(boxes).toHaveLength(3);
  for(let i=0;i<3;i++)for(let j=i+1;j<3;j++){const a=boxes[i],b=boxes[j];

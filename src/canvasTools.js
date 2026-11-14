@@ -102,10 +102,10 @@ export function createCanvasTools(api){
     const atCentre=spot.x===-12&&spot.y===-8;
     const ellipse=kind==='ellipse';
     const text=spot.overlaps
-      ?(ellipse?t('Ellipse added over another shape at hoop center, {w} × {h} mm',{w:24,h:16}):t('Rectangle added over another shape at hoop center, {w} × {h} mm',{w:24,h:16}))
+      ?(ellipse?t('Ellipse added over another shape, {w} × {h} mm',{w:24,h:16}):t('Rectangle added over another shape, {w} × {h} mm',{w:24,h:16}))
       :atCentre
-        ?(ellipse?t('Ellipse added at hoop center, {w} × {h} mm',{w:24,h:16}):t('Rectangle added at hoop center, {w} × {h} mm',{w:24,h:16}))
-        :(ellipse?t('Ellipse added beside the others near hoop center, {w} × {h} mm',{w:24,h:16}):t('Rectangle added beside the others near hoop center, {w} × {h} mm',{w:24,h:16}));
+        ?(ellipse?t('Ellipse added, {w} × {h} mm',{w:24,h:16}):t('Rectangle added, {w} × {h} mm',{w:24,h:16}))
+        :(ellipse?t('Ellipse added beside the others, {w} × {h} mm',{w:24,h:16}):t('Rectangle added beside the others, {w} × {h} mm',{w:24,h:16}));
     api.toast(text);
   }
 

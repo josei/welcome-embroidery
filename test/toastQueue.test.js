@@ -1,19 +1,14 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
-import {createToastQueue, toastDuration, TOAST_MAX_MS, TOAST_MIN_MS, TOAST_LOG_LIMIT} from '../src/toastQueue.js';
+import {createToastQueue, TOAST_MS, TOAST_LOG_LIMIT} from '../src/toastQueue.js';
 
-const trace = 'Traced 19 shapes from the picture, one per color region, with the stitch settings of your last trace run here';
-const appliqué = 'Appliqué: check the 10 mm bar before cutting fabric, then pin the fabric and sew the satin edge';
-
-test('a short confirmation still gets the four second minimum', () => {
-  assert.equal(toastDuration('Saved.'), TOAST_MIN_MS);
-  assert.equal(toastDuration(''), TOAST_MIN_MS);
-});
-
-test('a longer message stays up longer, and the rule is capped', () => {
-  assert.ok(toastDuration(trace) > toastDuration('Saved.'));
-  assert.ok(toastDuration(appliqué) > toastDuration('Saved.'), 'a long instruction outlasts a short confirmation');
-  assert.equal(toastDuration('word '.repeat(500)), TOAST_MAX_MS);
+test('a confirmation clears itself after three seconds, not before', () => {
+  const q = createToastQueue();
+  const id = q.push('Rectangle added, 24 × 16 mm', 'status', 1000);
+  assert.deepEqual(q.expire(1000 + TOAST_MS - 1), []);
+  assert.equal(q.visible().length, 1);
+  assert.deepEqual(q.expire(1000 + TOAST_MS), [id]);
+  assert.equal(q.visible().length, 0);
 });
 
 test('a toast can carry an action button, and the log keeps only the text', () => {
@@ -26,16 +21,7 @@ test('a toast can carry an action button, and the log keeps only the text', () =
   assert.equal(q.log()[0].id, id);
   assert.equal('action' in q.log()[0], false);
   assert.equal(q.push('Saved.', 'status', 0) > id, true);
-  assert.equal(q.visible()[1].action, null);
-});
-
-test('a confirmation expires after its duration, not before', () => {
-  const q = createToastQueue();
-  const id = q.push('Saved.', 'status', 1000);
-  assert.deepEqual(q.expire(1000 + TOAST_MIN_MS - 1), []);
-  assert.equal(q.visible().length, 1);
-  assert.deepEqual(q.expire(1000 + TOAST_MIN_MS), [id]);
-  assert.equal(q.visible().length, 0);
+  assert.equal(q.visible().at(-1).action, null);
 });
 
 test('an error stays until it is dismissed, however long that takes', () => {
@@ -44,11 +30,13 @@ test('an error stays until it is dismissed, however long that takes', () => {
   assert.deepEqual(q.expire(10 * 60_000), []);
   assert.equal(q.nextExpiry(), null);
   assert.equal(q.visible()[0].kind, 'error');
-  q.dismiss(id);
+  q.push('Invalid embroidery file.', 'error', 1000);
+  assert.equal(q.visible().length, 1, 'the same error is not shown twice');
+  q.dismiss(q.visible()[0].id);
   assert.equal(q.visible().length, 0);
 });
 
-test('two toasts fired together both stay on screen and both reach the log', () => {
+test('a confirmation and an error both stay on screen and both reach the log', () => {
   const q = createToastQueue();
   q.push('Copy a style first.', 'status', 0);
   q.push('Invalid embroidery file.', 'error', 0);
@@ -59,12 +47,12 @@ test('two toasts fired together both stay on screen and both reach the log', () 
 test('a hovered toast holds its time, and resumes with what was left', () => {
   const q = createToastQueue();
   const id = q.push('Saved.', 'status', 0);
-  q.pause(id, 1000); // 1 s in, 3 s left
+  q.pause(id, 1000); // 1 s in, 2 s left
   assert.equal(q.nextExpiry(), null);
   assert.deepEqual(q.expire(60_000), []);
   q.resume(id, 60_000);
-  assert.equal(q.nextExpiry(), 60_000 + 3000);
-  assert.deepEqual(q.expire(60_000 + 3000), [id]);
+  assert.equal(q.nextExpiry(), 60_000 + 2000);
+  assert.deepEqual(q.expire(60_000 + 2000), [id]);
 });
 
 test('overlapping holds from hover and focus release only when both end', () => {
@@ -75,16 +63,16 @@ test('overlapping holds from hover and focus release only when both end', () => 
   q.resume(id, 2000);
   assert.equal(q.nextExpiry(), null, 'still held by the other reason');
   q.resume(id, 2500);
-  assert.equal(q.nextExpiry(), 2500 + 3500);
+  assert.equal(q.nextExpiry(), 2500 + TOAST_MS - 500);
 });
 
-test('the stack drops the oldest confirmation from view, never an error', () => {
-  const q = createToastQueue({visibleLimit: 2});
+test('a second confirmation replaces the one on screen, and an error is never replaced', () => {
+  const q = createToastQueue();
   q.push('one', 'status', 0);
   q.push('Bad file.', 'error', 0);
   q.push('two', 'status', 0);
   assert.deepEqual(q.visible().map(t => t.text), ['Bad file.', 'two']);
-  assert.deepEqual(q.log().map(t => t.text), ['two', 'Bad file.', 'one'], 'the dropped confirmation stays in the log');
+  assert.deepEqual(q.log().map(t => t.text), ['two', 'Bad file.', 'one'], 'the replaced confirmation stays in the log');
 });
 
 test('the log keeps the last twenty messages, newest first', () => {
@@ -97,17 +85,14 @@ test('the log keeps the last twenty messages, newest first', () => {
   assert.equal(log[0].at, TOAST_LOG_LIMIT + 5);
 });
 
-test('a repeat of a message already on screen replaces it instead of stacking', () => {
+test('every confirmation replaces the one before it, and every message reaches the log', () => {
   const q = createToastQueue();
   const limit = 'This would go over the 100-object limit.';
   q.push(limit, 'status', 0);
-  q.push(limit, 'status', 100);
+  q.push('Saved.', 'status', 100);
   q.push(limit, 'status', 200);
   assert.deepEqual(q.visible().map(t => t.text), [limit]);
-  q.push('Saved.', 'status', 300);
-  q.push(limit, 'status', 400);
-  assert.deepEqual(q.visible().map(t => t.text), ['Saved.', limit]);
-  assert.equal(q.log().length, 5, 'every message still reaches the log');
+  assert.equal(q.log().length, 3);
 });
 
 test('two tool hints in sequence leave only the newer one on screen', () => {
@@ -118,19 +103,18 @@ test('two tool hints in sequence leave only the newer one on screen', () => {
   assert.equal(q.log().length, 2, 'the replaced hint still reaches the log');
 });
 
-test('a tool hint does not replace a confirmation or an error', () => {
+test('a tool hint replaces the confirmation on screen but not an error', () => {
   const q = createToastQueue();
   q.push('Saved.', 'status', 0);
   q.push('Invalid embroidery file.', 'error', 0);
   q.push('Drag on the canvas to draw a line.', 'status', 0, null, true);
-  assert.equal(q.visible().length, 3);
+  assert.deepEqual(q.visible().map(t => t.text), ['Invalid embroidery file.', 'Drag on the canvas to draw a line.']);
 });
 
-test('clearing hints removes the tool hint and keeps other toasts', () => {
+test('clearing the tool hint leaves nothing behind when it was the only toast', () => {
   const q = createToastQueue();
-  q.push('Saved.', 'status', 0);
   q.push('Drag on the canvas to draw a line.', 'status', 0, null, true);
   q.clearHints();
-  assert.deepEqual(q.visible().map(t => t.text), ['Saved.']);
-  assert.equal(q.nextExpiry(), TOAST_MIN_MS, 'the confirmation keeps its timer');
+  assert.equal(q.visible().length, 0);
+  assert.equal(q.nextExpiry(), null);
 });

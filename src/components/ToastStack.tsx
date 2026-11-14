@@ -4,8 +4,8 @@ import {toastActions, toastState} from '../toastState.js';
 import {useModalDialog} from './useModalDialog';
 
 // The toasts on screen. #toast keeps the text of the messages it shows (the tests and the public capture read it), and
-// each message is its own row: a confirmation is role="status" and goes away by itself; an error is role="alert", has a
-// close button and stays until it is dismissed.
+// each message is its own row: one confirmation is on screen at a time and a new one replaces it; it is role="status" and
+// goes away by itself after a few seconds. An error is role="alert", has a close button, and stays until it is dismissed.
 // The stack is click-through, so a message never takes clicks meant for the canvas beneath it. Hover is therefore read from
 // the document's pointer moves against each row's rectangle, and only an error's close button takes the pointer.
 export function ToastStack() {

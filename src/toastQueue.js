@@ -2,21 +2,9 @@
 // The toast model, without a DOM or timers: how long a message stays, which toasts are on screen, and the log of the last
 // messages. toastState.js drives it with the clock and renders it; the unit test drives it with plain numbers.
 
-export const TOAST_MIN_MS = 4000;
-export const TOAST_MAX_MS = 12000;
+/** How long a confirmation stays up: long enough to read a short sentence, short enough to not linger over the canvas. */
+export const TOAST_MS = 3000;
 export const TOAST_LOG_LIMIT = 20;
-export const TOAST_VISIBLE_LIMIT = 3;
-
-/**
- * How long a confirmation stays up: a fixed base plus time to read each character, never under the minimum.
- * Error toasts do not use this; they stay until dismissed.
- * @param {string} message
- * @returns {number} milliseconds
- */
-export function toastDuration(message) {
-  const ms = 1500 + 55 * [...message.trim()].length;
-  return Math.min(TOAST_MAX_MS, Math.max(TOAST_MIN_MS, ms));
-}
 
 /**
  * @typedef {'status' | 'error'} ToastKind
@@ -26,12 +14,12 @@ export function toastDuration(message) {
  */
 
 /**
- * A queue of toasts: messages shown together stack, the oldest confirmation is dropped from view when the stack is full
- * (it stays in the log), and errors stay until dismissed. Hovering or focusing a toast holds its timer; each hold must be
- * released before the time left runs again.
- * @param {{visibleLimit?: number, logLimit?: number}} [options]
+ * A queue of toasts: one confirmation is on screen at a time, so a new one replaces the one showing instead of stacking
+ * over the canvas. Errors stay until dismissed and are never replaced. Hovering or focusing a toast holds its timer; each
+ * hold must be released before the time left runs again.
+ * @param {{logLimit?: number}} [options]
  */
-export function createToastQueue({visibleLimit = TOAST_VISIBLE_LIMIT, logLimit = TOAST_LOG_LIMIT} = {}) {
+export function createToastQueue({logLimit = TOAST_LOG_LIMIT} = {}) {
   let nextId = 1;
   /** @type {ToastEntry[]} */
   let visible = [];
@@ -52,17 +40,13 @@ export function createToastQueue({visibleLimit = TOAST_VISIBLE_LIMIT, logLimit =
      */
     push(text, kind, now, action = null, hint = false) {
       const id = nextId++;
-      const duration = kind === 'error' ? null : toastDuration(text);
+      const duration = kind === 'error' ? null : TOAST_MS;
       /** @type {ToastEntry} */
       const entry = {id, kind, text, at: now, expiresAt: duration === null ? null : now + duration, remaining: duration ?? 0, holds: 0, action, hint};
-      // A repeat of a message already on screen replaces it rather than stacking an identical copy beside it.
-      visible = [...visible.filter(item => (item.text !== text || item.kind !== kind) && !(hint && item.hint)), entry];
-      // Drop the oldest confirmation from view when the stack is full. Errors are never dropped; they are dismissed by hand.
-      while (visible.length > visibleLimit) {
-        const oldest = visible.find(item => item.kind === 'status');
-        if (!oldest) break;
-        visible = visible.filter(item => item !== oldest);
-      }
+      // One confirmation at a time: a new confirmation (or tool hint) replaces the one on screen rather than stacking
+      // beside it. Errors are kept, so a passing confirmation never hides a problem that still needs an answer; a repeated
+      // error replaces its earlier copy instead of showing twice.
+      visible = [...visible.filter(item => (kind === 'status' ? item.kind !== 'status' : item.kind !== kind || item.text !== text)), entry];
       log = [{id, kind, text, at: now}, ...log].slice(0, logLimit);
       return id;
     },
