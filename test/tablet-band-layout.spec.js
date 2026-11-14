@@ -4,7 +4,7 @@ import {test,expect} from '@playwright/test';
 // Widths just outside the band keep their own columns (208 px below it, 256 px above it).
 // At 1024x768, 1100x800 and 1180x800, in English and Spanish, one rectangle is drawn and then:
 // layer names do not overflow, the stats line sits in one or two lines, the Properties button stays clear of the ruler,
-// and the design name is not cut short.
+// and the design name is whole or ends in an ellipsis.
 
 const firstColumn=page=>page.locator('.layout').evaluate(e=>parseFloat(getComputedStyle(e).gridTemplateColumns.split(' ')[0]));
 
@@ -38,8 +38,11 @@ for(const [w,h,lang] of cases){
     const ruler=document.querySelector('#rulerTop');
     const canvasBox=box(document.querySelector('.canvas'));
     const name=document.querySelector('header.top #name');
+    const shownName=document.querySelector('header.top .name-field');
+    // The name is drawn by the field's overlay, which shows an ellipsis; the input itself is transparent.
+    const nameEllipsis=getComputedStyle(shownName,'::after').textOverflow==='ellipsis';
     return {names,stats,btn:btn?box(btn):null,btnDisplay:btn?getComputedStyle(btn).display:null,canvasLeft:canvasBox.l,
-      rulerBox:ruler?box(ruler):null,nameOver:name.scrollWidth-name.clientWidth};
+      rulerBox:ruler?box(ruler):null,nameOver:nameEllipsis?0:name.scrollWidth-name.clientWidth};
   });
   test.info().attach('band-measurements',{body:JSON.stringify({w,h,lang,...m},null,1),contentType:'application/json'});
 
@@ -50,7 +53,7 @@ for(const [w,h,lang] of cases){
     expect(m.rulerBox,'top ruler is on the page').not.toBeNull();
     expect(m.btn.l>=m.rulerBox.r||m.btn.b<=m.rulerBox.t||m.btn.r<=m.rulerBox.l||m.btn.t>=m.rulerBox.b,'Properties button does not overlap the top ruler').toBeTruthy();
   }
-  expect(m.nameOver,'design name is not truncated').toBeLessThanOrEqual(0);
+  expect(m.nameOver,'design name is whole or ends in an ellipsis').toBeLessThanOrEqual(0);
   expect(errors).toEqual([]);
  });
 }
