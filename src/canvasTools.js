@@ -37,7 +37,7 @@ const TOOL_HINTS={
 // Hints for a touch screen, which has no Enter key: the ways to finish a path are taps. Other tools keep TOOL_HINTS.
 /** @type {Record<string, string>} */
 const TOUCH_HINTS={
-  path:'Tap to add points. Tap the first point to close, or tap Path again to finish.',
+  path:'Tap to add points. Tap the first point to close, or tap Done to finish.',
 };
 // The hint for a tool, in the wording the last input suggests.
 function toolHintText(/** @type {string} */ tool){
@@ -103,7 +103,7 @@ export function createCanvasTools(api){
         // The new object opens in the on-canvas text box with its placeholder selected, so typing replaces it. The box
         // takes the keystrokes, so letters never reach the tool shortcuts.
         enterEdit(documentNow().doc.objects.find((/** @type {any} */ o)=>o.id===id),true);
-      }, addLabel({kind:'text'}));
+      }, addLabel({name:'Text'}));
       return;
     }
     // Selected in both fields, as lettering is: the inspector reads the multi-selection, so the thread and stitch controls show.

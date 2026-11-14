@@ -6,6 +6,7 @@ import {documentNow} from './documentState.js';
 import {setSelection} from './selectionState.js';
 import {interactionNow, setInteraction} from './interactionState.js';
 import {isRegistryFont} from './fonts.js';
+import {addLabel} from './addLabel.js';
 
 /** The part of a document object the canvas text editor reads and writes. */
 export interface EditableObject {
@@ -22,7 +23,7 @@ export interface EditableObject {
 /** What the editor must do for the text box, supplied by app.js. */
 export interface CanvasTextApi {
   /** Runs one undoable command through the document store. */
-  edit(operations: unknown[], after?: () => void): boolean;
+  edit(operations: unknown[], after?: () => void, coalesceKey?: string, label?: string): boolean;
   /** Redraws the editor from the current document. */
   render(): void;
   /** Selects the objects and clears the node selection. */
@@ -108,7 +109,10 @@ export function finishCanvasText(commit: boolean, value: string, keyboard = fals
   o.text = state.original;
   o.w = measureText(state.original, o.font || 'welcome-mono/1', o.h, o);
   const text = savedText(o.font, value);
-  if (commit && text.trim() && text !== state.original) wired().edit([{op: 'set_object', id: state.id, text}]);
+  // A box opened for a new object names its step as the add, so Undo reads "add Text" rather than a generic change.
+  if (commit && text.trim() && text !== state.original) {
+    wired().edit([{op: 'set_object', id: state.id, text}], undefined, undefined, state.fresh ? addLabel({name: 'Text'}) : undefined);
+  }
   else wired().render();
 }
 

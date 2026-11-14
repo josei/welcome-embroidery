@@ -53,6 +53,7 @@ export const ES={...ES_ADDITIONS,
 'Color change to {n} at {time}':'Cambio de color a {n} a los {time}',
 'Grid spacing: {n} mm. Click to change.':'Separación de la cuadrícula: {n} mm. Haz clic para cambiarla.','Grid spacing: {n} mm':'Cuadrícula: {n} mm',
 'Drag to orbit · scroll to zoom · double-click to reset':'Arrastra para orbitar · rueda para zoom · doble clic para restablecer',
+'Drag to orbit · pinch to zoom · double-tap to reset':'Arrastra para orbitar · pellizca · doble toque para restablecer',
 'Zoom':'Zoom','Color 1':'Color 1','Color 2':'Color 2','Color 3':'Color 3','Color 4':'Color 4','Choose at least two colors for a palette.':
   'Elige al menos dos colores para la paleta.','Hand tool: drag to pan':'Herramienta mano: arrastra para mover la vista','Zoom out (−)':'Alejar (−)',
   'Zoom in (+)':'Acercar (+)','Reset to 100% ({shortcut})':'Restablecer al 100% ({shortcut})','Fit the hoop in view':'Ajustar el bastidor a la vista',

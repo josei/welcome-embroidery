@@ -1,14 +1,17 @@
 import {useSyncExternalStore} from 'react';
 import {t} from '../i18n.js';
 import {previewActions, previewState, type PreviewView} from '../previewState.js';
+import {inputMode} from '../inputMode.js';
 const VIEWS: [PreviewView, string][] = [['front', 'Front ¾'], ['close', 'Close-up'], ['turntable', 'Turntable']];
 // The hint under the 3D preview, its view choice and loupe, and its pull estimate, rendered by React.
 // Ids match the markup it replaced, because app.js wires them by id.
 export function PreviewPanel() {
  const preview = useSyncExternalStore(previewState.subscribe, previewState.get);
+ // A touch screen has no scroll wheel or double-click, so its hint names the gestures it has.
+ const touch = useSyncExternalStore(inputMode.subscribe, inputMode.get) === 'touch';
  return (
   <>
-   <div id="previewHint" hidden={!preview.threeD}>{t('Drag to orbit · scroll to zoom · double-click to reset')}</div>
+   <div id="previewHint" hidden={!preview.threeD}>{touch ? t('Drag to orbit · pinch to zoom · double-tap to reset') : t('Drag to orbit · scroll to zoom · double-click to reset')}</div>
    <div id="previewView" hidden={!preview.threeD} role="group" aria-label={t('3D view')}>
     {VIEWS.map(([view, label]) => (
      <button key={view} type="button" aria-pressed={preview.view === view && !preview.orbited} onClick={() => previewActions.chooseView(view)}>{t(label)}</button>

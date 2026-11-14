@@ -29,6 +29,15 @@ function fitInCanvas(c: {left: number; top: number; width: number; height: numbe
   };
 }
 
+// Puts focus on a tool button after the box closes from the keyboard, without a focus ring or a shortcut tooltip. The button
+// keeps focus, so the next key still reaches it; the ring returns once focus leaves and comes back by Tab.
+function focusQuietly(el: HTMLElement | null) {
+  if (!el) return;
+  el.setAttribute('data-quiet-focus', '');
+  el.addEventListener('blur', () => el.removeAttribute('data-quiet-focus'), {once: true});
+  el.focus();
+}
+
 export function CanvasTextEditor() {
   const {canvasText} = useSyncExternalStore(interactionState.subscribe, interactionState.get);
   // A phone has no Enter or Escape key, so after a tap the caption names the tap that saves the text instead.
@@ -82,11 +91,11 @@ export function CanvasTextEditor() {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       finish(true, e.currentTarget.value, true);
-      document.getElementById('letter')?.focus();
+      focusQuietly(document.getElementById('letter'));
     } else if (e.key === 'Escape') {
       e.preventDefault();
       finish(false, e.currentTarget.value);
-      document.getElementById('letter')?.focus();
+      focusQuietly(document.getElementById('letter'));
     } else if (e.key === 'Tab' && e.shiftKey) {
       // Shift+Tab from the box goes back to the object it edits (its first selection handle, the one Tab reaches
       // from Add lettering), not to BODY. The text is committed as when the box is left by clicking outside.

@@ -1105,3 +1105,13 @@ body{height:100dvh;min-height:0;overflow:hidden}
 }
 /* The bar opens with its first button, so a divider above or beside that button would be a stray line. */
 @media (min-width:601px) and (max-width:1024px){.canvas .floating>:first-child.tb-start::before{display:none}}
+
+/* A touch screen has no hover, but the browser keeps a tapped control in its hover state until the next tap. Its grey
+   border and fill made the tapped Shape tile look selected next to the active tool, so under touch the hover state is not
+   drawn on a control that is not armed. A control that has keyboard focus after its box closed shows no ring or tooltip
+   (data-quiet-focus, set by focusQuietly in CanvasTextEditor.tsx). The 3D hint stays on one line at phone widths. */
+html[data-input="touch"] .icon-button:not(.active-tool):hover{background:transparent;border-color:transparent;color:#66726c}
+html[data-input="touch"] .tool-row .icon-button:not(.active-tool):hover{background:#f6f7f5;border-color:transparent;color:#53635b}
+[data-quiet-focus]:focus-visible{outline:none}
+[data-quiet-focus]::after{display:none!important}
+#previewHint{white-space:nowrap;max-width:calc(100% - 24px);overflow:hidden;text-overflow:ellipsis}
