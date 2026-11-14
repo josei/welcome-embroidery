@@ -197,7 +197,7 @@ export function EditorIcons() {
         </symbol>
         {" "}
         <symbol id={"i-select-add"} viewBox={"0 0 24 24"}>
-          <path d={"M6 3l12 8-5.5 1.5L10 18z"} /><path d={"M18 14v7M14.5 17.5h7"} />
+          <rect x={"4"} y={"4"} width={"16"} height={"16"} rx={"2"} /><path d={"M12 8v8M8 12h8"} />
         </symbol>
         {" "}
         <symbol id={"i-line"} viewBox={"0 0 24 24"}>

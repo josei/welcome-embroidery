@@ -65,7 +65,7 @@ import {deletingGuideState, handModeState, panningState} from '../canvasModeStat
 import {setTraceDialogOpen} from '../traceDialogState.js';
 const groupLabel = t('Group ({shortcut})', {shortcut: shortcutLabel([{mod: true, key: 'G'}])});
 const ungroupLabel = t('Ungroup ({shortcut})', {shortcut: shortcutLabel([{mod: true, shift: true, key: 'G'}])});
-// Landscape phones (the bar is 52 px tall there). Tablets keep the bar, which also holds the grid chip, without a selection.
+// Landscape phones (the bar is 52 px tall there).
 const NARROW_QUERY = '(max-height: 500px)';
 const subscribeNarrow = (listen: () => void) => {
  const media = window.matchMedia(NARROW_QUERY);
@@ -101,7 +101,8 @@ export function EditorLayout() {
  const landscapePhone = useSyncExternalStore(subscribeLandscapePhone, landscapePhoneNow);
  const selection = useSyncExternalStore(selectionState.subscribe, selectionState.get);
  const hasSelection = selection.selected !== null || selection.multi.size > 0;
- // On a landscape phone the selection bar is contextual, so it is shown only with a selection.
+ // Below desktop the selection bar is contextual: it is shown only with a selection, so an empty bar never covers the drawing.
+ // At desktop widths it stays, because it also holds the grid and snap controls.
  const narrow = useSyncExternalStore(subscribeNarrow, narrowNow);
  const selectionLabels = useSyncExternalStore(selectionLabelsState.subscribe, selectionLabelsState.get);
  const view = useSyncExternalStore(viewMode.subscribe, viewMode.get);
@@ -218,7 +219,7 @@ export function EditorLayout() {
   );
  const toolRail = phone ? phoneDock : deskToolRail;
  const floatingBar = (
-             <div className={"floating"} role={"toolbar"} aria-label={"Canvas tools"} hidden={phone ? (view !== 'design' || !hasSelection) : (narrow && !hasSelection)}>
+             <div className={"floating"} role={"toolbar"} aria-label={"Canvas tools"} hidden={(compact || narrow || phone) && (!hasSelection || (phone && view !== 'design'))}>
                {/* Select, Duplicate, Delete and Arrange lead the bar, so they stay in view at phone widths. */}
                <SelectToggleButton />
                <ActionButton flag="duplicate" className={"icon-button bar-edit"} id={"barDuplicate"} aria-label={duplicateLabel} title={duplicateLabel}
