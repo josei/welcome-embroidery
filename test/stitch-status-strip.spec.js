@@ -85,3 +85,34 @@ for(const lang of ['en','es']) {
   expect(result.h).toBeGreaterThanOrEqual(44);
  });
 }
+
+// On the landscape phone and the tablet the status row holds one progress state (the compile or issue text) and the Messages
+// pill. The playback row above already reports the simulation, so its text is not repeated on the status row.
+const ONE_ROW=[[844,390],[768,1024]];
+for(const [w,h] of ONE_ROW) for(const lang of ['en','es']) {
+ test(`the status row shows one progress state beside Messages (${w}x${h} ${lang})`,async({page})=>{
+  await openStitches(page,w,h,lang);
+  const shown=await page.locator('#playbackProgress').isVisible();
+  expect(shown).toBe(false);
+  await expect(page.locator('#messagesBtn')).toBeVisible();
+  await expect(page.locator('#count')).toBeVisible();
+ });
+
+ test(`the status text and the thread summary are not cut off (${w}x${h} ${lang})`,async({page})=>{
+  await openStitches(page,w,h,lang);
+  const cut=await page.evaluate(()=>[...document.querySelectorAll('#count,.playback-summary,#playbackStitches,#playbackTime')]
+   .filter(e=>getComputedStyle(e).display!=='none'&&(e.scrollWidth>e.clientWidth+1||e.scrollHeight>e.clientHeight+1)).map(e=>`${e.id||e.className}: ${e.textContent}`));
+  expect(cut).toEqual([]);
+ });
+
+ test(`the playback strip does not cover the hoop at the bottom edge (${w}x${h} ${lang})`,async({page})=>{
+  await openStitches(page,w,h,lang);
+  await page.getByRole('button',{name:lang==='es'?'Ajustar bastidor':'Fit hoop',exact:true}).first().click();
+  const hit=await page.evaluate(()=>{
+   const canvas=document.querySelector('.layout main>.canvas').getBoundingClientRect();
+   const footer=document.querySelector('.layout main>footer').getBoundingClientRect();
+   return {canvasBottom:canvas.bottom,footerTop:footer.top};
+  });
+  expect(hit.canvasBottom).toBeLessThanOrEqual(hit.footerTop+0.5);
+ });
+}

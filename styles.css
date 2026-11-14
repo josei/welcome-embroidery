@@ -1133,3 +1133,18 @@ label:has(> input[type=checkbox]){display:flex;align-items:center;gap:8px}
 .layout main>.tool-rail{padding-left:4px;padding-right:4px;gap:1px}
 .layout main>.tool-rail .rail-label{font-size:10.5px;letter-spacing:-.02em}
 }
+
+/* Stitches and 3D on a landscape phone and on tablets. The status row keeps one progress state, the compile or issue text,
+   beside the Messages pill: the playback row above already reports how far the simulation has run, so its "Ready to
+   simulate" or percentage is not repeated on the status row (the phone portrait layout already drops it). The status text
+   may take two lines inside the 44 px row rather than being cut after a few words. On tablets the playback row is taller,
+   so the thread summary can wrap instead of ending in an ellipsis. */
+@media (min-width:601px) and (max-width:1024px),(orientation:landscape) and (max-height:500px) and (max-width:1000px){
+.layout main:not(.design-view)>footer>#playbackProgress{display:none}
+.layout main:not(.design-view)>footer>#count{white-space:normal;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;line-height:1.25;overflow:hidden}
+}
+@media (min-width:601px) and (max-width:1024px) and (min-height:501px){
+.layout main:not(.design-view)>footer{height:107px;min-height:107px}
+.layout main:not(.design-view)>footer>.playback-bar{height:62px;min-height:62px}
+.layout main:not(.design-view) .playback-bar .playback-summary{white-space:normal;overflow:visible;text-overflow:clip;line-height:1.25}
+}
