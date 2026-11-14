@@ -65,7 +65,8 @@ export function createCanvas(/** @type {any} */ api){
   // wider container (a folded panel) would stretch it again, so the scene is laid out across #art's own box.
   function drawArea(){const r=svg.getBoundingClientRect(),c=container.getBoundingClientRect();
     return {w:Math.max(1,r.width),h:Math.max(1,r.height),x:r.left-c.left,y:r.top-c.top};}
-  function toScreen(/** @type {any} */ x,/** @type {any} */ y){const {w,h}=size();return [(x-vp.cx)*vp.s+w/2,(y-vp.cy)*vp.s+h/2];}
+  // Screen points are in the canvas container's coordinates, the drawing sits at the drawing area's offset within it.
+  function toScreen(/** @type {any} */ x,/** @type {any} */ y){const {x:ox,y:oy,w,h}=drawArea();return [(x-vp.cx)*vp.s+ox+w/2,(y-vp.cy)*vp.s+oy+h/2];}
   function apply(){const {w,h}=drawArea();svg.setAttribute('viewBox',`${vp.cx-w/(2*vp.s)} ${vp.cy-h/(2*vp.s)} ${w/vp.s} ${h/vp.s}`);
     svg.setAttribute('preserveAspectRatio','none');api.onViewport?.(vp);drawRulers();refresh();}
   function fitRect(/** @type {any} */ x0,/** @type {any} */ y0,/** @type {any} */ x1,/** @type {any} */ y1,margin=48,inset={top:0,right:0}){const {w,h}=size();
@@ -88,8 +89,10 @@ export function createCanvas(/** @type {any} */ api){
    * @param {number} [clientX]
    * @param {number} [clientY]
    */
-  function zoomAt(factor,clientX,clientY){const {w,h}=size(),r=container.getBoundingClientRect(),px=(clientX??r.left+w/2)-r.left,py=(clientY??r.top+h/2)-
-    r.top,wx=vp.cx+(px-w/2)/vp.s,wy=vp.cy+(py-h/2)/vp.s;vp.s=Math.max(.4,Math.min(160,vp.s*factor));vp.cx=wx-(px-w/2)/vp.s;vp.cy=wy-(py-h/2)/vp.s;apply();}
+  // The anchor is measured from the drawing area (#art), which is where the scene is drawn, not from the container.
+  function anchorIn(/** @type {any} */ clientX,/** @type {any} */ clientY){const {w,h}=drawArea(),sr=svg.getBoundingClientRect();
+    return {w,h,px:clientX==null?w/2:clientX-sr.left,py:clientY==null?h/2:clientY-sr.top};}
+  function zoomAt(factor,clientX,clientY){const {w,h,px,py}=anchorIn(clientX,clientY),wx=vp.cx+(px-w/2)/vp.s,wy=vp.cy+(py-h/2)/vp.s;vp.s=Math.max(.4,Math.min(160,vp.s*factor));vp.cx=wx-(px-w/2)/vp.s;vp.cy=wy-(py-h/2)/vp.s;apply();}
   function zoomTo100(){zoomAt(PX_PER_MM/vp.s);}
   container.addEventListener('wheel',(/** @type {any} */ e)=>{if(e.target.closest?.('#preview3d,.floating,.zoombar,#ctxMenu'))return;e.preventDefault();
     if(wheelZooms(e))zoomAt(wheelZoomFactor(e),e.clientX,e.clientY);
@@ -302,10 +305,9 @@ export function createCanvas(/** @type {any} */ api){
   function cancelPreview(){if(previewFrame)cancelAnimationFrame(previewFrame);previewFrame=0;previewPending=null;}
   function cancelState(){if(!state)return;restore(state.els||[]);if(state.type==='move'){cancelPreview();api.previewMove?.(state.ids,0,0);}overlay.removeAttribute('transform');state=null;smartLines=[];panningState.set(false);
     deletingGuideState.set(false);refresh();}
-  function pinchState(){const [a,b]=touches.values(),r=container.getBoundingClientRect(),{w,h}=size(),mx=(a.x+b.x)/2-r.left,my=(a.y+b.y)/2-r.top;
+  function pinchState(){const [a,b]=touches.values(),{w,h,px:mx,py:my}=anchorIn((a.x+b.x)/2,(a.y+b.y)/2);
     return {type:'pinch',dist:Math.hypot(a.x-b.x,a.y-b.y)||1,s0:vp.s,wx:vp.cx+(mx-w/2)/vp.s,wy:vp.cy+(my-h/2)/vp.s};}
-  function pinchTo(/** @type {any} */ s){const [a,b]=touches.values(),r=container.getBoundingClientRect(),{w,h}=size(),mx=(a.x+b.x)/2-r.left,my=(a.y+b.y)/2-
-    r.top;
+  function pinchTo(/** @type {any} */ s){const [a,b]=touches.values(),{w,h,px:mx,py:my}=anchorIn((a.x+b.x)/2,(a.y+b.y)/2);
   vp.s=Math.max(.4,Math.min(160,s.s0*Math.hypot(a.x-b.x,a.y-b.y)/s.dist));
   vp.cx=s.wx-(mx-w/2)/vp.s;
   vp.cy=s.wy-(my-h/2)/vp.s;
