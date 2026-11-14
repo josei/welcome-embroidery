@@ -103,4 +103,6 @@ export const ES_ADDITIONS={
 'Done':'Listo',
 'Finish path':'Terminar trazado',
 'Tap outside the box to save the text.':'Toca fuera del cuadro para guardar el texto.',
+'Grid and zoom':'Cuadrícula y zoom',
+'Selected object':'Objeto seleccionado',
 };

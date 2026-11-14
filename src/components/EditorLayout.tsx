@@ -1,7 +1,7 @@
 import {layoutState} from '../layoutState.js';
 import {inspectorOpenState} from '../inspectorOpenState.js';
 import {useTabletPortrait} from '../tabletLayoutState.js';
-import {closePhoneSheet, isPhoneSheetLayout, phoneSheetDetent, phoneSheetState, usePhonePortrait} from '../phoneSheetState.js';
+import {closePhoneSheet, isPhoneSheetLayout, phoneSheetDetent, phoneSheetState, togglePhoneSheet, usePhonePortrait} from '../phoneSheetState.js';
 import {attachSheetDrag, firstSheetControl} from '../phoneSheetDrag.js';
 import {selectionState} from '../selectionState.js';
 import {selectionLabelsState} from '../selectionLabelsState.js';
@@ -82,6 +82,8 @@ const subscribeLandscapePhone = (listen: () => void) => {
 const landscapePhoneNow = () => window.matchMedia(LANDSCAPE_PHONE_QUERY).matches;
 const duplicateLabel = t('Duplicate selected object');
 const deleteLabel = t('Delete selected object');
+const propertiesLabel = t('Properties');
+const selectionBarLabel = t('Selected object');
 
 // The editor layout: the object list, the canvas and the inspector. Rendered by React; ids match the markup it
 // replaced, because the keyboard shortcuts and tests address them.
@@ -283,6 +285,30 @@ export function EditorLayout() {
                <PathNodeButtons />
              </div>
   );
+ // On a phone the selection bar carries the three commands a selected object needs, so they are one tap away. It is shown only
+ // with a selection, as on the tablet. Portrait phones place it as a strip above the dock; landscape phones float it over the canvas.
+ const phoneBar = (
+             <div className={"floating phone-selection"} role={"toolbar"} aria-label={selectionBarLabel} hidden={!hasSelection || view !== 'design'}>
+               <ActionButton flag="duplicate" className={"icon-button"} id={"barDuplicate"} aria-label={duplicateLabel} title={duplicateLabel}
+                 data-tooltip={duplicateLabel} onClick={() => toolbarActions.duplicate()}>
+                 <svg className={"icon"}>
+                   <use href={"#i-copy"} />
+                 </svg>
+               </ActionButton>
+               <ActionButton flag="remove" className={"icon-button"} id={"barDelete"} aria-label={deleteLabel} title={deleteLabel}
+                 data-tooltip={deleteLabel} onClick={() => toolbarActions.remove()}>
+                 <svg className={"icon"}>
+                   <use href={"#i-delete"} />
+                 </svg>
+               </ActionButton>
+               <button className={"icon-button"} id={"barProperties"} aria-label={propertiesLabel} title={propertiesLabel}
+                 data-tooltip={propertiesLabel} onClick={() => togglePhoneSheet('properties')}>
+                 <svg className={"icon"}>
+                   <use href={"#i-sliders"} />
+                 </svg>
+               </button>
+             </div>
+ );
  return (
   <>
     <div className={"layout"}>
@@ -317,6 +343,7 @@ export function EditorLayout() {
           <ZoomBar />
           <PreviewPanel />
           {phone || landscapePhone ? null : floatingBar}
+          {landscapePhone ? phoneBar : null}
           <svg id={"art"} viewBox={"-60 -60 120 120"} tabIndex={0} role={"application"} aria-label={designName(canvasDoc.doc.objects ?? [], canvasCounts)} {...referenceCanvasHandlers}>
             <defs>
               <pattern id={"linen"} width={"2.6"} height={"2.6"} patternUnits={"userSpaceOnUse"}>
@@ -340,6 +367,7 @@ export function EditorLayout() {
           </svg>
           <CanvasTextEditor />
         </div>
+        {phone ? phoneBar : null}
         {phone && view !== 'design' ? <div className={"phone-playback"}><PlaybackBar /></div> : null}
         {phone ? toolRail : null}
         <footer>

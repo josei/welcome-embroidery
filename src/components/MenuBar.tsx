@@ -309,8 +309,8 @@ export function ViewMenu() {
 }
 
 /** The phone Menu: an icon button in the top bar opens a full-height sheet. It has a
- * Command palette search field, then the desktop menu groups in the desktop order (File, Edit, Arrange), then View, then Settings
- * and Help. Each row has an icon and a short label. Keyboard shortcuts are not listed on phones. Every row runs the same command as its desktop counterpart.
+ * Command palette search field, then View (Layers, Properties and the 2D, Stitches and 3D switch, so they need no scrolling),
+ * then the desktop menu groups in the desktop order (File, Edit, Arrange), then grid and zoom, then Settings and Help. Each row has an icon and a short label. Keyboard shortcuts are not listed on phones. Every row runs the same command as its desktop counterpart.
  * On a phone the Menu is the only navigation: the canvas bar's commands and the More tools panel are listed here too. */
 const VIEW_ROWS = [
  {id: 'design', label: '2D', icon: 'i-rect'},
@@ -382,6 +382,10 @@ export function PhoneMenu() {
  const settingsHint = agent.active ? t('Settings: agent connected') : agent.waiting ? t('Settings: waiting for agent') : undefined;
  const rows: Row[] = [
   {id: 'menuCommandPalette', label: t('Command palette'), icon: 'i-search', className: 'menu-search', run: () => setPaletteOpen(true)},
+  {heading: t('View')},
+  {id: 'menuLayers', label: t('Layers'), icon: 'i-layers', hint: sheet === 'layers' ? t('Shown now') : undefined, run: () => togglePhoneSheet('layers')},
+  {id: 'menuProperties', label: t('Properties'), icon: 'i-sliders', hint: sheet === 'properties' ? t('Shown now') : undefined, run: () => togglePhoneSheet('properties')},
+  ...viewRows,
   {heading: t('File')},
   {id: 'menuNew', label: t('New'), icon: 'i-new', run: () => newProject()},
   // The file inputs are hidden in the header; a click on them opens the same pickers as the Open and Import buttons did.
@@ -392,10 +396,8 @@ export function PhoneMenu() {
   {id: 'menuExport', label: t('Export'), icon: 'i-export', run: () => openExportDialog()},
   {heading: t('Edit')}, ...edit, ...addRows, ...barRows,
   {heading: t('Arrange')}, ...arrange, ...arrangeBarRows,
-  {heading: t('View')}, ...viewRows,
+  {heading: t('Grid and zoom')},
   ...gridRows,
-  {id: 'menuLayers', label: t('Layers'), icon: 'i-layers', hint: sheet === 'layers' ? t('Shown now') : undefined, run: () => togglePhoneSheet('layers')},
-  {id: 'menuProperties', label: t('Properties'), icon: 'i-sliders', hint: sheet === 'properties' ? t('Shown now') : undefined, run: () => togglePhoneSheet('properties')},
   {id: 'menuFitHoop', label: t('Fit hoop'), icon: 'i-fit', run: () => zoomActions.fitHoop()},
   {heading: t('Settings and Help')},
   {id: 'menuSettings', label: t('Settings'), icon: 'i-gear', hint: settingsHint, run: () => setSettingsOpen(true)},

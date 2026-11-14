@@ -1,6 +1,6 @@
 import {test,expect} from '@playwright/test';
 
-// At phone sizes the canvas bar is not shown, so Duplicate, Delete, Arrange and the Select toggle are Menu rows. With a selection
+// At phone sizes the selection bar carries Duplicate, Delete and Properties; Arrange and the Select toggle are Menu rows. With a selection
 // the Menu runs them, and the Select toggle makes a tap add an object to the selection. Checked in English and Spanish.
 const SIZES=[[390,844],[844,390]];
 
@@ -21,13 +21,13 @@ const menuRow=async(page,id)=>{
 };
 
 for(const [width,height] of SIZES) for(const lang of ['en','es']){
- test(`the canvas bar is absent and Duplicate, Delete and Arrange are Menu rows at ${width}x${height} (${lang})`,async({page})=>{
+ test(`the Menu runs Duplicate and Delete, and Arrange is in the Menu, at ${width}x${height} (${lang})`,async({page})=>{
   const errors=await openEditor(page,width,height,lang);
   const rows=page.locator('.object-row');
   const start=await rows.count();
   await page.locator('#rect').click();
   await expect(rows,'the new object is added').toHaveCount(start+1);
-  await expect(page.locator('#barDuplicate'),'no canvas bar with a selection').toHaveCount(0);
+  await expect(page.locator('#barDuplicate'),'the selection bar is shown with a selection').toBeVisible();
 
   await (await menuRow(page,'menuDuplicate')).click();
   await expect(rows,'duplicate adds one').toHaveCount(start+2);

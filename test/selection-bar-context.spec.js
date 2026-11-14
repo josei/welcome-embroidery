@@ -103,7 +103,7 @@ for(const lang of ['en','es']){
  test(`a landscape phone has no selection bar and keeps its selection commands in the Menu (${lang})`,async({page})=>{
   const errors=await openEditor(page,844,390,lang);
   await page.locator('#rect').click();
-  await expect(page.locator('.layout main>.floating'),'no bar on a phone').toHaveCount(0);
+  await expect(page.locator('.phone-selection'),'the selection bar is shown with a selection').toBeVisible();
 
   // The commands the bar carries below desktop are all reachable as Menu rows.
   await page.locator('#phoneMenu').click();

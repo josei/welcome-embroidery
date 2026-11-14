@@ -803,7 +803,7 @@ body{height:100vh;height:100dvh;min-height:0;overflow:hidden}
 body{height:100vh;height:100dvh;min-height:0;overflow:hidden;overscroll-behavior:none}
 .top{height:52px;padding:0 6px;gap:4px;box-sizing:border-box;flex:none}
 .layout{display:flex;flex-direction:column;grid-template-columns:none;height:calc(100vh - 52px);height:calc(100dvh - 52px);min-height:0;overflow:hidden}
-.layout main{display:grid;grid-template-columns:minmax(0,1fr);grid-template-rows:minmax(0,1fr) auto auto auto;flex:1 1 0;order:0;width:100%;min-width:0;min-height:0;position:relative;overflow:hidden}
+.layout main{display:grid;grid-template-columns:minmax(0,1fr);grid-template-rows:minmax(0,1fr) auto auto auto auto;flex:1 1 0;order:0;width:100%;min-width:0;min-height:0;position:relative;overflow:hidden}
 .layout main>.canvas{grid-row:1;height:auto;min-height:0;position:relative;overflow:hidden;overscroll-behavior:none;touch-action:none}
 .canvas>#rulerTop,.canvas>#rulerLeft,.canvas>.ruler-corner,.canvas .canvas-views{display:none}
 .canvas .zoombar{position:absolute;left:auto;top:auto;right:12px;bottom:12px;z-index:5;display:flex;flex-direction:column;align-items:center;gap:6px;width:auto;height:auto;margin:0;padding:0;border:0;border-radius:0;background:none;box-shadow:none}
@@ -817,13 +817,15 @@ body{height:100vh;height:100dvh;min-height:0;overflow:hidden;overscroll-behavior
 .canvas-hint{bottom:168px}
 .layout main>.floating{grid-row:2;position:static;top:auto;right:auto;bottom:auto;left:auto;transform:none;z-index:auto;display:flex;flex-direction:row;flex-wrap:nowrap;align-items:center;justify-content:flex-start;align-content:center;gap:4px;width:auto;height:52px;max-width:none;max-height:none;margin:0;padding:4px 6px;box-sizing:border-box;grid-template-columns:none;overflow-x:auto;overflow-y:hidden;scrollbar-width:none;border:0;border-top:1px solid #e3e6e1;border-radius:0;background:#fff;box-shadow:none}
 .layout main>.floating[hidden]{display:none}
+/* Rows at phone portrait: canvas, selection bar, playback, dock, status line. Each is placed by row, so a hidden bar or playback
+   leaves an empty row of no height instead of moving the dock and status line up into its place. */
 .layout main>.floating .icon-button{width:44px;min-width:44px;height:44px;flex:none}
 .layout main>.floating>#snap,.layout main>.floating>#snapObj,.layout main>.floating>#gridCycle,.layout main>.floating>#grid{display:none}
 /* The playback bar takes two rows at phone portrait. Reset and play, and the time and stitch readout beside them, fill the
    first; the timeline spans the whole width under them, so the track is as wide as the bar instead of the 160 px that was
    left over beside the readout, which pushed its right end past the screen edge and put the last stitches out of reach.
    Reset and play stay 44 px, and the readout keeps the current and total time and stitch count, one label per line. */
-.layout main>.phone-playback{grid-row:2;display:flex;align-items:center;height:auto;min-height:0;min-width:0;box-sizing:border-box;padding:4px 8px;border-top:1px solid #e3e6e1;background:#fff;overflow:hidden}
+.layout main>.phone-playback{grid-row:3;display:flex;align-items:center;height:auto;min-height:0;min-width:0;box-sizing:border-box;padding:4px 8px;border-top:1px solid #e3e6e1;background:#fff;overflow:hidden}
 .layout main>.phone-playback .playback-bar{display:grid;grid-template-columns:44px 44px minmax(0,1fr);grid-template-rows:auto auto;align-items:center;column-gap:8px;row-gap:2px;width:100%;min-width:0}
 .layout main>.phone-playback .playback-control{grid-row:1}
 /* The counter stays on one line, in the row's third column; the track below it takes the width. */
@@ -831,7 +833,7 @@ body{height:100vh;height:100dvh;min-height:0;overflow:hidden;overscroll-behavior
 .layout main>.phone-playback .playback-time span{white-space:nowrap;overflow:visible;text-overflow:clip}
 .layout main>.phone-playback .playback-track{grid-column:1/-1;grid-row:2;min-width:0}
 .layout main>.phone-playback .playback-summary{white-space:normal;overflow:visible;text-overflow:clip}
-.layout main>.tool-rail{grid-row:3;position:static;inset:auto;z-index:auto;display:flex;flex-direction:row;flex-wrap:nowrap;align-items:center;justify-content:flex-start;align-content:center;gap:4px;width:auto;height:calc(56px + env(safe-area-inset-bottom));max-height:none;max-width:none;margin:0;padding:6px 8px calc(6px + env(safe-area-inset-bottom));box-sizing:border-box;overflow-x:auto;overflow-y:hidden;scrollbar-width:none;border:0;border-top:1px solid #e3e6e1;border-radius:0;background:#fff;box-shadow:none}
+.layout main>.tool-rail{grid-row:4;position:static;inset:auto;z-index:auto;display:flex;flex-direction:row;flex-wrap:nowrap;align-items:center;justify-content:flex-start;align-content:center;gap:4px;width:auto;height:calc(56px + env(safe-area-inset-bottom));max-height:none;max-width:none;margin:0;padding:6px 8px calc(6px + env(safe-area-inset-bottom));box-sizing:border-box;overflow-x:auto;overflow-y:hidden;scrollbar-width:none;border:0;border-top:1px solid #e3e6e1;border-radius:0;background:#fff;box-shadow:none}
 .layout main>.tool-rail .icon-button{width:44px;min-width:44px;height:44px;flex:none}
 .layout main:has(.canvas.preview-mode)>.tool-rail{display:none}
 /* At phone portrait the dock is six buttons on one row, each with its label under the
@@ -841,7 +843,7 @@ body{height:100vh;height:100dvh;min-height:0;overflow:hidden;overscroll-behavior
 .layout main>.tool-rail .icon-button .icon{width:20px;height:20px;flex:none}
 .layout main>.tool-rail .rail-label{display:block;max-width:100%;overflow:hidden;white-space:nowrap;font-size:11px;line-height:1.1;color:#4d5a54}
 .layout main>.tool-rail .icon-button.active-tool .rail-label{color:var(--teal-deep)}
-.layout main>footer{grid-row:4;position:relative;flex:none;height:28px;min-height:0;margin:0;padding:0 12px;box-sizing:border-box;display:flex;align-items:center;gap:8px;overflow:visible;background:#fff;border:0;border-top:1px solid #e3e6e1}
+.layout main>footer{grid-row:5;position:relative;flex:none;height:28px;min-height:0;margin:0;padding:0 12px;box-sizing:border-box;display:flex;align-items:center;gap:8px;overflow:visible;background:#fff;border:0;border-top:1px solid #e3e6e1}
 .layout main>footer>:not(#count):not(#toast){display:none}
 .layout main>footer>#count{flex:1 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;line-height:26px;font-size:var(--fs-caption)}
 /* Toasts stack above the contextual bar, so they never cover the dock (56 px) or the bar (52 px)
@@ -956,6 +958,9 @@ body{height:100dvh;min-height:0;overflow:hidden}
 #phoneMenuList .menu-icon{flex:none;width:20px;height:20px}
 #phoneMenuList .menu-item small{flex:none;margin-left:auto;white-space:nowrap}
 #phoneMenuList .menu-heading{white-space:nowrap;padding:12px 10px 4px}
+/* A landscape phone is only 390 px tall: the tighter heading and title spacing lets the first Menu section (View: Layers, Properties and
+   the 2D, Stitches and 3D rows) sit in the list with no scrolling. */
+@media (max-height:500px){#phoneMenuList .menu-heading{padding:6px 10px 0}#phoneMenuList .menu-title{margin-bottom:0}}
 /* The title row stays at the top of the list and takes a downward swipe that closes the Menu (MenuBar.tsx Dropdown). */
 #phoneMenuList .menu-title{position:sticky;top:-8px;z-index:1;display:flex;align-items:center;min-height:44px;margin:-8px -8px 4px;padding:0 18px;background:#fff;font-size:var(--fs-large);font-weight:var(--fw-emphasis);color:#243b32;touch-action:none;user-select:none;cursor:default}
 

@@ -2,7 +2,7 @@ import {test,expect} from '@playwright/test';
 
 // Selecting an object resizes the canvas: on a portrait tablet a touch tap on the drawing folds the Layers column to its
 // 44 px rail. The drawing keeps its place on screen through that resize, so the hoop does not slide away from the finger
-// and the next tap lands on the same object. On a phone no selection bar opens, so the canvas keeps its height and the
+// and the next tap lands on the same object. On a portrait phone the selection bar takes its own strip below the canvas, so the
 // drawing stays put as well.
 
 test.use({hasTouch:true});
@@ -76,10 +76,11 @@ test('390x844: a touch tap on the leaf leaves the hoop where it was',async({brow
  await page.goto('/?lang=en');
  await expect(page.locator('#hoopRing')).toBeVisible();
  const hoop=await hoopBox(page),leaf=await leafBox(page);
- // A phone has no selection bar to open under the canvas, so selecting must not shorten it.
+ // Selecting opens the phone bar. On a portrait phone it takes its own strip, so the canvas height must not change.
  await page.touchscreen.tap(leaf.left+leaf.width/2,leaf.top+leaf.height/2);
  await expect.poll(()=>selectedIds(page)).toEqual(['leaf']);
- await expect(page.locator('.layout main>.floating')).toHaveCount(0);
+ // The phone bar sits in its own strip under the canvas, not over it, so it can't cover the drawing.
+ await expect(page.locator('.layout main>.floating.phone-selection')).toBeVisible();
  await expectFixed(hoop,await hoopBox(page),'the hoop');
  await expectFixed(leaf,await leafBox(page),'the leaf');
  expect(errors).toEqual([]);

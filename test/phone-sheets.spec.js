@@ -253,6 +253,8 @@ for(const layout of LAYOUTS){
    await expect(list).toBeVisible();
    await dragDown(page,page.locator('#menuCommandPalette'),700);
    await expect(list).toBeVisible();
+   // The Menu's first section is short, so File's first row may sit below the fold; scroll it into view before the drag.
+   await page.locator('#menuNew').scrollIntoViewIfNeeded();
    await dragDown(page,page.locator('#menuNew'),700);
    await expect(list).toBeVisible();
    await page.keyboard.press('Escape');
@@ -284,8 +286,9 @@ test.describe('phone toast placement',()=>{
   await expect(toast).toBeVisible();
   const tb=await toast.boundingBox();
   const dock=await page.locator('.layout main>.tool-rail').boundingBox();
-  // With a selection the phone has no canvas bar: its commands are in the Menu, so the dock is the only bar under the canvas.
-  await expect(page.locator('.layout main>.floating'),'no canvas bar on a phone').toHaveCount(0);
-  expect(tb.y+tb.height,'toast bottom edge is above the dock').toBeLessThanOrEqual(dock.y);
+  // With a selection the phone shows its selection bar above the dock; the toast sits above both.
+  const bar=await page.locator('.layout main>.floating').boundingBox();
+  expect(tb.y+tb.height,'toast bottom edge is above the selection bar').toBeLessThanOrEqual(bar.y);
+  expect(bar.y+bar.height,'selection bar is above the dock').toBeLessThanOrEqual(dock.y);
  });
 });

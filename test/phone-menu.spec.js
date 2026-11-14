@@ -17,7 +17,7 @@ async function openEditor(page,width,height,lang){
 }
 
 for(const [width,height] of SIZES) for(const lang of ['en','es']){
- test(`the phone Menu is an icon button and its sheet lists the five groups at ${width}x${height} (${lang})`,async({page})=>{
+ test(`the phone Menu is an icon button and its sheet lists its groups at ${width}x${height} (${lang})`,async({page})=>{
   const errors=await openEditor(page,width,height,lang);
   const menu=page.locator('#phoneMenu');
   await expect(menu,'the Menu control has an accessible name').toHaveAttribute('aria-label',lang==='es'?/.+/:'Menu');
@@ -32,8 +32,8 @@ for(const [width,height] of SIZES) for(const lang of ['en','es']){
   const list=page.locator('#phoneMenuList');
   await expect(list).toBeVisible();
   await expect(list.locator('.menu-heading')).toHaveText(lang==='es'
-   ? ['Archivo','Editar','Organizar','Vista','Ajustes y ayuda']
-   : ['File','Edit','Arrange','View','Settings and Help']);
+   ? ['Vista','Archivo','Editar','Organizar','Cuadrícula y zoom','Ajustes y ayuda']
+   : ['View','File','Edit','Arrange','Grid and zoom','Settings and Help']);
   // The search field leads, and the sheet fills the window. On a phone the Menu is the only navigation: the canvas bar and the More
   // tools panel are gone, and their commands are rows in the groups above.
   await expect(list.locator('[role="menuitem"]').first()).toHaveAttribute('id','menuCommandPalette');

@@ -66,8 +66,8 @@ for(const lang of ['en','es']){
  test(`no two regions overlap at 390x844, with a selection too (${lang})`,async({page})=>{
   const errors=await openEditor(page,lang);
   await page.locator('#rect').click();
-  // The canvas bar is not shown on a phone with a selection: its commands are in the Menu.
-  await expect(page.locator('.layout main>.floating')).toHaveCount(0);
+  // With a selection the phone shows its selection bar: Duplicate, Delete and Properties.
+  await expect(page.locator('.layout main>.floating')).toBeVisible();
   const g=await regions(page);
   const boxes=[['top',g.top],['zoom',g.zoom],['bar',g.bar],['playback',g.playback],['dock',g.dock],['status',g.status]].filter(([,b])=>b);
   const bad=[];
@@ -75,7 +75,8 @@ for(const lang of ['en','es']){
   expect(bad,'overlapping regions').toEqual([]);
   // The regions stack: top bar, canvas, contextual bar, dock, status line, with no gap or overlap between them.
   expect(Math.round(g.top.b),'canvas starts under the top bar').toBe(Math.round(g.canvas.y));
-  expect(Math.round(g.canvas.b),'the dock starts under the canvas').toBe(Math.round(g.dock.y));
+  expect(Math.round(g.canvas.b),'the selection bar starts under the canvas').toBe(Math.round(g.bar.y));
+  expect(Math.round(g.bar.b),'the dock starts under the selection bar').toBe(Math.round(g.dock.y));
   expect(Math.round(g.dock.b),'the status line starts under the dock').toBe(Math.round(g.status.y));
   const small=g.controls.filter(c=>c.w<44||c.h<44).map(c=>`${c.region}:${c.id}`);
   expect(small,'controls under 44x44 with a selection').toEqual([]);
@@ -123,9 +124,9 @@ test('the portrait screenshots (EN and ES) are written to the artifacts folder',
   // Opening the Menu closes the sheet; toggling the Menu shut leaves the selection on the canvas.
   await page.locator('#phoneMenu').click();
   await page.locator('#phoneMenu').click();
-  // The Menu closes and the canvas shows the selection; a phone has no canvas command bar to open under it.
+  // The Menu closes and the canvas shows the selection with its bar.
   await expect(page.locator('#phoneMenuList')).toHaveCount(0);
-  await expect(page.locator('.layout main>.floating')).toHaveCount(0);
+  await expect(page.locator('.layout main>.floating')).toBeVisible();
   await page.screenshot({path:`${ARTIFACTS}/phone-portrait-selected-${lang}.png`});
   // Menu open.
   await page.locator('#phoneMenu').click();

@@ -248,7 +248,7 @@ for(const [width,height] of [[667,375],[844,390]]) for(const lang of ['en','es']
   // Icons only: no visible text in the tool rail or the canvas tool bar. The grid chip's "mm" text is clipped to 1px, and its name is kept.
   const tools=await page.evaluate(()=>{
    const out=[];
-   for(const b of document.querySelectorAll('.canvas .tool-rail button, .canvas .floating button')){
+   for(const b of document.querySelectorAll('.canvas .tool-rail button, .canvas .floating:not(.phone-selection) button')){
     if(!b.getBoundingClientRect().width)continue;
     const label=b.querySelector('.grid-label');
     const text=label?(label.getBoundingClientRect().width>1?label.textContent:''):b.innerText.trim();

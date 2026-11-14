@@ -24,7 +24,8 @@ for(const size of [PHONE,TABLET]) test(`the Menu at ${size[0]}x${size[1]} lists 
  await openEditor(page,size);
  await page.locator('#phoneMenu').click();
  const headings=await page.locator('#phoneMenuList .menu-heading').allTextContents();
- expect(headings.slice(0,3)).toEqual(['File','Edit','Arrange']);
+ // View leads, so Layers, Properties and the view switch need no scrolling; the desktop groups follow it in order.
+ expect(headings.slice(0,4)).toEqual(['View','File','Edit','Arrange']);
 });
 
 // Command ids under each desktop menu, keyed by the menu's button id.

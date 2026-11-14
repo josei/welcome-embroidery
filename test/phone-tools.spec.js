@@ -125,12 +125,14 @@ test('the Menu button opens File, Edit, View and Settings and Help, and every en
  await menu.click();
  const list=page.locator('#phoneMenuList');
  await expect(list,'Menu opens').toBeVisible();
- await expect(list.locator('.menu-heading'),'the five groups').toHaveText(['File','Edit','Arrange','View','Settings and Help']);
+ await expect(list.locator('.menu-heading'),'the groups').toHaveText(['View','File','Edit','Arrange','Grid and zoom','Settings and Help']);
  const ids=await list.locator('[role="menuitem"]').evaluateAll(els=>els.map(e=>e.id));
  expect(ids,'Edit items are in the menu').toEqual(expect.arrayContaining(['menuUndo','menuCopy','menuDuplicate','menuSelectAll','menuRepeat']));
  expect(ids,'Delete and keyboard shortcuts are not listed on a phone').not.toEqual(expect.arrayContaining(['menuDelete','menuShortcuts']));
  let clicked=0;
  for(const id of ids){
+  // A view row (2D, Stitches, 3D) is listed first and changes the view, which hides the tool dock; return to 2D before the next row.
+  if(!(await page.locator('#rect').isVisible())){ if(!(await list.isVisible())) await menu.click(); await page.locator('#menuView-design').click(); }
   if(!(await list.isVisible())) await menu.click();
   const item=list.locator(`#${id}`);
   await item.scrollIntoViewIfNeeded();
