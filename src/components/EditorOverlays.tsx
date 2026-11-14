@@ -223,17 +223,19 @@ export function EditorOverlays() {
             {exportProblem}
           </p>
         ) : null}
-        <button
-          id={"download"}
-          disabled={exportDialog.busy || Boolean(exportDialog.refusal)}
-          aria-busy={exportDialog.busy}
-          onClick={e => { e.preventDefault(); void exportCurrent(); }}
-        >
-          {exportDialog.busy ? t("Downloading…") : t('Download {fmt} file', {fmt: exportKind(exportFormat.format)})}
-        </button>
-        <button>
-          {"Cancel"}
-        </button>
+        <div className={"dialog-actions"}>
+          <button
+            id={"download"}
+            disabled={exportDialog.busy || Boolean(exportDialog.refusal)}
+            aria-busy={exportDialog.busy}
+            onClick={e => { e.preventDefault(); void exportCurrent(); }}
+          >
+            {exportDialog.busy ? t("Downloading…") : t('Download {fmt} file', {fmt: exportKind(exportFormat.format)})}
+          </button>
+          <button>
+            {"Cancel"}
+          </button>
+        </div>
       </form>
     </dialog>
     <MessagesDialog />

@@ -3004,7 +3004,7 @@ test('export is labelled as a machine file, shows its file name, says it does no
  await expect(page.locator('#exportDialog h2')).toHaveText('Export');
  await expect(page.locator('#exportDialog label[for="format"]')).toHaveText('File format');
  await expect(page.locator('#exportDialog form > p#exportHint')).toHaveCount(1);
- await expect(page.locator('#exportDialog form > button#download')).toHaveText('Download DST file');
+ await expect(page.locator('#exportDialog .dialog-actions > button#download')).toHaveText('Download DST file');
  await pickFormat(page,'vp3');
  await expect(page.locator('#exportDialog h2')).toHaveText('Export');
  await expect(page.locator('#download')).toHaveText('Download VP3 file');

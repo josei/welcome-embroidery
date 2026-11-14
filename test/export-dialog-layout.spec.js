@@ -15,7 +15,7 @@ async function measureDialog(page,width,height,lang){
   const box=el=>{const b=el.getBoundingClientRect();return {x:b.x,y:b.y,w:b.width,h:b.height};};
   const d=document.querySelector('#exportDialog');
   const download=document.querySelector('#download');
-  const cancel=[...d.querySelectorAll('form>button')].find(b=>b!==download);
+  const cancel=[...d.querySelectorAll('.dialog-actions>button')].find(b=>b!==download);
   const lines=el=>{const r=document.createRange();r.selectNodeContents(el);return new Set([...r.getClientRects()].map(x=>Math.round(x.top))).size;};
   return {
    dialog:box(d),
@@ -57,7 +57,7 @@ for(const lang of ['en','es']) for(const size of [{width:390,height:844},{width:
    await page.locator('#format').selectOption(format);
    const m=await page.evaluate(()=>{
     const download=document.querySelector('#download');
-    const cancel=[...document.querySelectorAll('#exportDialog form>button')].find(b=>b!==download);
+    const cancel=[...document.querySelectorAll('#exportDialog .dialog-actions>button')].find(b=>b!==download);
     const lines=el=>{const r=document.createRange();r.selectNodeContents(el);return new Set([...r.getClientRects()].map(x=>Math.round(x.top))).size;};
     return {label:download.textContent.trim(),downloadLines:lines(download),cancelLines:lines(cancel),
      downloadOverflow:download.scrollWidth>download.clientWidth,cancelOverflow:cancel.scrollWidth>cancel.clientWidth};

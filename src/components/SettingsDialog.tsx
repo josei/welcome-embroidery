@@ -27,7 +27,7 @@ export function SettingsDialog() {
     <div className="settings-body">
      <fieldset className="settings-group">
       <legend>{t('Language')}</legend>
-      <div className="settings-choices">
+      <div className="segmented" role="group" aria-label={t('Language')}>
        <button type="button" id="langEn" aria-pressed={lang === 'en'} onClick={() => setLanguage('en')}>English</button>
        <button type="button" id="langEs" aria-pressed={lang === 'es'} onClick={() => setLanguage('es')}>Español</button>
       </div>
@@ -43,7 +43,7 @@ export function SettingsDialog() {
         Boolean).join(' ') || undefined} onClick={() => agentLinkActions.open()}>{t('Connect an AI agent')}</button>
      </fieldset>
     </div>
-    <button>{t('Close')}</button>
+    <div className="dialog-actions"><button>{t('Close')}</button></div>
    </form>
   </dialog>
  );

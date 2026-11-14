@@ -60,7 +60,7 @@ export function SelectTool() {
  return (
   <button aria-pressed={current === 'select'} className={toolClass(current, 'select')} onClick={() =>
     toolActions.press(
-    'select')} aria-label={tip} title={tip} data-tooltip={tip} id="select"><svg className="icon"><use href="#i-select"/></svg><span className="rail-label">{t('Choose')}</span></button>
+    'select')} aria-label={tip} title={tip} data-tooltip={tip} id="select"><svg className="icon"><use href="#i-select"/></svg><span className="rail-label">{t('Select')}</span></button>
  );
 }
 

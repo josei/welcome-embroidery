@@ -12,7 +12,7 @@ export function PreviewPanel() {
  return (
   <>
    <div id="previewHint" hidden={!preview.threeD}>{touch ? t('Drag to orbit · pinch to zoom · double-tap to reset') : t('Drag to orbit · scroll to zoom · double-click to reset')}</div>
-   <div id="previewView" hidden={!preview.threeD} role="group" aria-label={t('3D view')}>
+   <div id="previewView" className="segmented" hidden={!preview.threeD} role="group" aria-label={t('3D view')}>
     {VIEWS.map(([view, label]) => (
      <button key={view} type="button" aria-pressed={preview.view === view && !preview.orbited} onClick={() => previewActions.chooseView(view)}>{t(label)}</button>
     ))}

@@ -95,8 +95,8 @@ nav .icon-button:first-of-type{margin-left:auto}
 /* Single top bar: views and edit tools live in the header; the canvas gets the freed height. */
 .top .sep{width:1px;height:20px;background:#e3e6e1;flex:0 0 auto}
 .segmented{display:flex;background:#f1f3ef;border-radius:8px;padding:2px}
-.segmented button[data-view]{border:0;background:transparent;border-radius:6px;padding:6px 12px;color:#66726c}
-.segmented button[data-view].active{background:#fff;color:var(--teal);font-weight:var(--fw-emphasis);box-shadow:0 1px 2px #1d29251f}
+.segmented button{border:0;background:transparent;border-radius:6px;padding:6px 12px;color:#66726c}
+.segmented button[aria-pressed=true]{background:#fff;color:var(--teal);font-weight:var(--fw-emphasis);box-shadow:0 1px 2px #1d29251f}
 .edit-tools{display:flex;gap:2px}
 /* Delete sits apart from Duplicate and turns red only on hover, so a slip is less likely; its focus ring is the shared one. */
 /* Delete sits apart from Duplicate and turns red only on hover, so a slip is less likely; its focus ring is the shared one. */
@@ -261,7 +261,7 @@ label[hidden],button[hidden],.sel-hint[hidden]{display:none!important}
 #restoreDialog [hidden]{display:none!important}
 #discardDialog{width:380px}#discardDialog .discard-actions{justify-content:flex-end}#discardDialog .danger{color:#fff;background:#b42318;border-color:#b42318}#discardDialog .primary{color:#fff;background:var(--primary-fill);border-color:var(--primary-fill)}#discardDialog [hidden]{display:none!important}
 
-.keys-list{columns:260px auto;column-gap:28px;font-size:var(--fs-body);max-height:calc(100vh - 140px);overflow:auto}.keys-group{display:grid;grid-template-columns:auto 1fr;gap:5px 14px;break-inside:avoid;margin-bottom:6px}.keys-list kbd{font:var(--fw-emphasis) var(--fs-caption) ui-monospace,monospace;background:#f1f3ef;border:1px solid var(--field-line);border-radius:4px;padding:2px 6px;white-space:nowrap}.keys-list h4{grid-column:1/-1;margin:8px 0 0;font-size:var(--fs-caption);letter-spacing:.07em;text-transform:uppercase;color:#66726c}
+.keys-list{columns:260px auto;column-gap:28px;font-size:var(--fs-body);max-height:calc(100vh - 140px);overflow:auto}.keys-group{display:grid;grid-template-columns:auto 1fr;gap:5px 14px;break-inside:avoid;margin-bottom:6px}.keys-list kbd{display:inline-block;box-sizing:border-box;width:11em;text-align:center;font:var(--fw-emphasis) var(--fs-caption) ui-monospace,monospace;background:#f1f3ef;border:1px solid var(--field-line);border-radius:4px;padding:2px 6px;white-space:nowrap}.keys-list h4{grid-column:1/-1;margin:8px 0 0;font-size:var(--fs-caption);letter-spacing:.07em;text-transform:uppercase;color:#66726c}
 #keysDialog{width:min(900px,calc(100vw - 24px))}.plan-list{display:grid;gap:4px;font-size:var(--fs-body)}.plan-row{display:flex;align-items:center;gap:8px}.plan-row .sw{width:14px;height:14px;border-radius:50%;border:1px solid #0003;flex:none}.plan-row .n{margin-left:auto;color:#66726c}#planEmpty[hidden]{display:none}
 .canvas .floating{display:grid;grid-template-columns:repeat(14,30px);gap:6px 4px;justify-content:center;max-width:calc(100% - 64px);width:max-content}
 .floating .tb-start{position:relative}
@@ -290,7 +290,7 @@ body{height:auto;min-height:0;overflow-x:hidden;overflow-y:auto}
 .top .sep,#helpBtn{display:none}
 .top #export{order:2;margin-left:0}
 .segmented{order:4;flex:1 1 100%;display:grid;grid-template-columns:repeat(3,1fr)}
-.segmented button[data-view]{padding:7px 4px}
+.segmented button{padding:7px 4px}
 .top>.icon-button,.edit-tools{order:5}
 .top .icon-button{width:34px;height:34px;min-width:34px}
 .edit-tools{gap:2px}
@@ -661,7 +661,7 @@ input[type=checkbox]{accent-color:var(--teal)}
 .canvas .floating .grid-chip{width:44px;min-width:44px;height:44px;min-height:44px;grid-column:span 2}
 }
 .messages-btn{min-height:44px;padding:0 12px}
-.segmented button[data-view]{min-height:44px}
+.segmented button{min-height:44px}
 }
 @media (max-width:600px){
 .row-btn,.row-eye,.row-lock{width:44px;min-width:44px;height:44px;min-height:44px}
@@ -729,7 +729,7 @@ body{height:100vh;height:100dvh;min-height:0;overflow:hidden}
 .top .name-field{display:flex;flex:1 1 0;min-width:0}
 .top #phoneMenu{height:44px;min-height:44px;min-width:44px}
 /* The 2D / Stitches / 3D switch keeps the desktop's canvas placement and grows to 44 px touch targets. */
-.canvas .canvas-views .segmented button[data-view]{min-height:44px;padding:0 12px}
+.canvas .canvas-views .segmented button{min-height:44px;padding:0 12px}
 /* A tablet's canvas is too narrow for the 3D camera presets beside the switch: at 768 px they run into the
    switch, and a preset drawn under it takes the switch's taps. The presets drop below the switch. */
 #previewView{top:68px}
@@ -1010,13 +1010,16 @@ body{height:100dvh;min-height:0;overflow:hidden}
 @media (min-width:601px){.canvas .zoombar{left:72px}}
 }
 
+/* The action row in Export and Settings. Desktop stacks each button full width; phone and tablet set them in a right-aligned row (see below). */
+.dialog-actions{display:grid;gap:12px}
+
 /* Phone and tablet lay the Export dialog out as the desktop dialog is: a 340 px card whose fields keep the desktop's width.
    Download and Cancel sit side by side in one row at the foot, each half the card's width less the gap. Touch heights stay
    44 px and field text stays 16 px. Below the desktop breakpoint only. */
 @media (max-width:1100px){
 #exportDialog{width:340px;max-width:calc(100vw - 24px)}
 #exportDialog form{grid-template-columns:repeat(2,minmax(0,1fr));column-gap:8px}
-#exportDialog #download{padding-left:4px;padding-right:4px}
+.dialog-actions{display:flex;justify-content:flex-end;align-items:center;gap:8px}.dialog-actions button{white-space:nowrap}
 #exportDialog form>:not(button){grid-column:1/-1}
 #exportDialog select,#exportDialog input:not([type=checkbox]),#exportDialog button{min-height:44px}
 }
@@ -1042,9 +1045,7 @@ body{height:100dvh;min-height:0;overflow:hidden}
    rather than the browser's grooved fieldset border. */
 #settingsDialog .settings-group{min-width:0;margin:0;padding:8px 12px 12px;border:1px solid var(--field-line);border-radius:10px;background:#fff}
 #settingsDialog .settings-group>legend{padding:0 4px;margin-left:-4px;font-size:var(--fs-body);color:#66726c}
-#settingsDialog .settings-choices{display:inline-flex;gap:2px;padding:2px;background:#f1f3ef;border-radius:8px}
-#settingsDialog .settings-choices button{border:0;background:transparent;border-radius:6px;padding:6px 12px;color:#66726c;box-shadow:none}
-#settingsDialog .settings-choices button[aria-pressed=true]{background:#fff;color:var(--teal);font-weight:var(--fw-emphasis);box-shadow:0 1px 2px #1d29251f}
+#settingsDialog .segmented{display:inline-flex}
 
 /* The dialog keeps its title and Close row in view. Only the groups between them scroll, which matters on a phone held in
    landscape, where the whole card is taller than the screen. In landscape on a phone or tablet the card is capped at 480 px
@@ -1060,6 +1061,8 @@ body{height:100dvh;min-height:0;overflow:hidden}
 /* Phone and tablet: the 3D overlay's four camera presets and the Show pull row are 44 px touch targets. The pull panel
    starts below the taller preset row, so the two never overlap. The tick's visual stays small; its row is the target. */
 @media (max-width:1024px){
+#previewView.segmented{display:flex}
+#previewView.segmented[hidden]{display:none}
 #previewView{gap:2px}
 #previewView button{min-height:44px;min-width:44px;padding:0 12px}
 #previewPull label{display:flex;align-items:center;gap:8px;min-height:44px}
@@ -1115,3 +1118,18 @@ html[data-input="touch"] .tool-row .icon-button:not(.active-tool):hover{backgrou
 [data-quiet-focus]:focus-visible{outline:none}
 [data-quiet-focus]::after{display:none!important}
 #previewHint{white-space:nowrap;max-width:calc(100% - 24px);overflow:hidden;text-overflow:ellipsis}
+
+/* A checkbox and its label share one row at every width and in both languages: the box is centred on the label's line,
+   and a label that wraps stays beside the box. */
+label:has(> input[type=checkbox]){display:flex;align-items:center;gap:8px}
+
+/* Phone and tablet tool tiles match the desktop rail: transparent, with a tinted fill and teal icon when the tool is armed.
+   The grey tile fill and the green edge stripe belong to the phone dock only. */
+@media (max-width:1024px){
+.layout main>.tool-rail .icon-button{background:transparent;box-shadow:none}
+.layout main>.tool-rail .icon-button:hover{background:#eef1ec;border-color:var(--field-line);color:var(--teal)}
+.layout main>.tool-rail .icon-button.active-tool{background:var(--teal-soft);border-color:var(--field-line);color:var(--teal);box-shadow:none}
+/* Six tiles share a 360 px phone. The sides and gaps are narrow enough, and the label a little tighter, that "Seleccionar" fits its tile. */
+.layout main>.tool-rail{padding-left:4px;padding-right:4px;gap:1px}
+.layout main>.tool-rail .rail-label{font-size:10.5px;letter-spacing:-.02em}
+}

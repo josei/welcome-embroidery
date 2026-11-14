@@ -129,7 +129,7 @@ for(const [w,h] of SIZES) for(const lang of ['en','es']){
   // The dialog fits the screen without scrolling, and Close is inside it and on screen.
   const fit=await page.evaluate(()=>{
    const d=document.querySelector('#settingsDialog'),r=d.getBoundingClientRect();
-   const close=d.querySelector('form>button:last-of-type').getBoundingClientRect();
+   const close=d.querySelector('.dialog-actions button').getBoundingClientRect();
    return {scrolls:d.scrollHeight>d.clientHeight+1||d.scrollWidth>d.clientWidth+1,
     onScreen:r.top>=0&&r.bottom<=innerHeight&&r.left>=0&&r.right<=innerWidth,
     closeInDialog:close.bottom<=r.bottom+1&&close.top>=r.top-1&&close.right<=r.right+1};
