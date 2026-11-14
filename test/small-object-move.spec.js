@@ -49,6 +49,26 @@ async function zoomTo(page,shape,percent){
  return {x,y};
 }
 
+
+// Zooms until the leaf's shorter side is about `side` screen px. A plain wheel only zooms on whole-number notches of
+// 100 px or more, so this holds Ctrl and sends a fractional wheel delta, which zooms smoothly by exp(-dy × 0.01) and
+// lets any target size be reached within about 1 %. Returns the measured shorter side for the caller to check.
+async function zoomToSide(page,shape,side){
+ await page.locator('#zoomPct').click();
+ await expect(page.locator('#zoomPct')).toHaveText('100%');
+ const b=await box(shape);
+ const percent=100*side/Math.min(b.width,b.height);
+ const dy=-100*Math.log(percent/100)+0.25;
+ const {x,y}=await centreOf(shape);
+ await page.mouse.move(x,y);
+ await page.keyboard.down('Control');
+ await page.mouse.wheel(0,dy);
+ await page.keyboard.up('Control');
+ await expect(page.locator('#zoomPct')).not.toHaveText('100%');
+ const after=await box(shape);
+ return Math.min(after.width,after.height);
+}
+
 async function touchDrag(page,x,y,dx,dy){
  const cdp=await page.context().newCDPSession(page);
  await cdp.send('Input.dispatchTouchEvent',{type:'touchStart',touchPoints:[{id:1,x,y}]});
@@ -135,4 +155,40 @@ test.describe('a touch drag on the body of a small object moves it on a phone',(
   await expect(page.locator('#undo')).toHaveAttribute('aria-label','Undo move');
   expect(errors).toEqual([]);
  });
+});
+
+test.describe('touch on a small square-ish object: body moves, handles resize',()=>{
+ test.use({hasTouch:true,viewport:{width:768,height:1024}});
+ test.skip(({browserName})=>browserName!=='chromium','touch points are dispatched through a Chromium CDP session');
+
+ for(const side of [30,45,60]){
+  test(`a touch drag from the centre of a ${side} px object moves it`,async({page})=>{
+   const errors=[];page.on('pageerror',e=>errors.push(e.message));page.on('dialog',d=>d.accept());
+   const shape=await openLeaf(page,768,1024);
+   const measured=await zoomToSide(page,shape,side);
+   expect(Math.abs(measured-side),`shorter side is about ${side} px`).toBeLessThan(3);
+   const {x,y}=await centreOf(shape);
+   const before=await box(shape);
+   await touchDrag(page,x,y,20,10);
+   expectMoved(before,await box(shape),20,10);
+   await expect(page.locator('#undo')).toHaveAttribute('aria-label','Undo move');
+   expect(errors).toEqual([]);
+  });
+
+  test(`a touch drag from the corner handle of a ${side} px object resizes it`,async({page})=>{
+   const errors=[];page.on('pageerror',e=>errors.push(e.message));page.on('dialog',d=>d.accept());
+   const shape=await openLeaf(page,768,1024);
+   const measured=await zoomToSide(page,shape,side);
+   expect(Math.abs(measured-side),`shorter side is about ${side} px`).toBeLessThan(3);
+   const before=await box(shape);
+   const hb=await box(page.locator('.sel-handle[data-handle="se"]'));
+   await touchDrag(page,hb.x+hb.width/2,hb.y+hb.height/2,12,12);
+   const after=await box(shape);
+   expect(after.width,'the corner handle widens the object').toBeGreaterThan(before.width+5);
+   expect(after.height,'the corner handle heightens the object').toBeGreaterThan(before.height+5);
+   expect(Math.abs(after.x-before.x),'the anchored side stays put').toBeLessThan(1.5);
+   await expect(page.locator('#undo')).toHaveAttribute('aria-label','Undo change');
+   expect(errors).toEqual([]);
+  });
+ }
 });

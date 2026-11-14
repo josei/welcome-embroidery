@@ -10,6 +10,7 @@ import {createCanvasEditing} from './canvasEditing.js';
 import {createCanvasTools} from './canvasTools.js';
 import {toolbarInset} from './floatingToolbar.js';
 import {clampMoveDelta,visibleCanvasRect} from './moveClamp.js';
+import {pressClaimedByHandle} from './handleClaim.js';
 import {multiSelectState} from './multiSelectState.js';
 import {deletingGuideState,handModeState,panningState} from './canvasModeState.js';
 
@@ -336,16 +337,14 @@ export function createCanvas(/** @type {any} */ api){
     if(handle&&!bodyMoves(name,o,p)){e.preventDefault();startHandle(e,name);return;}
     if(o){e.preventDefault();startMove(e,o,p);if(e.pointerType==='touch')armLongPress(e,o,p);}else{startMarquee(e,p);if(document.getElementById('canvasText'))state.dismissesText=true;}
   });
-  // A resize handle's hit area is 44 screen px square, the touch target. On a small object at low zoom that square reaches over
-  // the object's body, and a press on the body would resize from the handle under it instead of moving the object. So a handle
-  // claims a press only within handleClaim screen px of its centre; further out on the body of a selected object, the press
-  // moves it. The rotate and fill-angle handles sit outside the frame, never over the body, so they keep their whole square.
-  const handleClaim=(/** @type {any} */ f)=>Math.min(22,.3*Math.min(f.W,f.H)*vp.s);
+  // A resize handle's touch target is 44 screen px square and can reach over a small object's body. The shared rule in
+  // handleClaim.js decides, for mouse and touch alike, whether a press near a resize handle resizes or moves the object.
+  // The rotate and fill-angle handles are not in HANDLES, so they keep their whole square.
   function bodyMoves(/** @type {string} */ name,/** @type {any} */ o,/** @type {any} */ p){
     const spec=HANDLES.find(([n])=>n===name),f=frame();
     if(!spec||!f||!o||!api.ids().includes(o.id))return false;
     const [hx,hy]=toWorld(f,(spec[1]-.5)*f.W,(spec[2]-.5)*f.H);
-    return Math.hypot(p[0]-hx,p[1]-hy)*vp.s>handleClaim(f);
+    return !pressClaimedByHandle(Math.hypot(p[0]-hx,p[1]-hy),f.W,f.H,vp.s);
   }
   // Touch long-press: holding a finger on an object for 500 ms opens its object menu. A move of 8 px or more, a
   // second finger, or a lift before 500 ms cancels it. The press first runs as a plain move; the hold cancels that move
