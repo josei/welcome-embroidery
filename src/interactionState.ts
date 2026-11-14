@@ -36,8 +36,10 @@ export interface RefDrag {
 export interface CanvasTextEdit {
   id: string;
   original: string;
-  /** True for a box opened on a lettering object just placed: a blank or cancelled box removes it. */
+  /** True for a box opened on a lettering object just placed: an untouched, blank or cancelled box removes it. */
   fresh: boolean;
+  /** True once the user has typed or deleted in the box, so its placeholder is no longer its content. */
+  typed: boolean;
   maxLength: number;
   left: number;
   top: number;

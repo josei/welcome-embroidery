@@ -446,7 +446,7 @@ test('vertex editing works on any shape: Enter converts a rectangle and an ellip
  await page.keyboard.press('ArrowLeft');await page.keyboard.press('Delete');await expect(page.locator('.path-node')).toHaveCount(3);
  await page.keyboard.press('Escape');await expect(page.locator('.path-node')).toHaveCount(0);await expect(page.locator('.sel-handle').first()).toBeAttached();
  await page.locator('#ellipse').click();await page.keyboard.press('Enter');await expect(page.locator('.path-node')).toHaveCount(4);await page.locator('.path-node').first().click();await page.locator('#nodeCorner').isDisabled();await expect(page.locator('.path-handle')).toHaveCount(2);
- await page.locator('#letter').click();await expect(page.locator('#secText')).toBeVisible();await page.keyboard.press('Enter');await page.keyboard.press('Control+Shift+C');await expect(page.locator('#secText')).toBeHidden();expect(await page.locator('.object-row').count()).toBeGreaterThan(3);expect(errors).toEqual([]);
+ await page.locator('#letter').click();await expect(page.locator('#secText')).toBeVisible();await page.keyboard.type('Hi');await page.keyboard.press('Enter');await page.keyboard.press('Control+Shift+C');await expect(page.locator('#secText')).toBeHidden();expect(await page.locator('.object-row').count()).toBeGreaterThan(3);expect(errors).toEqual([]);
 });
 
 test('the sidebar only shows what applies to the selection',async({page})=>{
@@ -3098,7 +3098,7 @@ test('canceling Open or Import leaves a notice; a blank design is replaced witho
 test('lettering text applies while typing, without Tab, and survives a canvas click',async({page})=>{page.on('dialog',d=>d.accept());const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');await newDesign(page);await page.locator('#letter').click();await expect(page.locator('#canvasText')).toBeFocused();await page.keyboard.type('HI');await expect(page.locator('#canvasText')).toHaveValue('HI');const width=async()=>(await page.locator('#shapes g.shape').first().boundingBox()).width;const w0=await width();await page.keyboard.type(' WORLD');await expect(page.locator('#canvasText')).toHaveValue('HI WORLD');await expect.poll(width).toBeGreaterThan(w0);const a=await page.locator('#art').boundingBox();await page.mouse.click(a.x+a.width-20,a.y+a.height-20);await expect(page.locator('#canvasText')).toHaveCount(0);await expect(page.locator('.object-row').first()).toContainText('Text: HI WORLD');await expect.poll(width).toBeGreaterThan(w0);expect(await width()).toBeGreaterThan(w0);expect(errors).toEqual([]);});
 test('new lettering lands at the hoop centre, and a second one steps down rather than stacking',async({page})=>{page.on('dialog',d=>d.accept());const errors=[];page.on('pageerror',e=>errors.push(e.message));
  await page.setViewportSize({width:1600,height:1000});await page.goto('/');await newDesign(page);
- await page.locator('#letter').click();await page.keyboard.press('Enter');
+ await page.locator('#letter').click();await page.keyboard.type('Text');await page.keyboard.press('Enter');
  await expect(page.locator('.object-row').filter({hasText:'Text: Text'}).first()).toBeAttached();
  // The hoop ring is the hoop's size in mm; its on-screen box gives the scale to check the lettering box within 1 mm.
  const ring=await page.locator('#hoopRing').boundingBox();const mmPerPx=(Number(await page.inputValue('#hoopW')))/ring.width;
@@ -3108,7 +3108,7 @@ test('new lettering lands at the hoop centre, and a second one steps down rather
  expect(first).not.toBeNull();
  expect(Math.abs((first.x+first.width/2-hc.x)*mmPerPx)).toBeLessThan(1);
  expect(Math.abs((first.y+first.height/2-hc.y)*mmPerPx)).toBeLessThan(1);
- await page.locator('#letter').click();await page.keyboard.press('Enter');
+ await page.locator('#letter').click();await page.keyboard.type('Text');await page.keyboard.press('Enter');
  await expect(page.locator('.object-row').filter({hasText:'Text: Text'})).toHaveCount(2);
  const bboxes=await page.evaluate(()=>[...document.querySelectorAll('#art [data-id]')].map(o=>o.getBoundingClientRect().toJSON()));
  const second=bboxes[bboxes.length-1];

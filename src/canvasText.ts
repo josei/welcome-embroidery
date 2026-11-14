@@ -62,6 +62,7 @@ export function startCanvasText(o: EditableObject, fresh = false) {
       id: o.id,
       original: o.text ?? '',
       fresh,
+      typed: false,
       maxLength: isRegistryFont(o.font) ? 120 : 24,
       left: Math.max(26, x0 - 8),
       top: Math.max(26, y0 - 10),
@@ -76,6 +77,9 @@ export function liveCanvasText(id: string, value: string) {
   const objects: EditableObject[] = documentNow().doc.objects;
   const o = objects.find(v => v.id === id);
   if (!o) return;
+  // Any input, even deleting back to the placeholder, means the text is the user's rather than the hint it opened with.
+  const box = interactionNow().canvasText;
+  if (box && box.id === id && !box.typed) setInteraction({canvasText: {...box, typed: true}});
   const text = savedText(o.font, value);
   if (!text.trim()) return;
   o.text = text;
@@ -83,16 +87,21 @@ export function liveCanvasText(id: string, value: string) {
   wired().render();
 }
 
-/** Puts the original text back and commits the typed text as one command, or only redraws when cancelling. */
-export function finishCanvasText(commit: boolean, value: string) {
+/**
+ * Puts the original text back and commits the typed text as one command, or only redraws when cancelling.
+ * `keyboard` is true when Enter commits the box. Only that commit treats an untouched placeholder as nothing to place:
+ * leaving the box by clicking elsewhere keeps the object, so the Properties text field still works on it.
+ */
+export function finishCanvasText(commit: boolean, value: string, keyboard = false) {
   const state = interactionNow().canvasText;
   if (!state) return;
   setInteraction({canvasText: null});
   const objects: EditableObject[] = documentNow().doc.objects;
   const o = objects.find(v => v.id === state.id);
   if (!o) return;
-  // A box just placed that is cancelled or left blank is removed, so no stray "Text" object is left to export.
-  if (state.fresh && (!commit || !savedText(o.font, value).trim())) {
+  // A box just placed that is cancelled, committed with Enter while still the untouched placeholder, or left blank is
+  // removed, so opening the tool and pressing Enter places nothing.
+  if (state.fresh && (!commit || (keyboard && !state.typed) || !savedText(o.font, value).trim())) {
     wired().edit([{op: 'delete', id: state.id}], () => setSelection({multi: new Set<string>()}));
     return;
   }

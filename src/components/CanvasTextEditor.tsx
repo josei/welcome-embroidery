@@ -61,12 +61,14 @@ export function CanvasTextEditor() {
       window.clearTimeout(timer);
       window.removeEventListener('pointerup', onRelease, {capture: true});
     };
-  }, [canvasText]);
+    // Keyed by the box's object, not the whole record: recording that the user has typed updates that record, and
+    // re-running this effect would select the text again after the user's first keystroke.
+  }, [canvasText?.id]);
   if (!canvasText) return null;
-  const finish = (commit: boolean, value: string) => {
+  const finish = (commit: boolean, value: string, keyboard = false) => {
     if (finished.current) return;
     finished.current = true;
-    finishCanvasText(commit, value);
+    finishCanvasText(commit, value, keyboard);
   };
   const input = (e: FormEvent<HTMLTextAreaElement>) => liveCanvasText(canvasText.id, e.currentTarget.value);
   // Enter and Escape close the box from the keyboard, so focus goes to the Add lettering button rather than being lost to
@@ -76,7 +78,7 @@ export function CanvasTextEditor() {
     selectAllInField(e);
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
-      finish(true, e.currentTarget.value);
+      finish(true, e.currentTarget.value, true);
       document.getElementById('letter')?.focus();
     } else if (e.key === 'Escape') {
       e.preventDefault();
