@@ -710,6 +710,9 @@ body{height:100vh;height:100dvh;min-height:0;overflow:hidden}
 .top #phoneMenu{height:44px;min-height:44px;min-width:44px}
 /* The 2D / Stitches / 3D switch keeps the desktop's canvas placement and grows to 44 px touch targets. */
 .canvas .canvas-views .segmented button[data-view]{min-height:44px;padding:0 12px}
+/* A tablet's canvas is too narrow for the 3D camera presets beside the switch: at 768 px they run into the
+   switch, and a preset drawn under it takes the switch's taps. The presets drop below the switch. */
+#previewView{top:68px}
 .canvas .floating{left:72px;right:auto;display:flex;flex-wrap:wrap;gap:4px;max-width:calc(100% - 96px);grid-template-columns:none}
 .canvas .floating .icon-button,.canvas .floating button{width:44px;min-width:44px;height:44px;min-height:44px}
 .top #name{min-height:44px;height:44px;width:100%;min-width:0}
@@ -735,7 +738,8 @@ body{height:100vh;height:100dvh;min-height:0;overflow:hidden}
 .canvas .zoombar button{min-width:44px;height:44px;min-height:44px}
 .canvas .zoombar .icon-button{width:44px}
 .canvas .floating{left:72px;top:68px}
-.canvas #previewPull{top:68px}
+/* The pull estimate sits under the camera presets, which are below the switch, so it never covers a preset. */
+.canvas #previewPull{top:112px}
 /* Every inspector and status-line control is 44x44 px to tap at tablet portrait. The glyph inside may stay
    small; the element's box is the hit area. The status line grows from 28 to 44 px so the Messages button fits its height. */
 .layout main>footer{height:44px;min-height:44px}
