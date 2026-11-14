@@ -9,6 +9,7 @@ import {wheelZoomFactor,wheelZooms} from './wheelZoom.js';
 import {createCanvasEditing} from './canvasEditing.js';
 import {createCanvasTools} from './canvasTools.js';
 import {toolbarInset} from './floatingToolbar.js';
+import {clampMoveDelta,visibleCanvasRect} from './moveClamp.js';
 import {multiSelectState} from './multiSelectState.js';
 import {deletingGuideState,handModeState,panningState} from './canvasModeState.js';
 
@@ -356,6 +357,14 @@ export function createCanvas(/** @type {any} */ api){
       if(touches.size>1||state?.type!=='move'||state.pid!==pid)return;
       cancelState();openObjectMenu(x,y,o,p);},500)};
   }
+  // On a touch screen the dock (portrait) or rail (landscape) covers the canvas's edge and the canvas does not scroll, so a
+  // dragged object is kept clear of it. A mouse keeps the floating desktop rail over the canvas, so it is not clamped there.
+  function keepMoveOnCanvas(/** @type {number[]} */ box,/** @type {number} */ dx,/** @type {number} */ dy){
+    if(!globalThis.matchMedia?.('(pointer: coarse)').matches)return [dx,dy];
+    const sr=svg.getBoundingClientRect();
+    const bars=[...document.querySelectorAll('.tool-rail')].map(n=>n.getBoundingClientRect()).filter(r=>r.width&&r.height);
+    return clampMoveDelta({box,delta:[dx,dy],scale:vp.s,center:[vp.cx,vp.cy],svgRect:sr,visible:visibleCanvasRect(sr,bars)});
+  }
   function startMove(/** @type {any} */ e,/** @type {any} */ o,/** @type {any} */ p){
     // Double-click is decided on pointer-up (see the move branch), so a quick press-and-drag still moves.
     const now=performance.now(),dbl=Boolean(lastClick&&now-lastClick.t<380&&lastClick.id===o.id&&Math.hypot(p[0]-lastClick.p[0],p[1]-lastClick.p[1])*vp.s<8);
@@ -440,6 +449,7 @@ export function createCanvas(/** @type {any} */ api){
       dx+=sx;
       dy+=sy;
       }
+      [dx,dy]=keepMoveOnCanvas(state.box,dx,dy);
       state.delta=[dx,dy];previewMove(state.ids,dx,dy);setT(state.els,`translate(${dx} ${dy})`);overlay.setAttribute('transform',`translate(${dx} ${dy})`);
         previewMask(state.els,`translate(${dx} ${dy})`);drawSmart();return;}
     if(state.type==='marquee'||state.type==='nodemarquee'){const [x0,y0]=state.start,
