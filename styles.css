@@ -672,6 +672,9 @@ input[type=checkbox]{accent-color:var(--teal)}
 .top .save-status{position:absolute;width:0;height:0;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;margin:0}
 /* The saved and unsaved dots (more specific rules above) are hidden too: the phone top bar has no save status. */
 .top .save-status.autosaved,.top .save-status.unsaved{display:none}
+/* The unsaved dot is the bar's only save mark at phone widths. Its desktop overlap with the name (-8px) would cover half of it,
+   so at phone widths it keeps its full 8 px and the name starts after it. */
+.top .unsaved-marker:not([hidden]){margin-right:0}
 }
 /* At 360 px and narrower the bar's gaps and the Export label tighten, so the design name keeps a 44 px box on a 360 px screen. */
 @media (max-width:360px) and (orientation:landscape){
@@ -1052,4 +1055,10 @@ body{height:100dvh;min-height:0;overflow:hidden}
 @media (min-width:601px) and (max-width:1024px) and (orientation:portrait){
 #previewView{top:68px}
 .canvas #previewPull{top:128px}
+}
+/* Short landscape screens (a phone on its side, 390 px tall): the 1 px top rule is drawn as an inset line, so the 44 px status line
+   keeps its full height for the Messages button. A border would take 1 px and centre the 44 px button half a pixel past the
+   footer, which clips its bottom edge. */
+@media (max-width:1024px) and (orientation:landscape) and (max-height:500px){
+.layout main>footer{border-top:0;box-shadow:inset 0 1px 0 #e3e6e1}
 }
