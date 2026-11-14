@@ -986,3 +986,34 @@ body{height:100dvh;min-height:0;overflow:hidden}
 #exportDialog form>:not(button){grid-column:1/-1}
 #exportDialog select,#exportDialog input:not([type=checkbox]),#exportDialog button{min-height:44px}
 }
+
+/* Phone and tablet: the font picker's search field and its twelve category chips are 44 px touch targets, like the
+   fields and chips in the panels beside them. The chips keep to one row that scrolls sideways, so the font list keeps
+   the height the popover needs. Below the desktop breakpoint only. */
+@media (max-width:1024px){
+.font-panel input[type=search]{min-height:44px}
+.font-panel .chips{flex:0 0 auto;flex-wrap:nowrap;min-height:44px;overflow-x:auto;overscroll-behavior-x:contain;padding-bottom:2px}
+.font-panel .chip{flex:0 0 auto;display:inline-flex;align-items:center;justify-content:center;min-width:44px;min-height:44px;padding:0 14px;white-space:nowrap}
+}
+
+/* Phone and tablet: every control in the Settings dialog is 44 px tall, from the language buttons and the agent button
+   to Close. A sewing-tip row's label is the tap target for its tick, so the whole row grows and the 4 px gap stays. */
+@media (max-width:1024px){
+#settingsDialog button{min-height:44px;min-width:44px}
+#settingsDialog .tips-list label{min-height:44px}
+}
+
+/* Phone and tablet: the 3D overlay's four camera presets and the Show pull row are 44 px touch targets. The pull panel
+   starts below the taller preset row, so the two never overlap. The tick's visual stays small; its row is the target. */
+@media (max-width:1024px){
+#previewView{gap:2px}
+#previewView button{min-height:44px;min-width:44px;padding:0 12px}
+#previewPull label{display:flex;align-items:center;gap:8px;min-height:44px}
+.canvas #previewPull{top:72px}
+}
+/* A tablet keeps the 2D / Stitches / 3D switch in the canvas's top-right corner, where the wider preset row would run
+   under it. The preset row starts below the switch there, and the pull panel below the presets. */
+@media (min-width:601px) and (max-width:1024px) and (orientation:portrait){
+#previewView{top:68px}
+.canvas #previewPull{top:128px}
+}
