@@ -25,7 +25,8 @@ async function drawRect(page,lang){
  await page.mouse.move(c.x+c.width*0.6,c.y+c.height*0.6,{steps:5});
  await page.mouse.up();
  await expect(page.locator('#remove')).toBeEnabled();
- if(await page.locator('#phoneMenu').isVisible()){
+ // A portrait tablet keeps the Layers panel on screen, so only a layout that hides it opens the Menu.
+ if(!(await page.locator('.object-row').first().isVisible())&&await page.locator('#phoneMenu').isVisible()){
   await page.locator('#phoneMenu').click();
   await page.locator('#menuLayers').click();
  }

@@ -1,5 +1,14 @@
 import {test,expect} from '@playwright/test';
 
+// Unfolds every Menu group, so the rows of a folded group are in the DOM.
+async function expandMenuGroups(page){
+ for(;;){
+  const folded=page.locator('#phoneMenuList .menu-section[aria-expanded="false"]').first();
+  if(!(await folded.count())) return;
+  await folded.click();
+ }
+}
+
 // On a phone the Menu is the one navigation model. The bottom bar keeps only the tool palette and the view-mode control, no command
 // button in it repeats a Menu row, no More tools panel is rendered, and every command the removed controls offered is a Menu row.
 const SIZES=[[390,844],[844,390]];
@@ -27,6 +36,7 @@ async function menuIds(page){
  const list=page.locator('#phoneMenuList');
  if(!(await list.isVisible())) await page.locator('#phoneMenu').click();
  await expect(list).toBeVisible();
+ await expandMenuGroups(page);
  const ids=await list.locator('[role="menuitem"]').evaluateAll(els=>els.map(e=>e.id));
  await page.keyboard.press('Escape');
  await expect(list).toHaveCount(0);

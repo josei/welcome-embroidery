@@ -1,4 +1,5 @@
 import {test,expect} from '@playwright/test';
+import {revealMenuRow} from './menu-reveal.js';
 
 // On a tablet the selection bar is contextual: it appears with a selection and stays away otherwise. A phone has no
 // selection bar at all; its selection commands are Menu rows. Bar controls keep the desktop bar's accessible names and
@@ -108,7 +109,7 @@ for(const lang of ['en','es']){
   // The commands the bar carries below desktop are all reachable as Menu rows.
   await page.locator('#phoneMenu').click();
   for(const id of ['menuDuplicate','menuDelete','menuGroup','menuClip','menuSelectAdd'])
-   await expect(page.locator(`#${id}`),`${id} is a Menu row`).toHaveCount(1);
+   await expect(await revealMenuRow(page.locator('#phoneMenuList'),id),`${id} is a Menu row`).toHaveCount(1);
   expect(errors).toEqual([]);
  });
 }

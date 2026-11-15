@@ -1,4 +1,5 @@
 import {test,expect} from '@playwright/test';
+import {revealMenuRow} from './menu-reveal.js';
 
 // At phone widths (375x667 and 390x844, portrait) the top bar holds only Menu, the design name, undo, redo and Export,
 // at a 52 px bar. Every command that left the bar is one tap to open the Menu and one tap to choose, and the save status
@@ -47,28 +48,28 @@ test('each command that left the bar is one tap to open the Menu and one to choo
  // Save, Save As, Open and Import: each row exists and is enabled; Open and Import open their file pickers.
  await open();
  for(const id of ['menuCommandPalette','menuNew','menuSave','menuSaveAs','menuOpen','menuImport','menuExport','menuSettings','menuDuplicate']){
-  await expect(list.locator(`#${id}`),`${id} is in the Menu`).toBeVisible();
+  await expect(await revealMenuRow(list,id),`${id} is in the Menu`).toBeVisible();
  }
  await expect(list.locator('.menu-heading')).toHaveText(['View','File','Edit','Tools','Nodes','Arrange','Grid and zoom','Settings and Help']);
 
  // Open: a file chooser opens.
  await open();
  const chooser=page.waitForEvent('filechooser');
- await list.locator('#menuOpen').click();
+ await (await revealMenuRow(list,'menuOpen')).click();
  await chooser.then(c=>expect(c.isMultiple()).toBe(false));
  await expect(list,'Open closes the menu').toHaveCount(0);
 
  // Import: a second file chooser opens.
  await open();
  const machine=page.waitForEvent('filechooser');
- await list.locator('#menuImport').click();
+ await (await revealMenuRow(list,'menuImport')).click();
  await machine;
  await expect(list).toHaveCount(0);
 
  // Duplicate: one more object.
  const before=await objects();
  await open();
- await list.locator('#menuDuplicate').click();
+ await (await revealMenuRow(list,'menuDuplicate')).click();
  await expect.poll(objects).toBe(before+1);
 
  // The duplicate is removed with Undo, from the keyboard, so the test checks the Menu's Duplicate row and not Delete.
@@ -83,7 +84,7 @@ test('each command that left the bar is one tap to open the Menu and one to choo
 
  // Settings opens its dialog (keyboard shortcuts are not listed on phones).
  await open();
- await list.locator('#menuSettings').click();
+ await (await revealMenuRow(list,'menuSettings')).click();
  await expect(page.locator('#settingsDialog[open]'),'Settings opens').toHaveCount(1);
  await page.keyboard.press('Escape');
 
@@ -96,7 +97,7 @@ for(const [width,height] of PHONES) for(const lang of ['en','es']){
  test(`after New the name keeps its width and the export hint overlaps neither name nor Export at ${width}x${height} (${lang})`,async({page})=>{
   const errors=await openEditor(page,width,height,lang);
   await page.locator('#phoneMenu').click();
-  await page.locator('#phoneMenuList #menuNew').click();
+  await (await revealMenuRow(page.locator('#phoneMenuList'),'menuNew')).click();
   await expect(page.locator('#exportReason')).toBeVisible();
   const box=sel=>page.locator(sel).evaluate(e=>{const r=e.getBoundingClientRect();return {x:r.x,y:r.y,w:r.width,h:r.height};});
   const name=await box('#name'), hint=await box('#exportReason'), exp=await box('#export');

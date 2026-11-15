@@ -1,5 +1,14 @@
 import {test,expect} from '@playwright/test';
 
+// Unfolds every Menu group, so the rows of a folded group are in the DOM.
+async function expandMenuGroups(page){
+ for(;;){
+  const folded=page.locator('#phoneMenuList .menu-section[aria-expanded="false"]').first();
+  if(!(await folded.count())) return;
+  await folded.click();
+ }
+}
+
 // At phone and tablet widths the grid and snap chips are not on the canvas. Grid, Snap and
 // Snap to objects are in the View menu (the phone Menu, or the View menu on a desktop-style header), and each toggle reports its
 // state with aria-pressed. At 1280 px the desktop toolbar keeps its chips.
@@ -8,8 +17,10 @@ const CHIPS=['#gridCycle','#snap','#snapObj','#grid'];
 
 async function openView(page){
  // The header shows the phone Menu at phone widths and on portrait tablets; the desktop-style header shows the View menu.
- if(await page.locator('#phoneMenu').count()) await page.locator('#phoneMenu').click();
- else await page.locator('#viewMenu').click();
+ if(await page.locator('#phoneMenu').count()){
+  await page.locator('#phoneMenu').click();
+  await expandMenuGroups(page);
+ } else await page.locator('#viewMenu').click();
 }
 
 for(const lang of ['en','es']){

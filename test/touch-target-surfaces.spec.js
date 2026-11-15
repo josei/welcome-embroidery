@@ -1,4 +1,5 @@
 import {test,expect} from '@playwright/test';
+import {revealMenuRow} from './menu-reveal.js';
 
 // The font picker, the Settings dialog and the 3D overlay keep 44 px touch targets on phones and tablets, like the
 // dock, the sheet fields and the inspector rows around them. Measured at 390x844 and 768x1024 in English and Spanish.
@@ -60,7 +61,7 @@ async function openFontPicker(page,lang){
  const field=page.locator('#letteringText');
  if(!(await field.isVisible())){
   if(await page.locator('#propertiesBtn').isVisible())await page.locator('#propertiesBtn').click();
-  if(!(await field.isVisible())){await page.locator('#phoneMenu').click();await page.locator('#menuProperties').click();}
+  if(!(await field.isVisible())){await page.locator('#phoneMenu').click();await (await revealMenuRow(page.locator('#phoneMenuList'),'menuProperties')).click();}
  }
  await expect(field).toBeVisible();
  await field.fill('HI');
@@ -107,7 +108,7 @@ async function openSettings(page,lang){
  await page.goto(`/?lang=${lang}`);
  await expect(page.locator('.canvas')).toBeVisible();
  await page.locator('#phoneMenu').click();
- await page.locator('#menuSettings').click();
+ await (await revealMenuRow(page.locator('#phoneMenuList'),'menuSettings')).click();
  await expect(page.locator('#settingsDialog')).toBeVisible();
 }
 

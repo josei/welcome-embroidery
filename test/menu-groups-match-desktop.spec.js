@@ -23,16 +23,28 @@ test('the desktop menu bar has File, Edit and Arrange menus',async({page})=>{
 for(const size of [PHONE,TABLET]) test(`the Menu at ${size[0]}x${size[1]} lists the desktop File, Edit and Arrange groups in order`,async({page})=>{
  await openEditor(page,size);
  await page.locator('#phoneMenu').click();
- const headings=await page.locator('#phoneMenuList .menu-heading').allTextContents();
- // View leads, so Layers, Properties and the view switch need no scrolling; the desktop groups follow it in order.
- expect(headings.slice(0,6)).toEqual(['View','File','Edit','Tools','Nodes','Arrange']);
+ const headings=(await page.locator('#phoneMenuList .menu-heading').allTextContents()).map(h=>h.trim());
+ // A phone leads with View, so Layers, Properties and the view switch need no scrolling. A portrait tablet has no View group, since
+ // those panels and views stay on screen there. The desktop groups follow in order.
+ const expected=size===PHONE?['View','File','Edit','Tools','Nodes','Arrange']:['File','Edit','Tools','Nodes','Arrange'];
+ expect(headings.slice(0,expected.length)).toEqual(expected);
 });
 
 // Command ids under each desktop menu, keyed by the menu's button id.
 const DESKTOP_MENUS={File:'#fileMenu',Edit:'#editMenu',Arrange:'#arrangeMenu'};
 
+// Unfolds every group, so each group's rows are in the DOM.
+async function expandAll(page){
+ for(;;){
+  const folded=page.locator('#phoneMenuList .menu-section[aria-expanded="false"]').first();
+  if(!(await folded.count())) return;
+  await folded.click();
+ }
+}
+
 // Command ids per group in the phone or tablet Menu, keyed by heading text.
 async function phoneGroups(page){
+ await expandAll(page);
  return page.locator('#phoneMenuList').evaluate(list=>{
   const groups={};let current=null;
   for(const el of list.children){

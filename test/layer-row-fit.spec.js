@@ -26,7 +26,8 @@ async function drawAndSelect(page,lang){
  await page.mouse.move(c.x+c.width*0.6,c.y+c.height*0.6,{steps:5});
  await page.mouse.up();
  await expect(page.locator('#remove')).toBeEnabled();
- if(await page.locator('#phoneMenu').isVisible()){
+ // Only a phone keeps Layers in a sheet; a portrait tablet shows its object list already.
+ if(!(await page.locator('#objects').isVisible()) && await page.locator('#phoneMenu').isVisible()){
   await page.locator('#phoneMenu').click();
   await page.locator('#menuLayers').click();
  }

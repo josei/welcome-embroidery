@@ -1,5 +1,14 @@
 import {test,expect} from '@playwright/test';
 
+// Unfolds every Menu group, so the rows of a folded group are in the DOM.
+async function expandMenuGroups(page){
+ for(;;){
+  const folded=page.locator('#phoneMenuList .menu-section[aria-expanded="false"]').first();
+  if(!(await folded.count())) return;
+  await folded.click();
+ }
+}
+
 // The phone and tablet Menu shows whether each toggle is on, gives each toggle its own icon, names the reason each disabled row
 // is unavailable, and keeps a tablet's list at the desktop menu width instead of stretching it across the screen.
 const PHONE=[390,844], TABLET=[768,1024];
@@ -16,6 +25,7 @@ async function openEditor(page,[width,height]){
 async function openMenu(page){
  await page.locator('#phoneMenu').click();
  await expect(page.locator('#phoneMenuList')).toBeVisible();
+ await expandMenuGroups(page);
 }
 
 test('each on/off row in the phone Menu shows its state as text and sets aria-pressed',async({page})=>{

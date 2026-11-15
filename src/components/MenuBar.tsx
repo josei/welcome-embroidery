@@ -32,6 +32,7 @@ import {agentLinkState} from '../agentLinkState';
 import {viewActions, viewMode} from '../viewMode.js';
 import {documentState, documentNow} from '../documentState.js';
 import {menuReason, NEEDS_ONE, NEEDS_TWO, NEEDS_THREE} from '../menuReasons.js';
+import {useTabletPortrait} from '../tabletLayoutState.js';
 
 // The menu bar's dropdowns. Each item runs the same command as its toolbar button, context-menu row or keyboard shortcut,
 // and is disabled exactly when that command does not apply, using the same flags the toolbar uses. Nothing here is removed
@@ -53,9 +54,11 @@ interface Entry {
  reason?: string;
  run: () => void;
 }
-/** A non-clickable label that heads a group of rows (the phone menu groups its sections this way). */
+/** A label that heads a group of rows. A phone group that can fold has `section`: the heading is then a button that shows or
+ * hides the rows under it. */
 interface Heading {
  heading: string;
+ section?: {id: string; open: boolean; toggle: () => void};
 }
 /** A line of visible text that is not a command, such as the save status in the phone menu. */
 interface Note {
@@ -175,6 +178,15 @@ function Dropdown({id, label, rows, iconOnly}: {id: string; label: string; rows:
      )}
      {rows.map((row, i) => {
       if (row === '-') return <hr key={`sep${i}`} className="menu-sep" />;
+      if ('heading' in row && row.section) {
+       // A folding group's heading is a menu item, so arrow keys reach it. Enter or a tap folds or unfolds the group and keeps the Menu open.
+       return (
+        <button key={`head${i}`} type="button" role="menuitem" id={row.section.id} aria-expanded={row.section.open} className="menu-heading menu-section" onClick={row.section.toggle}>
+         <svg className="icon menu-icon" aria-hidden="true"><use href={row.section.open ? '#i-chevron' : '#i-chevron-right'} /></svg>
+         <span>{row.heading}</span>
+        </button>
+       );
+      }
       if ('heading' in row) return <div key={`head${i}`} role="presentation" className="menu-heading">{row.heading}</div>;
       if ('note' in row) return <div key={`note${i}`} role="status" className="menu-note">{row.note}</div>;
       return (
@@ -321,9 +333,11 @@ export function ViewMenu() {
  return <Dropdown id="viewMenu" label={t('View')} rows={useGridSnapRows()} />;
 }
 
-/** The phone Menu: an icon button in the top bar opens a full-height sheet. It has a
- * Command palette search field, then View (Layers, Properties and the 2D, Stitches and 3D switch, so they need no scrolling),
- * then the desktop menu groups in the desktop order (File, Edit, Arrange), then grid and zoom, then Settings and Help. Each row has an icon and a short label. Keyboard shortcuts are not listed on phones. Every row runs the same command as its desktop counterpart.
+/** The phone and tablet Menu: an icon button in the top bar opens a full-height sheet. It has a Command palette search field,
+ * then View (Layers, Properties and the 2D, Stitches and 3D switch; a portrait tablet leaves these out, since they stay on
+ * screen there), then the desktop menu groups in the desktop order (File, Edit, Arrange), then the drawing tools, nodes,
+ * grid and zoom, and Settings and Help. Each group after View folds: its heading shows or hides its rows. Each row has an icon
+ * and a short label. Keyboard shortcuts are not listed on phones. Every row runs the same command as its desktop counterpart.
  * On a phone the Menu is the only navigation: the canvas bar's commands and the More tools panel are listed here too. */
 const VIEW_ROWS = [
  {id: 'design', label: '2D', icon: 'i-rect'},
@@ -350,6 +364,7 @@ const HELP_URL = 'https://github.com/josei/welcome-embroidery#readme';
 
 export function PhoneMenu() {
  const photoInput = useRef<HTMLInputElement>(null);
+ const tablet = useTabletPortrait();
  const edit = useEditRows()
   .filter((r): r is Entry => typeof r === 'object' && 'id' in r && r.id in PHONE_EDIT_ICONS)
   .map(r => ({...r, key: undefined, icon: PHONE_EDIT_ICONS[r.id]}));
@@ -361,15 +376,29 @@ export function PhoneMenu() {
  const status = useSyncExternalStore(statusState.subscribe, statusState.get);
  const agent = useSyncExternalStore(agentLinkState.subscribe, agentLinkState.get);
  const actions = useSyncExternalStore(actionState.subscribe, actionState.get);
- const toolbar = useSyncExternalStore(selectionToolbarState.subscribe, selectionToolbarState.get);
  const nodes = useSyncExternalStore(nodeButtonsState.subscribe, nodeButtonsState.get);
  const selectAdd = useSyncExternalStore(multiSelectState.subscribe, multiSelectState.get);
  const reasonCtx = useReasonContext();
+ // Which groups are unfolded. Only the selection actions (Arrange) start open, since they act on what is selected. Every other group
+ // starts folded, so the Menu fits a phone screen; a tap on its heading shows its rows. A folded group keeps its heading.
+ const [unfolded, setUnfolded] = useState<Record<string, boolean>>({Arrange: true});
+ const group = (name: string, groupRows: Row[]): Row[] => {
+  const open = Boolean(unfolded[name]);
+  const id = `menuSection-${name.replace(/\W+/g, '-')}`;
+  return [{heading: t(name), section: {id, open, toggle: () => setUnfolded(u => ({...u, [name]: !open}))}}, ...(open ? groupRows : [])];
+ };
  // The reason a disabled row gives. Every disabled row has one; the generic line is only a fallback.
  const why = (id: string) => menuReason(id, reasonCtx) ?? t(NEEDS_ONE);
  const viewRows: Row[] = VIEW_ROWS.map(v => ({
   id: `menuView-${v.id}`, label: t(v.label), icon: v.icon, hint: view === v.id ? t('Shown now') : undefined, run: () => viewActions.choose(v.id),
  }));
+ // A portrait tablet always shows Layers, Properties and the 2D, Stitches and 3D switch on screen, so the Menu leaves them out.
+ const panelAndViewRows: Row[] = tablet ? [] : [
+  {heading: t('View')},
+  {id: 'menuLayers', label: t('Layers'), icon: 'i-layers', hint: sheet === 'layers' ? t('Shown now') : undefined, run: () => togglePhoneSheet('layers')},
+  {id: 'menuProperties', label: t('Properties'), icon: 'i-sliders', hint: sheet === 'properties' ? t('Shown now') : undefined, run: () => togglePhoneSheet('properties')},
+  ...viewRows,
+ ];
  // The drawing tools the canvas bar and More tools panel held on a phone. They run the same commands as those controls.
  const toolRows: Entry[] = [
   {id: 'menuSelectAdd', label: t('Tap to add to selection'), icon: 'i-select-add', pressed: selectAdd, hint: onOff(selectAdd), run: () => multiSelectState.set(!selectAdd)},
@@ -399,30 +428,30 @@ export function PhoneMenu() {
  const settingsHint = agent.active ? t('Settings: agent connected') : agent.waiting ? t('Settings: waiting for agent') : undefined;
  const rows: Row[] = [
   {id: 'menuCommandPalette', label: t('Command palette'), icon: 'i-search', className: 'menu-search', run: () => setPaletteOpen(true)},
-  {heading: t('View')},
-  {id: 'menuLayers', label: t('Layers'), icon: 'i-layers', hint: sheet === 'layers' ? t('Shown now') : undefined, run: () => togglePhoneSheet('layers')},
-  {id: 'menuProperties', label: t('Properties'), icon: 'i-sliders', hint: sheet === 'properties' ? t('Shown now') : undefined, run: () => togglePhoneSheet('properties')},
-  ...viewRows,
-  {heading: t('File')},
-  {id: 'menuNew', label: t('New'), icon: 'i-new', run: () => newProject()},
-  // The file inputs are hidden in the header; a click on them opens the same pickers as the Open and Import buttons did.
-  {id: 'menuOpen', label: t('Open'), icon: 'i-open', run: () => document.getElementById('file')?.click()},
-  {id: 'menuImport', label: t('Import'), icon: 'i-import', run: () => document.getElementById('machineFile')?.click()},
-  ...saveRows().filter((r): r is Entry => typeof r === 'object' && 'id' in r)
-   .map(r => ({...r, label: r.id === 'menuSave' ? t('Save') : t('Save As'), icon: 'i-save', hint: undefined})),
-  {id: 'menuExport', label: t('Export'), icon: 'i-export', run: () => openExportDialog()},
-  {heading: t('Edit')}, ...edit,
-  {heading: t('Tools')}, ...toolRows,
-  {heading: t('Nodes')}, ...nodeRows,
-  {heading: t('Arrange')}, ...arrange, ...arrangeBarRows,
-  {heading: t('Grid and zoom')},
-  ...gridRows,
-  {id: 'menuFitHoop', label: t('Fit hoop'), icon: 'i-fit', run: () => zoomActions.fitHoop()},
-  {heading: t('Settings and Help')},
-  {id: 'menuSettings', label: t('Settings'), icon: 'i-gear', hint: settingsHint, run: () => setSettingsOpen(true)},
-  {id: 'menuMessages', label: t('Messages'), icon: 'i-msg', run: () => toastActions.setLogOpen(true)},
-  ...(status.issuesHidden ? [] : [{id: 'menuIssues', label: status.issuesText, icon: 'i-msg', run: () => statusActions.issues()}]),
-  {id: 'menuHelp', label: t('Help'), icon: 'i-help', run: () => window.open(HELP_URL, '_blank', 'noopener')},
+  ...panelAndViewRows,
+  ...group('File', [
+   // The file inputs are hidden in the header; a click on them opens the same pickers as the Open and Import buttons did.
+   {id: 'menuNew', label: t('New'), icon: 'i-new', run: () => newProject()},
+   {id: 'menuOpen', label: t('Open'), icon: 'i-open', run: () => document.getElementById('file')?.click()},
+   {id: 'menuImport', label: t('Import'), icon: 'i-import', run: () => document.getElementById('machineFile')?.click()},
+   ...saveRows().filter((r): r is Entry => typeof r === 'object' && 'id' in r)
+    .map(r => ({...r, label: r.id === 'menuSave' ? t('Save') : t('Save As'), icon: 'i-save', hint: undefined})),
+   {id: 'menuExport', label: t('Export'), icon: 'i-export', run: () => openExportDialog()},
+  ]),
+  ...group('Edit', edit),
+  ...group('Tools', toolRows),
+  ...group('Nodes', nodeRows),
+  ...group('Arrange', [...arrange, ...arrangeBarRows]),
+  ...group('Grid and zoom', [
+   ...gridRows,
+   {id: 'menuFitHoop', label: t('Fit hoop'), icon: 'i-fit', run: () => zoomActions.fitHoop()},
+  ]),
+  ...group('Settings and Help', [
+   {id: 'menuSettings', label: t('Settings'), icon: 'i-gear', hint: settingsHint, run: () => setSettingsOpen(true)},
+   {id: 'menuMessages', label: t('Messages'), icon: 'i-msg', run: () => toastActions.setLogOpen(true)},
+   ...(status.issuesHidden ? [] : [{id: 'menuIssues', label: status.issuesText, icon: 'i-msg', run: () => statusActions.issues()}]),
+   {id: 'menuHelp', label: t('Help'), icon: 'i-help', run: () => window.open(HELP_URL, '_blank', 'noopener')},
+  ]),
  ];
  return (
   <>

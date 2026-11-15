@@ -1,5 +1,14 @@
 import {test,expect} from '@playwright/test';
 
+// Unfolds every Menu group, so the rows of a folded group are in the DOM.
+async function expandMenuGroups(page){
+ for(;;){
+  const folded=page.locator('#phoneMenuList .menu-section[aria-expanded="false"]').first();
+  if(!(await folded.count())) return;
+  await folded.click();
+ }
+}
+
 // The phone Menu is a three-line icon button in the top bar, and it opens a
 // full-height sheet with a Command palette search field and five groups (File, Edit, Arrange, View, Settings and Help). Each row has an icon
 // and a short label that stays on one line in English and Spanish, and each row is at least 44 px tall. The sheet scrolls inside
@@ -31,6 +40,8 @@ for(const [width,height] of SIZES) for(const lang of ['en','es']){
   await menu.click();
   const list=page.locator('#phoneMenuList');
   await expect(list).toBeVisible();
+  // Every group is unfolded, so the rows of all of them are checked.
+  await expandMenuGroups(page);
   await expect(list.locator('.menu-heading')).toHaveText(lang==='es'
    ? ['Vista','Archivo','Editar','Herramientas','Nodos','Organizar','Cuadrícula y zoom','Ajustes y ayuda']
    : ['View','File','Edit','Tools','Nodes','Arrange','Grid and zoom','Settings and Help']);

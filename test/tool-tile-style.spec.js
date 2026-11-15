@@ -51,6 +51,8 @@ test('Settings language switch shares the segmented style at phone portrait',asy
  await page.goto('/?lang=en');
  await expect(page.locator('header.top')).toBeVisible();
  await page.locator('#phoneMenu').click();
+ // Settings and Help folds in the phone Menu, so its heading is tapped first.
+ await page.locator('#menuSection-Settings-and-Help').click();
  await page.locator('#menuSettings').click();
  const seg=page.locator('#settingsDialog .segmented').first();
  await expect(seg).toBeVisible();

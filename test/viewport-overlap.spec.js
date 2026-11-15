@@ -101,8 +101,9 @@ for(const {name,width,height} of VIEWPORTS) for(const lang of LOCALES){
   await page.goto(lang==='en'?'/':`/?lang=${lang}`);
   await check(page,testInfo,'first screen');
 
-  // Layers and Properties sheets, at phone sizes, open from the Menu.
-  if(await open(page,page.locator('#phoneMenu'))){
+  // Layers and Properties sheets, at phone sizes, open from the Menu. A portrait tablet leaves them out of the Menu.
+  const sheetsInMenu=await page.locator('#menuLayers').count()>0;
+  if(sheetsInMenu&&await open(page,page.locator('#phoneMenu'))){
    await page.locator('#menuLayers').click();
    await check(page,testInfo,'Layers sheet','aside.sheet-open');
    // Properties sheet: select an object so Properties has its full set of controls, then open it. Opening the Menu closes the

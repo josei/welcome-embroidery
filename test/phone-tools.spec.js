@@ -1,4 +1,14 @@
 import {test,expect} from '@playwright/test';
+import {revealMenuRow} from './menu-reveal.js';
+
+// Unfolds every Menu group, so the rows of a folded group are in the DOM.
+async function expandMenuGroups(page){
+ for(;;){
+  const folded=page.locator('#phoneMenuList .menu-section[aria-expanded="false"]').first();
+  if(!(await folded.count())) return;
+  await folded.click();
+ }
+}
 
 // At phone widths (600px and narrower) the tool strip scrolls sideways inside its own box, the page never scrolls,
 // every tool can be selected, and Edit and Arrange sit behind one Menu button whose items can all be reached and clicked.
@@ -69,22 +79,22 @@ test('the dock tools are reachable and become active at 375px, and the Menu arms
  // The Menu's drawing tools arm the tool, which takes the Select button off.
  for(const id of ['menuPolygon','menuStar','menuPen']){
   const list=await openMenu(page);
-  await list.locator(`#${id}`).click();
+  await (await revealMenuRow(list,id)).click();
   await expect(list,`${id} closes the menu`).toHaveCount(0);
   await expect(rail.locator('#select'),`${id} arms its tool`).toHaveAttribute('aria-pressed','false');
   await rail.locator('#select').click();
  }
  // Ellipse adds an object, and Trace opens its dialog.
  const before=await page.locator('.object-row').count();
- await (await openMenu(page)).locator('#menuEllipse').click();
+ await (await revealMenuRow(await openMenu(page),'menuEllipse')).click();
  await expect.poll(()=>page.locator('.object-row').count(),'Ellipse adds an object').toBeGreaterThan(before);
- await (await openMenu(page)).locator('#menuTrace').click();
+ await (await revealMenuRow(await openMenu(page),'menuTrace')).click();
  await expect(page.locator('dialog[open]'),'trace opens its dialog').toHaveCount(1);
  await page.keyboard.press('Escape');
  await expect(page.locator('dialog[open]')).toHaveCount(0);
  // Photo stitch opens the picture picker (it is not used here).
  const chooser=page.waitForEvent('filechooser');
- await (await openMenu(page)).locator('#menuPhoto').click();
+ await (await revealMenuRow(await openMenu(page),'menuPhoto')).click();
  await chooser;
  expect(errors).toEqual([]);
 });
@@ -110,7 +120,7 @@ for(const [width,height] of [[390,844],[360,740]]) for(const lang of ['en','es']
  await expect(page.locator('#toolMore'),'no More tools button').toHaveCount(0);
  await expect(page.locator('#moreToolsSheet'),'no More tools panel').toHaveCount(0);
  const list=await openMenu(page);
- for(const id of MENU_TOOLS) await expect(list.locator(`#${id}`),`${id} in the Menu`).toBeVisible();
+ for(const id of MENU_TOOLS) await expect(await revealMenuRow(list,id),`${id} in the Menu`).toBeVisible();
  expect(errors).toEqual([]);
 });
 
@@ -126,7 +136,9 @@ test('the Menu button opens File, Edit, View and Settings and Help, and every en
  const list=page.locator('#phoneMenuList');
  await expect(list,'Menu opens').toBeVisible();
  await expect(list.locator('.menu-heading'),'the groups').toHaveText(['View','File','Edit','Tools','Nodes','Arrange','Grid and zoom','Settings and Help']);
- const ids=await list.locator('[role="menuitem"]').evaluateAll(els=>els.map(e=>e.id));
+ // Every group is unfolded, so each row is tried; the group headings themselves fold and unfold, so they are left out.
+ await expandMenuGroups(page);
+ const ids=(await list.locator('[role="menuitem"]').evaluateAll(els=>els.map(e=>e.id))).filter(id=>!id.startsWith('menuSection-'));
  expect(ids,'Edit items are in the menu').toEqual(expect.arrayContaining(['menuUndo','menuCopy','menuDuplicate','menuSelectAll','menuRepeat']));
  expect(ids,'Delete and keyboard shortcuts are not listed on a phone').not.toEqual(expect.arrayContaining(['menuDelete','menuShortcuts']));
  let clicked=0;
@@ -169,7 +181,7 @@ for(const [width,height] of [[390,844],[360,740]]) for(const lang of ['en','es']
   const list=page.locator('#phoneMenuList');
   await expect(list).toBeVisible();
   // The search field (Command palette) leads the sheet; New is the first group's first row.
-  const first=list.locator('#menuNew');
+  const first=await revealMenuRow(list,'menuNew');
   await expect(list.locator('[role="menuitem"]').first(),'the search field leads').toHaveAttribute('id','menuCommandPalette');
   await expect(first).toHaveText(lang==='es'?/^Nuevo$/:/^New$/);
   // Inside the window and inside the list without scrolling it.

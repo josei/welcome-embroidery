@@ -4,7 +4,7 @@ import {test,expect} from '@playwright/test';
 // hangs over the canvas bottom, at phone and desktop sizes: the two would otherwise hide each other's controls.
 const newDesign=async page=>{
  const menu=page.locator('#phoneMenu');
- if(await menu.count()&&await menu.isVisible()){await menu.click();await page.locator('#menuNew').click();}
+ if(await menu.count()&&await menu.isVisible()){await menu.click();await page.locator('#menuSection-File').click();await page.locator('#menuNew').click();}
  else await page.locator('#new').click();
  if(await page.locator('#discardDialog[open]').count())await page.locator('#discardDiscard').click();
 };
@@ -24,6 +24,7 @@ test('one confirmation stays clear of the zoom bar on a 390×844 phone in Spanis
  await page.locator('#rect').click();
  await page.keyboard.press('Escape');
  await page.locator('#phoneMenu').click();
+ await page.locator('#menuSection-Tools').click();
  await page.locator('#menuEllipse').click();
  await page.keyboard.press('Escape');
  await openStitches(page);

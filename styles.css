@@ -951,6 +951,10 @@ body{height:100dvh;min-height:0;overflow:hidden}
 #phoneMenuList .menu-icon{flex:none;width:20px;height:20px}
 #phoneMenuList .menu-item small{flex:0 1 auto;min-width:0;margin-left:auto;text-align:right;white-space:normal;overflow-wrap:anywhere}
 #phoneMenuList .menu-heading{white-space:nowrap;padding:12px 10px 4px}
+/* A folding group's heading is a full-width button: a chevron (right when folded, down when open) and then the group name. */
+#phoneMenuList .menu-section{display:flex;align-items:center;gap:12px;width:100%;min-height:44px;margin:0;padding:12px 10px 4px;border:0;background:none;text-align:left;color:inherit;cursor:pointer}
+#phoneMenuList .menu-section:hover:not(:disabled){background:none}
+#phoneMenuList .menu-section .menu-icon{color:#66726c}
 /* A landscape phone is only 390 px tall: the tighter heading and title spacing lets the first Menu section (View: Layers, Properties and
    the 2D, Stitches and 3D rows) sit in the list with no scrolling. */
 @media (max-height:500px){#phoneMenuList .menu-heading{padding:6px 10px 0}#phoneMenuList .menu-title{margin-bottom:0}}

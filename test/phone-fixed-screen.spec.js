@@ -1,5 +1,14 @@
 import {test,expect} from '@playwright/test';
 
+// Unfolds every Menu group, so the rows of a folded group are in the DOM.
+async function expandMenuGroups(page){
+ for(;;){
+  const folded=page.locator('#phoneMenuList .menu-section[aria-expanded="false"]').first();
+  if(!(await folded.count())) return;
+  await folded.click();
+ }
+}
+
 // At phone portrait (390x844) the screen is one fixed layout. The page never
 // scrolls; the top bar is 52 px; the canvas fills the rest and is the only pannable part; the contextual bar (52 px) shows only with a
 // selection; the tool dock is 56 px; the status line is 28 px; the zoom bar is the desktop's horizontal bar at the canvas's bottom left.
@@ -99,6 +108,7 @@ for(const lang of ['en','es']){
 test('the Menu holds grid, snap, the sheets and Messages at 390x844 (en)',async({page})=>{
  const errors=await openEditor(page,'en');
  await page.locator('#phoneMenu').click();
+ await expandMenuGroups(page);
  for(const id of ['menuSave','menuGrid','menuSnap','menuSnapObjects','menuLayers','menuProperties','menuMessages']){
   await expect(page.locator(`#${id}`),`${id} in the Menu`).toBeVisible();
  }

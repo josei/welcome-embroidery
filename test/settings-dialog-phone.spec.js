@@ -1,4 +1,5 @@
 import {test,expect} from '@playwright/test';
+import {revealMenuRow} from './menu-reveal.js';
 
 // The Settings dialog on phones and tablets: in landscape the card is capped at 480 px and centred, its title and Close
 // stay in view while the groups scroll, a tap on the backdrop closes it, and the groups and language pair use the same
@@ -13,7 +14,7 @@ async function openSettings(page,lang){
  if(await headerButton.isVisible()) await headerButton.click();
  else{
   await page.locator('#phoneMenu').click();
-  await page.locator('#menuSettings').click();
+  await (await revealMenuRow(page.locator('#phoneMenuList'),'menuSettings')).click();
  }
  await expect(page.locator('#settingsDialog[open]')).toHaveCount(1);
 }
@@ -78,7 +79,7 @@ test('desktop groups and the language pair use the same border and control style
   if(await page.locator('#settingsBtn').isVisible()) await page.locator('#settingsBtn').click();
   else{
    await page.locator('#phoneMenu').click();
-   await page.locator('#menuSettings').click();
+   await (await revealMenuRow(page.locator('#phoneMenuList'),'menuSettings')).click();
   }
   await expect(page.locator('#settingsDialog')).toBeVisible();
   const out=await page.evaluate(()=>{

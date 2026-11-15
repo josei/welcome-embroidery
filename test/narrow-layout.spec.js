@@ -3,7 +3,7 @@ import {test,expect} from '@playwright/test';
 // At narrow widths the top bar stays on one row with its controls whole, and every
 // panel header lines up with the body it heads, at 1920, 1024 and 760px.
 // A portrait tablet keeps New design in the Menu, so the top bar's New button is used only where it is shown.
-const newDesign=async page=>{if(await page.locator('#new').isVisible())await page.locator('#new').click();else{await page.locator('#phoneMenu').click();await page.locator('#menuNew').click();}if(await page.locator('#discardDialog[open]').count())await page.locator('#discardDiscard').click();};
+const newDesign=async page=>{if(await page.locator('#new').isVisible())await page.locator('#new').click();else{await page.locator('#phoneMenu').click();await page.locator('#menuSection-File').click();await page.locator('#menuNew').click();}if(await page.locator('#discardDialog[open]').count())await page.locator('#discardDiscard').click();};
 
 test.beforeEach(async({page})=>{await page.addInitScript(()=>{delete window.showSaveFilePicker;});});
 

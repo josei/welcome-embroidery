@@ -1,4 +1,5 @@
 import {test,expect} from '@playwright/test';
+import {revealMenuRow} from './menu-reveal.js';
 
 // At phone sizes the selection bar carries Duplicate, Delete and Properties; Arrange and the Select toggle are Menu rows. With a selection
 // the Menu runs them, and the Select toggle makes a tap add an object to the selection. Checked in English and Spanish.
@@ -17,7 +18,7 @@ const menuRow=async(page,id)=>{
  const list=page.locator('#phoneMenuList');
  if(!(await list.isVisible())) await page.locator('#phoneMenu').click();
  await expect(list).toBeVisible();
- return list.locator(`#${id}`);
+ return revealMenuRow(list,id);
 };
 
 for(const [width,height] of SIZES) for(const lang of ['en','es']){

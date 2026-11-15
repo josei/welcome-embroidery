@@ -1,4 +1,5 @@
 import {test,expect} from '@playwright/test';
+import {revealMenuRow} from './menu-reveal.js';
 
 // At 844x390 landscape the page never scrolls, every visible
 // control is at least 44x44, the Layers header stays within two lines, and the regions (top bar, tool rail, canvas, status line,
@@ -158,7 +159,7 @@ for(const lang of ['en','es']){
   await expect(page.locator('#toolMore')).toHaveCount(0);
   await expect(page.locator('#moreToolsSheet')).toHaveCount(0);
   await page.locator('#phoneMenu').click();
-  for(const id of ['menuEllipse','menuPolygon','menuStar','menuTrace','menuPhoto','menuPen']) await expect(page.locator(`#phoneMenuList #${id}`)).toHaveCount(1);
+  for(const id of ['menuEllipse','menuPolygon','menuStar','menuTrace','menuPhoto','menuPen']) await expect(await revealMenuRow(page.locator('#phoneMenuList'),id)).toHaveCount(1);
   await page.keyboard.press('Escape');
  });
 }
