@@ -17,7 +17,10 @@ for(const [width,height] of SIZES){
    return {c:r('.layout main>.canvas'),h:r('#hoopOuter')};
   });
   const small=Math.min(c.w,c.h);
-  expect(Math.max(h.w,h.h)).toBeGreaterThanOrEqual(0.9*small);
+  // In landscape the top ruler takes 18 px of the canvas, so the hoop is centred between the ruler and the bottom edge
+  // rather than rising into the ruler: about 88% of the short side is the most that fits with the hoop centred.
+  const minFill=c.w>c.h?0.88:0.9;
+  expect(Math.max(h.w,h.h)).toBeGreaterThanOrEqual(minFill*small);
   expect(h.l).toBeGreaterThanOrEqual(c.l);
   expect(h.r).toBeLessThanOrEqual(c.r);
   expect(h.t).toBeGreaterThanOrEqual(c.t);

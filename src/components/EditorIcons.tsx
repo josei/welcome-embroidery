@@ -306,8 +306,8 @@ export function EditorIcons() {
         </symbol>
         {" "}
         <symbol id={"i-contour"} viewBox={"0 0 24 24"}>
-          <rect x={"3.5"} y={"4.5"} width={"17"} height={"15"} rx={"2"} />
-          <rect x={"7.5"} y={"8.5"} width={"9"} height={"7"} rx={"1"} />
+          <circle cx={"12"} cy={"12"} r={"8.5"} />
+          <circle cx={"12"} cy={"12"} r={"4.5"} />
         </symbol>
         {" "}
         <symbol id={"i-spiral"} viewBox={"0 0 24 24"}>
@@ -397,6 +397,21 @@ export function EditorIcons() {
         <symbol id={"i-applique"} viewBox={"0 0 24 24"}>
           <path d={"M5 8c0-2 2-3 7-3s7 1 7 3v8c0 2-2 3-7 3s-7-1-7-3z"} strokeDasharray={"2.2 1.6"} />
           <path d={"M8 9c0-1 1.5-1.5 4-1.5s4 .5 4 1.5v6c0 1-1.5 1.5-4 1.5s-4-.5-4-1.5z"} fill={"currentColor"} opacity={".35"} />
+        </symbol>
+        {" "}
+        <symbol id={"i-wave"} viewBox={"0 0 24 24"}>
+          <path d={"M3 8.5q2.25-2.5 4.5 0t4.5 0 4.5 0 4.5 0"} />
+          <path d={"M3 15.5q2.25-2.5 4.5 0t4.5 0 4.5 0 4.5 0"} />
+        </symbol>
+        {" "}
+        <symbol id={"i-loops"} viewBox={"0 0 24 24"}>
+          <circle cx={"6.5"} cy={"12"} r={"2.8"} />
+          <circle cx={"12"} cy={"12"} r={"2.8"} />
+          <circle cx={"17.5"} cy={"12"} r={"2.8"} />
+        </symbol>
+        {" "}
+        <symbol id={"i-diamond"} viewBox={"0 0 24 24"}>
+          <path d={"M12 3.5l8.5 8.5-8.5 8.5-8.5-8.5z"} />
         </symbol>
         {" "}
         <symbol id={"i-ripple"} viewBox={"0 0 24 24"}>

@@ -14,10 +14,10 @@ const FILL_METHODS = [
  {value: 'meander', label: 'Meander', icon: 'i-meander'},
  {value: 'guided', label: 'Guided (follows a line)', icon: 'i-guided'},
  {value: 'cross', label: 'Cross stitch', icon: 'i-cross'},
- {value: 'ripple', label: 'Ripple', icon: 'i-ripple'},
- {value: 'motif', label: 'Motif loops', icon: 'i-bean'},
- {value: 'sequin', label: 'Sequin fill', icon: 'i-ripple'},
- {value: 'bling', label: 'Bling fill', icon: 'i-ripple'},
+ {value: 'ripple', label: 'Ripple', icon: 'i-wave'},
+ {value: 'motif', label: 'Motif loops', icon: 'i-loops'},
+ {value: 'sequin', label: 'Sequin fill', icon: 'i-star'},
+ {value: 'bling', label: 'Bling fill', icon: 'i-diamond'},
 ];
 const DEFAULT_THREADS = ['#527461', '#d9897e', '#d3ad61', '#89a377'];
 const THREAD_OPTIONS = [{value: '', label: t('None')}, ...DEFAULT_THREADS.map(hex => ({value: hex, label: threadName(hex)}))];
