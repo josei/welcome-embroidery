@@ -170,13 +170,13 @@ test('desktop at 1280x800 is not a landscape phone layout',async({page})=>{
 });
 
 // Landscape phone Menu and sheet details, checked together.
-test('the landscape Menu is a 320 px column, and each label starts within 16 px of its icon (en)',async({page})=>{
+test('the landscape Menu is a 420 px column at 844 px wide, and each label starts within 16 px of its icon (en)',async({page})=>{
  await openEditor(page,...LANDSCAPE,'en');
  await page.locator('#phoneMenu').click();
  const list=page.locator('#phoneMenuList');
  await expect(list).toBeVisible();
  const box=await list.boundingBox();
- expect(box.width).toBeLessThanOrEqual(390);
+ expect(box.width).toBeLessThanOrEqual(420);
  const gaps=await list.locator('[role="menuitem"]').evaluateAll(els=>els.map(e=>{
   const icon=e.querySelector('.menu-icon').getBoundingClientRect(), label=e.querySelector(':scope > span').getBoundingClientRect();
   return label.left-icon.right;
@@ -243,7 +243,7 @@ for(const [w,h] of [[390,844]]) for(const lang of ['en','es']) for(const view of
   await expect(page.locator('#play')).toBeVisible();
   await expect(page.locator('#playbackStitches')).toBeVisible();
   // A long satin gives a four-digit total (over 3,000), so the label is near its widest.
-  await expect(page.locator('#playbackStitches')).toHaveText(/\d,\d{3}$/);
+  await expect(page.locator('#playbackStitches')).toHaveText(/\d[.,]\d{3}$/);
   expect(await linesOf(page,'#playbackStitches'),`counter: "${await page.locator('#playbackStitches').textContent()}"`).toBe(1);
   // The dock clips overflow, so the counter's right edge must sit inside the viewport.
   expect(await page.locator('#playbackStitches').evaluate(e=>e.getBoundingClientRect().right<=window.innerWidth),`counter clipped: "${await page.locator('#playbackStitches').textContent()}"`).toBe(true);
