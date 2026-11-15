@@ -786,13 +786,14 @@ body{height:100vh;height:100dvh;min-height:0;overflow:hidden}
 @media (max-width:900px) and (orientation:landscape){
 .object-row .row-tag{display:flex;min-width:0;white-space:nowrap}.object-row .row-kind{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.object-row .row-sep,.object-row .row-count{flex:none;white-space:nowrap}.object-row .row-sep{white-space:pre}.object-row .row-icon{display:none}
 }
-/* On a tablet in portrait and a tablet or phone in landscape, a layer row's 44 px Hide and Lock buttons sit beside the row.
-   The selected highlight is drawn on the whole row (the line that holds the row and its buttons), not on the row alone.
-   The row also gives up 4 px of its gap, so the type word "relleno" stays whole at 844 px in Spanish. */
-@media (min-width:601px) and (max-width:1024px) and (orientation:portrait),(min-width:601px) and (max-width:900px) and (orientation:landscape){
-.object-row{gap:6px}
+/* A layer row's Hide and Lock buttons sit beside the row, so the selected highlight is drawn on the whole line that holds the row
+   and its buttons, at every size. The row itself keeps its 1 px border as a transparent edge, so its text does not move. */
 .object-line:has(>.object-row.selected){background:var(--teal-soft);border-radius:10px;box-shadow:inset 0 0 0 1px var(--teal)}
 .object-line:has(>.object-row.selected)>.object-row{background:transparent;border-color:transparent}
+/* On a tablet in portrait and a tablet or phone in landscape, the row gives up 4 px of its gap to its buttons,
+   so the type word "relleno" stays whole at 844 px in Spanish. */
+@media (min-width:601px) and (max-width:1024px) and (orientation:portrait),(min-width:601px) and (max-width:900px) and (orientation:landscape){
+.object-row{gap:6px}
 }
 @media (max-width:600px) and (orientation:portrait){
 body{height:100vh;height:100dvh;min-height:0;overflow:hidden;overscroll-behavior:none}
@@ -1177,4 +1178,15 @@ label:has(> input[type=checkbox]){display:flex;align-items:center;gap:8px}
 .layout{grid-template-columns:248px minmax(0,1fr) 248px}
 #inspector .corner-radii label:not(#blendPaletteRow > label){display:flex;align-items:center;gap:6px;min-width:0}
 #inspector .corner-radii input{flex:1 1 0;width:auto;min-width:0}
+}
+/* On a landscape tablet from 901 to 1100 px wide, the row's stitch icon repeats the type word beside it. The two 44 px row buttons
+   already take much of the Layers column, so the icon is dropped to leave the word and the stitch count room to read on one or two lines. */
+@media (min-width:901px) and (max-width:1100px) and (orientation:landscape){
+.object-row .row-icon{display:none}
+}
+/* With touch, the 44 px row buttons leave too little for the words in Spanish, so Layers takes 300 px here (as the tablet portrait
+   sheet does) and the inspector keeps the 248 px it has above. The 1024 to 1100 px mouse layout keeps its own column widths. */
+@media (min-width:901px) and (max-width:1100px) and (orientation:landscape) and (pointer:coarse){
+.layout{grid-template-columns:300px minmax(0,1fr) 248px}
+.layout:has(>.panel.inspector-collapsed:last-child){grid-template-columns:300px minmax(0,1fr)}
 }

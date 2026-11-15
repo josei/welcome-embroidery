@@ -1,7 +1,7 @@
 import {test,expect} from '@playwright/test';
 
-// On a tablet held upright or sideways, and on a landscape phone, a layer row's selected highlight covers the whole row,
-// including its Hide and Lock buttons, and the type and stitch count are separated by the same " · " as on the desktop.
+// At every size, a layer row's selected highlight covers the whole row, including its Hide and Lock buttons. The type and
+// stitch count are separated by the same " · " everywhere, and on a landscape tablet at 1024 by 768 they wrap to two lines at most.
 
 // A tablet's touch screen is a coarse pointer; a laptop's mouse is a fine one.
 async function openPage(browser,w,h,touch){
@@ -51,7 +51,7 @@ function measureSelected(){
  };
 }
 
-const SIZES=[[768,1024,false],[844,390,false],[768,1024,true],[844,390,true]];
+const SIZES=[[390,844,true],[844,390,false],[768,1024,false],[844,390,true],[768,1024,true],[1024,768,true],[1440,900,false]];
 
 for(const [w,h,touch] of SIZES){
  for(const lang of ['en','es']){
@@ -90,4 +90,22 @@ test('the stitch type and count are separated by a spaced dot on the desktop and
    expect(Math.abs(s.sepWidth-seps[`desktop-${lang}`].sepWidth),`separator width at ${key} in ${lang}`).toBeLessThanOrEqual(1);
   }
  }
+});
+
+test('the stitch type and count wrap to two lines at most on a landscape tablet at 1024 by 768, in English and Spanish',async({browser})=>{
+ test.setTimeout(120000);
+ const {page,context}=await openPage(browser,1024,768,true);
+ try{
+  for(const lang of ['en','es']){
+   await drawRect(page,lang);
+   const lines=await page.evaluate(()=>[...document.querySelectorAll('.object-row')].filter(r=>r.offsetParent).map(r=>{
+    const tag=r.querySelector('.row-tag');
+    return {text:tag.textContent,height:tag.getBoundingClientRect().height,lineHeight:parseFloat(getComputedStyle(tag).lineHeight)||parseFloat(getComputedStyle(tag).fontSize)*1.2};
+   }));
+   expect(lines.length,`${lang} rows`).toBeGreaterThan(0);
+   for(const row of lines){
+    expect(Math.round(row.height/row.lineHeight),`"${row.text}" in ${lang} lines`).toBeLessThanOrEqual(2);
+   }
+  }
+ }finally{await context.close();}
 });
