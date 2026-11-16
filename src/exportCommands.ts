@@ -2,7 +2,7 @@ import {documentNow} from './documentState.js';
 import {selectedObject} from './selectionCommands.js';
 import {exportFormatState, exportKind} from './exportFormatState.js';
 import {EMPTY_EXPORT_REASON, exportDialogState, setExportDialog} from './exportDialogState.js';
-import {download, designExportStem, exportStem, forWorker} from './appHelpers.js';
+import {download, designExportStem, designLabel, exportStem, forWorker} from './appHelpers.js';
 import {exportAppliqueTemplates, exportPrintTemplate, exportSvg, jefWarnings, sewingWorksheet} from './engine.js';
 import {exportDxf} from './dxf.js';
 import {t} from './i18n.js';
@@ -142,6 +142,7 @@ async function runExport(job: {abandoned: boolean}) {
     document: forWorker(documentNow().doc),
     format,
     color: selectedObject()?.thread || '#527461',
+    label: designLabel(documentNow().doc),
   });
   if (job.abandoned) return;
   if (result.plan.revision !== revision || revision !== documentNow().doc.revision) {

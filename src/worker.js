@@ -10,10 +10,10 @@ import {decodeEmbroidery} from './readers.js';
 function base64(bytes){let text='';for(let i=0;i<bytes.length;i+=0x8000)text+=String.fromCharCode(...bytes.subarray(i,Math.min(i+0x8000,bytes.length)));
   return btoa(text);}
 self.onmessage=async e=>
-  {const {id,generation,type,document,format,color,bytes,fileName}=e.data;
+  {const {id,generation,type,document,format,color,bytes,fileName,label}=e.data;
   try{
   if(type==='compile'){await ensureFonts(document);const plan=compile(document);self.postMessage({id,generation,ok:true,plan});}else if(type==='export'){
-  await ensureFonts(document);const plan=compile(document);const output=encode(plan,format,color,document.hoop,document);
+  await ensureFonts(document);const plan=compile(document);const output=encode(plan,format,color,document.hoop,document,label);
   self.postMessage({id,generation,ok:true,plan,bytes:output},[output.buffer]);}else if(type==='import'){
   if(!(bytes instanceof ArrayBuffer)||bytes.byteLength>1_048_576)throw Error('Machine-file imports are limited to 1 MiB.');const data=new Uint8Array(bytes),
   decoded=decodeEmbroidery(data,format);if(decoded.stitches.length>250_000)throw Error('This design exceeds the 250,000 stitch import limit.');const digest=

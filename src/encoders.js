@@ -54,9 +54,10 @@ const ANCHORABLE = new Set(['jef', 'exp', 'pes', 'pes6']);
  * @param {string} [color]
  * @param {number|{w: number, h: number}} [hoop]
  * @param {Document|null} [document]
+ * @param {string} [label] the DST header label; defaults to the document's name
  * @returns {Uint8Array}
  */
-export function encode(plan,format,color,hoop=110,document=null){
+export function encode(plan,format,color,hoop=110,document=null,label=undefined){
   if(document)hoop=hoopSize(document);
   if(
     !(['jef','vp3','dst','exp','pec','pes','pes6','sew','u01','xxx','tbf','col','edr'].includes(
@@ -75,7 +76,7 @@ export function encode(plan,format,color,hoop=110,document=null){
   // A document with a moved imported layer writes its JEF, PES and EXP file with the anchor tail, so the re-import keeps every position (see anchor.js).
   const anchored=ANCHORABLE.has(format)&&hasMovedImport(document);
   const tailed=(/** @type {Uint8Array} */ bytes,/** @type {number[]} */ lead=[])=>(anchored?withAnchorTail(bytes,lead):bytes);
-  if(format==='jef')return tailed(encodeJef(plan,color,hoop));if(format==='dst')return encodeDst(plan,document?.name||'Welcome');
+  if(format==='jef')return tailed(encodeJef(plan,color,hoop));if(format==='dst')return encodeDst(plan,label??(document?.name||'Welcome'));
     if(format==='exp')return tailed(encodeExp(plan),[0x80,0xF0]);if(format==='pec')return encodePec(plan,document?.name||'Welcome');
     if(format==='pes')return tailed(encodePes(plan,document?.name||'Welcome'));if(format==='pes6')return tailed(encodePesV6(plan,document?.name||'Welcome'));
     if(format==='sew')return encodeSew(plan);if(format==='u01')return encodeU01(plan);if(format==='xxx')return encodeXxx(plan);

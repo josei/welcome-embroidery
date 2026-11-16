@@ -3,7 +3,7 @@ import {selState} from './selectionState.js';
 import {batchDocuments, batchPlan} from './engine.js';
 import {arrayState} from './arrayState.js';
 import {batchNames, batchState, setBatchFields} from './batchState.js';
-import {download, exportStem, forWorker} from './appHelpers.js';
+import {download, designLabel, exportStem, forWorker} from './appHelpers.js';
 import {t, lang} from './i18n.js';
 
 /** What the batch export needs from the editor, supplied by app.js. */
@@ -94,7 +94,7 @@ export async function exportBatch() {
   const objects = documentNow().doc.objects as ExportObject[];
   const color = objects.find(o => o.id === selState().selected)?.thread || '#527461';
   for (const [i, d] of docs.entries()) {
-    const result = await wired().request({type: 'export', document: forWorker(d), format, color});
+    const result = await wired().request({type: 'export', document: forWorker(d), format, color, label: designLabel(d)});
     download(result.bytes, `${base}-hoop${i + 1}.${format === 'pes6' ? 'pes' : format}`, 'application/octet-stream');
   }
   wired().toast(t('{n} {fmt} files exported, one per hoop.', {n: docs.length, fmt: format.toUpperCase()}));

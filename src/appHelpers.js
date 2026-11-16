@@ -63,6 +63,19 @@ export function designExportStem(doc){
   return exportStem(lettering||doc.name);}
 
 /**
+ * The name written into a DST header's label field: the design's name as the editor shows it. A design the user named
+ * keeps that name; an unnamed one takes its lettering; with neither, the translated Untitled design. Accents are folded
+ * to plain letters, because the DST label holds printable ASCII only.
+ * @param {{name?: string, objects?: any[]}} doc
+ * @returns {string}
+ */
+export function designLabel(doc){
+  const named=doc.name&&doc.name!=='Untitled design'?doc.name:'';
+  const lettering=(doc.objects||[]).filter(o=>o.kind==='text'&&typeof o.text==='string')
+    .map(o=>o.text.replace(/\s+/g,' ').trim()).filter(Boolean).join(' ').trim();
+  return (named||lettering||t('Untitled design')).normalize('NFD').replace(/[\u0300-\u036f]/g,'');}
+
+/**
  * @param {any} p the plan's sewing span, as sewingSeconds reads it
  * @returns {string}
  */
