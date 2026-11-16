@@ -224,7 +224,8 @@ label[hidden],button[hidden],.sel-hint[hidden]{display:none!important}
 .switch-input:hover{filter:brightness(.95)}.switch-input:focus-visible{outline:2px solid var(--teal);outline-offset:2px}
 .switch-input:disabled{opacity:.45;cursor:default}
 .press-toggle{appearance:none;display:inline-flex;align-items:center;gap:6px;min-height:30px;padding:0 2px;border:0;background:none;font:inherit;color:inherit;cursor:pointer}.press-toggle .switch-track{position:relative;display:block;width:30px;height:16px;border-radius:8px;background:#c9d0cb;transition:background .15s}.press-toggle .switch-track::before{content:"";position:absolute;top:2px;left:2px;width:12px;height:12px;border-radius:50%;background:#fff;box-shadow:0 1px 2px #0003;transition:transform .15s}.press-toggle[aria-pressed=true] .switch-track{background:var(--teal)}.press-toggle[aria-pressed=true] .switch-track::before{transform:translateX(14px)}.press-toggle:hover .switch-track{filter:brightness(.95)}.press-toggle:focus-visible{outline:2px solid var(--teal);outline-offset:2px}.press-toggle:disabled{opacity:.45;cursor:default}.press-toggle[aria-pressed=true] .switch-state{color:var(--teal-deep);font-weight:var(--fw-emphasis)}
-.switch-state{min-width:20px;font-size:var(--fs-caption);color:#5c625e}.switch-row:has(.switch-input:checked) .switch-state{color:var(--teal-deep);font-weight:var(--fw-emphasis)}
+/* The word keeps its natural width in the flex row, so Spanish "Desactivado" is not squeezed and spills out of its box. */
+.switch-state{min-width:20px;flex:none;font-size:var(--fs-caption);color:#5c625e}.switch-row:has(.switch-input:checked) .switch-state{color:var(--teal-deep);font-weight:var(--fw-emphasis)}
 .icon-check[data-icon="border"]{--ic:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22black%22 stroke-width=%221.8%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22%3E%3Crect x=%224%22 y=%224%22 width=%2216%22 height=%2216%22 rx=%222%22/%3E%3Crect x=%228%22 y=%228%22 width=%228%22 height=%228%22 fill=%22black%22/%3E%3C/svg%3E")}
 .icon-check[data-icon="closed"]{--ic:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22black%22 stroke-width=%221.8%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22%3E%3Cpath d=%22M5 19 9 5l11 6-4 8z%22/%3E%3C/svg%3E")}
 .icon-check[data-icon="smooth"]{--ic:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22black%22 stroke-width=%221.8%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22%3E%3Cpath d=%22M3 17C7 5 11 21 15 11c1.5-3.5 3.5-3 6-3%22/%3E%3C/svg%3E")}
@@ -332,7 +333,8 @@ input:not([type=checkbox]):not([type=range]),select,textarea,.panel textarea{fon
 
 .floating button[hidden]{display:none}
 
-.canvas .tool-rail{position:absolute;left:28px;top:28px;z-index:6;display:flex;flex-direction:column;gap:2px;margin:0;padding:6px;background:#fff;border:0;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,.08);max-height:calc(100% - 56px);overflow:auto;order:0}
+/* The rail ends 68 px above the canvas bottom, so a tall rail stays clear of the zoom bar (about 58 px at the bottom) instead of covering its corner. */
+.canvas .tool-rail{position:absolute;left:28px;top:28px;z-index:6;display:flex;flex-direction:column;gap:2px;margin:0;padding:6px;background:#fff;border:0;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,.08);max-height:calc(100% - 96px);overflow:auto;order:0}
 .canvas .tool-rail .icon-button{width:36px;height:36px;min-width:36px}
 .canvas.preview-mode .tool-rail{display:none}
 /* At phone widths (600px and narrower) the tool rail sits along the bottom of the canvas, above the zoom bar.
