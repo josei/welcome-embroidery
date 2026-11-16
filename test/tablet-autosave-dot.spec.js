@@ -1,15 +1,15 @@
 import {test,expect} from '@playwright/test';
 
-// On phones and tablets the save status is the same text line as on desktop, set under the top bar. It is an overlay, so the
-// design name keeps its box whether the design is clean or has unsaved changes.
+// On tablets and a landscape phone the save status is the same text line as on desktop, set under the top bar. It is an overlay,
+// so the design name keeps its box whether the design is clean or has unsaved changes.
 
 test.beforeEach(async({page})=>{await page.addInitScript(()=>{delete window.showSaveFilePicker;});});
 
 const box=(page,sel)=>page.locator(sel).first().evaluate(e=>{const r=e.getBoundingClientRect();return {left:r.left,right:r.right,top:r.top,bottom:r.bottom};});
 
-for(const lang of ['en','es']){
- test(`tablet portrait 768x1024 ${lang}: the save status is a caption under the bar and the name does not move`,async({page})=>{
-  await page.setViewportSize({width:768,height:1024});
+for(const [w,h] of [[768,1024],[1024,768],[667,375]])for(const lang of ['en','es']){
+ test(`${w} x ${h} ${lang}: the save status is a caption under the bar and the name does not move`,async({page})=>{
+  await page.setViewportSize({width:w,height:h});
   await page.goto(`/?lang=${lang}`);
   await expect(page.locator('.canvas')).toBeVisible();
   const before=await box(page,'.top #name');
