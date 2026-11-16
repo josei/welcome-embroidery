@@ -3,7 +3,7 @@ import type {FormEvent, KeyboardEvent} from 'react';
 import {interactionState} from '../interactionState.js';
 import {finishCanvasText, liveCanvasText} from '../canvasText.js';
 import {t} from '../i18n.js';
-import {inputMode} from '../inputMode.js';
+import {pressMode} from '../inputMode.js';
 import {selectAllInField} from './selectAllKey';
 
 // The lettering text box over the canvas. interactionState.canvasText says which object is being edited and where its
@@ -40,8 +40,9 @@ function focusQuietly(el: HTMLElement | null) {
 
 export function CanvasTextEditor() {
   const {canvasText} = useSyncExternalStore(interactionState.subscribe, interactionState.get);
-  // A phone has no Enter or Escape key, so after a tap the caption names the tap that saves the text instead.
-  const touch = useSyncExternalStore(inputMode.subscribe, inputMode.get) === 'touch';
+  // A phone has no Enter or Escape key, so after a tap the caption names the tap that saves the text instead. Keyed to the
+  // last press rather than the last key, since typing on a phone's keyboard counts as a key press.
+  const touch = useSyncExternalStore(pressMode.subscribe, pressMode.get) === 'touch';
   const box = useRef<HTMLTextAreaElement>(null);
   const finished = useRef(false);
   useEffect(() => {

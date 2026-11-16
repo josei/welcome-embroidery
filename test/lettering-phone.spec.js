@@ -47,3 +47,27 @@ test('the text can be typed and saved by touch, and the box is a 44 px touch tar
  await expect(page.locator('.object-row',{hasText:'HI'}),'the lettering keeps the typed text').toHaveCount(1);
  expect(errors).toEqual([]);
 });
+
+// While a phone user types, the stitch count follows the text on screen and the hint keeps its tap wording. The first
+// keystroke on a phone's keyboard must not switch the hint to the keyboard wording.
+for(const lang of ['en','es']) test(`typing on a phone updates the count and keeps the tap hint (${lang})`,async({page})=>{
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));page.on('dialog',d=>d.accept());
+ await page.setViewportSize({width:390,height:844});
+ await page.goto(lang==='en'?'/':`/?lang=${lang}`);
+ await page.locator('.tool-rail #letter').tap();
+ const box=page.locator('#canvasText'),hint=page.locator('#canvasTextHint'),count=page.locator('#count');
+ await expect(box,'text box opens').toBeVisible();
+ const placeholderCount=(await count.textContent())?.trim();
+ const seen=[];
+ seen.push(await hint.textContent());
+ await page.keyboard.press('Control+A');
+ await page.keyboard.type('W');
+ seen.push(await hint.textContent());
+ await page.keyboard.type('E');
+ seen.push(await hint.textContent());
+ await expect(box).toHaveValue('WE');
+ await expect(count,'count is no longer the placeholder\'s').not.toHaveText(placeholderCount,{timeout:5000});
+ await expect(count).toHaveText(/\d+/);
+ for(const text of seen) expect(text,'hint keeps touch wording').not.toMatch(/Enter|Escape|clic|Esc/);
+ expect(errors).toEqual([]);
+});

@@ -7,6 +7,7 @@ import {setSelection} from './selectionState.js';
 import {interactionNow, setInteraction} from './interactionState.js';
 import {isRegistryFont} from './fonts.js';
 import {addLabel, editTextLabel} from './addLabel.js';
+import {clearComputed} from './compileService.js';
 
 /** The part of a document object the canvas text editor reads and writes. */
 export interface EditableObject {
@@ -86,6 +87,9 @@ export function liveCanvasText(id: string, value: string) {
   o.text = text;
   o.w = measureText(text, o.font || 'welcome-mono/1', o.h, o);
   wired().render();
+  // The status line reads the last compiled plan. Dropping it while the text changes shows a pending state rather than the
+  // count of the text before the keystroke, and schedules a compile that brings the count up to date.
+  clearComputed();
 }
 
 /**
