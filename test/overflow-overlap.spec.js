@@ -74,7 +74,7 @@ for(const [w,h] of viewports){
    await page.setViewportSize({width:w,height:h});
    await page.goto(`/?lang=${lang}`);
    // A portrait tablet keeps New design in the Menu, so the top bar's New button is used only where it is shown.
-   if(await page.locator('#new').isVisible())await page.locator('#new').click();else{await page.locator('#phoneMenu').click();await page.locator('#menuSection-File').click();await page.locator('#menuNew').click();}
+   if(await page.locator('#new').isVisible())await page.locator('#new').click();else{await page.locator('#phoneMenu').click();if(await page.locator('#menuSection-File[aria-expanded="false"]').count())await page.locator('#menuSection-File').click();await page.locator('#menuNew').click();}
    if(await page.locator('#discardDialog[open]').count())await page.locator('#discardDiscard').click();
    // Layers is the object list, always open at this width. On a phone it is a sheet, opened from the Menu at either orientation.
    const openSheet=async sheet=>{

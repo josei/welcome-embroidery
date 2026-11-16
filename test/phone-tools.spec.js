@@ -145,7 +145,7 @@ test('the Menu button opens File, Edit, View and Settings and Help, and every en
  for(const id of ids){
   // A view row (2D, Stitches, 3D) is listed first and changes the view, which hides the tool dock; return to 2D before the next row.
   if(!(await page.locator('#rect').isVisible())){ if(!(await list.isVisible())) await menu.click(); await page.locator('#menuView-design').click(); }
-  if(!(await list.isVisible())) await menu.click();
+  if(!(await list.isVisible())){ await menu.click(); await expandMenuGroups(page); } // reopening the Menu starts with its default group unfolded
   const item=list.locator(`#${id}`);
   await item.scrollIntoViewIfNeeded();
   await expect(item,`${id} is reachable in the menu`).toBeVisible();

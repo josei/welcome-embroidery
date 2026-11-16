@@ -73,7 +73,7 @@ type Row = Entry | Heading | Note | '-';
 // Closes on an outside press, Escape, or after an entry runs.
 // The phone Menu also closes on a downward swipe of at least TITLE_SWIPE_PX on its title row.
 const TITLE_SWIPE_PX = 60;
-function Dropdown({id, label, rows, iconOnly}: {id: string; label: string; rows: Row[]; iconOnly?: boolean}) {
+function Dropdown({id, label, rows, iconOnly, onOpen}: {id: string; label: string; rows: Row[]; iconOnly?: boolean; onOpen?: () => void}) {
  const [open, setOpen] = useState(false);
  const wrap = useRef<HTMLDivElement>(null);
  const trigger = useRef<HTMLButtonElement>(null);
@@ -111,7 +111,7 @@ function Dropdown({id, label, rows, iconOnly}: {id: string; label: string; rows:
   trigger.current?.focus();
  };
  // Opening a menu closes any phone sheet (Layers or Properties), so only one of them is ever open.
- const openWith = (where: 'first' | 'last' | null) => { closePhoneSheet(); focusOnOpen.current = where; setOpen(true); };
+ const openWith = (where: 'first' | 'last' | null) => { closePhoneSheet(); onOpen?.(); focusOnOpen.current = where; setOpen(true); };
  // Runs an item: the menu closes and focus goes back to the header, so keyboard users stay where they were.
  const choose = (row: Entry) => { setOpen(false); trigger.current?.focus(); row.run(); };
  function onKeyDown(e: ReactKeyboardEvent) {
@@ -379,9 +379,11 @@ export function PhoneMenu() {
  const nodes = useSyncExternalStore(nodeButtonsState.subscribe, nodeButtonsState.get);
  const selectAdd = useSyncExternalStore(multiSelectState.subscribe, multiSelectState.get);
  const reasonCtx = useReasonContext();
- // Which groups are unfolded. Only the selection actions (Arrange) start open, since they act on what is selected. Every other group
- // starts folded, so the Menu fits a phone screen; a tap on its heading shows its rows. A folded group keeps its heading.
- const [unfolded, setUnfolded] = useState<Record<string, boolean>>({Arrange: true});
+ // Which groups are unfolded. Exactly one starts open each time the Menu opens: Arrange when something is selected, since its
+ // rows act on the selection, otherwise File, so New, Open and Export are one tap away on a fresh profile. A tap on a heading
+ // shows or hides its rows. A folded group keeps its heading.
+ const defaultUnfolded = (selected: boolean): Record<string, boolean> => (selected ? {Arrange: true} : {File: true});
+ const [unfolded, setUnfolded] = useState<Record<string, boolean>>(() => defaultUnfolded(reasonCtx.count > 0));
  const group = (name: string, groupRows: Row[]): Row[] => {
   const open = Boolean(unfolded[name]);
   const id = `menuSection-${name.replace(/\W+/g, '-')}`;
@@ -455,7 +457,7 @@ export function PhoneMenu() {
  ];
  return (
   <>
-   <Dropdown id="phoneMenu" label={t('Menu')} iconOnly rows={rows} />
+   <Dropdown id="phoneMenu" label={t('Menu')} iconOnly rows={rows} onOpen={() => setUnfolded(defaultUnfolded(reasonCtx.count > 0))} />
    <input ref={photoInput} type="file" accept="image/*" hidden id="menuPhotoFile" onChange={event => {
     const file = event.target.files?.[0];
     event.target.value = '';

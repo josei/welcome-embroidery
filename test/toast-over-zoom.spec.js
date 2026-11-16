@@ -4,7 +4,7 @@ import {test,expect} from '@playwright/test';
 // hangs over the canvas bottom, at phone and desktop sizes: the two would otherwise hide each other's controls.
 const newDesign=async page=>{
  const menu=page.locator('#phoneMenu');
- if(await menu.count()&&await menu.isVisible()){await menu.click();await page.locator('#menuSection-File').click();await page.locator('#menuNew').click();}
+ if(await menu.count()&&await menu.isVisible()){await menu.click();if(await page.locator('#menuSection-File[aria-expanded="false"]').count())await page.locator('#menuSection-File').click();await page.locator('#menuNew').click();}
  else await page.locator('#new').click();
  if(await page.locator('#discardDialog[open]').count())await page.locator('#discardDiscard').click();
 };

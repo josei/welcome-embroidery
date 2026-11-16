@@ -120,3 +120,65 @@ test('the phone Menu still fills the screen width',async({page})=>{
  const box=await page.locator('#phoneMenuList').boundingBox();
  expect(box.width).toBe(PHONE[0]);
 });
+
+// On a fresh profile the Menu opens with File unfolded, so New, Open and Export are one tap away. Once an object is selected, the
+// Menu opens with Arrange unfolded instead, since its rows act on the selection.
+async function openBareEditor(page,[width,height]){
+ page.on('dialog',d=>d.accept());
+ await page.setViewportSize({width,height});
+ await page.goto('/');
+}
+
+async function drawRect(page){
+ await page.locator('#rect').click();
+ const box=await page.locator('body').boundingBox();
+ await page.mouse.move(box.x+box.width/2-40,box.y+box.height/2-40);
+ await page.mouse.down();
+ await page.mouse.move(box.x+box.width/2+40,box.y+box.height/2+40,{steps:5});
+ await page.mouse.up();
+}
+
+for(const size of [PHONE,TABLET]){
+ test(`the Menu opens with File unfolded and Arrange folded when nothing is selected at ${size.join('x')}`,async({page})=>{
+  await openBareEditor(page,size);
+  await page.locator('#phoneMenu').click();
+  await expect(page.locator('#phoneMenuList')).toBeVisible();
+  await expect(page.locator('#menuSection-File')).toHaveAttribute('aria-expanded','true');
+  await expect(page.locator('#menuSection-Arrange')).toHaveAttribute('aria-expanded','false');
+  await expect(page.locator('#menuNew')).toBeVisible();
+ });
+
+ test(`the Menu opens with Arrange unfolded once an object is selected at ${size.join('x')}`,async({page})=>{
+  await openBareEditor(page,size);
+  await drawRect(page);
+  await page.locator('#phoneMenu').click();
+  await expect(page.locator('#phoneMenuList')).toBeVisible();
+  await expect(page.locator('#menuSection-Arrange')).toHaveAttribute('aria-expanded','true');
+  await expect(page.locator('#menuSection-File')).toHaveAttribute('aria-expanded','false');
+ });
+}
+
+// From a fresh profile, a phone or tablet user can start a design, add lettering and export a DST file in 7 actions or fewer:
+// the Menu, New, the lettering tool, a tap to place the text, typing it, the top bar's Export, and Download.
+for(const size of [PHONE,TABLET]){
+ test(`a new design with lettering exports a DST file in 7 actions or fewer at ${size.join('x')}`,async({page})=>{
+  page.on('dialog',d=>d.accept());
+  await page.setViewportSize({width:size[0],height:size[1]});
+  await page.goto('/');
+  let actions=0;
+  const tap=async loc=>{actions++;await loc.click();};
+  await tap(page.locator('#phoneMenu'));
+  await tap(page.locator('#menuNew'));
+  await tap(page.locator('.tool-rail #letter'));
+  await tap(page.locator('.canvas'));
+  await page.keyboard.type('WE');
+  actions++;
+  await tap(page.locator('#export'));
+  await expect(page.locator('#exportDialog')).toBeVisible();
+  await expect(page.locator('#format')).toHaveValue('dst');
+  const download=page.waitForEvent('download');
+  await tap(page.locator('#download'));
+  expect((await download).suggestedFilename()).toMatch(/\.dst$/);
+  expect(actions).toBeLessThanOrEqual(7);
+ });
+}
