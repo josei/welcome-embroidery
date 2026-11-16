@@ -735,7 +735,8 @@ body{height:100vh;height:100dvh;min-height:0;overflow:hidden}
 .layout{display:grid;height:calc(100vh - 80px);height:calc(100dvh - 80px);grid-template-columns:minmax(0,1fr) 300px;grid-template-rows:minmax(0,0.42fr) minmax(0,1fr)}
 .layout>main{grid-column:1;grid-row:1 / span 2;display:flex;flex-direction:column;min-width:0;min-height:0;order:0}
 .layout main>.canvas{flex:1 1 0;height:auto;min-height:0}
-.layout main>footer{flex:none;height:28px;min-height:0;padding:0 10px;gap:10px;overflow:hidden;align-items:center;font-size:var(--fs-caption)}
+/* The toast hangs above the status line, outside its 28 px box, so the status line must not clip it. Its children fit the bar. */
+.layout main>footer{flex:none;height:28px;min-height:0;padding:0 10px;gap:10px;overflow:visible;align-items:center;font-size:var(--fs-caption);border-top:0;box-shadow:inset 0 1px 0 #e3e6e1}
 /* Layers and Properties share the right-hand column, Layers on top. Both are always open, and each scrolls inside itself. */
 .layout>#layersSheet,.layout>#inspector{display:block;min-height:0;min-width:0;overflow-y:auto;overscroll-behavior:contain;padding:12px 12px 16px;background:#fff;border:0;border-left:1px solid #e3e6e1;width:auto}
 .layout>#layersSheet{grid-column:2;grid-row:1}
@@ -919,7 +920,7 @@ body{height:100dvh;min-height:0;overflow:hidden}
 .canvas .canvas-text-hint,.canvas #canvasHint,.canvas .canvas-hint{bottom:56px;left:8px;right:auto;max-width:calc(100% - 140px)}
 /* The lettering caption is anchored at the left edge, so it must not keep the centring shift of .canvas-hint: that pushed it under the tool rail. */
 .canvas .canvas-text-hint{transform:none}
-.layout main>footer{position:relative;flex:none;height:44px;min-height:44px;margin:0;padding:0 196px 0 8px;display:flex;flex-wrap:nowrap;align-items:center;gap:8px;overflow:hidden;border-top:1px solid #e3e6e1;background:#fff}
+.layout main>footer{position:relative;flex:none;height:44px;min-height:44px;margin:0;padding:0 196px 0 8px;display:flex;flex-wrap:nowrap;align-items:center;gap:8px;overflow:visible;border-top:0;box-shadow:inset 0 1px 0 #e3e6e1;background:#fff}
 .layout main>footer .messages-btn{min-height:44px;min-width:44px;padding:0 12px}
 .layout main>footer>.playback-bar{flex:1 1 auto;min-width:0;height:44px}
 /* In the Stitches and 3D views the playback bar takes a row of its own above the status row, so the colour strip and the
