@@ -849,6 +849,9 @@ body{height:100vh;height:100dvh;min-height:0;overflow:hidden;overscroll-behavior
 /* Toasts stack above the contextual bar, so they never cover the dock (56 px) or the bar (52 px)
    and the status line (28 px) stays the anchor: 28 + 56 + 52 + an 8 px gap. The dock and the bar never move. */
 #toast{bottom:144px;margin-bottom:0}
+/* An open phone sheet covers the bottom half of the screen, so a toast that appeared over its fields would hide them. While a
+   sheet is open the toast rises to sit just above the sheet's top edge (the sheet is 50dvh tall, anchored to the bottom). */
+.layout:has(>aside.panel.sheet-open) main>footer>#toast{bottom:calc(50dvh + 8px)}
 /* The Stitches and 3D views add the playback row under the canvas: 101 px, since the timeline spans the bar's width
    under the controls and the readout. The toast keeps its anchor above the status line, so it moves up by the same
    amount and stays clear of the zoom bar inside the shorter canvas. */
