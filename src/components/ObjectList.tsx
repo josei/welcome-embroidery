@@ -268,9 +268,27 @@ function GroupRow({groupId, members, open, selectedIds, count, warning, onSelect
  );
 }
 
+// Scrolls the panel that holds a row the least that shows the whole row, as block 'nearest' does. Only that panel moves, never the page.
+function revealInPanel(row: HTMLElement) {
+ let panel = row.parentElement;
+ while (panel && !/(auto|scroll)/.test(getComputedStyle(panel).overflowY)) panel = panel.parentElement;
+ if (!panel) return;
+ const box = panel.getBoundingClientRect(), r = row.getBoundingClientRect();
+ if (r.top < box.top) panel.scrollTop -= box.top - r.top;
+ else if (r.bottom > box.bottom) panel.scrollTop += r.bottom - box.bottom;
+}
+
 export function ObjectList() {
  const objects = useObjects();
  const sel = useSyncExternalStore(selectionState.subscribe, selectionState.get);
+ const listRef = useRef<HTMLDivElement>(null);
+ // A newly selected row, a new shape or one picked on the canvas, is brought into view within its panel.
+ useEffect(() => {
+  const id = sel.selected;
+  if (!id || !listRef.current) return;
+  const row = [...listRef.current.querySelectorAll<HTMLElement>('.object-row')].find(r => r.dataset.id === id);
+  if (row) revealInPanel(row);
+ }, [sel.selected]);
  const counts = useSyncExternalStore(sewingCountsState.subscribe, sewingCountsState.get);
  const issue = useSyncExternalStore(compileIssueState.subscribe, compileIssueState.get);
  // The reason a failed compile gives, on the rows it names. The counts above stay on their rows meanwhile.
@@ -382,7 +400,7 @@ export function ObjectList() {
   setDrop(null);
  };
  return (
-  <div id="objects" onClick={onClick} onDragStart={onDragStart} onDragOver={onDragOver} onDragLeave={onDragLeave} onDrop={onDrop} onDragEnd={onDragEnd}>
+  <div id="objects" ref={listRef} onClick={onClick} onDragStart={onDragStart} onDragOver={onDragOver} onDragLeave={onDragLeave} onDrop={onDrop} onDragEnd={onDragEnd}>
    {issue && <div className="list-warning" role="status">{t('⚠ Can\'t compile: {e}', {e: t(issue.message)})}</div>}
    {objects.length === 0 && <p className="sel-hint empty-hint">{t('No objects yet. Draw a shape or import an image to start.')}</p>}
    {objects.length > 0 && (
