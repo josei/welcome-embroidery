@@ -15,7 +15,7 @@ import {
 } from './fonts.js';
 import {createFontPicker, fetchFontIndex, LEGACY} from './fontui.js';
 import {ttfToFont} from './ttf.js';
-import {measureText, objectBounds, hoopSize} from './engine.js';
+import {measureText, objectBounds, hoopSize, storedText, fontChangeOps} from './engine.js';
 import {t} from './i18n.js';
 
 /** The text object fields the lettering panel and the font picker read. */
@@ -218,23 +218,9 @@ export async function setFont(fid: string) {
     return;
   }
   newTextFont = fid;
-  const o = textObj(), f = isRegistryFont(fid) ? getFont(fid) : null;
-  if (o) {
-    const legacy = !isRegistryFont(fid);
-    const longest = o.text.split('\n').reduce((a, b) => (a.length >= b.length ? a : b), '');
-    const height = fitHeight(fid, longest, o);
-    const text = legacy ? o.text.replace(/\n/g, ' ').toUpperCase().slice(0, 24) : o.text;
-    wired().edit([
-      {
-        op: 'set_object',
-        id: o.id,
-        font: fid,
-        text,
-        stitch: f?.kind === 'outline' ? (getFont(o.font)?.kind === 'outline' && o.stitch === 'run' ? 'run' : 'fill') : 'run',
-      },
-      {op: 'transform', id: o.id, height, width: measureText(text, fid, height, o)},
-    ]);
-  } else syncTextInspector(null);
+  const o = textObj();
+  if (o) wired().edit(fontChangeOps(o, fid, hoopSize(documentNow().doc)));
+  else syncTextInspector(null);
 }
 
 /**
@@ -366,9 +352,9 @@ export function initFontPicker() {
   });
 }
 
-/** The text as the document stores it: one line, upper case, at most 24 characters, unless the font is a registry font. */
+/** The text as the document stores it for the lettering's font (see storedText). */
 function storedLetteringText(o: NonNullable<ReturnType<typeof textObj>>, text: string): string {
-  return isRegistryFont(o.font) ? text : text.replace(/\n/g, ' ').toUpperCase().slice(0, 24);
+  return storedText(o.font, text);
 }
 
 /** Wires the lettering edits and the font picker. app.js calls this once, before the first render. */

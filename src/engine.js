@@ -1,8 +1,8 @@
 // @ts-check
 // Deterministic stitch compiler and JEF/VP3 serializers. Document units are mm.
 import {getFont,isRegistryFont,registerDocumentFonts} from './fonts.js';
-import {bundledFontUsage,customFontUsage,measureText} from './fontHelpers.js';
-export {bundledFontUsage,customFontUsage,measureText};
+import {bundledFontUsage,customFontUsage,measureText,storedText,fontChangeOps as fontChangeOpsFor} from './fontHelpers.js';
+export {bundledFontUsage,customFontUsage,measureText,storedText};
 import {planPhoto,planContour,sampleRun,sampleLine} from './stitchplan.js';
 import {FABRIC_PROFILES,FABRIC_PRESETS,DISTORTION_SCALE,distortionGrid} from './fabrics.js';
 import {GLYPHS,parseSvgPath} from './lettering.js';
@@ -78,6 +78,11 @@ function polygonFill(rings,spacing,angle) {
 
 export {geometry,objectBounds};
 
-
-
-
+/**
+ * The operations for switching lettering to a font, placed with the engine's own bounds (see fontChangeOps in fontHelpers.js).
+ * @param {any} o
+ * @param {string} fid
+ * @param {{w: number, h: number}} hoop
+ * @returns {Record<string, any>[]}
+ */
+export function fontChangeOps(o,fid,hoop){return fontChangeOpsFor(o,fid,hoop,/** @type {any} */(objectBounds));}

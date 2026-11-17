@@ -45,7 +45,7 @@ test('lettering layer is never named "Text: Text" after typing (1440x900)',async
  await page.keyboard.press('Enter');
  await expect(page.locator('.object-row'),'the lettering is added').toHaveCount(1);
  const names=await rowNames(page);
- expect(names.join(' '),'the layer shows the typed word').toContain('HOLA');
+ expect(names.join(' '),'the layer shows the typed word').toContain('Hola');
  expect(names.join(' '),'no duplicated placeholder name').not.toMatch(/Text: Text/);
  expect(errors).toEqual([]);
 });

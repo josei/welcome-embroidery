@@ -1,7 +1,7 @@
 // Canvas lettering editing: opening the on-canvas text box, the live text and width as it is typed, committing or
 // cancelling it, and openEdit (Enter on an object). The box itself is CanvasTextEditor.tsx; app.js supplies the editor
 // commands through configureCanvasText.
-import {measureText, objectBounds} from './engine.js';
+import {measureText, objectBounds, storedText} from './engine.js';
 import {documentNow} from './documentState.js';
 import {setSelection} from './selectionState.js';
 import {interactionNow, setInteraction} from './interactionState.js';
@@ -50,9 +50,9 @@ function wired(): CanvasTextApi {
   return api;
 }
 
-/** The text as it is saved: registry fonts keep the lines typed, other fonts are single-line uppercase. */
+/** The text as it is saved for the font (see storedText). */
 function savedText(font: string | undefined, value: string): string {
-  return isRegistryFont(font) ? value : value.replace(/\n/g, ' ').toUpperCase().slice(0, 24);
+  return storedText(font, value);
 }
 
 /**

@@ -4,6 +4,7 @@
 import {getFont,isRegistryFont} from './fonts.js';
 import {FABRIC_PRESETS} from './fabrics.js';
 import {MAX_TEXT_CHARS} from './textlayout.js';
+import {MIN_TEXT_HEIGHT_MM} from './fontHelpers.js';
 import {t} from './i18n.js';
 import {hasName,objectLabel} from './objectNames.js';
 
@@ -15,7 +16,7 @@ import {hasName,objectLabel} from './objectNames.js';
 function textSizeRange(font){
   if(font==='neon-blinking/1')return {name:'Néon blinking',lo:20,hi:60};
   if(isRegistryFont(font)){const f=getFont(/** @type {string} */ (font));
-    if(f)return {name:f.name||String(font),lo:f.size*f.minScale,hi:f.size*f.maxScale};
+    if(f)return {name:f.name||String(font),lo:Math.min(f.size*f.minScale,MIN_TEXT_HEIGHT_MM),hi:f.size*f.maxScale};
     return {name:String(font),lo:2,hi:200};}
   return {name:'Welcome Mono',lo:4,hi:16};
 }

@@ -52,7 +52,7 @@ for(const lang of ['en','es']){
   await page.locator('.canvas').tap({position:{x:20,y:20}});
   await expect(page.locator('#canvasText'),'the box closes').toHaveCount(0);
   await expect(page.locator('.object-row'),'the object stays, as its placeholder word').toHaveCount(1);
-  await expect(page.locator('.object-row').first()).toContainText(PLACEHOLDER[lang].toUpperCase());
+  await expect(page.locator('.object-row').first()).toContainText(PLACEHOLDER[lang]);
  });
 
  test(`typing a word and pressing Enter places one selected object (390x844, ${lang})`,async({page})=>{
@@ -64,7 +64,7 @@ for(const lang of ['en','es']){
   await page.keyboard.press('Enter');
   await expect(page.locator('#canvasText'),'the box closes').toHaveCount(0);
   await expect(page.locator('.object-row'),'exactly one object is added').toHaveCount(1);
-  await expect(page.locator('.object-row').first(),'the layer row shows the typed word').toContainText('HOLA');
+  await expect(page.locator('.object-row').first(),'the layer row shows the typed word').toContainText('Hola');
   await expect(page.locator('.object-row.selected'),'the new object is selected').toHaveCount(1);
  });
 
@@ -85,7 +85,7 @@ for(const lang of ['en','es']){
   await page.keyboard.press('Enter');
   await expect(page.locator('#canvasText'),'the box closes').toHaveCount(0);
   await expect(page.locator('.object-row'),'one object is added').toHaveCount(1);
-  await expect(page.locator('.object-row').first()).toContainText(PLACEHOLDER[lang].toUpperCase());
+  await expect(page.locator('.object-row').first()).toContainText(PLACEHOLDER[lang]);
   await expect(page.locator('.object-row.selected'),'the new object is selected').toHaveCount(1);
  });
 }
@@ -105,7 +105,7 @@ test('at 1440x900 the text box opens on a selected object, selects the placehold
  await page.keyboard.press('Enter');
  await expect(box,'the box closes').toHaveCount(0);
  await expect(page.locator('.object-row')).toHaveCount(1);
- await expect(page.locator('.object-row').first()).toContainText('WELCOME');
+ await expect(page.locator('.object-row').first()).toContainText('Welcome');
  await expect(page.locator('.object-row.selected')).toHaveCount(1);
  expect(errors).toEqual([]);
 });
