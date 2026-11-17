@@ -2832,7 +2832,8 @@ test('status bar: every item stays on one line at 1440px and 1280px, in English 
   });
   // An empty item (the needle readout outside Design) has no line box to check.
   for (const [id,state,n] of lines) if (state==='shown' && n) expect(n,`${id} at ${width}px ${lang}`).toBe(1);
-  const ticks=await page.evaluate(()=>{const m=[...document.querySelectorAll('.timeline-marker')].map(e=>e.getBoundingClientRect());
+  // The visible dot is the marker less its transparent tap border, so the dots are compared, not the 24 px tap areas.
+  const ticks=await page.evaluate(()=>{const m=[...document.querySelectorAll('.timeline-marker')].map(e=>{const r=e.getBoundingClientRect(),b=parseFloat(getComputedStyle(e).borderLeftWidth)||0;return {left:r.left+b,right:r.right-b};});
    let overlap=0;for(let i=1;i<m.length;i++)if(m[i].left<m[i-1].right-0.5)overlap++;return overlap;});
   expect(ticks,`colour-change ticks overlap at ${width}px ${lang}`).toBe(0);
  }
