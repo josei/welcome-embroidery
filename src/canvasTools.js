@@ -20,6 +20,7 @@ import {applyOperations} from './operations.js';
 import {objectBounds} from './transforms.js';
 import {hoopSize} from './hoops.js';
 import {newShapeSpot} from './newShapePlacement.js';
+import {phoneSheetState} from './phoneSheetState.js';
 
 const NS='http://www.w3.org/2000/svg';
 const $=(/** @type {string} */ s)=>/** @type {any} */(document.querySelector(s));
@@ -82,6 +83,8 @@ export function createCanvasTools(api){
   }
   // A new shape or lettering object goes in at the hoop's centre with the thread and stitch in the sidebar. Lettering's
   // box is centred there too (see below); a new shape is placed at the hoop centre by its x/y origin.
+  // While a phone sheet covers the canvas, new objects are placed in the part still showing. Otherwise the whole hoop is open.
+  const placementView=()=>phoneSheetState.get()!=='none'?api.canvas.visibleArea():undefined;
   async function add(/** @type {string} */ kind){
     const id=crypto.randomUUID();
     if(kind==='text'){
@@ -96,7 +99,7 @@ export function createCanvasTools(api){
       applyOperations(probe,[{...op,text:PLACEMENT_TEXT}]);
       const [bx0,by0,bx1,by1]=objectBounds(probe.objects[0]);
       const doc=documentNow().doc;
-      const spot=newShapeSpot(doc.objects,hoopSize(doc),bx1-bx0,by1-by0);
+      const spot=newShapeSpot(doc.objects,hoopSize(doc),bx1-bx0,by1-by0,placementView());
       op.x=spot.x-bx0; op.y=spot.y-by0;
       api.commit([op],()=>{
         selectNew(id);
@@ -109,7 +112,7 @@ export function createCanvasTools(api){
     // Selected in both fields, as lettering is: the inspector reads the multi-selection, so the thread and stitch controls show.
     // Placement: see newShapePlacement.js. Successive adds take the next free slot beside the others.
     const doc=documentNow().doc;
-    const spot=newShapeSpot(doc.objects,hoopSize(doc),24,16);
+    const spot=newShapeSpot(doc.objects,hoopSize(doc),24,16,placementView());
     const shapeName=kind==='ellipse'?'Ellipse':'Rectangle';
     api.commit([{op:'add_shape',id,kind,name:shapeName,x:spot.x,y:spot.y,width:24,height:16,
       thread:$('#thread').value,stitch:(stitchChoicesState.get().type==='satin'?'fill':stitchChoicesState.get().type)}],()=>{

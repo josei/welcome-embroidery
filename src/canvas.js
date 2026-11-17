@@ -54,6 +54,7 @@ export function createCanvas(/** @type {any} */ api){
     snapPt:(/** @type {any} */ p)=>editing.snapPt(p),
     showSnap:(/** @type {any} */ hit)=>editing.showSnap(hit),
     px:(/** @type {number} */ n)=>editing.px(n),
+    visibleArea:()=>visibleArea(),
   }});
 
   // The edit-mode overlay and its pointer listeners live here, next to the rest of the canvas's pointer handling.
@@ -104,6 +105,18 @@ export function createCanvas(/** @type {any} */ api){
   }
   function fitAll(){const b=contentBounds();fitRect(b[0],b[1],b[2],b[3],56);}
   function fitSelection(){const ids=api.ids();if(!ids.length)return fitAll();{const b=contentBounds(ids);fitRect(b[0],b[1],b[2],b[3],90,toolbarInset(container));}}function revealSelection(){const ids=api.ids();if(!ids.length)return;const b=contentBounds(ids),ins=toolbarInset(container),{w,h}=size(),[x0,y0]=toScreen(b[0],b[1]),[x1,y1]=toScreen(b[2],b[3]);if(!(x0<RULER||y0<RULER+ins.top||x1>w-ins.right||y1>h-ins.bottom))return;fitRect(b[0],b[1],b[2],b[3],90,ins);}
+  // Pans, without zooming, so the selection sits in the part of the canvas no sheet or floating bar covers.
+  function panToReveal(){const ids=api.ids();if(!ids.length)return;const b=contentBounds(ids),ins=toolbarInset(container),{w,h}=size(),[x0,y0]=toScreen(b[0],b[1]),[x1,y1]=toScreen(b[2],b[3]);
+    if(!(x0<RULER||y0<RULER+ins.top||x1>w-ins.right||y1>h-ins.bottom))return;
+    const tx=(RULER+w-ins.right)/2,ty=(RULER+ins.top+h-ins.bottom)/2;
+    vp.cx+=((x0+x1)/2-tx)/vp.s;vp.cy+=((y0+y1)/2-ty)/vp.s;apply();}
+  // The zoom and centre of the view, so a sheet can put them back when it closes.
+  function viewport(){return {cx:vp.cx,cy:vp.cy,s:vp.s};}
+  function setViewport(/** @type {{cx:number,cy:number,s:number}} */ v){vp.cx=v.cx;vp.cy=v.cy;vp.s=v.s;apply();}
+  // The part of the canvas no sheet or floating bar covers, in world mm. Screen x maps to world as (sx - ox) / scale, where ox
+  // is where world 0 sits on screen (the inverse of toScreen).
+  function visibleArea(){const ins=toolbarInset(container),{w,h}=size(),[ox,oy]=toScreen(0,0),s=vp.s;
+    return {x0:(RULER-ox)/s,y0:(RULER+ins.top-oy)/s,x1:(w-ins.right-ox)/s,y1:(h-ins.bottom-oy)/s};}
   /**
    * @param {number} factor
    * @param {number} [clientX]
@@ -579,7 +592,7 @@ export function createCanvas(/** @type {any} */ api){
   });
 
   api.zoomUi?.(zoomAt,fitHoop,fitAll,zoomTo100);
-  return {vp,apply,refresh,drawScene,fitHoop,fitAll,fitSelection,revealSelection,zoomAt,zoomTo100,toScreen,scale:()=>vp.s,percent:()=>Math.round(vp.s/PX_PER_MM*100),hit,
+  return {vp,apply,refresh,drawScene,fitHoop,fitAll,fitSelection,revealSelection,panToReveal,viewport,setViewport,visibleArea,zoomAt,zoomTo100,toScreen,scale:()=>vp.s,percent:()=>Math.round(vp.s/PX_PER_MM*100),hit,
     closeMenu,isDragging:()=>Boolean(state),inField,RULER,
     px:editing.px,drawControls:editing.drawControls,showSnap:editing.showSnap,
     snapPt:editing.snapPt,insertNodeAt:editing.insertNodeAt,deleteNode:editing.deleteNode,

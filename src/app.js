@@ -64,10 +64,24 @@ configureShapePathActions({edit, toast, render});
 configureSelectionToolbarActions({edit});
 configureSewingOrder({edit});
 configureLettering({edit, transact, toast, render, reveal: () => editor.canvas?.revealSelection()});
-// Opening Properties on a phone covers the lower part of the canvas, so the selection is brought into the part above the sheet.
-// Waits a frame so the sheet is laid out before the canvas measures it.
+// Opening Properties on a phone covers the lower part of the canvas. The view pans, without zooming, so the selection sits above
+// the sheet, and closing the sheet puts back the zoom and centre it had before. Waits a frame so the sheet is laid out before the
+// canvas measures it.
+/** @type {{cx: number, cy: number, s: number} | null} */
+let viewBeforeSheet = null;
+let lastSheet = 'none';
 phoneSheetState.subscribe(() => {
-  if (phoneSheetState.get() === 'properties') requestAnimationFrame(() => editor.canvas?.revealSelection());
+  const sheet = phoneSheetState.get();
+  if (sheet === 'properties' && lastSheet !== 'properties') {
+    viewBeforeSheet = editor.canvas?.viewport() ?? null;
+    requestAnimationFrame(() => {
+      if (phoneSheetState.get() === 'properties') editor.canvas?.panToReveal();
+    });
+  } else if (sheet !== 'properties' && lastSheet === 'properties' && viewBeforeSheet) {
+    editor.canvas?.setViewport(viewBeforeSheet);
+    viewBeforeSheet = null;
+  }
+  lastSheet = sheet;
 });
 configureFontsDialog({edit, toast});
 configureProjectIO({

@@ -53,3 +53,38 @@ test('lettering with no free space reports overlap and goes back at the centre',
   assert.equal(s.overlaps, true);
   assert.deepEqual([s.x, s.y], [-15, -5]);
 });
+
+const inside = (s, w, h, v) => s.x >= v.x0 && s.y >= v.y0 && s.x + w <= v.x1 && s.y + h <= v.y1;
+
+test('with a visible area, the first shape goes inside it even when the hoop centre is off screen', () => {
+  const view = {x0: 20, y0: -30, x1: 60, y1: 30};
+  const s = newShapeSpot([], hoop, 24, 16, view);
+  assert.equal(s.overlaps, false);
+  assert.ok(inside(s, 24, 16, view), `spot ${JSON.stringify(s)} is outside ${JSON.stringify(view)}`);
+});
+
+test('with a visible area, successive shapes stay inside it and clear of each other', () => {
+  const wide = {w: 200, h: 200};
+  const view = {x0: -10, y0: -40, x1: 70, y1: 40};
+  const objects = [];
+  for (let i = 0; i < 4; i++) {
+    const s = newShapeSpot(objects, wide, 24, 16, view);
+    assert.equal(s.overlaps, false);
+    assert.ok(inside(s, 24, 16, view), `shape ${i} at ${JSON.stringify(s)} is outside the view`);
+    objects.push(rect(String(i), s.x, s.y, 24, 16));
+  }
+  for (let i = 0; i < objects.length; i++) for (let j = i + 1; j < objects.length; j++) assert.equal(overlap(objects[i], objects[j]), false);
+});
+
+test('with a visible area and no free slot in it, the shape goes inside the visible part and reports overlap', () => {
+  const view = {x0: -20, y0: -20, x1: 20, y1: 20};
+  const objects = [rect('a', -20, -20, 40, 40)];
+  const s = newShapeSpot(objects, hoop, 24, 16, view);
+  assert.equal(s.overlaps, true);
+  assert.ok(inside(s, 24, 16, view), `spot ${JSON.stringify(s)} is outside the view`);
+});
+
+test('a visible area larger than the hoop does not place a shape outside the hoop', () => {
+  const s = newShapeSpot([], hoop, 24, 16, {x0: -500, y0: -500, x1: 500, y1: 500});
+  assert.deepEqual([s.x, s.y], [-12, -8]);
+});
