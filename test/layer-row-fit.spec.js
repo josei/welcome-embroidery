@@ -134,3 +134,17 @@ test('desktop 1440x900 shows the long Spanish layer name whole without growing t
  expect(longName,'the long Spanish layer name is in the list').toBeTruthy();
  expect(longName.rowHeight,`the row holding "Centro de la flor" is tall enough for its name`).toBeGreaterThanOrEqual(longName.nameHeight);
 });
+
+// At 1024x768 the Layers list sits beside the canvas, and its type and count line ("relleno · 1.102 puntadas") must stay on one
+// line in Spanish, so no row is taller than its name plus one line.
+test('no layer row at 1024x768 in Spanish is taller than two lines',async({page})=>{
+ test.setTimeout(120000);
+ await page.setViewportSize({width:1024,height:768});
+ await drawAndSelect(page,'es');
+ const rows=await page.evaluate(()=>[...document.querySelectorAll('.object-row')].filter(r=>r.offsetParent).map(r=>{
+  const lineHeight=parseFloat(getComputedStyle(r.querySelector('.row-name')).lineHeight)||15;
+  return Math.round(r.querySelector('.row-text').getBoundingClientRect().height/lineHeight);
+ }));
+ expect(rows.length).toBeGreaterThan(0);
+ for(const lines of rows)expect(lines).toBeLessThanOrEqual(2);
+});

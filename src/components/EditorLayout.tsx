@@ -65,6 +65,8 @@ const groupLabel = t('Group ({shortcut})', {shortcut: shortcutLabel([{mod: true,
 const ungroupLabel = t('Ungroup ({shortcut})', {shortcut: shortcutLabel([{mod: true, shift: true, key: 'G'}])});
 // Landscape phones (the bar is 52 px tall there).
 const NARROW_QUERY = '(max-height: 500px)';
+// Below the desktop width the Properties panel is a scrolling panel of its own, rather than a column that stays in view.
+const BELOW_DESKTOP_QUERY = '(max-width: 1100px)';
 const subscribeNarrow = (listen: () => void) => {
  const media = window.matchMedia(NARROW_QUERY);
  media.addEventListener('change', listen);
@@ -126,6 +128,14 @@ export function EditorLayout() {
   document.addEventListener('keydown', escape);
   return () => document.removeEventListener('keydown', escape);
  }, [phoneSheet]);
+ // Where a tablet's Properties panel scrolls is kept for the object it showed. A new selection opens at the top, so its name and
+ // size are in view, rather than at the old scroll offset. Desktop keeps its own scroll position.
+ const selectedId = selection.selected;
+ useEffect(() => {
+  if (!window.matchMedia(BELOW_DESKTOP_QUERY).matches) return;
+  const panel = document.getElementById('inspector');
+  if (panel) panel.scrollTop = 0;
+ }, [selectedId]);
  const canvasClass = ['canvas', hand && 'hand', snapping && 'snapping', (gridShown || snapping) && 'grid-shown', view === 'preview' && 'preview-mode', panning && 'panning',
   deletingGuide && 'deleting-guide'].filter(Boolean).join(' ');
  // At phone portrait the dock is one row of six tool buttons, each with its label under the icon. The other drawing tools

@@ -1313,3 +1313,14 @@ html[lang="es"] .layout main>.tool-rail .rail-label{font-size:10px;letter-spacin
 /* The heading and Properties share the first row. The count takes a full row below them and wraps inside it, so a longer colour count never pushes Properties past the panel edge. */
 .layers-head{flex-wrap:wrap;row-gap:4px}
 .layers-head .layers-count{order:1;flex:1 1 100%;min-width:0;white-space:normal;overflow:visible;text-overflow:clip}
+/* Tablets at 601–1024 px wide hold the playback summary on a grid beside the seek track, not in a column under it, so the thread
+   summary has the bar's full width and reads on one line. The track is dissolved into the grid with display: contents. */
+@media (min-width:601px) and (max-width:1024px) and (min-height:501px){
+.layout main:not(.design-view) .playback-bar{display:grid;grid-template-columns:auto auto auto minmax(0,1fr);grid-template-rows:auto auto;align-items:center;column-gap:12px;row-gap:2px}
+.layout main:not(.design-view) .playback-bar .playback-track{display:contents}
+.layout main:not(.design-view) .playback-bar .playback-slider{grid-column:4;grid-row:1;min-width:0}
+.layout main:not(.design-view) .playback-bar .playback-summary{grid-column:3 / 5;grid-row:2;white-space:nowrap;overflow:visible;text-overflow:clip}
+}
+/* Layer rows in the Layers list keep the type word and the stitch count on one line at every width; the count stays whole. */
+.object-row .row-tag{display:flex;min-width:0;white-space:nowrap}
+.object-row .row-sep{white-space:pre}
