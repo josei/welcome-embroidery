@@ -28,6 +28,8 @@ export interface LetteringFields {
   fontInfoText: string;
   textOff: boolean;
   styleOff: boolean;
+  /** Why bold, italic and spacing are off: '' when they are on, 'select' with no text picked, 'font' for a single-line font. */
+  styleOffWhy: '' | 'select' | 'font';
 }
 
 export const letteringFieldsState = createStore<LetteringFields>({
@@ -57,6 +59,7 @@ export const letteringFieldsState = createStore<LetteringFields>({
   fontInfoText: '',
   textOff: false,
   styleOff: false,
+  styleOffWhy: '',
 });
 
 /** Changes some of the lettering fields. */

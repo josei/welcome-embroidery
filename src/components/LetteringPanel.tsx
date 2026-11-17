@@ -7,6 +7,7 @@ import {useDraftInput} from './useDraftInput';
 import {useDecimalNumber} from './useDecimalInput';
 import {selectAllInField} from './selectAllKey';
 import {stitchPanelActions, stitchPanelState} from '../stitchPanelState.js';
+import {t} from '../i18n.js';
 // The lettering panel, rendered by React. Ids match the markup it replaced, because app.js wires them by id.
 // The Fill and Outline choices for outline fonts: the value, its label and its icon.
 const STITCH_CHOICES: Array<[string, string, string]> = [['fill', 'Fill', 'i-fill'], ['run', 'Outline (running)', 'i-run']];
@@ -68,6 +69,7 @@ useLayoutEffect(() => {
     id="alignRight" className="icon-button" data-align-text="right" aria-pressed={l.align ===
   'right'} disabled={l.styleOff} onClick={() =>
   letteringActions.press('align', 'right')} title="Align right" aria-label="Align right"><svg className="icon"><use href="#i-al-right"/></svg></button></div>
+{l.styleOffWhy && <p className="font-info style-hint" role="note">{l.styleOffWhy === 'select' ? t('Select lettering on the canvas, or add some, to set bold and italic.') : t('Bold and italic need an outline or satin font. This font is single-line: choose another under Font.')}</p>}
 <div className="tool-grid text-options"><label>{"Letter spacing (mm)"}<input id="tracking" type="text" inputMode="decimal" min="-10" max="30" step="0.1" {...tracking.inputProps} disabled={l.styleOff} />{tracking.note && <span className="clamp-note" role="status">{tracking.note}</span>}</label><span></span><label>{"Word spacing (mm)"}<input id="wordSpacing" type="text" inputMode="decimal" min="-10" max="50" step="0.5" {...wordSpacing.inputProps} disabled={l.styleOff} />{wordSpacing.note && <span className="clamp-note" role="status">{wordSpacing.note}</span>}</label><span></span>
   <label>{"Line height (×)"}<input id="lineHeight" type="text" inputMode="decimal" min="0.5" max="3" step="0.05" {...lineHeight.inputProps} disabled={l.styleOff} />{lineHeight.note && <span className="clamp-note" role="status">{lineHeight.note}</span>}</label><label className="switch-row" style={{gridColumn: '1 / -1'}} title="Stack the letters one under another, top to bottom"><span>Vertical (one letter under another)</span><span className="switch-control"><input id="textVertical" type="checkbox" role="switch" className="switch-input" checked={l.vertical} disabled={l.styleOff} onChange={e => letteringActions.choose('vertical', e.target.checked)} /><span className="switch-state" aria-hidden="true">{l.vertical ? 'On' : 'Off'}</span></span></label>
 <label className="switch-row" style={{gridColumn: '1 / -1'}} title="Each letter of this text takes one name from the names list"><span>Name drop: this text takes each name</span><span className="switch-control"><input id="textNameDrop" type="checkbox" role="switch" className="switch-input" checked={l.nameDrop} onChange={e => letteringActions.choose('nameDrop', e.target.checked)} /><span className="switch-state" aria-hidden="true">{l.nameDrop ? 'On' : 'Off'}</span></span></label><span></span>

@@ -174,6 +174,7 @@ export function syncTextInspector(o: TextObject | null) {
   setLetteringFields({
     textOff: !isText,
     styleOff: !isText || !registry,
+    styleOffWhy: !isText ? 'select' : !registry ? 'font' : '',
     text: isText ? o.text : '',
     height: String(isText ? +Number(o.h).toFixed(2) : (f?.size ?? (legacyNeon ? 20 : 8))),
     heightMin: String(lo),

@@ -2,6 +2,8 @@
 // Spanish table entries that did not fit in src/i18n.js under its 500-line limit. i18n.js spreads these into ES
 // first, so an entry in i18n.js wins over one here with the same key.
 export const ES_ADDITIONS={
+'Select lettering on the canvas, or add some, to set bold and italic.':'Selecciona un texto en el lienzo, o añade uno, para elegir negrita y cursiva.',
+'Bold and italic need an outline or satin font. This font is single-line: choose another under Font.':'La negrita y la cursiva necesitan una fuente de contorno o de satén. Esta fuente es de una sola línea: elige otra en Fuente.',
 'Nothing selected. Tap an object to select it, tap another to add it, or pick a tool on the left.':'Nada seleccionado. Toca un objeto para seleccionarlo, toca otro para añadirlo o elige una herramienta a la izquierda.',
 'Tap to add to selection':'Toca objetos para añadirlos a la selección','Add node':'Añadir nodo','Delete node':'Eliminar nodo',
 'Smooth node':'Nodo suave','Corner node':'Nodo en esquina','Photo stitch':'Bordado desde foto','Clip':'Recortar con máscara',
