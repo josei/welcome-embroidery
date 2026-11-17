@@ -88,3 +88,15 @@ test('a visible area larger than the hoop does not place a shape outside the hoo
   const s = newShapeSpot([], hoop, 24, 16, {x0: -500, y0: -500, x1: 500, y1: 500});
   assert.deepEqual([s.x, s.y], [-12, -8]);
 });
+
+test('a new shape is never placed edge to edge with a neighbour of another size', () => {
+  const objects = [rect('tall', -12, -8, 24, 16)];
+  const s = newShapeSpot(objects, hoop, 26, 8);
+  assert.equal(s.overlaps, false);
+  const box = {x: s.x, y: s.y, w: 26, h: 8};
+  for (const o of objects) {
+    const gapX = Math.max(o.x - (box.x + box.w), box.x - (o.x + o.w));
+    const gapY = Math.max(o.y - (box.y + box.h), box.y - (o.y + o.h));
+    assert.ok(Math.max(gapX, gapY) >= 4, `gap to ${o.id} is ${Math.max(gapX, gapY)} mm`);
+  }
+});

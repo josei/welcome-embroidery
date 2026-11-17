@@ -3,8 +3,8 @@
 // Each further shape takes the nearest free slot on a grid around the centre, stepping by its own size plus a 4 mm gap
 // (so the slots are 28 mm apart horizontally and 20 mm vertically for the 24 × 16 mm default). Slots are tried in order of
 // their grid distance from the centre, ties broken left before right and up before down, and a slot counts as free when
-// its bounds do not touch any existing object's bounds and it lies inside the hoop. When no free slot exists, the shape
-// goes back at the centre and `overlaps` is true so the toast can say so.
+// it keeps 4 mm of clear space from every existing object and lies inside the hoop. When no free slot exists,
+// the shape goes back at the centre and `overlaps` is true so the toast can say so.
 // When a `view` is given (the part of the canvas the finger can see, in mm), a slot must also lie inside it, and the fallback
 // is the centre of the visible part of the hoop. A phone sheet covers the canvas, so a shape added under it must land above it.
 import {objectBounds} from './transforms.js';
@@ -17,10 +17,19 @@ const MAX_STEPS = 12;
  */
 
 /**
+ * Whether two boxes [x0, y0, x1, y1] overlap or share an edge.
  * @param {number[]} a
  * @param {number[]} b
  */
 const touches=(a,b)=>a[0]<b[2]&&b[0]<a[2]&&a[1]<b[3]&&b[1]<a[3];
+
+/**
+ * Whether a box keeps the gap clear of every taken box: no overlap, and no closer than GAP to any of them. The grid steps by
+ * the new shape's own size, so a neighbour of another size can otherwise sit with its edge exactly on the new one.
+ * @param {number[]} box
+ * @param {number[][]} taken the bounds of the existing objects
+ */
+export const clearOf=(box,taken)=>!taken.some(b=>touches(box,[b[0]-GAP,b[1]-GAP,b[2]+GAP,b[3]+GAP]));
 
 /**
  * @param {any[]} objects the document's objects
@@ -45,7 +54,7 @@ export function newShapeSpot(objects, hoop, w, h, view){
     const x=cx0+i*stepX, y=cy0+j*stepY;
     const box=[x,y,x+w,y+h];
     const inside=box[0]>=area[0]&&box[1]>=area[1]&&box[2]<=area[2]&&box[3]<=area[3];
-    if(inside&&!taken.some(b=>touches(box,b)))return {x,y,overlaps:false};
+    if(inside&&clearOf(box,taken))return {x,y,overlaps:false};
   }
   return {x:clampInto(area[0],area[2],w,(area[0]+area[2])/2), y:clampInto(area[1],area[3],h,(area[1]+area[3])/2), overlaps:true};
 }

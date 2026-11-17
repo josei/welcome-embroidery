@@ -547,8 +547,8 @@ test('lettering is edited on the canvas: live outlines while typing, Enter commi
  await page.locator('#letter').click();const text=page.locator('#shapes g.shape').first();let before=await text.boundingBox();const b=before;
  await page.mouse.dblclick(b.x+b.width/2,b.y+b.height/2);await expect(page.locator('#canvasText')).toBeFocused();await page.keyboard.type('ROSES AND MORE');await expect.poll(async()=>(await text.boundingBox()).width).toBeGreaterThan(before.width*1.6);
  await expect(page.locator('#saved')).toHaveCount(0);await page.keyboard.press('Enter');await expect(page.locator('#canvasText')).toHaveCount(0);await expect(page.locator('.object-row').first()).toContainText('ROSES AND MORE');
- await page.keyboard.press('Control+z');await expect(page.locator('.object-row').first()).toContainText('Text: Text');expect((await text.boundingBox()).width).toBeCloseTo(before.width,0);
- await page.locator('.object-row').first().click();await page.keyboard.press('Enter');await page.keyboard.type('X');await page.keyboard.press('Escape');await expect(page.locator('.object-row').first()).toContainText('Text: Text');await expect(page.locator('#canvasText')).toHaveCount(0);expect(errors).toEqual([]);
+ await page.keyboard.press('Control+z');await expect(page.locator('.object-row'),'one undo removes the lettering, with no placeholder left').toHaveCount(0);await page.locator('#redo').click();await expect(page.locator('.object-row').first()).toContainText('ROSES AND MORE');expect((await text.boundingBox()).width).toBeGreaterThan(before.width*1.6);
+ await page.locator('.object-row').first().click();await page.keyboard.press('Enter');await page.keyboard.type('X');await page.keyboard.press('Escape');await expect(page.locator('.object-row').first()).toContainText('ROSES AND MORE');await expect(page.locator('#canvasText')).toHaveCount(0);expect(errors).toEqual([]);
 });
 
 test('keyboard resize and rotate: Ctrl+Arrows change size, Ctrl+Alt+Left/Right rotate',async({page})=>{

@@ -113,7 +113,7 @@ export function mountCanvas() {
     ensureFontLoaded,
     fitHeight,
     select: selectIds,
-    commit: (/** @type {any[]} */ operations, /** @type {any} */ after, /** @type {string} */ label) => edit(operations, after, undefined, label),
+    commit: (/** @type {any[]} */ operations, /** @type {any} */ after, /** @type {string} */ label, /** @type {string} */ coalesceKey) => edit(operations, after, coalesceKey, label),
     render,
     toast: editor.toast,
     hint: toolHint,

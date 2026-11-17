@@ -8,6 +8,8 @@ import {interactionNow, setInteraction} from './interactionState.js';
 import {isRegistryFont} from './fonts.js';
 import {addLabel, editTextLabel} from './addLabel.js';
 import {clearComputed} from './compileService.js';
+import {newShapeSpot, clearOf} from './newShapePlacement.js';
+import {hoopSize} from './hoops.js';
 
 /** The part of a document object the canvas text editor reads and writes. */
 export interface EditableObject {
@@ -51,6 +53,32 @@ function wired(): CanvasTextApi {
 /** The text as it is saved: registry fonts keep the lines typed, other fonts are single-line uppercase. */
 function savedText(font: string | undefined, value: string): string {
   return isRegistryFont(font) ? value : value.replace(/\n/g, ' ').toUpperCase().slice(0, 24);
+}
+
+/**
+ * The undo coalesce key for a lettering object added in this session. Adding it and then typing into its box share the key,
+ * so one Undo removes the lettering (or restores the design as it was) instead of stopping at the placeholder.
+ */
+export function newLetteringKey(id: string): string {
+  return `new-lettering:${id}`;
+}
+
+/**
+ * Moves a freshly typed lettering object into free space when its real size now comes within 4 mm of another object. The first spot
+ * is chosen with the placeholder's size, so a longer or shorter word can end up against a neighbour; the same search
+ * as a new shape finds the nearest free slot for the final size. When no free slot exists it stays where it is.
+ */
+function keepClearOfNeighbours(id: string) {
+  const doc = documentNow().doc;
+  const o: EditableObject | undefined = doc.objects.find((v: EditableObject) => v.id === id);
+  if (!o) return;
+  const b = objectBounds(o);
+  const others = doc.objects.filter((v: EditableObject) => v.id !== id);
+  if (clearOf(b, others.map((v: EditableObject) => objectBounds(v)))) return;
+  const spot = newShapeSpot(others, hoopSize(doc), b[2] - b[0], b[3] - b[1]);
+  if (spot.overlaps) return;
+  o.x += spot.x - b[0];
+  o.y += spot.y - b[1];
 }
 
 /** Opens the text box over the object: its screen rectangle, its text, and the character limit of its font. */
@@ -107,7 +135,7 @@ export function finishCanvasText(commit: boolean, value: string, keyboard = fals
   // A box just placed that is cancelled, committed with Enter while still the untouched placeholder, or left blank is
   // removed, so opening the tool and pressing Enter places nothing.
   if (state.fresh && (!commit || (keyboard && !state.typed) || !savedText(o.font, value).trim())) {
-    wired().edit([{op: 'delete', id: state.id}], () => setSelection({multi: new Set<string>()}));
+    wired().edit([{op: 'delete', id: state.id}], () => setSelection({multi: new Set<string>()}), newLetteringKey(state.id));
     return;
   }
   o.text = state.original;
@@ -115,7 +143,9 @@ export function finishCanvasText(commit: boolean, value: string, keyboard = fals
   const text = savedText(o.font, value);
   // Typing into a box is its own step, "edit text", so it differs from the "add Text" step that placed the box.
   if (commit && text.trim() && text !== state.original) {
-    wired().edit([{op: 'set_object', id: state.id, text}], undefined, undefined, editTextLabel());
+    // A fresh box's typing folds into its add step (see newLetteringKey), so the step is not split.
+    if (state.fresh) wired().edit([{op: 'set_object', id: state.id, text}], () => keepClearOfNeighbours(state.id), newLetteringKey(state.id), editTextLabel());
+    else wired().edit([{op: 'set_object', id: state.id, text}], undefined, undefined, editTextLabel());
   }
   else wired().render();
 }

@@ -61,9 +61,19 @@ for(const [width,height] of SIZES) for(const lang of ['en','es']){
   await page.locator('#art').focus();
   for(let i=0;i<5;i++) await page.keyboard.press('Shift+ArrowLeft');
   await expect(page.locator('.object-row.selected'),'one selected').toHaveCount(1);
-  const boxes=await page.locator('#shapes > *').evaluateAll(els=>els.map(e=>{const r=e.getBoundingClientRect();return {x:r.left+r.width/2,y:r.top+r.height/2,right:r.right};}));
-  const other=boxes.reduce((a,b)=>(b.right>a.right?b:a));
-  await page.mouse.click(other.x,other.y);
+  // The tap goes on the rightmost other object, at a point the selection's handles do not cover (the angle handle can sit over its centre).
+  const target=await page.evaluate(()=>{
+    const els=[...document.querySelectorAll('#shapes > *')].map(e=>({e,r:e.getBoundingClientRect()}));
+    const other=els.reduce((a,b)=>(b.r.right>a.r.right?b:a));
+    for(const [fx,fy] of [[.5,.5],[.3,.3],[.7,.3],[.3,.7],[.7,.7]]){
+      const x=other.r.left+other.r.width*fx,y=other.r.top+other.r.height*fy;
+      const hit=document.elementFromPoint(x,y);
+      if(hit&&other.e.contains(hit)) return {x,y};
+    }
+    return null;
+  });
+  expect(target,'a point of the other object is free to tap').not.toBeNull();
+  await page.mouse.click(target.x,target.y);
   await expect(page.locator('.object-row.selected'),'the tapped object joins the selection').toHaveCount(2);
   expect(errors).toEqual([]);
  });

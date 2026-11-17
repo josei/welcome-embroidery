@@ -14,7 +14,7 @@ import {knifeState} from './knifeState.js';
 import {t} from './i18n.js';
 import {inputMode} from './inputMode.js';
 import {addLabel} from './addLabel.js';
-import {enterEdit} from './canvasText.js';
+import {enterEdit, newLetteringKey} from './canvasText.js';
 import {setEditMode} from './editModeState.js';
 import {applyOperations} from './operations.js';
 import {objectBounds} from './transforms.js';
@@ -48,7 +48,7 @@ function toolHintText(/** @type {string} */ tool){
 /**
  * @param {any} api
  *  canvas: refresh(), snapPt(p), showSnap(hit), px(n);
- *  edits: commit(ops, after, label), render(), toast(text), hint(text), clearHints(), setEditing(on), selectedObject();
+ *  edits: commit(ops, after, label, coalesceKey?), render(), toast(text), hint(text), clearHints(), setEditing(on), selectedObject();
  *  lettering: textFont(), ensureFontLoaded(id), fitHeight(fontId, text).
  */
 export function createCanvasTools(api){
@@ -106,7 +106,7 @@ export function createCanvasTools(api){
         // The new object opens in the on-canvas text box with its placeholder selected, so typing replaces it. The box
         // takes the keystrokes, so letters never reach the tool shortcuts.
         enterEdit(documentNow().doc.objects.find((/** @type {any} */ o)=>o.id===id),true);
-      }, addLabel({name:'Text'}));
+      }, addLabel({name:'Text'}), newLetteringKey(id));
       return;
     }
     // Selected in both fields, as lettering is: the inspector reads the multi-selection, so the thread and stitch controls show.
