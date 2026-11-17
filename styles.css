@@ -1279,3 +1279,7 @@ html[lang="es"] .layout main>.tool-rail .rail-label{font-size:10px;letter-spacin
 .layout main:not(.design-view) .playback-bar .playback-time{width:max-content;min-width:0;flex:none;overflow:visible}
 .layout main:not(.design-view) .playback-bar .playback-time span{overflow:visible;text-overflow:clip;white-space:nowrap}
 }
+/* Numeric fields in the panels share one right edge, as the X, Y, W and H fields do. Text fields keep their left alignment. */
+.panel input[inputmode=decimal],.panel input[type=number]{text-align:right}
+/* The Properties button is pressed while the inspector is open, in the same selected style as the chips and segmented controls. */
+.layers-head .inspector-toggle[aria-pressed=true]{background:var(--teal-soft);border-color:var(--field-line);color:var(--teal-deep);font-weight:var(--fw-emphasis)}

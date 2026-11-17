@@ -3,6 +3,7 @@
 // the DOM and starts the first render and compile. Nothing here looks up, writes to or listens on the DOM.
 import {editor} from './editorContext.js';
 import {phoneSheetState} from './phoneSheetState.js';
+import {inspectorOpenState} from './inspectorOpenState.js';
 import {initializeDocument, edit, transact} from './documentCommands.js';
 import {compile, configureCompile, compileNow, scheduleCompile, settleCompile} from './compileService.js';
 import {resetPlayback, resetPlaybackIndex, stopPlayback, mountSimulation} from './simulation.js';
@@ -71,6 +72,9 @@ configureLettering({edit, transact, toast, render, reveal: () => editor.canvas?.
 /** @type {{cx: number, cy: number, s: number} | null} */
 let viewBeforeSheet = null;
 let lastSheet = 'none';
+// The Properties button folds the right column on desktop and tablet landscape; the hoop is re-centred in the wider canvas
+// when the column changes size. (Phone sheets do not use this path.)
+inspectorOpenState.subscribe(() => editor.canvas?.recentreOnNextResize());
 phoneSheetState.subscribe(() => {
   const sheet = phoneSheetState.get();
   if (sheet === lastSheet) return;

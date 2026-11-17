@@ -162,8 +162,13 @@ export function createCanvas(/** @type {any} */ api){
   // changes shape instead (a rotation or a resized desktop window), the drawing area's origin moves or the viewport
   // changes; holding a corner there would leave part of the drawing outside the new area, so the scene is centred in it.
   let drawAreaBox=drawArea(),windowBox={w:innerWidth,h:innerHeight};
+  // The Properties column (desktop and tablet landscape) asks for its next resize to re-centre the hoop horizontally, at the
+  // zoom it has. It expires quickly, so a later resize that has nothing to do with the column does not move the view.
+  let recentreUntil=0;
   new ResizeObserver(()=>{const next=drawArea();
     const measured=drawAreaBox.w>1&&drawAreaBox.h>1;
+    if(measured&&next.w!==drawAreaBox.w&&performance.now()<recentreUntil){recentreUntil=0;drawAreaBox=next;windowBox={w:innerWidth,h:innerHeight};
+      vp.cx=-RULER/(2*vp.s);apply();return;}
     // Whether the hoop lay wholly in the old drawing area. A shrink that pushes it into the zoom bar's band (the Stitches footer
     // appearing) refits it, so the hoop is never left under the bar.
     const reserve=zoomBarReserve(),hoopWasIn=measured&&hoopInBox(drawAreaBox,reserve);
@@ -621,7 +626,7 @@ export function createCanvas(/** @type {any} */ api){
   });
 
   api.zoomUi?.(zoomAt,fitHoop,fitAll,zoomTo100);
-  return {vp,apply,refresh,drawScene,fitHoop,fitAll,fitSelection,revealSelection,panToReveal,viewport,setViewport,visibleArea,zoomAt,zoomTo100,toScreen,scale:()=>vp.s,percent:()=>Math.round(vp.s/PX_PER_MM*100),hit,
+  return {vp,apply,refresh,drawScene,fitHoop,recentreOnNextResize:()=>{recentreUntil=performance.now()+500;},fitAll,fitSelection,revealSelection,panToReveal,viewport,setViewport,visibleArea,zoomAt,zoomTo100,toScreen,scale:()=>vp.s,percent:()=>Math.round(vp.s/PX_PER_MM*100),hit,
     closeMenu,isDragging:()=>Boolean(state),inField,RULER,
     px:editing.px,drawControls:editing.drawControls,showSnap:editing.showSnap,
     snapPt:editing.snapPt,insertNodeAt:editing.insertNodeAt,deleteNode:editing.deleteNode,

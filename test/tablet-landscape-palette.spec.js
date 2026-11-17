@@ -46,14 +46,17 @@ for(const lang of ['en','es']) for(const touch of [false,true]) test(`text align
  await ctx.close();
 });
 
-for(const lang of ['en','es']) test(`Properties toggle is not drawn as a selected tool when open (${lang})`,async({browser})=>{
+for(const lang of ['en','es']) test(`Properties toggle is drawn pressed while the inspector is open (${lang})`,async({browser})=>{
  const {ctx,page}=await open(browser,{lang,touch:true});
  const toggle=page.locator('.layers-head .inspector-toggle');
  await expect(toggle).toHaveAttribute('aria-expanded','true');
+ await expect(toggle).toHaveAttribute('aria-pressed','true');
  const bg=await toggle.evaluate(e=>getComputedStyle(e).backgroundColor);
- const color=await toggle.evaluate(e=>getComputedStyle(e).color);
- expect(bg,'no teal fill').not.toBe('rgb(225, 241, 236)');
- expect(color,'no teal text').not.toBe('rgb(15, 90, 75)');
+ expect(bg,'selected teal fill while open').toBe('rgb(225, 241, 236)');
+ await toggle.click();
+ await expect(toggle).toHaveAttribute('aria-pressed','false');
+ const closedBg=await toggle.evaluate(e=>getComputedStyle(e).backgroundColor);
+ expect(closedBg,'no teal fill once folded').not.toBe('rgb(225, 241, 236)');
  await ctx.close();
 });
 

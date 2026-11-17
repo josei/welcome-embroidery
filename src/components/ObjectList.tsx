@@ -99,7 +99,7 @@ export function ObjectListHead() {
   <div className="layers-head">
    <h2 className="section-heading sheet-title" tabIndex={-1}>{t('Layers')}</h2>
    <span>{totals ? `${objectsText} · ${coloursText}` : objectsText}</span>
-   <button type="button" className="inspector-toggle" aria-expanded={open} aria-controls="inspector" onClick={toggle}>{t('Properties')}</button>
+   <button type="button" className="inspector-toggle" aria-expanded={open} aria-pressed={open} aria-controls="inspector" onClick={toggle}>{t('Properties')}</button>
    <button type="button" className="sheet-close" onClick={closePhoneSheet}>{t('Close')}</button>
   </div>
  );
