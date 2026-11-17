@@ -39,7 +39,7 @@ export const SHORTCUT_TABLE = [
   {section: 'Tools', keys: ['s'], label: 'S', desc: 'Star', press: 'star', command: 'tool:star'},
   {section: 'Tools', keys: ['m'], label: 'M', desc: 'Measure', press: 'measure', command: 'tool:measure'},
   {section: 'Tools', keys: ['k'], label: 'K', desc: 'Knife: click two or more points along the cut, then Enter', press: 'knife', command: 'tool:knife'},
-  {section: 'Tools', keys: ['i'], label: 'I', desc: 'Focus the Stitch type controls of the selected object'},
+  {section: 'Tools', keys: ['i'], label: 'I', desc: 'Go to the stitch type of the selected object'},
   {section: 'Tools', keys: ['Enter'], label: 'Enter', desc: 'Edit nodes / finish a path', command: 'editNodes'},
   {section: 'Tools', keys: ['Backspace'], label: 'Backspace', desc: 'Remove the last point while drawing a path'},
   {section: 'Tools', keys: ['Escape'], label: 'Esc', desc: 'Cancel, go back to select'},

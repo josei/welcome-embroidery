@@ -3166,9 +3166,10 @@ test('Edit and Arrange menus run the same commands as their shortcuts and disabl
  await page.locator('#editMenu').click();
  for(const id of ['menuCut','menuCopy','menuDuplicate','menuDelete','menuPaste'])await expect(page.locator(`#${id}`)).toBeDisabled();
  // Each disabled row says why, as visible text. Enabled rows show no reason (Undo is on: two shapes were drawn).
- await expect(page.locator('#menuCut')).toContainText('Select an object first');
- await expect(page.locator('#menuPaste')).toContainText('Copy something first');
- await expect(page.locator('#menuUndo')).not.toContainText('Nothing to undo');
+ // The reasons show in one line under the menu, for whichever disabled row the pointer or focus is on.
+ await page.locator('#menuCut').hover();await expect(page.locator('.menu-shared-reason')).toHaveText('Select an object first');
+ await page.locator('#menuPaste').hover();await expect(page.locator('.menu-shared-reason')).toHaveText('Copy something first');
+ await expect(page.locator('#menuUndo')).not.toHaveAttribute('aria-disabled','true');
  await page.locator('#editMenu').click();
  await page.locator('#arrangeMenu').click();
  for(const id of ['menuAlignLeft','menuDistributeH','menuFlipH','menuToFront','menuToBack','menuSubtract'])await expect(page.locator(`#${id}`)).toBeDisabled();
@@ -3459,14 +3460,14 @@ test('Menus, the shortcut sheet and the export dialog work from the keyboard alo
  await page.keyboard.press('ArrowDown');await expect(page.locator('#arrangeMenuList')).toBeVisible();
  await expect(page.locator('#menuAlignLeft')).toBeFocused();
  await page.keyboard.press('ArrowLeft');await expect(page.locator('#editMenuList')).toBeVisible();await expect(page.locator('#menuUndo')).toBeFocused();
- // Disabled items are skipped: nothing has been copied, so Paste is disabled and ArrowDown from Copy lands on Duplicate.
+ // Disabled items take focus too, so their reasons can be read: nothing has been copied, so ArrowDown from Copy lands on Paste (disabled).
  await page.keyboard.press('Escape');
  await page.locator('#editMenu').focus();await page.keyboard.press('ArrowDown');
  await expect(page.locator('#menuUndo')).toBeFocused();
  await page.keyboard.press('ArrowDown');await expect(page.locator('#menuRedo')).toBeFocused(); // Redo is on after the undo above
  await page.keyboard.press('ArrowDown');await expect(page.locator('#menuCut')).toBeFocused();
  await page.keyboard.press('ArrowDown');await expect(page.locator('#menuCopy')).toBeFocused();
- await page.keyboard.press('ArrowDown');await expect(page.locator('#menuDuplicate')).toBeFocused();
+ await page.keyboard.press('ArrowDown');await expect(page.locator('#menuPaste')).toBeFocused();await expect(page.locator('.menu-shared-reason')).toHaveText('Copy something first');await page.keyboard.press('ArrowDown');await expect(page.locator('#menuDuplicate')).toBeFocused();
  await page.keyboard.press('End');await expect(page.locator('#menuDelete')).toBeFocused();
  await page.keyboard.press('ArrowDown');await expect(page.locator('#menuUndo')).toBeFocused();
  await page.keyboard.press('ArrowUp');await expect(page.locator('#menuDelete')).toBeFocused();

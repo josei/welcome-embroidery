@@ -409,8 +409,10 @@ input:not([type=checkbox]):not([type=range]),select,textarea,.panel textarea{fon
 .file-menu{position:relative}
 .file-menu-list{position:absolute;top:calc(100% + 6px);left:0;z-index:30;display:grid;gap:2px;min-width:240px;padding:6px;background:#fff;border:1px solid var(--field-line);border-radius:8px;box-shadow:0 8px 24px #1d292533}
 .file-menu-list button{display:grid;gap:2px;justify-items:start;width:100%;border:0;padding:8px 10px;text-align:left}
-.file-menu-list button:hover:not(:disabled){background:#eef1ec}
-.file-menu-list button:disabled{color:#9aa39e;cursor:default}
+.file-menu-list button:hover:not(:disabled):not([aria-disabled="true"]){background:#eef1ec}
+.file-menu-list button:disabled,.file-menu-list button[aria-disabled="true"]{color:#9aa39e;cursor:default}
+/* One reason line for a whole menu (Edit): it hangs under the list, so the list keeps its height. */
+.file-menu-list .menu-shared-reason{position:absolute;left:0;top:calc(100% + 4px);white-space:nowrap;font-size:var(--fs-caption);color:#7a5a12;background:#fff;border:1px solid var(--field-line);border-radius:6px;padding:4px 8px;box-shadow:0 4px 12px #1d292526}
 .file-menu-list button.menu-item{display:flex;justify-content:space-between;align-items:center;gap:24px}
 .file-menu-list kbd{font:inherit;font-size:var(--fs-caption);color:#66726c}
 .file-menu-list .menu-sep{border:0;border-top:1px solid #e3e6e1;margin:4px 2px}

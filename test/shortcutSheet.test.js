@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {readdirSync} from 'node:fs';
 import {SHORTCUT_TABLE, TOOL_KEYS, shortcutFor, shortcutSections} from '../src/shortcutTable.js';
+import {ES} from '../src/i18n.js';
 
 // Every key the keyboard handler compares against, read from its source: `e.key === 'x'`, `key === 'x'`, `e.code === 'Digit1'`.
 const handlerSource = readFileSync(new URL('../src/keyboardShortcuts.js', import.meta.url), 'utf8');
@@ -31,6 +32,11 @@ test('every key in the shortcut table appears in the shortcut sheet', () => {
       assert.ok(rows.some(([, desc]) => desc === entry.desc), `${key} (${entry.desc}) is missing from the sheet`);
     }
   }
+});
+
+test('every shortcut in the table has a Spanish description', () => {
+  const untranslated = [...new Set(SHORTCUT_TABLE.map(entry => entry.desc))].filter(desc => !(desc in ES));
+  assert.deepEqual(untranslated, [], 'shortcut descriptions with no Spanish text');
 });
 
 test('the sheet names the zoom, measure, knife, backspace, nudge and sewing-order keys', () => {

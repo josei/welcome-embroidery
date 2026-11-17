@@ -73,13 +73,16 @@ type Row = Entry | Heading | Note | '-';
 // Closes on an outside press, Escape, or after an entry runs.
 // The phone Menu also closes on a downward swipe of at least TITLE_SWIPE_PX on its title row.
 const TITLE_SWIPE_PX = 60;
-function Dropdown({id, label, rows, iconOnly, onOpen}: {id: string; label: string; rows: Row[]; iconOnly?: boolean; onOpen?: () => void}) {
+function Dropdown({id, label, rows, iconOnly, onOpen, sharedReasons}: {id: string; label: string; rows: Row[]; iconOnly?: boolean; onOpen?: () => void; sharedReasons?: boolean}) {
  const [open, setOpen] = useState(false);
+ // The row the pointer or focus is on, when it is disabled. Shared-reason menus show its reason in one line under the list.
+ const [notedId, setNotedId] = useState<string | null>(null);
  const wrap = useRef<HTMLDivElement>(null);
  const trigger = useRef<HTMLButtonElement>(null);
  // Where focus goes once the menu has rendered: set when a key opens it, cleared when it is used.
  const focusOnOpen = useRef<'first' | 'last' | null>(null);
- const enabledItems = () => Array.from(wrap.current?.querySelectorAll<HTMLButtonElement>('[role="menuitem"]:not(:disabled)') ?? []);
+ // With shared reasons a disabled row stays focusable, so keyboard users reach its reason; it just cannot be activated.
+ const enabledItems = () => Array.from(wrap.current?.querySelectorAll<HTMLButtonElement>(sharedReasons ? '[role="menuitem"]' : '[role="menuitem"]:not(:disabled)') ?? []);
  useEffect(() => {
   if (!open) return;
   const want = focusOnOpen.current;
@@ -189,17 +192,27 @@ function Dropdown({id, label, rows, iconOnly, onOpen}: {id: string; label: strin
       }
       if ('heading' in row) return <div key={`head${i}`} role="presentation" className="menu-heading">{row.heading}</div>;
       if ('note' in row) return <div key={`note${i}`} role="status" className="menu-note">{row.note}</div>;
+      const shared = Boolean(sharedReasons) && row.disabled;
       return (
-       <button key={row.id} type="button" role="menuitem" id={row.id} disabled={row.disabled}
-        className={[row.key || row.icon ? 'menu-item' : '', row.className].filter(Boolean).join(' ') || undefined} aria-pressed={row.pressed} onClick={() => choose(row)}>
+       <button key={row.id} type="button" role="menuitem" id={row.id} disabled={row.disabled && !sharedReasons}
+        aria-disabled={shared || undefined} title={shared ? row.reason : undefined}
+        onFocus={() => { if (shared) setNotedId(row.id); }} onPointerEnter={() => { if (shared) setNotedId(row.id); }}
+        className={[row.key || row.icon ? 'menu-item' : '', row.className].filter(Boolean).join(' ') || undefined} aria-pressed={row.pressed}
+        onClick={() => { if (!row.disabled) choose(row); }}>
         {row.icon && <svg className="icon menu-icon" aria-hidden="true"><use href={`#${row.icon}`} /></svg>}
         <span>{row.label}</span>
         {row.key && <kbd>{row.key}</kbd>}
         {row.hint && <small>{row.hint}</small>}
-        {row.disabled && row.reason && <small className="menu-reason">{row.reason}</small>}
+        {!sharedReasons && row.disabled && row.reason && <small className="menu-reason">{row.reason}</small>}
        </button>
       );
      })}
+     {sharedReasons && (() => {
+      // One line for the whole menu: the reason of the row the pointer or focus is on, else the first disabled row's.
+      const disabledRows = rows.filter((r): r is Entry => typeof r === 'object' && 'id' in r && Boolean(r.disabled && r.reason));
+      const shownRow = disabledRows.find(r => r.id === notedId) ?? disabledRows[0];
+      return shownRow ? <div role="status" className="menu-shared-reason">{shownRow.reason}</div> : null;
+     })()}
     </div>
    )}
   </div>
@@ -264,7 +277,7 @@ export function useEditRows(): Row[] {
 
 /** The Edit menu. */
 export function EditMenu() {
- return <Dropdown id="editMenu" label={t('Edit')} rows={useEditRows()} />;
+ return <Dropdown id="editMenu" label={t('Edit')} rows={useEditRows()} sharedReasons />;
 }
 
 /** The Arrange menu's rows: align and distribute, flip, sewing order (front and back) and the boolean shape operations. */
