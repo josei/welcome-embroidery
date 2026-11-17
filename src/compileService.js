@@ -4,6 +4,7 @@
 import {documentNow} from './documentState.js';
 import {forWorker} from './appHelpers.js';
 import {setSewingCounts} from './sewingCountsState.js';
+import {setThreadTotals} from './threadTotalsState.js';
 import {setCompileIssue} from './compileIssueState.js';
 import {setExportRefusal, EMPTY_EXPORT_REASON} from './exportDialogState.js';
 import {editor} from './editorContext.js';
@@ -152,6 +153,7 @@ async function compileDocument(manual) {
     lastPlan = plan;
     setExportRefusal(plan.errors.join(' '));
     setSewingCounts(plan.objectCounts || {});
+    setThreadTotals(plan.threads);
     compileError = '';
     setCompileIssue(null);
     onCompiled?.();

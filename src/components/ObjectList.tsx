@@ -4,6 +4,7 @@ import {documentState} from '../documentState.js';
 import {selectionState} from '../selectionState.js';
 import {layersActions} from '../layersState.js';
 import {sewingCountsState} from '../sewingCountsState.js';
+import {threadTotalsState} from '../threadTotalsState.js';
 import {compileIssueState} from '../compileIssueState.js';
 import {inspectorOpenState, toggleInspectorOpen} from '../inspectorOpenState.js';
 import {closePhoneSheet} from '../phoneSheetState.js';
@@ -70,14 +71,16 @@ function useObjects(): Obj[] {
  return doc.objects ?? [];
 }
 
-// The heading: the object count and the thread count, as the sewing order panel shows them.
+// The heading: the object count and the colours used in the last compiled plan, the same figure the Document panel shows.
 // The page scroll before the inspector was opened from the Properties button, restored when it is folded again.
 let scrollBeforeOpen: number | null = null;
 export function ObjectListHead() {
  const objects = useObjects();
- const n = objects.length, threads = new Set(objects.map(o => o.thread)).size;
+ const n = objects.length;
+ const totals = useSyncExternalStore(threadTotalsState.subscribe, threadTotalsState.get);
  const objectsText = n === 1 ? t('1 object') : t('{n} objects', {n});
- const threadsText = threads === 1 ? t('1 thread') : t('{m} threads', {m: threads});
+ const colours = totals?.colours ?? 0;
+ const coloursText = colours === 1 ? t('1 color used') : t('{m} colors used', {m: colours});
  const open = useSyncExternalStore(inspectorOpenState.subscribe, inspectorOpenState.get);
  // At the stacked widths the inspector sits below the canvas, so this button is the way up to it; it folds it away again.
  // Opening scrolls the inspector into view, since it starts below the fold. (Phones use the dock's Properties button instead.)
@@ -95,7 +98,7 @@ export function ObjectListHead() {
  return (
   <div className="layers-head">
    <h2 className="section-heading sheet-title" tabIndex={-1}>{t('Layers')}</h2>
-   <span>{`${objectsText} · ${threadsText}`}</span>
+   <span>{totals ? `${objectsText} · ${coloursText}` : objectsText}</span>
    <button type="button" className="inspector-toggle" aria-expanded={open} aria-controls="inspector" onClick={toggle}>{t('Properties')}</button>
    <button type="button" className="sheet-close" onClick={closePhoneSheet}>{t('Close')}</button>
   </div>

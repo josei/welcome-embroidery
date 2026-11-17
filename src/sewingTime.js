@@ -23,6 +23,14 @@ export function threadPlan(plan){
     if(s.cmd!=='stitch'){prev=null;continue;}if(!cur||cur.thread.toLowerCase()!==String(s.thread).toLowerCase()){cur=
     {thread:s.thread,stitches:0,mm:0,trims:0,changed};blocks.push(cur);changed=false;prev=null;}cur.stitches++;if(prev)cur.mm+=
     Math.hypot(s.x-prev.x,s.y-prev.y);prev=s;}return blocks;}
+// The thread totals of a plan, from its thread blocks: the one calculation every thread length and count shows. colours is the
+// distinct threads sewn, changes the colour changes between blocks (the same count the simulation track draws), and lengthMm the
+// thread sewn across all blocks.
+/** @param {{stitches: PlanStitch[]}} plan @returns {{colours: number, changes: number, lengthMm: number}} */
+export function threadTotals(plan){
+  const blocks=threadPlan(plan);
+  return {colours:new Set(blocks.map(b=>String(b.thread).toLowerCase())).size,changes:Math.max(0,blocks.length-1),lengthMm:blocks.reduce((n,b)=>n+b.mm,0)};
+}
 // Sewing time for one thread block: its stitches at 600 a minute, 8 s per trim cut inside it, and 20 s for the colour change or stop that starts it (none for
 // the first block). An estimate: jumps between blocks are not counted here, so the blocks add up to a little less than the total.
 /** @param {{stitches: number, trims?: number, changed?: boolean}} b @returns {number} */

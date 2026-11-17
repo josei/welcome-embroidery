@@ -47,11 +47,11 @@ export {nodeFraction};
 export {FABRIC_PROFILES,FABRIC_PRESETS,DISTORTION_SCALE,distortionGrid};
 export {parseSvgPath};
 export {railsFromLine,widthAt};
-import {threadPlan,blockSeconds,blockTimeLabel,sewingSeconds,threadSpans,sewingSecondsUpTo} from './sewingTime.js';
+import {threadPlan,threadTotals,blockSeconds,blockTimeLabel,sewingSeconds,threadSpans,sewingSecondsUpTo} from './sewingTime.js';
 import {encodeJef,encodeVp3,encodePec,encodePes,encodePesV6,encodeSew,encodeTbf,encodeXxx,encodeU01,encodeExp,encodeDst,encodeCol,encodeEdr,
   encode} from './encoders.js';
 export {encodeJef,encodeVp3,encodePec,encodePes,encodePesV6,encodeSew,encodeTbf,encodeXxx,encodeU01,encodeExp,encodeDst,encodeCol,encodeEdr,encode};
-export {threadPlan,blockSeconds,blockTimeLabel,sewingSeconds,threadSpans,sewingSecondsUpTo};
+export {threadPlan,threadTotals,blockSeconds,blockTimeLabel,sewingSeconds,threadSpans,sewingSecondsUpTo};
 
 
 

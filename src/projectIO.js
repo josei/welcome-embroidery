@@ -6,6 +6,7 @@ import {documentActions, documentNow, setDocument} from './documentState.js';
 import {setSave} from './saveState.js';
 import {lastEditMinutes, openDiscard} from './discardState.js';
 import {setSewingCounts} from './sewingCountsState.js';
+import {setThreadTotals} from './threadTotalsState.js';
 import {selState, setSelection} from './selectionState.js';
 import {setEditMode} from './editModeState.js';
 import {clone, download, safeProjectFilename} from './appHelpers.js';
@@ -293,6 +294,7 @@ export function acceptProject(next, notes = []) {
   fileHandle = null;
   setSave({savedAt: null, savedFileName: null});
   setSewingCounts({});
+  setThreadTotals(null);
   setDocument({doc: opened});
   // After the document is replaced: scheduleCompile skips a blank design, so clearing first left the restored one never compiled.
   wired().clearComputed();
@@ -414,6 +416,7 @@ export async function saveRestoredThenStartFresh(saved, savedFileName = null) {
 function startNewDesign() {
   wired().clearComputed();
   setSewingCounts({});
+  setThreadTotals(null);
   setDocId(undefined);
   fileHandle = null;
   setSave({savedAt: null, savedFileName: null});

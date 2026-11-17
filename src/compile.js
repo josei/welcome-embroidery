@@ -9,6 +9,7 @@ import {pathDirs,motifLoops,motifPairLoops,sequinRuns,beadRuns,blingRuns} from '
 import {hoopSize} from './hoops.js';
 import {clipLines} from './clipMasks.js';
 import {sameThread} from './threads.js';
+import {threadTotals} from './sewingTime.js';
 import {closeRing,clipRuns,bartack} from './stitchRuns.js';
 import {decodeBase64,importMidpoint} from './stitchImport.js';
 import {fillRuns,satinRuns} from './fillStitch.js';
@@ -270,7 +271,6 @@ export function compile(doc,legacyPlacement=false) {
   for(const o of objectStarts)o.start=split.starts[o.start];
   const bounds=needleBounds(stitches);
   const count=stitches.reduce((n,p)=>n+(p.cmd==='stitch'?1:0),0);
-  const length=stitches.reduce((sum,p,i)=>i?sum+Math.hypot(p.x-stitches[i-1].x,p.y-stitches[i-1].y):0,0);
   // Stitches per object: an object's stitches run from its start to the next object's start (the last one runs to the end).
   /** @type {Record<string, number>} */
   const objectCounts={};
@@ -282,6 +282,6 @@ export function compile(doc,legacyPlacement=false) {
   // Non-DST writers take the placement of the legacy pass, so their bytes match the export before the 0.1 mm placement fix.
   const writer=hasImportedLayer&&!legacyPlacement?compile(doc,true).writer:{stitches:writerStitches,count:writerCount,bounds:writerBounds};
   // An imported layer's count is the planned one: the DST plan splits long moves, so it can differ from the stitches the other writers and the source hold.
-  return {revision:doc.revision,stitches,bounds,count,planned:hasImportedLayer,objectCounts,writer,threadLength:Math.round(length*1.12),
+  return {revision:doc.revision,stitches,bounds,count,planned:hasImportedLayer,objectCounts,writer,threads:threadTotals({stitches}),
     colors:[...new Set(stitches.filter(s=>s.cmd==='stitch'||s.cmd==='color').map(s=>s.thread).filter(Boolean))],errors:[...new Set(errors)],issues};
 }

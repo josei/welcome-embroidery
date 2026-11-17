@@ -91,7 +91,7 @@ export const ES_ADDITIONS={
 'The bundled single-line alphabet does not support: {chars}. Use A–Z, 0–9 and spaces.':'El alfabeto de trazo simple incluido no admite: {chars}. Usa A–Z, 0–9 y espacios.',
 '{n} planned stitches':'{n} puntadas planificadas','{n} planned stitches · {m} m estimated thread · {c} thread colors':'{n} puntadas planificadas · {m} m de hilo estimado · {c} colores de hilo','{n} planned stitches · {m} m estimated thread · {c} thread color':'{n} puntadas planificadas · {m} m de hilo estimado · {c} color de hilo',
 '{n} stitches in the {f} export':'{n} puntadas en la exportación {f}',
-'{m} m estimated thread · {c} thread colors':'{m} m de hilo estimado · {c} colores de hilo',
+'{m} m estimated thread · {c} colors used':'{m} m de hilo estimado · {c} colores usados','{m} m estimated thread · {c} color used':'{m} m de hilo estimado · {c} color usado','{m} colors used':'{m} colores usados','1 color used':'1 color usado',
 '{m} m estimated thread · {c} thread color':'{m} m de hilo estimado · {c} color de hilo',
 'Path':'Trazo',
 'Pen':'Pluma',

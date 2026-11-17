@@ -6,7 +6,7 @@ import {viewMode} from './viewMode.js';
 import {setStatus} from './statusState.js';
 import {setPlayback, playbackActions} from './playbackState.js';
 import {previewState, setPreviewState, previewActions} from './previewState.js';
-import {distortionGrid, hoopSize, threadPlan, threadSpans, sewingSeconds, sewingSecondsUpTo} from './engine.js';
+import {distortionGrid, hoopSize, threadTotals, threadSpans, sewingSeconds, sewingSecondsUpTo} from './engine.js';
 import {createThreadPreview} from './preview3d.js';
 import {lang, t} from './i18n.js';
 import {getPlan, getLastPlan, compileNow} from './compileService.js';
@@ -31,13 +31,14 @@ let spanCache = {plan: null, spans: [], trims: 0, metres: 0, changes: 0};
 function planSpans() {
   const plan = getPlan();
   if (spanCache.plan !== plan) {
+    const totals = plan ? threadTotals(plan) : {lengthMm: 0, changes: 0};
     const spans = plan ? threadSpans(plan).map((/** @type {any} */ s) => ({...s, seconds: sewingSecondsUpTo(plan, s.start)})) : [];
     spanCache = {
       plan,
       spans,
       trims: plan ? plan.stitches.filter((/** @type {any} */ s) => s.cmd === 'trim').length : 0,
-      metres: plan ? threadPlan(plan).reduce((n, b) => n + b.mm, 0) / 1000 : 0,
-      changes: Math.max(0, spans.length - 1),
+      metres: totals.lengthMm / 1000,
+      changes: totals.changes,
     };
   }
   return spanCache;

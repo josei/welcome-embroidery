@@ -38,7 +38,7 @@ export const ES={...ES_ADDITIONS,
 '3D thread preview. Drag to orbit, scroll to zoom, double-click to reset.':
   'Vista previa 3D del hilo. Arrastra para orbitar, rueda para zoom, doble clic para restablecer.','Front ¾':'Frontal ¾','Close-up':'Primer plano','Turntable':
   'Giro','Loupe 8×':'Lupa 8×','3D view':'Vista 3D',
-'Design canvas':'Lienzo de diseño','empty':'vacío','1 object':'1 objeto','{n} objects':'{n} objetos','1 thread':'1 hilo','{m} threads':'{m} hilos',
+'Design canvas':'Lienzo de diseño','empty':'vacío','1 object':'1 objeto','{n} objects':'{n} objetos',
 'Stitch {n} of {m}':'Puntada {n} de {m}','{n} of {m} stitches':'{n} de {m} puntadas','1 color change':'1 cambio de color','{n} color changes':
   '{n} cambios de color','1 trim':'1 corte','{n} trims':'{n} cortes','{m} m thread':'{m} m de hilo',
 'Agent connected':'Agente conectado','Waiting for agent':'Esperando al agente','Agent':'Agente','Waiting':'Esperando','Connected':'Conectado','Export format':

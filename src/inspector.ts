@@ -14,6 +14,7 @@ import {sewTime} from './appHelpers.js';
 import {t, lang} from './i18n.js';
 import {fieldText, formatCount, formatNumber} from './decimalText.js';
 import {viewMode} from './viewMode.js';
+import type {ThreadTotals} from './threadTotalsState.js';
 
 /** One object of the engine's document, typed with the fields the inspector reads. */
 interface InspectorObject {
@@ -54,7 +55,8 @@ export interface PlanInfo {
   exportFormat?: string;
   errors: string[];
   issues: Array<{id: string; message: string}>;
-  threadLength: number;
+  /** The thread totals of the plan: colours sewn, colour changes and thread length, the same figures the other views show. */
+  threads: ThreadTotals;
   colors: string[];
 }
 
@@ -155,9 +157,9 @@ export function syncInspector({plan, compileError, tips}: {plan: PlanInfo | null
     summary: plan
       ? countLabel(plan, formatCount(plan.count, lang)) +
           ' · ' +
-          t(lang === 'es' && plan.colors.length === 1 ? '{m} m estimated thread · {c} thread color' : '{m} m estimated thread · {c} thread colors', {
-            m: formatNumber(plan.threadLength / 1000, lang, 1),
-            c: plan.colors.length,
+          t(lang === 'es' && plan.threads.colours === 1 ? '{m} m estimated thread · {c} color used' : '{m} m estimated thread · {c} colors used', {
+            m: formatNumber(plan.threads.lengthMm / 1000, lang, 1),
+            c: plan.threads.colours,
           }) +
         ' · ' +
         (lang === 'es' && sewTime(plan) === '1 min' ? t('about 1 min to sew') : t('about {t} to sew', {t: sewTime(plan)})) +
