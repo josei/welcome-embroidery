@@ -266,7 +266,7 @@ label[hidden],button[hidden],.sel-hint[hidden]{display:none!important}
 #restoreDialog [hidden]{display:none!important}
 #discardDialog{width:380px}#discardDialog .discard-actions{justify-content:flex-end}#discardDialog .danger{color:#fff;background:#b42318;border-color:#b42318}#discardDialog .primary{color:#fff;background:var(--primary-fill);border-color:var(--primary-fill)}#discardDialog [hidden]{display:none!important}
 
-.keys-list{columns:260px auto;column-gap:28px;font-size:var(--fs-body);max-height:calc(100vh - 140px);overflow:auto}.keys-group{display:grid;grid-template-columns:auto 1fr;gap:5px 14px;align-items:center;break-inside:avoid;margin-bottom:6px}.keys-list kbd{display:inline-block;box-sizing:border-box;min-width:2.6em;text-align:center;font-family:inherit;font-weight:var(--fw-emphasis);font-size:var(--fs-caption);line-height:1.4;background:#f1f3ef;border:1px solid var(--field-line);border-radius:4px;padding:2px 6px;white-space:nowrap}.keys-list h4{grid-column:1/-1;margin:8px 0 0;font-size:var(--fs-caption);letter-spacing:.07em;text-transform:uppercase;color:#66726c}
+.keys-list{--keys-track:10em;columns:260px auto;column-gap:28px;font-size:var(--fs-body);max-height:calc(100vh - 140px);overflow:auto}.keys-group{display:grid;grid-template-columns:var(--keys-track) 1fr;gap:5px 14px;align-items:center;break-inside:avoid;margin-bottom:6px}.keys-list kbd{display:inline-block;justify-self:start;box-sizing:border-box;min-width:2em;text-align:center;font-family:inherit;font-weight:var(--fw-emphasis);font-size:var(--fs-caption);line-height:1.4;background:#f1f3ef;border:1px solid var(--field-line);border-radius:4px;padding:2px 6px;white-space:nowrap}.keys-list h4{grid-column:1/-1;margin:8px 0 0;font-size:var(--fs-caption);letter-spacing:.07em;text-transform:uppercase;color:#66726c}
 #keysDialog{width:min(900px,calc(100vw - 24px))}.plan-list{display:grid;gap:4px;font-size:var(--fs-body)}.plan-row{display:flex;align-items:center;gap:8px}.plan-row .sw{width:14px;height:14px;border-radius:50%;border:1px solid #0003;flex:none}.plan-row .n{margin-left:auto;color:#66726c}#planEmpty[hidden]{display:none}
 .canvas .floating{display:grid;grid-template-columns:repeat(14,30px);gap:6px 4px;justify-content:center;max-width:calc(100% - 64px);width:max-content}
 .floating .tb-start{position:relative}
@@ -415,6 +415,12 @@ input:not([type=checkbox]):not([type=range]),select,textarea,.panel textarea{fon
 .file-menu-list .menu-sep{border:0;border-top:1px solid #e3e6e1;margin:4px 2px}
 .file-menu-list small{font-size:var(--fs-caption);color:#66726c}
 .file-menu-list small.menu-reason{color:#7a5a12}
+/* Desktop menus: the label and shortcut share two columns, so a shortcut sits in the same column on enabled and disabled rows.
+   The reason or hint takes a second line under the label and never pushes the shortcut sideways. */
+.file-menu-list:not(#phoneMenuList) button.menu-item{display:grid;grid-template-columns:1fr auto;column-gap:24px;align-items:center}
+.file-menu-list:not(#phoneMenuList) button.menu-item>span{grid-column:1;grid-row:1}
+.file-menu-list:not(#phoneMenuList) button.menu-item>kbd{grid-column:2;grid-row:1;justify-self:end}
+.file-menu-list:not(#phoneMenuList) button.menu-item>small{grid-column:1/-1;grid-row:2}
 .file-menu-list .menu-heading{padding:8px 10px 2px;font-size:var(--fs-caption);font-weight:var(--fw-emphasis);letter-spacing:.07em;text-transform:uppercase;color:#66726c}
 .list-warning{font-size:var(--fs-body);color:var(--warn);background:var(--warn-soft);border:1px solid var(--warn-line);border-radius:8px;padding:7px 9px;margin:0 0 6px;line-height:1.4}
 .row-warn{flex:none;color:var(--warn);font-size:var(--fs-body);line-height:1;cursor:help}
