@@ -318,9 +318,7 @@ input:not([type=checkbox]):not([type=range]),select,textarea,.panel textarea{fon
 .icon-seg.labelled{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
 .icon-seg.labelled button{width:auto;height:auto;padding:9px 4px 7px;display:flex;flex-direction:column;align-items:center;gap:5px;border:1px solid var(--field-line);border-radius:10px;background:#fff;font-size:var(--fs-caption);font-weight:var(--fw-regular);color:#3c423e}
 .icon-seg.labelled button[aria-pressed=true]{padding:8px 3px 6px;border:2px solid var(--teal);background:var(--teal-soft);color:var(--teal-deep);font-weight:var(--fw-emphasis)}
-.icon-seg.labelled[data-select="fillMethod"]{grid-template-columns:minmax(0,1fr)}.icon-seg.labelled[data-select="fillMethod"] button span{white-space:normal;text-align:center;line-height:1.25}
-/* On a phone the pattern cards take two columns: a 366 px panel leaves room for the full names, which a single tall column does not need. */
-@media (max-width:600px) and (orientation:portrait),(max-height:500px) and (pointer:coarse){.icon-seg.labelled[data-select="fillMethod"]{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.icon-seg.labelled[data-select="fillMethod"] button span{white-space:normal;text-align:center;line-height:1.25}
 #methodRow[hidden]{display:none!important}
 .slider-field{margin:-4px 0 10px}.slider-field label{margin:0 0 6px}.slider-field input[type=range]{width:100%;margin:0;accent-color:var(--teal)}
 

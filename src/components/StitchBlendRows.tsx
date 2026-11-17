@@ -8,16 +8,16 @@ import {t} from '../i18n.js';
 import {threadName} from '../threadPalette.js';
 // Part of the stitch panel, rendered by React. Ids match the markup it replaced, because app.js wires them by id.
 const FILL_METHODS = [
- {value: 'rows', label: 'Rows (tatami)', icon: 'i-rows', hint: 'Tatami: parallel rows of short stitches, each row offset from the last, so the fill lies flat and even.'},
- {value: 'contour', label: 'Contours (concentric)', icon: 'i-contour'},
- {value: 'spiral', label: 'Spiral', icon: 'i-spiral'},
- {value: 'meander', label: 'Meander', icon: 'i-meander'},
- {value: 'guided', label: 'Guided (follows a line)', icon: 'i-guided'},
- {value: 'cross', label: 'Cross stitch', icon: 'i-cross'},
- {value: 'ripple', label: 'Ripple', icon: 'i-wave'},
- {value: 'motif', label: 'Motif loops', icon: 'i-loops'},
- {value: 'sequin', label: 'Sequin fill', icon: 'i-star'},
- {value: 'bling', label: 'Bling fill', icon: 'i-diamond'},
+ {value: 'rows', label: 'Rows (tatami)', icon: 'i-rows', thumb: 'fill', hint: 'Tatami: parallel rows of short stitches, each row offset from the last, so the fill lies flat and even.'},
+ {value: 'contour', label: 'Rings', icon: 'i-contour', thumb: 'contour'},
+ {value: 'spiral', label: 'Spiral', icon: 'i-spiral', thumb: 'spiral'},
+ {value: 'meander', label: 'Meander', icon: 'i-meander', thumb: 'meander'},
+ {value: 'guided', label: 'Guided (follows a line)', icon: 'i-guided', thumb: 'guided'},
+ {value: 'cross', label: 'Cross stitch', icon: 'i-cross', thumb: 'cross'},
+ {value: 'ripple', label: 'Ripple', icon: 'i-wave', thumb: 'ripple'},
+ {value: 'motif', label: 'Loop fill', icon: 'i-loops', thumb: 'motif'},
+ {value: 'sequin', label: 'Sequin fill', icon: 'i-star', thumb: 'sequin'},
+ {value: 'bling', label: 'Bling fill', icon: 'i-diamond', thumb: 'bling'},
 ];
 const DEFAULT_THREADS = ['#527461', '#d9897e', '#d3ad61', '#89a377'];
 const THREAD_OPTIONS = [{value: '', label: t('None')}, ...DEFAULT_THREADS.map(hex => ({value: hex, label: threadName(hex)}))];

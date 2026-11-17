@@ -2701,7 +2701,7 @@ test('stitch cards show a picture of each stitch, and the density swatch follows
  const errors=[];page.on('pageerror',e=>errors.push(e.message));
  await page.goto('/');page.on('dialog',d=>d.accept());await expect(page.locator('#count')).toContainText('Ready to sew');
  await newDesign(page);await page.locator('#rect').click();
- await expect(page.locator('.icon-seg.labelled .stitch-thumb')).toHaveCount(7);
+ await expect(page.locator('.icon-seg[data-select="type"] .stitch-thumb')).toHaveCount(7);
  await expect(page.locator('.icon-seg.labelled[data-select="type"] button').first().locator('.stitch-thumb')).toHaveCount(1);
  const swatch=page.locator('.density-swatch');await expect(swatch).toBeVisible();await expect(swatch).toHaveAttribute('data-spacing','0.4');
  await page.locator('#spacingSlider').focus();await page.keyboard.press('ArrowRight');

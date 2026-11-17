@@ -83,7 +83,7 @@ export const ES={...ES_ADDITIONS,
   'Satin end inset: end (mm)':'Retracción del final del satén (mm)','Bling fill':'Relleno de piedras','Raised spacing (mm)':
   'Separación del relleno elevado (mm)','Accordion start (mm)':'Inicio del acordeón (mm)','Accordion end (mm)':'Final del acordeón (mm)',
   'Raised fill (extra tatami underlay)':'Relleno elevado (base de relleno extra)','Custom':'Manual','4×4 in':'4×4 in','5×7 in':
-  '5×7 in','6×10 in':'6×10 in','Sequin fill':'Relleno de lentejuelas','Satin end inset (mm)':'Retracción de los extremos del satén (mm)','Redwork outline':
+  '5×7 in','6×10 in':'6×10 in','Sequin fill':'Relleno de lentejuelas','Loop fill':'Relleno de bucles','Satin end inset (mm)':'Retracción de los extremos del satén (mm)','Redwork outline':
   'Contorno en ida y vuelta','Fabric':'Tela','Stretchy knit':'Punto elástico','Terry towel or fleece':'Toalla de rizo o polar','Fabric stabilizer':
   'Estabilizador de tela','Woven (default)':'Tejido (por defecto)','Knit':'Punto','Towel or fleece':'Toalla o polar','Appliqué templates · 1:1 SVG':
   'Plantillas de aplicación · SVG a 1:1','Print template · 1:1 SVG (placement sheet)':'Plantilla para imprimir · SVG a 1:1 (hoja de colocación)',
@@ -358,7 +358,7 @@ export const ES={...ES_ADDITIONS,
   'Click points on the canvas for the line the rows follow, then press this button again':
   'Haz clic en puntos del lienzo para la línea que siguen las filas y luego pulsa de nuevo este botón','Remove the guide line':'Quita la línea guía',
   'Click points for the guide, then press Finish guide.':'Haz clic en puntos para la guía y luego pulsa Terminar guía.','Fill pattern':'Patrón de relleno',
-  'Contours (concentric)':'Contornos (concéntricos)','Start point':'Punto de inicio','End point':'Punto final','Clear':'Quitar',
+  'Rings':'Anillos','Start point':'Punto de inicio','End point':'Punto final','Clear':'Quitar',
   'Click the canvas to choose where this object starts sewing':'Haz clic en el lienzo para elegir dónde empieza a bordarse este objeto',
   'Click the canvas to choose where this object finishes sewing':'Haz clic en el lienzo para elegir dónde termina de bordarse este objeto',
   'Remove the start and end points':'Quita los puntos de inicio y final','Click the canvas to place the start point.':
