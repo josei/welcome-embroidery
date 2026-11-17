@@ -100,6 +100,11 @@ export function createCanvas(/** @type {any} */ api){
   function fitHoop(){const hs=hoopSize(api.doc()),{w,h}=size(),margin=currentFitMargin(Math.min(w,h)),f=4;
     const x0=-hs.w/2-f,y0=-hs.h/2-f,x1=hs.w/2+f,y1=hs.h/2+f;
     fitRect(x0,y0,x1,y1,margin,{top:0,right:0,bottom:0,...railInset(container)});
+    // Phone portrait: the ruler takes RULER px on the left, so fitRect centres the hoop on the space beside it, 9 px right of
+    // the canvas's middle. Here the hoop is centred on the canvas, with the same RULER band on the right, so it never reaches
+    // under the ruler. The vertical placement fitRect chose is kept.
+    if(margin===PHONE_FIT_MARGIN&&h>=w){const yc=(y0+y1)/2,sPortrait=Math.min(vp.s,(w-2*RULER)/Math.max(1,x1-x0));
+      vp.s=sPortrait;vp.cx=(x0+x1)/2;vp.cy=yc-RULER/(2*sPortrait);apply();}
     if(margin!==PHONE_FIT_MARGIN||h>=w)return;
     // Landscape phone: the top ruler takes RULER px, so the hoop must not rise into it. The scale is reduced to fit between
     // the ruler and the bottom edge, less the zoom bar's band, and the hoop's centre keeps its place on screen across the change.
