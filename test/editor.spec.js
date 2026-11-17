@@ -70,11 +70,11 @@ test('row spacing default is labelled as a default, inherited objects show it, o
 test('stitch simulation is visible, scrubbable, replayable, and stops on edits',async({page})=>{
  await page.goto('/');await expect(page.locator('#play')).toBeHidden();await expect(page.locator('#seek')).toBeHidden();await page.locator('button[data-view="stitches"]').click();await expect(page.locator('#play')).toBeVisible();await page.locator('#play').click();await expect(page.locator('button[data-view="stitches"]')).toHaveAttribute('aria-pressed','true');await expect(page.locator('#play')).toHaveAccessibleName('Pause stitch simulation');await expect(page.locator('#play')).toHaveClass(/playing/);
  await expect(page.locator('#stitches path')).not.toHaveCount(0,{timeout:5000});await expect(page.locator('#needleMarker')).toBeVisible();await expect(page.locator('#playbackStitches')).toContainText(' of ');await expect(page.locator('#needlePosition')).toContainText('Needle');
- await page.locator('#play').click();await expect(page.locator('#play')).toHaveAccessibleName('Play stitch simulation');const paused=await page.locator('#playbackProgress').textContent();await page.waitForTimeout(150);expect(await page.locator('#playbackProgress').textContent()).toBe(paused);
+ await page.locator('#play').click();await expect(page.locator('#play')).toHaveAccessibleName('Play stitch simulation');const paused=await page.locator('#count').textContent();await page.waitForTimeout(150);expect(await page.locator('#count').textContent()).toBe(paused);
  await page.locator('#seek').evaluate(el=>{el.value='60';el.dispatchEvent(new Event('input',{bubbles:true}));});await expect(page.locator('#seek')).toHaveValue('60');await expect(page.locator('#needleMarker')).toBeVisible();await expect(page.locator('#needlePosition')).toContainText('Needle');
  await page.locator('#resetPlayback').click();await expect(page.locator('#seek')).toHaveValue('0');await expect(page.locator('#playbackStitches')).toContainText('Stitch 0 of');await expect(page.locator('#needleMarker')).toHaveCount(0);
- const maximum=await page.locator('#seek').getAttribute('max');await page.locator('#seek').evaluate((el,n)=>{el.value=n;el.dispatchEvent(new Event('input',{bubbles:true}));},maximum);await expect(page.locator('#playbackProgress')).toContainText('100%');await page.locator('#play').click();await expect(page.locator('#seek')).toHaveValue('0');await expect(page.locator('#play')).toHaveAccessibleName('Pause stitch simulation');
- await page.locator('#rect').click();await expect(page.locator('#play')).not.toHaveClass(/playing/);await expect(page.locator('#play')).toHaveAccessibleName('Compile and play stitch simulation');await expect(page.locator('#playbackProgress')).toHaveText('Ready to simulate');await expect(page.locator('#stitches')).toBeEmpty();await page.waitForTimeout(150);await expect(page.locator('#playbackProgress')).toHaveText('Ready to simulate');
+ const maximum=await page.locator('#seek').getAttribute('max');await page.locator('#seek').evaluate((el,n)=>{el.value=n;el.dispatchEvent(new Event('input',{bubbles:true}));},maximum);await expect(page.locator('#playbackStitches')).toHaveText(/Stitch ([\d.,]+) of \1$/);await page.locator('#play').click();await expect(page.locator('#seek')).toHaveValue('0');await expect(page.locator('#play')).toHaveAccessibleName('Pause stitch simulation');
+ await page.locator('#rect').click();await expect(page.locator('#play')).not.toHaveClass(/playing/);await expect(page.locator('#play')).toHaveAccessibleName('Compile and play stitch simulation');await expect(page.locator('#count')).not.toContainText('%');await expect(page.locator('#stitches')).toBeEmpty();await page.waitForTimeout(150);await expect(page.locator('#count')).not.toContainText('%');
 });
 
 test('pinned JEF import renders a stitch layer, saves source commands, transforms with history, and preserves failures',async({page})=>{
@@ -280,8 +280,8 @@ test('subtract makes a hole (even-odd render, fewer stitches) and ties add lock 
  await expect(page.locator('#subtract')).toBeHidden();await page.locator('.object-row').first().click();await page.locator('.object-row').last().click({modifiers:['Shift']});await expect(page.locator('#subtract')).toBeEnabled();
  await page.locator('button[data-view="stitches"]').click();await expect.poll(n).toBeGreaterThan(0);const before=await n();
  await page.locator('#subtract').click();await expect(page.locator('.object-row')).toHaveCount(1);await expect(page.locator('#shapes path.shape')).toHaveAttribute('fill-rule','evenodd');
- await page.locator('button[data-view="stitches"]').click();await page.locator('#count').click();await expect.poll(async()=>{const v=await n();return v>0&&v<before;}).toBe(true);const holed=await n();
- await page.locator('#secDoc summary').click();await page.locator('#ties').check();await page.locator('#count').click();await expect.poll(async()=>(await n())>holed).toBe(true);expect(errors).toEqual([]);
+ await page.locator('button[data-view="stitches"]').click();await page.locator('#playbackStitches').click();await expect.poll(async()=>{const v=await n();return v>0&&v<before;}).toBe(true);const holed=await n();
+ await page.locator('#secDoc summary').click();await page.locator('#ties').check();await page.locator('#playbackStitches').click();await expect.poll(async()=>(await n())>holed).toBe(true);expect(errors).toEqual([]);
 });
 
 test('3D preview preset highlight clears when the camera is orbited and returns on choosing it again',async({page})=>{
@@ -826,7 +826,7 @@ test('start and end points: arm, click the canvas, markers appear, they follow t
 test('a fresh page compiles by itself, the 3D preview renders, and the sides field only shows for polygon and star tools',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));
  await page.goto('/');
- await expect(page.locator('#count')).toContainText('stitches · compiled');
+ await expect(page.locator('#count')).toContainText('stitches · Ready to sew');
  await expect(page.locator('.sides-row')).toBeHidden();
  await page.locator('#star').click();await expect(page.locator('.sides-row')).toBeVisible();
  await page.locator('#polygon').click();await expect(page.locator('.sides-row')).toBeVisible();
@@ -886,13 +886,13 @@ test('mixed selection: type and thread say Mixed when objects differ, and a type
 test('fill patterns: spiral, meander and guided recompile, and the guide is drawn on the canvas',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));
  await page.goto('/');page.on('dialog',d=>d.accept());await newDesign(page);await page.locator('#rect').click();
- await expect(page.locator('#count')).toContainText('compiled');
- for(const m of ['spiral','meander','contour']){await page.locator('#fillMethod').selectOption(m);await expect(page.locator('#count')).toContainText('compiled');await expect(page.locator('#angle')).toBeHidden();}
+ await expect(page.locator('#count')).toContainText('Ready to sew');
+ for(const m of ['spiral','meander','contour']){await page.locator('#fillMethod').selectOption(m);await expect(page.locator('#count')).toContainText('Ready to sew');await expect(page.locator('#angle')).toBeHidden();}
  await page.locator('#fillMethod').selectOption('guided');await expect(page.locator('#guideRow')).toBeVisible();
  const x=Number(await page.locator('#posX').inputValue()),y=Number(await page.locator('#posY').inputValue()),w=Number(await page.locator('#sizeW').inputValue()),h=Number(await page.locator('#sizeH').inputValue()),m=await ctm(page);
  await page.locator('#guideDraw').click();for(const [u,v] of [[0,.7],[.5,.3],[1,.7]]){const s=toScreen(m,x+u*w,y+v*h);await page.mouse.click(s.x,s.y);}
  await expect(page.locator('#controls .guide-line')).toHaveCount(1);await page.locator('#guideDraw').click();
- await expect(page.locator('#guideClear')).toBeEnabled();await expect(page.locator('#count')).toContainText('compiled');
+ await expect(page.locator('#guideClear')).toBeEnabled();await expect(page.locator('#count')).toContainText('Ready to sew');
  await page.locator('#guideClear').click();await expect(page.locator('#guideClear')).toBeDisabled();
  await page.locator('#fillMethod').selectOption('rows');await expect(page.locator('#guideRow')).toBeHidden();
  expect(errors).toEqual([]);
@@ -900,11 +900,11 @@ test('fill patterns: spiral, meander and guided recompile, and the guide is draw
 
 test('playing the simulation keeps the 3D preview visible and draws it progressively',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));
- await page.goto('/');await expect(page.locator('#count')).toContainText('compiled');
+ await page.goto('/');await expect(page.locator('#count')).toContainText('Ready to sew');
  await page.locator('[data-view=preview]').click();await expect(page.locator('#preview3d')).toBeVisible();
  await page.locator('#seek').evaluate(e=>{e.value=String(Math.floor(Number(e.max)/3));e.dispatchEvent(new Event('input',{bubbles:true}));});
  await expect(page.locator('#preview3d')).toBeVisible();await expect(page.locator('[data-view=preview]')).toHaveClass(/active/);
- await expect(page.locator('#playbackProgress')).toContainText('%');
+ await expect(page.locator('#playbackStitches')).toContainText(' of ');
  await page.locator('#play').click();await page.waitForTimeout(600);
  await expect(page.locator('#preview3d')).toBeVisible();await expect(page.locator('[data-view=preview]')).toHaveClass(/active/);
  await page.locator('#play').click();
@@ -972,7 +972,7 @@ test('editing tools: object snapping, clipping masks, caps/joins/node widths and
  await page.keyboard.press('Enter');const nodes=page.locator('.path-node');await expect(nodes).toHaveCount(2);await nodes.first().click();await expect(page.locator('#nodeWidthRow')).toBeVisible();
  await page.locator('#nodeWidth').fill('8');await page.locator('#nodeWidth').press('Tab');await expect(page.locator('#widthClearRow')).toBeVisible();await page.locator('#widthClear').click();await expect(page.locator('#widthClearRow')).toBeHidden();
  // clipping mask
- await page.keyboard.press('Escape');await page.locator('#ellipse').click();await page.keyboard.press('Control+a');await expect(page.locator('#count')).toContainText('compiled');const full=await n();
+ await page.keyboard.press('Escape');await page.locator('#ellipse').click();await page.keyboard.press('Control+a');await expect(page.locator('#count')).toContainText('Ready to sew');const full=await n();
  await expect(page.locator('#clipBtn')).toBeEnabled();await page.locator('#clipBtn').click();await expect(page.locator('#shapes .mask-shape')).toHaveCount(1);await expect.poll(n).toBeLessThan(full);
  await page.locator('#unclipBtn').click();await expect(page.locator('#shapes .mask-shape')).toHaveCount(0);
  expect(errors).toEqual([]);
@@ -1232,7 +1232,7 @@ test('3D preview pull view: the estimate is on the fabric, and it changes with t
  expect(errors).toEqual([]);
 });
 test('3D preview drag direction: dragging right turns the fabric right, dragging down looks more from above',async({page})=>{
- await page.goto('/');await expect(page.locator('#count')).toContainText('compiled');await page.locator('[data-view=preview]').click();const canvas=page.locator('#preview3d');await expect(canvas).toBeVisible();await expect(canvas).toHaveAttribute('data-instances',/\d+/);
+ await page.goto('/');await expect(page.locator('#count')).toContainText('Ready to sew');await page.locator('[data-view=preview]').click();const canvas=page.locator('#preview3d');await expect(canvas).toBeVisible();await expect(canvas).toHaveAttribute('data-instances',/\d+/);
  const box=await canvas.boundingBox(),cx=box.x+box.width/2,cy=box.y+box.height/2,num=async n=>Number(await canvas.getAttribute(n));
  const tilt0=await num('data-tilt');await page.mouse.move(cx,cy);await page.mouse.down();await page.mouse.move(cx+100,cy,{steps:5});await page.mouse.up();await expect.poll(()=>num('data-yaw')).toBeLessThan(-.5);
  await page.mouse.move(cx,cy);await page.mouse.down();await page.mouse.move(cx,cy+60,{steps:5});await page.mouse.up();await expect.poll(()=>num('data-tilt')).toBeLessThan(tilt0-.2);
@@ -1241,7 +1241,7 @@ test('3D preview drag direction: dragging right turns the fabric right, dragging
 test('3D preview views: close-up and turntable change the camera, the loupe magnifies under the pointer, and the fabric sets the background',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());
  const webgl=await page.evaluate(()=>Boolean(document.createElement('canvas').getContext('webgl2')));test.skip(!webgl,'WebGL2 is not available in this browser');
- await expect(page.locator('#count')).toContainText('compiled');await page.locator('[data-view=preview]').click();const canvas=page.locator('#preview3d');await expect(canvas).toBeVisible();await expect(canvas).toHaveAttribute('data-instances',/\d+/);
+ await expect(page.locator('#count')).toContainText('Ready to sew');await page.locator('[data-view=preview]').click();const canvas=page.locator('#preview3d');await expect(canvas).toBeVisible();await expect(canvas).toHaveAttribute('data-instances',/\d+/);
  const view=page.locator('#previewView'),pressed=async name=>view.getByRole('button',{name}).getAttribute('aria-pressed');
  await expect(view).toBeVisible();await expect(view.getByRole('button',{name:'Front ¾'})).toHaveAttribute('aria-pressed','true');await expect(canvas).toHaveAttribute('data-view','front');
  await view.getByRole('button',{name:'Close-up'}).click();await expect(canvas).toHaveAttribute('data-view','close');expect(await pressed('Close-up')).toBe('true');expect(await pressed('Front ¾')).toBe('false');
@@ -1306,7 +1306,7 @@ test('autosave: an edited design is offered back after a reload; starting fresh 
 });
 
 test('a hovered tool, the active tool and hover on the active tool look three different ways',async({page})=>{
- await page.goto('/');await expect(page.locator('#count')).toContainText('compiled');
+ await page.goto('/');await expect(page.locator('#count')).toContainText('Ready to sew');
  const look=async loc=>loc.evaluate(el=>{const s=getComputedStyle(el);return {bg:s.backgroundColor,shadow:s.boxShadow,color:s.color};});
  await page.locator('#select').click();await expect(page.locator('#select')).toHaveClass(/active-tool/);
  await page.locator('#rect').hover();const hovered=await look(page.locator('#rect'));
@@ -1318,7 +1318,7 @@ test('a hovered tool, the active tool and hover on the active tool look three di
 
 test('keyboard shortcut list opens with ? and the listed tool keys really work; the thread plan lists colors in sewing order',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));
- await page.goto('/');page.on('dialog',d=>d.accept());await expect(page.locator('#count')).toContainText('compiled');
+ await page.goto('/');page.on('dialog',d=>d.accept());await expect(page.locator('#count')).toContainText('Ready to sew');
  await page.keyboard.press('?');await expect(page.locator('#keysDialog')).toBeVisible();await expect(page.locator('#keysList')).toContainText(APPLE_KEYS?/⌘G/:/Ctrl\+G/);await expect(page.locator('#keysList')).toContainText(APPLE_KEYS?/⇧⌘G/:/Ctrl\+Shift\+G/);await page.keyboard.press('Escape');await expect(page.locator('#keysDialog')).toBeHidden();
  await page.locator('#helpBtn').click();await expect(page.locator('#keysDialog')).toBeVisible();await page.keyboard.press('Escape');
  for(const [key,id] of [['n','path'],['p','pen'],['l','line'],['g','polygon'],['s','star'],['v','select']]){await page.locator('#art').hover();await page.keyboard.press(key);await expect(page.locator('#'+id)).toHaveClass(/active-tool/);}
@@ -2555,7 +2555,7 @@ test('snap to other objects is on by default, toggles from the toolbar and is re
 
 test('stitch type shows labelled cards, and the row spacing slider sets the same value as its field, one undo step',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));
- await page.goto('/');page.on('dialog',d=>d.accept());await expect(page.locator('#count')).toContainText('compiled');
+ await page.goto('/');page.on('dialog',d=>d.accept());await expect(page.locator('#count')).toContainText('Ready to sew');
  await newDesign(page);await page.locator('#path').click();const m=await ctm(page);for(const [x,y] of [[-20,-15],[20,-15],[20,15],[-20,15],[-20,-15]]){const s=toScreen(m,x,y);await page.mouse.click(s.x,s.y);}await page.keyboard.press('Enter');
  await page.locator('#type').selectOption('fill');
  const cards=page.locator('.icon-seg.labelled[data-select="type"] button');await expect(cards).toHaveCount(7);await expect(cards.first()).toContainText('Fill');
@@ -2569,7 +2569,7 @@ test('stitch type shows labelled cards, and the row spacing slider sets the same
 
 test('sewing order: the heading counts objects and threads, and each row shows its stitch icon',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));
- await page.goto('/');page.on('dialog',d=>d.accept());await expect(page.locator('#count')).toContainText('compiled');
+ await page.goto('/');page.on('dialog',d=>d.accept());await expect(page.locator('#count')).toContainText('Ready to sew');
  await newDesign(page);await page.locator('#rect').click();await page.locator('#ellipse').click();
  await expect(page.locator('.layers-head')).toContainText('2 objects · 1 thread');
  const rows=page.locator('.object-row');await expect(rows).toHaveCount(2);
@@ -2581,7 +2581,7 @@ test('sewing order: the heading counts objects and threads, and each row shows i
 
 test('simulation bar: the time, stitch count, thread track and summary follow the playback position',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));
- await page.goto('/');page.on('dialog',d=>d.accept());await expect(page.locator('#count')).toContainText('compiled');
+ await page.goto('/');page.on('dialog',d=>d.accept());await expect(page.locator('#count')).toContainText('Ready to sew');
  await newDesign(page);await page.locator('#rect').click();await page.locator('#ellipse').click();
  await page.locator('.object-row').first().click();await page.locator('#thread').selectOption('#d9897e');
  await page.locator('button[data-view="stitches"]').click();
@@ -2600,7 +2600,7 @@ test('simulation bar: the time, stitch count, thread track and summary follow th
 
 test('header export: one Export button opens the dialog, which is the only format control, and the agent button opens the agent dialog',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));
- await page.goto('/');page.on('dialog',d=>d.accept());await expect(page.locator('#count')).toContainText('compiled');
+ await page.goto('/');page.on('dialog',d=>d.accept());await expect(page.locator('#count')).toContainText('Ready to sew');
  await expect(page.locator('header.top select')).toHaveCount(0);
  await page.locator('#export').click();await expect(page.locator('#exportDialog')).toBeVisible();
  await expect(page.locator('#format')).toHaveValue('dst');
@@ -2615,7 +2615,7 @@ test('header export: one Export button opens the dialog, which is the only forma
 
 test('blend color rows: each color label and its thread button stay in their own cell, with no overlap',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));
- await page.goto('/');page.on('dialog',d=>d.accept());await expect(page.locator('#count')).toContainText('compiled');
+ await page.goto('/');page.on('dialog',d=>d.accept());await expect(page.locator('#count')).toContainText('Ready to sew');
  await newDesign(page);await page.locator('#rect').click();await page.locator('.object-row').first().click();
  await expect(page.locator('#blendPaletteRow')).toBeVisible();
  const boxes=await page.locator('#blendPaletteRow > label').evaluateAll(ls=>ls.map(l=>{const r=l.getBoundingClientRect(),b=l.querySelector('.thread-btn').getBoundingClientRect();return {l:r.left,r:r.right,t:r.top,b:r.bottom,bl:b.left,br:b.right,bt:b.top,bb:b.bottom};}));
@@ -2633,7 +2633,7 @@ test('blend color rows: each color label and its thread button stay in their own
 
 test('canvas views: 2D, Stitches and 3D sit on the canvas, and the 3D pull panel sits below them',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));
- await page.goto('/');page.on('dialog',d=>d.accept());await expect(page.locator('#count')).toContainText('compiled');
+ await page.goto('/');page.on('dialog',d=>d.accept());await expect(page.locator('#count')).toContainText('Ready to sew');
  const webgl=await page.evaluate(()=>Boolean(document.createElement('canvas').getContext('webgl2')));test.skip(!webgl,'WebGL2 is not available in this browser');
  await expect(page.locator('.canvas-views button')).toHaveText(['2D','Stitches','3D']);
  await expect(page.locator('.canvas-views button[data-view="design"]')).toHaveAttribute('aria-pressed','true');
@@ -2646,7 +2646,7 @@ test('canvas views: 2D, Stitches and 3D sit on the canvas, and the 3D pull panel
 
 test('contextual toolbar: only the actions that apply to the selection show; align needs one object, distribute three',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));
- await page.goto('/');page.on('dialog',d=>d.accept());await expect(page.locator('#count')).toContainText('compiled');
+ await page.goto('/');page.on('dialog',d=>d.accept());await expect(page.locator('#count')).toContainText('Ready to sew');
  await newDesign(page);
  const align=page.locator('[data-align="left"]'),distribute=page.locator('[data-distribute="horizontal"]'),flip=page.locator('#flipH'),union=page.locator('#union'),group=page.locator('#group'),rows=page.locator('.object-row');
  await expect(page.locator('#snap')).toBeVisible();
@@ -2663,7 +2663,7 @@ test('the interface uses the bundled Inter font, and the page loads no font from
  page.on('pageerror',e=>errors.push(e.message));
  page.on('request',r=>requests.push(r.url()));
  page.on('response',r=>{if(/\.woff2(\?|$)/.test(r.url()))fontStatuses.push(r.status());});
- await page.goto('/');await expect(page.locator('#count')).toContainText('compiled');
+ await page.goto('/');await expect(page.locator('#count')).toContainText('Ready to sew');
  const origin=new URL(page.url()).origin;
  const loaded=await page.evaluate(async()=>{await document.fonts.load('600 13px Inter');return [...document.fonts].some(f=>f.family.replace(/"/g,'')==='Inter'&&f.status==='loaded');});
  expect(loaded).toBe(true);
@@ -2674,7 +2674,7 @@ test('the interface uses the bundled Inter font, and the page loads no font from
 
 test('tool rail: the tools sit on the canvas beside the rulers, keep working, and hide in 3D',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));
- await page.goto('/');page.on('dialog',d=>d.accept());await expect(page.locator('#count')).toContainText('compiled');
+ await page.goto('/');page.on('dialog',d=>d.accept());await expect(page.locator('#count')).toContainText('Ready to sew');
  const rail=page.locator('.canvas .tool-rail');await expect(rail).toBeVisible();
  for(const id of ['select','rect','ellipse','path','pen','letter','line','measure','polygon','star','traceBtn','photo']) await expect(rail.locator('#'+id)).toBeVisible();
  await expect(page.locator('.layout > aside.panel .tool-row')).toHaveCount(0);
@@ -2688,7 +2688,7 @@ test('tool rail: the tools sit on the canvas beside the rulers, keep working, an
 
 test('sewing-order list: each row shows its stitch count, the counts add up to the design, and each row has a thread spool',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));
- await page.goto('/');page.on('dialog',d=>d.accept());await expect(page.locator('#count')).toContainText('compiled');
+ await page.goto('/');page.on('dialog',d=>d.accept());await expect(page.locator('#count')).toContainText('Ready to sew');
  await newDesign(page);await page.locator('#rect').click();await page.locator('#ellipse').click();
  const rowCounts=async()=>(await page.locator('.object-row .row-tag').allTextContents()).map(t=>Number((t.match(/([\d,]+) stitch/)||[,'NaN'])[1].replace(/,/g,'')));
  const total=async()=>Number((await page.locator('#count').textContent()).match(/([\d,]+) stitches/)[1].replace(/,/g,''));
@@ -2699,7 +2699,7 @@ test('sewing-order list: each row shows its stitch count, the counts add up to t
 
 test('stitch cards show a picture of each stitch, and the density swatch follows the row spacing slider',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));
- await page.goto('/');page.on('dialog',d=>d.accept());await expect(page.locator('#count')).toContainText('compiled');
+ await page.goto('/');page.on('dialog',d=>d.accept());await expect(page.locator('#count')).toContainText('Ready to sew');
  await newDesign(page);await page.locator('#rect').click();
  await expect(page.locator('.icon-seg.labelled .stitch-thumb')).toHaveCount(7);
  await expect(page.locator('.icon-seg.labelled[data-select="type"] button').first().locator('.stitch-thumb')).toHaveCount(1);
@@ -2713,7 +2713,7 @@ test('stitch cards show a picture of each stitch, and the density swatch follows
 
 test('fill angle handle: dragging it turns the rows as one undo step, the Angle field follows, and the arrow keys nudge it',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));
- await page.goto('/');page.on('dialog',d=>d.accept());await expect(page.locator('#count')).toContainText('compiled');
+ await page.goto('/');page.on('dialog',d=>d.accept());await expect(page.locator('#count')).toContainText('Ready to sew');
  await newDesign(page);await page.locator('#rect').click();
  const handle=page.locator('[data-handle="angle"]');await expect(handle).toBeVisible();
  await expect(page.locator('#angle')).toHaveValue('32');
@@ -2731,7 +2731,7 @@ test('fill angle handle: dragging it turns the rows as one undo step, the Angle 
 
 test('pull compensation is a slider that shows the document value until the object gets its own, and the fabric choice sits at the bottom of the inspector',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));
- await page.goto('/');page.on('dialog',d=>d.accept());await expect(page.locator('#count')).toContainText('compiled');
+ await page.goto('/');page.on('dialog',d=>d.accept());await expect(page.locator('#count')).toContainText('Ready to sew');
  await newDesign(page);await page.locator('#rect').click();
  const slider=page.locator('#compensationSlider'),field=page.locator('#compensation'),reset=page.locator('#compUseDoc');
  await expect(slider).toBeVisible();await expect(slider).toHaveValue('0.2');await expect(reset).toBeHidden();
@@ -2745,7 +2745,7 @@ test('pull compensation is a slider that shows the document value until the obje
 
 test('underlay select: choosing one sets the underlay as one undo step',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));
- await page.goto('/');page.on('dialog',d=>d.accept());await expect(page.locator('#count')).toContainText('compiled');
+ await page.goto('/');page.on('dialog',d=>d.accept());await expect(page.locator('#count')).toContainText('Ready to sew');
  await newDesign(page);await page.locator('#rect').click();
  const underlay=page.locator('#underlayType');
  await expect(underlay).toHaveValue('auto');
@@ -2759,7 +2759,7 @@ test('underlay select: choosing one sets the underlay as one undo step',async({p
 
 test('sewing tips: Fix tip makes one undo step and clears the tip, and Ignore hides it until the object changes',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));
- await page.goto('/');page.on('dialog',d=>d.accept());await expect(page.locator('#count')).toContainText('compiled');
+ await page.goto('/');page.on('dialog',d=>d.accept());await expect(page.locator('#count')).toContainText('Ready to sew');
  await newDesign(page);await page.locator('#rect').click();
  await page.locator('#sizeW').fill('1');await page.locator('#sizeW').press('Tab');await page.locator('#sizeH').fill('1');await page.locator('#sizeH').press('Tab');
  const card=page.locator('#sewTips');
@@ -2776,11 +2776,11 @@ test('sewing tips: Fix tip makes one undo step and clears the tip, and Ignore hi
 
 test('timeline: a marker sits at each color change, in the new thread color, and clicking one seeks to that change',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));
- await page.goto('/');page.on('dialog',d=>d.accept());await expect(page.locator('#count')).toContainText('compiled');
+ await page.goto('/');page.on('dialog',d=>d.accept());await expect(page.locator('#count')).toContainText('Ready to sew');
  await newDesign(page);await page.locator('#rect').click();await page.locator('#ellipse').click();await page.locator('#rect').click();
  await page.locator('.object-row').nth(1).click();await page.locator('#thread').selectOption('#d9897e');
  await page.locator('.object-row').nth(2).click();await page.locator('#thread').selectOption('#d3ad61');
- await expect(page.locator('#count')).toContainText('compiled');
+ await expect(page.locator('#count')).toContainText('Ready to sew');
  await page.locator('button[data-view="stitches"]').click();
  const blocks=page.locator('.playback-spans span'),markers=page.locator('.timeline-marker');
  await expect(blocks).toHaveCount(3);
@@ -2796,7 +2796,7 @@ test('timeline: a marker sits at each color change, in the new thread color, and
 
 test('grid chip: it is no wider than the toolbar buttons, shows the spacing, and cycles through it',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));
- await page.goto('/');page.on('dialog',d=>d.accept());await expect(page.locator('#count')).toContainText('compiled');
+ await page.goto('/');page.on('dialog',d=>d.accept());await expect(page.locator('#count')).toContainText('Ready to sew');
  const chip=page.locator('#gridCycle'),snap=page.locator('#snap');
  await expect(chip).toBeVisible();await expect(chip).toContainText('1 mm');await expect(chip).toHaveAttribute('aria-label','Grid spacing: 1 mm');await expect(chip).toHaveAttribute('title','Grid spacing: 1 mm. Click to change.');
  const cw=(await chip.boundingBox()).width,sw=(await snap.boundingBox()).width;
@@ -2810,7 +2810,7 @@ test('grid chip: it is no wider than the toolbar buttons, shows the spacing, and
 });
 
 test('sidebars: the right inspector is as wide as the left sidebar',async({page})=>{
- await page.goto('/');await expect(page.locator('#count')).toContainText('compiled');
+ await page.goto('/');await expect(page.locator('#count')).toContainText('Ready to sew');
  for (const width of [1600,1280]) {
   await page.setViewportSize({width,height:1000});
   const left=await page.locator('.layout > aside.panel').first().boundingBox(),right=await page.locator('.layout > aside.panel').last().boundingBox();
@@ -2823,7 +2823,7 @@ test('status bar: every item stays on one line at 1440px and 1280px, in English 
  const errors=[];page.on('pageerror',e=>errors.push(e.message));page.on('dialog',d=>d.accept());
  for (const lang of ['en','es']) for (const width of [1440,1280]) {
   await page.setViewportSize({width,height:900});
-  await page.goto(`/?lang=${lang}`);await expect(page.locator('#count')).toContainText(lang==='es'?ES['compiled']:'compiled');
+  await page.goto(`/?lang=${lang}`);await expect(page.locator('#count')).toContainText(lang==='es'?ES['Ready to sew']:'Ready to sew');
   await page.locator('button[data-view="stitches"]').click();await expect(page.locator('#play')).toBeVisible();
   const lines=await page.evaluate(()=>{
    const ids=['cursorPosition','playbackTime','playbackStitches','playbackSummary','playbackProgress','needlePosition','count','issuesBtn','messagesBtn'];
@@ -2874,7 +2874,7 @@ test('open elsewhere: a second tab on the same document shows a notice in both, 
 
 test('Ctrl+S saves and is prevented; Ctrl+O and Ctrl+N run Open and New outside fields; Save also works in a field; the ? list shows them',async({page})=>{
  const errors=[],dialogs=[];page.on('pageerror',e=>errors.push(e.message));page.on('dialog',d=>{dialogs.push(d.message());d.dismiss();});
- await page.goto('/');await expect(page.locator('#count')).toContainText('compiled');
+ await page.goto('/');await expect(page.locator('#count')).toContainText('Ready to sew');
  const saved=page.waitForEvent('download');const prevented=await page.evaluate(()=>{const e=new KeyboardEvent('keydown',{key:'s',ctrlKey:true,bubbles:true,cancelable:true});document.body.dispatchEvent(e);return e.defaultPrevented;});
  expect(prevented).toBe(true);expect((await saved).suggestedFilename()).toMatch(/\.welcome$/);
  await page.locator('#rect').click();await expect(page.locator('.object-row')).toHaveCount(6);
@@ -2967,7 +2967,7 @@ test('a reference picture that is not an image is left out and the design opens'
 });
 test('header controls have accessible names: New design and Import are labelled, and the agent status lives in Settings',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));
- await page.goto('/');await expect(page.locator('#count')).toContainText('compiled');
+ await page.goto('/');await expect(page.locator('#count')).toContainText('Ready to sew');
  await expect(page.getByRole('button',{name:'New design',exact:true})).toHaveAttribute('title',/^New design \(/);
  await expect(page.getByRole('button',{name:'Import JEF / VP3…'})).toHaveAttribute('title','Import JEF / VP3…');
  await expect(page.getByRole('button',{name:'Settings',exact:true})).toBeVisible();
@@ -3438,7 +3438,7 @@ test('deleting an object confirms with a toast whose Undo restores it; the Undo 
  await page.locator('#toast .toast-action').filter({hasText:'Undo'}).click();
  await expect(page.locator('.object-row')).toHaveCount(1);await expect(page.locator('.object-row').first()).toHaveAttribute('data-id',id);
  await expect(page.locator('#toast .toast-action')).toHaveCount(0);
- await expect(page.locator('#undo')).toHaveAttribute('aria-label','Undo change');
+ await expect(page.locator('#undo')).toHaveAttribute('aria-label','Undo add Rectangle');
  await expect(page.locator('#redo')).toHaveAttribute('aria-label','Redo delete Rectangle');
 });
 test('Menus, the shortcut sheet and the export dialog work from the keyboard alone',async({page})=>{
@@ -3726,10 +3726,10 @@ test('add rectangle and add ellipse select the new shape and say where it went',
 test('three adds with no drag leave three shapes that do not overlap',async({page})=>{page.on('dialog',d=>d.accept());const errors=[];page.on('pageerror',e=>errors.push(e.message));
  await page.goto('/');await newDesign(page);
  await page.locator('#rect').click();await page.keyboard.press('Escape');
- await page.locator('#ellipse').click();await page.keyboard.press('Escape');
- await expect(page.locator('#toast')).toContainText('Ellipse added beside the others');
- await page.locator('#rect').click();await page.keyboard.press('Escape');
- await expect(page.locator('#toast')).toContainText('Rectangle added beside the others');
+ await page.locator('#ellipse').click();
+ await expect(page.locator('#toast')).toContainText('Ellipse added beside the others');await page.keyboard.press('Escape');
+ await page.locator('#rect').click();
+ await expect(page.locator('#toast')).toContainText('Rectangle added beside the others');await page.keyboard.press('Escape');
  const boxes=await page.locator('#shapes [data-id]').evaluateAll(els=>els.map(el=>{const r=el.getBoundingClientRect();return {x0:r.left,y0:r.top,x1:r.right,y1:r.bottom};}));
  expect(boxes).toHaveLength(3);
  for(let i=0;i<3;i++)for(let j=i+1;j<3;j++){const a=boxes[i],b=boxes[j];
@@ -4199,7 +4199,7 @@ test('inspector: stitch types lay out 3 + 3 + 1 and every field starts on one le
 
 test('new lettering stays selected after a stray canvas click, and typing goes to its text field; a later click deselects it',async({page})=>{page.on('dialog',d=>d.accept());const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');await newDesign(page);await page.locator('#letter').click();await expect(page.locator('#canvasText')).toBeFocused();await expect(page.locator('#selected')).toContainText('Text: Text');const a=await page.locator('#art').boundingBox();await page.mouse.click(a.x+a.width*0.2,a.y+a.height/2);await expect(page.locator('#canvasText')).toHaveCount(0);await expect(page.locator('#selected')).toContainText('Text: TEXT');await expect(page.locator('#letteringText')).toBeFocused();await page.keyboard.type('WE');await expect(page.locator('#letteringText')).toHaveValue('WE');await expect(page.locator('.object-row').first()).toContainText('Text: WE');await page.mouse.click(a.x+a.width*0.2,a.y+a.height/2);await expect(page.locator('#selected')).not.toContainText('Text: WE');expect(errors).toEqual([]);});
 
-test('a tool hint ends with its step: closing a polygon and selecting it clears the path hint, and switching tool mid-draw clears the line hint',async({page})=>{
+test('a tool hint ends with its step: closing a polygon and selecting it clears the path hint, and switching tool clears the line hint, and pressing on the canvas ends it',async({page})=>{
  page.on('dialog',d=>d.accept());await page.goto('/');await newDesign(page);
  const m=await page.evaluate(()=>{const m=document.querySelector('#art').getScreenCTM();return {a:m.a,d:m.d,e:m.e,f:m.f};}),at=(x,y)=>({x:m.a*x+m.e,y:m.d*y+m.f});
  const hints=()=>page.locator('#toast .toast-item');
@@ -4207,9 +4207,12 @@ test('a tool hint ends with its step: closing a polygon and selecting it clears 
  for(const [x,y] of [[-20,-20],[20,-20],[20,20],[-20,-20]]){const p=at(x,y);await page.mouse.click(p.x,p.y);}
  await expect(page.locator('.object-row').last()).toContainText('Polygon');await expect(page.locator('#toast')).not.toContainText('Click to add points');
  await page.locator('.object-row').last().click();await expect(page.locator('#toast')).not.toContainText('Click to add points');
- await page.locator('#line').click();const a=at(-30,30),b=at(30,30);await page.mouse.move(a.x,a.y);await page.mouse.down();await page.mouse.move(b.x,b.y,{steps:3});
+ await page.locator('#line').click();const a=at(-30,30),b=at(30,30);
  await expect(hints()).toHaveCount(1);await expect(hints()).toContainText('Drag on the canvas to draw a line');
- await page.locator('#select').click();await expect(page.locator('#toast')).not.toContainText('Drag on the canvas to draw a line');await page.mouse.up();
+ await page.mouse.move(a.x,a.y);await page.mouse.down();await page.mouse.move(b.x,b.y,{steps:3});
+ await expect(page.locator('#toast')).not.toContainText('Drag on the canvas to draw a line');await page.mouse.up();
+ await page.locator('#line').click();await expect(hints()).toContainText('Drag on the canvas to draw a line');
+ await page.locator('#select').click();await expect(page.locator('#toast')).not.toContainText('Drag on the canvas to draw a line');
  await page.locator('#polygon').click();await expect(hints()).toHaveCount(1);await expect(hints()).toContainText('Drag from the center');await expect(page.locator('#toast')).not.toContainText('Drag on the canvas');
 });
 

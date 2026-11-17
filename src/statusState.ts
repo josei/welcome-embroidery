@@ -21,7 +21,7 @@ export const statusState = createStore<StatusRun>({
   issuesHidden: true,
   issuesText: '',
   issuesTitle: '',
-  playback: 'Ready to simulate',
+  playback: '',
   needle: '',
 });
 

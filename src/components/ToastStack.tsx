@@ -27,10 +27,20 @@ export function ToastStack() {
     else if (!inside && was) { hovered.current.delete(id); toastActions.release(id); }
    }
   };
+  // The next action the user takes ends a confirmation or hint, so it never lingers over the work they moved on to. Keys and
+  // presses count; input events do not, since a checkbox fires one after the click that made the toast. Only real user
+  // events count, and the toasts themselves are skipped: pressing Undo or Dismiss must still reach its button.
+  const onAction = (event: Event) => {
+   if (!event.isTrusted || (event.target as Element | null)?.closest?.('#toast')) return;
+   toastActions.dismissStatus();
+  };
+  const actions = ['keydown', 'pointerdown'] as const;
+  for (const name of actions) window.addEventListener(name, onAction, true);
   document.addEventListener('pointermove', onMove);
   document.documentElement.addEventListener('mouseleave', releaseAll);
   window.addEventListener('blur', releaseAll);
   return () => {
+   for (const name of actions) window.removeEventListener(name, onAction, true);
    document.removeEventListener('pointermove', onMove);
    document.documentElement.removeEventListener('mouseleave', releaseAll);
    window.removeEventListener('blur', releaseAll);

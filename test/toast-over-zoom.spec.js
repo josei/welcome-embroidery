@@ -8,11 +8,6 @@ const newDesign=async page=>{
  else await page.locator('#new').click();
  if(await page.locator('#discardDialog[open]').count())await page.locator('#discardDiscard').click();
 };
-const openStitches=async page=>{
- const menu=page.locator('#phoneMenu');
- if(await menu.count()&&await menu.isVisible()){await menu.click();await page.locator('#menuView-stitches').click();}
- else await page.locator('button[data-view="stitches"]').click();
-};
 // The visible zoom bar buttons' boxes.
 const zoomButtons=page=>page.locator('.zoombar button').filter({visible:true});
 
@@ -26,9 +21,7 @@ test('one confirmation stays clear of the zoom bar on a 390×844 phone in Spanis
  await page.locator('#phoneMenu').click();
  await page.locator('#menuSection-Tools').click();
  await page.locator('#menuEllipse').click();
- await page.keyboard.press('Escape');
- await openStitches(page);
- await expect(page.locator('button[data-view="stitches"]').first()).toHaveAttribute('aria-pressed','true');
+ // Any key or pointer action ends a confirmation, so the add is the last action before the check.
  // The second add replaces the first, so exactly one confirmation is on screen.
  await expect(page.locator('#toast .toast-item')).toHaveCount(1);
  await expect(page.locator('#toast')).toContainText('Elipse añadida junto a las demás');
@@ -53,9 +46,6 @@ test('one confirmation stays clear of the zoom bar at 1440 px',async({page})=>{
  await page.locator('#rect').click();
  await page.keyboard.press('Escape');
  await page.locator('#ellipse').click();
- await page.keyboard.press('Escape');
- await openStitches(page);
- await expect(page.locator('button[data-view="stitches"]').first()).toHaveAttribute('aria-pressed','true');
  await expect(page.locator('#toast .toast-item')).toHaveCount(1);
  const toast=page.locator('#toast .toast-item').first(),tb=await toast.boundingBox();
  expect(tb,'toast box').not.toBeNull();

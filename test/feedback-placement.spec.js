@@ -24,16 +24,8 @@ for(const lang of ['en','es']){
    await page.locator('#phoneMenu').click();
    await page.locator('#menuProperties').click();
    await expect(page.locator('#inspector')).toHaveClass(/sheet-open/);
-   // The rectangle was added with the Properties sheet closed, so its toast is the one on screen.
-   const toast=page.locator('#toast .toast-item').first();
-   await expect(toast).toBeVisible();
-   const tb=await toast.boundingBox();
-   const hits=await page.evaluate(([x,y,w2,h2])=>[...document.querySelectorAll('input:not([type=hidden]),select,textarea')]
-    .filter(e=>e.offsetParent)
-    .filter(e=>{const r=e.getBoundingClientRect();return Math.min(x+w2,r.right)>Math.max(x,r.left)&&Math.min(y+h2,r.bottom)>Math.max(y,r.top);})
-    .map(e=>e.id||e.name),[tb.x,tb.y,tb.width,tb.height]);
-   expect(hits,`fields under the toast at ${w}x${h}`).toEqual([]);
-   await expect(toast).toBeVisible();
+   // Opening the sheet is a user action, so the rectangle's confirmation is gone and no toast can sit over a field.
+   await expect(page.locator('#toast .toast-item')).toHaveCount(0);
    await page.reload();
    if(await page.locator('#restoreDialog[open]').count())await page.locator('#restoreNo').click();
    if(await page.locator('#discardDialog[open]').count())await page.locator('#discardDiscard').click();

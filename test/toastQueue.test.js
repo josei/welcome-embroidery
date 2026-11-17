@@ -118,3 +118,13 @@ test('clearing the tool hint leaves nothing behind when it was the only toast', 
   assert.equal(q.visible().length, 0);
   assert.equal(q.nextExpiry(), null);
 });
+
+test('the next user action ends a confirmation and a tool hint, but keeps an error', () => {
+  const q = createToastQueue();
+  q.push('Rectangle added, 24 × 16 mm', 'status', 0);
+  q.push('Click to place the text', 'status', 0, null, true);
+  q.push("Can't compile", 'error', 0);
+  q.dismissStatus();
+  assert.deepEqual(q.visible().map(entry => entry.text), ["Can't compile"]);
+  assert.equal(q.log().length, 3, 'the log keeps every message');
+});

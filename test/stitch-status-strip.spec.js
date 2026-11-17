@@ -25,7 +25,7 @@ async function openStitches(page,width,height,lang,{overrun=false}={}){
   await page.locator('#phoneMenu').click();await page.locator('#menuView-stitches').click();
  }
  await expect(page.locator('#play')).toBeVisible();
- await expect(page.locator('#playbackProgress')).not.toHaveText('');
+ await expect(page.locator('#playbackStitches')).not.toHaveText('');
  return errors;
 }
 
@@ -47,7 +47,8 @@ for(const [w,h] of SIZES) for(const lang of ['en','es']) for(const overrun of [f
   const errors=await openStitches(page,w,h,lang,{overrun});
   const {controls,status}=await boxes(page);
   expect(controls.length).toBeGreaterThan(0);
-  expect(status.length).toBeGreaterThan(0);
+  // The status slot is empty in the stitch view unless there is a message to show, so the overlap check needs one.
+  if(overrun) expect(status.length).toBeGreaterThan(0);
   for(const c of controls) for(const s of status){
    expect(overlaps(c,s),`${c.id} "${c.text}" over ${s.id} "${s.text}"`).toBe(false);
   }
@@ -87,7 +88,7 @@ for(const lang of ['en','es']) {
 }
 
 // On the landscape phone and the tablet the status row holds one progress state (the compile or issue text) and the Messages
-// pill. The playback row above already reports the simulation, so its text is not repeated on the status row.
+// pill. The playback row above already reports the simulation, so the status row leaves its count slot empty.
 const ONE_ROW=[[844,390],[768,1024]];
 for(const [w,h] of ONE_ROW) for(const lang of ['en','es']) {
  test(`the status row shows one progress state beside Messages (${w}x${h} ${lang})`,async({page})=>{
@@ -95,7 +96,8 @@ for(const [w,h] of ONE_ROW) for(const lang of ['en','es']) {
   const shown=await page.locator('#playbackProgress').isVisible();
   expect(shown).toBe(false);
   await expect(page.locator('#messagesBtn')).toBeVisible();
-  await expect(page.locator('#count')).toBeVisible();
+  await expect(page.locator('#playbackStitches')).toBeVisible();
+  await expect(page.locator('#count')).toHaveText('');
  });
 
  test(`the status text and the thread summary are not cut off (${w}x${h} ${lang})`,async({page})=>{

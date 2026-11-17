@@ -129,18 +129,17 @@ export function syncInspector({plan, compileError, tips}: {plan: PlanInfo | null
     syncTextInspector(o);
   } else syncTextInspector(null);
 
-  setStatus({
-    count: compileError
-      ? t('⚠ Can\'t compile: {e}', {e: t(compileError)})
-      : plan
-        ? viewMode.get() === 'design'
-          ? `${countLabel(plan, formatCount(plan.count, lang))} · ${plan.errors.length ? plan.errors[0] : t('compiled')}`
-          // The stitch and 3D views show the count in the playback readout, so the status line gives only the state there.
-          : plan.errors.length ? plan.errors[0] : t('compiled')
-        : documentNow().doc.objects.length
-          ? 'Compiling…'
-          : 'Nothing to sew yet',
-  });
+  // The status line shows one state. In the stitch and 3D views the simulation owns it (simulation.js), so this sets it
+  // there only when there is no plan or a compile failed.
+  const designView = viewMode.get() === 'design';
+  const countText = compileError
+    ? t('⚠ Can\'t compile: {e}', {e: t(compileError)})
+    : !plan
+      ? documentNow().doc.objects.length ? 'Compiling…' : 'Nothing to sew yet'
+      : plan.errors.length
+        ? designView ? `${countLabel(plan, formatCount(plan.count, lang))} · ${plan.errors[0]}` : plan.errors[0]
+        : designView ? `${countLabel(plan, formatCount(plan.count, lang))} · ${t('Ready to sew')}` : null;
+  if (countText !== null) setStatus({count: countText});
   setStatus({countError: Boolean(compileError) || Boolean(plan?.errors.length)});
   const errs = plan?.issues || [];
   setStatus({

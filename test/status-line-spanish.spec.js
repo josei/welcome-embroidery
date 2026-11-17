@@ -34,7 +34,7 @@ test('the Spanish status line is not truncated on landscape, tablet and phone po
    console.log('MEASURE',label,JSON.stringify({sw:box.scrollWidth,cw:box.clientWidth,ov:box.overflow,rect:box.rect}));
    expect(box.scrollWidth,`count not clipped, ${label}`).toBeLessThanOrEqual(box.clientWidth);
    if(lang==='es') expect(box.text,`full Spanish status, ${label}`).toContain('466 puntadas · listo para bordar');
-   else expect(box.text,`full English status, ${label}`).toContain('466 stitches · compiled');
+   else expect(box.text,`full English status, ${label}`).toContain('466 stitches · Ready to sew');
    expect(errors).toEqual([]);
    await ctx.close();
   }

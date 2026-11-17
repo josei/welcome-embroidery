@@ -9,7 +9,7 @@ import {previewState, setPreviewState, previewActions} from './previewState.js';
 import {distortionGrid, hoopSize, threadTotals, threadSpans, sewingSeconds, sewingSecondsUpTo} from './engine.js';
 import {createThreadPreview} from './preview3d.js';
 import {lang, t} from './i18n.js';
-import {getPlan, getLastPlan, compileNow} from './compileService.js';
+import {getPlan, getLastPlan, compileNow, getCompileError} from './compileService.js';
 import {editor} from './editorContext.js';
 import {buildThreadPaths} from './threadPaths.js';
 import {formatCount, formatNumber} from './decimalText.js';
@@ -79,13 +79,15 @@ export function syncPlaybackControls() {
     totalSeconds: plan ? sewingSeconds(plan) : 0,
     spans: cache.spans, colourChanges: cache.changes, trims: cache.trims, metres: cache.metres,
   });
-  if (!plan) { setStatus({playback: 'Ready to simulate', needle: ''}); return; }
-  // The count is in the playback bar's readout, so the status line shows only the state here.
-  if (ready) { setStatus({playback: t('Ready to simulate'), needle: ''}); return; }
-  const percent = length ? Math.floor(limit / length * 100) : 0;
+  // The playback bar's readout carries the count in the stitch and 3D views, so the status line's count slot stays empty
+  // there. The design view's count already names the state, so it is left to the inspector.
+  // With no plan, or a plan that failed, the inspector owns the status line.
+  const stitchView = viewMode.get() !== 'design';
+  if (!plan || plan.errors.length || getCompileError()) { setStatus({playback: '', needle: ''}); return; }
   setStatus({
-    playback: `${percent}%`,
-    needle: current ? `Needle ${formatNumber(current.x, lang, 1)}, ${formatNumber(current.y, lang, 1)} mm` : 'Needle at start',
+    ...(stitchView ? {count: ''} : {}),
+    playback: '',
+    needle: ready ? '' : current ? `Needle ${formatNumber(current.x, lang, 1)}, ${formatNumber(current.y, lang, 1)} mm` : 'Needle at start',
   });
 }
 

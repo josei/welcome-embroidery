@@ -852,8 +852,9 @@ body{height:100vh;height:100dvh;min-height:0;overflow:hidden;overscroll-behavior
 .layout main>footer>:not(#count):not(#toast){display:none}
 .layout main>footer>#count{flex:1 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;line-height:26px;font-size:var(--fs-caption)}
 /* Toasts stack above the contextual bar, so they never cover the dock (56 px) or the bar (52 px)
-   and the status line (28 px) stays the anchor: 28 + 56 + 52 + an 8 px gap. The dock and the bar never move. */
-#toast{bottom:144px;margin-bottom:0}
+   and the status line (28 px) stays the anchor: 28 + 56 + 52 + an 8 px gap. In the design view the zoom bar sits on the canvas
+   bottom, 8 px up and 46 px tall, so the toast rises a further 54 px above the bar's top edge (198 px). */
+#toast{bottom:198px;margin-bottom:0}
 /* An open phone sheet covers the bottom half of the screen, so a toast that appeared over its fields would hide them. While a
    sheet is open the toast rises to sit just above the sheet's top edge (the sheet is 50dvh tall, anchored to the bottom). */
 .layout:has(>aside.panel.sheet-open) main>footer>#toast{bottom:calc(50dvh + 8px)}
@@ -1264,4 +1265,10 @@ html[lang="es"] .layout main>.tool-rail .rail-label{font-size:10px;letter-spacin
 .object-line:not(.group-line):hover>.object-row:not(.is-hidden):not(.is-locked) .row-name,.object-line:not(.group-line):focus-within>.object-row:not(.is-hidden):not(.is-locked) .row-name{padding-right:58px}
 .object-line:has(>.object-row.is-hidden) .row-eye{opacity:1}
 .object-line:has(>.object-row.is-hidden)>.object-row,.object-line:has(>.object-row.is-locked)>.object-row{padding-right:58px}
+}
+/* On the desktop the stitch count sits on one line and is never clipped: the playback bar's counter column takes the width the
+   text needs, and the track gives up the room. */
+@media (min-width:1001px){
+.layout main:not(.design-view) .playback-bar .playback-time{width:max-content;min-width:0;flex:none;overflow:visible}
+.layout main:not(.design-view) .playback-bar .playback-time span{overflow:visible;text-overflow:clip;white-space:nowrap}
 }

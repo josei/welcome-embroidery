@@ -70,6 +70,11 @@ export function createToastQueue({logLimit = TOAST_LOG_LIMIT} = {}) {
       if (entry.holds === 0) entry.expiresAt = now + entry.remaining;
     },
 
+    /** Removes the confirmations and tool hints on screen, keeping errors. The log keeps them. */
+    dismissStatus() {
+      visible = visible.filter(entry => entry.kind === 'error');
+    },
+
     /** Removes the tool hint on screen, if any. The log keeps it. */
     clearHints() {
       visible = visible.filter(entry => !entry.hint);

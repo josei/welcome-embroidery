@@ -470,7 +470,7 @@ test('i18n: Spanish placeholders and exact strings resolve', async()=>{
     '2 copias caben en un bastidor de 110×110 mm (1 × 2). 2 copias necesitan 1 bastidor.');
   assert.equal(t('{perHoop} copies fit one {hoop} mm hoop ({cols} × {rows}). {copies} copies need {hoops} hoop(s).',{perHoop:2,hoop:'110×110',cols:1,rows:2,copies:6,hoops:3}),
     '2 copias caben en un bastidor de 110×110 mm (1 × 2). 6 copias necesitan 3 bastidores.');
-  assert.equal(t('compiled'),'listo para bordar');
+  assert.equal(t('Ready to sew'),'listo para bordar');
   delete globalThis.location;
 });
 

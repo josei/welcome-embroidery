@@ -58,6 +58,8 @@ export const toastActions = {
     emit();
     return id;
   },
+  /** Removes the confirmations and tool hints on screen, e.g. when the user types or selects. Errors stay. */
+  dismissStatus() { queue.dismissStatus(); emit(); },
   /** Removes the tool hint on screen, e.g. when its step has ended. */
   clearHints() { queue.clearHints(); emit(); },
   /** @param {number} id */
