@@ -36,8 +36,8 @@ for(const [w,h] of [[768,1024],[820,1180]]){
    const doc=await page.evaluate(()=>({sh:document.documentElement.scrollHeight,ih:innerHeight,sw:document.documentElement.scrollWidth,iw:innerWidth}));
    expect(doc.sh,'scrollHeight === innerHeight').toBe(doc.ih);
    expect(doc.sw,'scrollWidth === innerWidth').toBe(doc.iw);
-   const scrollers=await page.evaluate(()=>['#layersSheet','#inspector'].map(s=>getComputedStyle(document.querySelector(s)).overflowY));
-   expect(scrollers,'panels scroll inside themselves').toEqual(['auto','auto']);
+   const scrollers=await page.evaluate(()=>['#objects','#inspector'].map(s=>getComputedStyle(document.querySelector(s)).overflowY));
+   expect(scrollers,'the Layers list and Properties scroll inside their panels').toEqual(['auto','auto']);
    expect(errors).toEqual([]);
   });
 

@@ -64,24 +64,36 @@ configureShapePathActions({edit, toast, render});
 configureSelectionToolbarActions({edit});
 configureSewingOrder({edit});
 configureLettering({edit, transact, toast, render, reveal: () => editor.canvas?.revealSelection()});
-// Opening Properties on a phone covers the lower part of the canvas. The view pans, without zooming, so the selection sits above
-// the sheet, and closing the sheet puts back the zoom and centre it had before. Waits a frame so the sheet is laid out before the
-// canvas measures it.
+// Opening Layers or Properties on a phone covers the lower part of the canvas (a side sheet, the right part in landscape). The
+// view pans, without zooming, so the selection sits clear of the sheet, and closing the sheet puts back the zoom and centre it
+// had before. Switching from one sheet to the other starts again from that view. Waits a frame so the sheet is laid out before
+// the canvas measures it.
 /** @type {{cx: number, cy: number, s: number} | null} */
 let viewBeforeSheet = null;
 let lastSheet = 'none';
 phoneSheetState.subscribe(() => {
   const sheet = phoneSheetState.get();
-  if (sheet === 'properties' && lastSheet !== 'properties') {
-    viewBeforeSheet = editor.canvas?.viewport() ?? null;
-    requestAnimationFrame(() => {
-      if (phoneSheetState.get() === 'properties') editor.canvas?.panToReveal();
-    });
-  } else if (sheet !== 'properties' && lastSheet === 'properties' && viewBeforeSheet) {
-    editor.canvas?.setViewport(viewBeforeSheet);
-    viewBeforeSheet = null;
-  }
+  if (sheet === lastSheet) return;
+  if (lastSheet === 'none') viewBeforeSheet = editor.canvas?.viewport() ?? null;
+  else if (viewBeforeSheet) editor.canvas?.setViewport(viewBeforeSheet);
   lastSheet = sheet;
+  if (sheet === 'none') {
+    viewBeforeSheet = null;
+    return;
+  }
+  // Pan now, once the sheet is laid out, and again when its height transition ends, in case the sheet was still moving.
+  const pan = () => {
+    if (phoneSheetState.get() === sheet) editor.canvas?.panToReveal();
+  };
+  requestAnimationFrame(pan);
+  const sheetEl = document.querySelector('.layout>aside.panel.sheet-open');
+  const onSettled = e => {
+    if (e.target !== sheetEl) return;
+    sheetEl.removeEventListener('transitionend', onSettled);
+    pan();
+  };
+  sheetEl?.addEventListener('transitionend', onSettled);
+  setTimeout(() => sheetEl?.removeEventListener('transitionend', onSettled), 400);
 });
 configureFontsDialog({edit, toast});
 configureProjectIO({

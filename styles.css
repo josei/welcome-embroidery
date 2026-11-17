@@ -1119,11 +1119,16 @@ body{height:100dvh;min-height:0;overflow:hidden}
 .layout main:not(.design-view) .playback-bar .playback-time span{overflow:visible;text-overflow:clip;white-space:nowrap}
 }
 
-/* Tablet portrait (601 to 1024 px wide): the selection bar is a vertical column on the canvas's right edge, below the 2D / Stitches / 3D
-   switch and clear of the tool palette on the left, as the desktop bar is on the right. Its buttons share one centre line. */
+/* Tablet portrait (601 to 1024 px wide): the selection bar is a row under the 2D / Stitches / 3D switch, on the canvas's right. The
+   hoop starts lower down, so the bar covers no part of it, and it clears the zoom bar at the bottom left. Its buttons share one
+   centre line. */
 @media (min-width:601px) and (max-width:1024px) and (orientation:portrait){
-.canvas .floating{left:auto;right:12px;top:68px;transform:none;display:flex;flex-direction:column;flex-wrap:nowrap;align-items:center;align-content:flex-start;justify-content:flex-start;gap:4px;width:auto;max-width:none;max-height:calc(100% - 80px);overflow-y:auto;overflow-x:visible;padding:6px;grid-template-columns:none}
-.canvas .floating .tb-start::before{left:5px;right:5px;top:-2px;bottom:auto;width:auto;height:1px}
+.canvas .floating{left:auto;right:12px;top:68px;transform:none;display:flex;flex-direction:row;flex-wrap:wrap;align-items:center;align-content:center;justify-content:flex-end;gap:4px;width:auto;max-width:calc(100% - 24px);max-height:none;overflow:visible;padding:6px;grid-template-columns:none}
+.canvas .floating .tb-start::before{left:-2px;right:auto;top:5px;bottom:5px;width:1px;height:auto}
+/* The Layers heading stays at the top of its column: only the list scrolls, inside the space under the heading. */
+.layout>#layersSheet{display:flex;flex-direction:column;overflow:hidden;padding-top:0}
+.layout>#layersSheet>.layers-head{flex:none;margin:0;padding:12px 0}
+.layout>#layersSheet #objects{flex:1 1 auto;min-height:0;overflow-y:auto;overscroll-behavior:contain;margin:0}
 }
 /* The bar opens with its first button, so a divider above or beside that button would be a stray line. */
 @media (min-width:601px) and (max-width:1024px){.canvas .floating>:first-child.tb-start::before{display:none}}

@@ -31,17 +31,27 @@ for(const [width,height] of PHONES){
   await page.locator('#rect').tap();
   await expect(page.locator('.sel-box')).toBeVisible();
   await openProperties(page);
-  const canvas=await rectOf(page,'.canvas');
-  const sheet=await rectOf(page,'#inspector');
-  const frame=await rectOf(page,'.sel-box');
-  // The visible part of the canvas is above the panel (portrait) or left of it (landscape).
-  const bottomSheet=sheet.right-sheet.left>=(canvas.right-canvas.left)*0.9;
-  const visibleRight=bottomSheet?canvas.right:Math.min(canvas.right,sheet.left);
-  const visibleBottom=bottomSheet?Math.min(canvas.bottom,sheet.top):canvas.bottom;
-  expect(frame.left,'frame left edge is in view').toBeGreaterThanOrEqual(canvas.left);
-  expect(frame.top,'frame top edge is in view').toBeGreaterThanOrEqual(canvas.top);
-  expect(frame.right,'frame right edge is in view').toBeLessThanOrEqual(visibleRight);
-  expect(frame.bottom,'frame bottom edge is in view').toBeLessThanOrEqual(visibleBottom);
+  // The visible part of the canvas is above the panel (portrait) or left of it (landscape). The wait accepts a sample and the
+  // checks read that same sample, so a redraw between two reads cannot fail them.
+  let sample;
+  await expect.poll(async()=>{
+    const canvas=await rectOf(page,'.canvas');
+    const sheet=await rectOf(page,'#inspector');
+    const frame=await rectOf(page,'.sel-box');
+    const bottomSheet=sheet.right-sheet.left>=(canvas.right-canvas.left)*0.9;
+    const part={
+      left:canvas.left,top:canvas.top,
+      right:bottomSheet?canvas.right:Math.min(canvas.right,sheet.left),
+      bottom:bottomSheet?Math.min(canvas.bottom,sheet.top):canvas.bottom,
+    };
+    sample={frame,part};
+    return frame.left>=part.left&&frame.top>=part.top&&frame.right<=part.right&&frame.bottom<=part.bottom;
+  }).toBe(true);
+  const {frame,part}=sample;
+  expect(frame.left,'frame left edge is in view').toBeGreaterThanOrEqual(part.left);
+  expect(frame.top,'frame top edge is in view').toBeGreaterThanOrEqual(part.top);
+  expect(frame.right,'frame right edge is in view').toBeLessThanOrEqual(part.right);
+  expect(frame.bottom,'frame bottom edge is in view').toBeLessThanOrEqual(part.bottom);
   expect(errors).toEqual([]);
  });
 

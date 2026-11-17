@@ -30,6 +30,23 @@ async function visiblePart(page){
  };
 }
 
+// The pan runs once the sheet has settled, so wait for the selection to be inside the visible part, not for a fixed number of frames.
+// The check asserts on the same sample the wait accepted, so a redraw between two reads cannot fail it.
+async function expectSelectionInView(page){
+ let sample;
+ await expect.poll(async()=>{
+  const frame=await rectOf(page,'.sel-box');
+  const part=await visiblePart(page);
+  sample={frame,part};
+  return frame.left>=part.left&&frame.right<=part.right&&frame.top>=part.top&&frame.bottom<=part.bottom;
+ }).toBe(true);
+ const {frame,part}=sample;
+ expect(frame.left,'selection left edge is in view').toBeGreaterThanOrEqual(part.left);
+ expect(frame.right,'selection right edge is in view').toBeLessThanOrEqual(part.right);
+ expect(frame.top,'selection top edge is in view').toBeGreaterThanOrEqual(part.top);
+ expect(frame.bottom,'selection bottom edge is in view').toBeLessThanOrEqual(part.bottom);
+}
+
 async function openProperties(page){
  await page.locator('#phoneMenu').click();
  await page.locator('#menuProperties').click();
@@ -50,12 +67,7 @@ for(const lang of LANGS)for(const [width,height] of PHONES){
   await page.evaluate(()=>new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r))));
   const before={view:await viewBox(page),pct:await page.locator('#zoomPct').textContent()};
   await openProperties(page);
-  const frame=await rectOf(page,'.sel-box');
-  const part=await visiblePart(page);
-  expect(frame.left,'selection left edge is in view').toBeGreaterThanOrEqual(part.left);
-  expect(frame.right,'selection right edge is in view').toBeLessThanOrEqual(part.right);
-  expect(frame.top,'selection top edge is in view').toBeGreaterThanOrEqual(part.top);
-  expect(frame.bottom,'selection bottom edge is in view').toBeLessThanOrEqual(part.bottom);
+  await expectSelectionInView(page);
   expect(await page.locator('#zoomPct').textContent(),'zoom is unchanged while Properties is open').toBe(before.pct);
   await page.locator('#inspector .sheet-close').click();
   await expect(page.locator('#inspector')).not.toHaveClass(/sheet-open/);
@@ -71,13 +83,7 @@ for(const lang of LANGS)for(const [width,height] of PHONES){
   // The Add rectangle button sits under the sheet on a phone, so it is clicked as a DOM event here.
   await page.locator('#rect').evaluate(e=>e.click());
   await expect(page.locator('.sel-box')).toBeVisible();
-  await page.evaluate(()=>new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r))));
-  const frame=await rectOf(page,'.sel-box');
-  const part=await visiblePart(page);
-  expect(frame.left).toBeGreaterThanOrEqual(part.left);
-  expect(frame.right).toBeLessThanOrEqual(part.right);
-  expect(frame.top).toBeGreaterThanOrEqual(part.top);
-  expect(frame.bottom).toBeLessThanOrEqual(part.bottom);
+  await expectSelectionInView(page);
   await page.screenshot({path:`test-results/properties-add-${lang}-${width}x${height}.png`});
   expect(errors).toEqual([]);
  });
