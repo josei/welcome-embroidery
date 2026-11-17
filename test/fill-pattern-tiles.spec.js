@@ -26,7 +26,9 @@ for(const [width,height] of SIZES) for(const lang of ['en','es']){
   await expect(fill.locator('button .stitch-thumb')).toHaveCount(10);
   const columns=g=>g.evaluate(el=>getComputedStyle(el).gridTemplateColumns.split(' ').length);
   expect(await columns(fill)).toBe(3);
-  expect(await columns(type)).toBe(await columns(fill));
+  // The Stitch type cards run 3 + 2 + 2, so their first row holds three across like the Fill pattern cards.
+  const firstRow=await type.locator('button').evaluateAll(bs=>bs.filter(b=>b.getBoundingClientRect().top===bs[0].getBoundingClientRect().top).length);
+  expect(firstRow).toBe(await columns(fill));
 
   if(width<=768){
    const boxes=await fill.locator('button').evaluateAll(bs=>bs.map(b=>{const r=b.getBoundingClientRect();return [r.width,r.height];}));

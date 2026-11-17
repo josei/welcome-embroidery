@@ -25,23 +25,23 @@ export function SettingsDialog() {
    <form method="dialog">
     <h2>{t('Settings')}</h2>
     <div className="settings-body">
-     <fieldset className="settings-group">
-      <legend>{t('Language')}</legend>
+     <section className="settings-group" aria-labelledby="settingsLanguage">
+      <h3 id="settingsLanguage" className="section-heading">{t('Language')}</h3>
       <div className="segmented" role="group" aria-label={t('Language')}>
        <button type="button" id="langEn" aria-pressed={lang === 'en'} onClick={() => setLanguage('en')}>English</button>
        <button type="button" id="langEs" aria-pressed={lang === 'es'} onClick={() => setLanguage('es')}>Español</button>
       </div>
-     </fieldset>
-     <fieldset className="settings-group">
-      <legend>{t('Sewing tips to show')}</legend>
+     </section>
+     <section className="settings-group" aria-labelledby="settingsTips">
+      <h3 id="settingsTips" className="section-heading">{t('Sewing tips to show')}</h3>
       <div id="tipsList" className="tips-list"></div>
-     </fieldset>
-     <fieldset className="settings-group" hidden={rows.copyEndpoint}>
-      <legend>{t('AI agent')}</legend>
+     </section>
+     <section className="settings-group" hidden={rows.copyEndpoint} aria-labelledby="settingsAgent">
+      <h3 id="settingsAgent" className="section-heading">{t('AI agent')}</h3>
       <p id="agentState" className="agent-state" role="status">{agent.active ? t('Agent connected') : agent.waiting ? t('Waiting for agent') : t('Not connected')}</p>
       <button type="button" id="copyEndpoint" className={[agent.waiting || agent.active ? 'agent-on' : '', agent.active ? 'agent-active' : ''].filter(
         Boolean).join(' ') || undefined} onClick={() => agentLinkActions.open()}>{t('Connect an AI agent')}</button>
-     </fieldset>
+     </section>
     </div>
     <div className="dialog-actions"><button>{t('Close')}</button></div>
    </form>

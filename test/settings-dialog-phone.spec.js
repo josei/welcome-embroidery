@@ -71,7 +71,7 @@ for(const [name,size] of [['phone portrait',PHONE_PORTRAIT],['tablet portrait',T
  });
 }
 
-test('desktop groups and the language pair use the same border and control styles as phones',async({page})=>{
+test('desktop groups and the language pair use the same head and control styles as phones',async({page})=>{
  const styles=async(size)=>{
   await page.setViewportSize(size);
   await page.goto('/?lang=en');
@@ -83,11 +83,12 @@ test('desktop groups and the language pair use the same border and control style
   }
   await expect(page.locator('#settingsDialog')).toBeVisible();
   const out=await page.evaluate(()=>{
-   const g=getComputedStyle(document.querySelector('#settingsDialog .settings-group'));
+   const g=getComputedStyle(document.querySelector('#settingsDialog .settings-group .section-heading'));
    const en=getComputedStyle(document.getElementById('langEn'));
    const es=getComputedStyle(document.getElementById('langEs'));
    return {
-    groupBorder:[g.borderTopStyle,g.borderTopWidth,g.borderTopColor,g.borderTopLeftRadius].join(' '),
+    groupHead:[g.textTransform,g.fontSize,g.letterSpacing,g.color].join(' '),
+    groupBorder:getComputedStyle(document.querySelector('#settingsDialog .settings-group')).borderTopWidth,
     langEnBorder:en.borderTopWidth,
     langEsBorder:es.borderTopWidth,
    };
@@ -97,7 +98,10 @@ test('desktop groups and the language pair use the same border and control style
  };
  const desktop=await styles({width:1280,height:800});
  const phone=await styles(PHONE_PORTRAIT);
- expect(phone.groupBorder,'group border matches desktop').toBe(desktop.groupBorder);
+ expect(phone.groupHead,'group heads match desktop').toBe(desktop.groupHead);
+ expect(desktop.groupHead).toContain('uppercase');
+ expect(desktop.groupBorder,'groups carry no bordered fieldset').toBe('0px');
+ expect(phone.groupBorder,'groups carry no bordered fieldset on phones').toBe('0px');
  expect(phone.langEnBorder,'language buttons carry no border of their own').toBe('0px');
  expect(desktop.langEnBorder,'language buttons carry no border of their own on desktop').toBe('0px');
  expect(phone.langEsBorder).toBe(desktop.langEsBorder);

@@ -1,6 +1,6 @@
 // A select with a row of icon buttons beside it. The select keeps the value (it is visually hidden); the buttons show it.
 // Clicking a button picks its value, as clicking an option does. The row's labels and icons are the ones the helper it replaces built.
-// With labelled, each button shows its label under the icon, as cards in a three-column grid (seven stitch types lay out as 3 + 3 + 1). Three columns leave a card wide enough for the longest Spanish label, "Lentejuelas".
+// With labelled, each button shows its label under the icon, as cards in a three-column grid (the Stitch type grid spans its cards in CSS, 3 + 2 + 2, so none is left alone). Three across leaves a card wide enough for the longest Spanish label, "Lentejuelas", in the narrow inspector.
 // A value of '' matches no button: the select then shows a disabled Mixed option and no button is pressed.
 import {StitchThumb} from './StitchThumb';
 import {t} from '../i18n.js';

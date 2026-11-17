@@ -316,6 +316,11 @@ input:not([type=checkbox]):not([type=range]),select,textarea,.panel textarea{fon
 }
 
 .icon-seg.labelled{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+/* Stitch type: seven cards lay out as 3 + 2 + 2 on a six-unit grid, so no card is left alone on the last row. The first row
+   keeps the three-across width, and the two rows below take two wider cards each. Rows share one height. */
+.icon-seg.labelled[data-select="type"]{grid-template-columns:repeat(6,minmax(0,1fr));grid-auto-rows:1fr}
+.icon-seg.labelled[data-select="type"] button{grid-column:span 2}
+.icon-seg.labelled[data-select="type"] button:nth-child(n+4){grid-column:span 3}
 .icon-seg.labelled button{width:auto;height:auto;padding:9px 4px 7px;display:flex;flex-direction:column;align-items:center;gap:5px;border:1px solid var(--field-line);border-radius:10px;background:#fff;font-size:var(--fs-caption);font-weight:var(--fw-regular);color:#3c423e}
 .icon-seg.labelled button[aria-pressed=true]{padding:8px 3px 6px;border:2px solid var(--teal);background:var(--teal-soft);color:var(--teal-deep);font-weight:var(--fw-emphasis)}
 .icon-seg.labelled[data-select="fillMethod"] button span{white-space:normal;text-align:center;line-height:1.25}
@@ -567,7 +572,7 @@ html[data-input="touch"] button:focus-visible,html[data-input="touch"] #art:focu
 /* One section heading style for the inspector and side panels: every heading and every collapsible summary
    shares this case, tracking, size, weight and colour. Collapsible sections (<details class="sec-fold|doc-settings">) get a
    disclosure triangle; plain headings get none. */
-.panel .section-heading,.panel .sec-fold>summary,.panel .doc-settings>summary{font-size:var(--fs-caption);font-weight:var(--fw-emphasis);letter-spacing:.07em;text-transform:uppercase;color:#66726c}
+.panel .section-heading,#settingsDialog .section-heading,.panel .sec-fold>summary,.panel .doc-settings>summary{font-size:var(--fs-caption);font-weight:var(--fw-emphasis);letter-spacing:.07em;text-transform:uppercase;color:#66726c}
 .panel .sec-fold>summary,.panel .doc-settings>summary{cursor:pointer;list-style:none;position:relative;padding:6px 0 6px 14px}
 .panel .sec-fold>summary::-webkit-details-marker,.panel .doc-settings>summary::-webkit-details-marker{display:none}
 .panel .sec-fold>summary::before,.panel .doc-settings>summary::before{content:"";position:absolute;left:2px;top:50%;margin-top:-4px;border-style:solid;border-width:4px 0 4px 5px;border-color:transparent transparent transparent currentColor;transition:transform .12s}
@@ -1079,11 +1084,11 @@ body{height:100dvh;min-height:0;overflow:hidden}
 #settingsDialog .tips-list label{min-height:44px}
 }
 
-/* The Settings dialog uses the editor's own choice control and group border, on desktop and phone alike. The language pair is
-   the same segmented control as the view switch, and each group is outlined in the field line colour with the panel radius
-   rather than the browser's grooved fieldset border. */
-#settingsDialog .settings-group{min-width:0;margin:0;padding:8px 12px 12px;border:1px solid var(--field-line);border-radius:10px;background:#fff}
-#settingsDialog .settings-group>legend{padding:0 4px;margin-left:-4px;font-size:var(--fs-body);color:#66726c}
+/* The Settings dialog groups use the same uppercase section heads as Properties, Document and Menu. Each group is a plain
+   block under its head, with no border, so the dialog reads as one product with the rest of the editor. */
+#settingsDialog .settings-group{min-width:0;margin:0;display:grid;gap:8px}
+#settingsDialog .settings-group[hidden]{display:none}
+#settingsDialog .section-heading{margin:0}
 #settingsDialog .segmented{display:inline-flex}
 
 /* The dialog keeps its title and Close row in view. Only the groups between them scroll, which matters on a phone held in
