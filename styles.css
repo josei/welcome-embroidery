@@ -831,6 +831,11 @@ body{height:100vh;height:100dvh;min-height:0;overflow:hidden;overscroll-behavior
 .canvas .zoombar .zoom-text{font-size:0}
 .canvas .zoombar .zoom-fit-icon{display:inline-block;width:20px;height:20px}
 .canvas-hint{bottom:168px}
+/* On a portrait phone the lettering save hint sits just above the zoom bar, not at the height of the other canvas hints,
+   where it covered the design's lower lettering. */
+@media (max-width:600px) and (orientation:portrait){
+.canvas .canvas-text-hint{bottom:56px}
+}
 .layout main>.floating{grid-row:2;position:static;top:auto;right:auto;bottom:auto;left:auto;transform:none;z-index:auto;display:flex;flex-direction:row;flex-wrap:nowrap;align-items:center;justify-content:flex-start;align-content:center;gap:4px;width:auto;height:52px;max-width:none;max-height:none;margin:0;padding:4px 6px;box-sizing:border-box;grid-template-columns:none;overflow-x:auto;overflow-y:hidden;scrollbar-width:none;border:0;border-top:1px solid #e3e6e1;border-radius:0;background:#fff;box-shadow:none}
 .layout main>.floating[hidden]{display:none}
 /* Rows at phone portrait: canvas, selection bar, playback, dock, status line. Each is placed by row, so a hidden bar or playback
@@ -1156,6 +1161,10 @@ html[data-input="touch"] .tool-row .icon-button:not(.active-tool):hover{backgrou
 .tool-row .icon-button[data-quiet-focus]:not(.active-tool):focus-visible{background:#f6f7f5}
 [data-quiet-focus]::after{display:none!important}
 #previewHint{white-space:nowrap;max-width:calc(100% - 24px);overflow:hidden;text-overflow:ellipsis}
+/* The 3D canvas fills the canvas down to the playback bar. At phone sizes that edge falls on a fractional pixel, and with
+   overflow:hidden the browser leaves the bottom ~18 px of the 3D view unpainted, under the orbit hint. overflow:clip clips
+   the same content without that gap. */
+.layout main>.canvas.preview-mode{overflow:clip}
 
 /* A checkbox and its label share one row at every width and in both languages: the box is centred on the label's line,
    and a label that wraps stays beside the box. */

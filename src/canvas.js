@@ -330,9 +330,14 @@ export function createCanvas(/** @type {any} */ api){
       el('line',{class:'sel-stem',x1:pv[0]-10*k,y1:pv[1],x2:pv[0]+10*k,y2:pv[1]}),el('line',{class:'sel-stem',x1:pv[0],y1:pv[1]-10*k,x2:pv[0],y2:pv[1]+10*k}));
     const corners=[[-.5,-.5],[.5,-.5],[.5,.5],[-.5,.5]].map(([a,b])=>toWorld(f,a*f.W,b*f.H));
     overlay.append(el('polygon',{class:'sel-box',points:corners.map(p=>p.join(',')).join(' '),fill:'none'}));
+    // A touch target stays 44 screen px square, but on a touch screen it reaches out from the frame, away from the object's
+    // middle, so on a small object it never covers the lettering there. A mouse keeps the square centred on the handle.
+    // The press rule in handleClaim.js still decides between a handle and the body.
+    const reach=(/** @type {number} */ d)=>d>0?[0,44*k]:d<0?[-44*k,0]:[-22*k,22*k];
     for(const [name,fx,fy] of HANDLES){if(name.length===1&&((name==='n'||name==='s')?f.W*vp.s<30:f.H*vp.s<30))continue;const [x,y]=
       toWorld(f,(fx-.5)*f.W,(fy-.5)*f.H),rot=f.rot?`rotate(${f.rot*180/Math.PI} ${x} ${y})`:'';
-      overlay.append(el('rect',{class:'sel-hit','data-hit':name,x:x-22*k,y:y-22*k,width:44*k,height:44*k,transform:rot}));
+      const [ox0,ox1]=touchPointer()?reach(fx-.5):[-22*k,22*k],[oy0,oy1]=touchPointer()?reach(fy-.5):[-22*k,22*k];
+      overlay.append(el('rect',{class:'sel-hit','data-hit':name,x:x+ox0,y:y+oy0,width:ox1-ox0,height:oy1-oy0,transform:rot}));
       overlay.append(
       el('rect',
       {class:'sel-handle','data-handle':name,tabindex:0,role:'button','aria-label':HANDLE_LABEL[name],x:x-hs,y:y-hs,width:hs*2,height:hs*2,transform:
