@@ -296,7 +296,8 @@ body{height:auto;min-height:0;overflow-x:hidden;overflow-y:auto}
 .top #export{order:2;margin-left:0}
 .segmented{order:4;flex:1 1 100%;display:grid;grid-template-columns:repeat(3,1fr)}
 .segmented button{padding:7px 4px}
-.top>.icon-button,.edit-tools{order:5}
+.top>.icon-button{order:5}
+.edit-tools{order:0}
 .top .icon-button{width:34px;height:34px;min-width:34px}
 .edit-tools{gap:2px}
 .layout{height:auto;display:flex;flex-direction:column;grid-template-columns:none}
