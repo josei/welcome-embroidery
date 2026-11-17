@@ -8,7 +8,7 @@ import {drawScene} from './canvasScene.js';
 import {wheelZoomFactor,wheelZooms} from './wheelZoom.js';
 import {createCanvasEditing} from './canvasEditing.js';
 import {createCanvasTools} from './canvasTools.js';
-import {toolbarInset} from './floatingToolbar.js';
+import {railInset, toolbarInset} from './floatingToolbar.js';
 import {clampMoveDelta,visibleCanvasRect} from './moveClamp.js';
 import {pressClaimedByHandle} from './handleClaim.js';
 import {clampResizeScale} from './resizeLimit.js';
@@ -74,11 +74,11 @@ export function createCanvas(/** @type {any} */ api){
   function toScreen(/** @type {any} */ x,/** @type {any} */ y){const {x:ox,y:oy,w,h}=drawArea();return [(x-vp.cx)*vp.s+ox+w/2,(y-vp.cy)*vp.s+oy+h/2];}
   function apply(){const {w,h}=drawArea();svg.setAttribute('viewBox',`${vp.cx-w/(2*vp.s)} ${vp.cy-h/(2*vp.s)} ${w/vp.s} ${h/vp.s}`);
     svg.setAttribute('preserveAspectRatio','none');api.onViewport?.(vp);drawRulers();refresh();}
-  function fitRect(/** @type {any} */ x0,/** @type {any} */ y0,/** @type {any} */ x1,/** @type {any} */ y1,margin=48,inset={top:0,right:0,bottom:0}){const {w,h}=size();
+  function fitRect(/** @type {any} */ x0,/** @type {any} */ y0,/** @type {any} */ x1,/** @type {any} */ y1,margin=48,inset={top:0,right:0,bottom:0,left:0}){const {w,h}=size(),left=inset.left||0;
   vp.cx=(x0+x1)/2;
   vp.cy=(y0+y1)/2;
-  vp.s=Math.max(.4,Math.min(120,Math.min((w-margin*2-RULER-inset.right)/Math.max(1,x1-x0),(h-margin*2-RULER-inset.top-inset.bottom)/Math.max(1,y1-y0))));
-  vp.cx-=(RULER-inset.right)/2/vp.s;
+  vp.s=Math.max(.4,Math.min(120,Math.min((w-margin*2-RULER-left-inset.right)/Math.max(1,x1-x0),(h-margin*2-RULER-inset.top-inset.bottom)/Math.max(1,y1-y0))));
+  vp.cx-=(RULER+left-inset.right)/2/vp.s;
   vp.cy-=(RULER+inset.top-inset.bottom)/2/vp.s;
   apply();
   }
@@ -92,7 +92,7 @@ export function createCanvas(/** @type {any} */ api){
   // itself instead, so both gaps match; the scale and the horizontal centring are left as fitRect set them.
   function fitHoop(){const hs=hoopSize(api.doc()),{w,h}=size(),margin=currentFitMargin(Math.min(w,h)),f=4;
     const x0=-hs.w/2-f,y0=-hs.h/2-f,x1=hs.w/2+f,y1=hs.h/2+f;
-    fitRect(x0,y0,x1,y1,margin);
+    fitRect(x0,y0,x1,y1,margin,{top:0,right:0,bottom:0,...railInset(container)});
     if(margin!==PHONE_FIT_MARGIN||h>=w)return;
     // Landscape phone: centre the hoop on the canvas so the top and bottom gaps match. The top ruler takes RULER px, so
     // the hoop must not rise into it: the scale is reduced to fit between the ruler and the bottom edge, and the hoop's
@@ -103,8 +103,8 @@ export function createCanvas(/** @type {any} */ api){
     d.objects.filter((/** @type {any} */ o)=>ids.includes(o.id)):d.objects,bs=list.filter((/** @type {any} */ o)=>o.visible!==false).map(objectBounds);
   return ids&&bs.length?union(bs):union([[-hs.w/2,-hs.h/2,hs.w/2,hs.h/2],...bs]);
   }
-  function fitAll(){const b=contentBounds();fitRect(b[0],b[1],b[2],b[3],56);}
-  function fitSelection(){const ids=api.ids();if(!ids.length)return fitAll();{const b=contentBounds(ids);fitRect(b[0],b[1],b[2],b[3],90,toolbarInset(container));}}function revealSelection(){const ids=api.ids();if(!ids.length)return;const b=contentBounds(ids),ins=toolbarInset(container),{w,h}=size(),[x0,y0]=toScreen(b[0],b[1]),[x1,y1]=toScreen(b[2],b[3]);if(!(x0<RULER||y0<RULER+ins.top||x1>w-ins.right||y1>h-ins.bottom))return;fitRect(b[0],b[1],b[2],b[3],90,ins);}
+  function fitAll(){const b=contentBounds();fitRect(b[0],b[1],b[2],b[3],56,railInset(container));}
+  function fitSelection(){const ids=api.ids();if(!ids.length)return fitAll();{const b=contentBounds(ids);fitRect(b[0],b[1],b[2],b[3],90,{...toolbarInset(container),...railInset(container)});}}function revealSelection(){const ids=api.ids();if(!ids.length)return;const b=contentBounds(ids),ins=toolbarInset(container),{w,h}=size(),[x0,y0]=toScreen(b[0],b[1]),[x1,y1]=toScreen(b[2],b[3]);if(!(x0<RULER||y0<RULER+ins.top||x1>w-ins.right||y1>h-ins.bottom))return;fitRect(b[0],b[1],b[2],b[3],90,ins);}
   // Pans, without zooming, so the selection sits in the part of the canvas no sheet or floating bar covers.
   function panToReveal(){const ids=api.ids();if(!ids.length)return;const b=contentBounds(ids),ins=toolbarInset(container),{w,h}=size(),[x0,y0]=toScreen(b[0],b[1]),[x1,y1]=toScreen(b[2],b[3]);
     if(!(x0<RULER||y0<RULER+ins.top||x1>w-ins.right||y1>h-ins.bottom))return;

@@ -154,7 +154,7 @@ export const ES={...ES_ADDITIONS,
   'Separación de filas (mm)','Angle (°)':'Ángulo (°)','Stitch length (mm)':'Largo de puntada (mm)',
 'Needle stagger':'Desfase de agujas','Off':'Desactivado','2 phases':'2 fases','4 phases':'4 fases','8 phases':'8 fases','Underlay':'Base (underlay)',
   'Inset (mm)':'Margen interior (mm)',
-'Auto (by size)':'Auto (según tamaño)','None':'Ninguna','Edge walk':'Recorrido del borde','Tatami (90°)':'Tatami (90°)','Edge walk + tatami':
+'Auto (by size)':'Automática','None':'Ninguna','Edge walk':'Recorrido del borde','Tatami (90°)':'Tatami (90°)','Edge walk + tatami':
   'Recorrido del borde + tatami','Auto (by width)':'Auto (según ancho)','Center run':'Línea central','Zigzag':'Zigzag','Center + zigzag':'Centro + zigzag',
   'Edge walk + zigzag':'Recorrido del borde + zigzag',
 'Border':'Borde','Border thread':'Hilo del borde','Closed shape':'Forma cerrada','Smooth curve':'Curva suave','This object overrides row spacing/angle':
