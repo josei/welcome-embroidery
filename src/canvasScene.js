@@ -12,6 +12,8 @@ import {importMidpoint} from './stitchImport.js';
 const NS='http://www.w3.org/2000/svg';
 const $=(/** @type {string} */ s)=>/** @type {any} */(document.querySelector(s));
 const node=(/** @type {string} */ tag)=>/** @type {any} */(document.createElementNS(NS,tag));
+// How strongly a hidden layer shows on the canvas: visible enough to find and select, clearly not part of the stitches.
+export const HIDDEN_OPACITY='0.3';
 
 // Lettering drawn with a bundled font: filled outlines, satin columns and running lines, one path per primitive.
 function appendTextShapes(/** @type {any} */ group,/** @type {any} */ o){
@@ -161,6 +163,8 @@ export function drawScene(){
    element.setAttribute('stroke-linejoin','round');
    element.style.strokeLinecap='butt';
   }
+  // A hidden layer is left out of the stitches and the export, so the drawing shows it ghosted rather than at full strength.
+  if(o.visible===false){element.setAttribute('opacity',HIDDEN_OPACITY);element.classList.add('hidden-layer');}
   if(o.id===selected)element.classList.add('selected');else if(multi.has(o.id))element.classList.add('multi');
   if(o.border&&o.stitch==='fill'){
    element.setAttribute('stroke',o.borderThread||o.thread);
