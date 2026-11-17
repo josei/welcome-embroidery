@@ -31,6 +31,10 @@ function segDistance(/** @type {any} */ p,/** @type {any} */ a,/** @type {any} *
 return Math.hypot(p[0]-a[0]-dx*t,p[1]-a[1]-dy*t);
 }
 const RULER=18,RULER_FONT=11;
+// The clear gap kept between a selection and a panel edge, in screen px: a finger's width.
+const REVEAL_CLEAR=44;
+// On a touch screen the handle marks are drawn at 6 px, so small lettering stays readable under them; their 44 px hit areas are unchanged.
+const touchPointer=()=>Boolean(globalThis.matchMedia?.('(pointer: coarse)').matches);
 // On a landscape phone the zoom bar sits along the canvas's bottom edge, 8 px in and 44 px tall. Fit hoop keeps this band clear.
 const LANDSCAPE_BAR_RESERVE=52;
 
@@ -117,11 +121,21 @@ export function createCanvas(/** @type {any} */ api){
   }
   function fitAll(){const b=contentBounds();fitRect(b[0],b[1],b[2],b[3],56,railInset(container));}
   function fitSelection(){const ids=api.ids();if(!ids.length)return fitAll();{const b=contentBounds(ids);fitRect(b[0],b[1],b[2],b[3],90,{...toolbarInset(container),...railInset(container)});}}function revealSelection(){const ids=api.ids();if(!ids.length)return;const b=contentBounds(ids),ins=toolbarInset(container),{w,h}=size(),[x0,y0]=toScreen(b[0],b[1]),[x1,y1]=toScreen(b[2],b[3]);if(!(x0<RULER||y0<RULER+ins.top||x1>w-ins.right||y1>h-ins.bottom))return;fitRect(b[0],b[1],b[2],b[3],90,ins);}
-  // Pans, without zooming, so the selection sits in the part of the canvas no sheet or floating bar covers.
+  // Pans, without zooming, so the selection sits in the part of the canvas no sheet or floating bar covers. The selection's
+  // bounds keep REVEAL_CLEAR px from each panel or toolbar edge, a finger's width, so its handles can be reached. The view moves
+  // only as far as needed, so the hoop stays in view as much as the panel allows. A selection larger than the clear area is
+  // centred instead.
   function panToReveal(){const ids=api.ids();if(!ids.length)return;const b=contentBounds(ids),ins=toolbarInset(container),{w,h}=size(),[x0,y0]=toScreen(b[0],b[1]),[x1,y1]=toScreen(b[2],b[3]);
-    if(!(x0<RULER||y0<RULER+ins.top||x1>w-ins.right||y1>h-ins.bottom))return;
-    const tx=(RULER+w-ins.right)/2,ty=(RULER+ins.top+h-ins.bottom)/2;
-    vp.cx+=((x0+x1)/2-tx)/vp.s;vp.cy+=((y0+y1)/2-ty)/vp.s;apply();}
+    const gap=(/** @type {number} */ v)=>v>0?REVEAL_CLEAR:0;
+    const left=RULER,top=RULER+ins.top+gap(ins.top),right=w-ins.right-gap(ins.right),bottom=h-ins.bottom-gap(ins.bottom);
+    const shift=(/** @type {number} */ lo,/** @type {number} */ hi,/** @type {number} */ a,/** @type {number} */ z)=>{
+      if(z-a>hi-lo)return (a+z)/2-(lo+hi)/2;
+      if(z>hi)return z-hi;
+      if(a<lo)return a-lo;
+      return 0;};
+    const dx=shift(left,right,x0,x1),dy=shift(top,bottom,y0,y1);
+    if(!dx&&!dy)return;
+    vp.cx+=dx/vp.s;vp.cy+=dy/vp.s;apply();}
   // The zoom and centre of the view, so a sheet can put them back when it closes.
   function viewport(){return {cx:vp.cx,cy:vp.cy,s:vp.s};}
   function setViewport(/** @type {{cx:number,cy:number,s:number}} */ v){vp.cx=v.cx;vp.cy=v.cy;vp.s=v.s;apply();}
@@ -306,7 +320,7 @@ export function createCanvas(/** @type {any} */ api){
   }
   function refresh(f0=/** @type {any} */(null),note=/** @type {string|null} */(null)){
     drawGuides();overlay.replaceChildren();drawMeasure();drawKnife();if(api.tool()!=='select'||state?.type==='marquee'||state?.type==='nodemarquee')return;
-    const f=f0||frame();if(!f||api.isEditing())return;const k=1/vp.s,hs=4*k,pv=api.pivot?.();
+    const f=f0||frame();if(!f||api.isEditing())return;const k=1/vp.s,hs=(touchPointer()?3:4)*k,pv=api.pivot?.();
     if(pv)overlay.append(el('circle',{class:'pivot-mark',cx:pv[0],cy:pv[1],r:5*k}),
       el('line',{class:'sel-stem',x1:pv[0]-10*k,y1:pv[1],x2:pv[0]+10*k,y2:pv[1]}),el('line',{class:'sel-stem',x1:pv[0],y1:pv[1]-10*k,x2:pv[0],y2:pv[1]+10*k}));
     const corners=[[-.5,-.5],[.5,-.5],[.5,.5],[-.5,.5]].map(([a,b])=>toWorld(f,a*f.W,b*f.H));
