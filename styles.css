@@ -1037,6 +1037,13 @@ body{height:100dvh;min-height:0;overflow:hidden}
 .dialog-actions{display:flex;justify-content:flex-end;align-items:center;gap:8px}.dialog-actions button{white-space:nowrap}
 #exportDialog form>:not(button){grid-column:1/-1}
 #exportDialog select,#exportDialog input:not([type=checkbox]),#exportDialog button{min-height:44px}
+/* On a short window (a landscape phone at 390 px) the Export card is taller than the screen. The fields scroll inside it and the
+   Download row stays pinned at the foot, so the main action is always in view. */
+@media (max-height:500px){
+#exportDialog{box-sizing:border-box;max-height:calc(100dvh - 24px);padding:0;overflow:hidden}
+#exportDialog form{box-sizing:border-box;max-height:calc(100dvh - 24px);overflow-y:auto;overscroll-behavior:contain;padding:28px 36px 0}
+#exportDialog .dialog-actions{position:sticky;bottom:0;z-index:1;margin:0 -36px;padding:12px 36px 28px;background:#fff}
+}
 }
 
 /* Phone and tablet: the font picker's search field and its twelve category chips are 44 px touch targets, like the
@@ -1103,16 +1110,10 @@ body{height:100dvh;min-height:0;overflow:hidden}
 /* The heading row (title and Close) stays at the top of an open phone panel while its contents scroll. */
 .layout>aside.panel.sheet-open>.sheet-head{position:sticky;top:0;z-index:1;background:#fff}
 
-/* A landscape phone (844x390) keeps the zoom bar in the canvas's right-hand column, as a vertical stack of 44 px buttons, not
-   the bottom-left bar. The bar then sits clear of the hoop at the default fit, and in the Stitches view it no longer covers
-   the playback row. The percentage and hand tool stay; the Fit hoop label is an icon, as on a portrait phone. The stitch
-   readout in the playback row takes the width it needs, and the track beside it shrinks. */
+/* A landscape phone (844x390) uses the same zoom bar as the other sizes: one row along the canvas's bottom edge, with the
+   percentage, hand tool and All. Fit hoop leaves that band clear (see LANDSCAPE_BAR_RESERVE in canvas.js), so the bar does not
+   cover the hoop, and the playback readouts keep their width. */
 @media (orientation:landscape) and (max-height:500px) and (max-width:1000px){
-.canvas .zoombar{left:auto;right:8px;top:auto;bottom:8px;flex-direction:column;align-items:center;justify-content:flex-end;gap:6px;width:auto;height:auto;margin:0;padding:0;border:0;border-radius:0;background:none;box-shadow:none}
-.canvas .zoombar>button{width:44px;min-width:44px;height:44px;min-height:44px;padding:0;border:1px solid var(--field-line);border-radius:10px;background:#fff;box-shadow:0 4px 16px #1d292514;font-size:var(--fs-caption);color:#53635b}
-.canvas .zoombar .sep,.canvas .zoombar #zoomAll{display:none}
-.canvas .zoombar .zoom-text{font-size:0}
-.canvas .zoombar .zoom-fit-icon{display:inline-block;width:20px;height:20px}
 .layout main:not(.design-view) .playback-bar .playback-time{width:max-content;min-width:0;flex:none;overflow:visible}
 .layout main:not(.design-view) .playback-bar .playback-time span{overflow:visible;text-overflow:clip;white-space:nowrap}
 }
@@ -1232,3 +1233,9 @@ label:has(> input[type=checkbox]){display:flex;align-items:center;gap:8px}
 .layout{grid-template-columns:300px minmax(0,1fr) 248px}
 .layout:has(>.panel.inspector-collapsed:last-child){grid-template-columns:300px minmax(0,1fr)}
 }
+
+/* Phone and tablet: the status footer keeps 8 px under the Messages pill, so the pill never sits on the edge of the screen. A
+   landscape phone's footer is 98 px tall to hold that margin beside the playback row and the status line. */
+@media (max-width:1024px){.layout main:not(.design-view)>footer{padding-bottom:8px}}
+@media (min-width:601px) and (max-width:1024px) and (orientation:portrait){.layout main:not(.design-view)>footer{height:115px;min-height:115px}}
+@media (max-width:1024px) and (orientation:landscape) and (max-height:500px){.layout main:not(.design-view)>footer{height:98px;min-height:98px}}

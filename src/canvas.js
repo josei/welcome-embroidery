@@ -15,7 +15,7 @@ import {clampResizeScale} from './resizeLimit.js';
 import {multiSelectState} from './multiSelectState.js';
 import {deletingGuideState,handModeState,panningState} from './canvasModeState.js';
 import {formatNumber} from './decimalText.js';
-import {currentFitMargin,PHONE_FIT_MARGIN} from './fitMargin.js';
+import {currentFitMargin,isPhoneFitLayout,PHONE_FIT_MARGIN} from './fitMargin.js';
 
 const SVG='http://www.w3.org/2000/svg',PX_PER_MM=96/25.4;
 const el=(/** @type {any} */ tag,attrs={})=>{const n=document.createElementNS(SVG,tag);for(const [k,v] of Object.entries(attrs))n.setAttribute(k,v);return n;};
@@ -31,6 +31,8 @@ function segDistance(/** @type {any} */ p,/** @type {any} */ a,/** @type {any} *
 return Math.hypot(p[0]-a[0]-dx*t,p[1]-a[1]-dy*t);
 }
 const RULER=18,RULER_FONT=11;
+// On a landscape phone the zoom bar sits along the canvas's bottom edge, 8 px in and 44 px tall. Fit hoop keeps this band clear.
+const LANDSCAPE_BAR_RESERVE=52;
 
 export function createCanvas(/** @type {any} */ api){
   const {svg,container,overlay}=api;
@@ -83,22 +85,27 @@ export function createCanvas(/** @type {any} */ api){
   apply();
   }
   // Whether the hoop's outer frame lies wholly inside the drawing area at the current zoom.
-  function hoopInArea(){const hs=hoopSize(api.doc()),a=drawArea(),[x0,y0]=toScreen(-hs.w/2-4,-hs.h/2-4),[x1,y1]=toScreen(hs.w/2+4,hs.h/2+4);
-    return x0>=a.x-.5&&y0>=a.y-.5&&x1<=a.x+a.w+.5&&y1<=a.y+a.h+.5;}
+  // reserve is a band along the bottom of the area that the hoop must also stay clear of (the landscape phone's zoom bar).
+  function hoopInBox(/** @type {any} */ a,reserve=0){const hs=hoopSize(api.doc()),sc=(/** @type {number} */ x,/** @type {number} */ y)=>[(x-vp.cx)*vp.s+a.x+a.w/2,(y-vp.cy)*vp.s+a.y+a.h/2],[x0,y0]=sc(-hs.w/2-4,-hs.h/2-4),[x1,y1]=sc(hs.w/2+4,hs.h/2+4);
+    return x0>=a.x-.5&&y0>=a.y-.5&&x1<=a.x+a.w+.5&&y1<=a.y+a.h-reserve+.5;}
+  function hoopInArea(reserve=0){return hoopInBox(drawArea(),reserve);}
+  // The band the zoom bar takes along the bottom of a landscape phone's canvas. Fit hoop keeps it clear; no other window has one.
+  function zoomBarReserve(){const {w,h}=size();return h<w&&isPhoneFitLayout()?LANDSCAPE_BAR_RESERVE:0;}
   // The fit covers the hoop's outer frame, which is drawn 4 mm beyond the ring on each side. The margin depends on the
   // pointer and layout (see fitMargin.js): a touch tablet keeps the full margin so the whole hoop shows.
   // On a phone in landscape the height is what limits the fit. fitRect shifts the view down by the top ruler's band, which
-  // leaves the hoop 22 px from the top of the canvas and 4 px from the bottom. Here the hoop is centred on the canvas
-  // itself instead, so both gaps match; the scale and the horizontal centring are left as fitRect set them.
+  // leaves the hoop 22 px from the top of the canvas and 4 px from the bottom, and the zoom bar would cover that bottom
+  // edge. Here the hoop is centred between the ruler and the zoom bar's band instead; the horizontal centring is left as
+  // fitRect set it.
   function fitHoop(){const hs=hoopSize(api.doc()),{w,h}=size(),margin=currentFitMargin(Math.min(w,h)),f=4;
     const x0=-hs.w/2-f,y0=-hs.h/2-f,x1=hs.w/2+f,y1=hs.h/2+f;
     fitRect(x0,y0,x1,y1,margin,{top:0,right:0,bottom:0,...railInset(container)});
     if(margin!==PHONE_FIT_MARGIN||h>=w)return;
-    // Landscape phone: centre the hoop on the canvas so the top and bottom gaps match. The top ruler takes RULER px, so
-    // the hoop must not rise into it: the scale is reduced to fit between the ruler and the bottom edge, and the hoop's
-    // centre keeps its place on screen across the change.
-    const s0=vp.s,xc=(x0+x1)/2,cx0=vp.cx,sFit=Math.min(s0,(h-2*RULER)/Math.max(1,y1-y0));
-    vp.cx=xc-(xc-cx0)*s0/sFit;vp.s=sFit;vp.cy=(y0+y1)/2;apply();}
+    // Landscape phone: the top ruler takes RULER px, so the hoop must not rise into it. The scale is reduced to fit between
+    // the ruler and the bottom edge, less the zoom bar's band, and the hoop's centre keeps its place on screen across the change.
+    const reserve=zoomBarReserve(),yc=(y0+y1)/2;
+    const s0=vp.s,xc=(x0+x1)/2,cx0=vp.cx,sFit=Math.min(s0,(h-2*RULER-reserve)/Math.max(1,y1-y0));
+    vp.cx=xc-(xc-cx0)*s0/sFit;vp.s=sFit;vp.cy=yc+reserve/(2*sFit);apply();}
   function contentBounds(ids=/** @type {any} */(undefined)){const d=api.doc(),hs=hoopSize(d),list=ids?
     d.objects.filter((/** @type {any} */ o)=>ids.includes(o.id)):d.objects,bs=list.filter((/** @type {any} */ o)=>o.visible!==false).map(objectBounds);
   return ids&&bs.length?union(bs):union([[-hs.w/2,-hs.h/2,hs.w/2,hs.h/2],...bs]);
@@ -138,13 +145,16 @@ export function createCanvas(/** @type {any} */ api){
   let drawAreaBox=drawArea(),windowBox={w:innerWidth,h:innerHeight};
   new ResizeObserver(()=>{const next=drawArea();
     const measured=drawAreaBox.w>1&&drawAreaBox.h>1;
+    // Whether the hoop lay wholly in the old drawing area. A shrink that pushes it into the zoom bar's band (the Stitches footer
+    // appearing) refits it, so the hoop is never left under the bar.
+    const reserve=zoomBarReserve(),hoopWasIn=measured&&hoopInBox(drawAreaBox,reserve);
     const resized=next.w!==drawAreaBox.w||next.h!==drawAreaBox.h;
     const originHeld=Math.abs(next.x-drawAreaBox.x)<.5&&Math.abs(next.y-drawAreaBox.y)<.5;
     const windowHeld=innerWidth===windowBox.w&&innerHeight===windowBox.h;
     if(measured&&resized&&originHeld&&windowHeld){vp.cx+=(next.w-drawAreaBox.w)/(2*vp.s);vp.cy+=(next.h-drawAreaBox.h)/(2*vp.s);}
     drawAreaBox=next;windowBox={w:innerWidth,h:innerHeight};
     // A rotation keeps the zoom, so a hoop fitted to the old shape can be taller than the new area: fit it again then.
-    if(measured&&resized&&!windowHeld&&!hoopInArea())fitHoop();else apply();
+    if(measured&&resized&&(!windowHeld||hoopWasIn)&&!hoopInArea(reserve))fitHoop();else apply();
   }).observe(container);
   document.addEventListener('keydown',e=>
     {if(e.code==='Space'&&!inField(e)){spaceDown=true;panningState.set(true);if(e.target===document.body)e.preventDefault();}});
