@@ -149,7 +149,7 @@ nav .icon-button:first-of-type{margin-left:auto}
 
 #alongRow[hidden]{display:none!important}
 
-.tool-grid{display:grid;grid-template-columns:1fr auto;gap:2px 8px;align-items:end}.tool-grid label{margin:6px 0}.tool-grid input,.tool-grid select{width:90px!important}.tool-grid button{margin-bottom:6px}.btn-row{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}.btn-row button,.tool-grid button{font-size:var(--fs-caption);padding:5px 8px}#fillReset[hidden],#arrAngleRow[hidden]{display:none!important}#arrAngleRow,#blendAngleRow{grid-column:1/-1}
+.tool-grid{display:grid;grid-template-columns:1fr auto;gap:2px 8px;align-items:end}.tool-grid label{margin:6px 0}.tool-grid input:not(.switch-input),.tool-grid select{width:90px!important}.tool-grid button{margin-bottom:6px}.btn-row{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}.btn-row button,.tool-grid button{font-size:var(--fs-caption);padding:5px 8px}#fillReset[hidden],#arrAngleRow[hidden]{display:none!important}#arrAngleRow,#blendAngleRow{grid-column:1/-1}
 
 /* Font picker and text options */
 .sr-only{position:absolute!important;width:1px!important;height:1px!important;margin:-1px;padding:0;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0;opacity:0}
@@ -195,7 +195,7 @@ label[hidden],button[hidden],.sel-hint[hidden]{display:none!important}
 
 #count.error{color:var(--warn)}.issues-btn{border:1px solid var(--warn-line);background:var(--warn-soft);color:var(--warn);font-size:var(--fs-caption);padding:3px 9px;border-radius:99px;cursor:pointer}#stitches.stale{opacity:.35;transition:opacity .15s}
 
-.tool-grid label{min-width:0}.tool-grid input,.tool-grid select{width:100px!important}.tool-grid{grid-template-columns:minmax(0,1fr) auto}
+.tool-grid label{min-width:0}.tool-grid input:not(.switch-input),.tool-grid select{width:100px!important}.tool-grid{grid-template-columns:minmax(0,1fr) auto}
 
 /* rulers, guides, smart guides, on-canvas text editor */
 #rulerTop,#rulerLeft{position:absolute;z-index:4;display:block;cursor:crosshair;touch-action:none}#rulerTop{top:0;left:0;height:18px}#rulerLeft{top:0;left:0;width:18px}.ruler-corner{position:absolute;z-index:5;left:0;top:0;width:18px;height:18px;background:#fbfbf9;border-right:1px solid #dfe3dd;border-bottom:1px solid #dfe3dd}
@@ -222,7 +222,7 @@ label[hidden],button[hidden],.sel-hint[hidden]{display:none!important}
 .icon-check:checked{background:#e3f1ec;border-color:var(--teal)}.icon-check:checked::before{background:var(--teal)}.icon-check:hover{border-color:#7b9a89}.icon-check:focus-visible{outline:2px solid var(--teal);outline-offset:1px}
 .switch-row{display:flex;align-items:center;justify-content:space-between;gap:10px;cursor:pointer}
 .switch-control{display:inline-flex;align-items:center;gap:6px;flex:none}
-.switch-input{appearance:none;-webkit-appearance:none;position:relative;width:30px;height:16px;margin:0;border-radius:8px;background:#c9d0cb;cursor:pointer;transition:background .15s}
+.switch-input{appearance:none;-webkit-appearance:none;position:relative;width:30px;height:16px;margin:0;flex:none;border-radius:8px;background:#c9d0cb;cursor:pointer;transition:background .15s}
 .switch-input::before{content:"";position:absolute;top:2px;left:2px;width:12px;height:12px;border-radius:50%;background:#fff;box-shadow:0 1px 2px #0003;transition:transform .15s}
 .switch-input:checked{background:var(--teal)}.switch-input:checked::before{transform:translateX(14px)}
 .switch-input:hover{filter:brightness(.95)}.switch-input:focus-visible{outline:2px solid var(--teal);outline-offset:2px}
@@ -628,7 +628,7 @@ html[data-input="touch"] button:focus-visible,html[data-input="touch"] #art:focu
 /* Duplicate, Delete, New and Import are icon-only at every width; their names stay on the buttons for screen readers and tooltips. */
 .top #duplicate,.top #remove,.top #new,.top #importMachine{width:36px;min-width:36px;padding:0}.top #duplicate .icon-label,.top #remove .icon-label,.top #new .icon-label,.top #importMachine .icon-label{display:none}
 /* Checkboxes show a 24px box, the WCAG 2.5.8 minimum for the visible control, not just its label row. Icon checkboxes keep their own size. */
-input[type=checkbox]:not(.icon-check){width:24px;height:24px;min-width:24px;margin:0;flex:none}
+input[type=checkbox]:not(.icon-check):not(.switch-input){width:24px;height:24px;min-width:24px;margin:0;flex:none}
 /* A tick takes the product's green, the same accent a selected segmented control uses, rather than the browser's blue. */
 input[type=checkbox]{accent-color:var(--teal)}
 /* On a landscape phone (height 500 px or less, touch) the tool column is icons only. The grid chip keeps its drawn grid
