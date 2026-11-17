@@ -1759,7 +1759,7 @@ test('print template: a check line that measures 100 mm on a 110 mm hoop, and th
 });
 
 test('organize fonts lists bundled fonts used by lettering, read-only, and leaves custom fonts to customFontUsage',()=>{
- const d=blank();applyOperations(d,[{op:'add_text',id:'t1',text:'ANA',x:0,y:0,height:8,font:'inkstitch/allegria20',name:'Name one'},{op:'add_text',id:'t2',text:'BEN',x:0,y:10,height:8,font:'inkstitch/allegria20'},{op:'add_text',id:'t3',text:'CAT',x:0,y:20,height:8,font:'inkstitch/abecedaire'}]);
+ const d=blank();applyOperations(d,[{op:'add_text',id:'t1',text:'ANA',x:0,y:0,height:8,font:'inkstitch/allegria20'},{op:'add_text',id:'t2',text:'BEN',x:0,y:10,height:8,font:'inkstitch/allegria20'},{op:'add_text',id:'t3',text:'CAT',x:0,y:20,height:8,font:'inkstitch/abecedaire'}]);
  assert.deepEqual(bundledFontUsage(d),[{id:'inkstitch/allegria20',uses:['Text: ANA','Text: BEN']},{id:'inkstitch/abecedaire',uses:['Text: CAT']}],'two bundled fonts, with the lettering that uses each');
  assert.deepEqual(customFontUsage(d),[],'no custom fonts are listed here');
 });

@@ -65,7 +65,7 @@ function applyOperation(doc,op){
       Object.fromEntries([...TEXT_OPTION_KEYS,'stitchLength','stagger','underlayType','underlayInset','underlaySpacing','angle','spacing'].filter(k=>op[k]!==
       undefined).map(k=>[k,op[k]]));
       doc.objects.push(
-      {id:op.id||crypto.randomUUID(),name:`Text: ${String(op.text).split('\n')[0]}`,kind:'text',text:op.text,x:op.x,y:op.y,w:op.width||
+      {id:op.id||crypto.randomUUID(),name:typeof op.name==='string'&&op.name?op.name:`Text: ${String(op.text).split('\n')[0]}`,kind:'text',text:op.text,x:op.x,y:op.y,w:op.width||
       measureText(op.text,op.font||'welcome-mono/1',h,opts),h,thread:op.thread||'#527461',stitch:op.stitch||(rf?.kind==='outline'?'fill':'run'),font:op.font||
       'welcome-mono/1',...opts});}
     else if(op.op==='clear'){doc.objects=[];}

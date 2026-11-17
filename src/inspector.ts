@@ -163,7 +163,9 @@ export function syncInspector({plan, compileError, tips}: {plan: PlanInfo | null
         ' · ' +
         (lang === 'es' && sewTime(plan) === '1 min' ? t('about 1 min to sew') : t('about {t} to sew', {t: sewTime(plan)})) +
         (plan.errors.length ? ' · ' + plan.errors.join(' ') : '')
-      : 'No generated stitches.',
+      : compileError
+        ? t('⚠ Can\'t compile: {e}', {e: t(compileError)})
+        : documentNow().doc.objects.length ? 'Compiling…' : 'No generated stitches.',
   });
 }
 
