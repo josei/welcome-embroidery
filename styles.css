@@ -1239,3 +1239,25 @@ label:has(> input[type=checkbox]){display:flex;align-items:center;gap:8px}
 @media (max-width:1024px){.layout main:not(.design-view)>footer{padding-bottom:8px}}
 @media (min-width:601px) and (max-width:1024px) and (orientation:portrait){.layout main:not(.design-view)>footer{height:115px;min-height:115px}}
 @media (max-width:1024px) and (orientation:landscape) and (max-height:500px){.layout main:not(.design-view)>footer{height:98px;min-height:98px}}
+
+/* A layer name runs to two lines at most and then ends in an ellipsis, at every size, so a long or translated name never makes a
+   row three or four lines high. The full name is still in the row's accessible name and its title on hover. */
+.object-row .row-text .row-name,.group-row .row-text .row-name{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;overflow-wrap:break-word}
+
+/* On a mouse desktop the Hide and Lock buttons float over a layer's right end instead of taking a column of their own, so the name
+   keeps the whole width of the Layers column. A layer whose Hide or Lock is on keeps that end clear for the icon it shows. The
+   buttons take the background of the row's state so the icon reads cleanly over the name's end. While a row is hovered or focused,
+   its name wraps before the buttons, so the ellipsis of a long name stays visible; the name's box does not move. A group's caret is
+   not floated. */
+@media (min-width:1101px) and (hover:hover){
+.object-line:not(.group-line){display:block}
+.object-line:not(.group-line) .row-btn{position:absolute;top:50%;translate:0 -50%;background:#fff}
+.object-line:not(.group-line) .row-eye{right:30px}
+.object-line:not(.group-line) .row-lock{right:4px}
+.object-line:not(.group-line):hover .row-btn,.object-line:not(.group-line):focus-within .row-btn{background:#f1f5f1}
+.object-line:has(>.object-row.selected) .row-btn{background:var(--teal-soft)}
+.object-line:not(.group-line):hover .row-btn:hover{background:#dfe9e3}
+.object-line:not(.group-line):hover>.object-row:not(.is-hidden):not(.is-locked) .row-name,.object-line:not(.group-line):focus-within>.object-row:not(.is-hidden):not(.is-locked) .row-name{padding-right:58px}
+.object-line:has(>.object-row.is-hidden) .row-eye{opacity:1}
+.object-line:has(>.object-row.is-hidden)>.object-row,.object-line:has(>.object-row.is-locked)>.object-row{padding-right:58px}
+}
