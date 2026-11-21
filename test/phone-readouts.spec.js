@@ -38,8 +38,10 @@ test('phone readouts are not clipped at 390x844 with 466 stitches, in English an
   const thread=await page.evaluate(()=>{
    const e=document.getElementById('playbackSummary');const r=document.createRange();r.selectNodeContents(e);
    const q=[...r.getClientRects()].filter(x=>x.width>0&&x.height>0);
-   const m=e.textContent.match(/[\d.]+ m (de hilo|thread)/);
-   return {text:e.textContent,m:m?m[0]:null,rects:q.map(x=>({left:x.left,right:x.right}))};
+   // On a phone the summary is icons and numbers; the thread length's sentence is its figure's accessible name.
+   const text=[...e.querySelectorAll('[role=img]')].map(x=>x.getAttribute('aria-label')).join(' ')||e.textContent;
+   const m=text.match(/[\d.]+ m (de hilo|thread)/);
+   return {text,m:m?m[0]:null,rects:q.map(x=>({left:x.left,right:x.right}))};
   });
   expect(thread.m,`thread length in summary (${lang}): "${thread.text}"`).not.toBeNull();
   for(const q of thread.rects) expect(q.left>=0&&q.right<=390,`summary text inside the viewport (${lang})`).toBe(true);

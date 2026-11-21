@@ -20,7 +20,7 @@ async function openDesign(page,width,height){
 // Visible elements whose text names a stitch count (a number next to the word "stitch", in either language).
 const countLabels=page=>page.evaluate(()=>[...document.querySelectorAll('#count,#playbackStitches,#playbackProgress,#playbackTime,#playbackSummary')]
  .filter(e=>{const cs=getComputedStyle(e);const r=e.getBoundingClientRect();return cs.display!=='none'&&r.width>0&&r.height>0;})
- .map(e=>e.textContent.trim()).filter(t=>/\d[\d,]*\s+(stitch|puntada)|(stitch|puntada)\w*\s+\d|\bof\s+[\d,]+/i.test(t)));
+ .map(e=>(e.querySelector('[role=img]')?.getAttribute('aria-label')||e.textContent).trim()).filter(t=>/\d[\d,]*\s+(stitch|puntada)|(stitch|puntada)\w*\s+\d|\bof\s+[\d,]+/i.test(t)));
 
 for(const [w,h] of SIZES) for(const view of ['stitches','preview']) {
  test(`the stitch count is named once in the ${view} view (${w}x${h})`,async({page})=>{
@@ -30,7 +30,7 @@ for(const [w,h] of SIZES) for(const view of ['stitches','preview']) {
   }else{
    await page.locator('#phoneMenu').click();await page.locator(`#menuView-${view}`).click();
   }
-  await expect(page.locator('#playbackStitches')).toContainText('Stitch');
+  await expect(page.locator('#playbackStitches')).toContainText(/\d/);
   const labels=await countLabels(page);
   expect(labels,'elements naming the stitch count').toHaveLength(1);
  });

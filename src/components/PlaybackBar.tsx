@@ -5,6 +5,8 @@ import {threadName} from '../threadPalette.js';
 import {playbackActions, playbackState} from '../playbackState.js';
 import {formatCount, formatNumber} from '../decimalText.js';
 import {groupColourMarkers} from '../timelineMarkers.js';
+import {useCompactLayout} from '../compactLayout';
+import {Figure} from './Figure';
 // The simulation bar below the canvas, rendered by React: play and restart, the time and stitch count, the thread blocks as a
 // track with the seek position on it, and the summary. Ids match the markup it replaced, because app.js and the tests use them.
 // A thread's name for its marker. A colour with no palette name shows as its hex code, which a reader cannot use, so it is called
@@ -34,6 +36,16 @@ export function PlaybackBar() {
  const changesText = p.colourChanges === 1 ? t('1 color change') : t('{n} color changes', {n: p.colourChanges});
  const trimsText = p.trims === 1 ? t('1 trim') : t('{n} trims', {n: p.trims});
  const metresText = t('{m} m thread', {m: formatNumber(p.metres, lang, 1)});
+ // On a phone or tablet the readouts are icons and numbers; each keeps its sentence as its name and tooltip.
+ const compact = useCompactLayout();
+ const sewnFigure = `${formatCount(p.sewn, lang)} / ${formatCount(p.count, lang)}`;
+ const summary = compact ? (
+  <>
+   <Figure value={String(p.colourChanges)} label={changesText} />
+   <Figure icon="i-cut" value={String(p.trims)} label={trimsText} />
+   <Figure icon="i-measure" value={formatNumber(p.metres, lang, 1)} label={metresText} />
+  </>
+ ) : `${changesText} · ${trimsText} · ${metresText}`;
  return (
   <div className="playback-bar">
    <button type="button" id="resetPlayback" className="icon-button playback-control" aria-label={t('Restart stitch simulation')} title={t(
@@ -47,7 +59,11 @@ export function PlaybackBar() {
    </button>
    <div className="playback-time">
     <span id="playbackTime">{`${blockTimeLabel(p.sewnSeconds)} / ${blockTimeLabel(p.totalSeconds)}`}</span>
-    <span id="playbackStitches">{t('Stitch {n} of {m}', {n: formatCount(p.sewn, lang), m: formatCount(p.count, lang)})}</span>
+    {compact ? (
+     <span id="playbackStitches"><Figure icon="i-run" value={sewnFigure} label={t('Stitch {n} of {m}', {n: formatCount(p.sewn, lang), m: formatCount(p.count, lang)})} /></span>
+    ) : (
+     <span id="playbackStitches">{t('Stitch {n} of {m}', {n: formatCount(p.sewn, lang), m: formatCount(p.count, lang)})}</span>
+    )}
    </div>
    <div className="playback-track">
     <div className="playback-slider" ref={sliderRef}>
@@ -90,7 +106,7 @@ export function PlaybackBar() {
      onChange={() => undefined}
     />
     </div>
-    <span id="playbackSummary" className="playback-summary">{p.hasPlan ? `${changesText} · ${trimsText} · ${metresText}` : ''}</span>
+    <span id="playbackSummary" className={compact ? 'playback-summary playback-figures' : 'playback-summary'}>{p.hasPlan ? summary : ''}</span>
    </div>
   </div>
  );

@@ -28,7 +28,8 @@ test('the Spanish status line is not truncated on landscape, tablet and phone po
    await page.waitForTimeout(300);
    const box=await page.evaluate(()=>{
     const e=document.getElementById('count');const cs=getComputedStyle(e);
-    return {text:e.textContent,scrollWidth:e.scrollWidth,clientWidth:e.clientWidth,overflow:cs.textOverflow,rect:e.getBoundingClientRect().toJSON()};
+    // On a phone or tablet the count is an icon and its number; the full sentence is the figure's accessible name.
+    return {text:e.querySelector('[role=img]')?.getAttribute('aria-label')||e.textContent,scrollWidth:e.scrollWidth,clientWidth:e.clientWidth,overflow:cs.textOverflow,rect:e.getBoundingClientRect().toJSON()};
    });
    const label=`${vp.name} ${lang}: "${box.text}"`;
    console.log('MEASURE',label,JSON.stringify({sw:box.scrollWidth,cw:box.clientWidth,ov:box.overflow,rect:box.rect}));

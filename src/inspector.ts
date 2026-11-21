@@ -139,7 +139,7 @@ export function syncInspector({plan, compileError, tips}: {plan: PlanInfo | null
       : plan.errors.length
         ? designView ? `${countLabel(plan, formatCount(plan.count, lang))} · ${plan.errors[0]}` : plan.errors[0]
         : designView ? `${countLabel(plan, formatCount(plan.count, lang))} · ${t('Ready to sew')}` : null;
-  if (countText !== null) setStatus({count: countText});
+  if (countText !== null) setStatus({count: countText, countFigure: designView && plan && !compileError && !plan.errors.length ? {text: countText, value: formatCount(plan.count, lang)} : undefined});
   setStatus({countError: Boolean(compileError) || Boolean(plan?.errors.length)});
   const errs = plan?.issues || [];
   setStatus({

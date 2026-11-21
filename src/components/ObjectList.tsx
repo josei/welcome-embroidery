@@ -12,6 +12,8 @@ import {lang, t} from '../i18n.js';
 import {selectionChange} from '../objectListSelection.js';
 import type {Click} from '../objectListSelection.js';
 import {formatCount} from '../decimalText.js';
+import {useCompactLayout} from '../compactLayout';
+import {Figure} from './Figure';
 // The object list in sewing order, rendered by React. It is a listbox: each row is an option that a click, or Enter or Space,
 // selects (Shift selects a range from the anchor, Ctrl or Cmd adds or removes one row). Hide and Lock are their own buttons beside each row, not inside it. Groups collapse,
 // a double click renames, and rows drag to reorder. Ids and classes match the markup it replaced, because the styles and tests use them.
@@ -81,6 +83,7 @@ export function ObjectListHead() {
  const objectsText = n === 1 ? t('1 object') : t('{n} objects', {n});
  const colours = totals?.colours ?? 0;
  const coloursText = colours === 1 ? t('1 color used') : t('{m} colors used', {m: colours});
+ const compact = useCompactLayout();
  const open = useSyncExternalStore(inspectorOpenState.subscribe, inspectorOpenState.get);
  // At the stacked widths the inspector sits below the canvas, so this button is the way up to it; it folds it away again.
  // Opening scrolls the inspector into view, since it starts below the fold. (Phones use the dock's Properties button instead.)
@@ -98,7 +101,14 @@ export function ObjectListHead() {
  return (
   <div className="layers-head">
    <h2 className="section-heading sheet-title" tabIndex={-1}>{t('Layers')}</h2>
-   <span className="layers-count">{objectsText}{totals ? <><br />{coloursText}</> : null}</span>
+   {compact ? (
+    <span className="layers-count">
+     <Figure icon="i-layers" value={String(n)} label={objectsText} />
+     {totals ? <Figure value={String(colours)} label={coloursText} /> : null}
+    </span>
+   ) : (
+    <span className="layers-count">{objectsText}{totals ? <><br />{coloursText}</> : null}</span>
+   )}
    <button type="button" className="inspector-toggle" aria-expanded={open} aria-pressed={open} aria-controls="inspector" title={t('Properties')} aria-label={t('Properties')} onClick={toggle}>
     <svg className="icon" aria-hidden="true" focusable="false"><use href="#i-sliders" /></svg>
    </button>

@@ -67,7 +67,8 @@ for(const lang of ['en','es']){
 
  test(`the stitch label is read whole (${where})`,async({page})=>{
   await openStitches(page,lang);
-  const label=await page.locator('#playbackStitches').evaluate(e=>({text:e.textContent.trim(),scrollWidth:e.scrollWidth,clientWidth:e.clientWidth}));
+  // On a tablet the figure shows an icon and the number; the sentence is its accessible name, so that is what is read whole.
+  const label=await page.locator('#playbackStitches').evaluate(e=>({text:e.querySelector('[role=img]')?.getAttribute('aria-label')??e.textContent.trim(),scrollWidth:e.scrollWidth,clientWidth:e.clientWidth}));
   expect(label.text.length,'a long label is under test').toBeGreaterThan(18);
   expect(label.text.match(/2[.,]687/g),'the label names the full stitch count twice').toHaveLength(2);
   expect(label.scrollWidth,`"${label.text}" is cut off`).toBeLessThanOrEqual(label.clientWidth+0.5);

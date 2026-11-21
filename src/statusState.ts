@@ -6,6 +6,8 @@ import {lang} from './i18n.js';
 export interface StatusRun {
   cursor: string;
   count: string;
+  /** The count as an icon and its number, set with the same text as `count`; the status run shows it on phones and tablets. */
+  countFigure?: {text: string; value: string};
   countError: boolean;
   issuesHidden: boolean;
   issuesText: string;

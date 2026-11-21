@@ -1121,6 +1121,9 @@ body{height:100dvh;min-height:0;overflow:hidden}
 #previewView{gap:2px}
 #previewView button{min-height:44px;min-width:44px;padding:0 12px}
 #previewPull label{display:flex;align-items:center;gap:8px;min-height:44px}
+/* The compact pull card keeps a 96 px minimum width: at its bare 64 px, Chromium left the bottom of the 3D view unpainted. */
+#previewPull{min-width:96px}
+#previewPull .pull-switch{min-width:44px;justify-content:center}
 .canvas #previewPull{top:72px}
 }
 /* A tablet keeps the 2D / Stitches / 3D switch in the canvas's top-right corner, where the wider preset row would run
@@ -1351,3 +1354,14 @@ html[lang="es"] .layout main>.tool-rail .rail-label{font-size:10px;letter-spacin
 /* Layer rows in the Layers list keep the type word and the stitch count on one line at every width; the count stays whole. */
 .object-row .row-tag{display:flex;min-width:0;white-space:nowrap}
 .object-row .row-sep{white-space:pre}
+
+/* Phone and tablet readouts: an icon from the desktop set (or a dot) and its number, in place of a sentence. The sentence is
+   the figure's accessible name and tooltip. */
+.figure{display:inline-flex;align-items:center;gap:4px;white-space:nowrap;font-variant-numeric:tabular-nums}
+.figure .icon{width:16px;height:16px;flex:none}
+.figure-dot{display:inline-block;width:10px;height:10px;border-radius:50%;border:2px solid currentColor;flex:none}
+.layers-count .figure{margin-right:10px}
+.layers-count{display:inline-flex;align-items:center}
+.preview-hint-icon{display:flex;align-items:center;justify-content:center;width:30px;height:24px}
+.preview-hint-icon .icon{width:16px;height:16px}
+.layout main .playback-bar .playback-summary.playback-figures{display:flex;align-items:center;gap:10px;min-width:0;overflow:hidden;white-space:nowrap}
