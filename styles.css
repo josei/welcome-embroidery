@@ -1111,7 +1111,7 @@ body{height:100dvh;min-height:0;overflow:hidden}
 }
 /* A tablet keeps the 2D / Stitches / 3D switch in the canvas's top-right corner, where the wider preset row would run
    under it. The preset row starts below the switch there, and the pull panel below the presets. */
-@media (min-width:601px) and (max-width:1024px) and (orientation:portrait){
+@media (min-width:601px) and (max-width:1024px) and (min-height:501px){
 #previewView{top:68px}
 .canvas #previewPull{top:128px}
 }

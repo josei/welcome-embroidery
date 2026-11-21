@@ -97,6 +97,34 @@ for(const lang of ['en','es']){
   }
  });
 
+ test(`1024x768 ${lang}: the camera presets sit below the switch and every label is whole`,async({page})=>{
+  await goto(page,1024,768,lang);
+  await open3d(page);
+  const viewSwitch=await box(page,'.canvas-views');
+  const canvas=await box(page,'.canvas');
+  const presets=await presetBoxes(page);
+  expect(presets.map(p=>p.name),'the camera presets are listed in order').toEqual(PRESETS[lang]);
+  for(const preset of presets){
+   expect(intersects(preset,viewSwitch),`${preset.name} overlaps the view switch`).toBe(false);
+   expect(inside(preset,canvas),`${preset.name} stays inside the canvas`).toBe(true);
+  }
+  const labels=await page.locator('#previewView button').evaluateAll(bs=>bs.map(b=>({
+   name:b.textContent.trim(),clipped:b.scrollWidth>b.clientWidth+0.5,
+  })));
+  for(const label of labels) expect(label.clipped,`${label.name} is cut off`).toBe(false);
+  const hits=await page.evaluate(()=>[...document.querySelectorAll('#previewView button')].map(b=>{
+   const r=b.getBoundingClientRect(),el=document.elementFromPoint(r.left+r.width/2,r.top+r.height/2);
+   return {name:b.textContent.trim(),own:el===b||b.contains(el),hit:el?el.textContent.trim():'none'};
+  }));
+  for(const hit of hits) expect(hit.own,`the centre of ${hit.name} hits ${hit.hit}`).toBe(true);
+  for(const [index,name] of PRESETS[lang].entries()){
+   const r=await page.locator('#previewView button').nth(index).boundingBox();
+   await page.touchscreen.tap(r.x+r.width/2,r.y+r.height/2);
+   await expect(page.locator('#previewView button').nth(index),`${name} is the highlighted preset after a tap`).toHaveAttribute('aria-pressed','true');
+   await expect(page.locator('.canvas-views button[data-view="preview"]'),'3D is still the view').toHaveAttribute('aria-pressed','true');
+  }
+ });
+
  test(`390x844 ${lang}: the phone camera presets keep the top-left corner`,async({page})=>{
   await goto(page,390,844,lang);
   await open3d(page,{phone:true});
