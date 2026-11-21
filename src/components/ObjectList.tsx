@@ -99,7 +99,9 @@ export function ObjectListHead() {
   <div className="layers-head">
    <h2 className="section-heading sheet-title" tabIndex={-1}>{t('Layers')}</h2>
    <span className="layers-count">{objectsText}{totals ? <><br />{coloursText}</> : null}</span>
-   <button type="button" className="inspector-toggle" aria-expanded={open} aria-pressed={open} aria-controls="inspector" onClick={toggle}>{t('Properties')}</button>
+   <button type="button" className="inspector-toggle" aria-expanded={open} aria-pressed={open} aria-controls="inspector" title={t('Properties')} aria-label={t('Properties')} onClick={toggle}>
+    <svg className="icon" aria-hidden="true" focusable="false"><use href="#i-sliders" /></svg>
+   </button>
    <button type="button" className="sheet-close" onClick={closePhoneSheet}>{t('Close')}</button>
   </div>
  );
