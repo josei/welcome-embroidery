@@ -10,9 +10,19 @@ import {shortcutLabel} from '../shortcutLabels.js';
 const resetLabel = t('Reset to 100% ({shortcut})', {shortcut: shortcutLabel([{shift: true, key: '0'}])});
 const fitHoopLabel = t('Fit hoop');
 const fitAllLabel = t('Fit everything ({shortcut})', {shortcut: shortcutLabel([{shift: true, key: '1'}])});
+// The desktop width (above 1024 px, the breakpoint the phone and tablet styles stop at) shows the fit buttons' words;
+// narrower screens show the fit glyph only, so the bar reads the same at every size.
+const desktopQuery = '(min-width: 1025px)';
+const subscribeDesktop = (notify: () => void) => {
+ const query = window.matchMedia(desktopQuery);
+ query.addEventListener('change', notify);
+ return () => query.removeEventListener('change', notify);
+};
+const isDesktop = () => window.matchMedia(desktopQuery).matches;
 export function ZoomBar() {
  const percent = useSyncExternalStore(zoomPercent.subscribe, zoomPercent.get);
  const hand = useSyncExternalStore(handModeState.subscribe, handModeState.get);
+ const desktop = useSyncExternalStore(subscribeDesktop, isDesktop);
  return (
   <div className="zoombar" role="toolbar" aria-label="Zoom">
    <button type="button" id="zoomOut" className="icon-button" aria-label="Zoom out (−)" title="Zoom out (−)" onClick={() => zoomActions.zoomOut()}>
@@ -37,11 +47,12 @@ export function ZoomBar() {
    </button>
    <span className="sep"></span>
    <button type="button" id="zoomFit" className="zoom-text" title={fitHoopLabel} aria-label={fitHoopLabel} onClick={() => zoomActions.fitHoop()}>
-    {fitHoopLabel}
+    {desktop && fitHoopLabel}
     <svg className="icon zoom-fit-icon" aria-hidden="true"><use href="#i-fit"/></svg>
    </button>
-   <button type="button" id="zoomAll" className="zoom-text" title={fitAllLabel} onClick={() => zoomActions.fitAll()}>
-    All
+   <button type="button" id="zoomAll" className="zoom-text" title={fitAllLabel} aria-label={fitAllLabel} onClick={() => zoomActions.fitAll()}>
+    {desktop && 'All'}
+    <svg className="icon zoom-fit-icon" aria-hidden="true"><use href="#i-fit"/></svg>
    </button>
   </div>
  );

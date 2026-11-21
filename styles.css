@@ -832,9 +832,6 @@ body{height:100vh;height:100dvh;min-height:0;overflow:hidden;overscroll-behavior
 .canvas .zoombar #zoomIn{order:1}
 .canvas .zoombar #zoomOut{order:2}
 .canvas .zoombar #zoomFit{order:3}
-.canvas .zoombar #zoomPct,.canvas .zoombar #handTool,.canvas .zoombar #zoomAll,.canvas .zoombar .sep{display:none}
-.canvas .zoombar .zoom-text{font-size:0}
-.canvas .zoombar .zoom-fit-icon{display:inline-block;width:20px;height:20px}
 .canvas-hint{bottom:168px}
 /* On a portrait phone the lettering save hint sits just above the zoom bar, not at the height of the other canvas hints,
    where it covered the design's lower lettering. */
@@ -1042,7 +1039,7 @@ body{height:100dvh;min-height:0;overflow:hidden}
 .canvas .zoombar #zoomIn,.canvas .zoombar #zoomOut,.canvas .zoombar #zoomFit{order:0}
 .canvas .zoombar .sep{width:1px;height:18px;background:#e3e6e1;margin:0 2px;padding:0}
 .canvas .zoombar .zoom-text{font-size:var(--fs-caption)}
-.canvas .zoombar .zoom-fit-icon{display:none}
+.canvas .zoombar .zoom-fit-icon{display:inline-block;width:20px;height:20px}
 /* On a tablet the tool rail sits over the canvas's left edge, so the zoom bar starts to its right, as it does on desktop. */
 @media (min-width:601px){.canvas .zoombar{left:72px}}
 }
