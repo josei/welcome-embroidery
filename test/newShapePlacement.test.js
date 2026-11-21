@@ -25,7 +25,7 @@ test('three successive adds with no drag land in three places, none covering ano
 });
 
 test('when no free slot is inside the hoop, the shape goes at the centre and reports overlap', () => {
-  const small = {w: 30, h: 20};
+  const small = {w: 40, h: 30};
   const objects = [rect('a', -12, -8, 24, 16)];
   const s = newShapeSpot(objects, small, 24, 16);
   assert.equal(s.overlaps, true);
@@ -99,4 +99,15 @@ test('a new shape is never placed edge to edge with a neighbour of another size'
     const gapY = Math.max(o.y - (box.y + box.h), box.y - (o.y + o.h));
     assert.ok(Math.max(gapX, gapY) >= 4, `gap to ${o.id} is ${Math.max(gapX, gapY)} mm`);
   }
+});
+
+test('new lettering on a phone or tablet portrait keeps at least 5 mm inside the hoop rim', () => {
+  const s = newShapeSpot([], {w: 130, h: 180}, 30, 10);
+  assert.ok(s.y >= -90 + 5, `top edge ${s.y} is inside the rim by at least 5 mm`);
+  assert.ok(s.y + 10 <= 90 - 5, 'bottom edge is inside the rim by at least 5 mm');
+});
+
+test('a free slot never sits within 5 mm of the hoop rim, even when the view reaches the rim', () => {
+  const s = newShapeSpot([], {w: 100, h: 100}, 30, 10, {x0: -50, y0: -50, x1: 50, y1: 50});
+  assert.ok(s.y >= -45 && s.y + 10 <= 45 && s.x >= -45 && s.x + 30 <= 45);
 });

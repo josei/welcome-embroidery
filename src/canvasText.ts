@@ -100,6 +100,8 @@ export function startCanvasText(o: EditableObject, fresh = false) {
       height: Math.max(44, Math.min(160, y1 - y0 + 20)),
     },
   });
+  // Redraws the object under the box, so its own drawing and handles are hidden while the box is open.
+  wired().render();
 }
 
 /** Updates the object's text and width while typing, so the stitch outlines follow without an undo step. */

@@ -13,6 +13,7 @@ import {clampMoveDelta,visibleCanvasRect} from './moveClamp.js';
 import {pressClaimedByHandle} from './handleClaim.js';
 import {clampResizeScale} from './resizeLimit.js';
 import {multiSelectState} from './multiSelectState.js';
+import {interactionNow} from './interactionState.js';
 import {deletingGuideState,handModeState,panningState} from './canvasModeState.js';
 import {formatNumber} from './decimalText.js';
 import {currentFitMargin,isPhoneFitLayout,PHONE_FIT_MARGIN} from './fitMargin.js';
@@ -323,9 +324,22 @@ export function createCanvas(/** @type {any} */ api){
     }));
     if(label){const t=el('text',{class:'sel-note',x:hp[0],y:hp[1]-9*k,'text-anchor':'middle','font-size':11*k});t.textContent=label;overlay.append(t);}
   }
+  // The rotate knob sits 22 px above the frame. When that lands under the save strip at the top of the screen, the knob goes
+  // below the frame instead, so it stays reachable. Returns true when the knob should be drawn below.
+  function knobUnderBar(/** @type {any} */ f,/** @type {number} */ k){
+    const bar=document.querySelector('.top'),m=overlay.getScreenCTM?.();
+    if(!bar||!m)return false;
+    const clear=bar.getBoundingClientRect().bottom+(parseFloat(getComputedStyle(bar).marginBottom)||0);
+    const [x,y]=toWorld(f,0,-f.H/2-22*k);
+    return m.b*x+m.d*y+m.f-5<clear;
+  }
   function refresh(f0=/** @type {any} */(null),note=/** @type {string|null} */(null)){
     drawGuides();overlay.replaceChildren();drawMeasure();drawKnife();if(api.tool()!=='select'||state?.type==='marquee'||state?.type==='nodemarquee')return;
-    const f=f0||frame();if(!f||api.isEditing())return;const k=1/vp.s,hs=(touchPointer()?3:4)*k,pv=api.pivot?.();
+    // While the lettering box is open it covers the object, so its handles are left off rather than drawn over the text.
+    const f=f0||frame();if(!f||api.isEditing()||interactionNow().canvasText)return;const k=1/vp.s,pv=api.pivot?.();
+    // On a touch screen the handle marks and the knob shrink with a small object, so they never hide its lettering. Their
+    // 44 px touch targets are unchanged.
+    const small=Math.min(f.W,f.H)*vp.s,hs=(touchPointer()?Math.min(3,Math.max(1.5,small*.12)):4)*k;
     if(pv)overlay.append(el('circle',{class:'pivot-mark',cx:pv[0],cy:pv[1],r:5*k}),
       el('line',{class:'sel-stem',x1:pv[0]-10*k,y1:pv[1],x2:pv[0]+10*k,y2:pv[1]}),el('line',{class:'sel-stem',x1:pv[0],y1:pv[1]-10*k,x2:pv[0],y2:pv[1]+10*k}));
     const corners=[[-.5,-.5],[.5,-.5],[.5,.5],[-.5,.5]].map(([a,b])=>toWorld(f,a*f.W,b*f.H));
@@ -342,9 +356,10 @@ export function createCanvas(/** @type {any} */ api){
       el('rect',
       {class:'sel-handle','data-handle':name,tabindex:0,role:'button','aria-label':HANDLE_LABEL[name],x:x-hs,y:y-hs,width:hs*2,height:hs*2,transform:
       f.rot?`rotate(${f.rot*180/Math.PI} ${x} ${y})`:''}));}
-    const top=toWorld(f,0,-f.H/2),rot=toWorld(f,0,-f.H/2-22*k);overlay.append(el('line',{class:'sel-stem',x1:top[0],y1:top[1],x2:rot[0],y2:rot[1]}));
+    const below=knobUnderBar(f,k),side=below?.5:-.5,rr=touchPointer()?Math.min(5,Math.max(2.5,small*.2)):5;
+    const top=toWorld(f,0,side*f.H),rot=toWorld(f,0,side*f.H+(below?22:-22)*k);overlay.append(el('line',{class:'sel-stem',x1:top[0],y1:top[1],x2:rot[0],y2:rot[1]}));
       overlay.append(el('circle',{class:'sel-hit','data-hit':'rot',cx:rot[0],cy:rot[1],r:22*k}),
-      el('circle',{class:'sel-handle sel-rotate','data-handle':'rot',tabindex:0,role:'button','aria-label':HANDLE_LABEL.rot,cx:rot[0],cy:rot[1],r:5*k}));
+      el('circle',{class:'sel-handle sel-rotate','data-handle':'rot',tabindex:0,role:'button','aria-label':HANDLE_LABEL.rot,cx:rot[0],cy:rot[1],r:rr*k}));
     {const spot=angleSpot(f);if(spot)drawAngle(spot,spot.deg);}
     if(note){const base=toWorld(f,0,f.H/2),t=el('text',{class:'sel-note',x:base[0],y:base[1]+16*k,'text-anchor':'middle','font-size':11*k});t.textContent=
       note;overlay.append(t);}

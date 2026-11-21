@@ -4,6 +4,7 @@
 import {geometry,hoopSize,HOOP_PRESETS,textPrimitives} from './engine.js';
 import {documentNow} from './documentState.js';
 import {selState} from './selectionState.js';
+import {interactionNow} from './interactionState.js';
 import {setHoopFields} from './hoopState.js';
 import {isRegistryFont} from './fonts.js';
 import {photoUrl} from './photoUrl.js';
@@ -51,6 +52,8 @@ export function drawScene(){
   const element=node(tag);
   element.classList.add('shape');
   element.dataset.id=o.id;
+  // The lettering box is drawn over the object it edits, so the object's own drawing is hidden while the box is open.
+  if(interactionNow().canvasText?.id===o.id)element.style.visibility='hidden';
   if(o.clipId){
    const m=doc.objects.find((/** @type {any} */ v)=>v.id===o.clipId);
    if(m){
