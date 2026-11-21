@@ -50,19 +50,19 @@ export const ES={...ES_ADDITIONS,
 'Sets density, pull compensation and the stabilizer tip for the design. Objects with their own values keep them.':
   'Ajusta la densidad, la compensación de tirón y la estabilización de la tela del diseño. Los objetos con valores propios los mantienen.',
 'Fix tip':'Corregir','Ignore':'Ignorar',
-'Color change to {n} at {time}':'Cambio de color a {n} a los {time}',
+'Color change to {n} at {time}':'Cambio de color a {n} en {time}',
 '{n} color changes from {time}':'{n} cambios de color desde los {time}','Thread {n}':'Hilo {n}',
 'Grid spacing: {n} mm. Click to change.':'Separación de la cuadrícula: {n} mm. Haz clic para cambiarla.','Grid spacing: {n} mm':'Cuadrícula: {n} mm',
 'Drag to orbit · scroll to zoom · double-click to reset':'Arrastra para orbitar · rueda para zoom · doble clic para restablecer',
 'Drag to orbit · pinch to zoom · double-tap to reset':'Arrastra para orbitar · pellizca · doble toque para restablecer',
-'Zoom':'Zoom','Color 1':'Color 1','Color 2':'Color 2','Color 3':'Color 3','Color 4':'Color 4','Choose at least two colors for a palette.':
+'Zoom':'Ampliación','Color 1':'Color 1','Color 2':'Color 2','Color 3':'Color 3','Color 4':'Color 4','Choose at least two colors for a palette.':
   'Elige al menos dos colores para la paleta.','Hand tool: drag to pan':'Herramienta mano: arrastra para mover la vista','Zoom out (−)':'Alejar (−)',
   'Zoom in (+)':'Acercar (+)','Reset to 100% ({shortcut})':'Restablecer al 100% ({shortcut})','Fit the hoop in view':'Ajustar el bastidor a la vista',
   'Fit everything ({shortcut})':'Ajustar todo ({shortcut})','All':'Todo',
-'Canvas tools':'Herramientas del lienzo','Snap to grid':'Ajustar a la cuadrícula','Grid size':'Tamaño de cuadrícula',
+'Canvas tools':'Herramientas del lienzo','Snap to grid':'Encajar a la cuadrícula','Grid size':'Tamaño de cuadrícula',
 'Grid 0.1 mm':'Cuadrícula 0.1 mm','Grid 0.25 mm':'Cuadrícula 0.25 mm','Grid 0.5 mm':'Cuadrícula 0.5 mm',
 'Grid 1 mm':'Cuadrícula 1 mm','Grid 2 mm':'Cuadrícula 2 mm','Grid 5 mm':'Cuadrícula 5 mm',
-'Grid spacing: the distance Snap to grid snaps to':'Separación de la cuadrícula: la distancia a la que ajusta Ajustar a la cuadrícula',
+'Grid spacing: the distance Snap to grid snaps to':'Separación de la cuadrícula: distancia a la que encajan los objetos',
 'Align left':'Alinear a la izquierda','Align horizontal centers':'Centrar horizontalmente','Align right':'Alinear a la derecha','Align top':'Alinear arriba',
   'Align vertical centers':'Centrar verticalmente','Align bottom':'Alinear abajo','Align center':'Centrar',
 'Distribute horizontally':'Distribuir horizontalmente','Distribute vertically':'Distribuir verticalmente','Group ({shortcut})':'Agrupar ({shortcut})',
@@ -71,7 +71,7 @@ export const ES={...ES_ADDITIONS,
   'Intersection of selected shapes':'Intersección de las formas seleccionadas',
 'Put the selected text on the selected path':'Poner el texto seleccionado sobre el trazado seleccionado','Detach text from its path':
   'Separar el texto de su trazado','Flip horizontally':'Voltear horizontalmente','Flip vertically':'Voltear verticalmente',
-'Edit nodes (Enter) — converts rectangles and ellipses to paths':'Editar nodos (Enter) — convierte rectángulos y elipses en trazados','Edit nodes (Enter)':'Editar nodos (Enter)',
+'Edit nodes (Enter) — converts rectangles and ellipses to paths':'Editar nodos (Intro) — convierte rectángulos y elipses en trazados','Edit nodes (Enter)':'Editar nodos (Intro)',
   'Paired loops across the width (uses Satin width)':'Bucles en pareja a lo ancho (usa el ancho de satén)','Spacing (mm)':'Separación (mm)',
   '{perHoop} copies fit one {hoop} mm hoop ({cols} × {rows}). {copies} copies need {hoops} hoop(s).':
   '{perHoop} copias caben en un bastidor de {hoop} mm ({cols} × {rows}). {copies} copias necesitan {hoops} bastidores.','{perHoop} copies fit one {hoop} mm hoop ({cols} × {rows}). {copies} copies need 1 hoop.':'{perHoop} copias caben en un bastidor de {hoop} mm ({cols} × {rows}). {copies} copias necesitan 1 bastidor.','{n} {fmt} files exported, one per hoop.':
@@ -153,7 +153,7 @@ export const ES={...ES_ADDITIONS,
   'Running stitch':'Puntada recta','Satin column':'Columna de satén',
 'Thread':'Hilo','Forest':'Bosque','Coral':'Coral','Honey':'Miel','Sage':'Salvia','Satin width (mm)':'Ancho del satén (mm)','Row spacing (mm)':
   'Separación de filas (mm)','Angle (°)':'Ángulo (°)','Stitch length (mm)':'Largo de puntada (mm)',
-'Needle stagger':'Desfase de agujas','Off':'Desactivado','2 phases':'2 fases','4 phases':'4 fases','8 phases':'8 fases','Underlay':'Base (underlay)',
+'Needle stagger':'Desfase de agujas','Off':'Desactivado','2 phases':'2 fases','4 phases':'4 fases','8 phases':'8 fases','Underlay':'Base',
   'Inset (mm)':'Margen interior (mm)',
 'Auto (by size)':'Automática','None':'Ninguna','Edge walk':'Recorrido del borde','Tatami (90°)':'Tatami (90°)','Edge walk + tatami':
   'Recorrido del borde + tatami','Auto (by width)':'Auto (según ancho)','Center run':'Línea central','Zigzag':'Zigzag','Center + zigzag':'Centro + zigzag',
@@ -163,7 +163,7 @@ export const ES={...ES_ADDITIONS,
 'Lettering':'Texto','Offset along path (mm)':'Desplazamiento a lo largo del trazado (mm)','Font':'Fuente','Embroidery font':'Fuente de bordado',
   'Néon blinking (centerline)':'Néon blinking (línea central)','Text':'Texto','Text content':'Contenido del texto','Edit text content':
   'Editar contenido del texto',
-'Enter or clicking outside saves the text. Escape cancels.':'Enter o clic fuera guarda el texto. Escape cancela.',
+'Enter or clicking outside saves the text. Escape cancels.':'Intro o clic fuera guarda el texto. Esc cancela.',
 'Font size (mm)':'Tamaño de fuente (mm)','Text style':'Estilo de texto','Bold (adds weight to fills and satin columns)':
   'Negrita (añade grosor a rellenos y columnas de satén)','Bold':'Negrita','Italic (slant)':'Cursiva (inclinación)','Italic':'Cursiva',
 'Letter spacing (mm)':'Espaciado de letras (mm)','Word spacing (mm)':'Espaciado de palabras (mm)','Line height (×)':'Interlineado (×)','Bold (mm)':
@@ -208,14 +208,14 @@ export const ES={...ES_ADDITIONS,
   'Cancelar',
 'Check hoop and thread choices for your machine and materials.':'Revisa el bastidor y los hilos según tu máquina y materiales.','Language':'Idioma',
 'Click to add points. Click the first point to close a polygon, Enter or double-click to finish.':
-  'Haz clic para añadir puntos. Haz clic en el primero para cerrar el polígono; Enter o doble clic para terminar.',
+  'Haz clic para añadir puntos. Haz clic en el primero para cerrar el polígono; Intro o doble clic para terminar.',
 'Click to add corner nodes, drag to pull curve handles. Click the first node to close, Enter to finish.':
-  'Haz clic para añadir nodos de esquina, arrastra para sacar tiradores de curva. Clic en el primer nodo para cerrar, Enter para terminar.',
+  'Haz clic para añadir nodos de esquina, arrastra para sacar tiradores de curva. Clic en el primer nodo para cerrar, Intro para terminar.',
 'Drag on the canvas to draw a line.':'Arrastra sobre el lienzo para dibujar una línea.','Drag from the center to size and rotate. Sides come from the sidebar.':
   'Arrastra desde el centro para ajustar tamaño y giro. Los lados se eligen en la barra lateral.',
   'Drag from the center to size and rotate. Points come from the sidebar.':
   'Arrastra desde el centro para ajustar tamaño y giro. Las puntas se eligen en la barra lateral.',
-'Finish path (Enter · click first point to close · Esc cancels)':'Terminar trazado (Enter · clic en el primer punto para cerrar · Esc cancela)',
+'Finish path (Enter · click first point to close · Esc cancels)':'Terminar trazado (Intro · clic en el primer punto para cerrar · Esc cancela)',
 'Path point is outside the supported workspace.':'El punto del trazado está fuera del área de trabajo admitida.','A path is limited to 1,000 points.':
   'Un trazado está limitado a 1.000 puntos.','Drag to draw a line.':'Arrastra para dibujar una línea.',
 'Select a node that has a following segment, or double-click the path.':'Selecciona un nodo que tenga un segmento siguiente, o haz doble clic en el trazado.',
@@ -272,7 +272,7 @@ export const ES={...ES_ADDITIONS,
   'Hoja de bordado descargada.','Compile the design first.':'Compila el diseño primero.','Edit':'Editar','Select':'Seleccionar','Pen with curves':
   'Pluma con curvas','Line':'Línea','Polygon':'Polígono','Star':'Estrella','Edit nodes / finish a path':'Editar nodos / terminar un trazado',
   'Cancel, go back to select':'Cancelar, volver a seleccionar','Undo / redo':'Deshacer / rehacer','Copy, cut, paste':'Copiar, cortar, pegar','Group / ungroup':
-  'Agrupar / desagrupar','Nudge ({shift} = 5 mm, {alt} = 0.1 mm)':'Mover ({shift} = 5 mm, {alt} = 0.1 mm)','Resize':'Redimensionar','Rotate':'Girar',
+  'Agrupar / desagrupar','Nudge ({shift} = 5 mm, {alt} = 0.1 mm)':'Mover ({shift} = 5 mm, {alt} = 0,1 mm)','Resize':'Redimensionar','Rotate':'Girar',
   'Measure':'Medir','Knife: click two or more points along the cut, then Enter':'Cuchillo: haz clic en dos o más puntos del corte y luego Intro',
   'Remove the last point while drawing a path':'Quitar el último punto mientras dibujas un trazado','Resize from the top-left corner ({shift} = 5 mm steps)':
   'Redimensionar desde la esquina superior izquierda ({shift} = pasos de 5 mm)','Rotate (1° per press, {shift} = 15°)':'Girar (1° por pulsación, {shift} = 15°)',
@@ -332,9 +332,9 @@ export const ES={...ES_ADDITIONS,
   'Sustituye la compensación del documento para este objeto; déjalo vacío para usar la del documento',
   'Clip: use the top selected shape as a mask for the other selected objects':
   'Recortar: usa la forma superior seleccionada como máscara de los demás objetos seleccionados','Release the clipping mask':'Liberar la máscara de recorte',
-  'Snap to other objects (nodes, midpoints, edges, centers)':'Ajustar a otros objetos (nodos, puntos medios, bordes, centros)','Snap to other objects':
-  'Ajustar a otros objetos','Snapping to other objects on.':'Ajuste a otros objetos activado.','Snapping to other objects off.':
-  'Ajuste a otros objetos desactivado.','Line ends':'Extremos de línea','Flat ends':'Extremos planos','Round ends':'Extremos redondos','Square ends':
+  'Snap to other objects (nodes, midpoints, edges, centers)':'Encajar a otros objetos (nodos, puntos medios, bordes, centros)','Snap to other objects':
+  'Encajar a otros objetos','Snapping to other objects on.':'Encaje a otros objetos activado.','Snapping to other objects off.':
+  'Encaje a otros objetos desactivado.','Line ends':'Extremos de línea','Flat ends':'Extremos planos','Round ends':'Extremos redondos','Square ends':
   'Extremos cuadrados','Corners':'Esquinas','Rounded corners':'Esquinas redondeadas','Sharp (mitered) corners':'Esquinas en punta (inglete)','Bevelled corners':
   'Esquinas biseladas','Width at selected node (mm)':'Ancho en el nodo seleccionado (mm)',
   'Select a node of the satin path in node-edit mode, then set the column width there; the width eases between nodes':

@@ -1,4 +1,5 @@
 // @ts-check
+import {t} from './i18n.js';
 // Keyboard shortcut labels, in one place. Other platforms read "Ctrl+Shift+S" and "Alt+←"; Apple platforms read
 // "⇧⌘S" and "⌥←" in macOS menu order (⌃ ⌥ ⇧ ⌘), glyphs with no separator. Labels are built from structured chords,
 // so no component hand-writes a shortcut string. Plain text parts (a bare key such as "V", or " / ") are shown as they are.
@@ -39,7 +40,7 @@ function formatPart(part, apple) {
   if (typeof part === 'string') return part;
   const {key, mod, alt, shift, appleKey} = part;
   if (apple) return (alt ? '⌥' : '') + (shift ? '⇧' : '') + (mod ? '⌘' : '') + (appleKey ?? key);
-  return [mod && 'Ctrl', alt && 'Alt', shift && 'Shift', key].filter(Boolean).join('+');
+  return [mod && t('Ctrl'), alt && t('Alt'), shift && t('Shift'), key].filter(Boolean).join('+');
 }
 
 /**
@@ -62,5 +63,5 @@ export function shortcutLabel(parts, apple = isApple) {
  */
 export function modifierName(modifier, apple = isApple) {
   if (apple) return modifier === 'shift' ? '⇧' : '⌥';
-  return modifier === 'shift' ? 'Shift' : 'Alt';
+  return modifier === 'shift' ? t('Shift') : t('Alt');
 }

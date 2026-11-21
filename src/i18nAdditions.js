@@ -2,6 +2,7 @@
 // Spanish table entries that did not fit in src/i18n.js under its 500-line limit. i18n.js spreads these into ES
 // first, so an entry in i18n.js wins over one here with the same key.
 export const ES_ADDITIONS={
+'Shift':'Mayús','Ctrl':'Ctrl','Alt':'Alt',
 'Select lettering on the canvas, or add some, to set bold and italic.':'Selecciona un texto en el lienzo, o añade uno, para elegir negrita y cursiva.',
 'Bold and italic need an outline or satin font. This font is single-line: choose another under Font.':'La negrita y la cursiva necesitan una fuente de contorno o de satén. Esta fuente es de una sola línea: elige otra en Fuente.',
 'Nothing selected. Tap an object to select it, tap another to add it, or pick a tool on the left.':'Nada seleccionado. Toca un objeto para seleccionarlo, toca otro para añadirlo o elige una herramienta a la izquierda.',
@@ -9,8 +10,10 @@ export const ES_ADDITIONS={
 'Smooth node':'Nodo suave','Corner node':'Nodo en esquina','Photo stitch':'Bordado desde foto','Clip':'Recortar con máscara',
 'Release clip':'Quitar máscara','Text on path':'Texto sobre trazado','Detach text':'Separar texto del trazado',
 'Shown now':'Vista actual',
-'Snap':'Ajustar',
-'Snap to objects':'Ajustar a objetos',
+'Snap':'Encajar',
+'Snap to objects':'Encajar a objetos',
+'Home':'Inicio','End':'Fin','Enter':'Intro','Backspace':'Retroceso','Del / Backspace':'Supr / Retroceso',
+'W':'An','H':'Al',
 'Grid':'Cuadrícula',
 'Help':'Ayuda',
 'Panels':'Paneles',
@@ -48,7 +51,7 @@ export const ES_ADDITIONS={
 'Hoop preset':'Preajuste del bastidor',
 'Hoop presets: 110 × 110 mm, and Brother 4×4, 5×7 and 6×10 embroidery hoops':'Preajustes del bastidor: 110 × 110 mm, y los bastidores de bordado Brother de 4×4, 5×7 y 6×10',
 "Swap the hoop's width and height; the design stays where it is":'Intercambia el ancho y el alto del bastidor; el diseño se queda donde está',
-'Underlay: a first layer of stitches under the top stitches that holds the fabric flat. Automatic by default.':'Base (underlay): primera capa de puntadas bajo las de encima que mantiene la tela plana. Automática por defecto.',
+'Underlay: a first layer of stitches under the top stitches that holds the fabric flat. Automatic by default.':'Base: primera capa de puntadas bajo las de encima que mantiene la tela plana. Automática por defecto.',
 'Stitch length: the distance between needle holes along a stitch, in mm.':'Largo de puntada: distancia entre pinchazos de aguja a lo largo de una puntada, en mm.',
 'Tatami: parallel rows of short stitches, each row offset from the last, so the fill lies flat and even.':'Tatami: filas paralelas de puntadas cortas, cada fila desplazada respecto a la anterior, para que el relleno quede plano y uniforme.',
 'Redwork: one run sewn out along a line and back over the same stitches, for a fine outline.':'Redwork: una línea de puntada corrida que va y vuelve sobre los mismos pinchazos, para contornos finos.',
@@ -111,6 +114,7 @@ export const ES_ADDITIONS={
 'Nodes':'Nodos','Not a group':'No es un grupo','Not clipped':'No tiene máscara','Not text on a path':'No es texto sobre trazado',
 'Not a path':'No es un trazado','Select a node first':'Selecciona primero un nodo','This node is already a corner':'Este nodo ya es una esquina',
 'Select one text and one path':'Selecciona un texto y un trazado','Select one object to edit its nodes':'Selecciona un objeto para editar sus nodos',
+'Reset to default ({n} mm)':'Restablecer al valor predeterminado ({n} mm)',
 'Stitch layers have no nodes':'Las capas de puntadas no tienen nodos',
 'The top object must be a rectangle, ellipse or closed path':'El objeto de arriba debe ser un rectángulo, una elipse o un trazado cerrado',
 };

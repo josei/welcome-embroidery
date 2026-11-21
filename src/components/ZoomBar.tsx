@@ -24,7 +24,7 @@ export function ZoomBar() {
  const hand = useSyncExternalStore(handModeState.subscribe, handModeState.get);
  const desktop = useSyncExternalStore(subscribeDesktop, isDesktop);
  return (
-  <div className="zoombar" role="toolbar" aria-label="Zoom">
+  <div className="zoombar" role="toolbar" aria-label={t('Zoom')}>
    <button type="button" id="zoomOut" className="icon-button" aria-label="Zoom out (−)" title="Zoom out (−)" onClick={() => zoomActions.zoomOut()}>
     <svg className="icon"><use href="#i-minus"/></svg>
    </button>

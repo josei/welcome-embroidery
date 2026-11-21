@@ -274,9 +274,9 @@ export function EditorLayout() {
                </ActionButton>
                <ActionButton flag="editNodes" hideWhenDisabled
                  className={editing ? "icon-button tb-start active-tool" : "icon-button tb-start"}
-                 aria-label={"Edit nodes (Enter)"}
-                 title={"Edit nodes (Enter) — converts rectangles and ellipses to paths"}
-                 data-tooltip={"Edit nodes (Enter) — converts rectangles and ellipses to paths"}
+                 aria-label={t("Edit nodes (Enter)")}
+                 title={t("Edit nodes (Enter) — converts rectangles and ellipses to paths")}
+                 data-tooltip={t("Edit nodes (Enter) — converts rectangles and ellipses to paths")}
                  id={"editNodes"}
                  onClick={() => toolbarActions.editNodes()}
                >
