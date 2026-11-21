@@ -1185,6 +1185,9 @@ html[data-input="touch"] .tool-row .icon-button:not(.active-tool):hover{backgrou
    overflow:hidden the browser leaves the bottom ~18 px of the 3D view unpainted, under the orbit hint. overflow:clip clips
    the same content without that gap. */
 .layout main>.canvas.preview-mode{overflow:clip}
+/* On screens up to 1024 px wide the opaque save-status strip covers the top edge of the 3D canvas, and Chromium then
+   leaves the matching bottom band of the WebGL canvas unpainted. A filter on the canvas makes it paint the whole frame. */
+#preview3d{filter:blur(0)}
 
 /* A checkbox and its label share one row at every width and in both languages: the box is centred on the label's line,
    and a label that wraps stays beside the box. */

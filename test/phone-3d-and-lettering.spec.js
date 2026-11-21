@@ -1,6 +1,6 @@
 import {test,expect} from '@playwright/test';
 
-// On a phone, the 3D view is painted down to the playback bar, the handles of small lettering leave its letters clear,
+// On a phone, the 3D view is painted to its bottom edge, the handles of small lettering leave its letters clear,
 // and the lettering save hint stays off the lettering in portrait.
 test.use({hasTouch:true});
 
@@ -18,29 +18,57 @@ async function openView(page,width,height,view){
  }
 }
 
-// Counts the rows in the bottom 20 px of the 3D canvas that are not painted on screen. The screenshot is decoded in the
-// page, so the check reads what the user sees rather than the canvas's own buffer.
-async function unpaintedBottomRows(page){
- const png=(await page.screenshot()).toString('base64');
+// Compares the bottom 30 rows of the 3D canvas as they appear on screen with the same rows read back from its WebGL
+// buffer. A band the page background shows through differs from the buffer, so this fails when the canvas is not painted
+// to its edge. The camera is held still with a pointer press (a drag stops the turntable spinning) and the hint is hidden,
+// since it sits over those rows.
+async function bottomRowsMismatch(page){
+ await page.addStyleTag({content:'#previewHint{visibility:hidden!important}'});
  const box=await page.locator('#preview3d').boundingBox();
- return page.evaluate(async([data,x,y,w,h])=>{
+ await page.mouse.move(box.x+box.width/2,box.y+box.height/2);
+ await page.mouse.down();
+ await page.waitForTimeout(400);
+ const png=(await page.screenshot()).toString('base64');
+ const result=await page.evaluate(async([data,x,y,w,h])=>{
   const img=new Image();img.src='data:image/png;base64,'+data;await img.decode();
-  const c=document.createElement('canvas');c.width=img.width;c.height=img.height;const ctx=c.getContext('2d');ctx.drawImage(img,0,0);
-  const bottom=Math.floor(y+h),left=Math.round(x+w*0.1),width=Math.round(w*0.8);let blank=0;
-  for(let row=bottom-20;row<bottom;row++){
-   const d=ctx.getImageData(left,row,width,1).data;let painted=false;
-   for(let i=3;i<d.length;i+=4)if(d[i]>0){painted=true;break;}
-   if(!painted)blank++;
+  const c=document.createElement('canvas');c.width=img.width;c.height=img.height;const ctx=c.getContext('2d',{willReadFrequently:true});ctx.drawImage(img,0,0);
+  const gl=document.querySelector('#preview3d').getContext('webgl2');
+  const W=gl.drawingBufferWidth,rows=30;
+  const px=new Uint8Array(W*rows*4);
+  gl.readPixels(0,0,W,rows,gl.RGBA,gl.UNSIGNED_BYTE,px);
+  const screenBottom=Math.floor(y+h);
+  let badRows=0;
+  for(let r=0;r<rows;r++){
+   const sy=screenBottom-1-r;
+   const row=ctx.getImageData(Math.floor(x),sy,Math.ceil(w),1).data;
+   let off=0,n=0;
+   for(let col=0;col<W;col+=2){
+    const sx=Math.floor(x+(col+0.5)*w/W)-Math.floor(x);
+    const b=(r*W+col)*4,s=sx*4;n++;
+    if(Math.abs(row[s]-px[b])>8||Math.abs(row[s+1]-px[b+1])>8||Math.abs(row[s+2]-px[b+2])>8)off++;
+   }
+   if(off>n*0.1)badRows++;
   }
-  return blank;
+  return {badRows};
  },[png,box.x,box.y,box.width,box.height]);
+ await page.mouse.up();
+ return result;
 }
 
-// Known gap: at 844x390 the bottom ~18 px of the 3D view composite as the page background in headless Chromium, so this check
-// stays unexpected there until the cause is found (see landscape-stitch-3d-frame.spec.js). Portrait is checked.
-for(const [width,height] of [[390,844],[844,390]]) (width<height?test:test.fixme)(`the 3D view is painted down to the playback bar at ${width}x${height}`,async({page})=>{
- await openView(page,width,height,'preview');
- expect(await unpaintedBottomRows(page),'rows in the bottom 20 px of the 3D view left unpainted').toBe(0);
+for(const [w,h] of [[844,390],[390,844]]) for(const lang of ['en','es']) test(`the 3D view is painted down to its bottom edge at ${w}x${h} (${lang})`,async({page})=>{
+ page.on('dialog',d=>d.accept());
+ await page.setViewportSize({width:w,height:h});
+ await page.goto(lang==='en'?'/':`/?lang=${lang}`);
+ if(await page.locator('#phoneMenu').isVisible()){await page.locator('#phoneMenu').click();await page.locator('#menuView-preview').click();}
+ else await page.locator('[data-view=preview]').click();
+ await expect(page.locator('#preview3d')).toHaveAttribute('data-instances',/^[1-9]\d*$/,{timeout:8000});
+ const views=lang==='en'?['Front ¾','Close-up','Turntable','Loupe 8×']:['Frontal ¾','Primer plano','Giro','Lupa 8×'];
+ for(const name of views){
+  await page.locator('#previewView button',{hasText:name}).click();
+  await page.waitForTimeout(600);
+  const r=await bottomRowsMismatch(page);
+  expect(r.badRows,`${name}: bottom rows of the 3D view that differ from its WebGL buffer`).toBe(0);
+ }
 });
 
 // Lettering at 8 mm and 79% zoom is 24 px tall on screen: its top and bottom handles reach over the glyphs unless they sit outside.
