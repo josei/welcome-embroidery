@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {copyName} from '../src/objectNames.js';
+import {copyName, letteringName} from '../src/objectNames.js';
 import {initialDocument,applyOperations} from '../src/engine.js';
 
 test('copies are numbered from the base name, not stacked as "copy copy"', () => {
@@ -24,4 +24,17 @@ test('copy, paste and duplicate in a row never repeat a name', () => {
   assert.equal(new Set(names()).size, names().length, `repeated names: ${names()}`);
   assert.notEqual(first, undefined);
   assert.deepEqual(names().slice(1), [`${first} 2`, `${first} 3`, `${first} 4`]);
+});
+
+test('lettering is named its type, then its first line of text in quotes', () => {
+  assert.equal(letteringName('Hola'), 'Text "Hola"');
+  assert.equal(letteringName('Hola\nsegunda'), 'Text "Hola"');
+  assert.equal(letteringName(''), 'Text');
+  assert.equal(letteringName(undefined), 'Text');
+});
+
+test('the starter lettering is named by the same rule as new lettering', () => {
+  const starter = initialDocument().objects.find(o => o.kind === 'text');
+  assert.equal(starter.name, letteringName(starter.text));
+  assert.equal(starter.name, 'Text "Bloom"');
 });

@@ -384,7 +384,7 @@ export const ES={...ES_ADDITIONS,
 'Ready · {n} stitches':'Listo · {n} puntadas','{a} / {b} stitches · {p}%':'{a} / {b} puntadas · {p}%','Needle {x}, {y} mm':'Aguja {x}, {y} mm','Ready to sew':'listo para bordar','⚠ Can\'t compile: {e}':'⚠ No se puede compilar: {e}',
 '{n} stitches · {m} m estimated thread · {c} thread colors':'{n} puntadas · {m} m de hilo estimado · {c} colores de hilo','{n} stitches · {m} m estimated thread · {c} thread color':'{n} puntadas · {m} m de hilo estimado · {c} color de hilo','about 1 min to sew':'menos de 1 min de bordado',
   '{n} stitches · {m} m estimated thread · {c} thread colors · {x}':'{n} puntadas · {m} m de hilo estimado · {c} colores de hilo · {x}',
-'{lo}–{hi} mm for this font':'{lo}–{hi} mm para esta fuente','Text: {t}':'Texto: {t}',
+'{lo}–{hi} mm for this font':'{lo}–{hi} mm para esta fuente','Text "{t}"':'Texto "{t}"',
 '{name} — loaded from a file; stored inside this project. Check the license of the font file before sharing the design.':
   '{name} — cargada desde un archivo; guardada dentro de este proyecto. Revisa la licencia del archivo de fuente antes de compartir el diseño.',
 'x {x} mm · y {y} mm':'x {x} mm · y {y} mm',

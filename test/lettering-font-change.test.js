@@ -30,7 +30,7 @@ function switchFont(d, fid, hoop = HOOP) {
 test('Welcome Mono keeps the casing typed and still draws capitals', () => {
   const d = doc(MONO);
   assert.equal(d.objects[0].text, 'Hola');
-  assert.equal(d.objects[0].name, 'Text: Hola');
+  assert.equal(d.objects[0].name, 'Text "Hola"');
   const typed = textLines({...d.objects[0]});
   const capitals = textLines({...d.objects[0], text: 'HOLA'});
   assert.deepEqual(typed, capitals, 'Welcome Mono draws its capitals from the typed letters');
@@ -42,7 +42,7 @@ test('typed casing survives a switch to a font with lower case', () => {
   assert.equal(getFont(ALLEGRIA).letterCase ?? '', '', 'Allegria 55 is not forced to one case');
   assert.equal(o.font, ALLEGRIA);
   assert.equal(o.text, 'Hola');
-  assert.equal(o.name, 'Text: Hola');
+  assert.equal(o.name, 'Text "Hola"');
 });
 
 test('typed casing survives a switch back to Welcome Mono', () => {

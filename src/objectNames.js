@@ -41,3 +41,14 @@ export function objectLabel(o, form = 'start') {
   if (form === 'other') return lettering ? 'another text' : 'another object';
   return lettering ? 'This text' : 'This object';
 }
+
+/**
+ * The layer name of a lettering object: the object type, then its first line of text in quotes, as in Text "Hola".
+ * Before any text is typed it is the bare type, so the layer never reads an empty pair of quotes.
+ * @param {string | undefined} text the lettering's text (may be empty)
+ * @returns {string}
+ */
+export function letteringName(text) {
+  const first = String(text ?? '').split('\n')[0];
+  return first ? `Text "${first}"` : 'Text';
+}

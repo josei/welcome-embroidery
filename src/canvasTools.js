@@ -90,7 +90,7 @@ export function createCanvasTools(api){
     if(kind==='text'){
       try{await api.ensureFontLoaded(api.textFont());}catch(/** @type {any} */ error){api.toast(error.message, 'error');return;}
       const f=getFont(api.textFont());
-      // The layer shows the bare placeholder word until the text is typed, so it never reads "Text: Text" (translated: "Texto: Texto").
+      // The layer shows the bare placeholder word until the text is typed, so it never reads a doubled Text (translated: a doubled Texto).
       const op={op:'add_text',id,text:NEW_TEXT,name:PLACEMENT_TEXT,x:0,y:0,height:api.fitHeight(api.textFont(),PLACEMENT_TEXT),
         thread:$('#thread').value,font:api.textFont(),...(f?.kind==='outline'?{stitch:'fill'}:{})};
       // Placement: the same free-space search as new shapes (see newShapePlacement.js). The op is measured once at the

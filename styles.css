@@ -372,10 +372,11 @@ input:not([type=checkbox]):not([type=range]),select,textarea,.panel textarea{fon
    The field column is 100px, which leaves the label column about 118px in the 256px inspector: wide enough for "Pull compensation" on one line. */
 .panel label:not(.block):not(#blendPaletteRow>label){display:grid;grid-template-columns:minmax(0,1fr) 100px;align-items:center;column-gap:6px}
 .panel label:not(.block)>input:not([type=checkbox]),.panel label:not(.block)>select{grid-column:2;width:100%;min-width:0}
-/* The underlay select shows its selected option. The Spanish default "Automática" plus the arrow needs about 96px. Under touch the inspector is narrower,
-   so the field is 140px: the label "Base (underlay)" keeps the 58px its longest word needs, and neither clips. */
-#underlayRow{grid-template-columns:minmax(0,1fr) 140px!important}
-#underlayRow>select{width:100%!important}
+/* The underlay select is as wide as its selected option, so no option text is cut off in English or Spanish ("Auto (según ancho)").
+   Where the browser cannot size a select to its text (field-sizing), it takes the width of its widest option, which is never clipped either.
+   The label keeps the rest of the row and wraps. */
+#underlayRow{grid-template-columns:minmax(0,1fr) auto!important}
+#underlayRow>select{width:auto!important;max-width:100%;field-sizing:content}
 .panel label:not(.block)>input[type=checkbox]{grid-column:2;justify-self:start;margin:0}
 .panel label:not(.block)>.field-range{grid-column:2;justify-self:start;margin:0}
 .panel label:not(.block)>.thread-btn{grid-column:2;width:100%;min-width:0}
@@ -416,8 +417,6 @@ input:not([type=checkbox]):not([type=range]),select,textarea,.panel textarea{fon
 .file-menu-list button{display:grid;gap:2px;justify-items:start;width:100%;border:0;padding:8px 10px;text-align:left}
 .file-menu-list button:hover:not(:disabled):not([aria-disabled="true"]){background:#eef1ec}
 .file-menu-list button:disabled,.file-menu-list button[aria-disabled="true"]{color:#9aa39e;cursor:default}
-/* One reason line for a whole menu (Edit): it hangs under the list, so the list keeps its height. */
-.file-menu-list .menu-shared-reason{position:absolute;left:0;top:calc(100% + 4px);white-space:nowrap;font-size:var(--fs-caption);color:#7a5a12;background:#fff;border:1px solid var(--field-line);border-radius:6px;padding:4px 8px;box-shadow:0 4px 12px #1d292526}
 .file-menu-list button.menu-item{display:flex;justify-content:space-between;align-items:center;gap:24px}
 .file-menu-list kbd{font:inherit;font-size:var(--fs-caption);color:#66726c}
 .file-menu-list .menu-sep{border:0;border-top:1px solid #e3e6e1;margin:4px 2px}
@@ -428,6 +427,8 @@ input:not([type=checkbox]):not([type=range]),select,textarea,.panel textarea{fon
 .file-menu-list:not(#phoneMenuList) button.menu-item{display:grid;grid-template-columns:1fr auto;column-gap:24px;align-items:center}
 .file-menu-list:not(#phoneMenuList) button.menu-item>span{grid-column:1;grid-row:1}
 .file-menu-list:not(#phoneMenuList) button.menu-item>kbd{grid-column:2;grid-row:1;justify-self:end}
+/* A row's state (On, Off, a value, Shown now) sits on the row's own line, right-aligned, beside its name. */
+.file-menu-list:not(#phoneMenuList) button.menu-item>small.menu-state{grid-column:2;grid-row:1;justify-self:end}
 .file-menu-list:not(#phoneMenuList) button.menu-item>small{grid-column:1/-1;grid-row:2}
 .file-menu-list .menu-heading{padding:8px 10px 2px;font-size:var(--fs-caption);font-weight:var(--fw-emphasis);letter-spacing:.07em;text-transform:uppercase;color:#66726c}
 .list-warning{font-size:var(--fs-body);color:var(--warn);background:var(--warn-soft);border:1px solid var(--warn-line);border-radius:8px;padding:7px 9px;margin:0 0 6px;line-height:1.4}
@@ -993,7 +994,7 @@ body{height:100dvh;min-height:0;overflow:hidden}
 #phoneMenuList .menu-item small{flex:0 1 auto;min-width:0;margin-left:auto;text-align:right;white-space:normal;overflow-wrap:anywhere}
 #phoneMenuList .menu-heading{white-space:nowrap;padding:12px 10px 4px}
 /* A folding group's heading is a full-width button: a chevron (right when folded, down when open) and then the group name. */
-#phoneMenuList .menu-section{display:flex;align-items:center;gap:12px;width:100%;min-height:44px;margin:0;padding:12px 10px 4px;border:0;background:none;text-align:left;color:inherit;cursor:pointer}
+#phoneMenuList .menu-section{display:flex;align-items:center;gap:12px;width:100%;min-height:44px;margin:0;padding:12px 10px 4px;border:0;background:none;text-align:left;color:#66726c;cursor:pointer}
 #phoneMenuList .menu-section:hover:not(:disabled){background:none}
 #phoneMenuList .menu-section .menu-icon{color:#66726c}
 /* A landscape phone is only 390 px tall: the tighter heading and title spacing lets the first Menu section (View: Layers, Properties and
@@ -1365,3 +1366,15 @@ html[lang="es"] .layout main>.tool-rail .rail-label{font-size:10px;letter-spacin
 .preview-hint-icon{display:flex;align-items:center;justify-content:center;width:30px;height:24px}
 .preview-hint-icon .icon{width:16px;height:16px}
 .layout main .playback-bar .playback-summary.playback-figures{display:flex;align-items:center;gap:10px;min-width:0;overflow:hidden;white-space:nowrap}
+
+/* On a portrait phone the 3D camera presets start below the autosave strip (24 px band, ends at 71 px), not under it. The Show pull
+   panel moves down with them, below the taller preset row. */
+@media (max-width:600px) and (orientation:portrait){
+.canvas #previewView{top:24px}
+.canvas #previewPull{top:80px}
+}
+/* The portrait phone selection bar is the same floating pill as the landscape phone and tablet bar: a rounded, bordered, shadowed
+   pill centred under the canvas, not a full-width strip with its icons pushed left. */
+@media (max-width:600px) and (orientation:portrait){
+.layout main>.floating.phone-selection{width:max-content;height:44px;margin:4px auto;padding:0 6px;border:1px solid var(--field-line);border-radius:10px;box-shadow:0 4px 18px #1d292518;justify-content:center;overflow:hidden}
+}

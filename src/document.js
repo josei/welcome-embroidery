@@ -3,6 +3,7 @@
 // The engine re-exports these functions, so callers keep importing them from engine.js.
 import {validateDocument} from './validate.js';
 import {objectBounds} from './transforms.js';
+import {letteringName} from './objectNames.js';
 
 /** @typedef {import('./stitchRuns.js').Settings & {compensation?: number}} Settings */
 /** @typedef {{design: number[], origin: number[], hoop: number[], cols: number, rows: number, perHoop: number, copies: number, hoopsNeeded: number|null,
@@ -45,7 +46,7 @@ export function initialDocument() {
       x:-27.35,y:-7.72,w:20.35,h:12.72,
       thread:'#527461',stitch:'fill',fillMethod:'contour',border:true,borderThread:'#38503f'},
     // Cursive wordmark in a bundled script font (filled, not a mono running line), so the lettering reads as sewn calligraphy.
-    {id:'letters',name:'Text',kind:'text',text:'Bloom',x:-13.45,y:33,w:26.9,h:11,thread:'#527461',stitch:'fill',fillMethod:'rows',font:'ttf/greatvibes'}
+    {id:'letters',name:letteringName('Bloom'),kind:'text',text:'Bloom',x:-13.45,y:33,w:26.9,h:11,thread:'#527461',stitch:'fill',fillMethod:'rows',font:'ttf/greatvibes'}
   ]};
 }
 

@@ -52,6 +52,8 @@ interface Entry {
  /** For a row that switches something on or off: whether it is on now (sets aria-pressed). */
  pressed?: boolean;
  reason?: string;
+ /** Short state shown on the row's line, right-aligned: On, Off, a value or Shown now. */
+ state?: string;
  run: () => void;
 }
 /** A label that heads a group of rows. A phone group that can fold has `section`: the heading is then a button that shows or
@@ -164,6 +166,9 @@ function Dropdown({id, label, rows, iconOnly, onOpen, sharedReasons}: {id: strin
   else if (e.key === 'End') target = items.length - 1;
   if (target !== null) { e.preventDefault(); e.stopPropagation(); items[target].focus(); }
  }
+ // One reason line for a shared-reason menu (Edit): it is drawn on the row the pointer or focus is on, else the first disabled row.
+ const disabledRows = rows.filter((r): r is Entry => typeof r === 'object' && 'id' in r && Boolean(r.disabled && r.reason));
+ const reasonRowId = sharedReasons ? (disabledRows.find(r => r.id === notedId) ?? disabledRows[0])?.id : undefined;
  return (
   <div className="file-menu" ref={wrap} onKeyDown={onKeyDown}>
    <button ref={trigger} type="button" id={id} aria-haspopup="menu" aria-expanded={open} aria-controls={open ? `${id}List` : undefined}
@@ -202,17 +207,12 @@ function Dropdown({id, label, rows, iconOnly, onOpen, sharedReasons}: {id: strin
         {row.icon && <svg className="icon menu-icon" aria-hidden="true"><use href={`#${row.icon}`} /></svg>}
         <span>{row.label}</span>
         {row.key && <kbd>{row.key}</kbd>}
+        {row.state && <small className="menu-state">{row.state}</small>}
         {row.hint && <small>{row.hint}</small>}
-        {!sharedReasons && row.disabled && row.reason && <small className="menu-reason">{row.reason}</small>}
+        {(sharedReasons ? row.id === reasonRowId : row.disabled && row.reason) && <small className="menu-reason">{row.reason}</small>}
        </button>
       );
      })}
-     {sharedReasons && (() => {
-      // One line for the whole menu: the reason of the row the pointer or focus is on, else the first disabled row's.
-      const disabledRows = rows.filter((r): r is Entry => typeof r === 'object' && 'id' in r && Boolean(r.disabled && r.reason));
-      const shownRow = disabledRows.find(r => r.id === notedId) ?? disabledRows[0];
-      return shownRow ? <div role="status" className="menu-shared-reason">{shownRow.reason}</div> : null;
-     })()}
     </div>
    )}
   </div>
@@ -331,13 +331,13 @@ export function useGridSnapRows(): Row[] {
  const grid = useSyncExternalStore(gridState.subscribe, gridState.get);
  const snapObjects = useSyncExternalStore(snapObjState.subscribe, snapObjState.get);
  return [
-  {id: 'menuGrid', label: t('Grid'), icon: 'i-grid', hint: onOff(shown), pressed: shown, run: toggleGridShown},
-  {id: 'menuGridSpacing', label: t('Grid spacing'), icon: 'i-grid-space', hint: `${grid.value} mm`, run: () => {
+  {id: 'menuGrid', label: t('Grid'), icon: 'i-grid', state: onOff(shown), pressed: shown, run: toggleGridShown},
+  {id: 'menuGridSpacing', label: t('Grid spacing'), icon: 'i-grid-space', state: `${grid.value} mm`, run: () => {
     const spacings = GRID_SPACINGS;
     gridActions.choose(spacings[(spacings.indexOf(grid.value) + 1) % spacings.length]);
   }},
-  {id: 'menuSnap', label: t('Snap'), icon: 'i-magnet', hint: onOff(snapOn), pressed: snapOn, run: () => gridSnapActions.toggle()},
-  {id: 'menuSnapObjects', label: t('Snap to objects'), icon: 'i-snap-obj', hint: onOff(snapObjects), pressed: snapObjects, run: () => snapObjActions.toggle()},
+  {id: 'menuSnap', label: t('Snap'), icon: 'i-magnet', state: onOff(snapOn), pressed: snapOn, run: () => gridSnapActions.toggle()},
+  {id: 'menuSnapObjects', label: t('Snap to objects'), icon: 'i-snap-obj', state: onOff(snapObjects), pressed: snapObjects, run: () => snapObjActions.toggle()},
  ];
 }
 
@@ -405,18 +405,18 @@ export function PhoneMenu() {
  // The reason a disabled row gives. Every disabled row has one; the generic line is only a fallback.
  const why = (id: string) => menuReason(id, reasonCtx) ?? t(NEEDS_ONE);
  const viewRows: Row[] = VIEW_ROWS.map(v => ({
-  id: `menuView-${v.id}`, label: t(v.label), icon: v.icon, hint: view === v.id ? t('Shown now') : undefined, run: () => viewActions.choose(v.id),
+  id: `menuView-${v.id}`, label: t(v.label), icon: v.icon, state: view === v.id ? t('Shown now') : undefined, run: () => viewActions.choose(v.id),
  }));
  // A portrait tablet always shows Layers, Properties and the 2D, Stitches and 3D switch on screen, so the Menu leaves them out.
  const panelAndViewRows: Row[] = tablet ? [] : [
   {heading: t('View')},
-  {id: 'menuLayers', label: t('Layers'), icon: 'i-layers', hint: sheet === 'layers' ? t('Shown now') : undefined, run: () => togglePhoneSheet('layers')},
-  {id: 'menuProperties', label: t('Properties'), icon: 'i-sliders', hint: sheet === 'properties' ? t('Shown now') : undefined, run: () => togglePhoneSheet('properties')},
+  {id: 'menuLayers', label: t('Layers'), icon: 'i-layers', state: sheet === 'layers' ? t('Shown now') : undefined, run: () => togglePhoneSheet('layers')},
+  {id: 'menuProperties', label: t('Properties'), icon: 'i-sliders', state: sheet === 'properties' ? t('Shown now') : undefined, run: () => togglePhoneSheet('properties')},
   ...viewRows,
  ];
  // The drawing tools the canvas bar and More tools panel held on a phone. They run the same commands as those controls.
  const toolRows: Entry[] = [
-  {id: 'menuSelectAdd', label: t('Tap to add to selection'), icon: 'i-select-add', pressed: selectAdd, hint: onOff(selectAdd), run: () => multiSelectState.set(!selectAdd)},
+  {id: 'menuSelectAdd', label: t('Tap to add to selection'), icon: 'i-select-add', pressed: selectAdd, state: onOff(selectAdd), run: () => multiSelectState.set(!selectAdd)},
   {id: 'menuEllipse', label: t('Ellipse'), icon: 'i-ellipse', run: () => { toolActions.press('select'); toolbarActions.addShape('ellipse'); }},
   {id: 'menuPolygon', label: t('Polygon'), icon: 'i-polygon', run: () => toolActions.press('polygon')},
   {id: 'menuStar', label: t('Star'), icon: 'i-star', run: () => toolActions.press('star')},

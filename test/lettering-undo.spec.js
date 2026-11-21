@@ -1,7 +1,7 @@
 import {test,expect} from '@playwright/test';
 
 // Adding lettering and typing into its box is one undo step: one Undo returns the design to how it was before the
-// lettering was added, with no placeholder left behind and no "Text: Text" layer name.
+// lettering was added, with no placeholder left behind and no doubled "Text" layer name.
 test.beforeEach(async({page})=>{await page.addInitScript(()=>{delete window.showSaveFilePicker;});});
 
 async function openEmptyEditor(page,width,height,lang){
@@ -37,7 +37,7 @@ test('one undo after typing lettering removes it entirely (1440x900)',async({pag
  expect(errors).toEqual([]);
 });
 
-test('lettering layer is never named "Text: Text" after typing (1440x900)',async({page})=>{
+test('lettering layer is never named with a doubled Text after typing (1440x900)',async({page})=>{
  const errors=await openEmptyEditor(page,1440,900,'en');
  await page.locator('.tool-rail #letter').click();
  await expect(page.locator('#canvasText'),'text box opens').toBeVisible();
@@ -46,7 +46,7 @@ test('lettering layer is never named "Text: Text" after typing (1440x900)',async
  await expect(page.locator('.object-row'),'the lettering is added').toHaveCount(1);
  const names=await rowNames(page);
  expect(names.join(' '),'the layer shows the typed word').toContain('Hola');
- expect(names.join(' '),'no duplicated placeholder name').not.toMatch(/Text: Text/);
+ expect(names.join(' '),'no duplicated placeholder name').not.toMatch(/Text "Text"/);
  expect(errors).toEqual([]);
 });
 
