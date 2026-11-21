@@ -11,6 +11,8 @@ export interface StatusRun {
   countError: boolean;
   issuesHidden: boolean;
   issuesText: string;
+  /** How many issues and sewing tips the issues button counts; the phone and tablet status run shows only this number. */
+  issuesCount: number;
   issuesTitle: string;
   playback: string;
   needle: string;
@@ -22,6 +24,7 @@ export const statusState = createStore<StatusRun>({
   countError: false,
   issuesHidden: true,
   issuesText: '',
+  issuesCount: 0,
   issuesTitle: '',
   playback: '',
   needle: '',

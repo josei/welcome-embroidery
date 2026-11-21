@@ -144,6 +144,7 @@ export function syncInspector({plan, compileError, tips}: {plan: PlanInfo | null
   const errs = plan?.issues || [];
   setStatus({
     issuesHidden: errs.length + tips.length === 0,
+    issuesCount: errs.length + tips.length,
     issuesText: `⚠ ${[
       errs.length ? t(errs.length === 1 ? '1 issue' : '{n} issues', {n: errs.length}) : '',
       tips.length ? t(tips.length === 1 ? '1 sewing tip' : '{n} sewing tips', {n: tips.length}) : '',
