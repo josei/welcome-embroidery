@@ -955,7 +955,10 @@ body{height:100dvh;min-height:0;overflow:hidden}
 /* The Messages and Issues buttons keep their width and stay on the status row, so a long status text can only shrink the count. */
 .layout main:not(.design-view)>footer>#issuesBtn,.layout main:not(.design-view)>footer>#messagesBtn{flex:0 0 auto;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;height:44px;min-height:44px}
 .layout main:not(.design-view)>footer>#count,.layout main:not(.design-view)>footer>#playbackProgress{flex:1 1 0;min-width:0;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.layout main:not(.design-view) .canvas .tool-rail{bottom:90px}
+/* Stitches and 3D have no drawing palette on a landscape phone: the palette would reach over the playback buttons and leave an
+   empty column beside the 3D view. The canvas takes the full width. */
+.layout main:not(.design-view) .canvas .tool-rail{display:none}
+.layout main:not(.design-view) .canvas{margin-left:0}
 
 #toast{margin-bottom:64px;z-index:50}
 .row-btn,.row-eye,.row-lock{width:44px;min-width:44px;height:44px;min-height:44px}

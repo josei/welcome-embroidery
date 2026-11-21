@@ -1,7 +1,7 @@
 import {test,expect} from '@playwright/test';
 
 // The phone header reads the same left to right in portrait and landscape: the Menu, Undo, Redo, the design name, then Export.
-// The Stitches view keeps the tool dock at both orientations, as the desktop does.
+// The Stitches view keeps the tool dock in portrait. On a landscape phone the dock is hidden there, so the playback buttons stay clear.
 const SIZES=[[390,844],[844,390]];
 
 for(const [width,height] of SIZES) for(const lang of ['en','es']) {
@@ -17,14 +17,19 @@ for(const [width,height] of SIZES) for(const lang of ['en','es']) {
   expect(order.filter(id=>['phoneMenu','undo','redo','name','export-split'].includes(id))).toEqual(['phoneMenu','undo','redo','name','export-split']);
  });
 
- test(`Stitches shows the same tool dock at ${width}x${height} (${lang})`,async({page})=>{
+ test(`Stitches shows the tool dock in portrait, and hides it on a landscape phone (${width}x${height}, ${lang})`,async({page})=>{
   await page.addInitScript(()=>{delete window.showSaveFilePicker;});
   await page.setViewportSize({width,height});
   await page.goto(lang==='en'?'/':'/?lang=es');
   await expect(page.locator('.tool-rail').first()).toBeVisible();
   await page.evaluate(()=>document.querySelector('[data-view=stitches]').click());
-  await expect(page.locator('.tool-rail').first()).toBeVisible();
-  const buttons=await page.locator('.tool-rail').first().locator('button').count();
-  expect(buttons).toBe(6);
+  if(width<height){
+   await expect(page.locator('.tool-rail').first()).toBeVisible();
+   const buttons=await page.locator('.tool-rail').first().locator('button').count();
+   expect(buttons).toBe(6);
+  } else {
+   await expect(page.locator('#play')).toBeVisible();
+   await expect(page.locator('.tool-rail').first()).toBeHidden();
+  }
  });
 }
