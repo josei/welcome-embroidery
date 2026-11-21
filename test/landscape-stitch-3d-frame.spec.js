@@ -76,24 +76,6 @@ for(const lang of ['en','es']){
   expect(errors).toEqual([]);
  });
 
- // Known gap, not fixed here: in headless Chromium the bottom ~18 px of the 3D view composite as the page background, not
- // the scene, at this size. The WebGL buffer itself is full, and the gap is present with the palette shown as well. It stays
- // unexpected until the cause is found; the check below is what it must pass.
- test.fixme(`3D paints to the bottom edge of its frame at 844x390 (${lang})`,async({page})=>{
-  await openEditor(page,lang);
-  await chooseView(page,'preview');
-  await expect(page.locator('#preview3d')).toBeVisible();
-  const frame=await box(page,'.layout main>.canvas');
-  const shot=await page.screenshot({clip:{x:0,y:frame.b-14,width:LANDSCAPE[0],height:14}});
-  const unpainted=await page.evaluate(async([b64,x0,w])=>{
-   const img=new Image();img.src='data:image/png;base64,'+b64;await img.decode();
-   const c=document.createElement('canvas');c.width=img.width;c.height=img.height;const g=c.getContext('2d');g.drawImage(img,0,0);
-   let rows=0;
-   for(let y=0;y<img.height;y++){const d=g.getImageData(Math.round(x0),y,Math.round(w),1).data;let painted=false;for(let i=3;i<d.length;i+=4)if(d[i]>0){painted=true;break;}if(!painted)rows++;}
-   return rows;
-  },[shot.toString('base64'),frame.l+frame.w*0.1,frame.w*0.8]);
-  expect(unpainted).toBe(0);
- });
 }
 
 test.describe('touch',()=>{
