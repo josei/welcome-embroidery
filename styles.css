@@ -1206,6 +1206,8 @@ html[lang="es"] .layout main>.tool-rail .rail-label{font-size:10px;letter-spacin
 .top{overflow:visible;position:relative;z-index:7}
 .top #savedStatus,.top #unsavedMark,.top #idleStatus{display:block;position:absolute;top:100%;left:0;right:0;width:auto;height:auto;margin:0;padding:2px 12px;clip:auto;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:var(--fs-caption);line-height:1.3;background:#fff;color:#66726c}
 .top #unsavedMark{color:#8a5a00}
+/* Phones and tablets show the state as a dot in the same colour the words take on desktop (currentColor follows the state's class). */
+.top .save-dot{display:block;width:8px;height:8px;margin:4px 0;border-radius:50%;background:currentColor}
 }
 /* At tablet portrait the strip stops at the Layers column's left edge, so the column keeps the band under the top bar to itself.
    The Layers list scrolls inside its panel; rows it scrolls past the top edge would otherwise sit under the strip. */

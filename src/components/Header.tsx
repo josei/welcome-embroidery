@@ -53,18 +53,37 @@ function HistoryButton({undo = false}: {undo?: boolean}) {
 // The save status: the same text line at every size. While the design has changes it reads "Unsaved" (or "Autosaved in this
 // browser" until a file exists); otherwise the time of the last save in this tab and the file it wrote to. The words come from
 // saveStatusWords, which the phone Menu shows too. Phones and tablets place this line under the bar (styles.css).
+// The phone and tablet strip (up to 1024 px wide, the same breakpoint styles.css uses for the strip under the bar) shows a dot
+// in place of the words. Its words stay as the strip's accessible name and tooltip.
+const STRIP_DOT_QUERY = '(max-width: 1024px)';
+function subscribeStripDot(onChange: () => void) {
+ const query = window.matchMedia(STRIP_DOT_QUERY);
+ query.addEventListener('change', onChange);
+ return () => query.removeEventListener('change', onChange);
+}
+function useStripDot(): boolean {
+ return useSyncExternalStore(subscribeStripDot, () => window.matchMedia(STRIP_DOT_QUERY).matches);
+}
+
 function SaveStatus() {
  const {dirty} = useSyncExternalStore(documentState.subscribe, documentState.get);
  const {savedAt, savedFileName} = useSyncExternalStore(saveState.subscribe, saveState.get);
+ const dotOnly = useStripDot();
  // The status is always rendered, so the bar keeps its shape as the state changes: a clean design that has not been saved
  // shows the same autosave words as a dirty one.
  const text = saveStatusWords(dirty, savedAt, savedFileName, t);
+ // On a phone or tablet the words are not visible: the dot is, and the words name it for a screen reader.
+ const body = dotOnly ? <span className="save-dot" aria-hidden="true" /> : text;
+ // The words are the name only where they are not shown. Desktop keeps its markup as it was.
+ const named = dotOnly ? {'aria-label': text} : {};
  if (dirty) {
   const mark = dirtyMark(savedFileName, t);
-  return <span id="unsavedMark" className={mark.unsaved ? 'save-status unsaved' : 'save-status autosaved'} title={text}>{text}</span>;
+  return <span id="unsavedMark" className={mark.unsaved ? 'save-status unsaved' : 'save-status autosaved'} title={text}
+   {...named} {...(dotOnly ? {role: 'img'} : {})}>{body}</span>;
  }
- if (savedAt === null) return <span id="idleStatus" className="save-status autosaved" title={text}>{text}</span>;
- return <span id="savedStatus" className="save-status" role="status">{text}</span>;
+ if (savedAt === null) return <span id="idleStatus" className="save-status autosaved" title={text}
+  {...named} {...(dotOnly ? {role: 'img'} : {})}>{body}</span>;
+ return <span id="savedStatus" className="save-status" role="status" title={dotOnly ? text : undefined} {...named}>{body}</span>;
 }
 
 // Export: the one Export button opens the export dialog, where the format is chosen. Its name never changes with the format.
