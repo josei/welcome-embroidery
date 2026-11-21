@@ -584,13 +584,13 @@ test('sewing tips to show: unticking a category hides its tips from the panel an
  expect(await page.evaluate(()=>localStorage.getItem('welcome.hiddenTips'))).toBe('[]');
 });
 
-test('inspector with nothing selected has no sewing tips settings and starts with the document stitch settings',async({page})=>{
+test('inspector with nothing selected has no sewing tips settings and starts with the fabric choice',async({page})=>{
  await page.goto('/');page.on('dialog',d=>d.accept());await page.locator('#new').click();
  await expect(page.locator('#selHint')).toBeVisible();await expect(page.locator('#tipsSettings')).toHaveCount(0);
 expect(await page.locator('#selHint').evaluate(hint=>{const panel=hint.closest('aside');
   const next=[...panel.querySelectorAll('section,details')].find(el=>!el.closest('[hidden]')&&el.getClientRects().length&&
    (hint.compareDocumentPosition(el)&Node.DOCUMENT_POSITION_FOLLOWING));
-  return next?.id;})).toBe('secDoc');
+  return next?.className;})).toBe('fabric-section');
 });
 
 test('a PES file with header metadata names its layer after the file and shows the author in the info panel',async({page})=>{
@@ -1750,7 +1750,6 @@ test('organize fonts lists the bundled font a lettering uses, marked as not remo
  const errors=[];page.on('pageerror',e=>errors.push(e.message));page.on('dialog',d=>d.accept());
  await page.goto('/');await newDesign(page);
  await page.locator('#letter').click();await page.locator('#font').selectOption('inkstitch/allegria20');await page.locator('#letteringText').fill('ANA');await page.locator('#letteringText').press('Tab');
- await page.locator('details#secDoc').evaluate(d=>{d.open=true;});
  await page.locator('#organizeFonts').click();
  await expect(page.locator('#fontsList')).toContainText('Allegria 20 (bundled, not removed): used by 1 text object');
  await expect(page.locator('#fontsEmpty')).toBeHidden();
@@ -1762,14 +1761,15 @@ test('organize fonts lists a loaded font with its lettering, and removes it only
  const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');page.on('dialog',d=>d.accept());await newDesign(page);
  await page.locator('#letter').click();await page.waitForTimeout(300);
  await page.locator('#fontButton').click();await page.locator('#fontFile').setInputFiles('test/fixtures/BebasNeue-Regular.ttf');await expect(page.locator('#toast')).toContainText('Loaded');
- await page.locator('details#secDoc').evaluate(d=>{d.open=true;});
  await page.locator('#organizeFonts').click();await expect(page.locator('#fontsList')).toContainText('BebasNeue-Regular: used by 1 text object');
  await expect(page.locator('#removeUnusedFonts')).toBeDisabled();
  await page.keyboard.press('Escape');
- await page.locator('.object-row').first().click();await page.keyboard.press('Delete');
+ // Organize fonts sits in the lettering section, so reselect the lettering object before reopening it.
+ await page.locator('.object-row').last().click();
+ await page.locator('#font').selectOption('inkstitch/allegria20');
  await page.locator('#organizeFonts').click();await expect(page.locator('#fontsList')).toContainText('used by 0 text objects');
  await page.locator('#removeUnusedFonts').click();await expect(page.locator('#toast')).toContainText('Removed 1 unused font');
- await expect(page.locator('#fontsEmpty')).toBeVisible();
+ await expect(page.locator('#fontsList')).not.toContainText('BebasNeue-Regular');
  expect(errors).toEqual([]);
 });
 

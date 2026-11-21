@@ -2,13 +2,12 @@ import {useState, useSyncExternalStore} from 'react';
 import {documentState, settingsActions} from '../documentState.js';
 import {useDecimalNumber} from './useDecimalInput';
 import {FABRIC_PROFILES} from '../engine.js';
-import {setFontsDialogOpen} from '../fontsDialogState.js';
 import {rangeText} from '../fieldRanges.js';
 
 // The units of these two fields are shown under them, not in the label, so the label fits the inspector's label column.
 const TRIM_RANGE = {min: 2, max: 30};
 const COMP_RANGE = {min: 0, max: 2};
-// The document stitch settings panel, rendered by React. Ids match the markup it replaced, because app.js wires them by id.
+// The advanced stitch settings: the document's tie-in, jump trimming and pull compensation. Rendered by React. Ids match the markup it replaced, because app.js wires them by id.
 // The fabric choice, at the bottom of the inspector: it sets the document's density, underlay, pull compensation and stabilizer tip.
 export function FabricSection() {
  const {doc} = useSyncExternalStore(documentState.subscribe, documentState.get);
@@ -22,17 +21,17 @@ export function FabricSection() {
      aria-label="Fabric"
      value={settings.fabric ?? 'woven'}
      onChange={e => settingsActions.set({fabric: e.target.value})}
-     title="Sets the spacing, stitch length, underlay and pull compensation for the fabric, and names a stabilizer. Explicit settings still apply."
+     title="Sets the spacing, stitch length and pull compensation for the fabric, and names a stabilizer. Explicit settings still apply."
     >
      {Object.entries(FABRIC_PROFILES).map(([key, profile]) => <option key={key} value={key}>{profile.label}</option>)}
     </select>
    </label>
-   <p className="fabric-hint">Sets density, underlay, pull compensation and the stabilizer tip for the design. Objects with their own values keep them.</p>
+   <p className="fabric-hint">Sets density, pull compensation and the stabilizer tip for the design. Objects with their own values keep them.</p>
   </section>
  );
 }
 
-// The document stitch settings panel, rendered by React. Ids match the markup it replaced, because app.js wires them by id.
+// The advanced stitch settings: the document's tie-in, jump trimming and pull compensation. Rendered by React. Ids match the markup it replaced, because app.js wires them by id.
 // The panel is remounted when the selection changes (it sits in a different place in the inspector then), so its open state is kept here.
 let documentSettingsOpen = false;
 export function DocumentSettings() {
@@ -42,16 +41,10 @@ export function DocumentSettings() {
  const trim = useDecimalNumber(String(settings.trimMm ?? ''), text => settingsActions.set({trimMm: text === '' ? 5 : Number(text)}), {min: 2, max: 30}, {allowEmpty: true});
  const comp = useDecimalNumber(String(settings.compensation ?? ''), text => settingsActions.set({compensation: Number(text)}), {min: 0, max: 2});
  return (
-  <details id="secDoc" className="doc-settings" open={open} onToggle={e => {documentSettingsOpen = e.currentTarget.open; setOpen(e.currentTarget.open);}}><summary>Document stitch settings</summary><label>Tie-in /
+  <details id="secDoc" className="doc-settings" open={open} onToggle={e => {documentSettingsOpen = e.currentTarget.open; setOpen(e.currentTarget.open);}}><summary>Advanced stitch settings</summary><label>Tie-in /
     tie-off <input id="ties" type="checkbox" checked={Boolean(settings.ties)} onChange={e =>
     settingsActions.set({ties: e.target.checked})} /></label><label>Trim long jumps <input id="trims" type="checkbox" checked={Boolean(
     settings.trims)} onChange={e => settingsActions.set({trims: e.target.checked})} /></label><label>{"Trim jumps from"}<input id="trimMm" type="text" inputMode="decimal" min="2" max="30" step="0.5" placeholder="5"
-      {...trim.inputProps} title="A jump at least this long is trimmed when Trim long jumps is on (2-30 mm, default 5)" /><span className="field-range">{rangeText(TRIM_RANGE)}</span>{trim.note && <span className="clamp-note" role="status">{trim.note}</span>}</label><label title="Underlay: a first layer of stitches under the top stitches that holds the fabric flat. Automatic by default.">Underlay <input
-        id="underlay" type="checkbox" checked={Boolean(
-    settings.underlay)} onChange={e =>
-    settingsActions.set(
-    {underlay: e.target.checked})} /></label><button type="button" id="organizeFonts"
-      title="List the custom fonts in this document and remove the ones no lettering uses" onClick={(
-    ) => setFontsDialogOpen(true)}>Organize fonts</button><label>{"Pull compensation"}<input id="comp" type="text" inputMode="decimal" min="0" max="2" step="0.05" {...comp.inputProps} /><span className="field-range">{rangeText(COMP_RANGE)}</span>{comp.note && <span className="clamp-note" role="status">{comp.note}</span>}</label></details>
+      {...trim.inputProps} title="A jump at least this long is trimmed when Trim long jumps is on (2-30 mm, default 5)" /><span className="field-range">{rangeText(TRIM_RANGE)}</span>{trim.note && <span className="clamp-note" role="status">{trim.note}</span>}</label><label>{"Pull compensation"}<input id="comp" type="text" inputMode="decimal" min="0" max="2" step="0.05" {...comp.inputProps} /><span className="field-range">{rangeText(COMP_RANGE)}</span>{comp.note && <span className="clamp-note" role="status">{comp.note}</span>}</label></details>
  );
 }

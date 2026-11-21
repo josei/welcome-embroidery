@@ -195,9 +195,9 @@ for(const lang of ['en','es']){
   const errors=[];page.on('pageerror',e=>errors.push(e.message));page.on('dialog',d=>d.accept());
   await page.setViewportSize({width:1024,height:768});
   await page.goto(`/?lang=${lang}`);await newDesign(page);
-  // Nothing selected: the document settings (trims, underlay, pull compensation) sit beside the default stitch fields. With the
+  // Nothing selected: the advanced stitch settings (trims, pull compensation) sit beside the default stitch fields. With the
   // sections open as a worst case, and with two rectangles selected, the thread plan's Replace control must not sit on Fabric.
-  const pairs=[['#trims','#spacing'],['#underlay','#angle'],['#comp','#stitchLength']];
+  const pairs=[['#trims','#spacing'],['#comp','#stitchLength']];
   // A closed section draws none of its controls, so its control has no box to overlap; the field below it must still be drawn.
   const checkClosed=async()=>{
    for(const [x,y] of pairs){

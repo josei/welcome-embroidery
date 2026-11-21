@@ -54,7 +54,7 @@ export const ES_ADDITIONS={
 'Redwork: one run sewn out along a line and back over the same stitches, for a fine outline.':'Redwork: una línea de puntada corrida que va y vuelve sobre los mismos pinchazos, para contornos finos.',
 'A jump at least this long is trimmed when Trim long jumps is on (2-30 mm, default 5)':'Un salto de al menos esta longitud se corta cuando «Cortar saltos largos» está activado (2-30 mm, por defecto 5)',
 'List the custom fonts in this document and remove the ones no lettering uses':'Lista las fuentes personalizadas de este documento y quita las que ningún texto usa',
-'Sets the spacing, stitch length, underlay and pull compensation for the fabric, and names a stabilizer. Explicit settings still apply.':'Ajusta la separación, el largo de puntada, la base (underlay) y la compensación de tirón para la tela, y nombra un estabilizador. Los ajustes explícitos siguen aplicándose.',
+'Sets the spacing, stitch length and pull compensation for the fabric, and names a stabilizer. Explicit settings still apply.':'Ajusta la separación, el largo de puntada y la compensación de tirón para la tela, y nombra un estabilizador. Los ajustes explícitos siguen aplicándose.',
 'Raised fill: adds a second tatami underlay so the fill stands up':'Relleno elevado: añade una segunda base tatami para que el relleno quede en relieve',
 'Row spacing at the top of the fill, changing linearly to the end spacing. Set both or neither.':'Separación de filas en la parte superior del relleno, que cambia de forma lineal hasta la separación final. Rellena ambas o ninguna.',
 'Row spacing at the bottom of the fill (rows pattern only).':'Separación de filas en la parte inferior del relleno (solo con patrón de filas).',

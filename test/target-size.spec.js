@@ -38,7 +38,7 @@ test('checkboxes draw a 24px box at 1280 and 1024 px wide',async({page})=>{
   for(const id of ['allFormats','withWorksheet']){const b=await page.locator(`#${id}`).boundingBox();expect(b.width,`#${id} ${width} width`).toBeGreaterThanOrEqual(24);expect(b.height,`#${id} ${width} height`).toBeGreaterThanOrEqual(24);}
   await page.keyboard.press('Escape');
   await page.locator('#secDoc summary').click();
-  for(const id of ['ties','trims','underlay']){const b=await page.locator(`#${id}`).boundingBox();expect(b.width,`#${id} ${width} width`).toBeGreaterThanOrEqual(24);expect(b.height,`#${id} ${width} height`).toBeGreaterThanOrEqual(24);}
+  for(const id of ['ties','trims','underlayType']){const b=await page.locator(`#${id}`).boundingBox();expect(b.width,`#${id} ${width} width`).toBeGreaterThanOrEqual(24);expect(b.height,`#${id} ${width} height`).toBeGreaterThanOrEqual(24);}
   await page.locator('#secDoc summary').click();
  }
  expect(errors).toEqual([]);

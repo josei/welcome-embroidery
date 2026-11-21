@@ -311,6 +311,28 @@ export function EditorLayout() {
                </button>
              </div>
  );
+  // The object stitch rows. With nothing selected they set the defaults for new objects and sit in the Document section.
+  const stitchSection = (
+    <section id={"secStitch"} data-sec={""} hidden={layout.secStitch}>
+      <StitchTypeRows />
+      <StitchBlingRows />
+      <StitchFillRows />
+      <StitchBlendRows />
+      <StitchAccordionRows />
+      <StitchRunRows />
+      <StitchCapRows />
+      <StitchSatinEndRows />
+      <StitchPathRows />
+      {" "}
+    </section>
+  );
+  // The thread plan and reference image: in the Document section with nothing selected, after the object rows otherwise.
+  const designFolds = (
+    <>
+      <ThreadPlan />
+      <ReferencePicture />
+    </>
+  );
  return (
   <>
     <div className={"layout"}>
@@ -384,43 +406,40 @@ export function EditorLayout() {
         <SelectionHeading />
         <TipCard />
         <SelectionHint />
+        {/* One Document section. With nothing selected it holds the design's settings in order: fabric, the object defaults, the advanced
+            stitch settings, the thread plan and the reference image. With an object selected it sits at the end of the panel instead. */}
         {selectionLabels.hintHidden ? null : (
           <div className={"scope-document"}>
             <h3 className={"section-heading scope-heading"}>
               {"Document"}
             </h3>
+            {hoopInProperties ? <HoopFields /> : null}
+            <DesignSummary />
+            <FabricSection />
+            {stitchSection}
             <DocumentSettings />
+            {designFolds}
           </div>
         )}
         <SourceInfo />
         <TransformPanel />
-        <section id={"secStitch"} data-sec={""} hidden={layout.secStitch}>
-          <StitchTypeRows />
-          <StitchBlingRows />
-          <StitchFillRows />
-          <StitchBlendRows />
-          <StitchAccordionRows />
-          <StitchRunRows />
-          <StitchCapRows />
-          <StitchSatinEndRows />
-          <StitchPathRows />
-          {" "}
-        </section>
+        {selectionLabels.hintHidden ? stitchSection : null}
         <LetteringPanel />
         <PathPanel />
         <ArrayPanel />
         <SewingOrder />
-        <ReferencePicture />
-        <ThreadPlan />
-        <div className={"scope-document"}>
-          <h3 className={"section-heading scope-heading"}>
-            {"Document"}
-          </h3>
-          {hoopInProperties ? <HoopFields /> : null}
-          {selectionLabels.hintHidden ? <DocumentSettings /> : null}
-          <DesignSummary />
-          <FabricSection />
-        </div>
+        {selectionLabels.hintHidden ? designFolds : null}
+        {selectionLabels.hintHidden ? (
+          <div className={"scope-document"}>
+            <h3 className={"section-heading scope-heading"}>
+              {"Document"}
+            </h3>
+            {hoopInProperties ? <HoopFields /> : null}
+            <DesignSummary />
+            <FabricSection />
+            <DocumentSettings />
+          </div>
+        ) : null}
       </aside>
     </div>
   </>

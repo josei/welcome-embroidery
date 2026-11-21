@@ -1,3 +1,4 @@
+import {setFontsDialogOpen} from '../fontsDialogState.js';
 import {layoutState} from '../layoutState.js';
 import {stitchRowsState} from '../stitchRowsState.js';
 import {useLayoutEffect, useRef, useSyncExternalStore} from 'react';
@@ -49,7 +50,8 @@ useLayoutEffect(() => {
   aria-expanded="false" aria-controls="fontPanel"><svg id="fontButtonPreview" className="font-preview" aria-hidden="true"></svg><span
     id="fontButtonName">Welcome Mono</span><svg className="icon chevron" aria-hidden="true"><use href="#i-chevron"/></svg></button>
 <select id="font" className="sr-only" tabIndex={-1} aria-label="Embroidery font" value={l.fontValue} onChange={e =>
-  letteringActions.choose('font', e.target.value)}>{l.fontOptions.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}</select></div>
+  letteringActions.choose('font', e.target.value)}>{l.fontOptions.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}</select><button type="button" id="organizeFonts"
+  title="List the custom fonts in this document and remove the ones no lettering uses" onClick={() => setFontsDialogOpen(true)}>Organize fonts</button></div>
 <label className="block">Text<textarea id="letteringText" ref={textRef} rows={2} maxLength={120} aria-label="Text content" {...text} disabled={l.textOff} /></label>
 <label>Font size (mm)<input id="letteringHeight" type="text" inputMode="decimal" min={l.heightMin} max={l.heightMax} {...height.inputProps} title={l.heightTitle || height.inputProps.title} step="0.5" disabled={l.textOff} />{height.note && <span className="clamp-note" role="status">{height.note}</span>}</label>
 <div className="style-row" role="group" aria-label="Text style"><button type="button" id="textBold" className="icon-button" aria-pressed={l.bold}

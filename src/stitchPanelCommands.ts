@@ -123,7 +123,7 @@ export function configureStitchPanelActions(next: StitchPanelApi) {
   underlayActions.choose = v => {
     if (selState().multi.size) {
       wired().edit(wired().orderedIds().map(id => ({op: 'set_object', id, underlayType: v})));
-    } else wired().edit([{op: 'set_settings', underlayType: v}]);
+    } else wired().edit([{op: 'set_settings', underlayType: v, underlay: true}]); // choosing a type replaces the old on/off flag
   };
   settingsActions.set = patch => {
     wired().edit([{op: 'set_settings', ...patch}]);
