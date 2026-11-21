@@ -1,7 +1,7 @@
 import {test,expect} from '@playwright/test';
 
-// The Export dialog at phone and tablet widths: Download and Cancel share one row at the foot, each no wider than half the card;
-// the select and file-name field keep the desktop's width; no label wraps. The desktop dialog's layout and sizes do not change.
+// The Export dialog at phone and tablet widths: a 340 px card whose select and file-name field keep the desktop's width, with the
+// desktop's stacked footer; no label wraps.
 
 test.beforeEach(async({page})=>{await page.addInitScript(()=>{delete window.showSaveFilePicker;});});
 
@@ -35,12 +35,11 @@ async function measureDialog(page,width,height,lang){
 }
 
 for(const lang of ['en','es']) for(const size of [{width:390,height:844},{width:768,height:1024}]){
- test(`Download and Cancel share one row, each at most half the dialog at ${size.width}x${size.height} (${lang})`,async({page})=>{
+ test(`Download and Cancel stack full width, each at most the dialog width, at ${size.width}x${size.height} (${lang})`,async({page})=>{
   const m=await measureDialog(page,size.width,size.height,lang);
-  expect(Math.abs(m.download.y-m.cancel.y),'same top edge').toBeLessThan(1);
-  expect(m.download.x,'Download left of Cancel').toBeLessThan(m.cancel.x);
-  expect(m.download.w,'Download no wider than half the dialog').toBeLessThanOrEqual(m.dialog.w/2);
-  expect(m.cancel.w,'Cancel no wider than half the dialog').toBeLessThanOrEqual(m.dialog.w/2);
+  expect(m.download.y,'Download above Cancel').toBeLessThan(m.cancel.y);
+  expect(Math.abs(m.download.x-m.cancel.x),'same left edge').toBeLessThan(1);
+  expect(m.download.w,'Download as wide as the footer').toBeCloseTo(m.cancel.w,0);
   expect(m.download.h,'Download is a 44 px touch target').toBeGreaterThanOrEqual(44);
   expect(m.cancel.h,'Cancel is a 44 px touch target').toBeGreaterThanOrEqual(44);
  });

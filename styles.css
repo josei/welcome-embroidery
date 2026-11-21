@@ -1047,24 +1047,28 @@ body{height:100dvh;min-height:0;overflow:hidden}
 @media (min-width:601px){.canvas .zoombar{left:72px}}
 }
 
-/* The action row in Export and Settings. Desktop stacks each button full width; phone and tablet set them in a right-aligned row (see below). */
+/* The action row at the foot of a dialog (Export, Settings, the keyboard shortcuts sheet). Every size uses the desktop footer:
+   each button stacks full width, at the same 44 px touch height, so a dialog's footer looks the same on a phone as on a desktop. */
 .dialog-actions{display:grid;gap:12px}
+.dialog-actions button{min-height:44px}
 
-/* Phone and tablet lay the Export dialog out as the desktop dialog is: a 340 px card whose fields keep the desktop's width.
-   Download and Cancel sit side by side in one row at the foot, each half the card's width less the gap. Touch heights stay
-   44 px and field text stays 16 px. Below the desktop breakpoint only. */
+/* The Export and Settings cards keep their 24 px margin on the form, not the dialog, so the margin is one number at every size. */
+#exportDialog{padding:0}
+#exportDialog form{padding:24px}
+
+/* Phone and tablet lay the Export dialog out as the desktop dialog is: a 340 px card whose fields keep the desktop's width,
+   with the same stacked footer. Field text stays 16 px. Below the desktop breakpoint only. */
 @media (max-width:1100px){
 #exportDialog{width:340px;max-width:calc(100vw - 24px)}
 #exportDialog form{grid-template-columns:repeat(2,minmax(0,1fr));column-gap:8px}
-.dialog-actions{display:flex;justify-content:flex-end;align-items:center;gap:8px}.dialog-actions button{white-space:nowrap}
 #exportDialog form>:not(button){grid-column:1/-1}
-#exportDialog select,#exportDialog input:not([type=checkbox]),#exportDialog button{min-height:44px}
+#exportDialog select,#exportDialog input:not([type=checkbox]){min-height:44px}
 /* On a short window (a landscape phone at 390 px) the Export card is taller than the screen. The fields scroll inside it and the
-   Download row stays pinned at the foot, so the main action is always in view. */
+   Download button stays pinned at the foot, so the main action is always in view. The sides keep the desktop's 24 px margin. */
 @media (max-height:500px){
 #exportDialog{box-sizing:border-box;max-height:calc(100dvh - 24px);padding:0;overflow:hidden}
-#exportDialog form{box-sizing:border-box;max-height:calc(100dvh - 24px);overflow-y:auto;overscroll-behavior:contain;padding:28px 36px 0}
-#exportDialog .dialog-actions{position:sticky;bottom:0;z-index:1;margin:0 -36px;padding:12px 36px 28px;background:#fff}
+#exportDialog form{box-sizing:border-box;max-height:calc(100dvh - 24px);overflow-y:auto;overscroll-behavior:contain;padding:28px 24px 0}
+#exportDialog .dialog-actions{position:sticky;bottom:0;z-index:1;margin:0 -24px;padding:12px 24px 28px;background:#fff}
 }
 }
 
@@ -1095,8 +1099,8 @@ body{height:100dvh;min-height:0;overflow:hidden}
    landscape, where the whole card is taller than the screen. In landscape on a phone or tablet the card is capped at 480 px
    and centred. */
 #settingsDialog{max-height:calc(100dvh - 24px);padding:0}
-#settingsDialog form{grid-template-rows:auto minmax(0,1fr) auto;max-height:calc(100dvh - 24px);min-height:0}
-#settingsDialog .settings-body{display:grid;gap:12px;min-height:0;overflow-y:auto;overscroll-behavior:contain;padding:2px}
+#settingsDialog form{grid-template-rows:auto minmax(0,1fr) auto;max-height:calc(100dvh - 24px);min-height:0;padding:24px}
+#settingsDialog .settings-body{display:grid;gap:12px;min-height:0;overflow-y:auto;overscroll-behavior:contain;padding:2px 0}
 #settingsDialog .settings-body:focus-visible{outline:none}
 @media (max-width:1024px) and (orientation:landscape){
 #settingsDialog{width:min(480px,calc(100vw - 24px));max-width:calc(100vw - 24px)}

@@ -15,6 +15,6 @@ export function KeysDialog() {
     <h4>{t(title)}</h4>
     {rows.flatMap(([key, desc]) => [<kbd key={'k' + key + desc}>{key}</kbd>, <span key={'d' + key + desc}>{t(desc, {shift: modifierName('shift'), alt: modifierName('alt')})}</span>])}
    </section>
-  ))}</div><button>Close</button></form></dialog>
+  ))}</div><div className="dialog-actions"><button>{t('Close')}</button></div></form></dialog>
  );
 }
