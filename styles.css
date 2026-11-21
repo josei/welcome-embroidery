@@ -729,6 +729,9 @@ body{height:100vh;height:100dvh;min-height:0;overflow:hidden}
 .object-row .row-tag{display:flex;min-width:0;white-space:nowrap}.object-row .row-kind{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.object-row .row-sep,.object-row .row-count{flex:none;white-space:nowrap}.object-row .row-sep{white-space:pre}.object-row .row-icon{display:none}
 /* The Layers column stays 300px. Its rows give the two 44px row buttons less room, so the stitch count keeps its full width. */
 @media (min-width:601px) and (max-width:1024px) and (orientation:portrait){.layout>#layersSheet{padding-left:8px;padding-right:8px}.layout>#layersSheet #objects{padding-left:4px;padding-right:4px}.object-row{gap:6px;padding-left:6px;padding-right:4px}.object-line{gap:4px}}
+/* The Layers list stops on a whole row: a scroll position rests with a row's top edge at the list's top, under the count's divider,
+   so no row is left half-hidden there. */
+@media (min-width:601px) and (max-width:1024px) and (orientation:portrait){.layout>#layersSheet #objects{scroll-snap-type:y mandatory;border-top:1px solid #e3e6e1}.layout>#layersSheet .object-line{scroll-snap-align:start}}
 /* A tablet's Properties disclosure rows get the 44 px touch height that phone sheets already use. */
 @media (min-width:601px) and (max-width:1024px) and (orientation:portrait){.layout>#inspector .sec-fold>summary,.layout>#inspector .doc-settings>summary{min-height:44px;display:flex;align-items:center}}
 .top{height:56px;padding:0 8px;gap:6px}
@@ -880,6 +883,10 @@ body{height:100vh;height:100dvh;min-height:0;overflow:hidden;overscroll-behavior
    under the controls and the readout. The toast keeps its anchor above the status line, so it moves up by the same
    amount and stays clear of the zoom bar inside the shorter canvas. */
 .layout main:not(.design-view)>footer>#toast{bottom:245px}
+/* In the Stitches and 3D views the status line has no text of its own (the playback row above it carries the count), so the
+   empty row is removed and the canvas takes its height. A message in the count, such as a compile error, brings the row back.
+   Toasts hang from the row's bottom edge, which does not move. */
+.layout main:not(.design-view)>footer:has(#count:empty){height:0;min-height:0;padding:0;border-top:0}
 }
 
 /* A landscape phone (844x390, any landscape

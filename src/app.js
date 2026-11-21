@@ -86,8 +86,19 @@ phoneSheetState.subscribe(() => {
     return;
   }
   // Pan now, once the sheet is laid out, and again when its height transition ends, in case the sheet was still moving.
+  // Layers on a portrait phone refits the design above the sheet; Properties, and Layers in landscape, only pan.
+  const portrait = matchMedia('(orientation: portrait)').matches;
+  // The first frame can run before the sheet is in the DOM, so the pan waits for it: measured without it, the view would
+  // centre on the whole canvas and leave the design under the sheet.
+  let frames = 0;
   const pan = () => {
-    if (phoneSheetState.get() === sheet) editor.canvas?.panToReveal();
+    if (phoneSheetState.get() !== sheet) return;
+    if (!document.querySelector('.layout>aside.panel.sheet-open') && frames++ < 30) {
+      requestAnimationFrame(pan);
+      return;
+    }
+    if (sheet === 'layers' && portrait) editor.canvas?.fitAboveSheet();
+    else editor.canvas?.panToReveal();
   };
   requestAnimationFrame(pan);
   const sheetEl = document.querySelector('.layout>aside.panel.sheet-open');

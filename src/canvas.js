@@ -121,7 +121,11 @@ export function createCanvas(/** @type {any} */ api){
   return ids&&bs.length?union(bs):union([[-hs.w/2,-hs.h/2,hs.w/2,hs.h/2],...bs]);
   }
   function fitAll(){const b=contentBounds();fitRect(b[0],b[1],b[2],b[3],56,railInset(container));}
-  function fitSelection(){const ids=api.ids();if(!ids.length)return fitAll();{const b=contentBounds(ids);fitRect(b[0],b[1],b[2],b[3],90,{...toolbarInset(container),...railInset(container)});}}function revealSelection(){const ids=api.ids();if(!ids.length)return;const b=contentBounds(ids),ins=toolbarInset(container),{w,h}=size(),[x0,y0]=toScreen(b[0],b[1]),[x1,y1]=toScreen(b[2],b[3]);if(!(x0<RULER||y0<RULER+ins.top||x1>w-ins.right||y1>h-ins.bottom))return;fitRect(b[0],b[1],b[2],b[3],90,ins);}
+  function fitSelection(){const ids=api.ids();if(!ids.length)return fitAll();{const b=contentBounds(ids);fitRect(b[0],b[1],b[2],b[3],90,{...toolbarInset(container),...railInset(container)});}}
+  // Refits the whole design into the part of the canvas no open phone sheet or toolbar covers, so a design that is larger than that part
+  // still shows its full extent above the sheet. Used when Layers opens on a portrait phone.
+  function fitAboveSheet(){const b=contentBounds(),t=toolbarInset(container),r=railInset(container);fitRect(b[0],b[1],b[2],b[3],56,{top:t.top+r.top,right:t.right+r.right,bottom:t.bottom+r.bottom,left:t.left+r.left});}
+  function revealSelection(){const ids=api.ids();if(!ids.length)return;const b=contentBounds(ids),ins=toolbarInset(container),{w,h}=size(),[x0,y0]=toScreen(b[0],b[1]),[x1,y1]=toScreen(b[2],b[3]);if(!(x0<RULER||y0<RULER+ins.top||x1>w-ins.right||y1>h-ins.bottom))return;fitRect(b[0],b[1],b[2],b[3],90,ins);}
   // Pans, without zooming, so the selection sits in the part of the canvas no sheet or floating bar covers. The selection's
   // bounds keep REVEAL_CLEAR px from each panel or toolbar edge, a finger's width, so its handles can be reached. The view moves
   // only as far as needed, so the hoop stays in view as much as the panel allows. A selection larger than the clear area is
@@ -646,7 +650,7 @@ export function createCanvas(/** @type {any} */ api){
   });
 
   api.zoomUi?.(zoomAt,fitHoop,fitAll,zoomTo100);
-  return {vp,apply,refresh,drawScene,fitHoop,recentreOnNextResize:()=>{recentreUntil=performance.now()+500;},fitAll,fitSelection,revealSelection,panToReveal,viewport,setViewport,visibleArea,zoomAt,zoomTo100,toScreen,scale:()=>vp.s,percent:()=>Math.round(vp.s/PX_PER_MM*100),hit,
+  return {vp,apply,refresh,drawScene,fitHoop,recentreOnNextResize:()=>{recentreUntil=performance.now()+500;},fitAll,fitSelection,fitAboveSheet,revealSelection,panToReveal,viewport,setViewport,visibleArea,zoomAt,zoomTo100,toScreen,scale:()=>vp.s,percent:()=>Math.round(vp.s/PX_PER_MM*100),hit,
     closeMenu,isDragging:()=>Boolean(state),inField,RULER,
     px:editing.px,drawControls:editing.drawControls,showSnap:editing.showSnap,
     snapPt:editing.snapPt,insertNodeAt:editing.insertNodeAt,deleteNode:editing.deleteNode,
