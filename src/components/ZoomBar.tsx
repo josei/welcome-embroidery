@@ -32,7 +32,7 @@ export function ZoomBar() {
     {percent}
    </button>
    <button type="button" id="zoomIn" className="icon-button" aria-label="Zoom in (+)" title="Zoom in (+)" onClick={() => zoomActions.zoomIn()}>
-    <svg className="icon"><use href="#i-new"/></svg>
+    <svg className="icon"><use href="#i-zoom-in"/></svg>
    </button>
    <button
     type="button"

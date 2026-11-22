@@ -364,11 +364,11 @@ const PHONE_EDIT_ICONS: Record<string, string> = {
  menuSelectAll: 'i-select-all', menuRepeat: 'i-repeat', menuDelete: 'i-delete',
 };
 
-/** The icon each Arrange row shows on a phone. Front and back have no sprite of their own, so they share the Arrange icon. */
+/** The icon each Arrange row shows on a phone. Front and back have their own sprites, so no two rows share one. */
 const PHONE_ARRANGE_ICONS: Record<string, string> = {
  menuAlignLeft: 'i-al-left', menuAlignHCenter: 'i-al-hcenter', menuAlignRight: 'i-al-right', menuAlignTop: 'i-al-top',
  menuAlignVCenter: 'i-al-vcenter', menuAlignBottom: 'i-al-bottom', menuDistributeH: 'i-dist-h', menuDistributeV: 'i-dist-v',
- menuFlipH: 'i-flip-h', menuFlipV: 'i-flip-v', menuToFront: 'i-arrange', menuToBack: 'i-arrange',
+ menuFlipH: 'i-flip-h', menuFlipV: 'i-flip-v', menuToFront: 'i-to-front', menuToBack: 'i-to-back',
  menuSubtract: 'i-subtract', menuUnion: 'i-union', menuIntersect: 'i-intersect',
 };
 
@@ -450,7 +450,7 @@ export function PhoneMenu() {
    {id: 'menuOpen', label: t('Open'), icon: 'i-open', run: () => document.getElementById('file')?.click()},
    {id: 'menuImport', label: t('Import'), icon: 'i-import', run: () => document.getElementById('machineFile')?.click()},
    ...saveRows().filter((r): r is Entry => typeof r === 'object' && 'id' in r)
-    .map(r => ({...r, label: r.id === 'menuSave' ? t('Save') : t('Save As'), icon: 'i-save', hint: undefined})),
+    .map(r => ({...r, label: r.id === 'menuSave' ? t('Save') : t('Save As'), icon: r.id === 'menuSave' ? 'i-save' : 'i-save-as', hint: undefined})),
    {id: 'menuExport', label: t('Export'), icon: 'i-export', run: () => openExportDialog()},
   ]),
   ...group('Edit', edit),
@@ -464,7 +464,7 @@ export function PhoneMenu() {
   ...group('Settings and Help', [
    {id: 'menuSettings', label: t('Settings'), icon: 'i-gear', hint: settingsHint, run: () => setSettingsOpen(true)},
    {id: 'menuMessages', label: t('Messages'), icon: 'i-msg', run: () => toastActions.setLogOpen(true)},
-   ...(status.issuesHidden ? [] : [{id: 'menuIssues', label: status.issuesText, icon: 'i-msg', run: () => statusActions.issues()}]),
+   ...(status.issuesHidden ? [] : [{id: 'menuIssues', label: status.issuesText, icon: 'i-issues', run: () => statusActions.issues()}]),
    {id: 'menuHelp', label: t('Help'), icon: 'i-help', run: () => window.open(HELP_URL, '_blank', 'noopener')},
   ]),
  ];

@@ -77,6 +77,28 @@ export function EditorIcons() {
           <path d={"M4 4h13l3 3v13H4zM8 4v6h8V4M8 20v-6h8v6"} />
         </symbol>
         {" "}
+        <symbol id={"i-save-as"} viewBox={"0 0 24 24"}>
+          <path d={"M4 4h10l3 3v4M4 4v16h7M8 4v5h6V4M14 20l1-3.5 6-6 2.5 2.5-6 6z"} />
+        </symbol>
+        {" "}
+        <symbol id={"i-issues"} viewBox={"0 0 24 24"}>
+          <path d={"M12 4 21 19H3zM12 10v4M12 16.3v.4"} />
+        </symbol>
+        {" "}
+        <symbol id={"i-zoom-in"} viewBox={"0 0 24 24"}>
+          <path d={"M10.5 4.5a6 6 0 1 0 0 12 6 6 0 0 0 0-12zM15.5 15.5L20 20M10.5 8v5M8 10.5h5"} />
+        </symbol>
+        {" "}
+        <symbol id={"i-to-front"} viewBox={"0 0 24 24"}>
+          <rect x={"3"} y={"3"} width={"11"} height={"11"} rx={"1"} />
+          <rect x={"10"} y={"10"} width={"11"} height={"11"} rx={"1"} fill={"currentColor"} opacity={".35"} />
+        </symbol>
+        {" "}
+        <symbol id={"i-to-back"} viewBox={"0 0 24 24"}>
+          <rect x={"3"} y={"3"} width={"11"} height={"11"} rx={"1"} fill={"currentColor"} opacity={".35"} />
+          <rect x={"10"} y={"10"} width={"11"} height={"11"} rx={"1"} />
+        </symbol>
+        {" "}
         <symbol id={"i-status-saved"} viewBox={"0 0 24 24"}>
           <path d={"M12 3.5a8.5 8.5 0 1 0 0 17 8.5 8.5 0 0 0 0-17zM8.5 12.2l2.4 2.4 4.6-4.8"} />
         </symbol>
