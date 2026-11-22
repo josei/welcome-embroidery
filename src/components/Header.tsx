@@ -11,6 +11,7 @@ import {shortcutLabel} from '../shortcutLabels.js';
 import {shortcutFor, shortcutForCommand} from '../shortcutTable.js';
 import {importMachineFile, newProject, openProjectFile, projectSave} from '../projectIO.js';
 import {saveState} from '../saveState.js';
+import {toastActions} from '../toastState.js';
 import {dirtyMark, saveStatusWords} from '../saveMark.js';
 import {toolbarActions} from '../toolbarCommands.js';
 import {t} from '../i18n.js';
@@ -88,6 +89,9 @@ function SaveStatus() {
 }
 
 // Export: the one Export button opens the export dialog, where the format is chosen. Its name never changes with the format.
+// On a phone (600 px and narrower) a blank design shows its reason as a toast when Export is tapped, since the bar has no
+// room for a caption. Wider layouts keep the caption beneath the button and do nothing on tap.
+const PHONE_QUERY = '(max-width: 600px)';
 function ExportSplit() {
  const {doc} = useSyncExternalStore(documentState.subscribe, documentState.get);
  const exportTip = t('Export ({shortcut})', {shortcut: shortcutFor('export')});
@@ -99,7 +103,10 @@ function ExportSplit() {
    {blank && <span id="exportReason" className="export-reason">{t(EMPTY_EXPORT_REASON)}</span>}
    <div className={blank ? 'export-split is-blank' : 'export-split'}>
     {/* On phones and tablets (1024 px and below) the stylesheet swaps the word for the export glyph; the name stays in aria-label. */}
-    <button id="export" aria-label={t('Export')} aria-disabled={blank} aria-describedby={blank ? 'exportReason' : undefined} title={t('Export')} data-tooltip={exportTip} onClick={() => { if (!blank) openExportDialog(); }}><span className="export-label">{t('Export')}</span><svg className="icon export-icon" aria-hidden="true"><use href="#i-export" /></svg></button>
+    <button id="export" aria-label={t('Export')} aria-disabled={blank} aria-describedby={blank ? 'exportReason' : undefined} title={t('Export')} data-tooltip={exportTip} onClick={() => {
+     if (!blank) openExportDialog();
+     else if (window.matchMedia(PHONE_QUERY).matches) toastActions.push(t(EMPTY_EXPORT_REASON), 'status');
+    }}><span className="export-label">{t('Export')}</span><svg className="icon export-icon" aria-hidden="true"><use href="#i-export" /></svg></button>
    </div>
   </>
  );
