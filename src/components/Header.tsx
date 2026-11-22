@@ -1,5 +1,5 @@
 import {stitchRowsState} from '../stitchRowsState.js';
-import {useEffect, useRef, useSyncExternalStore} from 'react';
+import {useEffect, useRef, useSyncExternalStore, type ReactNode} from 'react';
 import {ActionButton} from './ActionButton';
 import {useDraftInput} from './useDraftInput';
 import {documentActions, documentState} from '../documentState.js';
@@ -14,13 +14,14 @@ import {saveState} from '../saveState.js';
 import {toastActions} from '../toastState.js';
 import {dirtyMark, saveStatusWords} from '../saveMark.js';
 import {toolbarActions} from '../toolbarCommands.js';
+import {toast} from '../editorChrome.js';
 import {t} from '../i18n.js';
 import {ArrangeMenu, EditMenu, FileMenu, PhoneMenu, ViewMenu} from './MenuBar';
 import {useCompactLayout} from '../compactLayout';
 import {usePhoneMenu} from '../phoneSheetState.js';
 import {useTabletPortrait} from '../tabletLayoutState.js';
 // The project name field: it shows the document name, and a committed change is an edit (see documentActions).
-function ProjectName() {
+function ProjectName({status}: {status?: ReactNode}) {
  const {doc, dirty} = useSyncExternalStore(documentState.subscribe, documentState.get);
  const shown = t(doc.name ?? '');
  const field = useDraftInput(shown, text => documentActions.rename(text === shown ? (doc.name ?? '') : text));
@@ -29,9 +30,10 @@ function ProjectName() {
  useEffect(() => {
   document.title = `${dirty ? '• ' : ''}${shown} — ${t('Welcome Embroidery')}`;
  }, [dirty, shown]);
- // The wrapper carries the shown name for the narrow-width ellipsis (styles.css): an input cannot show one itself.
+ // The wrapper carries the shown name for the narrow-width ellipsis (styles.css): an input cannot show one itself. On a phone
+ // or tablet the save status sits inside the wrapper, after the input, so it follows the name's text.
  return (
-  <span className="name-field" data-shown={shown}><input id="name" aria-label={t('Design name')} {...field} /></span>
+  <span className="name-field" data-shown={shown}><input id="name" aria-label={t('Design name')} {...field} />{status}</span>
  );
 }
 
@@ -54,9 +56,10 @@ function HistoryButton({undo = false}: {undo?: boolean}) {
 // The save status: the same text line at every size. While the design has changes it reads "Unsaved" (or "Autosaved in this
 // browser" until a file exists); otherwise the time of the last save in this tab and the file it wrote to. The words come from
 // saveStatusWords, which the phone Menu shows too.
-// Phones and tablets (up to 1024 px wide) show an icon in the top bar instead, beside the design name: a check when the design
-// matches its file, a sync arrow when it is autosaved in this browser, and an alert when the file is out of date. The words
-// stay as its accessible name and tooltip.
+// Phones and tablets (up to 1024 px wide) show an icon instead, placed inside the design name field right after the name's
+// text: a ringed check when the design matches its file, a bare check when it is autosaved in this browser, and a ringed
+// alert when the file is out of date. The icon is a button: a tap shows the words in a toast. The words stay as its
+// accessible name and tooltip.
 const ICON_QUERY = '(max-width: 1024px)';
 function subscribeIconStatus(onChange: () => void) {
  const query = window.matchMedia(ICON_QUERY);
@@ -74,18 +77,22 @@ function SaveStatus() {
  // The status is always rendered, so the bar keeps its shape as the state changes: a clean design that has not been saved
  // shows the same autosave words as a dirty one.
  const text = saveStatusWords(dirty, savedAt, savedFileName, t);
- // The words are the name only where they are not shown. Desktop keeps its markup as it was.
- const named = iconOnly ? {'aria-label': text} : {};
  const icon = (symbol: string) => <svg className="icon" aria-hidden="true" focusable="false"><use href={`#${symbol}`} /></svg>;
+ // On a phone or tablet the icon is the button; the words are its name and tooltip, and a tap shows them in a toast.
+ const phone = (id: string, className: string, symbol: string) => <button type="button" id={id} className={className}
+  aria-label={text} title={text} onClick={() => toast(text)}>{icon(symbol)}</button>;
  if (dirty) {
   const mark = dirtyMark(savedFileName, t);
-  return <span id="unsavedMark" className={mark.unsaved ? 'save-status unsaved' : 'save-status autosaved'} title={text}
-   {...named} {...(iconOnly ? {role: 'img'} : {})}>{iconOnly ? icon(mark.unsaved ? 'i-status-unsaved' : 'i-status-autosaved') : text}</span>;
+  const className = mark.unsaved ? 'save-status unsaved' : 'save-status autosaved';
+  if (iconOnly) return phone('unsavedMark', className, mark.unsaved ? 'i-status-unsaved' : 'i-status-autosaved');
+  return <span id="unsavedMark" className={className} title={text}>{text}</span>;
  }
- if (savedAt === null) return <span id="idleStatus" className="save-status autosaved" title={text}
-  {...named} {...(iconOnly ? {role: 'img'} : {})}>{iconOnly ? icon('i-status-autosaved') : text}</span>;
- return <span id="savedStatus" className="save-status" role="status" title={iconOnly ? text : undefined} {...named}>
-  {iconOnly ? icon('i-status-saved') : text}</span>;
+ if (savedAt === null) {
+  if (iconOnly) return phone('idleStatus', 'save-status autosaved', 'i-status-autosaved');
+  return <span id="idleStatus" className="save-status autosaved" title={text}>{text}</span>;
+ }
+ if (iconOnly) return phone('savedStatus', 'save-status', 'i-status-saved');
+ return <span id="savedStatus" className="save-status" role="status">{text}</span>;
 }
 
 // Export: the one Export button opens the export dialog, where the format is chosen. Its name never changes with the format.
@@ -128,6 +135,7 @@ function withKeys(name: string, command: string) {
 // because app.js wires its controls by id.
 export function Header() {
  const phone = usePhoneMenu();
+ const iconOnly = useIconStatus();
  // A portrait tablet gets the phone Menu (one Menu button, not the three desktop menus).
  const tablet = useTabletPortrait();
  // Grid and snap leave the canvas at compact widths, so the desktop menus gain a View menu for them.
@@ -180,7 +188,7 @@ export function Header() {
       aria-label="Import JEF / VP3…" title="Import JEF / VP3…" data-tooltip="Import JEF / VP3…" onClick={() => machineFile.current?.click()}><svg className="icon"><use href="#i-import"/></svg></button><button className="icon-button" id="save" aria-label={saveLabel}
       title={saveLabel} data-tooltip={saveLabel} onClick={() => projectSave()}><svg className="icon"><use href="#i-save"/></svg></button><span className="sep" aria-hidden="true" /><div className="edit-tools"><HistoryButton undo /><HistoryButton /><ActionButton flag="duplicate" className="icon-button" id="duplicate"
       aria-label="Duplicate selected object" title={duplicateTip} data-tooltip={duplicateTip} onClick={() => toolbarActions.duplicate()}><svg className="icon"><use href="#i-copy"/></svg></ActionButton><ActionButton flag="remove" className="icon-button" id="remove"
-      aria-label="Delete selected object" title={deleteTip} data-tooltip={deleteTip} onClick={() => toolbarActions.remove()}><svg className="icon"><use href="#i-delete"/></svg></ActionButton></div><span className="sep" aria-hidden="true" /><ProjectName /><SaveStatus /><span className="sep" aria-hidden="true" /><ExportSplit /><button className="icon-button" id="helpBtn" aria-label="Keyboard shortcuts (?)"
+      aria-label="Delete selected object" title={deleteTip} data-tooltip={deleteTip} onClick={() => toolbarActions.remove()}><svg className="icon"><use href="#i-delete"/></svg></ActionButton></div><span className="sep" aria-hidden="true" /><ProjectName status={iconOnly ? <SaveStatus /> : null} />{iconOnly ? null : <SaveStatus />}<span className="sep" aria-hidden="true" /><ExportSplit /><button className="icon-button" id="helpBtn" aria-label="Keyboard shortcuts (?)"
       title="Keyboard shortcuts (?)" data-tooltip="Keyboard shortcuts (?)"><svg className="icon"><use href="#i-keys"/></svg></button><button type="button" className={settingsButtonClass(agent)}
       id="settingsBtn" aria-label="Settings" title={settingsTip(agent)} data-tooltip="Settings" onClick={() => setSettingsOpen(true)}><svg className="icon"><use href="#i-gear"/></svg></button><input id="file" ref={projectFile} type="file"
       accept=".welcome,.welcome,.svg,.dxf,application/json,image/svg+xml" hidden onChange={async e =>

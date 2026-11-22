@@ -82,7 +82,7 @@ export function EditorIcons() {
         </symbol>
         {" "}
         <symbol id={"i-status-autosaved"} viewBox={"0 0 24 24"}>
-          <path d={"M19.5 12a7.5 7.5 0 0 1-13 5.1M4.5 12a7.5 7.5 0 0 1 13-5.1M18.5 3.5v3.6h-3.6M5.5 20.5v-3.6h3.6"} />
+          <path d={"M5.5 12.5l4.3 4.3 8.7-9"} />
         </symbol>
         {" "}
         <symbol id={"i-status-unsaved"} viewBox={"0 0 24 24"}>

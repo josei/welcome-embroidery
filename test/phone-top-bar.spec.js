@@ -1,12 +1,12 @@
 import {test,expect} from '@playwright/test';
 import {revealMenuRow} from './menu-reveal.js';
 
-// At phone widths (375x667 and 390x844, portrait) the top bar holds only Menu, the design name, undo, redo and Export,
-// at a 52 px bar. Every command that left the bar is one tap to open the Menu and one tap to choose, and the save status
-// is a line of text in the Menu. The canvas bar and the More tools panel are gone on a phone: their commands are in the Menu too.
+// At phone widths (375x667 and 390x844, portrait) the top bar holds Menu, the design name, undo, redo and Export, at a 52 px
+// bar, and the save status icon sits inside the name field. Every command that left the bar is one tap to open the Menu and
+// one tap to choose, and the save status words are in the Menu. The canvas bar and the More tools panel are gone on a phone: their commands are in the Menu too.
 // At desktop widths nothing leaves the bar.
 const PHONES=[[375,667],[390,844]];
-const BAR_CONTROLS=['#phoneMenu','#name','#undo','#redo','#export'];
+const BAR_CONTROLS=['#phoneMenu','#name','#undo','#redo','#export','#unsavedMark'];
 
 test.beforeEach(async({page})=>{await page.addInitScript(()=>{delete window.showSaveFilePicker;});});
 
@@ -23,7 +23,7 @@ const visibleBarIds=page=>page.locator('header.top button, header.top input').ev
  .map(e=>e.id||e.className).filter(Boolean));
 
 for(const [width,height] of PHONES) for(const lang of ['en','es']){
- test(`the phone top bar holds only Menu, name, undo, redo and Export at ${width}x${height} (${lang})`,async({page})=>{
+ test(`the phone top bar holds Menu, name, status icon, undo, redo and Export at ${width}x${height} (${lang})`,async({page})=>{
   const errors=await openEditor(page,width,height,lang);
   await page.locator('#rect').click();
   const ids=await visibleBarIds(page);
