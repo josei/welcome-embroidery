@@ -61,3 +61,14 @@ export function formatNumber(n, language, digits = 0) {
 export function formatCount(n, language) {
  return formatNumber(n, language, 0);
 }
+
+/**
+ * A decimal captured for an {n} placeholder of an English sentence, shown with the UI language's separator: "120.2" becomes
+ * "120,2" in Spanish. Text that is not a plain decimal number, and every value in English, is returned as it is.
+ * @param {string} v
+ * @param {string} language  'en' or 'es'
+ * @returns {string}
+ */
+export function countText(v, language) {
+ return language === 'es' && /^-?\d+\.\d+$/.test(v) ? decimalText(v, 'es') : v;
+}

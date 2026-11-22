@@ -1,5 +1,5 @@
 // @ts-check
-import {ES_ADDITIONS} from './i18nAdditions.js';
+import {ES_ADDITIONS} from './i18nAdditions.js';import {countText} from './decimalText.js';
 // Tiny UI translation layer: English is the source language, Spanish is looked up by exact string.
 // Static markup and dynamically written text/attributes are translated by a DOM walker + observer; strings with numbers use {name} placeholders.
 export const ES={...ES_ADDITIONS,
@@ -460,7 +460,7 @@ export function t(s,vars){
   const e=exact.get(s);
   if(e!==undefined)out=e;
   else for(const r of rx){const m=r.re.exec(s);
-    if(m){const v=Object.fromEntries(r.names.map((n,i)=>[n,t(m[i+1])]));out=r.out.replace(/\{(\w+)\}/g,(_,n)=>v[n]);break;}}
+    if(m){const v=Object.fromEntries(r.names.map((n,i)=>[n,n==='n'?countText(t(m[i+1]),lang):t(m[i+1])]));out=r.out.replace(/\{(\w+)\}/g,(_,n)=>v[n]);break;}}
  }
  return vars?out.replace(/\{(\w+)\}/g,(_,n)=>vars[n]??''):out;
 }

@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {decimalText, fieldText, formatCount, formatNumber, parseDecimal} from '../src/decimalText.js';
+import {countText, decimalText, fieldText, formatCount, formatNumber, parseDecimal} from '../src/decimalText.js';
 
 test('a stored value shows a dot in English and a comma in Spanish', () => {
  assert.equal(decimalText('-12.0', 'en'), '-12.0');
@@ -56,4 +56,11 @@ test('a fixed-place number uses the UI language separators', () => {
  assert.equal(formatNumber(0.4, 'es', 2), '0,40');
  assert.equal(formatNumber(1234.5, 'es', 1), '1.234,5');
  assert.equal(formatNumber(1234.5, 'en', 1), '1,234.5');
+});
+
+test('a distance in a sentence takes the comma in Spanish and the point in English', () => {
+ assert.equal(countText('120.2', 'es'), '120,2');
+ assert.equal(countText('120.2', 'en'), '120.2');
+ assert.equal(countText('3', 'es'), '3');
+ assert.equal(countText('1.0, 2.0', 'es'), '1.0, 2.0');
 });
