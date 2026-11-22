@@ -1121,7 +1121,12 @@ body{height:100dvh;min-height:0;overflow:hidden}
 #previewPull label{display:flex;align-items:center;gap:8px;min-height:44px}
 /* The compact pull card keeps a 96 px minimum width: at its bare 64 px, Chromium left the bottom of the 3D view unpainted. */
 #previewPull{min-width:96px}
-#previewPull .pull-switch{min-width:44px;justify-content:center}
+/* The compact pull control is a one-button segmented control, drawn like the camera presets beside it: a word on the track, the
+   selected state a raised white tile in teal. It is a button, so its on state is read from aria-pressed, not from a switch. */
+#previewPull{background:#f1f3efee;padding:2px;border-radius:8px}
+#previewPull .pull-toggle{display:block;min-height:44px;min-width:44px;padding:0 12px;border:0;border-radius:6px;background:transparent;font:inherit;font-size:var(--fs-caption);color:#66726c;white-space:nowrap;cursor:pointer}
+#previewPull .pull-toggle[aria-pressed=true]{background:#fff;color:var(--teal);font-weight:var(--fw-emphasis);box-shadow:0 1px 2px #1d29251f}
+#previewPull .pull-toggle:focus-visible{outline:2px solid var(--teal);outline-offset:2px}
 .canvas #previewPull{top:72px}
 }
 /* A tablet keeps the 2D / Stitches / 3D switch in the canvas's top-right corner, where the wider preset row would run

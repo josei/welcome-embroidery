@@ -8,7 +8,7 @@ test.use({hasTouch:true});
 test.beforeEach(async({page})=>{await page.addInitScript(()=>{delete window.showSaveFilePicker;});});
 
 const VIEWPORTS=[[390,844],[844,390],[768,1024]];
-const AREAS=['#count','#playbackSummary','#playbackStitches','#previewHint','#previewPull label','.layers-count'];
+const AREAS=['#count','#playbackSummary','#playbackStitches','#previewHint','#previewPull','.layers-count'];
 
 async function seed(page,lang){
  const {initialDocument,applyOperations}=await import('../src/engine.js');

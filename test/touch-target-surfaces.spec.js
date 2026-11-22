@@ -166,7 +166,7 @@ for(const [w,h] of SIZES) for(const lang of ['en','es']){
   await page.setViewportSize({width:w,height:h});
   const where=`${w}x${h} ${lang} 3D overlay`;
   await openPreview(page,lang);
-  const controls=await expectTouchTargets(page,'#previewView button, #previewPull label',where);
+  const controls=await expectTouchTargets(page,'#previewView button, #previewPull button',where);
   expect(controls.length,`${where}: four presets and the pull row`).toBe(5);
 
   // The presets still change the camera.
@@ -179,7 +179,7 @@ for(const [w,h] of SIZES) for(const lang of ['en','es']){
   await expect(canvas,`${where}: Front ¾ moves the camera`).toHaveAttribute('data-view','front');
 
   // The tick still turns the pull display on and off.
-  const tick=page.locator('#previewPull label');
+  const tick=page.locator('#previewPull button');
   await expect(canvas).toHaveAttribute('data-pull','off');
   await tick.tap();
   await expect(canvas,`${where}: the tick shows the pull`).toHaveAttribute('data-pull','on');

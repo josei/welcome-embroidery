@@ -30,10 +30,8 @@ export function PreviewPanel() {
    </div>
    <div id="previewPull" hidden={!preview.threeD}>
     {compact ? (
-     <label className="pull-switch" title={pullLabel}>
-      <input type="checkbox" className="switch-input" id="showPull" role="switch" aria-label={pullLabel} checked={preview.pull} onChange={e =>
-        previewActions.choosePull(e.target.checked)} />
-     </label>
+     <button type="button" id="showPull" className="pull-toggle" aria-pressed={preview.pull} aria-label={pullLabel} title={pullLabel}
+      onClick={() => previewActions.choosePull(!preview.pull)}>{t('Pull')}</button>
     ) : (
      <label><input type="checkbox" id="showPull" checked={preview.pull} onChange={e =>
        previewActions.choosePull(e.target.checked)} /> {pullLabel}</label>

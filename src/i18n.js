@@ -19,7 +19,7 @@ export const ES={...ES_ADDITIONS,
 'Writes to the file you chose':'Escribe en el archivo que elegiste','Downloads the project file':'Descarga el archivo del proyecto',
 'Choose a new file':'Elegir un archivo nuevo','Download under a name you type':'Descargar con el nombre que escribas',
 'This browser downloads the project file. The name below is the file name.':'Este navegador descarga el archivo del proyecto. El nombre de abajo es el nombre del archivo.',
-'The project could not be saved.':'No se pudo guardar el proyecto.','Show pull for the fabric':'Mostrar la tracción de la tela',
+'The project could not be saved.':'No se pudo guardar el proyecto.','Show pull for the fabric':'Mostrar la tracción de la tela','Pull':'Tracción',
   ['Peak estimate {n}% of the scale on {fabric}. Lines show the direction the fabric pulls. A guide for where to look: it uses stitch density, stitch ' +
   'direction and fabric stretch, not a simulation of the machine.']:
   'Estimación máxima del {n}% de la escala en {fabric}. Las líneas muestran la dirección en la que tira la tela. Una guía para saber dónde mirar: usa la ' +
