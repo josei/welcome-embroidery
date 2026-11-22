@@ -59,7 +59,7 @@ export function EditorIcons() {
           <path d={"M4 4h13l3 3v13H4zM8 4v6h8V4M8 20v-6h8v6"} />
         </symbol>
         <symbol id={"i-save-as"} viewBox={"0 0 24 24"}>
-          <path d={"M4 4h10l3 3v4M4 4v16h7M8 4v5h6V4M14 20l1-3.5 6-6 2.5 2.5-6 6z"} />
+          <path transform={"translate(-1.75 0)"}  d={"M4 4h10l3 3v4M4 4v16h7M8 4v5h6V4M14 20l1-3.5 6-6 2.5 2.5-6 6z"} />
         </symbol>
         <symbol id={"i-issues"} viewBox={"0 0 24 24"}>
           <path d={"M12 4 21 19H3zM12 10v4M12 16.3v.4"} />
@@ -85,8 +85,8 @@ export function EditorIcons() {
           <path d={"M6 3.5h8l4 4v13H6zM14 3.5v4h4M12 11.5v4M12 17.8v.2"} />
         </symbol>
         <symbol id={"i-agent"} viewBox={"0 0 24 24"}>
-          <rect x={"4"} y={"7"} width={"16"} height={"12"} rx={"3"} />
-          <path d={"M12 3v4M9 13v1M15 13v1"} />
+          <rect transform={"translate(0 1)"}  x={"4"} y={"7"} width={"16"} height={"12"} rx={"3"} />
+          <path transform={"translate(0 1)"}  d={"M12 3v4M9 13v1M15 13v1"} />
         </symbol>
         <symbol id={"i-gear"} viewBox={"0 0 24 24"}>
           <path
@@ -102,9 +102,9 @@ export function EditorIcons() {
           <ellipse cx={"12"} cy={"12"} rx={"8"} ry={"6"} />
         </symbol>
         <symbol id={"i-path"} viewBox={"0 0 24 24"}>
-          <path d={"m4 19 5-13 4 9 7-8"} />
-          <circle cx={"4"} cy={"19"} r={"1.5"} />
-          <circle cx={"20"} cy={"7"} r={"1.5"} />
+          <path transform={"translate(0 -1)"}  d={"m4 19 5-13 4 9 7-8"} />
+          <circle transform={"translate(0 -1)"}  cx={"4"} cy={"19"} r={"1.5"} />
+          <circle transform={"translate(0 -1)"}  cx={"20"} cy={"7"} r={"1.5"} />
         </symbol>
         <symbol id={"i-text"} viewBox={"0 0 24 24"}>
           <path d={"M5 6V4h14v2M12 4v16M9 20h6"} />
@@ -123,7 +123,7 @@ export function EditorIcons() {
           <path d={"M4 7h16M9 7V4h6v3m3 0-1 13H7L6 7m3 3v7m6-7v7"} />
         </symbol>
         <symbol id={"i-reset"} viewBox={"0 0 24 24"}>
-          <path d={"M4 4v6h6M5 10a8 8 0 1 1-1 5"} />
+          <path transform={"translate(-0.03 -0.99)"}  d={"M4 4v6h6M5 10a8 8 0 1 1-1 5"} />
         </symbol>
         <symbol id={"i-play"} viewBox={"0 0 24 24"}>
           <path d={"M8 5v14l11-7Z"} fill={"currentColor"} stroke={"none"} />
@@ -159,18 +159,18 @@ export function EditorIcons() {
           <path d={"M4 4h16v16H4zM4 12h16M12 4v16"} />
         </symbol>
         <symbol id={"i-node-add"} viewBox={"0 0 24 24"}>
-          <path d={"M4 18c4 0 4-12 8-12s4 12 8 12M18 3v6M15 6h6"} />
+          <path transform={"translate(-0.5 1.5)"}  d={"M4 18c4 0 4-12 8-12s4 12 8 12M18 3v6M15 6h6"} />
         </symbol>
         <symbol id={"i-node-del"} viewBox={"0 0 24 24"}>
           <path d={"M4 18c4 0 4-12 8-12s4 12 8 12M15 6h6"} />
         </symbol>
         <symbol id={"i-node-smooth"} viewBox={"0 0 24 24"}>
-          <path d={"M3 17c5 0 5-10 9-10s4 10 9 10M6 17h-3M21 17h-3"} />
-          <circle cx={"12"} cy={"7"} r={"1.6"} />
+          <path transform={"translate(0 0.8)"}  d={"M3 17c5 0 5-10 9-10s4 10 9 10M6 17h-3M21 17h-3"} />
+          <circle transform={"translate(0 0.8)"}  cx={"12"} cy={"7"} r={"1.6"} />
         </symbol>
         <symbol id={"i-node-corner"} viewBox={"0 0 24 24"}>
-          <path d={"M3 18 12 6l9 12"} />
-          <circle cx={"12"} cy={"6"} r={"1.6"} />
+          <path transform={"translate(0 0.8)"}  d={"M3 18 12 6l9 12"} />
+          <circle transform={"translate(0 0.8)"}  cx={"12"} cy={"6"} r={"1.6"} />
         </symbol>
         <symbol id={"i-group"} viewBox={"0 0 24 24"}>
           <path d={"M4 4h4M16 4h4M4 20h4M16 20h4M4 4v4M4 16v4M20 4v4M20 16v4"} />
@@ -181,7 +181,7 @@ export function EditorIcons() {
           <rect x={"13"} y={"13"} width={"7"} height={"7"} />
         </symbol>
         <symbol id={"i-select"} viewBox={"0 0 24 24"}>
-          <path d={"M6 3l12 8-5.5 1.5L10 18z"} />
+          <path transform={"translate(0 1.5)"}  d={"M6 3l12 8-5.5 1.5L10 18z"} />
         </symbol>
         <symbol id={"i-select-add"} viewBox={"0 0 24 24"}>
           <rect x={"4"} y={"4"} width={"16"} height={"16"} rx={"2"} /><path d={"M12 8v8M8 12h8"} />
@@ -269,7 +269,7 @@ export function EditorIcons() {
           <circle cx={"12"} cy={"12"} r={"4.5"} />
         </symbol>
         <symbol id={"i-spiral"} viewBox={"0 0 24 24"}>
-          <path
+          <path transform={"translate(-1.9 0.2)"} 
             d={"M12 12.5a1.2 1.2 0 0 1 1.2-1.2 2.6 2.6 0 0 1 2.6 2.6 4 4 0 0 1-4 4 5.4 5.4 0 0 1-5.4-5.400 6.800 6.800 0 0 1 " +
 "6.800-6.800 8.200 8.200 0 0 1 8.200 8.200"}
           />
@@ -306,7 +306,7 @@ export function EditorIcons() {
           <rect x={"15"} y={"15"} width={"6"} height={"6"} rx={"1"} strokeDasharray={"2 1.500"} />
         </symbol>
         <symbol id={"i-magnet"} viewBox={"0 0 24 24"}>
-          <path d={"M5 3v8a7 7 0 0 0 14 0V3h-4v8a3 3 0 0 1-6 0V3zM5 7h4M15 7h4"} />
+          <path transform={"translate(0 1.5)"}  d={"M5 3v8a7 7 0 0 0 14 0V3h-4v8a3 3 0 0 1-6 0V3zM5 7h4M15 7h4"} />
         </symbol>
         <symbol id={"i-cap-butt"} viewBox={"0 0 24 24"}>
           <path d={"M3 9h12v6H3z"} />
@@ -361,9 +361,9 @@ export function EditorIcons() {
           <path d={"M4 17l5-4 3 2.500 3-3 5 4.500"} />
         </symbol>
         <symbol id={"i-trace"} viewBox={"0 0 24 24"}>
-          <path d={"M4 18c0-6 3-11 8-11s8 4 8 8"} strokeDasharray={"2.5 2"} />
-          <path d={"M5 19c1-4 3-7 7-7 3 0 5 2 6 5"} />
-          <circle cx={"12"} cy={"12"} r={"1.600"} fill={"currentColor"} />
+          <path transform={"translate(0 -1)"}  d={"M4 18c0-6 3-11 8-11s8 4 8 8"} strokeDasharray={"2.5 2"} />
+          <path transform={"translate(0 -1)"}  d={"M5 19c1-4 3-7 7-7 3 0 5 2 6 5"} />
+          <circle transform={"translate(0 -1)"}  cx={"12"} cy={"12"} r={"1.600"} fill={"currentColor"} />
         </symbol>
         <symbol id={"i-layers"} viewBox={"0 0 24 24"}>
           <path d={"M12 3 3 8l9 5 9-5zM3 12.5l9 5 9-5M3 17l9 5 9-5"} />
@@ -382,7 +382,7 @@ export function EditorIcons() {
           <path d={"M3 12h18M7 8l5-5 5 5zM7 16l5 5 5-5z"} />
         </symbol>
         <symbol id={"i-hand"} viewBox={"0 0 24 24"}>
-          <path
+          <path transform={"translate(1.67 0.5)"} 
             d={"M18 11V6a2 2 0 0 0-4 0M14 10V4a2 2 0 0 0-4 0v7M10 10.5V6a2 2 0 0 0-4 0v9l-2.5-2.5a2 2 0 0 0-3 2.6L6.5 21h10a4 4 0 0 0 4-4v-4a2 2 0 0 0-4 0"}
           />
         </symbol>

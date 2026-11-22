@@ -27,9 +27,9 @@ export function ReadoutIcons() {
         </symbol>
         {" "}
         <symbol id={"i-needle"} viewBox={"0 0 24 24"}>
-          <path d={"M12 21.5V8"} />
-          <ellipse cx={"12"} cy={"5.5"} rx={"2.2"} ry={"3"} />
-          <path d={"M12 8c3.5 0 5 1.8 5 4.2S15 16 12 16"} />
+          <path transform={"translate(-1.4 0)"}  d={"M12 21.5V8"} />
+          <ellipse transform={"translate(-1.4 0)"}  cx={"12"} cy={"5.5"} rx={"2.2"} ry={"3"} />
+          <path transform={"translate(-1.4 0)"}  d={"M12 8c3.5 0 5 1.8 5 4.2S15 16 12 16"} />
         </symbol>
         {" "}
         <symbol id={"i-tip"} viewBox={"0 0 24 24"}>
