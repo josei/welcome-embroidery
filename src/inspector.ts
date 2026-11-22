@@ -9,6 +9,7 @@ import {setTransformFields, transformActions} from './transformState.js';
 import {setLetteringFields} from './letteringFieldsState.js';
 import {pivotActions, pivotState} from './pivotState.js';
 import {setStatus} from './statusState.js';
+import {designCountState, issueCount} from './statusCount.js';
 import {syncTextInspector} from './letteringFonts.js';
 import {sewTime} from './appHelpers.js';
 import {t, lang} from './i18n.js';
@@ -139,12 +140,13 @@ export function syncInspector({plan, compileError, tips}: {plan: PlanInfo | null
       : plan.errors.length
         ? designView ? `${countLabel(plan, formatCount(plan.count, lang))} · ${plan.errors[0]}` : plan.errors[0]
         : designView ? `${countLabel(plan, formatCount(plan.count, lang))} · ${t('Ready to sew')}` : null;
-  if (countText !== null) setStatus({count: countText, countFigure: designView && plan && !compileError && !plan.errors.length ? {text: countText, value: formatCount(plan.count, lang)} : undefined});
-  setStatus({countError: Boolean(compileError) || Boolean(plan?.errors.length)});
+  const countState = designCountState({plan, compileError});
+  if (countText !== null) setStatus({count: countText, countFigure: countState.figure && plan ? {text: countText, value: formatCount(plan.count, lang)} : undefined});
+  setStatus({countError: countState.error});
   const errs = plan?.issues || [];
   setStatus({
-    issuesHidden: errs.length + tips.length === 0,
-    issuesCount: errs.length + tips.length,
+    issuesHidden: issueCount({issues: errs, tips}) === 0,
+    issuesCount: issueCount({issues: errs, tips}),
     issuesText: `⚠ ${[
       errs.length ? t(errs.length === 1 ? '1 issue' : '{n} issues', {n: errs.length}) : '',
       tips.length ? t(tips.length === 1 ? '1 sewing tip' : '{n} sewing tips', {n: tips.length}) : '',

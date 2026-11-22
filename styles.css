@@ -863,8 +863,10 @@ body{height:100vh;height:100dvh;min-height:0;overflow:hidden;overscroll-behavior
 .layout main>.tool-rail .rail-label{display:block;max-width:100%;overflow:hidden;white-space:nowrap;font-size:11px;line-height:1.1;color:#4d5a54}
 .layout main>.tool-rail .icon-button.active-tool .rail-label{color:var(--teal-deep)}
 .layout main>footer{grid-row:5;position:relative;flex:none;height:28px;min-height:0;margin:0;padding:0 12px;box-sizing:border-box;display:flex;align-items:center;gap:8px;overflow:visible;background:#fff;border:0;border-top:1px solid #e3e6e1}
-.layout main>footer>:not(#count):not(#toast){display:none}
+.layout main>footer>:not(#count):not(#toast):not(#issuesBtn){display:none}
 .layout main>footer>#count{flex:1 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;line-height:26px;font-size:var(--fs-caption)}
+/* The issues chip sits beside the count in the bar, so a design past the hoop shows its warning count on a phone. */
+.layout main>footer>#issuesBtn{flex:none;margin:0;padding:0 8px;line-height:18px;font-size:var(--fs-caption);white-space:nowrap}
 /* Toasts stack above the contextual bar, so they never cover the dock (56 px) or the bar (52 px)
    and the status line (28 px) stays the anchor: 28 + 56 + 52 + an 8 px gap. In the design view the zoom bar sits on the canvas
    bottom, 8 px up and 46 px tall, so the toast rises a further 54 px above the bar's top edge (198 px). */

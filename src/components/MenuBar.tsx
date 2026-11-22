@@ -464,7 +464,6 @@ export function PhoneMenu() {
   ...group('Settings and Help', [
    {id: 'menuSettings', label: t('Settings'), icon: 'i-gear', hint: settingsHint, run: () => setSettingsOpen(true)},
    {id: 'menuMessages', label: t('Messages'), icon: 'i-msg', run: () => toastActions.setLogOpen(true)},
-   ...(status.issuesHidden ? [] : [{id: 'menuIssues', label: status.issuesText, icon: 'i-issues', run: () => statusActions.issues()}]),
    {id: 'menuHelp', label: t('Help'), icon: 'i-help', run: () => window.open(HELP_URL, '_blank', 'noopener')},
   ]),
  ];

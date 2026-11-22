@@ -10,7 +10,8 @@ import {MeasureReadout} from './MeasureReadout';
 // button shows its count only; the full text stays as its accessible name and tooltip.
 export function StatusRun() {
  const s = useSyncExternalStore(statusState.subscribe, statusState.get);
- // On a phone or tablet the design count is an icon and its number; the full sentence stays as the name and tooltip.
+ // On a phone or tablet the design count is an icon and its number, in the warning colour when the design has an error; the
+ // full sentence stays as the name and tooltip, and the issues chip beside it counts the problems.
  const compact = useCompactLayout();
  const figure = compact && s.countFigure && s.countFigure.text === s.count ? s.countFigure : null;
  return (
@@ -18,7 +19,7 @@ export function StatusRun() {
    <span id="cursorPosition">{s.cursor}</span>
    <MeasureReadout />
    {figure ? (
-    <span id="count" className="count-figure" onClick={() => statusActions.compile()}>
+    <span id="count" className={s.countError ? 'count-figure error' : 'count-figure'} onClick={() => statusActions.compile()}>
      <Figure icon="i-run" value={figure.value} label={figure.text} />
     </span>
    ) : (

@@ -71,7 +71,7 @@ test('the Save and Save As, Front and Back, Messages and Issues rows each have t
  await page.setViewportSize({width:390,height:844});
  await page.goto('/');
  await expect(page.locator('header.top #name')).toBeVisible();
- // Moving an object outside the hoop adds an issue, so the Menu lists the Issues row.
+ // Moving an object outside the hoop adds an issue, which the status bar's issues chip shows (the Menu has no row for it).
  await page.locator('#phoneMenu').click();
  await page.locator('#menuLayers').click();
  await page.locator('.object-row').first().click();
@@ -87,6 +87,5 @@ test('the Save and Save As, Front and Back, Messages and Issues rows each have t
  expect(await glyph('menuSave')).toEqual(['#i-save']);
  expect(await glyph('menuSaveAs')).toEqual(['#i-save-as']);
  expect(await glyph('menuMessages')).toEqual(['#i-msg']);
- expect(await glyph('menuIssues')).toEqual(['#i-issues']);
- expect(await glyph('menuToFront')).not.toEqual(await glyph('menuToBack'));
+  expect(await glyph('menuToFront')).not.toEqual(await glyph('menuToBack'));
 });
