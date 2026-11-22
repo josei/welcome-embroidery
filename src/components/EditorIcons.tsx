@@ -14,7 +14,7 @@ export function EditorIcons() {
         </symbol>
         {" "}
         <symbol id={"i-export"} viewBox={"0 0 24 24"}>
-          <path d={"M12 4v11M7 10l5 5 5-5M5 20h14"} />
+          <path d={"M12 15V4M7 9l5-5 5 5M4 13v7h16v-7"} />
         </symbol>
         {" "}
         <symbol id={"i-cut"} viewBox={"0 0 24 24"}>
