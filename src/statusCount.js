@@ -16,9 +16,19 @@ export function designCountState({plan, compileError}) {
 }
 
 /**
- * How many issues and sewing tips the issues chip counts: the warning count that the phone and tablet bar shows.
- * @param {{issues?: unknown[], tips?: unknown[]}} lists
+ * The objects the issues chip points at, each once and in the order they were reported. A past-the-hoop issue and a
+ * sewing tip about the same object share its id, so the chip counts and cycles through that object once.
+ * @param {{issues?: {id: string}[], tips?: {id: string}[]}} lists
+ * @returns {string[]}
  */
-export function issueCount({issues = [], tips = []}) {
-  return issues.length + tips.length;
+export function issueObjectIds({issues = [], tips = []}) {
+  return [...new Set([...issues, ...tips].map(item => item.id))];
+}
+
+/**
+ * How many objects the issues chip counts: each object that has an issue or a sewing tip, counted once.
+ * @param {{issues?: {id: string}[], tips?: {id: string}[]}} lists
+ */
+export function issueCount(lists) {
+  return issueObjectIds(lists).length;
 }

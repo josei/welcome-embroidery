@@ -1,6 +1,6 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
-import {designCountState, issueCount} from '../src/statusCount.js';
+import {designCountState, issueCount, issueObjectIds} from '../src/statusCount.js';
 
 const ready = {errors: [], issues: [], count: 2514};
 const outside = {errors: ['Logo extends 2.5 mm past the hoop.'], issues: [{id: 1, message: 'x'}], count: 2514};
@@ -21,7 +21,13 @@ test('the stitch view shows the same figure and error state as the design view',
   assert.deepEqual(designCountState({plan: outside, compileError: ''}), {figure: true, error: true});
 });
 
-test('the issues chip counts issues and sewing tips together', () => {
+test('the issues chip counts each object with an issue or a sewing tip once', () => {
   assert.equal(issueCount({issues: [], tips: []}), 0);
-  assert.equal(issueCount({issues: outside.issues, tips: ['a', 'b']}), 3);
+  assert.equal(issueCount({issues: [{id: 'a'}], tips: [{id: 'a'}]}), 1);
+  assert.equal(issueCount({issues: [{id: 'a'}], tips: [{id: 'b'}, {id: 'c'}]}), 3);
+});
+
+test('the issues chip cycles through each object once, in the order they were reported', () => {
+  assert.deepEqual(issueObjectIds({issues: [{id: 'a'}], tips: [{id: 'a'}, {id: 'b'}]}), ['a', 'b']);
+  assert.deepEqual(issueObjectIds({issues: [], tips: []}), []);
 });

@@ -71,3 +71,34 @@ test('1280x800 en: the issues button and messages button keep their words', asyn
  await expect(page.locator('#issuesBtn')).toContainText('issue');
  await expect(page.locator('#messagesBtn')).toHaveText('Messages');
 });
+
+// Restores a design with one square placed past the 400 mm hoop, from the autosave the editor offers back.
+async function openSquareOutsideHoop(page, lang){
+ const {initialDocument,applyOperations}=await import('../src/engine.js');
+ const doc=initialDocument();doc.objects=[];doc.hoop=400;doc.name='Probe';doc.revision=1;
+ applyOperations(doc,[{op:'add_shape',id:'s0',kind:'rect',x:300,y:0,width:20,height:15.1,thread:'#cc3333',stitch:'fill'}]);
+ await page.goto(`/?lang=${lang}`);
+ await page.evaluate(d=>localStorage.setItem('welcome.autosave:'+sessionStorage.getItem('welcome.tabId'),JSON.stringify({doc:d,clean:false,savedAt:Date.now()})),doc);
+ await page.goto(`/?lang=${lang}`);
+ await page.locator('#restoreYes').click();
+ await expect(page.locator('.object-row')).toHaveCount(1);
+}
+
+// One object past the hoop is both an issue and a sewing tip. The chip counts that object once, and each tap keeps the
+// selection on it, since there is no other object to move to.
+for(const [w,h] of [[390,844],[768,1024]]) test(`${w}x${h} es: one object past the hoop gives a chip total of 1 and stays on that object`,async({page})=>{
+ page.on('dialog',d=>d.accept());
+ await page.setViewportSize({width:w,height:h});
+ await openSquareOutsideHoop(page,'es');
+ const btn=page.locator('#issuesBtn');
+ await expect(btn).toBeVisible();
+ await expect(btn).toHaveText('1');
+ const selected=page.locator('.object-row.selected');
+ await btn.click();
+ await expect(selected).toHaveCount(1);
+ const before=await selected.first().textContent();
+ await btn.click();
+ await expect(selected).toHaveCount(1);
+ expect(await selected.first().textContent()).toBe(before);
+ await expect(btn).toHaveText('1');
+});

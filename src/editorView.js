@@ -18,6 +18,7 @@ import {syncBatchInfo} from './batchExport.js';
 import {kickFontLoads, letteringTextFont, ensureFontLoaded, fitHeight} from './letteringFonts.js';
 import {sewingTips, renderSewTips} from './sewingTips.js';
 import {setStatus, statusActions} from './statusState.js';
+import {issueObjectIds} from './statusCount.js';
 import {setZoomPercent, configureZoom} from './zoomState.js';
 import {createCanvas} from './canvas.js';
 import {menuItems, configureContextMenu} from './contextMenu.js';
@@ -161,10 +162,10 @@ export function mountCanvas() {
   statusActions.compile = () => compileNow(true);
   let issueAt = 0;
   statusActions.issues = () => {
-    const list = [...(getPlan()?.issues || []), ...sewingTips()];
-    if (!list.length) return;
-    const issue = list[issueAt++ % list.length];
-    selectIds([...canvas.withGroup(issue.id)], issue.id);
+    const ids = issueObjectIds({issues: getPlan()?.issues || [], tips: sewingTips()});
+    if (!ids.length) return;
+    const id = ids[issueAt++ % ids.length];
+    selectIds([...canvas.withGroup(id)], id);
     canvas.fitSelection();
   };
   editor.render = render;
