@@ -28,7 +28,7 @@ export function ZoomBar() {
    <button type="button" id="zoomOut" className="icon-button" aria-label="Zoom out (−)" title="Zoom out (−)" onClick={() => zoomActions.zoomOut()}>
     <svg className="icon"><use href="#i-minus"/></svg>
    </button>
-   <button type="button" id="zoomPct" className="zoom-pct" title={resetLabel} onClick={() => zoomActions.zoom100()}>
+   <button type="button" id="zoomPct" className="zoom-pct" aria-label={resetLabel} title={resetLabel} onClick={() => zoomActions.zoom100()}>
     {percent}
    </button>
    <button type="button" id="zoomIn" className="icon-button" aria-label="Zoom in (+)" title="Zoom in (+)" onClick={() => zoomActions.zoomIn()}>
