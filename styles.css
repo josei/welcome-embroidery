@@ -196,7 +196,7 @@ section[data-sec][hidden]{display:none}
 
 label[hidden],button[hidden],.sel-hint[hidden]{display:none!important}
 
-#count.error{color:var(--warn)}.issues-btn .icon{width:1em;height:1em;vertical-align:-.125em}.layout main:not(.design-view)>footer>#issuesBtn{min-width:56px;justify-content:center}.issues-btn{white-space:nowrap;display:inline-flex;align-items:center;align-self:center;gap:3px;border:1px solid var(--warn-line);background:var(--warn-soft);color:var(--warn);font-size:var(--fs-caption);padding:3px 9px;border-radius:99px;cursor:pointer}#stitches.stale{opacity:.35;transition:opacity .15s}
+#count.error{color:var(--warn)}.issues-btn .icon{width:1em;height:1em;vertical-align:-.125em}.layout main:not(.design-view)>footer>#issuesBtn{min-width:56px;justify-content:center}.issues-btn[hidden]{display:none}.issues-btn{white-space:nowrap;display:inline-flex;align-items:center;align-self:center;gap:3px;border:1px solid var(--warn-line);background:var(--warn-soft);color:var(--warn);font-size:var(--fs-caption);padding:3px 9px;border-radius:99px;cursor:pointer}#stitches.stale{opacity:.35;transition:opacity .15s}
 
 .tool-grid label{min-width:0}.tool-grid input:not(.switch-input),.tool-grid select{width:100px!important}.tool-grid{grid-template-columns:minmax(0,1fr) auto}
 

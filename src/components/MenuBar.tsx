@@ -6,7 +6,7 @@ import {nodeActions, nodeButtonsState} from '../nodeButtonsState.js';
 import {actionState} from '../actionState.js';
 import {addPhoto} from '../photoCommands';
 import {setTraceDialogOpen} from '../traceDialogState.js';
-import {closePhoneSheet, phoneSheetState, togglePhoneSheet} from '../phoneSheetState.js';
+import {closePhoneSheet, openPhoneSheet, phoneSheetState, togglePhoneSheet, usePhoneWidth} from '../phoneSheetState.js';
 import {flushSync} from 'react-dom';
 import type {KeyboardEvent as ReactKeyboardEvent, PointerEvent as ReactPointerEvent} from 'react';
 import {alignActions, alignState} from '../alignState.js';
@@ -381,6 +381,7 @@ const HELP_URL = 'https://github.com/josei/welcome-embroidery#readme';
 export function PhoneMenu() {
  const photoInput = useRef<HTMLInputElement>(null);
  const tablet = useTabletPortrait();
+ const phone = usePhoneWidth();
  const edit = useEditRows()
   .filter((r): r is Entry => typeof r === 'object' && 'id' in r && r.id in PHONE_EDIT_ICONS)
   .map(r => ({...r, key: undefined, icon: PHONE_EDIT_ICONS[r.id]}));
@@ -449,10 +450,16 @@ export function PhoneMenu() {
   {id: 'menuTextOnPath', label: t('Text on path'), icon: 'i-text-path', disabled: actions.textOnPath, reason: why('menuTextOnPath'), run: () => selectionToolbarActions.textOnPath()},
   {id: 'menuTextOffPath', label: t('Detach text'), icon: 'i-text-detach', disabled: actions.textOffPath, reason: why('menuTextOffPath'), run: () => selectionToolbarActions.textOffPath()},
  ];
+ // At phone width the status line's issues chip is only an indicator, so the Menu carries the Issues row: it selects the first
+ // object with a tip and opens the Properties sheet, where the tips show.
+ const issuesRows: Row[] = phone && !status.issuesHidden ? [
+  {id: 'menuIssues', label: t('Issues'), icon: 'i-issues', state: status.issuesText, run: () => { statusActions.issues(); openPhoneSheet('properties'); }},
+ ] : [];
  const settingsHint = agent.active ? t('Settings: agent connected') : agent.waiting ? t('Settings: waiting for agent') : undefined;
  const rows: Row[] = [
   {id: 'menuCommandPalette', label: t('Command palette'), icon: 'i-search', className: 'menu-search', run: () => setPaletteOpen(true)},
   ...panelAndViewRows,
+  ...issuesRows,
   ...group('File', [
    // The save status in words, as a line of text: it is not a command, so it has no icon, run or disabled style.
    {note: saveStatusWords(saveDoc.dirty, saveMark.savedAt, saveMark.savedFileName, t)},

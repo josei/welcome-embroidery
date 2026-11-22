@@ -261,7 +261,7 @@ export const ES={...ES_ADDITIONS,
   '{l} mide solo {n} mm de alto; el texto de menos de unos 5 mm rara vez se borda limpio en una fuente de satén o relleno.',
   '{l} extends {n} mm past the hoop. Move it or choose a larger hoop.':'{l} sobrepasa el bastidor en {n} mm. Muévelo o elige un bastidor más grande.',
   'Object {l} lies outside its clipping mask, so nothing is sewn.':'El objeto {l} queda fuera de su máscara de recorte, así que no se borda nada.',
-  'Sewing tips':'Consejos de bordado','1 issue':'1 aviso','{n} issues':'{n} avisos','1 sewing tip':'1 consejo','{n} sewing tips':'{n} consejos',
+  'Sewing tips':'Consejos de bordado','Issues':'Avisos','1 issue':'1 aviso','{n} issues':'{n} avisos','1 sewing tip':'1 consejo','{n} sewing tips':'{n} consejos',
   'Third thread (mid-tones)':'Tercer hilo (tonos medios)','Fourth thread (mid-dark)':'Cuarto hilo (tonos medio-oscuros)','Copy style':'Copiar estilo',
   'Paste style':'Pegar estilo','Copy / paste style':'Copiar / pegar estilo','Select one object to copy its style from.':
   'Selecciona un objeto del que copiar el estilo.','Style copied. Paste it onto other objects with {shortcut}.':

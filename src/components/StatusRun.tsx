@@ -4,6 +4,7 @@ import {statusActions, statusState} from '../statusState.js';
 import {viewMode} from '../viewMode.js';
 import {toastActions} from '../toastState.js';
 import {useCompactLayout} from '../compactLayout';
+import {usePhoneWidth} from '../phoneSheetState.js';
 import {Figure} from './Figure';
 import {MeasureReadout} from './MeasureReadout';
 
@@ -16,6 +17,8 @@ export function StatusRun() {
  // On a phone or tablet the design count is an icon and its number, in the warning colour when the design has an error; the
  // full sentence stays as the name and tooltip, and the issues chip beside it counts the problems.
  const compact = useCompactLayout();
+ // At phone width the Menu's Issues row is the one route to the tips, so the status line shows the count as an indicator.
+ const phone = usePhoneWidth();
  const stitchView = useSyncExternalStore(viewMode.subscribe, viewMode.get) !== 'design';
  const figure = compact && s.countFigure && s.countFigure.text === s.count ? s.countFigure : null;
  const hideOverHoop = compact && stitchView && s.countError;
@@ -32,7 +35,13 @@ export function StatusRun() {
    ) : (
     <span id="count" className={s.countError ? 'error' : undefined} onClick={() => statusActions.compile()}>{s.count}</span>
    )}
-   {compact ? (
+   {phone && compact ? (
+    <span id="issuesBtn" className="issues-btn" hidden={s.issuesHidden} role="img" aria-label={s.issuesText}
+     title={`${s.issuesText}\n${s.issuesTitle}`}>
+     <svg className="icon" aria-hidden="true" focusable="false"><use href={s.issuesWarning ? '#i-issues' : '#i-tip'} /></svg>
+     <span aria-hidden="true">{s.issuesCount}</span>
+    </span>
+   ) : compact ? (
     <button type="button" id="issuesBtn" className="issues-btn" hidden={s.issuesHidden} aria-label={s.issuesText}
      title={`${s.issuesText}\n${s.issuesTitle}`} onClick={() => statusActions.issues()}>
      <svg className="icon" aria-hidden="true" focusable="false"><use href={s.issuesWarning ? '#i-issues' : '#i-tip'} /></svg>
