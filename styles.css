@@ -1224,7 +1224,9 @@ html[lang="es"] .layout main>.tool-rail .rail-label{font-size:10px;letter-spacin
 .top .name-field::before{content:attr(data-shown);visibility:hidden;white-space:pre;overflow:hidden;flex:0 1 auto;min-width:0;padding:0 0 0 8px;font-family:inherit;font-size:var(--fs-heading);font-weight:var(--fw-emphasis);line-height:1.3}
 .top .name-field::after{display:none}
 .top .name-field:not(:focus-within) #name{color:inherit}
-.top .name-field #name{position:absolute;top:0;bottom:0;left:0;right:0;width:auto;height:100%;min-width:0;padding:0 48px 0 8px;text-overflow:ellipsis}
+/* The input takes the same type as the hidden copy that sizes the field (the heading size, as on desktop). At 16 px the input text
+   is wider than that copy, so the field would clip the name's last word. */
+.top .name-field #name{position:absolute;top:0;bottom:0;left:0;right:0;width:auto;height:100%;min-width:0;padding:0 48px 0 8px;font-size:var(--fs-heading);line-height:1.3;text-overflow:ellipsis}
 .top .save-status{position:relative;z-index:1;flex:none;display:flex;align-items:center;justify-content:center;width:44px;height:44px;margin:0 6px 0 0;padding:0;border:0;background:none;color:#66726c;cursor:pointer}
 .top .save-status .icon{width:20px;height:20px}
 .top .save-status.saved{color:var(--teal)}.top .save-status.unsaved{color:#8a5a00}
@@ -1378,11 +1380,12 @@ html[lang="es"] .layout main>.tool-rail .rail-label{font-size:10px;letter-spacin
 .top .export-split .export-label{display:none}
 .top .export-split .export-icon{display:block;width:20px;height:20px}
 }
-/* A phone in portrait keeps the name field at least 200 px wide with the icon-only Export. The bar's gaps and edge padding
-   tighten. The save status icon sits inside the name field, after the name's text (see the save status block below). */
+/* A phone in portrait keeps the name field at least 168 px wide, enough for the default Spanish name with its save icon, so the
+   icon-only Export stays inside a 360 px screen. The bar's gaps and edge padding tighten. The save status icon sits inside the
+   name field, after the name's text (see the save status block below). */
 @media (max-width:600px) and (orientation:portrait){
 .top{gap:2px;padding:0 3px}
-.top .name-field{min-width:200px}
+.top .name-field{min-width:168px}
 }
 
 /* On a phone the bar runs to the screen corner: the Export split fills the bar height and sits flush with the top and right edges, with no square corner radius, so it does not sit in a padded inset. */
