@@ -23,7 +23,8 @@ for(const lang of ['en','es'])for(const size of SIZES){
   expect((await fit.textContent()).trim(),'Fit hoop text').toBe('');
   expect((await all.textContent()).trim(),'Fit everything text').toBe('');
   expect(await fit.locator('use').getAttribute('href')).toBe('#i-fit');
-  expect(await all.locator('use').getAttribute('href')).toBe('#i-fit');
+  expect(await all.locator('use').getAttribute('href')).toBe('#i-fit-all');
+  expect(await fit.locator('use').getAttribute('href')).not.toBe(await all.locator('use').getAttribute('href'));
   expect(errors).toEqual([]);
  });
 

@@ -49,6 +49,10 @@ export function EditorIcons() {
           <path d={"M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"} />
         </symbol>
         {" "}
+        <symbol id={"i-fit-all"} viewBox={"0 0 24 24"}>
+          <path d={"M4 4h16v16H4zM8 8h8v8H8z"} />
+        </symbol>
+        {" "}
         <symbol id={"i-msg"} viewBox={"0 0 24 24"}>
           <path d={"M4 5h16v11H9l-5 4z"} />
         </symbol>

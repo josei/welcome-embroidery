@@ -52,7 +52,7 @@ export function ZoomBar() {
    </button>
    <button type="button" id="zoomAll" className="zoom-text" title={fitAllLabel} aria-label={fitAllLabel} onClick={() => zoomActions.fitAll()}>
     {desktop && 'All'}
-    <svg className="icon zoom-fit-icon" aria-hidden="true"><use href="#i-fit"/></svg>
+    <svg className="icon zoom-fit-icon" aria-hidden="true"><use href="#i-fit-all"/></svg>
    </button>
   </div>
  );
