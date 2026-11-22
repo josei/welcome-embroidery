@@ -31,7 +31,7 @@ An open-source, userless embroidery editor that runs as a static web app, a self
 
 The project is built and run with Node 22, as set in the `Dockerfile` (`node:22-alpine`). `package.json` does not declare an `engines` range. Use Node 22 with `npm ci` and `npm start`.
 
-The project was tested on Node 22: CI runs `npm ci` and the Pages tests on Node 22 (`.github/workflows/pages.yml`).
+CI builds and publishes the site and the editor on Node 22 (`.github/workflows/pages.yml`).
 
 ## Run
 
