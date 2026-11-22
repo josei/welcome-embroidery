@@ -5,6 +5,7 @@ import {inputMode} from '../inputMode.js';
 import {useCompactLayout} from '../compactLayout';
 const VIEWS: [PreviewView, string][] = [['front', 'Front ¾'], ['close', 'Close-up'], ['turntable', 'Turntable']];
 // The hint under the 3D preview, its view choice and loupe, and its pull estimate, rendered by React.
+// The hint is plain text, not a control: it has no button role or pill, so it never reads as one of the tool buttons.
 // Ids match the markup it replaced, because app.js wires them by id.
 export function PreviewPanel() {
  const preview = useSyncExternalStore(previewState.subscribe, previewState.get);
@@ -15,13 +16,7 @@ export function PreviewPanel() {
  const pullLabel = t('Show pull for the fabric');
  return (
   <>
-   {compact ? (
-    <div id="previewHint" className="preview-hint-icon" role="img" aria-label={hint} title={hint} hidden={!preview.threeD}>
-     <svg className="icon" aria-hidden="true" focusable="false"><use href="#i-hand" /></svg>
-    </div>
-   ) : (
-    <div id="previewHint" hidden={!preview.threeD}>{hint}</div>
-   )}
+   <div id="previewHint" hidden={!preview.threeD}>{hint}</div>
    <div id="previewView" className="segmented" hidden={!preview.threeD} role="group" aria-label={t('3D view')}>
     {VIEWS.map(([view, label]) => (
      <button key={view} type="button" aria-pressed={preview.view === view && !preview.orbited} onClick={() => previewActions.chooseView(view)}>{t(label)}</button>

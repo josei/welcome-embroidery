@@ -91,7 +91,9 @@ nav .icon-button:first-of-type{margin-left:auto}
 .top .icon-button[data-tooltip]::after{top:calc(100% + 7px);bottom:auto}
 .icon-button.active-tool{background:var(--teal-soft);border-color:var(--field-line);color:var(--teal);box-shadow:inset 3px 0 0 var(--teal)}
 /* Hover on the active tool gets its own deeper tint, so it differs from both hover and active; the left bar marks the active tool without relying on colour. */
-.icon-button.active-tool:hover,.tool-row .icon-button.active-tool:hover,.floating .icon-button.active-tool:hover{background:#cde7de;color:var(--teal-deep)}
+.icon-button.active-tool:hover,.tool-row .icon-button.active-tool:hover,.floating .icon-button.active-tool:hover,.canvas .zoombar .icon-button.active-tool:hover{background:#cde7de;color:var(--teal-deep)}
+/* The zoom bar's own button rules would otherwise hide the active style, so the hand tool gets the same on state as every other tool. */
+.canvas .zoombar .icon-button.active-tool{background:var(--teal-soft);border-color:var(--field-line);color:var(--teal);box-shadow:inset 3px 0 0 var(--teal)}
 
 /* Single top bar: views and edit tools live in the header; the canvas gets the freed height. */
 .top .sep{width:1px;height:20px;background:#e3e6e1;flex:0 0 auto}
@@ -144,7 +146,7 @@ nav .icon-button:first-of-type{margin-left:auto}
 #agentDialog{width:480px}.agent-field{display:grid;gap:6px;font-size:var(--fs-body);color:#66726c}#agentUrl{width:100%;border:1px solid var(--field-line);border-radius:6px;padding:8px;font:var(--fs-caption) ui-monospace,monospace;background:#f6f7f5}.agent-actions{display:flex;gap:8px}.agent-help{font-size:var(--fs-caption);line-height:1.5}#agentStatus{margin:0;font-weight:var(--fw-emphasis);color:var(--teal)}@media(prefers-reduced-motion:reduce){.icon-button.agent-active::before{animation:none}}
 #satinRow[hidden]{display:none!important}
 
-#preview3d{position:absolute;inset:0;width:100%;height:100%;display:block;cursor:grab;touch-action:none;z-index:1}#preview3d:active{cursor:grabbing}#preview3d[hidden]{display:none}#previewHint{position:absolute;left:50%;bottom:12px;transform:translateX(-50%);z-index:2;font-size:var(--fs-caption);color:#66726c;background:#fffc;padding:4px 10px;border-radius:99px;pointer-events:none}#previewHint[hidden]{display:none}#previewPull{position:absolute;right:12px;top:12px;z-index:2;background:#fffe;padding:8px 10px;border-radius:8px;font-size:var(--fs-caption);max-width:240px;box-shadow:0 2px 8px rgba(0,0,0,.08)}#previewPull[hidden],#pullNote[hidden]{display:none}#previewPull p{margin:6px 0 0;color:#66726c;line-height:1.35}#previewView{position:absolute;left:12px;top:12px;z-index:2;display:flex;gap:4px}#previewView[hidden]{display:none}#preview3dLoupe{position:fixed;z-index:9;width:150px;height:150px;border-radius:50%;border:2px solid #fff;box-shadow:0 4px 14px rgba(0,0,0,.25);pointer-events:none}#preview3dLoupe[hidden]{display:none}.canvas .floating{z-index:5}
+#preview3d{position:absolute;inset:0;width:100%;height:100%;display:block;cursor:grab;touch-action:none;z-index:1}#preview3d:active{cursor:grabbing}#preview3d[hidden]{display:none}#previewHint{position:absolute;left:12px;right:12px;bottom:12px;z-index:2;font-size:var(--fs-caption);line-height:1.35;text-align:center;color:#66726c;pointer-events:none}#previewHint[hidden]{display:none}#previewPull{position:absolute;right:12px;top:12px;z-index:2;background:#fffe;padding:8px 10px;border-radius:8px;font-size:var(--fs-caption);max-width:240px;box-shadow:0 2px 8px rgba(0,0,0,.08)}#previewPull[hidden],#pullNote[hidden]{display:none}#previewPull p{margin:6px 0 0;color:#66726c;line-height:1.35}#previewView{position:absolute;left:12px;top:12px;z-index:2;display:flex;gap:4px}#previewView[hidden]{display:none}#preview3dLoupe{position:fixed;z-index:9;width:150px;height:150px;border-radius:50%;border:2px solid #fff;box-shadow:0 4px 14px rgba(0,0,0,.25);pointer-events:none}#preview3dLoupe[hidden]{display:none}.canvas .floating{z-index:5}
 
 #alongRow[hidden]{display:none!important}
 
@@ -1020,7 +1022,6 @@ body{height:100dvh;min-height:0;overflow:hidden}
 .floating .bar-edit{display:none}
 .floating .bar-direct{display:contents}
 @media (max-width:1024px){.floating .bar-edit{display:inline-flex;align-items:center;justify-content:center}.floating .bar-direct{display:none}.top .edit-tools #duplicate,.top .edit-tools #remove{display:none}}
-.floating #selectToggle[aria-pressed=true]{background:var(--teal-soft);color:var(--teal)}
 /* On tablets the toggle carries its word beside the glyph, since a plus in a square alone does not say it adds to the selection. */
 .floating .bar-word{display:none}
 @media (max-width:1024px){.floating #selectToggle{width:auto;min-width:30px;padding:0 7px 0 5px;display:inline-flex;align-items:center;gap:3px}.floating #selectToggle .bar-word{display:inline;font-size:var(--fs-caption);line-height:1;white-space:nowrap;color:#4d5a54}.floating #selectToggle[aria-pressed=true] .bar-word{color:var(--teal-deep)}}
@@ -1184,7 +1185,6 @@ html[data-input="touch"] .tool-row .icon-button:not(.active-tool):hover{backgrou
 /* A tool tile keeps its grey fill when it is the quiet-focus control, so the dock looks the same after an action. */
 .tool-row .icon-button[data-quiet-focus]:not(.active-tool):focus-visible{background:#f6f7f5}
 [data-quiet-focus]::after{display:none!important}
-#previewHint{white-space:nowrap;max-width:calc(100% - 24px);overflow:hidden;text-overflow:ellipsis}
 /* On screens up to 1024 px wide Chromium can leave the bottom band of the WebGL canvas unpainted. A filter on the canvas makes it
    paint the whole frame. */
 #preview3d{filter:blur(0)}
@@ -1329,7 +1329,7 @@ html[lang="es"] .layout main>.tool-rail .rail-label{font-size:10px;letter-spacin
 /* Numeric fields in the panels share one right edge, as the X, Y, W and H fields do. Text fields keep their left alignment. */
 .panel input[inputmode=decimal],.panel input[type=number]{text-align:right}
 /* The Properties button is pressed while the inspector is open, in the same selected style as the chips and segmented controls. */
-.layers-head .inspector-toggle[aria-pressed=true]{background:var(--teal-soft);border-color:var(--field-line);color:var(--teal-deep);font-weight:var(--fw-emphasis)}
+.layers-head .inspector-toggle[aria-pressed=true]{background:var(--teal-soft);border-color:var(--field-line);color:var(--teal-deep);font-weight:var(--fw-emphasis);box-shadow:inset 3px 0 0 var(--teal)}
 
 /* The controls along the bottom of the canvas, at tablet and desktop sizes. Phones keep their own rules above.
    The lettering caption sits 8 px above the zoom bar: tablets set the bar 8 px up, 46 px tall (62 px in all); the desktop
@@ -1366,8 +1366,6 @@ html[lang="es"] .layout main>.tool-rail .rail-label{font-size:10px;letter-spacin
 .figure .icon{width:16px;height:16px;flex:none}
 .layers-count .figure{margin-right:10px}
 .layers-count{display:inline-flex;align-items:center}
-.preview-hint-icon{display:flex;align-items:center;justify-content:center;width:30px;height:24px}
-.preview-hint-icon .icon{width:16px;height:16px}
 .layout main .playback-bar .playback-summary.playback-figures{display:flex;align-items:center;gap:10px;min-width:0;overflow:hidden;white-space:nowrap}
 
 /* On a portrait phone the 3D camera presets start 24 px below the canvas's top edge, and the Show pull panel moves down with them,

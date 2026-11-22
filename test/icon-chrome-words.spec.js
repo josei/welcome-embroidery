@@ -63,7 +63,7 @@ test('390x844 es: the status figure and the 3D hint keep their sentences as name
  await page.locator('#phoneMenu').tap();
  await page.locator('#menuView-preview').tap();
  await expect(page.locator('#preview3d')).toHaveAttribute('data-instances',/^[1-9]\d*$/,{timeout:8000});
- await expect(page.locator('#previewHint')).toHaveAttribute('aria-label','Arrastra para orbitar · pellizca · doble toque para restablecer');
+ await expect(page.locator('#previewHint')).toHaveText('Arrastra para orbitar · pellizca · doble toque para restablecer');
  await expect(page.locator('#showPull')).toHaveAttribute('aria-label','Mostrar la tracción de la tela');
 });
 
