@@ -60,8 +60,7 @@ nav button[data-view]{padding:7px 13px;color:#66726c}nav button[data-view].activ
 .icon-defs{position:absolute;width:0;height:0;overflow:hidden}
 .icon{width:18px;height:18px;display:block;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;pointer-events:none}
 .icon-button{position:relative;display:inline-flex;flex-direction:column;align-items:center;justify-content:center;width:36px;height:36px;min-width:36px;padding:0;border:1px solid transparent;border-radius:8px;background:transparent;color:#66726c;flex:0 0 auto}
-.icon-button:hover{background:#eef1ec;border-color:var(--field-line);color:var(--teal)}
-.icon-button:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--teal);outline-offset:2px;z-index:8}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--teal);outline-offset:2px;z-index:8}
 .icon-button:disabled{opacity:.38;cursor:default;background:transparent}
 /* Header Undo/Redo when unavailable: a clearly lighter grey glyph (about 2.2:1 on white, against 5.0:1 for the enabled glyph),
    so the difference shows at arm's length without hover. Disabled controls are exempt from the contrast minimum, so the
@@ -75,8 +74,6 @@ nav button[data-view]{padding:7px 13px;color:#66726c}nav button[data-view].activ
 .top #export{display:flex;align-items:center;justify-content:center;min-height:36px}
 .tool-row{display:flex;gap:4px;margin:0 0 10px}
 .tool-row .icon-button{background:#f6f7f5;color:#53635b}
-.tool-row .icon-button:hover{background:#eef1ec;color:var(--teal)}
-.tool-row .icon-button:focus-visible{background:var(--teal-soft);color:var(--teal)}
 nav .icon-button{width:36px;height:36px}
 nav .icon-button:first-of-type{margin-left:auto}
 #playbackProgress{font-variant-numeric:tabular-nums;min-width:112px;color:#53635b}
@@ -89,11 +86,6 @@ nav .icon-button:first-of-type{margin-left:auto}
 @media(min-width:601px) and (max-width:1000px),(max-width:600px) and (orientation:landscape){#playbackProgress{min-width:82px}#needlePosition{display:none}.top .icon-button{width:32px;min-width:32px;height:32px}}
 @media(prefers-reduced-motion:reduce){.icon-button[data-tooltip]::after{transition:none}}
 .top .icon-button[data-tooltip]::after{top:calc(100% + 7px);bottom:auto}
-.icon-button.active-tool{background:var(--teal-soft);border-color:var(--field-line);color:var(--teal);box-shadow:inset 3px 0 0 var(--teal)}
-/* Hover on the active tool gets its own deeper tint, so it differs from both hover and active; the left bar marks the active tool without relying on colour. */
-.icon-button.active-tool:hover,.tool-row .icon-button.active-tool:hover,.floating .icon-button.active-tool:hover,.canvas .zoombar .icon-button.active-tool:hover{background:#cde7de;color:var(--teal-deep)}
-/* The zoom bar's own button rules would otherwise hide the active style, so the hand tool gets the same on state as every other tool. */
-.canvas .zoombar .icon-button.active-tool{background:var(--teal-soft);border-color:var(--field-line);color:var(--teal);box-shadow:inset 3px 0 0 var(--teal)}
 
 /* Single top bar: views and edit tools live in the header; the canvas gets the freed height. */
 .top .sep{width:1px;height:20px;background:#e3e6e1;flex:0 0 auto}
@@ -116,7 +108,6 @@ nav .icon-button:first-of-type{margin-left:auto}
 .floating{position:absolute;top:12px;left:50%;transform:translateX(-50%);z-index:5;display:flex;align-items:center;gap:2px;padding:4px 6px;background:#fff;border:1px solid var(--field-line);border-radius:11px;box-shadow:0 4px 18px #1d292518}
 .floating .icon-button{width:30px;height:30px;min-width:30px}
 .floating .icon-button[data-tooltip]::after{top:calc(100% + 7px);bottom:auto}
-.floating .icon-button.active-tool{background:var(--teal-soft);color:var(--teal)}
 .floating select{border:1px solid var(--field-line);border-radius:6px;font:inherit;font-size:var(--fs-caption);padding:4px;background:#f6f7f5;color:#53635b;margin-left:2px}
 .canvas.snapping,.canvas.grid-shown{background-image:radial-gradient(#1c7a6755 1px,transparent 1.2px)}
 .path-node.selected-node{fill:var(--teal);stroke:#fff}
@@ -126,7 +117,7 @@ nav .icon-button:first-of-type{margin-left:auto}
 
 .path-handle{fill:var(--teal);stroke:#fff;stroke-width:.3;vector-effect:non-scaling-stroke;cursor:crosshair;pointer-events:all}.handle-line{stroke:var(--teal);stroke-width:.25;stroke-opacity:.7;pointer-events:none}
 
-.tool-row{flex-wrap:wrap}.sides-row{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:0 0 6px;font-size:var(--fs-caption);color:#66726c}.sides-row input{width:56px;border:1px solid var(--field-line);border-radius:6px;padding:4px 6px;font:inherit;background:#f6f7f5}.icon-button.active-tool{background:var(--teal-soft);border-color:var(--field-line);color:var(--teal)}#art.drawing{cursor:crosshair}
+.tool-row{flex-wrap:wrap}.sides-row{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:0 0 6px;font-size:var(--fs-caption);color:#66726c}.sides-row input{width:56px;border:1px solid var(--field-line);border-radius:6px;padding:4px 6px;font:inherit;background:#f6f7f5}#art.drawing{cursor:crosshair}
 
 .footer.hoop-edit{display:flex;align-items:center;gap:6px;left:16px;width:224px;right:auto;bottom:16px;font-size:var(--fs-caption);color:#66726c}.hoop-edit input{width:52px;border:1px solid var(--field-line);border-radius:6px;padding:4px 6px;font:inherit;background:#f6f7f5}.hoop-edit select{border:1px solid var(--field-line);border-radius:6px;padding:4px;font:inherit;font-size:var(--fs-caption);background:#f6f7f5;width:84px}
 .panel .footer.hoop-edit input{width:46px;padding:4px}.panel .footer.hoop-edit select{width:76px;padding:4px}.footer.hoop-edit{gap:4px;width:224px}
@@ -162,7 +153,7 @@ nav .icon-button:first-of-type{margin-left:auto}
 .font-list{flex:1;min-height:200px;overflow:auto;border-top:1px solid #eef0ec;scroll-behavior:auto}.font-row{display:grid;grid-template-columns:1fr 112px;align-items:center;gap:10px;padding:6px 8px;border-radius:8px;cursor:pointer;min-height:48px}.font-row:hover,.font-row.active{background:#f1f5f1}.font-row[aria-selected=true]{background:var(--teal-soft)}.font-row.failed .font-preview{opacity:.25}
 .font-preview{width:100%;height:34px;color:#1d2925;display:block}.font-meta{display:flex;flex-direction:column;gap:1px;min-width:0;font-size:var(--fs-caption)}.font-meta b{font-size:var(--fs-body);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.font-meta span{color:var(--mute-text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.font-empty{padding:18px;color:var(--mute-text);text-align:center}
 .font-foot{display:flex;flex-direction:column;gap:4px;font-size:var(--fs-caption);color:var(--mute-text)}.font-foot button{align-self:flex-start;font-size:var(--fs-caption);padding:5px 9px}
-.style-row{display:flex;align-items:center;gap:2px;margin:6px 0}.style-row .icon-button{width:30px;height:30px;min-width:30px}.style-row .icon-button[aria-pressed=true]{background:var(--teal-soft);border-color:var(--field-line);color:var(--teal)}.style-row .sep{width:1px;height:20px;background:#e3e6e1;margin:0 4px}.style-row .icon-button b,.style-row .icon-button i{font-size:16px;line-height:1;font-weight:var(--fw-emphasis);font-family:Inter,ui-sans-serif,system-ui,sans-serif}
+.style-row{display:flex;align-items:center;gap:2px;margin:6px 0}.style-row .icon-button{width:30px;height:30px;min-width:30px}.style-row .sep{width:1px;height:20px;background:#e3e6e1;margin:0 4px}.style-row .icon-button b,.style-row .icon-button i{font-size:16px;line-height:1;font-weight:var(--fw-emphasis);font-family:Inter,ui-sans-serif,system-ui,sans-serif}
 .panel label.block{flex-direction:column;align-items:stretch;gap:5px}.panel textarea{width:100%;resize:vertical;border:1px solid var(--field-line);border-radius:6px;padding:7px;font:inherit;background:#f6f7f5;min-height:44px}.text-options label{margin:4px 0}.font-info{font-size:var(--fs-caption);line-height:1.4;color:var(--mute-text);margin:4px 0}.font-info[hidden],#textStitchRow[hidden]{display:none!important}
 
 /* Context-sensitive inspector */
@@ -764,7 +755,6 @@ body{height:100vh;height:100dvh;min-height:0;overflow:hidden}
 .canvas .tool-rail{position:absolute;left:0;top:0;bottom:0;width:64px;max-height:none;z-index:4;display:flex;flex-direction:column;align-items:stretch;gap:4px;padding:6px 4px;overflow-y:auto;overscroll-behavior:contain;background:#fff;border-right:1px solid #e3e6e1}
 .canvas .tool-rail>button.icon-button,.canvas .tool-rail>.icon-button{width:44px;min-width:44px;height:44px;min-height:44px;align-self:center;flex-direction:column;align-items:center;justify-content:center;gap:2px}
 .canvas .tool-rail .rail-label{display:none}
-.canvas .tool-rail .icon-button.active-tool{background:var(--teal-soft);color:var(--teal)}
 .canvas #art{inset:0 0 0 64px;width:calc(100% - 64px)!important}
 .canvas #rulerTop,.canvas #rulerLeft,.canvas .ruler-corner{left:64px}
 .canvas .zoombar{left:auto;right:12px;bottom:12px;top:auto}
@@ -1181,7 +1171,6 @@ body{height:100dvh;min-height:0;overflow:hidden}
 html[data-input="touch"] .icon-button:not(.active-tool):hover{background:transparent;border-color:transparent;color:#66726c}
 html[data-input="touch"] .tool-row .icon-button:not(.active-tool):hover{background:#f6f7f5;border-color:transparent;color:#66726c}
 [data-quiet-focus]:focus-visible{outline:none}
-.icon-button[data-quiet-focus]:not(.active-tool):focus-visible{background:transparent;border-color:transparent;box-shadow:none;color:#66726c}
 /* A tool tile keeps its grey fill when it is the quiet-focus control, so the dock looks the same after an action. */
 .tool-row .icon-button[data-quiet-focus]:not(.active-tool):focus-visible{background:#f6f7f5}
 [data-quiet-focus]::after{display:none!important}
@@ -1423,3 +1412,19 @@ html[lang="es"] .layout main>.tool-rail .rail-label{font-size:10px;letter-spacin
 @media (min-width:601px) and (max-width:1024px){
 .layout main>footer>#messagesBtn{align-self:flex-end}
 }
+
+/* Shared state for glyph-only chrome controls. Each control carries the chrome-state class and gets hover, selected,
+   focus-visible and pressed from this block on its own box. Pressed is the hover fill one step darker, so a tap shows
+   feedback on touch as well. The zoom bar's own fills sit at higher specificity, so its rules repeat the state there. */
+.chrome-state:hover:not(:disabled){background:#eef1ec;border-color:var(--field-line);color:var(--teal)}
+.canvas .zoombar>.chrome-state:hover:not(:disabled){background:#eef1ec}
+.chrome-state:active:not(:disabled),.canvas .zoombar>.chrome-state:active:not(:disabled){background:#e1e7df}
+.chrome-state.active-tool,.canvas .zoombar>.chrome-state.active-tool{background:var(--teal-soft);border-color:var(--field-line);color:var(--teal);box-shadow:inset 3px 0 0 var(--teal)}
+.chrome-state.active-tool:hover:not(:disabled),.canvas .zoombar>.chrome-state.active-tool:hover:not(:disabled){background:#cde7de;color:var(--teal-deep)}
+.chrome-state.active-tool:active:not(:disabled),.canvas .zoombar>.chrome-state.active-tool:active:not(:disabled){background:#bfdfd1;color:var(--teal-deep)}
+.chrome-state[aria-pressed=true]:not(:disabled){background:var(--teal-soft);border-color:var(--field-line);color:var(--teal)}
+.chrome-state[aria-pressed=true]:hover:not(:disabled){background:#cde7de;color:var(--teal-deep)}
+.chrome-state[aria-pressed=true]:active:not(:disabled){background:#bfdfd1;color:var(--teal-deep)}
+.chrome-state:focus-visible:not([data-quiet-focus]),.canvas .zoombar>.chrome-state:focus-visible:not([data-quiet-focus]){outline:2px solid var(--teal);outline-offset:2px;z-index:8}
+.chrome-state[data-quiet-focus]:not(.active-tool):focus-visible{background:transparent;border-color:transparent;box-shadow:none;color:#66726c}
+.tool-row .chrome-state[data-quiet-focus]:not(.active-tool):focus-visible{background:#f6f7f5}

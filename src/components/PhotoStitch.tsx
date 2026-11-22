@@ -7,7 +7,7 @@ export function PhotoStitch() {
  return (
   <>
    <button
-    className="icon-button"
+    className="icon-button chrome-state"
     id="photo"
     aria-label="Photo stitch from a picture"
     title="Photo stitch from a picture"

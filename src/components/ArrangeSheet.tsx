@@ -99,7 +99,7 @@ export function ArrangeSheet() {
 
  return (
   <>
-   <button type={"button"} ref={trigger} className={"icon-button tb-start"} id={"arrangeBtn"} aria-haspopup={"dialog"} aria-expanded={open}
+   <button type={"button"} ref={trigger} className={"icon-button chrome-state tb-start"} id={"arrangeBtn"} aria-haspopup={"dialog"} aria-expanded={open}
     aria-controls={"arrangeSheet"} aria-label={t('Arrange')} title={t('Arrange')} data-tooltip={t('Arrange')} onClick={toggle}>
     <svg className={"icon"}><use href={"#i-arrange"} /></svg>
    </button>

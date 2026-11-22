@@ -25,19 +25,19 @@ export function ZoomBar() {
  const desktop = useSyncExternalStore(subscribeDesktop, isDesktop);
  return (
   <div className="zoombar" role="toolbar" aria-label={t('Zoom')}>
-   <button type="button" id="zoomOut" className="icon-button" aria-label="Zoom out (−)" title="Zoom out (−)" onClick={() => zoomActions.zoomOut()}>
+   <button type="button" id="zoomOut" className="icon-button chrome-state" aria-label="Zoom out (−)" title="Zoom out (−)" onClick={() => zoomActions.zoomOut()}>
     <svg className="icon"><use href="#i-minus"/></svg>
    </button>
    <button type="button" id="zoomPct" className="zoom-pct" aria-label={resetLabel} title={resetLabel} onClick={() => zoomActions.zoom100()}>
     {percent}
    </button>
-   <button type="button" id="zoomIn" className="icon-button" aria-label="Zoom in (+)" title="Zoom in (+)" onClick={() => zoomActions.zoomIn()}>
+   <button type="button" id="zoomIn" className="icon-button chrome-state" aria-label="Zoom in (+)" title="Zoom in (+)" onClick={() => zoomActions.zoomIn()}>
     <svg className="icon"><use href="#i-zoom-in"/></svg>
    </button>
    <button
     type="button"
     id="handTool"
-    className={hand ? 'icon-button active-tool' : 'icon-button'}
+    className={hand ? 'icon-button chrome-state active-tool' : 'icon-button chrome-state'}
     aria-label="Hand tool: drag to pan"
     title="Hand tool: drag to pan"
     aria-pressed={hand}

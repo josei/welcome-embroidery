@@ -9,7 +9,7 @@ export function BooleanButtons() {
  return (
   <>
    <button
-    className="icon-button"
+    className="icon-button chrome-state"
     aria-label="Subtract the others from the lowest shape"
     title="Subtract the others from the lowest shape"
     data-tooltip="Subtract the others from the lowest shape"
@@ -18,7 +18,7 @@ export function BooleanButtons() {
     onClick={() => selectionToolbarActions.press('subtract')}
    ><svg className="icon"><use href="#i-subtract"/></svg></button>
    <button
-    className="icon-button"
+    className="icon-button chrome-state"
     aria-label="Union of selected shapes"
     title="Union of selected shapes"
     data-tooltip="Union of selected shapes"
@@ -27,7 +27,7 @@ export function BooleanButtons() {
     onClick={() => selectionToolbarActions.press('union')}
    ><svg className="icon"><use href="#i-union"/></svg></button>
    <button
-    className="icon-button"
+    className="icon-button chrome-state"
     aria-label="Intersection of selected shapes"
     title="Intersection of selected shapes"
     data-tooltip="Intersection of selected shapes"
@@ -45,7 +45,7 @@ export function FlipButtons() {
  return (
   <>
    <button
-    className="icon-button tb-start"
+    className="icon-button chrome-state tb-start"
     aria-label="Flip horizontally"
     title="Flip horizontally"
     data-tooltip="Flip horizontally"
@@ -54,7 +54,7 @@ export function FlipButtons() {
     onClick={() => selectionToolbarActions.press('flipH')}
    ><svg className="icon"><use href="#i-flip-h"/></svg></button>
    <button
-    className="icon-button"
+    className="icon-button chrome-state"
     aria-label="Flip vertically"
     title="Flip vertically"
     data-tooltip="Flip vertically"
@@ -74,7 +74,7 @@ export function SelectToggleButton() {
  return (
   <button
    type="button"
-   className={on ? "icon-button tb-start active-tool" : "icon-button tb-start"}
+   className={on ? "icon-button chrome-state tb-start active-tool" : "icon-button chrome-state tb-start"}
    id="selectToggle"
    aria-pressed={on}
    aria-label={label}

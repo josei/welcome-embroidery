@@ -160,7 +160,7 @@ export function EditorLayout() {
                <AddShapeButton kind={"text"} id={"letter"} label={"Add lettering"} icon={"text"} tip={t('Add lettering ({shortcut})', {shortcut: shortcutFor('letter')})} short={t('Text')} />
                {landscapePhone ? <><LineTool /><MeasureTool /></> : <ToolButtons />}
                {landscapePhone ? null : <button
-                 className={"icon-button"}
+                 className={"icon-button chrome-state"}
                  id={"traceBtn"}
                  aria-label={"Trace a picture into filled shapes"}
                  title={"Trace a picture into filled shapes"}
@@ -181,13 +181,13 @@ export function EditorLayout() {
              <div className={"floating"} role={"toolbar"} aria-label={"Canvas tools"} hidden={(compact || narrow || phone) && (!hasSelection || (phone && view !== 'design'))}>
                {/* Select, Duplicate, Delete and Arrange lead the bar. On phones the bar is not shown at all: its commands are in the Menu. */}
                <SelectToggleButton />
-               <ActionButton flag="duplicate" className={"icon-button bar-edit"} id={"barDuplicate"} aria-label={duplicateLabel} title={duplicateLabel}
+               <ActionButton flag="duplicate" className={"icon-button chrome-state bar-edit"} id={"barDuplicate"} aria-label={duplicateLabel} title={duplicateLabel}
                  data-tooltip={duplicateLabel} onClick={() => toolbarActions.duplicate()}>
                  <svg className={"icon"}>
                    <use href={"#i-copy"} />
                  </svg>
                </ActionButton>
-               <ActionButton flag="remove" className={"icon-button bar-edit"} id={"barDelete"} aria-label={deleteLabel} title={deleteLabel}
+               <ActionButton flag="remove" className={"icon-button chrome-state bar-edit"} id={"barDelete"} aria-label={deleteLabel} title={deleteLabel}
                  data-tooltip={deleteLabel} onClick={() => toolbarActions.remove()}>
                  <svg className={"icon"}>
                    <use href={"#i-delete"} />
@@ -202,7 +202,7 @@ export function EditorLayout() {
                  <AlignButtons />
                  <FlipButtons />
                </span>
-               <ActionButton flag="group" hideWhenDisabled className={"icon-button"} aria-label={groupLabel} title={groupLabel}
+               <ActionButton flag="group" hideWhenDisabled className={"icon-button chrome-state"} aria-label={groupLabel} title={groupLabel}
                  data-tooltip={groupLabel} id={"group"} onClick={(
                  ) => toolbarActions.group()}>
                  <svg className={"icon"}>
@@ -210,7 +210,7 @@ export function EditorLayout() {
                  </svg>
                </ActionButton>
                <ActionButton flag="ungroup" hideWhenDisabled
-                 className={"icon-button"}
+                 className={"icon-button chrome-state"}
                  aria-label={ungroupLabel}
                  title={ungroupLabel}
                  data-tooltip={ungroupLabel}
@@ -225,7 +225,7 @@ export function EditorLayout() {
                  <BooleanButtons />
                </span>
                <ActionButton flag="clip" hideWhenDisabled
-                 className={"icon-button tb-start"}
+                 className={"icon-button chrome-state tb-start"}
                  aria-label={"Clip: use the top selected shape as a mask for the other selected objects"}
                  title={"Clip: use the top selected shape as a mask for the other selected objects"}
                  data-tooltip={"Clip: use the top selected shape as a mask for the other selected objects"}
@@ -237,7 +237,7 @@ export function EditorLayout() {
                  </svg>
                </ActionButton>
                <ActionButton flag="unclip" hideWhenDisabled
-                 className={"icon-button"}
+                 className={"icon-button chrome-state"}
                  aria-label={"Release the clipping mask"}
                  title={"Release the clipping mask"}
                  data-tooltip={"Release the clipping mask"}
@@ -249,7 +249,7 @@ export function EditorLayout() {
                  </svg>
                </ActionButton>
                <ActionButton flag="textOnPath" hideWhenDisabled
-                 className={"icon-button tb-start"}
+                 className={"icon-button chrome-state tb-start"}
                  aria-label={"Put the selected text on the selected path"}
                  title={"Put the selected text on the selected path"}
                  data-tooltip={"Put the selected text on the selected path"}
@@ -261,7 +261,7 @@ export function EditorLayout() {
                  </svg>
                </ActionButton>
                <ActionButton flag="textOffPath" hideWhenDisabled
-                 className={"icon-button"}
+                 className={"icon-button chrome-state"}
                  aria-label={"Detach text from its path"}
                  title={"Detach text from its path"}
                  data-tooltip={"Detach text from its path"}
@@ -273,7 +273,7 @@ export function EditorLayout() {
                  </svg>
                </ActionButton>
                <ActionButton flag="editNodes" hideWhenDisabled
-                 className={editing ? "icon-button tb-start active-tool" : "icon-button tb-start"}
+                 className={editing ? "icon-button chrome-state tb-start active-tool" : "icon-button chrome-state tb-start"}
                  aria-label={t("Edit nodes (Enter)")}
                  title={t("Edit nodes (Enter) — converts rectangles and ellipses to paths")}
                  data-tooltip={t("Edit nodes (Enter) — converts rectangles and ellipses to paths")}
@@ -293,19 +293,19 @@ export function EditorLayout() {
  const phoneBar = (
              <div className={"floating phone-selection"} role={"toolbar"} aria-label={selectionBarLabel} hidden={!hasSelection || view !== 'design'}>
                <SelectToggleButton />
-               <ActionButton flag="duplicate" className={"icon-button"} id={"barDuplicate"} aria-label={duplicateLabel} title={duplicateLabel}
+               <ActionButton flag="duplicate" className={"icon-button chrome-state"} id={"barDuplicate"} aria-label={duplicateLabel} title={duplicateLabel}
                  data-tooltip={duplicateLabel} onClick={() => toolbarActions.duplicate()}>
                  <svg className={"icon"}>
                    <use href={"#i-copy"} />
                  </svg>
                </ActionButton>
-               <ActionButton flag="remove" className={"icon-button"} id={"barDelete"} aria-label={deleteLabel} title={deleteLabel}
+               <ActionButton flag="remove" className={"icon-button chrome-state"} id={"barDelete"} aria-label={deleteLabel} title={deleteLabel}
                  data-tooltip={deleteLabel} onClick={() => toolbarActions.remove()}>
                  <svg className={"icon"}>
                    <use href={"#i-delete"} />
                  </svg>
                </ActionButton>
-               <button className={"icon-button"} id={"barProperties"} aria-label={propertiesLabel} title={propertiesLabel}
+               <button className={"icon-button chrome-state"} id={"barProperties"} aria-label={propertiesLabel} title={propertiesLabel}
                  data-tooltip={propertiesLabel} onClick={() => togglePhoneSheet('properties')}>
                  <svg className={"icon"}>
                    <use href={"#i-sliders"} />

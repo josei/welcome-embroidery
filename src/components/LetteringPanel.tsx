@@ -54,21 +54,21 @@ useLayoutEffect(() => {
   title="List the custom fonts in this document and remove the ones no lettering uses" onClick={() => setFontsDialogOpen(true)}>Organize fonts</button></div>
 <label className="block">Text<textarea id="letteringText" ref={textRef} rows={2} maxLength={120} aria-label="Text content" {...text} disabled={l.textOff} /></label>
 <label>Font size (mm)<input id="letteringHeight" type="text" inputMode="decimal" min={l.heightMin} max={l.heightMax} {...height.inputProps} title={l.heightTitle || height.inputProps.title} step="0.5" disabled={l.textOff} />{height.note && <span className="clamp-note" role="status">{height.note}</span>}</label>
-<div className="style-row" role="group" aria-label="Text style"><button type="button" id="textBold" className="icon-button" aria-pressed={l.bold}
+<div className="style-row" role="group" aria-label="Text style"><button type="button" id="textBold" className="icon-button chrome-state" aria-pressed={l.bold}
   disabled={l.styleOff} onClick={(
   ) =>
   letteringActions.press(
   'bold')} title="Bold (adds weight to fills and satin columns)" aria-label="Bold"><b>B</b></button><button type="button" id="textItalic"
-    className="icon-button" aria-pressed={l.italic} disabled={l.styleOff} onClick={(
+    className="icon-button chrome-state" aria-pressed={l.italic} disabled={l.styleOff} onClick={(
   ) => letteringActions.press('italic')} title="Italic (slant)" aria-label="Italic"><i>I</i></button><span className="sep"></span>
-<button type="button" id="alignLeft" className="icon-button" data-align-text="left" aria-pressed={l.align === 'left'} disabled={l.styleOff} onClick={() =>
+<button type="button" id="alignLeft" className="icon-button chrome-state" data-align-text="left" aria-pressed={l.align === 'left'} disabled={l.styleOff} onClick={() =>
   letteringActions.press('align',
   'left')} title="Align left" aria-label="Align left"><svg className="icon"><use href="#i-al-left"/></svg></button><button type="button" id="alignCenter"
-    className="icon-button" data-align-text="center" aria-pressed={l.align ===
+    className="icon-button chrome-state" data-align-text="center" aria-pressed={l.align ===
   'center'} disabled={l.styleOff} onClick={() =>
   letteringActions.press('align',
   'center')} title="Align center" aria-label="Align center"><svg className="icon"><use href="#i-al-hcenter"/></svg></button><button type="button"
-    id="alignRight" className="icon-button" data-align-text="right" aria-pressed={l.align ===
+    id="alignRight" className="icon-button chrome-state" data-align-text="right" aria-pressed={l.align ===
   'right'} disabled={l.styleOff} onClick={() =>
   letteringActions.press('align', 'right')} title="Align right" aria-label="Align right"><svg className="icon"><use href="#i-al-right"/></svg></button></div>
 {l.styleOffWhy && <p className="font-info style-hint" role="note">{l.styleOffWhy === 'select' ? t('Select lettering on the canvas, or add some, to set bold and italic.') : t('Bold and italic need an outline or satin font. This font is single-line: choose another under Font.')}</p>}

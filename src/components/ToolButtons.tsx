@@ -9,7 +9,7 @@ import {shortcutFor} from '../shortcutTable.js';
 import {t} from '../i18n.js';
 
 function toolClass(current: string, name: string) {
- return current === name ? 'icon-button active-tool' : 'icon-button';
+ return current === name ? 'icon-button chrome-state active-tool' : 'icon-button chrome-state';
 }
 
 // One drawing-tool button: it arms the tool, and shows as pressed while the tool is armed. Its tooltip names the key from the shortcut
@@ -23,11 +23,11 @@ function DrawTool({tool, id, icon, label, tip}: {tool: DrawToolName; id: string;
  );
 }
 
-// A tool-row button that opens a panel or dialog rather than arming a drawing tool. It is the same icon-button the tool rows use, so it
+// A tool-row button that opens a panel or dialog rather than arming a drawing tool. It is the same icon-button chrome-state the tool rows use, so it
 // takes the same colours, hover and focus styles wherever it is shown.
 export function RailButton({id, icon, label, tip, onClick, pressed}: {id: string; icon: string; label: string; tip: string; onClick: () => void; pressed?: boolean}) {
  return (
-  <button type={"button"} className={"icon-button"} id={id} aria-label={tip} title={tip} data-tooltip={tip} aria-pressed={pressed} onClick={onClick}>
+  <button type={"button"} className={"icon-button chrome-state"} id={id} aria-label={tip} title={tip} data-tooltip={tip} aria-pressed={pressed} onClick={onClick}>
    <svg className={"icon"}><use href={`#i-${icon}`}/></svg><span className={"rail-label"}>{label}</span>
   </button>
  );
@@ -95,7 +95,7 @@ export function PathTool() {
 // first, so the Select button is the pressed one after the object is placed. `tip` is the tooltip, which names the key.
 export function AddShapeButton({kind, id, label, icon, tip, short}: {kind: 'rect' | 'ellipse' | 'text'; id: string; label: string; icon: string; tip: string; short: string}) {
  return (
-  <button aria-pressed={false} className="icon-button" id={id} aria-label={label} title={tip} data-tooltip={tip} onClick={event => {
+  <button aria-pressed={false} className="icon-button chrome-state" id={id} aria-label={label} title={tip} data-tooltip={tip} onClick={event => {
     toolActions.press('select');
     toolbarActions.addShape(kind);
     // A keyboard add (detail 0) moves focus to the new shape's Stitch type controls, so the next key works on it. Lettering
@@ -112,7 +112,7 @@ export function GridSnapButton() {
  const on = useSyncExternalStore(gridSnapState.subscribe, gridSnapState.get);
  return (
   <button className={on ?
-    'icon-button active-tool' : 'icon-button'} aria-label="Snap to grid" title="Snap to grid" data-tooltip="Snap to grid" id="snap" onClick={() =>
+    'icon-button chrome-state active-tool' : 'icon-button chrome-state'} aria-label="Snap to grid" title="Snap to grid" data-tooltip="Snap to grid" id="snap" onClick={() =>
     gridSnapActions.toggle()}>
    <svg className="icon"><use href="#i-snap"/></svg>
   </button>

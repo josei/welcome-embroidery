@@ -7,7 +7,7 @@ export function PathNodeButtons() {
  return (
   <>
    <button
-    className="icon-button"
+    className="icon-button chrome-state"
     aria-label="Add node at midpoint of selected segment (or double-click a path)"
     title="Add node at midpoint of selected segment (or double-click a path)"
     data-tooltip="Add node at midpoint of selected segment (or double-click a path)"
@@ -16,7 +16,7 @@ export function PathNodeButtons() {
     onClick={() => nodeActions.add()}
    ><svg className="icon"><use href="#i-node-add"/></svg></button>
    <button
-    className="icon-button"
+    className="icon-button chrome-state"
     aria-label="Delete selected node (Delete key)"
     title="Delete selected node (Delete key)"
     data-tooltip="Delete selected node (Delete key)"
@@ -25,7 +25,7 @@ export function PathNodeButtons() {
     onClick={() => nodeActions.del()}
    ><svg className="icon"><use href="#i-node-del"/></svg></button>
    <button
-    className="icon-button"
+    className="icon-button chrome-state"
     aria-label="Smooth node (Bézier handles)"
     title="Smooth node (Bézier handles)"
     data-tooltip="Smooth node (Bézier handles)"
@@ -34,7 +34,7 @@ export function PathNodeButtons() {
     onClick={() => nodeActions.smooth()}
    ><svg className="icon"><use href="#i-node-smooth"/></svg></button>
    <button
-    className="icon-button"
+    className="icon-button chrome-state"
     aria-label="Corner node (remove handles)"
     title="Corner node (remove handles)"
     data-tooltip="Corner node (remove handles)"

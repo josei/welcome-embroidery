@@ -8,7 +8,7 @@ export function AlignButtons() {
  return (
   <>
    <button
-    className="icon-button tb-start"
+    className="icon-button chrome-state tb-start"
     data-align="left"
     aria-label="Align left"
     title="Align left"
@@ -17,7 +17,7 @@ export function AlignButtons() {
     onClick={() => alignActions.press('left')}
    ><svg className="icon"><use href="#i-al-left"/></svg></button>
    <button
-    className="icon-button"
+    className="icon-button chrome-state"
     data-align="hcenter"
     aria-label="Align horizontal centers"
     title="Align horizontal centers"
@@ -26,7 +26,7 @@ export function AlignButtons() {
     onClick={() => alignActions.press('hcenter')}
    ><svg className="icon"><use href="#i-al-hcenter"/></svg></button>
    <button
-    className="icon-button"
+    className="icon-button chrome-state"
     data-align="right"
     aria-label="Align right"
     title="Align right"
@@ -35,7 +35,7 @@ export function AlignButtons() {
     onClick={() => alignActions.press('right')}
    ><svg className="icon"><use href="#i-al-right"/></svg></button>
    <button
-    className="icon-button"
+    className="icon-button chrome-state"
     data-align="top"
     aria-label="Align top"
     title="Align top"
@@ -44,7 +44,7 @@ export function AlignButtons() {
     onClick={() => alignActions.press('top')}
    ><svg className="icon"><use href="#i-al-top"/></svg></button>
    <button
-    className="icon-button"
+    className="icon-button chrome-state"
     data-align="vcenter"
     aria-label="Align vertical centers"
     title="Align vertical centers"
@@ -53,7 +53,7 @@ export function AlignButtons() {
     onClick={() => alignActions.press('vcenter')}
    ><svg className="icon"><use href="#i-al-vcenter"/></svg></button>
    <button
-    className="icon-button"
+    className="icon-button chrome-state"
     data-align="bottom"
     aria-label="Align bottom"
     title="Align bottom"
@@ -62,7 +62,7 @@ export function AlignButtons() {
     onClick={() => alignActions.press('bottom')}
    ><svg className="icon"><use href="#i-al-bottom"/></svg></button>
    <button
-    className="icon-button tb-start"
+    className="icon-button chrome-state tb-start"
     data-distribute="horizontal"
     aria-label="Distribute horizontally"
     title="Distribute horizontally"
@@ -71,7 +71,7 @@ export function AlignButtons() {
     onClick={() => alignActions.press('horizontal')}
    ><svg className="icon"><use href="#i-dist-h"/></svg></button>
    <button
-    className="icon-button"
+    className="icon-button chrome-state"
     data-distribute="vertical"
     aria-label="Distribute vertically"
     title="Distribute vertically"
