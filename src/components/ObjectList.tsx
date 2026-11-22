@@ -104,7 +104,7 @@ export function ObjectListHead() {
    {compact ? (
     <span className="layers-count">
      <Figure icon="i-layers" value={String(n)} label={objectsText} />
-     {totals ? <Figure value={String(colours)} label={coloursText} /> : null}
+     {totals ? <Figure icon="i-colours" value={String(colours)} label={coloursText} /> : null}
     </span>
    ) : (
     <span className="layers-count">{objectsText}{totals ? <><br />{coloursText}</> : null}</span>

@@ -147,6 +147,7 @@ export function syncInspector({plan, compileError, tips}: {plan: PlanInfo | null
   setStatus({
     issuesHidden: issueCount({issues: errs, tips}) === 0,
     issuesCount: issueCount({issues: errs, tips}),
+    issuesWarning: errs.length > 0,
     issuesText: [
       errs.length ? t(errs.length === 1 ? '1 issue' : '{n} issues', {n: errs.length}) : '',
       tips.length ? t(tips.length === 1 ? '1 sewing tip' : '{n} sewing tips', {n: tips.length}) : '',

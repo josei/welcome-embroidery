@@ -32,24 +32,29 @@ async function assertFits(locator,maxHeight=34){
 }
 
 for(const lang of ['es','en']) for(const [w,h] of [[390,844],[844,390],[768,1024]]){
- test(`${w}x${h} ${lang}: an object past the hoop shows the count in red with a visible issues chip`,async({page})=>{
+ test(`${w}x${h} ${lang}: an object past the hoop shows the count with a needle and the chip with a warning triangle`,async({page})=>{
   page.on('dialog',d=>d.accept());
   await page.setViewportSize({width:w,height:h});
   await openDesign(page, lang, true);
   const count=page.locator('#count');
   await expect(count).toHaveClass(/count-figure error/);
-  await expect(count.locator('svg use')).toHaveAttribute('href','#i-run');
+  await expect(count.locator('svg use')).toHaveAttribute('href','#i-needle');
   const label=await count.locator('.figure').getAttribute('aria-label');
   expect(label).toMatch(lang==='es'?/sobrepasa/:/past the hoop/);
   const chip=page.locator('#issuesBtn');
   await expect(chip).toBeVisible();
-  expect((await chip.textContent()).trim()).toMatch(/^\d+$/);
   await expect(chip.locator('svg use')).toHaveAttribute('href','#i-issues');
+  expect((await chip.textContent()).trim()).toMatch(/^\d+$/);
   await assertFits(count);
   await assertFits(chip,44);
   await showStitchView(page);
-  await expect(count).toHaveClass(/count-figure error/);
-  await assertFits(count);
+  // In Stitches view the playback bar names the count, so the status count stays empty over the hoop.
+  await expect(count).toBeEmpty();
+  await expect(chip.locator('svg use')).toHaveAttribute('href','#i-issues');
+  // The chip keeps the stitch view's 44 px touch target, and it is a pill, not an upright capsule.
+  const box=await chip.boundingBox();
+  expect(box.height,'chip is one line at the touch target').toBeLessThanOrEqual(44);
+  expect(box.width,'chip is wider than it is tall').toBeGreaterThanOrEqual(48);
  });
 }
 

@@ -41,9 +41,9 @@ export function PlaybackBar() {
  const sewnFigure = `${formatCount(p.sewn, lang)} / ${formatCount(p.count, lang)}`;
  const summary = compact ? (
   <>
-   <Figure value={String(p.colourChanges)} label={changesText} />
-   <Figure icon="i-cut" value={String(p.trims)} label={trimsText} />
-   <Figure icon="i-measure" value={formatNumber(p.metres, lang, 1)} label={metresText} />
+   <Figure icon="i-swap" value={String(p.colourChanges)} label={changesText} />
+   <Figure icon="i-scissors" value={String(p.trims)} label={trimsText} />
+   <Figure icon="i-spool" value={formatNumber(p.metres, lang, 1)} label={metresText} />
   </>
  ) : `${changesText} · ${trimsText} · ${metresText}`;
  return (
@@ -60,7 +60,7 @@ export function PlaybackBar() {
    <div className="playback-time">
     <span id="playbackTime">{`${blockTimeLabel(p.sewnSeconds)} / ${blockTimeLabel(p.totalSeconds)}`}</span>
     {compact ? (
-     <span id="playbackStitches"><Figure icon="i-run" value={sewnFigure} label={t('Stitch {n} of {m}', {n: formatCount(p.sewn, lang), m: formatCount(p.count, lang)})} /></span>
+     <span id="playbackStitches"><Figure icon="i-needle" value={sewnFigure} label={t('Stitch {n} of {m}', {n: formatCount(p.sewn, lang), m: formatCount(p.count, lang)})} /></span>
     ) : (
      <span id="playbackStitches">{t('Stitch {n} of {m}', {n: formatCount(p.sewn, lang), m: formatCount(p.count, lang)})}</span>
     )}

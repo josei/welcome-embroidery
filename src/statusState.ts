@@ -13,6 +13,8 @@ export interface StatusRun {
   issuesText: string;
   /** How many issues and sewing tips the issues button counts; the phone and tablet status run shows only this number. */
   issuesCount: number;
+  /** True when the design has real issues, so the issues button shows the warning triangle. Sewing tips alone do not. */
+  issuesWarning: boolean;
   issuesTitle: string;
   playback: string;
   needle: string;
@@ -25,6 +27,7 @@ export const statusState = createStore<StatusRun>({
   issuesHidden: true,
   issuesText: '',
   issuesCount: 0,
+  issuesWarning: false,
   issuesTitle: '',
   playback: '',
   needle: '',

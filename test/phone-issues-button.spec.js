@@ -41,7 +41,7 @@ test('390x844 en: the messages button is hidden in the phone design view', async
  await expect(page.locator('#messagesBtn')).toBeHidden();
 });
 
-for(const lang of ['en','es']) test(`768x1024 ${lang}: the issues button shows the Issues icon and count, with the full text as its name`,async({page})=>{
+for(const lang of ['en','es']) test(`768x1024 ${lang}: the issues button shows a count, with the full text as its name`,async({page})=>{
  page.on('dialog',d=>d.accept());
  await page.setViewportSize({width:768,height:1024});
  await page.goto(`/?lang=${lang}`);
@@ -50,8 +50,8 @@ for(const lang of ['en','es']) test(`768x1024 ${lang}: the issues button shows t
  const btn=page.locator('#issuesBtn');
  await expect(btn).toBeVisible();
  const text=(await btn.textContent()).trim();
- expect(text,'visible text is a count only').toMatch(/^\d+$/);
- await expect(btn.locator('svg use')).toHaveAttribute('href','#i-issues');
+ expect(text,'visible text is a count').toMatch(/^\d+$/);
+ expect(words(text),'visible text is at most two words').toBeLessThanOrEqual(2);
  const label=await btn.getAttribute('aria-label');
  expect(label,'the accessible name does not start with a text glyph').not.toMatch(/^⚠/);
  expect(label).toMatch(lang==='es'?/aviso/:/issue/);

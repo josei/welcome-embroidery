@@ -194,7 +194,7 @@ section[data-sec][hidden]{display:none}
 
 label[hidden],button[hidden],.sel-hint[hidden]{display:none!important}
 
-#count.error{color:var(--warn)}.issues-btn{border:1px solid var(--warn-line);background:var(--warn-soft);color:var(--warn);font-size:var(--fs-caption);padding:3px 9px;border-radius:99px;cursor:pointer}#stitches.stale{opacity:.35;transition:opacity .15s}
+#count.error{color:var(--warn)}.issues-btn .icon{width:1em;height:1em;vertical-align:-.125em}.layout main:not(.design-view)>footer>#issuesBtn{min-width:56px;justify-content:center}.issues-btn{white-space:nowrap;display:inline-flex;align-items:center;align-self:center;gap:3px;border:1px solid var(--warn-line);background:var(--warn-soft);color:var(--warn);font-size:var(--fs-caption);padding:3px 9px;border-radius:99px;cursor:pointer}#stitches.stale{opacity:.35;transition:opacity .15s}
 
 .tool-grid label{min-width:0}.tool-grid input:not(.switch-input),.tool-grid select{width:100px!important}.tool-grid{grid-template-columns:minmax(0,1fr) auto}
 
@@ -881,7 +881,9 @@ body{height:100vh;height:100dvh;min-height:0;overflow:hidden;overscroll-behavior
 /* In the Stitches and 3D views the status line has no text of its own (the playback row above it carries the count), so the
    empty row is removed and the canvas takes its height. A message in the count, such as a compile error, brings the row back.
    Toasts hang from the row's bottom edge, which does not move. */
-.layout main:not(.design-view)>footer:has(#count:empty){height:0;min-height:0;padding:0;border-top:0}
+.layout main:not(.design-view)>footer:has(#count:empty):has(#issuesBtn[hidden]){height:0;min-height:0;padding:0;border-top:0}
+/* With only sewing tips the count is empty but the chip shows, so the row is kept at the chip's touch-target height. */
+.layout main:not(.design-view)>footer:has(#count:empty):has(#issuesBtn:not([hidden])){min-height:44px}
 }
 
 /* A landscape phone (844x390, any landscape
@@ -1362,7 +1364,6 @@ html[lang="es"] .layout main>.tool-rail .rail-label{font-size:10px;letter-spacin
    the figure's accessible name and tooltip. */
 .figure{display:inline-flex;align-items:center;gap:4px;white-space:nowrap;font-variant-numeric:tabular-nums}
 .figure .icon{width:16px;height:16px;flex:none}
-.figure-dot{display:inline-block;width:10px;height:10px;border-radius:50%;border:2px solid currentColor;flex:none}
 .layers-count .figure{margin-right:10px}
 .layers-count{display:inline-flex;align-items:center}
 .preview-hint-icon{display:flex;align-items:center;justify-content:center;width:30px;height:24px}
