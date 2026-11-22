@@ -132,8 +132,8 @@ for(const lang of ['en','es']){
     footerTop:document.querySelector('.layout main>footer').getBoundingClientRect().top,
     topBar:document.querySelector('.top').getBoundingClientRect().bottom};
   });
-  // The rail starts under the top bar's 24 px autosave band, not directly under the bar.
-  expect(Math.round(r.top)).toBe(Math.round(r.topBar)+24);
+  // The rail starts directly under the top bar.
+  expect(Math.round(r.top)).toBe(Math.round(r.topBar));
   expect(Math.round(r.bottom)).toBe(Math.round(r.footerTop));
   expect(r.sh).toBeLessThanOrEqual(r.ch);
   expect(r.sw).toBeLessThanOrEqual(r.cw);

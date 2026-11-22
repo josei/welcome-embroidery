@@ -297,6 +297,9 @@ body{height:auto;min-height:0;overflow-x:hidden;overflow-y:auto}
 .segmented{order:4;flex:1 1 100%;display:grid;grid-template-columns:repeat(3,1fr)}
 .segmented button{padding:7px 4px}
 .top>.icon-button{order:5}
+/* Tablet order: status, then Save, then Export at the right edge. The Export wrapper carries the order, not the button inside it. */
+.top #save{order:2}
+.top .export-split{order:3}
 .edit-tools{order:0}
 .top .icon-button{width:34px;height:34px;min-width:34px}
 .edit-tools{gap:2px}
@@ -1214,12 +1217,6 @@ html[lang="es"] .layout main>.tool-rail .rail-label{font-size:10px;letter-spacin
 @media (min-width:601px) and (max-width:1024px) and (orientation:landscape) and (min-height:501px){
 .layout{height:calc(100vh - 48px);height:calc(100dvh - 48px)}
 }
-/* On a landscape phone the layout keeps its height, so the hoop fills the same canvas. The tool rail and the selection bar
-   move down inside it, clear of the 44 px top bar. */
-@media (orientation:landscape) and (max-height:500px) and (max-width:1000px){
-.canvas .tool-rail{top:68px}
-.canvas .floating{top:24px}
-}
 /* Tablet landscape (601-1100 px wide) with touch: the same 44 px targets as the tablet portrait layout. Mouse sizes stay as on the desktop. */
 @media (min-width:601px) and (max-width:1100px) and (orientation:landscape) and (pointer:coarse){
 .top a,.top button,.top input:not([type=checkbox]),.top select{min-height:44px}
@@ -1374,4 +1371,10 @@ html[lang="es"] .layout main>.tool-rail .rail-label{font-size:10px;letter-spacin
 .top .save-status{position:absolute;right:49px;top:50%;margin:0;transform:translateY(-50%);pointer-events:none}
 .top .name-field #name{padding-right:30px}
 .top .name-field::after{padding-right:34px}
+}
+
+/* On a phone the bar runs to the screen corner: the Export split fills the bar height and sits flush with the top and right edges, with no square corner radius, so it does not sit in a padded inset. */
+@media (max-width:600px) and (orientation:portrait),(orientation:landscape) and (max-height:500px){
+.top{padding-right:0}
+.top .export-split{align-self:stretch;height:auto;margin-right:0;border-radius:0}
 }
