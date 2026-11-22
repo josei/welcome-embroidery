@@ -18,7 +18,7 @@ async function openEditor(page,width,height,lang='en'){
 }
 
 // The visible controls in the top bar, by id (the Menu button has an id; the name is an input).
-const visibleBarIds=page=>page.locator('header.top button, header.top input').evaluateAll(els=>els
+const visibleBarIds=page=>page.locator('header.top button, header.top input, header.top [role="img"]').evaluateAll(els=>els
  .filter(e=>e.offsetParent!==null && !e.closest('.file-menu-list') && e.getBoundingClientRect().width>0)
  .map(e=>e.id||e.className).filter(Boolean));
 

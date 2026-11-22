@@ -14,7 +14,6 @@ import {saveState} from '../saveState.js';
 import {toastActions} from '../toastState.js';
 import {dirtyMark, saveStatusIcon, saveStatusWords} from '../saveMark.js';
 import {toolbarActions} from '../toolbarCommands.js';
-import {toast} from '../editorChrome.js';
 import {t} from '../i18n.js';
 import {ArrangeMenu, EditMenu, FileMenu, PhoneMenu, ViewMenu} from './MenuBar';
 import {useCompactLayout} from '../compactLayout';
@@ -55,11 +54,11 @@ function HistoryButton({undo = false}: {undo?: boolean}) {
 
 // The save status: the same text line at every size. While the design has changes it reads "Unsaved" (or "Autosaved in this
 // browser" until a file exists); otherwise the time of the last save in this tab and the file it wrote to. The words come from
-// saveStatusWords, which the phone Menu shows too.
-// Phones and tablets (up to 1024 px wide) show an icon instead, placed inside the design name field right after the name's
+// saveStatusWords, which the phone Menu shows as a status line at the top of its File group.
+// Phones and tablets (up to 1024 px wide) show a mark instead, placed inside the design name field right after the name's
 // text: a file with a check when the design matches its file, a browser window when it is only autosaved in this browser,
-// and a file with an alert when the file is out of date. saveStatusIcon picks the glyph. The icon is a button: a tap shows
-// the words in a toast. The words stay as its accessible name and tooltip.
+// and a file with an alert when the file is out of date. saveStatusIcon picks the glyph. The mark is not a control: it has no
+// tap action, and its words are its accessible name and tooltip.
 const ICON_QUERY = '(max-width: 1024px)';
 function subscribeIconStatus(onChange: () => void) {
  const query = window.matchMedia(ICON_QUERY);
@@ -78,9 +77,9 @@ function SaveStatus() {
  // shows the same autosave words as a dirty one.
  const text = saveStatusWords(dirty, savedAt, savedFileName, t);
  const icon = (symbol: string) => <svg className="icon" aria-hidden="true" focusable="false"><use href={`#${symbol}`} /></svg>;
- // On a phone or tablet the icon is the button; the words are its name and tooltip, and a tap shows them in a toast.
- const phone = (id: string, className: string, symbol: string) => <button type="button" id={id} className={className}
-  aria-label={text} title={text} onClick={() => toast(text)}>{icon(symbol)}</button>;
+ // On a phone or tablet the mark is a picture of the state: no focus, no press, no tap. Its words are the accessible name.
+ const phone = (id: string, className: string, symbol: string) => <span id={id} className={className} role="img"
+  aria-label={text} title={text}>{icon(symbol)}</span>;
  if (dirty) {
   const mark = dirtyMark(savedFileName, t);
   const className = mark.unsaved ? 'save-status unsaved' : 'save-status autosaved';

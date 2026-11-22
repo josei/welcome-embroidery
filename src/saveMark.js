@@ -27,8 +27,9 @@ export function saveStatusIcon(dirty, savedAt, savedFileName) {
 }
 
 /**
- * The save status in words: the text the header shows at desktop widths and the phone Menu shows in its place. A dirty design
- * gets the dirtyMark words; a clean one shows when it was last saved in this tab, and the file it went to.
+ * The save status in words: the text the header shows at desktop widths. A dirty design
+ * gets the dirtyMark words; a clean one shows when it was last saved in this tab, and the file it went to. The desktop header
+ * shows these words, and the phone and tablet Menu shows them as a status line at the top of its File group.
  * @param {boolean} dirty whether the design has changes since the last save
  * @param {number|null} savedAt the time of the last save in this tab, or null before one
  * @param {string|null|undefined} savedFileName the file that save wrote to, or none

@@ -31,6 +31,8 @@ import {setSettingsOpen} from '../settingsState';
 import {agentLinkState} from '../agentLinkState';
 import {viewActions, viewMode} from '../viewMode.js';
 import {documentState, documentNow} from '../documentState.js';
+import {saveState} from '../saveState.js';
+import {saveStatusWords} from '../saveMark.js';
 import {menuReason, NEEDS_ONE, NEEDS_TWO, NEEDS_THREE} from '../menuReasons.js';
 import {useTabletPortrait} from '../tabletLayoutState.js';
 
@@ -351,7 +353,8 @@ export function ViewMenu() {
  * screen there), then the desktop menu groups in the desktop order (File, Edit, Arrange), then the drawing tools, nodes,
  * grid and zoom, and Settings and Help. Each group after View folds: its heading shows or hides its rows. Each row has an icon
  * and a short label. Keyboard shortcuts are not listed on phones. Every row runs the same command as its desktop counterpart.
- * On a phone the Menu is the only navigation: the canvas bar's commands and the More tools panel are listed here too. */
+ * On a phone the Menu is the only navigation: the canvas bar's commands and the More tools panel are listed here too. The File
+ * group opens with the save status as its first line. */
 const VIEW_ROWS = [
  {id: 'design', label: '2D', icon: 'i-rect'},
  {id: 'stitches', label: 'Stitches', icon: 'i-run'},
@@ -387,6 +390,8 @@ export function PhoneMenu() {
  const gridRows = useGridSnapRows();
  const sheet = useSyncExternalStore(phoneSheetState.subscribe, phoneSheetState.get);
  const status = useSyncExternalStore(statusState.subscribe, statusState.get);
+ const saveDoc = useSyncExternalStore(documentState.subscribe, documentState.get);
+ const saveMark = useSyncExternalStore(saveState.subscribe, saveState.get);
  const agent = useSyncExternalStore(agentLinkState.subscribe, agentLinkState.get);
  const actions = useSyncExternalStore(actionState.subscribe, actionState.get);
  const nodes = useSyncExternalStore(nodeButtonsState.subscribe, nodeButtonsState.get);
@@ -449,6 +454,8 @@ export function PhoneMenu() {
   {id: 'menuCommandPalette', label: t('Command palette'), icon: 'i-search', className: 'menu-search', run: () => setPaletteOpen(true)},
   ...panelAndViewRows,
   ...group('File', [
+   // The save status in words, as a line of text: it is not a command, so it has no icon, run or disabled style.
+   {note: saveStatusWords(saveDoc.dirty, saveMark.savedAt, saveMark.savedFileName, t)},
    // The file inputs are hidden in the header; a click on them opens the same pickers as the Open and Import buttons did.
    {id: 'menuNew', label: t('New'), icon: 'i-new', run: () => newProject()},
    {id: 'menuOpen', label: t('Open'), icon: 'i-open', run: () => document.getElementById('file')?.click()},
