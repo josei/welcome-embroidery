@@ -46,11 +46,11 @@ export function EditorIcons() {
         </symbol>
         {" "}
         <symbol id={"i-fit"} viewBox={"0 0 24 24"}>
-          <path d={"M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"} />
+          <path d={"M3.2 2H20.8A1.2 1.2 0 0 1 22 3.2V20.8A1.2 1.2 0 0 1 20.8 22H3.2A1.2 1.2 0 0 1 2 20.8V3.2A1.2 1.2 0 0 1 3.2 2ZM5.5 5H18.5A0.5 0.5 0 0 1 19 5.5V18.5A0.5 0.5 0 0 1 18.5 19H5.5A0.5 0.5 0 0 1 5 18.5V5.5A0.5 0.5 0 0 1 5.5 5Z"} />
         </symbol>
         {" "}
         <symbol id={"i-fit-all"} viewBox={"0 0 24 24"}>
-          <path d={"M4 4h16v16H4zM8 8h8v8H8z"} />
+          <path d={"M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5M8 8h2v2H8zM14 8h2v2h-2zM8 14h2v2H8zM14 14h2v2h-2z"} />
         </symbol>
         {" "}
         <symbol id={"i-msg"} viewBox={"0 0 24 24"}>
@@ -468,9 +468,6 @@ export function EditorIcons() {
           <path d={"M3 12h18M7 8l5-5 5 5zM7 16l5 5 5-5z"} />
         </symbol>
         {" "}
-        <symbol id={"i-fit"} viewBox={"0 0 24 24"}>
-          <path d={"M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5"} />
-        </symbol>
         <symbol id={"i-hand"} viewBox={"0 0 24 24"}>
           <path
             d={"M18 11V6a2 2 0 0 0-4 0M14 10V4a2 2 0 0 0-4 0v7M10 10.5V6a2 2 0 0 0-4 0v9l-2.5-2.5a2 2 0 0 0-3 2.6L6.5 21h10a4 4 0 0 0 4-4v-4a2 2 0 0 0-4 0"}

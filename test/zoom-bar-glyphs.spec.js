@@ -59,3 +59,27 @@ test('the desktop zoom bar keeps its words',async({page})=>{
  await expect(page.locator('#zoomFit')).toHaveText('Fit hoop');
  await expect(page.locator('#zoomAll')).toHaveText('All');
 });
+
+// The hoop glyph is a rounded square frame whose corner radius and frame band follow the hoop drawn on the canvas
+// (#hoopOuter and #hoopRing in the layout), scaled to the 24-unit icon grid.
+const HOOP_GLYPH_PATH='M3.2 2H20.8A1.2 1.2 0 0 1 22 3.2V20.8A1.2 1.2 0 0 1 20.8 22H3.2A1.2 1.2 0 0 1 2 20.8V3.2A1.2 1.2 0 0 1 3.2 2ZM5.5 5H18.5A0.5 0.5 0 0 1 19 5.5V18.5A0.5 0.5 0 0 1 18.5 19H5.5A0.5 0.5 0 0 1 5 18.5V5.5A0.5 0.5 0 0 1 5.5 5Z';
+
+test('the fit glyphs are distinct symbols, and the hoop glyph matches the canvas hoop',async({page})=>{
+ await openEditor(page,'en',[1280,800]);
+ const paths=await page.evaluate(()=>{
+  const d=id=>document.querySelector(`symbol#${id} path`)?.getAttribute('d')??null;
+  return {hoop:d('i-fit'),all:d('i-fit-all')};
+ });
+ expect(paths.hoop,'Fit hoop glyph path').toBeTruthy();
+ expect(paths.all,'Fit everything glyph path').toBeTruthy();
+ expect(paths.hoop).not.toBe(paths.all);
+ expect(paths.hoop).toBe(HOOP_GLYPH_PATH);
+
+ const canvasHoop=await page.evaluate(()=>{
+  const r=id=>{const el=document.getElementById(id);return {w:+el.getAttribute('width'),rx:+el.getAttribute('rx')};};
+  return {outer:r('hoopOuter'),ring:r('hoopRing')};
+ });
+ // Corner radius as a share of the side, glyph against canvas, within rounding.
+ expect(1.2/20).toBeCloseTo(canvasHoop.outer.rx/canvasHoop.outer.w,2);
+ expect(0.5/14).toBeCloseTo(canvasHoop.ring.rx/canvasHoop.ring.w,2);
+});
