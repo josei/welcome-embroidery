@@ -42,12 +42,7 @@ export function StatusRun() {
     <button type="button" id="issuesBtn" className="issues-btn" hidden={s.issuesHidden} title={s.issuesTitle} onClick={() =>
      statusActions.issues()}><svg className="icon" aria-hidden="true" focusable="false"><use href="#i-issues" /></svg>{s.issuesText}</button>
    )}
-   {compact ? (
-    <button type="button" id="messagesBtn" className="messages-btn" aria-label={t('Messages')} title={t('Messages')}
-     onClick={() => toastActions.setLogOpen(true)}><svg className="icon" aria-hidden="true" focusable="false"><use href="#i-msg" /></svg></button>
-   ) : (
-    <button type="button" id="messagesBtn" className="messages-btn" onClick={() => toastActions.setLogOpen(true)}>{t('Messages')}</button>
-   )}
+   <button type="button" id="messagesBtn" className="messages-btn" onClick={() => toastActions.setLogOpen(true)}>{t('Messages')}</button>
    <span id="playbackProgress" aria-live="polite">{s.playback}</span>
    <span id="needlePosition" aria-live="polite">{s.needle}</span>
   </>

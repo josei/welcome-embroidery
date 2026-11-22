@@ -1293,9 +1293,9 @@ html[lang="es"] .layout main>.tool-rail .rail-label{font-size:10px;letter-spacin
 .layout:has(>.panel.inspector-collapsed:last-child){grid-template-columns:300px minmax(0,1fr)}
 }
 
-/* Phone and tablet: the status footer keeps 8 px under the Messages pill, so the pill never sits on the edge of the screen. A
-   landscape phone's footer is 98 px tall to hold that margin beside the playback row and the status line. */
-@media (max-width:1024px){.layout main:not(.design-view)>footer{padding-bottom:8px}}
+/* Phone and tablet: the status line is pinned to the footer's bottom edge, so the Messages pill sits in the same place in the 2D,
+   Stitches and 3D views. A landscape phone's footer is 98 px tall to hold the playback row beside the status line. */
+@media (max-width:1024px){.layout main:not(.design-view)>footer{padding-bottom:0;align-content:flex-end}}
 @media (min-width:601px) and (max-width:1024px) and (orientation:portrait){.layout main:not(.design-view)>footer{height:115px;min-height:115px}}
 @media (max-width:1024px) and (orientation:landscape) and (max-height:500px){.layout main:not(.design-view)>footer{height:98px;min-height:98px}}
 
@@ -1340,10 +1340,10 @@ html[lang="es"] .layout main>.tool-rail .rail-label{font-size:10px;letter-spacin
 @media (min-width:1025px){
 .canvas .canvas-text-hint{bottom:56px}
 }
-/* The Stitches and 3D footer holds the 62 px playback row, the 44 px status row and the 8 px margin under the Messages pill.
+/* The Stitches and 3D footer holds the 62 px playback row and the 44 px status row, which sits on the footer's bottom edge.
    The status row and the playback row use the full width, so the thread summary and the readouts keep one line each. */
 @media (min-width:601px) and (max-width:1024px) and (min-height:501px){
-.layout main:not(.design-view)>footer{height:116px;min-height:116px;padding-right:8px}
+.layout main:not(.design-view)>footer{height:116px;min-height:116px;padding-right:8px;padding-bottom:0;align-content:flex-end}
 }
 @media (min-width:601px) and (max-width:1024px) and (orientation:landscape) and (min-height:501px){
 .layout main:not(.design-view) .playback-bar .playback-summary{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.3}
@@ -1407,3 +1407,26 @@ html[lang="es"] .layout main>.tool-rail .rail-label{font-size:10px;letter-spacin
 /* On a phone or tablet the Issues chip is the Issues icon and its count, and its hit area is the 44 px target the rest of the
    status row keeps. The chip stays a short pill, so the glyph sits centred inside the 44 px box. */
 @media (max-width:1100px){.layout main>footer>#issuesBtn{min-width:44px;min-height:44px;height:44px}.layout main>footer>#issuesBtn:not([hidden]){display:inline-flex;align-items:center;justify-content:center;gap:4px}.issues-btn .icon{width:16px;height:16px}}
+
+/* On a phone or tablet the Messages button is a word in the top bar's button style, not a round outline, and it sits at the right
+   end of the status row in every view. Its order and auto left margin keep it there whether or not the playback row is shown
+   above, so it does not move between the 2D, Stitches and 3D views. */
+@media (max-width:1100px){
+.layout main>footer>#messagesBtn{order:2;margin-left:auto;margin-right:0;background:transparent;border:1px solid transparent;border-radius:6px;color:#66726c;font-size:var(--fs-caption);padding:0 12px;height:44px;min-height:44px;min-width:44px}
+.layout main>footer>#messagesBtn:hover{background:#eef1ec;border-color:transparent}
+/* On a tablet's Stitches status row the count takes what is left after the readouts and the Messages button, so the row stays on one
+   line and the needle readout does not wrap below the window. The needle readout sits before Messages, which stays the row's last item. */
+@media (min-width:601px) and (max-width:1100px){
+.layout main:not(.design-view)>footer>#count{flex:1 1 0;min-width:0}
+.layout main>footer>#needlePosition{order:1}
+}
+}
+/* The tablet 2D status row takes the same 8 px right padding as the Stitches and 3D status row, so the Messages button sits at the
+   same x in every view. */
+@media (min-width:601px) and (max-width:1024px) and (min-height:501px){
+.layout main.design-view>footer{padding-right:8px}
+}
+/* The Messages pill sits on the status row's bottom edge in every view, so its y matches between 2D and Stitches/3D. */
+@media (min-width:601px) and (max-width:1024px){
+.layout main>footer>#messagesBtn{align-self:flex-end}
+}

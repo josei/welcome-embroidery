@@ -1,7 +1,10 @@
 import {test,expect} from '@playwright/test';
 
-// On tablets the status line shows the issues button as the Issues icon and count, and the messages button as an icon.
-// Each control keeps its full text as its accessible name and tooltip. The desktop status line keeps the words.
+// On tablets the status line shows the issues button as the Issues icon and count. The messages button is the word, in the
+// top bar's button style, at the same place in every view. The issues button keeps its full text as its accessible name and
+// tooltip.
+
+const words=s=>s.trim().split(/\s+/).filter(Boolean).length;
 
 test.beforeEach(async({page})=>{await page.addInitScript(()=>{delete window.showSaveFilePicker;});});
 
@@ -14,21 +17,34 @@ async function moveOutOfHoop(page){
  await expect(page.locator('#count')).toHaveClass(/error/);
 }
 
-const words=s=>s.trim().split(/\s+/).filter(Boolean).length;
+// Switches view from the view switch, or from the Menu where the switch is not shown (a landscape phone).
+async function openView(page,view){
+ const sw=page.locator(`.canvas-views button[data-view="${view}"]`);
+ if(await sw.isVisible()) await sw.click();
+ else{await page.locator('#phoneMenu').click();await page.locator(`#menuView-${view}`).click();}
+}
 
-// The messages button has no text on tablets and phones in landscape, so its word is its name.
+// The messages button is the word on tablets and phones in landscape, as on the desktop, so it needs no icon to be read.
 for(const lang of ['en','es']) for(const [w,h] of [[844,390],[768,1024]]){
- test(`${w}x${h} ${lang}: the messages button shows only its icon, with the word as its name`,async({page})=>{
+ test(`${w}x${h} ${lang}: the messages button is its word, in the same place in each view`,async({page})=>{
   await page.setViewportSize({width:w,height:h});
   await page.goto(`/?lang=${lang}`);
   await expect(page.locator('.canvas')).toBeVisible();
   const btn=page.locator('#messagesBtn');
   await expect(btn).toBeVisible();
-  expect(words(await btn.textContent()),'visible text is at most two words').toBeLessThanOrEqual(2);
-  const word=lang==='es'?'Mensajes':'Messages';
-  expect(await btn.getAttribute('aria-label')).toBe(word);
-  expect(await btn.getAttribute('title')).toBe(word);
-  await expect(btn.locator('svg use')).toHaveAttribute('href','#i-msg');
+  await expect(btn).toHaveText(lang==='es'?'Mensajes':'Messages');
+  await expect(btn.locator('svg')).toHaveCount(0);
+  const at=async()=>{const b=await btn.boundingBox();return {x:Math.round(b.x),y:Math.round(b.y)};};
+  const start=await at();
+  await openView(page,'stitches');
+  await expect(page.locator('#play')).toBeVisible();
+  expect(await at(),'position in Stitches view').toEqual(start);
+  await openView(page,'preview');
+  await expect(page.locator('#messagesBtn')).toBeVisible();
+  expect(await at(),'position in 3D view').toEqual(start);
+  await openView(page,'design');
+  await expect(page.locator('#messagesBtn')).toBeVisible();
+  expect(await at(),'position back in 2D view').toEqual(start);
  });
 }
 
