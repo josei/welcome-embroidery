@@ -24,10 +24,11 @@ async function showStitchView(page){
  await page.locator('#menuView-stitches').click();
 }
 
-async function assertFits(locator){
+// maxHeight is the most a status control may be tall: the count sits on one 34 px line, and the issues chip is a 44 px target.
+async function assertFits(locator,maxHeight=34){
  const box=await locator.evaluate(el=>({sw:el.scrollWidth,cw:el.clientWidth,h:el.getBoundingClientRect().height}));
  expect(box.sw,'no horizontal clipping').toBeLessThanOrEqual(box.cw+1);
- expect(box.h,'one line tall').toBeLessThanOrEqual(34);
+ expect(box.h,'one line tall').toBeLessThanOrEqual(maxHeight);
 }
 
 for(const lang of ['es','en']) for(const [w,h] of [[390,844],[844,390],[768,1024]]){
@@ -42,9 +43,10 @@ for(const lang of ['es','en']) for(const [w,h] of [[390,844],[844,390],[768,1024
   expect(label).toMatch(lang==='es'?/sobrepasa/:/past the hoop/);
   const chip=page.locator('#issuesBtn');
   await expect(chip).toBeVisible();
-  expect((await chip.textContent()).trim()).toMatch(/^⚠ \d+$/);
+  expect((await chip.textContent()).trim()).toMatch(/^\d+$/);
+  await expect(chip.locator('svg use')).toHaveAttribute('href','#i-issues');
   await assertFits(count);
-  await assertFits(chip);
+  await assertFits(chip,44);
   await showStitchView(page);
   await expect(count).toHaveClass(/count-figure error/);
   await assertFits(count);

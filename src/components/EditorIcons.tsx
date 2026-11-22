@@ -314,7 +314,7 @@ export function EditorIcons() {
         </symbol>
         {" "}
         <symbol id={"i-node-edit"} viewBox={"0 0 24 24"}>
-          <path d={"M4 20l4-1 11-11-3-3L5 16zM14 6l3 3"} />
+          <path d={"M4 20C4 10 10 4 20 4M4 20v-10M20 4h-10M2.5 18.5h3v3h-3zM18.5 2.5h3v3h-3zM5.5 10a1.5 1.5 0 1 0-3 0 1.5 1.5 0 1 0 3 0M11.5 4a1.5 1.5 0 1 0-3 0 1.5 1.5 0 1 0 3 0"} />
         </symbol>
         {" "}
         <symbol id={"i-flip-h"} viewBox={"0 0 24 24"}>

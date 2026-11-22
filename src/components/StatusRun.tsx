@@ -7,7 +7,7 @@ import {Figure} from './Figure';
 import {MeasureReadout} from './MeasureReadout';
 
 // The status run below the canvas. Its text and the issues button come from statusState. On a phone or tablet the issues
-// button shows its count only; the full text stays as its accessible name and tooltip.
+// button shows the Issues icon and its count only; the full text stays as its accessible name and tooltip.
 export function StatusRun() {
  const s = useSyncExternalStore(statusState.subscribe, statusState.get);
  // On a phone or tablet the design count is an icon and its number, in the warning colour when the design has an error; the
@@ -27,10 +27,10 @@ export function StatusRun() {
    )}
    {compact ? (
     <button type="button" id="issuesBtn" className="issues-btn" hidden={s.issuesHidden} aria-label={s.issuesText}
-     title={`${s.issuesText}\n${s.issuesTitle}`} onClick={() => statusActions.issues()}>⚠ {s.issuesCount}</button>
+     title={`${s.issuesText}\n${s.issuesTitle}`} onClick={() => statusActions.issues()}><svg className="icon" aria-hidden="true" focusable="false"><use href="#i-issues" /></svg>{s.issuesCount}</button>
    ) : (
     <button type="button" id="issuesBtn" className="issues-btn" hidden={s.issuesHidden} title={s.issuesTitle} onClick={() =>
-     statusActions.issues()}>{s.issuesText}</button>
+     statusActions.issues()}><svg className="icon" aria-hidden="true" focusable="false"><use href="#i-issues" /></svg>{s.issuesText}</button>
    )}
    {compact ? (
     <button type="button" id="messagesBtn" className="messages-btn" aria-label={t('Messages')} title={t('Messages')}

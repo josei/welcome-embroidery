@@ -1390,3 +1390,7 @@ html[lang="es"] .layout main>.tool-rail .rail-label{font-size:10px;letter-spacin
 .top{padding-right:0}
 .top .export-split{align-self:stretch;height:auto;margin-right:0;border-radius:0}
 }
+
+/* On a phone or tablet the Issues chip is the Issues icon and its count, and its hit area is the 44 px target the rest of the
+   status row keeps. The chip stays a short pill, so the glyph sits centred inside the 44 px box. */
+@media (max-width:1100px){.layout main>footer>#issuesBtn{min-width:44px;min-height:44px;height:44px}.layout main>footer>#issuesBtn:not([hidden]){display:inline-flex;align-items:center;justify-content:center;gap:4px}.issues-btn .icon{width:16px;height:16px}}

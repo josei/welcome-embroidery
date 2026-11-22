@@ -1,6 +1,6 @@
 import {test,expect} from '@playwright/test';
 
-// On tablets the status line shows the issues button as a warning sign and count, and the messages button as an icon.
+// On tablets the status line shows the issues button as the Issues icon and count, and the messages button as an icon.
 // Each control keeps its full text as its accessible name and tooltip. The desktop status line keeps the words.
 
 test.beforeEach(async({page})=>{await page.addInitScript(()=>{delete window.showSaveFilePicker;});});
@@ -41,7 +41,7 @@ test('390x844 en: the messages button is hidden in the phone design view', async
  await expect(page.locator('#messagesBtn')).toBeHidden();
 });
 
-for(const lang of ['en','es']) test(`768x1024 ${lang}: the issues button shows the warning sign and count, with the full text as its name`,async({page})=>{
+for(const lang of ['en','es']) test(`768x1024 ${lang}: the issues button shows the Issues icon and count, with the full text as its name`,async({page})=>{
  page.on('dialog',d=>d.accept());
  await page.setViewportSize({width:768,height:1024});
  await page.goto(`/?lang=${lang}`);
@@ -50,10 +50,14 @@ for(const lang of ['en','es']) test(`768x1024 ${lang}: the issues button shows t
  const btn=page.locator('#issuesBtn');
  await expect(btn).toBeVisible();
  const text=(await btn.textContent()).trim();
- expect(text,'visible text is the warning sign and a count').toMatch(/^⚠ \d+$/);
- expect(words(text),'visible text is at most two words').toBeLessThanOrEqual(2);
+ expect(text,'visible text is a count only').toMatch(/^\d+$/);
+ await expect(btn.locator('svg use')).toHaveAttribute('href','#i-issues');
  const label=await btn.getAttribute('aria-label');
+ expect(label,'the accessible name does not start with a text glyph').not.toMatch(/^⚠/);
  expect(label).toMatch(lang==='es'?/aviso/:/issue/);
+ const box=await btn.boundingBox();
+ expect(box.width,'hit area width').toBeGreaterThanOrEqual(44);
+ expect(box.height,'hit area height').toBeGreaterThanOrEqual(44);
  expect(await btn.getAttribute('title')).toContain(label);
  await expect(btn).toHaveClass(/issues-btn/);
 });
