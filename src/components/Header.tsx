@@ -98,7 +98,8 @@ function ExportSplit() {
   <>
    {blank && <span id="exportReason" className="export-reason">{t(EMPTY_EXPORT_REASON)}</span>}
    <div className={blank ? 'export-split is-blank' : 'export-split'}>
-    <button id="export" aria-disabled={blank} aria-describedby={blank ? 'exportReason' : undefined} title={exportTip} data-tooltip={exportTip} onClick={() => { if (!blank) openExportDialog(); }}>{t('Export')}</button>
+    {/* On phones and tablets (1024 px and below) the stylesheet swaps the word for the export glyph; the name stays in aria-label. */}
+    <button id="export" aria-label={t('Export')} aria-disabled={blank} aria-describedby={blank ? 'exportReason' : undefined} title={t('Export')} data-tooltip={exportTip} onClick={() => { if (!blank) openExportDialog(); }}><span className="export-label">{t('Export')}</span><svg className="icon export-icon" aria-hidden="true"><use href="#i-export" /></svg></button>
    </div>
   </>
  );
