@@ -1231,6 +1231,13 @@ html[lang="es"] .layout main>.tool-rail .rail-label{font-size:10px;letter-spacin
 .top .save-status .icon{width:20px;height:20px}
 .top .save-status.saved{color:var(--teal)}.top .save-status.unsaved{color:#8a5a00}
 }
+/* On tablets and landscape phones the name takes the bar's free width, so "Untitled design" or "Diseño sin título" is not
+   clipped while the bar has room. Export and the other controls keep their places at the end of the bar. Phones keep the
+   name at its own width. */
+@media (min-width:601px) and (max-width:1024px){
+.top .name-field{flex:1 1 0;margin-right:0}
+.top .name-field .save-status{margin-left:4px}
+}
 @media (min-width:601px) and (max-width:1024px) and (orientation:landscape) and (min-height:501px){
 .layout{height:calc(100vh - 48px);height:calc(100dvh - 48px)}
 }
