@@ -12,7 +12,7 @@ import {shortcutFor, shortcutForCommand} from '../shortcutTable.js';
 import {importMachineFile, newProject, openProjectFile, projectSave} from '../projectIO.js';
 import {saveState} from '../saveState.js';
 import {toastActions} from '../toastState.js';
-import {dirtyMark, saveStatusWords} from '../saveMark.js';
+import {dirtyMark, saveStatusIcon, saveStatusWords} from '../saveMark.js';
 import {toolbarActions} from '../toolbarCommands.js';
 import {toast} from '../editorChrome.js';
 import {t} from '../i18n.js';
@@ -57,9 +57,9 @@ function HistoryButton({undo = false}: {undo?: boolean}) {
 // browser" until a file exists); otherwise the time of the last save in this tab and the file it wrote to. The words come from
 // saveStatusWords, which the phone Menu shows too.
 // Phones and tablets (up to 1024 px wide) show an icon instead, placed inside the design name field right after the name's
-// text: a ringed check when the design matches its file, a bare check when it is autosaved in this browser, and a ringed
-// alert when the file is out of date. The icon is a button: a tap shows the words in a toast. The words stay as its
-// accessible name and tooltip.
+// text: a file with a check when the design matches its file, a browser window when it is only autosaved in this browser,
+// and a file with an alert when the file is out of date. saveStatusIcon picks the glyph. The icon is a button: a tap shows
+// the words in a toast. The words stay as its accessible name and tooltip.
 const ICON_QUERY = '(max-width: 1024px)';
 function subscribeIconStatus(onChange: () => void) {
  const query = window.matchMedia(ICON_QUERY);
@@ -84,14 +84,14 @@ function SaveStatus() {
  if (dirty) {
   const mark = dirtyMark(savedFileName, t);
   const className = mark.unsaved ? 'save-status unsaved' : 'save-status autosaved';
-  if (iconOnly) return phone('unsavedMark', className, mark.unsaved ? 'i-status-unsaved' : 'i-status-autosaved');
+  if (iconOnly) return phone('unsavedMark', className, saveStatusIcon(dirty, savedAt, savedFileName));
   return <span id="unsavedMark" className={className} title={text}>{text}</span>;
  }
  if (savedAt === null) {
-  if (iconOnly) return phone('idleStatus', 'save-status autosaved', 'i-status-autosaved');
+  if (iconOnly) return phone('idleStatus', 'save-status autosaved', saveStatusIcon(dirty, savedAt, savedFileName));
   return <span id="idleStatus" className="save-status autosaved" title={text}>{text}</span>;
  }
- if (iconOnly) return phone('savedStatus', 'save-status', 'i-status-saved');
+ if (iconOnly) return phone('savedStatus', 'save-status saved', saveStatusIcon(dirty, savedAt, savedFileName));
  return <span id="savedStatus" className="save-status" role="status">{text}</span>;
 }
 

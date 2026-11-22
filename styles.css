@@ -1222,7 +1222,7 @@ html[lang="es"] .layout main>.tool-rail .rail-label{font-size:10px;letter-spacin
 .top .name-field #name{position:absolute;top:0;bottom:0;left:0;right:0;width:auto;height:100%;min-width:0;padding:0 48px 0 8px;text-overflow:ellipsis}
 .top .save-status{position:relative;z-index:1;flex:none;display:flex;align-items:center;justify-content:center;width:44px;height:44px;margin:0 6px 0 0;padding:0;border:0;background:none;color:#66726c;cursor:pointer}
 .top .save-status .icon{width:20px;height:20px}
-.top .save-status.unsaved{color:#8a5a00}
+.top .save-status.saved{color:var(--teal)}.top .save-status.unsaved{color:#8a5a00}
 }
 @media (min-width:601px) and (max-width:1024px) and (orientation:landscape) and (min-height:501px){
 .layout{height:calc(100vh - 48px);height:calc(100dvh - 48px)}

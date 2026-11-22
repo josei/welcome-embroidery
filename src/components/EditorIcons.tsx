@@ -100,15 +100,15 @@ export function EditorIcons() {
         </symbol>
         {" "}
         <symbol id={"i-status-saved"} viewBox={"0 0 24 24"}>
-          <path d={"M12 3.5a8.5 8.5 0 1 0 0 17 8.5 8.5 0 0 0 0-17zM8.5 12.2l2.4 2.4 4.6-4.8"} />
+          <path d={"M6 3.5h8l4 4v13H6zM14 3.5v4h4M9.2 13.2l2 2 3.8-4"} />
         </symbol>
         {" "}
         <symbol id={"i-status-autosaved"} viewBox={"0 0 24 24"}>
-          <path d={"M5.5 12.5l4.3 4.3 8.7-9"} />
+          <path d={"M4 5.5h16v13H4zM4 9.5h16"} />
         </symbol>
         {" "}
         <symbol id={"i-status-unsaved"} viewBox={"0 0 24 24"}>
-          <path d={"M12 3.5a8.5 8.5 0 1 0 0 17 8.5 8.5 0 0 0 0-17zM12 7.5v5.5M12 16.2v.3"} />
+          <path d={"M6 3.5h8l4 4v13H6zM14 3.5v4h4M12 11.5v4M12 17.8v.2"} />
         </symbol>
         {" "}
         <symbol id={"i-agent"} viewBox={"0 0 24 24"}>
