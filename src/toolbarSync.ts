@@ -7,6 +7,8 @@ import {setActions} from './actionState.js';
 import {alignState} from './alignState.js';
 import {selectionToolbarState} from './selectionToolbarState.js';
 import {nodeButtonsState} from './nodeButtonsState.js';
+import {nodeAddDisabled} from './nodeAddRule.js';
+import {editModeNow, editModeState} from './editModeState.js';
 import type {SelectionObject} from './selectionCommands.js';
 
 function sync() {
@@ -25,7 +27,7 @@ function sync() {
   setActions({editNodes: count !== 1 || primary?.kind === 'stitch_layer'});
   selectionToolbarState.set({subtract: count < 2, union: count < 2, intersect: count < 2, flip: count < 1});
   nodeButtonsState.set({
-    add: primary?.kind !== 'path',
+    add: nodeAddDisabled(primary?.kind, editModeNow()),
     del: selection.selNode === null,
     smooth: selection.selNode === null,
     corner: selection.selNode === null || !primary?.handles?.[selection.selNode],
@@ -37,4 +39,5 @@ function sync() {
 
 selectionState.subscribe(sync);
 documentState.subscribe(sync);
+editModeState.subscribe(sync);
 sync();
