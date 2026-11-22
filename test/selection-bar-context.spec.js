@@ -108,8 +108,10 @@ for(const lang of ['en','es']){
 
   // The commands the bar carries below desktop are all reachable as Menu rows.
   await page.locator('#phoneMenu').click();
-  for(const id of ['menuDuplicate','menuDelete','menuGroup','menuClip','menuSelectAdd'])
+  for(const id of ['menuDuplicate','menuDelete','menuGroup','menuClip'])
    await expect(await revealMenuRow(page.locator('#phoneMenuList'),id),`${id} is a Menu row`).toHaveCount(1);
+  // The add-to-selection toggle is on the phone bar, not in the Menu.
+  await expect(page.locator('.phone-selection #selectToggle'),'the toggle is on the phone bar').toBeVisible();
   expect(errors).toEqual([]);
  });
 }

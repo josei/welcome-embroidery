@@ -64,7 +64,7 @@ for(const [width,height] of SIZES) for(const lang of ['en','es']){
   }
   for(const id of ['menuNew','menuOpen','menuImport','menuSave','menuSaveAs','menuExport','menuUndo','menuRedo','menuCut','menuCopy','menuPaste','menuDuplicate','menuSelectAll','menuRepeat','menuGrid','menuSnap','menuFitHoop','menuSettings','menuMessages','menuHelp','menuAlignLeft','menuFlipH','menuToFront','menuUnion','menuDelete',
    // The canvas bar and the More tools panel used to hold these on a phone; the Menu is their one home now.
-   'menuSelectAdd','menuEditNodes','menuNodeAdd','menuNodeDelete','menuNodeSmooth','menuNodeCorner','menuGroup','menuUngroup','menuClip','menuUnclip','menuTextOnPath','menuTextOffPath','menuEllipse','menuPolygon','menuStar','menuPen','menuTrace','menuPhoto','menuLayers','menuProperties'])
+   'menuEditNodes','menuNodeAdd','menuNodeDelete','menuNodeSmooth','menuNodeCorner','menuGroup','menuUngroup','menuClip','menuUnclip','menuTextOnPath','menuTextOffPath','menuEllipse','menuPolygon','menuStar','menuPen','menuTrace','menuPhoto','menuLayers','menuProperties'])
    expect(rows.map(r=>r.id),`${id} is listed`).toContain(id);
   expect(rows.map(r=>r.id),'no keyboard-shortcut sheet row on a phone').not.toContain('menuShortcuts');
   // The sheet scrolls inside itself; the page never does.

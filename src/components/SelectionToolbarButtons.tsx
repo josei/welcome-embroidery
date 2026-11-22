@@ -81,6 +81,6 @@ export function SelectToggleButton() {
    title={label}
    data-tooltip={label}
    onClick={() => multiSelectState.set(!on)}
-  ><svg className="icon"><use href="#i-select-add"/></svg></button>
+  ><svg className="icon"><use href="#i-select-add"/></svg><span className="bar-word">{t('Several')}</span></button>
  );
 }

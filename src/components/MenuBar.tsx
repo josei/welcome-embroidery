@@ -415,8 +415,12 @@ export function PhoneMenu() {
   ...viewRows,
  ];
  // The drawing tools the canvas bar and More tools panel held on a phone. They run the same commands as those controls.
- const toolRows: Entry[] = [
+ // The add-to-selection row is listed on a tablet only: a phone's selection bar carries the toggle, so the Menu leaves it out there.
+ const addSelectRow: Entry[] = tablet ? [
   {id: 'menuSelectAdd', label: t('Tap to add to selection'), icon: 'i-select-add', pressed: selectAdd, state: onOff(selectAdd), run: () => multiSelectState.set(!selectAdd)},
+ ] : [];
+ const toolRows: Entry[] = [
+  ...addSelectRow,
   {id: 'menuEllipse', label: t('Ellipse'), icon: 'i-ellipse', run: () => { toolActions.press('select'); toolbarActions.addShape('ellipse'); }},
   {id: 'menuPolygon', label: t('Polygon'), icon: 'i-polygon', run: () => toolActions.press('polygon')},
   {id: 'menuStar', label: t('Star'), icon: 'i-star', run: () => toolActions.press('star')},

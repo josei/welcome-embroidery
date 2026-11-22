@@ -42,20 +42,17 @@ for(const [width,height] of SIZES) for(const lang of ['en','es']){
   expect(errors).toEqual([]);
  });
 
- test(`the Select toggle is a Menu row, and a tap then adds an object to the selection at ${width}x${height} (${lang})`,async({page})=>{
+ test(`the Select toggle on the phone bar adds an object to the selection at ${width}x${height} (${lang})`,async({page})=>{
   const errors=await openEditor(page,width,height,lang);
   const rows=page.locator('.object-row');
   const start=await rows.count();
   await page.locator('#rect').click();
   await page.locator('#rect').click();
   await expect(rows).toHaveCount(start+2);
-  const toggle=await menuRow(page,'menuSelectAdd');
+  const toggle=page.locator('.phone-selection #selectToggle');
   await expect(toggle).toHaveAttribute('aria-pressed','false');
   await toggle.click();
-  await expect(await menuRow(page,'menuSelectAdd')).toHaveAttribute('aria-pressed','true');
-  // Close the Menu without dropping the selection, then tap a second object: it joins the selection.
-  await page.locator('#phoneMenu').click();
-  await expect(page.locator('#phoneMenuList'),'Menu closed').toBeHidden();
+  await expect(toggle).toHaveAttribute('aria-pressed','true');
   await expect(page.locator('.object-row.selected'),'one selected').toHaveCount(1);
   // Move the newest object (selected) left with Shift+Arrow so the other one can be tapped.
   await page.locator('#art').focus();

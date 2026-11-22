@@ -45,7 +45,7 @@ async function menuIds(page){
 
 // The commands the phone bottom bar and More tools panel offered before this change, with the Menu row that now holds each.
 const OLD_COMMANDS={
- selectToggle:'menuSelectAdd', barDuplicate:'menuDuplicate', barDelete:'menuDelete', group:'menuGroup', ungroup:'menuUngroup',
+ barDuplicate:'menuDuplicate', barDelete:'menuDelete', group:'menuGroup', ungroup:'menuUngroup',
  clipBtn:'menuClip', unclipBtn:'menuUnclip', textOnPath:'menuTextOnPath', textOffPath:'menuTextOffPath', editNodes:'menuEditNodes',
  nodeAdd:'menuNodeAdd', nodeDel:'menuNodeDelete', nodeSmooth:'menuNodeSmooth', nodeCorner:'menuNodeCorner',
  ellipse:'menuEllipse', polygon:'menuPolygon', star:'menuStar', traceBtn:'menuTrace', photo:'menuPhoto', pen:'menuPen',

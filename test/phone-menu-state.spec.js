@@ -86,7 +86,7 @@ test('the phone Menu lists the drawing tools under Tools and the node commands u
   }
   return out;
  });
- expect(groups.Tools).toEqual(['menuSelectAdd','menuEllipse','menuPolygon','menuStar','menuPen','menuTrace','menuPhoto']);
+ expect(groups.Tools).toEqual(['menuEllipse','menuPolygon','menuStar','menuPen','menuTrace','menuPhoto']);
  expect(groups.Nodes).toEqual(['menuEditNodes','menuNodeAdd','menuNodeDelete','menuNodeSmooth','menuNodeCorner']);
 });
 

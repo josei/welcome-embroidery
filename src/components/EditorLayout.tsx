@@ -287,10 +287,12 @@ export function EditorLayout() {
                <PathNodeButtons />
              </div>
   );
- // On a phone the selection bar carries the three commands a selected object needs, so they are one tap away. It is shown only
+ // On a phone the selection bar carries the add-to-selection toggle with its word and the three commands a selected object needs,
+ // so they are one tap away. The Menu does not list the toggle on a phone, so it has one route on screen. It is shown only
  // with a selection, as on the tablet. Portrait phones place it as a strip above the dock; landscape phones float it over the canvas.
  const phoneBar = (
              <div className={"floating phone-selection"} role={"toolbar"} aria-label={selectionBarLabel} hidden={!hasSelection || view !== 'design'}>
+               <SelectToggleButton />
                <ActionButton flag="duplicate" className={"icon-button"} id={"barDuplicate"} aria-label={duplicateLabel} title={duplicateLabel}
                  data-tooltip={duplicateLabel} onClick={() => toolbarActions.duplicate()}>
                  <svg className={"icon"}>
