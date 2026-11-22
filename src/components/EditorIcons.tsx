@@ -77,6 +77,18 @@ export function EditorIcons() {
           <path d={"M4 4h13l3 3v13H4zM8 4v6h8V4M8 20v-6h8v6"} />
         </symbol>
         {" "}
+        <symbol id={"i-status-saved"} viewBox={"0 0 24 24"}>
+          <path d={"M12 3.5a8.5 8.5 0 1 0 0 17 8.5 8.5 0 0 0 0-17zM8.5 12.2l2.4 2.4 4.6-4.8"} />
+        </symbol>
+        {" "}
+        <symbol id={"i-status-autosaved"} viewBox={"0 0 24 24"}>
+          <path d={"M19.5 12a7.5 7.5 0 0 1-13 5.1M4.5 12a7.5 7.5 0 0 1 13-5.1M18.5 3.5v3.6h-3.6M5.5 20.5v-3.6h3.6"} />
+        </symbol>
+        {" "}
+        <symbol id={"i-status-unsaved"} viewBox={"0 0 24 24"}>
+          <path d={"M12 3.5a8.5 8.5 0 1 0 0 17 8.5 8.5 0 0 0 0-17zM12 7.5v5.5M12 16.2v.3"} />
+        </symbol>
+        {" "}
         <symbol id={"i-agent"} viewBox={"0 0 24 24"}>
           <rect x={"4"} y={"7"} width={"16"} height={"12"} rx={"3"} />
           <path d={"M12 3v4M9 13v1M15 13v1"} />

@@ -609,7 +609,7 @@ html[data-input="touch"] button:focus-visible,html[data-input="touch"] #art:focu
    desktop bar's 48 px. Every other command, the save status included, is listed in the phone Menu (MenuBar.tsx PhoneMenu). */
 @media (max-width:600px) and (orientation:landscape){.top{height:48px}}
 @media (max-width:600px){
-.top .sep,.top .logo,.top #new,.top #open,.top #importMachine,.top #save,.top #duplicate,.top #remove,.top #helpBtn,.top #settingsBtn,.top .save-status{display:none}
+.top .sep,.top .logo,.top #new,.top #open,.top #importMachine,.top #save,.top #duplicate,.top #remove,.top #helpBtn,.top #settingsBtn{display:none}
 .top .file-menu-list .menu-note{padding:8px 12px;font-size:var(--fs-caption);color:#5c625e;line-height:1.4;white-space:normal;overflow-wrap:anywhere}
 /* The blank-design reason takes no room in the bar, so the design name keeps its width beside Export. It hangs as a
    small caption under the bar (outside its box, so it never overlaps the name or Export), and screen readers still get it. */
@@ -695,13 +695,6 @@ input[type=checkbox]{accent-color:var(--teal)}
 @media (max-width:600px){
 .top .name-field #name{width:100%;flex:1 1 auto;min-width:0;height:44px}
 }
-/* At phone widths the save status leaves the bar's row (it stays in the DOM, so screen readers still get it as a status), and
-   the design name takes the room, so the name field keeps a 44 px box in the top bar. */
-@media (max-width:600px){
-.top .save-status{position:absolute;width:0;height:0;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;margin:0}
-/* The saved and unsaved dots (more specific rules above) are hidden too: the phone top bar has no save status. */
-.top .save-status.autosaved,.top .save-status.unsaved{display:none}
-}
 /* At 360 px and narrower the bar's gaps and the Export label tighten, so the design name keeps a 44 px box on a 360 px screen. */
 @media (max-width:360px) and (orientation:landscape){
 .top{gap:2px;padding:0 4px}
@@ -738,8 +731,6 @@ body{height:100vh;height:100dvh;min-height:0;overflow:hidden}
 .top{height:56px;padding:0 8px;gap:6px}
 .top .logo,.top .sep,.top #new,.top #open,.top #importMachine,.top #duplicate,.top #remove,.top #helpBtn,.top #settingsBtn,
 .top .export-reason{display:none}
-/* The save status is centred on the bar's text row. A fixed-height dot cannot stretch, so it must be centred explicitly, or it hugs the top edge. */
-.top .save-status{align-self:center;display:flex;align-items:center;margin-top:0}
 .top .icon-button{width:44px;min-width:44px;height:44px;min-height:44px}
 .top .export-split button,.top #export{width:auto;min-width:44px;height:44px;min-height:44px;padding:0 10px}
 .top .name-field{display:flex;flex:1 1 0;min-width:0}
@@ -754,9 +745,7 @@ body{height:100vh;height:100dvh;min-height:0;overflow:hidden}
 .top #name{min-height:44px;height:44px;width:100%;min-width:0}
 .top .export-split{height:44px}.top #export{height:44px;min-height:44px}
 .top .edit-tools{gap:0}
-/* The autosave strip hangs under the top bar in a 24 px band of its own, so the layout starts below it rather than under it. */
-.top{margin-bottom:24px}
-.layout{display:grid;height:calc(100vh - 80px);height:calc(100dvh - 80px);grid-template-columns:minmax(0,1fr) 300px;grid-template-rows:minmax(0,0.42fr) minmax(0,1fr)}
+.layout{display:grid;height:calc(100vh - 56px);height:calc(100dvh - 56px);grid-template-columns:minmax(0,1fr) 300px;grid-template-rows:minmax(0,0.42fr) minmax(0,1fr)}
 .layout>main{grid-column:1;grid-row:1 / span 2;display:flex;flex-direction:column;min-width:0;min-height:0;order:0}
 .layout main>.canvas{flex:1 1 0;height:auto;min-height:0}
 /* The toast hangs above the status line, outside its 28 px box, so the status line must not clip it. Its children fit the bar. */
@@ -903,7 +892,7 @@ body{height:100vh;height:100dvh;min-height:0;overflow:hidden;overscroll-behavior
 .layout>#layersSheet.sheet-open,.layout>#inspector.sheet-open{display:flex;flex-direction:column;position:fixed;top:44px;bottom:44px;left:auto;right:0;width:320px;height:auto;max-height:none;margin:0;padding:10px 12px 12px;overflow-y:auto;overscroll-behavior:contain;z-index:40;background:#fff;border:0;border-left:1px solid #e3e6e1;border-radius:0;box-shadow:-6px 0 24px #1d292533}
 body{height:100dvh;min-height:0;overflow:hidden}
 .top{position:fixed;top:0;left:0;right:0;z-index:7;height:44px;min-height:44px;flex-wrap:nowrap;gap:4px;padding:0 6px;overflow:hidden}
-.top .logo,.top .sep,.top #new,.top #open,.top #importMachine,.top #save,.top #duplicate,.top #remove,.top #helpBtn,.top #settingsBtn,.top .save-status{display:none}
+.top .logo,.top .sep,.top #new,.top #open,.top #importMachine,.top #save,.top #duplicate,.top #remove,.top #helpBtn,.top #settingsBtn{display:none}
 .top .file-menu>button,.top .icon-button,.top #undo,.top #redo,.top #settingsBtn,.top #export{min-width:44px;height:44px;min-height:44px}
 .top .icon-button{width:44px}
 .top .file-menu>button{padding:6px 6px}
@@ -1181,8 +1170,8 @@ html[data-input="touch"] .tool-row .icon-button:not(.active-tool):hover{backgrou
 .tool-row .icon-button[data-quiet-focus]:not(.active-tool):focus-visible{background:#f6f7f5}
 [data-quiet-focus]::after{display:none!important}
 #previewHint{white-space:nowrap;max-width:calc(100% - 24px);overflow:hidden;text-overflow:ellipsis}
-/* On screens up to 1024 px wide the opaque save-status strip covers the top edge of the 3D canvas, and Chromium then
-   leaves the matching bottom band of the WebGL canvas unpainted. A filter on the canvas makes it paint the whole frame. */
+/* On screens up to 1024 px wide Chromium can leave the bottom band of the WebGL canvas unpainted. A filter on the canvas makes it
+   paint the whole frame. */
 #preview3d{filter:blur(0)}
 
 /* A checkbox and its label share one row at every width and in both languages: the box is centred on the label's line,
@@ -1213,29 +1202,20 @@ html[lang="es"] .layout main>.tool-rail .rail-label{font-size:10px;letter-spacin
 .layout main:not(.design-view) .playback-bar .playback-summary{white-space:normal;overflow:visible;text-overflow:clip;line-height:1.25}
 }
 
-/* One save status at every size: the desktop's text line, in the same words. On phones and tablets it hangs under the bar as a
-   small caption, out of the bar's row, so the design name keeps its place and width whatever the state. Screen readers get the
-   same text at every size. */
+/* One save status at every size: the desktop's text line, in the same words. On phones and tablets it is an icon inside the top
+   bar, beside the design name, so the bar keeps its height and no row sits between the bar and the canvas. A check is saved to
+   a file, a sync arrow is autosaved in this browser, and an amber alert means the file is out of date. The words stay as the
+   accessible name and tooltip. */
 @media (max-width:1024px){
-.top{overflow:visible;position:relative;z-index:7}
-.top #savedStatus,.top #unsavedMark,.top #idleStatus{display:block;position:absolute;top:100%;left:0;right:0;width:auto;height:auto;margin:0;padding:2px 12px;clip:auto;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:var(--fs-caption);line-height:1.3;background:#fff;color:#66726c}
-.top #unsavedMark{color:#8a5a00}
-/* Phones and tablets show the state as a dot in the same colour the words take on desktop (currentColor follows the state's class). */
-.top .save-dot{display:block;width:8px;height:8px;margin:4px 0;border-radius:50%;background:currentColor}
+.top .save-status{flex:none;display:flex;align-items:center;justify-content:center;width:28px;height:28px;margin:0 2px;color:#66726c}
+.top .save-status .icon{width:20px;height:20px}
+.top .save-status.unsaved{color:#8a5a00}
 }
-/* At tablet portrait the strip stops at the Layers column's left edge, so the column keeps the band under the top bar to itself.
-   The Layers list scrolls inside its panel; rows it scrolls past the top edge would otherwise sit under the strip. */
-@media (min-width:601px) and (max-width:1024px) and (orientation:portrait){
-.top #savedStatus,.top #unsavedMark,.top #idleStatus{right:300px}
-}
-/* The autosave strip gets a 24 px band under the top bar on a landscape tablet, as in portrait, so the controls below start
-   under the band rather than under the strip. Each band sits inside its own size range only. */
 @media (min-width:601px) and (max-width:1024px) and (orientation:landscape) and (min-height:501px){
-.top{margin-bottom:24px}
-.layout{height:calc(100vh - 72px);height:calc(100dvh - 72px)}
+.layout{height:calc(100vh - 48px);height:calc(100dvh - 48px)}
 }
 /* On a landscape phone the layout keeps its height, so the hoop fills the same canvas. The tool rail and the selection bar
-   move down inside it, clear of the strip's band under the 44 px top bar. */
+   move down inside it, clear of the 44 px top bar. */
 @media (orientation:landscape) and (max-height:500px) and (max-width:1000px){
 .canvas .tool-rail{top:68px}
 .canvas .floating{top:24px}
@@ -1366,8 +1346,8 @@ html[lang="es"] .layout main>.tool-rail .rail-label{font-size:10px;letter-spacin
 .preview-hint-icon .icon{width:16px;height:16px}
 .layout main .playback-bar .playback-summary.playback-figures{display:flex;align-items:center;gap:10px;min-width:0;overflow:hidden;white-space:nowrap}
 
-/* On a portrait phone the 3D camera presets start below the autosave strip (24 px band, ends at 71 px), not under it. The Show pull
-   panel moves down with them, below the taller preset row. */
+/* On a portrait phone the 3D camera presets start 24 px below the canvas's top edge, and the Show pull panel moves down with them,
+   below the taller preset row. */
 @media (max-width:600px) and (orientation:portrait){
 .canvas #previewView{top:24px}
 .canvas #previewPull{top:80px}

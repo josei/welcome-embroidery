@@ -1,7 +1,7 @@
 import {test,expect} from '@playwright/test';
 
 // Phone portrait (390x844) in English and Spanish: Fit centres the hoop on the canvas, every dock tile keeps its grey
-// fill after lettering is placed, no canvas shows between the header and the autosave strip, and Spanish dock labels
+// fill after lettering is placed, no canvas shows between the header and the canvas, and Spanish dock labels
 // keep a margin inside their tiles.
 test.use({hasTouch:true});
 
@@ -36,7 +36,7 @@ for(const lang of ['en','es']){
   await page.screenshot({path:`test-results/phone-dock-after-lettering-${lang}.png`});
  });
 
- test(`no canvas shows between the header and the autosave strip (${lang})`,async({page})=>{
+ test(`no canvas shows between the header and the canvas (${lang})`,async({page})=>{
   await page.setViewportSize({width:390,height:844});
   await page.goto(`/?lang=${lang}`);
   await expect(page.locator('header.top')).toBeVisible();

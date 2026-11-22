@@ -132,8 +132,8 @@ for(const lang of ['en','es']){
   const canvas=await box(page,'.canvas');
   const row=await box(page,'#previewView');
   expect(Math.round(row.left-canvas.left),'the preset row keeps its left inset').toBe(12);
-  const strip=await box(page,'.save-status:visible');
-  expect(row.top,'the preset row starts below the autosave strip, not under it').toBeGreaterThanOrEqual(strip.bottom);
+  const bar=await box(page,'header.top');
+  expect(row.top,'the preset row starts below the top bar, not under it').toBeGreaterThanOrEqual(bar.bottom);
   for(const preset of await presetBoxes(page)) expect(inside(preset,canvas),`${preset.name} stays inside the canvas`).toBe(true);
  });
 
