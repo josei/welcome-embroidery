@@ -1388,19 +1388,14 @@ html[lang="es"] .layout main>.tool-rail .rail-label{font-size:10px;letter-spacin
 .top .export-split .export-label{display:none}
 .top .export-split .export-icon{display:block;width:20px;height:20px}
 }
-/* A phone in portrait keeps the name field at least 168 px wide, enough for the default Spanish name with its save icon, so the
-   icon-only Export stays inside a 360 px screen. The bar's gaps and edge padding tighten. The save status icon sits inside the
-   name field, after the name's text (see the save status block below). */
+/* A phone in portrait tightens the bar's gaps and edge padding. The Export split keeps the same pill as the desktop and sits inside
+   that padding on every size; the name field shrinks to fit rather than pushing the bar wider than the screen. The save status icon
+   sits inside the name field, after the name's text (see the save status block below). */
 @media (max-width:600px) and (orientation:portrait){
 .top{gap:2px;padding:0 3px}
-.top .name-field{min-width:168px}
+.top .name-field{min-width:0}
 }
 
-/* On a phone the bar runs to the screen corner: the Export split fills the bar height and sits flush with the top and right edges, with no square corner radius, so it does not sit in a padded inset. */
-@media (max-width:600px) and (orientation:portrait),(orientation:landscape) and (max-height:500px){
-.top{padding-right:0}
-.top .export-split{align-self:stretch;height:auto;margin-right:0;border-radius:0}
-}
 
 /* On a phone or tablet the Issues chip is the Issues icon and its count, and its hit area is the 44 px target the rest of the
    status row keeps. The chip stays a short pill, so the glyph sits centred inside the 44 px box. */

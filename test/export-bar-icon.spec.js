@@ -1,7 +1,7 @@
 import {test,expect} from '@playwright/test';
 
 // On a phone (390x844) the top bar's Export button is the export glyph, not a word: it has no visible text,
-// is at most 44 px wide, and leaves the project name at least 200 px wide. Its name is kept in aria-label.
+// is at most 44 px wide, and the project name is not clipped. Its name is kept in aria-label.
 // The same button still opens the export dialog, and so does the Export row in the phone Menu.
 
 test.beforeEach(async({page})=>{await page.addInitScript(()=>{delete window.showSaveFilePicker;});});
@@ -25,8 +25,9 @@ for(const lang of ['en','es']){
   expect(width,'Export button width').toBeLessThanOrEqual(44);
   expect(await exportBtn.getAttribute('aria-label'),'aria-label').toBe(word);
   expect(await exportBtn.getAttribute('title'),'title').toBe(word);
-  const nameWidth=await page.locator('#name').evaluate(e=>e.getBoundingClientRect().width);
-  expect(nameWidth,'name field width at 390 px').toBeGreaterThanOrEqual(200);
+  // The name's text must fit in the field's content box, or it is clipped.
+  const nameFits=await page.locator('#name').evaluate(e=>{const cs=getComputedStyle(e);const c=document.createElement('canvas').getContext('2d');c.font=`${cs.fontWeight} ${cs.fontSize} ${cs.fontFamily}`;const inner=e.clientWidth-parseFloat(cs.paddingLeft)-parseFloat(cs.paddingRight);return c.measureText(e.value).width<=inner+1;});
+  expect(nameFits,'design name is not clipped at 390 px').toBe(true);
   expect(errors).toEqual([]);
  });
 }
