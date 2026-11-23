@@ -5,7 +5,7 @@ browser, nothing to install, no account.
 
 An open-source, userless embroidery editor that runs as a static web app, a self-hosted server, or a desktop app, and that AI agents can drive through MCP. Draw and edit vector shapes and lettering, choose how each object is stitched, preview the result (including a 3D thread view), and export machine files for Janome/Elna (JEF, SEW), Pfaff (VP3), Tajima (DST, TBF), Brother/Babylock (PEC, PES), Melco (EXP), Barudan (U01) and Singer (XXX) machines, thread colour lists (COL, EDR), SVG, DXF, and print and appliqué templates. Designs stay in your browser as local `.welcome` project files.
 
-**Status:** a working editor with a deliberately limited stitch engine. It is not Ink/Stitch parity, not machine-certified (nothing here has been sewn on a real machine; output is checked against pinned open-source readers: `npm test` compares fixed digests of pystitch's decode of JEF and VP3 and of pyembroidery's decode of SEW, PEC, PES, EXP, HUS, XXX, DSB, DSZ, TAP, TBF, PCS, SHV, STX, BRO, EMD, KSM and 10O; live checks that decode files again, run by hand and not by `npm test`, cover DST and the JEF header with pystitch and SEW, TBF, U01, XXX, COL, EDR and PES v6 thread names with pyembroidery), and has no EMB support.
+**Status:** a working editor with a deliberately limited stitch engine. It is not Ink/Stitch parity, not machine-certified (nothing here has been sewn on a real machine; exported machine files are read back by Welcome's own readers in the test suite, and those readers are checked against pystitch and pyembroidery decodes of pinned sample files).
 
 ## What it does
 
