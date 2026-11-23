@@ -37,9 +37,9 @@ export function TransformPanel() {
     pivotActions.reset(
     )}>Use center</button><span id="pivotInfo" className="sel-hint" role="status">{info}</span></div><div id="radiusRow"
       hidden={rows.radiusRow}><label>{"Corner radius (mm)"}<input id="radius" {...radius.inputProps} type="text" inputMode="decimal" min="0" max="500" step="0.5" />{radius.note && <span className="clamp-note" role="status">{radius.note}</span>}</label><div className="corner-radii" role="group"
-      aria-label="Corner radii (mm)"><label>TL<input id="radiusTL" {...radiusTL.inputProps} type="text" inputMode="decimal" min="0" max="500" step="0.5" />{radiusTL.note && <span className="clamp-note" role="status">{radiusTL.note}</span>}</label><label>TR<input
-        id="radiusTR" {...radiusTR.inputProps} type="text" inputMode="decimal" min="0" max="500" step="0.5" />{radiusTR.note && <span className="clamp-note" role="status">{radiusTR.note}</span>}</label><label>BR<input id="radiusBR" {...radiusBR.inputProps} type="text" inputMode="decimal"
-          min="0" max="500" step="0.5" />{radiusBR.note && <span className="clamp-note" role="status">{radiusBR.note}</span>}</label><label>BL<input id="radiusBL" {...radiusBL.inputProps} type="text" inputMode="decimal" min="0" max="500"
+      aria-label="Corner radii (mm)"><label><span className="corner-name">TL</span><input aria-label="Top-left corner radius (mm)" id="radiusTL" {...radiusTL.inputProps} type="text" inputMode="decimal" min="0" max="500" step="0.5" />{radiusTL.note && <span className="clamp-note" role="status">{radiusTL.note}</span>}</label><label><span className="corner-name">TR</span><input aria-label="Top-right corner radius (mm)"
+        id="radiusTR" {...radiusTR.inputProps} type="text" inputMode="decimal" min="0" max="500" step="0.5" />{radiusTR.note && <span className="clamp-note" role="status">{radiusTR.note}</span>}</label><label><span className="corner-name">BR</span><input aria-label="Bottom-right corner radius (mm)" id="radiusBR" {...radiusBR.inputProps} type="text" inputMode="decimal"
+          min="0" max="500" step="0.5" />{radiusBR.note && <span className="clamp-note" role="status">{radiusBR.note}</span>}</label><label><span className="corner-name">BL</span><input aria-label="Bottom-left corner radius (mm)" id="radiusBL" {...radiusBL.inputProps} type="text" inputMode="decimal" min="0" max="500"
             step="0.5" />{radiusBL.note && <span className="clamp-note" role="status">{radiusBL.note}</span>}</label></div></div></section>
  );
 }

@@ -117,4 +117,8 @@ export const ES_ADDITIONS={
 'Reset to default ({n} mm)':'Restablecer al valor predeterminado ({n} mm)',
 'Stitch layers have no nodes':'Las capas de puntadas no tienen nodos',
 'The top object must be a rectangle, ellipse or closed path':'El objeto de arriba debe ser un rectángulo, una elipse o un trazado cerrado',
+'TL':'SI','TR':'SD','BR':'ID','BL':'II',
+'Top-left corner radius (mm)':'Radio de esquina superior izquierda (mm)','Top-right corner radius (mm)':'Radio de esquina superior derecha (mm)',
+'Bottom-right corner radius (mm)':'Radio de esquina inferior derecha (mm)','Bottom-left corner radius (mm)':'Radio de esquina inferior izquierda (mm)',
+'Bold thickness (mm)':'Grosor de negrita (mm)','Italic slant (°)':'Inclinación de cursiva (°)',
 };
