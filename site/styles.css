@@ -34,6 +34,7 @@ section{max-width:1160px;margin:0 auto}
 .eyebrow{display:flex;align-items:center;gap:10px;font-size:.78rem;text-transform:uppercase;letter-spacing:.14em;color:var(--accent);font-weight:700;margin-bottom:16px}
 .eyebrow span{width:28px;height:0;border-top:2px dashed var(--accent)}
 .sec-head{margin-bottom:36px;max-width:22em}
+.sec-head>p:not(.eyebrow){margin-top:14px;color:var(--muted);font-size:1.02rem;text-wrap:balance}
 
 /* hero */
 .hero{position:relative;padding:clamp(48px,8vw,104px) 0 40px;display:grid;gap:clamp(36px,5vw,64px)}

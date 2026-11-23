@@ -60,7 +60,7 @@ export function EditorOverlays() {
           <CloseButton type={"submit"} />
         </div>
         <p className={"agent-help"}>
-          {"About the agent link: the design you share goes through your own Welcome server (this desktop app or the server you host) to an outside AI service, the one your agent uses. Files the agent exports are kept on that server for 7 days."}
+          {"About the agent link: the design you share goes from your own computer (the desktop app) or the self-hosted server you run, to an outside AI service, the one your agent uses. Files the agent exports stay on that computer or server for 7 days."}
         </p>
         <p id={"agentStatus"} role={"status"} aria-live={"polite"}>
           {agent.statusText}
