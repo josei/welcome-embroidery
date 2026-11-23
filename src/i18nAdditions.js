@@ -49,7 +49,7 @@ export const ES_ADDITIONS={
 'Leave empty for plain copies':'Déjalo vacío para copias sencillas',
 'Name drop: names, one per line (each name replaces the lettering marked for name drop, or the first lettering if none is marked)':'Sustitución por nombres: un nombre por línea (cada nombre reemplaza al texto marcado para sustitución, o al primero si no hay ninguno marcado)',
 'Hoop preset':'Preajuste del bastidor',
-'Hoop presets: 110 × 110 mm, and Brother 4×4, 5×7 and 6×10 embroidery hoops':'Preajustes del bastidor: 110 × 110 mm, y los bastidores de bordado Brother de 4×4, 5×7 y 6×10',
+'Hoop presets: 110 × 110 mm, 4×4 in, 5×7 in and 6×10 in':'Preajustes del bastidor: 110 × 110 mm, 4×4 pulg., 5×7 pulg. y 6×10 pulg.',
 "Swap the hoop's width and height; the design stays where it is":'Intercambia el ancho y el alto del bastidor; el diseño se queda donde está',
 'Underlay: a first layer of stitches under the top stitches that holds the fabric flat. Automatic by default.':'Base: primera capa de puntadas bajo las de encima que mantiene la tela plana. Automática por defecto.',
 'Stitch length: the distance between needle holes along a stitch, in mm.':'Largo de puntada: distancia entre pinchazos de aguja a lo largo de una puntada, en mm.',

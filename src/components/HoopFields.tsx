@@ -23,7 +23,7 @@ export function HoopFields() {
   // Each dimension keeps its label, input and unit together (.hoop-dim); the two dimensions wrap as one .hoop-dims group, so the
   // Rotate button drops to its own line before any unit or label is split from its input.
   <div className="footer hoop-edit"><span>Hoop</span><select id="hoopPreset" aria-label="Hoop preset"
-    title="Hoop presets: 110 × 110 mm, and Brother 4×4, 5×7 and 6×10 embroidery hoops" value={hoop.preset} onChange={e =>
+    title="Hoop presets: 110 × 110 mm, 4×4 in, 5×7 in and 6×10 in" value={hoop.preset} onChange={e =>
     hoopActions.preset(
     e.target.value)}><option value="custom">Custom</option><option value="110x110">110 × 110 mm</option><option value="4x4in">4×4 in</option><option
       value="5x7in">5×7 in</option><option value="6x10in">6×10 in</option></select>
