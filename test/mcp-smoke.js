@@ -130,6 +130,7 @@ const back=await client.callTool({name:'document_restore',arguments:{documentId:
 const pv=await client.callTool({name:'embroidery_preview',arguments:{documentId:uxId,expectedRevision:3}});assert.ok(pv.content.some(c=>c.type==='image'&&c.mimeType==='image/png'),'the preview comes back as a picture');
 const sv=await client.callTool({name:'document_export_svg',arguments:{documentId:uxId}});assert.ok(sv.content.some(c=>c.type==='text'&&c.text.includes('<svg')),'the SVG text is inline');
 for(const topic of ['overview','coordinates','workflow','operations','stitching','sewing-rules','lettering']){const h=await client.callTool({name:'embroidery_help',arguments:{topic}});assert.ok(h.content[0].text.length>150,topic);}
+const overview=(await client.callTool({name:'embroidery_help',arguments:{topic:'overview'}})).content[0].text;for(const fmt of ['jef','vp3','dst','sew','pes'])assert.ok(overview.includes(fmt),'the overview names '+fmt);
 const ops=await client.callTool({name:'embroidery_help',arguments:{topic:'operations'}});assert.ok(/set_path_node_type/.test(ops.content[0].text),'the full operation list moved into help');
 const tools=await client.listTools();const applyDesc=tools.tools.find(t=>t.name==='document_apply').description;assert.ok(applyDesc.length<1500&&/TOP-LEFT/.test(applyDesc)&&/DOWN/.test(applyDesc)&&/BASELINE/.test(applyDesc),'the apply description is short and states the coordinate conventions');
 const isl=(await client.callTool({name:'document_create',arguments:{name:'Island limit',hoop:100}})).structuredContent.documentId;

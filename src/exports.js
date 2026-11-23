@@ -125,6 +125,6 @@ const margin=10,gap=12,ink='#000';
  */
 export function jefWarnings(plan,format='jef'){if(format!=='jef'||!plan.bounds)return [];const w=plan.bounds[2]-plan.bounds[0],h=plan.bounds[3]-plan.bounds[1];
   return w>=200||h>=
-  200?[`This design is ${w.toFixed(0)} × ${h.toFixed(0)} mm, larger than Welcome can write to JEF (up to 200 × 200 mm). ` +
+  200?[`The JEF file was written, but it is set for the 110 × 110 mm hoop, which this ${w.toFixed(0)} × ${h.toFixed(0)} mm design does not fit. ` +
   `Make it smaller or export another format.`]:[
   ];}
