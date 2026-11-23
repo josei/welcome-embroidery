@@ -9,7 +9,7 @@ export const DEFAULT_EXPORT_RETENTION_DAYS=7;
 export const exportRetentionDays=raw=>{const days=Number(raw);return raw!==undefined&&raw!==''&&Number.isFinite(days)&&days>0?days:DEFAULT_EXPORT_RETENTION_DAYS;};
 
 // Export files a client may download. Saved documents (.welcome) are served but never expire.
-export const SERVED_NAME=/^[0-9a-f-]{36}\.(jef|vp3|dst|sew|welcome|svg|txt)$/;
+export const SERVED_NAME=/^[0-9a-f-]{36}\.(jef|vp3|dst|sew|pes|welcome|svg|txt)$/;
 
 // Only UUID-named export files. Saved documents (.welcome) are deliberately absent from this list.
 const EXPORT_NAME=/^[0-9a-f-]{36}\.(jef|vp3|dst|sew|svg|txt)$/;
