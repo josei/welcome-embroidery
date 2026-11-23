@@ -194,6 +194,9 @@ export function EditorOverlays() {
         <p id={"exportNotice"}>
           {"Exporting does not save your project. Use Save to keep it as a .welcome file."}
         </p>
+        <p id={"exportSewnNotice"}>
+          {"Nothing here has been sewn on a real machine yet."}
+        </p>
         <div id={"worksheetRow"} className={"check-row"} hidden={!MACHINE_FORMATS.includes(exportFormat.format)}>
           <label>
             <input

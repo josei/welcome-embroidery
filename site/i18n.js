@@ -70,7 +70,8 @@ const T={
 "c3": "Desktop",
 "n1": "3D preview",
 "n2": "Turn your design around <em>before you sew it.</em>",
-"n3": "Calls Welcome's tools through MCP"
+"n3": "Calls Welcome's tools through MCP",
+"n4": "Nothing here has been sewn on a real machine yet."
 },
 "es": {
 "k0": "Puntadas",
@@ -141,7 +142,8 @@ const T={
 "c3": "Escritorio",
 "n1": "Vista previa 3D",
 "n2": "Dale la vuelta a tu diseño <em>antes de bordarlo.</em>",
-"n3": "Llama a las herramientas de Welcome por MCP"
+"n3": "Llama a las herramientas de Welcome por MCP",
+"n4": "Nada de esto se ha bordado todavía en una máquina real."
 }
 };
 const META={"en": {"title": "Welcome Embroidery: design in your browser", "desc": "Draw, letter and digitize embroidery in the browser. Preview every stitch and export JEF or VP3 files. Free, open source, no account."}, "es": {"title": "Welcome Embroidery: diseña bordados en tu navegador", "desc": "Dibuja, compón letras y digitaliza bordados en el navegador. Previsualiza cada puntada y exporta archivos JEF o VP3. Gratis, código abierto, sin cuenta."}};
