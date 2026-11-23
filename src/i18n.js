@@ -371,8 +371,8 @@ export const ES={...ES_ADDITIONS,
   'Estrella {n}','Drawn path':'Trazado dibujado','Imported rectangle':'Rectángulo importado','Imported ellipse':'Elipse importada','{x} copy':'{x} copia',
 'Botanical badge':'Insignia botánica','Wildflower':'Flor silvestre','Flower center':'Centro de la flor','Stem':'Tallo','Leaf':'Hoja','Untitled design':
   'Diseño sin título','Imported path':'Trazado importado','Imported SVG':'SVG importado','Imported · replace all':'Importado · reemplazar todo',
-'This design is {w} × {h} mm, bigger than a JEF machine can hoop (200 × 200 mm). Make it smaller or export another format.':
-  'Este diseño mide {w} × {h} mm, más grande de lo que una máquina JEF puede bordar (200 × 200 mm). Hazlo más pequeño o exporta otro formato.',
+'This design is {w} × {h} mm, larger than Welcome can write to JEF (up to 200 × 200 mm). Make it smaller or export another format.':
+  'Este diseño mide {w} × {h} mm, más grande de lo que Welcome puede escribir en JEF (hasta 200 × 200 mm). Hazlo más pequeño o exporta otro formato.',
 'This object':'Este objeto','This text':'Este texto','another object':'otro objeto','another text':'otro texto',
 'Snap to {n} mm grid on.':'Ajuste a la cuadrícula de {n} mm activado.',
   'Loaded {name}. It is stored in this project.':'{name} cargada. Se guarda en este proyecto.','Imported {name} as {article} {fmt} stitch layer.':

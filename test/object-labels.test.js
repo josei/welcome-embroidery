@@ -32,9 +32,9 @@ test('the clipping and hoop messages avoid the id when the object has no name', 
 
 test('the JEF warning is plain and keeps the design size', () => {
   const [w]=jefWarnings({bounds:[0,0,210,50]},'jef');
-  assert.equal(w,'This design is 210 × 50 mm, bigger than a JEF machine can hoop (200 × 200 mm). Make it smaller or export another format.');
+  assert.equal(w,'This design is 210 × 50 mm, larger than Welcome can write to JEF (up to 200 × 200 mm). Make it smaller or export another format.');
   for(const bad of ['hoop code','header','distances']) assert.ok(!w.includes(bad),bad);
-  assert.equal(ES[w.replace('210','{w}').replace('50','{h}')],'Este diseño mide {w} × {h} mm, más grande de lo que una máquina JEF puede bordar (200 × 200 mm). Hazlo más pequeño o exporta otro formato.');
+  assert.equal(ES[w.replace('210','{w}').replace('50','{h}')],'Este diseño mide {w} × {h} mm, más grande de lo que Welcome puede escribir en JEF (hasta 200 × 200 mm). Hazlo más pequeño o exporta otro formato.');
 });
 
 test('no translation string interpolates an internal id', () => {

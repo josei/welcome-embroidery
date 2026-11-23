@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import neonGlyphs from '../fonts/neon_blinking/glyphs.json' with {type:'json'};
 import {pinnedMachineFixture} from './fixture-archive.js';
+import {encodeJef} from '../src/encoders/jef.js';
 import {FABRIC_PROFILES,distortionGrid,bundledFontUsage,blockSeconds,blockTimeLabel,initialDocument,compile,encode,applyOperations,geometry,objectBounds,validateDocument,jefWarnings,exportSvg,exportPrintTemplate,exportAppliqueTemplates,isClosedShape,HOOP_PRESETS,batchDocuments,customFontUsage,hoopSize,importStitchLayer,measureText,threadPlan,threadSpans,sewingSeconds,sewingSecondsUpTo,sewingWorksheet,designWarnings,TIP_CATEGORIES,visibleTips,measureBetween,nearestStockThread,parseThreadStock,svgPathFill,parseSvgPath,cornerRadii} from '../src/engine.js';
 
 test('browser and MCP semantic operations share editable document behavior',()=>{
@@ -139,8 +140,13 @@ test('custom rectangular hoops: set_hoop, bounds diagnostics, align to hoop, JEF
  assert.throws(()=>applyOperations(doc,[{op:'set_hoop',width:5}]),/between 10 and 400/);
 });
 
+test('a JEF design just under the encoder limit still encodes',()=>{
+  const plan={errors:[],stitches:[{x:0,y:0,cmd:'stitch'},{x:199.9,y:0,cmd:'stitch'},{x:199.9,y:199.9,cmd:'stitch'},{x:0,y:199.9,cmd:'stitch'},{x:0,y:0,cmd:'end'}]};
+  assert.ok(encodeJef(plan,'#527461',200).length>0);
+});
+
 test('JEF warns beyond the largest hoop code but does not block',()=>{
- assert.deepEqual(jefWarnings({bounds:[0,0,150,150]},'jef'),[]);assert.match(jefWarnings({bounds:[0,0,210,50]},'jef')[0],/bigger than a JEF machine can hoop \(200 × 200 mm\)\. Make it smaller or export another format\./);assert.deepEqual(jefWarnings({bounds:[0,0,300,300]},'vp3'),[]);
+ assert.deepEqual(jefWarnings({bounds:[0,0,150,150]},'jef'),[]);assert.deepEqual(jefWarnings({bounds:[0,0,199.9,199.9]},'jef'),[]);assert.match(jefWarnings({bounds:[0,0,210,50]},'jef')[0],/larger than Welcome can write to JEF \(up to 200 × 200 mm\)\. Make it smaller or export another format\./);assert.deepEqual(jefWarnings({bounds:[0,0,300,300]},'vp3'),[]);
 });
 
 test('satin columns: zigzag across rails, honors width and spacing, underlay, bounds and export',()=>{
