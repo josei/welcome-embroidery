@@ -21,6 +21,7 @@ import {removeUnusedFonts} from '../fontsDialogCommands.js';
 import {SettingsDialog} from './SettingsDialog';
 import {CloseButton} from './CloseButton';
 import {ThreadPopover} from './ThreadPopover';
+import {agentReachNote, pageBindScope} from '../agentReach.js';
 // Enter on a select only changes its value. Inside a dialog form, Enter would otherwise submit the form and press the
 // default button (Download), so the export format select would start a download as soon as it was chosen.
 function keepEnterOnSelect(e: React.KeyboardEvent<HTMLSelectElement>) {
@@ -59,7 +60,7 @@ export function EditorOverlays() {
           <CloseButton type={"submit"} />
         </div>
         <p className={"agent-help"}>
-          {"Before you link an agent: the design you share goes through Welcome's server to an outside AI service, the one your agent uses. Files the agent exports are kept on the server for 7 days."}
+          {"About the agent link: the design you share goes through your own Welcome server (this desktop app or the server you host) to an outside AI service, the one your agent uses. Files the agent exports are kept on that server for 7 days."}
         </p>
         <p id={"agentStatus"} role={"status"} aria-live={"polite"}>
           {agent.statusText}
@@ -82,7 +83,9 @@ export function EditorOverlays() {
           </button>
         </div>
         <p className={"agent-help"}>
-          {"Anyone holding this link can read and edit the design open in this tab, so share it only with your agent. The server only relays the agent's requests while this tab is open. Closing the tab ends the link. The link works only with an MCP client running on this computer; web-based assistants cannot reach it. In the agent, use "}
+          {"Anyone holding this link can read and edit the design open in this tab, so share it only with your agent. The server only relays the agent's requests while this tab is open. Closing the tab ends the link. "}
+          {agentReachNote(pageBindScope())}
+          {" In the agent, use "}
           <code>
             {"documentId: \"live\""}
           </code>
