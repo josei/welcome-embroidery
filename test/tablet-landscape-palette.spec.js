@@ -83,8 +83,8 @@ for(const lang of ['en','es']) for(const touch of [false,true]) test(`underlay l
  const {ctx,page}=await open(browser,{lang,touch});
  await page.locator('#objects .object-row').first().click();
  await page.locator('#underlayRow').scrollIntoViewIfNeeded();
- const gap=await page.evaluate(()=>{const r=document.querySelector('#underlayRow');const range=document.createRange();range.selectNodeContents(r.firstChild);const textRight=Math.max(...[...range.getClientRects()].map(x=>x.right));return document.querySelector('#underlayType').getBoundingClientRect().left-textRight;});
- expect(gap,'label text ends before the select').toBeGreaterThanOrEqual(4);
+ const gap=await page.evaluate(()=>{const r=document.querySelector('#underlayRow');const range=document.createRange();range.selectNodeContents(r.firstChild);const textBottom=Math.max(...[...range.getClientRects()].map(x=>x.bottom));return document.querySelector('#underlayType').getBoundingClientRect().top-textBottom;});
+ expect(gap,'label text ends above the select').toBeGreaterThanOrEqual(4);
  await ctx.close();
 });
 

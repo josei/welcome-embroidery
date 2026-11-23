@@ -17,7 +17,7 @@ export function StitchAccordionRows() {
   <><label id="accordionStartRow" hidden={rows.accordionStartRow}>{"Accordion start (mm)"}<input id="accordionStart" {...accordionStart.inputProps} type="text" inputMode="decimal" min="0.25" max="1.2" step="0.05" placeholder="off"
       title="Row spacing at the top of the fill, changing linearly to the end spacing. Set both or neither." />{accordionStart.note && <span className="clamp-note" role="status">{accordionStart.note}</span>}</label><label id="accordionEndRow"
         hidden={rows.accordionEndRow}>{"Accordion end (mm)"}<input id="accordionEnd" {...accordionEnd.inputProps} type="text" inputMode="decimal" min="0.25" max="1.2" step="0.05" placeholder="off"
-      title="Row spacing at the bottom of the fill (rows pattern only)." />{accordionEnd.note && <span className="clamp-note" role="status">{accordionEnd.note}</span>}</label><label id="accordionEaseRow" hidden={rows.accordionEaseRow}>Accordion
+      title="Row spacing at the bottom of the fill (rows pattern only)." />{accordionEnd.note && <span className="clamp-note" role="status">{accordionEnd.note}</span>}</label><label id="accordionEaseRow" className="block" hidden={rows.accordionEaseRow}>Accordion
         curve<select id="accordionEase" value={acc.accordionEase} onChange={e =>
     accordionRowsActions.choose('accordionEase',
     e.target.value)}

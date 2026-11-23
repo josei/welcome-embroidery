@@ -119,8 +119,8 @@ nav .icon-button:first-of-type{margin-left:auto}
 
 .tool-row{flex-wrap:wrap}.sides-row{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:0 0 6px;font-size:var(--fs-caption);color:#66726c}.sides-row input{width:56px;border:1px solid var(--field-line);border-radius:6px;padding:4px 6px;font:inherit;background:#f6f7f5}#art.drawing{cursor:crosshair}
 
-.footer.hoop-edit{display:flex;align-items:center;gap:6px;left:16px;width:224px;right:auto;bottom:16px;font-size:var(--fs-caption);color:#66726c}.hoop-edit input{width:52px;border:1px solid var(--field-line);border-radius:6px;padding:4px 6px;font:inherit;background:#f6f7f5}.hoop-edit select{border:1px solid var(--field-line);border-radius:6px;padding:4px;font:inherit;font-size:var(--fs-caption);background:#f6f7f5;width:84px}
-.panel .footer.hoop-edit input{width:46px;padding:4px}.panel .footer.hoop-edit select{width:76px;padding:4px}.footer.hoop-edit{gap:4px;width:224px}
+.footer.hoop-edit{display:flex;align-items:center;gap:6px;left:16px;width:224px;right:auto;bottom:16px;font-size:var(--fs-caption);color:#66726c}.hoop-edit input{width:52px;border:1px solid var(--field-line);border-radius:6px;padding:4px 6px;font:inherit;background:#f6f7f5}.hoop-edit select{border:1px solid var(--field-line);border-radius:6px;padding:4px;font:inherit;font-size:var(--fs-caption);background:#f6f7f5;width:104px}
+.panel .footer.hoop-edit input{width:46px;padding:4px}.panel .footer.hoop-edit select{width:104px;padding:4px}.footer.hoop-edit{gap:4px;width:224px}
 .hoop-edit{flex-wrap:wrap}
 /* Desktop: the object list scrolls in the left column and the hoop row stays fixed under it, so the rows never sit under the footer. */
 @media (min-width:1101px) and (min-height:501px){
@@ -368,11 +368,9 @@ input:not([type=checkbox]):not([type=range]),select,textarea,.panel textarea{fon
    The field column is 100px, which leaves the label column about 118px in the 256px inspector: wide enough for "Pull compensation" on one line. */
 .panel label:not(.block):not(#blendPaletteRow>label){display:grid;grid-template-columns:minmax(0,1fr) 100px;align-items:center;column-gap:6px}
 .panel label:not(.block)>input:not([type=checkbox]),.panel label:not(.block)>select{grid-column:2;width:100%;min-width:0}
-/* The underlay select is as wide as its selected option, so no option text is cut off in English or Spanish ("Auto (según ancho)").
-   Where the browser cannot size a select to its text (field-sizing), it takes the width of its widest option, which is never clipped either.
-   The label keeps the rest of the row and wraps. */
-#underlayRow{grid-template-columns:minmax(0,1fr) auto!important}
-#underlayRow>select{width:auto!important;max-width:100%;field-sizing:content}
+/* Dropdowns whose longest option cannot fit the 100 px field column (underlay, accordion curve, needle stagger) stack: the label
+   sits above and the select takes the full inspector width, so no option text is covered by the label beside it. */
+.panel label.block>select{width:100%;min-width:0}
 .panel label:not(.block)>input[type=checkbox]{grid-column:2;justify-self:start;margin:0}
 .panel label:not(.block)>.field-range{grid-column:2;justify-self:start;margin:0}
 .panel label:not(.block)>.thread-btn{grid-column:2;width:100%;min-width:0}

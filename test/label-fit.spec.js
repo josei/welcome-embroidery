@@ -4,6 +4,8 @@ import {test,expect} from '@playwright/test';
 // (scrollWidth <= clientWidth), in English and Spanish, at 1280 and 1024 px, with no selection and with a rectangle selected.
 // Measured regions: the top bar, the floating canvas toolbar, the canvas tool rail, both sidebars, and the footer (status bar).
 // Ignored: .sr-only text, and width-1 .icon-label text (visually hidden labels). Inline elements are skipped: they have no clientWidth to clip.
+// Dropdowns (inspector selects and the hoop preset) are measured per option: every option's text must fit inside the field, and
+// the field must not cover any text or control beside it in its row (its label, or the hoop's width field).
 // EXCEPTIONS: a control may be listed only when its clipping is intended. Each entry gives the selector and a one-line reason.
 // Do not add an entry to hide a real overflow; fix the layout or the translation instead.
 const EXCEPTIONS=[
@@ -44,6 +46,56 @@ function findOverflows(){
  return out;
 }
 
+// Runs in the page: tries every option of every visible inspector dropdown and reports any option whose text does not fit,
+// or whose field box overlaps the text or a control next to it.
+function findDropdownCovers(){
+ const out=[];
+ const selects=[...document.querySelectorAll('.layout > aside select, .footer.hoop-edit select')]
+  .filter(s=>!s.classList.contains('sr-only')&&!s.closest('[hidden], dialog:not([open])'));
+ const ctx=document.createElement('canvas').getContext('2d');
+ const rectsOf=node=>{
+  if(node.nodeType===3){
+   if(!node.textContent.trim())return [];
+   const range=document.createRange();range.selectNodeContents(node);
+   return [...range.getClientRects()];
+  }
+  if(node.nodeType!==1)return [];
+  if(getComputedStyle(node).display==='none')return [];
+  return [node.getBoundingClientRect()];
+ };
+ const overlaps=(a,b)=>Math.min(a.right,b.right)-Math.max(a.left,b.left)>0.5&&Math.min(a.bottom,b.bottom)-Math.max(a.top,b.top)>0.5;
+ for(const s of selects){
+  const row=s.closest('label')||s.parentElement;
+  const label=s.id?`#${s.id}`:'select';
+  const original=s.value;
+  for(const opt of s.options){
+   s.value=opt.value;
+   const sr=s.getBoundingClientRect();
+   if(sr.width===0||sr.height===0)continue;
+   const cs=getComputedStyle(s);
+   ctx.font=`${cs.fontStyle} ${cs.fontWeight} ${cs.fontSize} ${cs.fontFamily}`;
+   const textWidth=ctx.measureText(opt.text).width;
+   // The arrow takes about 18 px at the field's right edge; the rest is the text box.
+   const available=sr.width-parseFloat(cs.paddingLeft)-parseFloat(cs.paddingRight)-18;
+   if(textWidth>available){
+    out.push({label,text:opt.text,problem:`option text ${Math.round(textWidth)} px does not fit in ${Math.round(available)} px`});
+   }
+   for(const node of row.childNodes){
+    if(node===s||s.contains(node))continue;
+    if(node.nodeType===1&&node.classList.contains('sr-only'))continue;
+    for(const r of rectsOf(node)){
+     if(overlaps(r,sr)){
+      out.push({label,text:opt.text,problem:`field covers "${(node.textContent||node.tagName).trim().slice(0,40)}"`});
+      break;
+     }
+    }
+   }
+  }
+  s.value=original;
+ }
+ return out;
+}
+
 for(const [locale,lang] of LOCALES){
  for(const width of WIDTHS){
   for(const selected of [false,true]){
@@ -61,6 +113,8 @@ for(const [locale,lang] of LOCALES){
     const failures=overflows.filter(o=>!exceptionLabels.has(o.label));
     const lines=failures.map(o=>
      `${o.label} "${o.text}" in ${locale} at ${width}px: scrollWidth ${o.scrollWidth} > clientWidth ${o.clientWidth}`);
+    const covers=await page.evaluate(findDropdownCovers);
+    for(const c of covers)lines.push(`dropdown ${c.label} option "${c.text}" in ${locale} at ${width}px: ${c.problem}`);
     expect(lines,`overflowing controls in ${locale} at ${width}px`).toEqual([]);
     expect(errors).toEqual([]);
    });
