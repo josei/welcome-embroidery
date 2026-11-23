@@ -1,6 +1,6 @@
 import {test,expect} from '@playwright/test';
 
-// The phone Menu has no Close or × control. Layers and Properties have a Close button in their heading row. Menu > View
+// The phone Menu has no Close or × control. Layers and Properties close with the shared × in their heading row, never a text Close. Menu > View
 // holds the 2D / Stitches / 3D switch on a landscape phone, and the canvas has none. On a landscape phone, choosing Menu > Layers or
 // Menu > Properties closes the Menu and opens the sheet. A tap outside each closes it.
 const SIZES=[[390,844],[844,390]];
@@ -12,7 +12,7 @@ const closeLike=/^(close|cerrar|×|✕|x)$/i;
 for(const [width,height] of SIZES) for(const lang of ['en','es']){
  test.describe(()=>{
  test.use({hasTouch:width>height});
- test(`no Close control in Menu, Layers or Properties at ${width}x${height} (${lang})`,async({page})=>{
+ test(`the Menu has no Close control, and Layers and Properties have no text Close at ${width}x${height} (${lang})`,async({page})=>{
   const errors=[];page.on('pageerror',e=>errors.push(e.message));page.on('dialog',d=>d.dismiss());
   await page.setViewportSize({width,height});
   await page.goto(lang==='en'?'/':`/?lang=${lang}`);
@@ -23,8 +23,10 @@ for(const [width,height] of SIZES) for(const lang of ['en','es']){
   await page.locator('#menuLayers').click();
   await expect(page.locator('#phoneMenuList')).toHaveCount(0);
   await expect(page.locator('#layersSheet')).toHaveClass(/sheet-open/);
-  const layerButtons=await page.locator('#layersSheet button:visible').evaluateAll(bs=>bs.map(b=>(b.getAttribute('aria-label')||b.textContent||'').trim()));
-  // The panels have a Close button in their heading row (see phone-sheets.spec.js); the Menu has none.
+  // The panels close with the × control in their heading row (see close-control.spec.js); the Menu has none. Neither header has a
+  // word button that closes it.
+  const layerWords=await page.locator('#layersSheet button:visible').evaluateAll(bs=>bs.map(b=>(b.textContent||'').trim()));
+  expect(layerWords.filter(l=>closeLike.test(l))).toEqual([]);
   await page.waitForTimeout(300);
   await page.locator('#layersSheet').getByRole('button',{name:/^(Close|Cerrar)$/}).click();
   await expect(page.locator('#layersSheet')).not.toHaveClass(/sheet-open/);
@@ -32,6 +34,8 @@ for(const [width,height] of SIZES) for(const lang of ['en','es']){
   await page.locator('#menuProperties').click();
   await expect(page.locator('#phoneMenuList')).toHaveCount(0);
   await expect(page.locator('#inspector')).toHaveClass(/sheet-open/);
+  const propWords=await page.locator('#inspector button:visible').evaluateAll(bs=>bs.map(b=>(b.textContent||'').trim()));
+  expect(propWords.filter(l=>closeLike.test(l))).toEqual([]);
   await page.waitForTimeout(300);
   await page.locator('#inspector').getByRole('button',{name:/^(Close|Cerrar)$/}).click();
   await expect(page.locator('#inspector')).not.toHaveClass(/sheet-open/);

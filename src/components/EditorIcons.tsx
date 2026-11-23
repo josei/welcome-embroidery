@@ -327,6 +327,9 @@ export function EditorIcons() {
         <symbol id={"i-join-bevel"} viewBox={"0 0 24 24"}>
           <path d={"M4 20V9l5-5h11"} />
         </symbol>
+        <symbol id={"i-close"} viewBox={"0 0 24 24"}>
+          <path d={"M6 6l12 12M18 6 6 18"} />
+        </symbol>
         <symbol id={"i-cross"} viewBox={"0 0 24 24"}>
           <rect x={"3.5"} y={"3.5"} width={"17"} height={"17"} rx={"1"} strokeDasharray={"2 2"} />
           <path d={"M7 7l10 10M17 7 7 17"} />

@@ -38,3 +38,16 @@ test('Cancel still closes Export at the tablet size',async({page})=>{
  await expect(page.locator('#exportDialog')).toBeHidden();
  await expect(page.locator('#export')).toBeFocused();
 });
+
+test('Escape closes Export and keeps the selected object selected',async({page})=>{
+ await page.setViewportSize({width:1280,height:800});
+ await page.goto('/?lang=en');
+ await expect(page.locator('.canvas')).toBeVisible();
+ await page.locator('#rect').click();
+ await expect(page.locator('#inspector')).toContainText('Rectangle');
+ await page.locator('#export').click();
+ await expect(page.locator('#exportDialog')).toBeVisible();
+ await page.keyboard.press('Escape');
+ await expect(page.locator('#exportDialog')).toBeHidden();
+ await expect(page.locator('#inspector')).toContainText('Rectangle');
+});

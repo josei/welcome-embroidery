@@ -4,6 +4,7 @@ import {lang, setLanguage, t} from '../i18n.js';
 import {setSettingsOpen, settingsState} from '../settingsState.js';
 import {stitchRowsState} from '../stitchRowsState.js';
 import {agentLinkState, agentLinkActions} from '../agentLinkState.js';
+import {CloseButton} from './CloseButton';
 // The settings dialog, rendered by React. It holds the language and the AI agent link, which the header used to show.
 // It opens and closes through settingsState, the same way the shortcuts dialog does.
 // Phones and tablets close it on a tap outside the card. The card fills the dialog's box, so a click whose target is the
@@ -23,7 +24,7 @@ export function SettingsDialog() {
  return (
   <dialog id="settingsDialog" ref={ref} onClose={() => setSettingsOpen(false)} onClick={closeOnBackdropTap}>
    <form method="dialog">
-    <h2>{t('Settings')}</h2>
+    <div className="dialog-head"><h2>{t('Settings')}</h2><CloseButton type="submit" /></div>
     <div className="settings-body">
      <section className="settings-group" aria-labelledby="settingsLanguage">
       <h3 id="settingsLanguage" className="section-heading">{t('Language')}</h3>
@@ -43,7 +44,6 @@ export function SettingsDialog() {
         Boolean).join(' ') || undefined} onClick={() => agentLinkActions.open()}>{t('Connect an AI agent')}</button>
      </section>
     </div>
-    <div className="dialog-actions"><button>{t('Close')}</button></div>
    </form>
   </dialog>
  );

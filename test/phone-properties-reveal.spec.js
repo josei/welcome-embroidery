@@ -61,7 +61,7 @@ for(const [width,height] of PHONES){
   await openProperties(page);
   await page.locator('#inspector').evaluate(e=>{e.scrollTop=e.scrollHeight;});
   const panel=await rectOf(page,'#inspector');
-  const close=await rectOf(page,'#inspector .sheet-close');
+  const close=await rectOf(page,'#inspector .close-control');
   const scrolled=await page.locator('#inspector').evaluate(e=>e.scrollTop);
   expect(scrolled,'the panel really scrolled').toBeGreaterThan(0);
   expect(close.top).toBeGreaterThanOrEqual(panel.top);

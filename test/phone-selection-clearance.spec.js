@@ -64,7 +64,7 @@ for(const lang of ['en','es']){
   await openProperties(page);
   await page.locator('#letteringHeight').fill('8');
   await page.locator('#letteringHeight').press('Tab');
-  await page.locator('#inspector .sheet-close').tap();
+  await page.locator('#inspector .close-control').tap();
   await expect(page.locator('#inspector')).not.toHaveClass(/sheet-open/);
   await expect(page.locator('.sel-box')).toBeVisible();
   await page.evaluate(()=>new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r))));

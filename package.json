@@ -12,6 +12,7 @@
     "test:server": "npm run build && node scripts/test-server-page.mjs",
     "test:e2e": "playwright test",
     "test:e2e:webkit": "PW_BROWSER=webkit playwright test",
+    "walk": "node scripts/walk.mjs",
     "build": "node scripts/build-static.mjs",
     "serve:watch": "node scripts/serve-watch.mjs",
     "typecheck": "tsc --noEmit",

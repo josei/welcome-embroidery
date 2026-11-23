@@ -32,7 +32,7 @@ for(const lang of ['en','es']){
   expect(Math.abs(box.x+box.width/2-PHONE_LANDSCAPE.width/2),'centred horizontally').toBeLessThanOrEqual(2);
   const view=await page.evaluate(()=>{
    const d=document.getElementById('settingsDialog');
-   const close=d.querySelector('.dialog-actions button').getBoundingClientRect();
+   const close=d.querySelector('[data-close-control]').getBoundingClientRect();
    const title=d.querySelector('h2').getBoundingClientRect();
    return {closeH:close.height,closeBottom:close.bottom,titleTop:title.top,innerH:innerHeight,innerW:innerWidth};
   });
@@ -52,7 +52,7 @@ test('landscape phone: the groups scroll inside the card while the title and Clo
  await body.evaluate(e=>{e.scrollTop=e.scrollHeight;});
  const after=await page.locator('#settingsDialog h2').boundingBox();
  expect(after.y,'title does not scroll away').toBe(before.y);
- await expect(page.locator('#settingsDialog .dialog-actions button')).toBeInViewport();
+ await expect(page.locator('#settingsDialog [data-close-control]')).toBeInViewport();
 });
 
 for(const [name,size] of [['phone portrait',PHONE_PORTRAIT],['tablet portrait',TABLET_PORTRAIT],['phone landscape',PHONE_LANDSCAPE]]){

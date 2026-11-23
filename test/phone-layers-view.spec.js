@@ -55,7 +55,7 @@ for(const [width,height] of PHONES) test(`opening Layers keeps the selection in 
  const before=await viewBox(page);
  await openLayers(page);
  await expectSelectionInView(page);
- await page.locator('#layersSheet .sheet-close').click();
+ await page.locator('#layersSheet .close-control').click();
  await expect(page.locator('#layersSheet')).not.toHaveClass(/sheet-open/);
  await expect.poll(()=>viewBox(page)).toEqual(before);
  expect(errors).toEqual([]);

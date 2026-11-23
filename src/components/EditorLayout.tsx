@@ -33,6 +33,7 @@ import {SewingOrder} from './SewingOrder';
 import {SnapObjectButton} from './SnapObjectButton';
 import {StatusRun} from './StatusRun';
 import {ToastStack} from './ToastStack';
+import {CloseButton} from './CloseButton';
 import {StitchAccordionRows} from './StitchAccordionRows';
 import {StitchBlendRows} from './StitchBlendRows';
 import {StitchBlingRows} from './StitchBlingRows';
@@ -403,7 +404,7 @@ export function EditorLayout() {
       <aside className={[inspectorOpen || tablet ? "panel" : "panel inspector-collapsed", phoneSheet === 'properties' && 'sheet-open'].filter(Boolean).join(' ')} id={"inspector"} aria-label={t('Properties')}>
         <div className={"sheet-head"}>
           <h2 className={"section-heading sheet-title"} tabIndex={-1}>{t('Properties')}</h2>
-          <button type={"button"} className={"sheet-close"} onClick={closePhoneSheet}>{t('Close')}</button>
+          <CloseButton onClick={closePhoneSheet} />
         </div>
         <SelectionHeading />
         <TipCard />

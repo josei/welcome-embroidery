@@ -2,6 +2,7 @@ import {useEffect, useRef, useSyncExternalStore} from 'react';
 import {t} from '../i18n.js';
 import {toastActions, toastState} from '../toastState.js';
 import {useModalDialog} from './useModalDialog';
+import {CloseButton} from './CloseButton';
 
 // The toasts on screen. #toast keeps the text of the messages it shows (the tests and the public capture read it), and
 // each message is its own row: one confirmation is on screen at a time and a new one replaces it; it is role="status" and
@@ -62,7 +63,7 @@ export function ToastStack() {
      >
       <span>{entry.text}</span>
       {entry.action ? <button type={"button"} className={"toast-action"} onClick={() => { toastActions.dismiss(entry.id); entry.action?.run(); }}>{entry.action.label}</button> : null}
-      {error ? <button type={"button"} className={"toast-close"} aria-label={t('Dismiss')} onClick={() => toastActions.dismiss(entry.id)}>{"×"}</button> : null}
+      {error ? <CloseButton onDark label={t('Dismiss')} onClick={() => toastActions.dismiss(entry.id)} /> : null}
      </div>
     );
    })}
@@ -78,7 +79,7 @@ export function MessagesDialog() {
  return (
   <dialog id={"messagesDialog"} ref={ref} aria-labelledby={"messagesTitle"} onClose={() => toastActions.setLogOpen(false)}>
    <form method={"dialog"}>
-    <h2 id={"messagesTitle"}>{t('Messages')}</h2>
+    <div className={"dialog-head"}><h2 id={"messagesTitle"}>{t('Messages')}</h2><CloseButton type={"submit"} /></div>
     {log.length ? (
      <ol id={"messagesList"} className={"messages-list"}>
       {log.map(entry => (
@@ -89,7 +90,6 @@ export function MessagesDialog() {
       ))}
      </ol>
     ) : <p>{t('No messages yet.')}</p>}
-    <button>{t('Close')}</button>
    </form>
   </dialog>
  );

@@ -13,3 +13,6 @@ src-tauri/resources/
 
 /dist
 .serve-watch/
+
+# Walk screenshots (npm run walk)
+walk-screenshots/

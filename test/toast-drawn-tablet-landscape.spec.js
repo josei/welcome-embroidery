@@ -53,7 +53,7 @@ for(const [width,height] of [[768,1024],[667,375]]) for(const lang of ['en','es'
   const toast=await toastClip(page);
   const covered=await page.evaluate(([x,y,w,h])=>{
    const visible=e=>{const r=e.getBoundingClientRect();return r.width>0&&r.height>0&&getComputedStyle(e).visibility!=='hidden';};
-   const sel='.zoombar button,.floating button,.floating input,.floating select,input:not([type=hidden]),select,textarea,#toast .toast-action,#toast .toast-close';
+   const sel='.zoombar button,.floating button,.floating input,.floating select,input:not([type=hidden]),select,textarea,#toast .toast-action,#toast [data-close-control]';
    return [...document.querySelectorAll(sel)].filter(visible).filter(e=>{
     const r=e.getBoundingClientRect();
     return Math.min(x+w,r.right)>Math.max(x,r.left)&&Math.min(y+h,r.bottom)>Math.max(y,r.top);

@@ -19,6 +19,7 @@ import {getFont} from '../fonts.js';
 import {fontsDialogState, setFontsDialogOpen} from '../fontsDialogState.js';
 import {removeUnusedFonts} from '../fontsDialogCommands.js';
 import {SettingsDialog} from './SettingsDialog';
+import {CloseButton} from './CloseButton';
 import {ThreadPopover} from './ThreadPopover';
 // Enter on a select only changes its value. Inside a dialog form, Enter would otherwise submit the form and press the
 // default button (Download), so the export format select would start a download as soon as it was chosen.
@@ -51,9 +52,12 @@ export function EditorOverlays() {
   <>
     <dialog id={"agentDialog"} ref={agentDialog} onClose={() => setAgentDialogOpen(false)}>
       <form method={"dialog"}>
-        <h2>
-          {"Connect an AI agent"}
-        </h2>
+        <div className={"dialog-head"}>
+          <h2>
+            {"Connect an AI agent"}
+          </h2>
+          <CloseButton type={"submit"} />
+        </div>
         <p id={"agentStatus"} role={"status"} aria-live={"polite"}>
           {agent.statusText}
         </p>
@@ -81,9 +85,6 @@ export function EditorOverlays() {
           </code>
           {", for example: “Use the Welcome MCP to draw a leaf badge with BLOOM text on the live document, then export JEF.”"}
         </p>
-        <button>
-          {"Close"}
-        </button>
       </form>
     </dialog>
     {" "}
@@ -106,9 +107,12 @@ export function EditorOverlays() {
     {" "}
     <dialog id={"fontsDialog"} ref={fontsDialog} aria-labelledby={"fontsTitle"} onClose={() => setFontsDialogOpen(false)}>
       <form method={"dialog"}>
-        <h2 id={"fontsTitle"}>
-          {"Organize fonts"}
-        </h2>
+        <div className={"dialog-head"}>
+          <h2 id={"fontsTitle"}>
+            {"Organize fonts"}
+          </h2>
+          <CloseButton type={"submit"} />
+        </div>
         <ul id={"fontsList"}>
           {customFonts.map(f =>
             <li key={"c" +
@@ -128,9 +132,6 @@ export function EditorOverlays() {
         <button type={"button"} id={"removeUnusedFonts"} disabled={!customFontUsage(doc).some(f => !f.uses.length)} onClick={() => removeUnusedFonts()}>
           {"Remove unused fonts"}
         </button>
-        <button>
-          {"Close"}
-        </button>
       </form>
     </dialog>
     <TraceDialog />
@@ -143,9 +144,12 @@ export function EditorOverlays() {
     <ThreadPopover />
     <dialog id={"exportDialog"} ref={exportElement} onClose={() => setExportDialog({open: false})}>
       <form method={"dialog"}>
-        <h2>
-          {t('Export')}
-        </h2>
+        <div className={"dialog-head"}>
+          <h2>
+            {t('Export')}
+          </h2>
+          <CloseButton type={"submit"} />
+        </div>
         <label htmlFor={"machine"}>
           {t("Your machine")}
         </label>

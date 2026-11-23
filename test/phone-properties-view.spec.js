@@ -69,7 +69,7 @@ for(const lang of LANGS)for(const [width,height] of PHONES){
   await openProperties(page);
   await expectSelectionInView(page);
   expect(await page.locator('#zoomPct').textContent(),'zoom is unchanged while Properties is open').toBe(before.pct);
-  await page.locator('#inspector .sheet-close').click();
+  await page.locator('#inspector .close-control').click();
   await expect(page.locator('#inspector')).not.toHaveClass(/sheet-open/);
   await expect.poll(()=>viewBox(page)).toEqual(before.view);
   expect(await page.locator('#zoomPct').textContent()).toBe(before.pct);

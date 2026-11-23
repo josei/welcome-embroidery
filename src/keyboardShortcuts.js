@@ -129,6 +129,8 @@ export function mountKeyboard() {
       return;
     }
     if (e.key === 'Escape') {
+      // Escape pressed inside an open dialog closes that dialog and must not also clear the object beneath it.
+      if (e.target instanceof Element && e.target.closest('dialog[open]')) return;
       if (toolMode.get() !== 'select') canvas.setTool('select');
       else if (editModeNow()) { setEditMode(false); setSelection({selNode: null}); editor.render(); }
       else { setSelection({selected: null}); setSelection({multi: new Set()}); setSelection({selNode: null}); editor.render(); }

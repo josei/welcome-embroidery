@@ -14,6 +14,7 @@ import type {Click} from '../objectListSelection.js';
 import {formatCount} from '../decimalText.js';
 import {useCompactLayout} from '../compactLayout';
 import {Figure} from './Figure';
+import {CloseButton} from './CloseButton';
 // The object list in sewing order, rendered by React. It is a listbox: each row is an option that a click, or Enter or Space,
 // selects (Shift selects a range from the anchor, Ctrl or Cmd adds or removes one row). Hide and Lock are their own buttons beside each row, not inside it. Groups collapse,
 // a double click renames, and rows drag to reorder. Ids and classes match the markup it replaced, because the styles and tests use them.
@@ -112,7 +113,7 @@ export function ObjectListHead() {
    <button type="button" className="inspector-toggle chrome-state" aria-expanded={open} aria-pressed={open} aria-controls="inspector" title={t('Properties')} aria-label={t('Properties')} onClick={toggle}>
     <svg className="icon" aria-hidden="true" focusable="false"><use href="#i-sliders" /></svg>
    </button>
-   <button type="button" className="sheet-close" onClick={closePhoneSheet}>{t('Close')}</button>
+   <CloseButton onClick={closePhoneSheet} />
   </div>
  );
 }
