@@ -189,10 +189,9 @@ export const ES={...ES_ADDITIONS,
   'Pull compensation (mm)':'Compensación de tirón (mm)',
 'MCP endpoint (private link)':'Punto de conexión para agentes (enlace privado)','Copy URL':'Copiar URL','Revoke & make new link':'Revocar y crear un enlace nuevo',
 ['Anyone holding this link can read and edit the design open in this tab, so share it only with your agent. Your design stays in this browser; the server ' +
-'only relays the agent\'s requests while this tab is open. Closing the tab ends the link. In the agent, use']:
+'only relays the agent\'s requests while this tab is open. Closing the tab ends the link. The link works only with an MCP client running on this computer; web-based assistants cannot reach it. In the agent, use']:
   'Cualquiera que tenga este enlace puede leer y editar el diseño abierto en esta pestaña, así que compártelo solo con tu agente. Tu diseño permanece en ' +
-  'este navegador; el servidor solo retransmite las peticiones del agente mientras esta pestaña esté abierta. Al cerrar la pestaña, el enlace termina. En el ' +
-  'agente, usa ',
+  'este navegador; el servidor solo retransmite las peticiones del agente mientras esta pestaña esté abierta. Al cerrar la pestaña, el enlace termina. El enlace funciona solo con un cliente MCP que se ejecute en este equipo; los asistentes web no pueden acceder a él. En el agente, usa ',
 ', for example: “Use the Welcome MCP to draw a leaf badge with BLOOM text on the live document, then export JEF.”':
   ', por ejemplo: «Usa Welcome para dibujar una insignia de hoja con el texto BLOOM en el documento en vivo y luego exporta a JEF.»',
 'Not connected.':'No conectado.','Connected. Waiting for an agent to use the link.':'Conectado. Esperando a que un agente use el enlace.','Agent active.':
