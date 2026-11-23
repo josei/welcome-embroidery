@@ -3,12 +3,12 @@
 // resize/rotate handles (oriented for a single rotated shape), smart snapping, marquee selection and the context menu.
 // Document state stays in app.js; this module talks to it through `api`.
 import {lang, t} from './i18n.js';
-import {geometry,objectBounds,hoopSize} from './engine.js';
+import {objectBounds} from './engine.js';
 import {drawScene} from './canvasScene.js';
 import {wheelZoomFactor,wheelZooms} from './wheelZoom.js';
 import {createCanvasEditing} from './canvasEditing.js';
 import {createCanvasTools} from './canvasTools.js';
-import {railInset, toolbarInset} from './floatingToolbar.js';
+import {toolbarInset} from './floatingToolbar.js';
 import {clampMoveDelta,visibleCanvasRect} from './moveClamp.js';
 import {pressClaimedByHandle} from './handleClaim.js';
 import {clampResizeScale} from './resizeLimit.js';
@@ -16,29 +16,13 @@ import {multiSelectState} from './multiSelectState.js';
 import {interactionNow} from './interactionState.js';
 import {deletingGuideState,handModeState,panningState} from './canvasModeState.js';
 import {formatNumber} from './decimalText.js';
-import {currentFitMargin,isPhoneFitLayout,PHONE_FIT_MARGIN} from './fitMargin.js';
+import {createCanvasFit} from './canvasFit.js';
+import {createContextMenu} from './canvasMenu.js';
+import {el,union,touchPointer,hitObject,bestDelta,snapCandidates,toWorld,toLocal,HANDLES,HANDLE_LABEL} from './canvasGeometry.js';
+import {RULER,drawRulers as paintRulers,overRuler} from './canvasRulers.js';
+import {drawMeasureLine,drawKnifeLine,drawGuideLines,drawSmartLines,drawAngleHandle} from './canvasOverlay.js';
 
-const SVG='http://www.w3.org/2000/svg',PX_PER_MM=96/25.4;
-const el=(/** @type {any} */ tag,attrs={})=>{const n=document.createElementNS(SVG,tag);for(const [k,v] of Object.entries(attrs))n.setAttribute(k,v);return n;};
-const union=(/** @type {any} */ bs)=>[Math.min(...bs.map((/** @type {any} */ b)=>b[0])),Math.min(...bs.map((/** @type {any} */ b)=>b[1])),
-  Math.max(...bs.map((/** @type {any} */ b)=>b[2])),Math.max(...bs.map((/** @type {any} */ b)=>b[3]))];
-function pointInRing(/** @type {any} */ p,/** @type {any} */ ring){let inside=false;
-for(let i=0,j=ring.length-1;i<ring.length;j=i++){const [xi,yi]=ring[i],[xj,yj]=ring[j];
-if((yi>p[1])!==(yj>p[1])&&p[0]<(xj-xi)*(p[1]-yi)/(yj-yi)+xi)inside=!inside;
-}return inside;
-}
-function segDistance(/** @type {any} */ p,/** @type {any} */ a,/** @type {any} */ b){const dx=b[0]-a[0],dy=b[1]-a[1],l2=dx*dx+dy*dy,t=l2?
-  Math.max(0,Math.min(1,((p[0]-a[0])*dx+(p[1]-a[1])*dy)/l2)):0;
-return Math.hypot(p[0]-a[0]-dx*t,p[1]-a[1]-dy*t);
-}
-const RULER=18,RULER_FONT=11;
-// The clear gap kept between a selection and a panel edge, in screen px: a finger's width.
-const REVEAL_CLEAR=44;
-// On a touch screen the handle marks are drawn at 6 px, so small lettering stays readable under them; their 44 px hit areas are unchanged.
-const touchPointer=()=>Boolean(globalThis.matchMedia?.('(pointer: coarse)').matches);
-// On a landscape phone the zoom bar sits along the canvas's bottom edge, 8 px in and 44 px tall. Fit hoop keeps this band clear.
-const LANDSCAPE_BAR_RESERVE=52;
-
+const PX_PER_MM=96/25.4;
 export function createCanvas(/** @type {any} */ api){
   const {svg,container,overlay}=api;
   const vp={cx:0,cy:0,s:PX_PER_MM*1.9};let spaceDown=false,hintOn=false;
@@ -46,8 +30,6 @@ export function createCanvas(/** @type {any} */ api){
   let state=null;
   /** @type {any} */
   let lastClick=null;
-  /** @type {any} */
-  let menu=null;
   /** @type {any[]} */
   let smartLines=[];
   const rulerTop=container.querySelector('#rulerTop'),rulerLeft=container.querySelector('#rulerLeft'),guidesLayer=svg.querySelector('#guides');
@@ -81,66 +63,8 @@ export function createCanvas(/** @type {any} */ api){
   function toScreen(/** @type {any} */ x,/** @type {any} */ y){const {x:ox,y:oy,w,h}=drawArea();return [(x-vp.cx)*vp.s+ox+w/2,(y-vp.cy)*vp.s+oy+h/2];}
   function apply(){const {w,h}=drawArea();svg.setAttribute('viewBox',`${vp.cx-w/(2*vp.s)} ${vp.cy-h/(2*vp.s)} ${w/vp.s} ${h/vp.s}`);
     svg.setAttribute('preserveAspectRatio','none');api.onViewport?.(vp);drawRulers();refresh();}
-  function fitRect(/** @type {any} */ x0,/** @type {any} */ y0,/** @type {any} */ x1,/** @type {any} */ y1,margin=48,inset={top:0,right:0,bottom:0,left:0}){const {w,h}=size(),left=inset.left||0;
-  vp.cx=(x0+x1)/2;
-  vp.cy=(y0+y1)/2;
-  vp.s=Math.max(.4,Math.min(120,Math.min((w-margin*2-RULER-left-inset.right)/Math.max(1,x1-x0),(h-margin*2-RULER-inset.top-inset.bottom)/Math.max(1,y1-y0))));
-  vp.cx-=(RULER+left-inset.right)/2/vp.s;
-  vp.cy-=(RULER+inset.top-inset.bottom)/2/vp.s;
-  apply();
-  }
-  // Whether the hoop's outer frame lies wholly inside the drawing area at the current zoom.
-  // reserve is a band along the bottom of the area that the hoop must also stay clear of (the landscape phone's zoom bar).
-  function hoopInBox(/** @type {any} */ a,reserve=0){const hs=hoopSize(api.doc()),sc=(/** @type {number} */ x,/** @type {number} */ y)=>[(x-vp.cx)*vp.s+a.x+a.w/2,(y-vp.cy)*vp.s+a.y+a.h/2],[x0,y0]=sc(-hs.w/2-4,-hs.h/2-4),[x1,y1]=sc(hs.w/2+4,hs.h/2+4);
-    return x0>=a.x-.5&&y0>=a.y-.5&&x1<=a.x+a.w+.5&&y1<=a.y+a.h-reserve+.5;}
-  function hoopInArea(reserve=0){return hoopInBox(drawArea(),reserve);}
-  // The band the zoom bar takes along the bottom of a landscape phone's canvas. Fit hoop keeps it clear; no other window has one.
-  function zoomBarReserve(){const {w,h}=size();return h<w&&isPhoneFitLayout()?LANDSCAPE_BAR_RESERVE:0;}
-  // The fit covers the hoop's outer frame, which is drawn 4 mm beyond the ring on each side. The margin depends on the
-  // pointer and layout (see fitMargin.js): a touch tablet keeps the full margin so the whole hoop shows.
-  // On a phone in landscape the height is what limits the fit. fitRect shifts the view down by the top ruler's band, which
-  // leaves the hoop 22 px from the top of the canvas and 4 px from the bottom, and the zoom bar would cover that bottom
-  // edge. Here the hoop is centred between the ruler and the zoom bar's band instead; the horizontal centring is left as
-  // fitRect set it.
-  function fitHoop(){const hs=hoopSize(api.doc()),{w,h}=size(),margin=currentFitMargin(Math.min(w,h)),f=4;
-    const x0=-hs.w/2-f,y0=-hs.h/2-f,x1=hs.w/2+f,y1=hs.h/2+f;
-    fitRect(x0,y0,x1,y1,margin,{top:0,right:0,bottom:0,...railInset(container)});
-    // Phone portrait: the ruler takes RULER px on the left, so fitRect centres the hoop on the space beside it, 9 px right of
-    // the canvas's middle. Here the hoop is centred on the canvas, with the same RULER band on the right, so it never reaches
-    // under the ruler. The vertical placement fitRect chose is kept.
-    if(margin===PHONE_FIT_MARGIN&&h>=w){const yc=(y0+y1)/2,sPortrait=Math.min(vp.s,(w-2*RULER)/Math.max(1,x1-x0));
-      vp.s=sPortrait;vp.cx=(x0+x1)/2;vp.cy=yc-RULER/(2*sPortrait);apply();}
-    if(margin!==PHONE_FIT_MARGIN||h>=w)return;
-    // Landscape phone: the top ruler takes RULER px, so the hoop must not rise into it. The scale is reduced to fit between
-    // the ruler and the bottom edge, less the zoom bar's band, and the hoop's centre keeps its place on screen across the change.
-    const reserve=zoomBarReserve(),yc=(y0+y1)/2;
-    const s0=vp.s,xc=(x0+x1)/2,cx0=vp.cx,sFit=Math.min(s0,(h-2*RULER-reserve)/Math.max(1,y1-y0));
-    vp.cx=xc-(xc-cx0)*s0/sFit;vp.s=sFit;vp.cy=yc+reserve/(2*sFit);apply();}
-  function contentBounds(ids=/** @type {any} */(undefined)){const d=api.doc(),hs=hoopSize(d),list=ids?
-    d.objects.filter((/** @type {any} */ o)=>ids.includes(o.id)):d.objects,bs=list.filter((/** @type {any} */ o)=>o.visible!==false).map(objectBounds);
-  return ids&&bs.length?union(bs):union([[-hs.w/2,-hs.h/2,hs.w/2,hs.h/2],...bs]);
-  }
-  function fitAll(){const b=contentBounds();fitRect(b[0],b[1],b[2],b[3],56,railInset(container));}
-  function fitSelection(){const ids=api.ids();if(!ids.length)return fitAll();{const b=contentBounds(ids);fitRect(b[0],b[1],b[2],b[3],90,{...toolbarInset(container),...railInset(container)});}}
-  // Refits the whole design into the part of the canvas no open phone sheet or toolbar covers, so a design that is larger than that part
-  // still shows its full extent above the sheet. Used when Layers opens on a portrait phone.
-  function fitAboveSheet(){const b=contentBounds(),t=toolbarInset(container),r=railInset(container);fitRect(b[0],b[1],b[2],b[3],56,{top:t.top+r.top,right:t.right+r.right,bottom:t.bottom+r.bottom,left:t.left+r.left});}
-  function revealSelection(){const ids=api.ids();if(!ids.length)return;const b=contentBounds(ids),ins=toolbarInset(container),{w,h}=size(),[x0,y0]=toScreen(b[0],b[1]),[x1,y1]=toScreen(b[2],b[3]);if(!(x0<RULER||y0<RULER+ins.top||x1>w-ins.right||y1>h-ins.bottom))return;fitRect(b[0],b[1],b[2],b[3],90,ins);}
-  // Pans, without zooming, so the selection sits in the part of the canvas no sheet or floating bar covers. The selection's
-  // bounds keep REVEAL_CLEAR px from each panel or toolbar edge, a finger's width, so its handles can be reached. The view moves
-  // only as far as needed, so the hoop stays in view as much as the panel allows. A selection larger than the clear area is
-  // centred instead.
-  function panToReveal(){const ids=api.ids();if(!ids.length)return;const b=contentBounds(ids),ins=toolbarInset(container),{w,h}=size(),[x0,y0]=toScreen(b[0],b[1]),[x1,y1]=toScreen(b[2],b[3]);
-    const gap=(/** @type {number} */ v)=>v>0?REVEAL_CLEAR:0;
-    const left=RULER,top=RULER+ins.top+gap(ins.top),right=w-ins.right-gap(ins.right),bottom=h-ins.bottom-gap(ins.bottom);
-    const shift=(/** @type {number} */ lo,/** @type {number} */ hi,/** @type {number} */ a,/** @type {number} */ z)=>{
-      if(z-a>hi-lo)return (a+z)/2-(lo+hi)/2;
-      if(z>hi)return z-hi;
-      if(a<lo)return a-lo;
-      return 0;};
-    const dx=shift(left,right,x0,x1),dy=shift(top,bottom,y0,y1);
-    if(!dx&&!dy)return;
-    vp.cx+=dx/vp.s;vp.cy+=dy/vp.s;apply();}
+  const {fitHoop,fitAll,fitSelection,fitAboveSheet,revealSelection,panToReveal,hoopInBox,hoopInArea,zoomBarReserve}=
+    createCanvasFit({vp,apply,size,container,api,toScreen,drawArea});
   // The zoom and centre of the view, so a sheet can put them back when it closes.
   function viewport(){return {cx:vp.cx,cy:vp.cy,s:vp.s};}
   function setViewport(/** @type {{cx:number,cy:number,s:number}} */ v){vp.cx=v.cx;vp.cy=v.cy;vp.s=v.s;apply();}
@@ -190,43 +114,12 @@ export function createCanvas(/** @type {any} */ api){
   document.addEventListener('keyup',e=>{if(e.code==='Space'){spaceDown=false;panningState.set(false);}});
 
   // ---- rulers and guides ------------------------------------------------------------------------------------
-  function niceStep(){for(const s of [.5,1,2,5,10,20,50,100,200,500])if(s*vp.s>=42)return s;return 1000;}
-  function drawRulers(){
-    if(!rulerTop)return;const {w,h}=size(),dpr=devicePixelRatio||1,step=niceStep(),sub=step>=5?5:step>=2?4:2;
-    for(const [cv,horizontal] of [[rulerTop,true],[rulerLeft,false]]){const len=horizontal?w:h;cv.width=(horizontal?w:RULER)*dpr;
-      cv.height=(horizontal?RULER:h)*dpr;cv.style.width=(horizontal?w:RULER)+'px';cv.style.height=(horizontal?RULER:h)+'px';
-      const g=cv.getContext('2d');g.scale(dpr,dpr);g.fillStyle='#fbfbf9';g.fillRect(0,0,cv.width,cv.height);g.strokeStyle='#c9cec8';g.fillStyle='#66726c';
-        g.lineWidth=1;g.font=`${RULER_FONT}px Inter,system-ui,sans-serif`;
-      const c0=horizontal?vp.cx-w/(2*vp.s):vp.cy-h/(2*vp.s),c1=c0+len/vp.s,first=Math.floor(c0/(step/sub))*(step/sub);
-      for(let v=first;v<=c1+step;v+=step/sub){const pos=(v-c0)*vp.s+.5,major=Math.abs(v/step-Math.round(v/step))<1e-6,tick=major?RULER:RULER*.35;
-        g.beginPath();if(horizontal){g.moveTo(pos,RULER);g.lineTo(pos,RULER-tick);}else{g.moveTo(RULER,pos);g.lineTo(RULER-tick,pos);}g.stroke();
-        if(major){const label=String(Math.round(v*100)/100);if(horizontal)g.fillText(label,pos+2,RULER_FONT);
-          else{g.save();g.translate(RULER_FONT,pos-2);g.rotate(-Math.PI/2);g.fillText(label,0,0);g.restore();}}}
-      g.strokeStyle='#dfe3dd';g.beginPath();
-        if(horizontal){g.moveTo(0,RULER-.5);g.lineTo(w,RULER-.5);}else{g.moveTo(RULER-.5,0);g.lineTo(RULER-.5,h);}g.stroke();}
-  }
+  function drawRulers(){paintRulers(rulerTop,rulerLeft,vp,size());}
   // The measure tool's line and its two points, drawn in mm over the design.
-  function drawMeasure(){const m=api.measure?.();if(!m)return;const k=1/vp.s;
-    if(m.b)overlay.append(el('line',{class:'measure-line',x1:m.a[0],y1:m.a[1],x2:m.b[0],y2:m.b[1]}));
-    for(const p of m.b?[m.a,m.b]:[m.a])overlay.append(el('circle',{class:'measure-point',cx:p[0],cy:p[1],r:3*k}));}
+  function drawMeasure(){drawMeasureLine(overlay,api.measure?.(),vp.s);}
   // The knife tool's points, joined by lines, until Enter cuts the shape along them.
-  function drawKnife(){const k=api.knife?.();
-  if(!k?.length)return;
-  if(k.length>1)overlay.append(el('polyline',{class:'measure-line',fill:'none',points:k.map((/** @type {any} */ p)=>p.join(',')).join(' ')}));
-  for(const p of k)overlay.append(el('circle',{class:'measure-point',cx:p[0],cy:p[1],r:3/vp.s}));
-  }
-  function drawGuides(){
-    if(!guidesLayer)return;guidesLayer.replaceChildren();const d=api.doc(),big=1e5;
-    (d.guides||[]).forEach((/** @type {any} */ g,/** @type {any} */ i)=>
-      {const x=g.axis==='x';const line=el('line',{class:'guide','data-guide':i,x1:x?g.pos:-big,x2:x?g.pos:big,y1:x?-big:g.pos,y2:x?big:g.pos});
-      guidesLayer.append(line);
-      guidesLayer.append(
-      el('line',
-      {class:'guide-hit','data-guide':i,x1:line.getAttribute('x1'),x2:line.getAttribute('x2'),y1:line.getAttribute('y1'),y2:line.getAttribute('y2')}));});
-  }
-  const overRuler=(/** @type {any} */ e)=>{const r=container.getBoundingClientRect();
-  return e.clientX<r.left+RULER||e.clientY<r.top+RULER||e.clientX>r.right||e.clientY>r.bottom;
-  };
+  function drawKnife(){drawKnifeLine(overlay,api.knife?.(),vp.s);}
+  function drawGuides(){drawGuideLines(guidesLayer,api.doc());}
   for(const [cv,axis] of [[rulerTop,'y'],[rulerLeft,'x']])cv?.addEventListener('pointerdown',(/** @type {any} */ e)=>
     {if(e.button!==0||(e.pointerType==='touch'&&touches.size>0))return;e.preventDefault();state={type:'guide',axis,index:null,pid:e.pointerId};
     cv.setPointerCapture?.(e.pointerId);});
@@ -235,16 +128,7 @@ export function createCanvas(/** @type {any} */ api){
     Number(g.dataset.guide),guide=api.doc().guides[i];state={type:'guide',axis:guide.axis,index:i,pid:e.pointerId};svg.setPointerCapture?.(e.pointerId);},true);
 
   // ---- smart snapping ---------------------------------------------------------------------------------------
-  // Candidates: ruler guides, the hoop centre and edges, and the edges/centres of the other objects.
-  function candidates(/** @type {any} */ exclude){const d=api.doc(),hs=hoopSize(d),xs=[0,-hs.w/2,hs.w/2],ys=[0,-hs.h/2,hs.h/2];
-  for(const g of d.guides||[])(g.axis==='x'?xs:ys).push(g.pos);
-    for(const o of d.objects){if(exclude.includes(o.id)||o.visible===false)continue;const b=objectBounds(o);xs.push(b[0],(b[0]+b[2])/2,b[2]);
-      ys.push(b[1],(b[1]+b[3])/2,b[3]);if(o.kind==='path'&&Array.isArray(o.points))for(const q of o.points){xs.push(q[0]);ys.push(q[1]);}}return {xs,ys};}
-  function bestDelta(/** @type {any} */ values,/** @type {any} */ cands,/** @type {any} */ tol){let best=null;
-  for(const v of values)for(const c of cands){const d=c-v;
-  if(Math.abs(d)<=tol&&(best===null||Math.abs(d)<Math.abs(best.d)))best={d,at:c};
-  }return best;
-  }
+  function candidates(/** @type {any} */ exclude){return snapCandidates(api.doc(),exclude);}
   function snapMove(/** @type {any} */ box,/** @type {any} */ exclude,nodes=/** @type {any[]} */([])){const {xs,ys}=candidates(exclude),tol=6/vp.s,bx=
     bestDelta([box[0],(box[0]+box[2])/2,box[2],...nodes.map(q=>q[0])],xs,tol),by=bestDelta([box[1],(box[1]+box[3])/2,box[3],...nodes.map(q=>q[1])],ys,tol);
   smartLines=[...(bx?[{axis:'x',pos:bx.at}]:[]),...(by?[{axis:'y',pos:by.at}]:[])];
@@ -255,11 +139,7 @@ export function createCanvas(/** @type {any} */ api){
   smartLines=[...(bx?[{axis:'x',pos:bx.at}]:[]),...(by?[{axis:'y',pos:by.at}]:[])];
   return [p[0]+(bx?.d??0),p[1]+(by?.d??0)];
   }
-  function drawSmart(){overlay.querySelectorAll('.smart').forEach((/** @type {any} */ n)=>n.remove());
-  const big=1e5;
-  for(const l of smartLines)overlay.append(
-    el('line',{class:'smart',x1:l.axis==='x'?l.pos:-big,x2:l.axis==='x'?l.pos:big,y1:l.axis==='x'?-big:l.pos,y2:l.axis==='x'?big:l.pos}));
-  }
+  function drawSmart(){drawSmartLines(overlay,smartLines);}
 
   // Hovering a selected object shows the guides it already lines up with, so a drag from here will snap to them.
   function hoverHint(/** @type {any} */ e){
@@ -269,15 +149,6 @@ export function createCanvas(/** @type {any} */ api){
   }
 
   // ---- hit testing -------------------------------------------------------------------------------------------
-  function hitObject(/** @type {any} */ o,/** @type {any} */ p,/** @type {any} */ tol){
-    if(o.kind==='stitch_layer'||o.kind==='text'){const b=objectBounds(o);return p[0]>=b[0]-tol&&p[0]<=b[2]+tol&&p[1]>=b[1]-tol&&p[1]<=b[3]+tol;}
-    const lines=geometry(o);if(!lines.length)return false;
-    const interior=o.kind==='rect'||o.kind==='ellipse'||(o.kind==='path'&&o.closed&&o.stitch==='fill');
-    if(interior){let inside=false;for(const ring of lines)if(pointInRing(p,ring))inside=!inside;if(inside)return true;}
-    const reach=Math.max(tol,(o.stitch==='satin'?(o.satinWidth??3)/2:0));
-    for(const line of lines)for(let i=1;i<line.length;i++)if(segDistance(p,line[i-1],line[i])<=reach)return true;
-    return false;
-  }
   function hit(/** @type {any} */ p,tol=6/vp.s){const objs=api.doc().objects;
   for(let i=objs.length-1;i>=0;i--){const o=objs[i];
   if(o.visible===false||o.locked)continue;
@@ -293,18 +164,6 @@ export function createCanvas(/** @type {any} */ api){
       if(o.rotation&&(o.kind==='rect'||o.kind==='ellipse'||o.kind==='stitch_layer'))return {rot:o.rotation*Math.PI/180,c:[o.x+o.w/2,o.y+o.h/2],W:o.w,H:o.h,
       oriented:true,id:o.id};}
     const b=union(objs.map(objectBounds));return {rot:0,c:[(b[0]+b[2])/2,(b[1]+b[3])/2],W:b[2]-b[0],H:b[3]-b[1],oriented:false,b};}
-  const toWorld=(/** @type {any} */ f,/** @type {any} */ lx,/** @type {any} */ ly)=>{const co=Math.cos(f.rot),si=Math.sin(f.rot);
-  return [f.c[0]+lx*co-ly*si,f.c[1]+lx*si+ly*co];
-  };
-  const toLocal=(/** @type {any} */ f,/** @type {any} */ p)=>{const co=Math.cos(f.rot),si=Math.sin(f.rot),dx=p[0]-f.c[0],dy=p[1]-f.c[1];
-  return [dx*co+dy*si,-dx*si+dy*co];
-  };
-  /** @type {Array<[string, number, number]>} */
-  const HANDLES=[['nw',0,0],['n',.5,0],['ne',1,0],['e',1,.5],['se',1,1],['s',.5,1],['sw',0,1],['w',0,.5]];
-  /** @type {Record<string, string>} */
-  const HANDLE_LABEL=
-    {nw:'Resize from north-west corner',n:'Resize from north edge',ne:'Resize from north-east corner',e:'Resize from east edge',se:
-    'Resize from south-east corner',s:'Resize from south edge',sw:'Resize from south-west corner',w:'Resize from west edge',rot:'Rotate selection'};
   /** @type {any} */
   let keyFocus=null;
   // The fill angle handle: on a single fill, a point beyond the object's corners on the line its rows run along (the angle is in world degrees).
@@ -316,18 +175,7 @@ export function createCanvas(/** @type {any} */ api){
     if(o.kind==='path'&&!o.closed)return null;
     return {id:o.id,c:f.c,deg:Number(o.angle??api.doc().settings.angle??0),dist:Math.hypot(f.W,f.H)/2};
   }
-  // Draws the angle handle and its line at an angle (degrees) from the object's centre.
-  function drawAngle(/** @type {any} */ spot,/** @type {any} */ deg,label=/** @type {string|null} */(null)){
-    const k=1/vp.s,rad=deg*Math.PI/180,r=spot.dist+18*k,hp=[spot.c[0]+r*Math.cos(rad),spot.c[1]+r*Math.sin(rad)];
-    overlay.append(el('line',{class:'sel-stem sel-angle-line',x1:spot.c[0],y1:spot.c[1],x2:hp[0],y2:hp[1]}));
-    overlay.append(el('circle',{class:'sel-hit','data-hit':'angle',cx:hp[0],cy:hp[1],r:22*k}));
-    overlay.append(el('circle',{
-      class:'sel-angle','data-handle':'angle',tabindex:0,role:'button',
-      'aria-label':t('Fill angle {deg}°. Drag or use the arrow keys to turn the rows.',{deg:formatNumber(deg, lang, 0)}),
-      cx:hp[0],cy:hp[1],r:4*k,
-    }));
-    if(label){const t=el('text',{class:'sel-note',x:hp[0],y:hp[1]-9*k,'text-anchor':'middle','font-size':11*k});t.textContent=label;overlay.append(t);}
-  }
+  function drawAngle(/** @type {any} */ spot,/** @type {any} */ deg,label=/** @type {string|null} */(null)){drawAngleHandle(overlay,spot,deg,label,vp.s);}
   // The rotate knob sits 22 px above the frame. When that lands under the save strip at the top of the screen, the knob goes
   // below the frame instead, so it stays reachable. Returns true when the knob should be drawn below.
   function knobUnderBar(/** @type {any} */ f,/** @type {number} */ k){
@@ -523,7 +371,7 @@ export function createCanvas(/** @type {any} */ api){
     if(state.type==='pan'){vp.cx=state.cx-(e.clientX-state.x)/vp.s;vp.cy=state.cy-(e.clientY-state.y)/vp.s;apply();return;}
     if(e.pointerId!==state.pid)return;
     if(state.type==='guide'){const q=coord(e);
-    const out=overRuler(e),pos=state.axis==='x'?q[0]:q[1];
+    const out=overRuler(e,container),pos=state.axis==='x'?q[0]:q[1];
     overlay.querySelectorAll('.guide-preview').forEach((/** @type {any} */ n)=>n.remove());
     if(!out){const big=1e5,x=state.axis==='x';
     overlay.append(el('line',{class:'guide guide-preview',x1:x?pos:-big,x2:x?pos:big,y1:x?-big:pos,y2:x?big:pos}));
@@ -618,31 +466,12 @@ export function createCanvas(/** @type {any} */ api){
   },true);
 
   // ---- context menu ------------------------------------------------------------------------------------------
-  function closeMenu(){menu?.remove();menu=null;}
-  document.addEventListener('pointerdown',e=>{if(menu&&!menu.contains(e.target))closeMenu();},true);
+  const contextMenu=createContextMenu();
+  const closeMenu=contextMenu.close;
+  document.addEventListener('pointerdown',e=>contextMenu.closeIfOutside(e.target),true);
   document.addEventListener('keydown',e=>{if(e.key==='Escape')closeMenu();});
   function openObjectMenu(/** @type {number} */ x,/** @type {number} */ y,/** @type {any} */ o,/** @type {any} */ p){
-    const items=api.menuItems(o,p);if(!items.length)return;closeMenu();
-    menu=document.createElement('div');menu.id='ctxMenu';menu.setAttribute('role','menu');
-    for(const it of items){if(it==='-'){menu.append(document.createElement('hr'));
-    continue;
-    }const b=document.createElement('button');
-    b.type='button';
-    b.setAttribute('role','menuitem');
-    b.disabled=Boolean(it.disabled);
-    b.innerHTML=`<span></span><kbd></kbd>`;
-    /** @type {HTMLElement} */(b.firstChild).textContent=t(it.label);
-    /** @type {HTMLElement} */(b.lastChild).textContent=it.key||'';
-    b.onclick=()=>{closeMenu();
-    it.run();
-    };
-    menu.append(b);
-    }
-    document.body.append(menu);
-    const r=menu.getBoundingClientRect();
-    menu.style.left=Math.min(x,innerWidth-r.width-8)+'px';
-    menu.style.top=Math.min(y,innerHeight-r.height-8)+'px';
-    /** @type {HTMLElement|null} */(menu.querySelector('button:not(:disabled)'))?.focus();
+    contextMenu.open(api.menuItems(o,p),x,y);
   }
   svg.addEventListener('contextmenu',(/** @type {any} */ e)=>{
     if(api.tool()!=='select')return;e.preventDefault();const p=coord(e),o=hit(p);if(o&&!api.ids().includes(o.id))api.select([...tools.withGroup(o.id)],o.id);
