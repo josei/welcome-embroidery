@@ -146,7 +146,7 @@ const T={
 "n4": "Nada de esto se ha bordado todavía en una máquina real."
 }
 };
-const META={"en": {"title": "Welcome Embroidery: design in your browser", "desc": "Draw, letter and digitize embroidery in the browser. Preview every stitch and export JEF or VP3 files. Free, open source, no account."}, "es": {"title": "Welcome Embroidery: diseña bordados en tu navegador", "desc": "Dibuja, compón letras y digitaliza bordados en el navegador. Previsualiza cada puntada y exporta archivos JEF o VP3. Gratis, código abierto, sin cuenta."}};
+const META={"en": {"title": "Welcome Embroidery: design in your browser", "desc": "Draw, letter and digitize embroidery in the browser. Preview every stitch and export PES, DST, JEF and VP3 files, and more machine formats. Free, open source, no account."}, "es": {"title": "Welcome Embroidery: diseña bordados en tu navegador", "desc": "Dibuja, compón letras y digitaliza bordados en el navegador. Previsualiza cada puntada y exporta archivos PES, DST, JEF y VP3, y más formatos para máquina. Gratis, código abierto, sin cuenta."}};
 const ATTRS=['alt','aria-label'];
 function detect(){
  try{const s=localStorage.getItem('welcome.lang');if(s==='es'||s==='en')return s;}catch{}
