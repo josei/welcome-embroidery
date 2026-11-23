@@ -58,6 +58,9 @@ export function EditorOverlays() {
           </h2>
           <CloseButton type={"submit"} />
         </div>
+        <p className={"agent-help"}>
+          {"Before you link an agent: the design you share goes through Welcome's server to an outside AI service, the one your agent uses. Files the agent exports are kept on the server for 7 days."}
+        </p>
         <p id={"agentStatus"} role={"status"} aria-live={"polite"}>
           {agent.statusText}
         </p>
@@ -79,7 +82,7 @@ export function EditorOverlays() {
           </button>
         </div>
         <p className={"agent-help"}>
-          {"Anyone holding this link can read and edit the design open in this tab, so share it only with your agent. Your design stays in this browser; the server only relays the agent's requests while this tab is open. Closing the tab ends the link. The link works only with an MCP client running on this computer; web-based assistants cannot reach it. In the agent, use "}
+          {"Anyone holding this link can read and edit the design open in this tab, so share it only with your agent. The server only relays the agent's requests while this tab is open. Closing the tab ends the link. The link works only with an MCP client running on this computer; web-based assistants cannot reach it. In the agent, use "}
           <code>
             {"documentId: \"live\""}
           </code>
