@@ -100,8 +100,8 @@ export const ES={...ES_ADDITIONS,
   'Redwork (ida y vuelta)','Raised satin (thick underlay)':'Satén elevado (base gruesa)','Continue digitizing':'Seguir digitalizando',
   'Continue digitizing this path':'Seguir digitalizando este trazado','Click to add points. Click the first point to close the path, or press Enter to finish.':
   'Haz clic para añadir puntos. Haz clic en el primer punto para cerrar el trazado, o pulsa Intro para terminar.','Select a path first.':
-  'Selecciona primero un trazado.','Add node at midpoint of selected segment (or double-click a path)':
-  'Añadir nodo en el punto medio del segmento seleccionado (o doble clic en un trazado)',
+  'Selecciona primero un trazado.','Add node at the midpoint of the segment after the selected node':
+  'Añadir nodo en el punto medio del segmento tras el nodo seleccionado',
 'Delete selected node (Delete key)':'Eliminar el nodo seleccionado (tecla Supr)','Smooth node (Bézier handles)':'Nodo suave (tiradores Bézier)',
   'Corner node (remove handles)':'Nodo en esquina (quitar tiradores)',
 'Restart stitch simulation':'Reiniciar la simulación de puntadas','Restart simulation':'Reiniciar simulación','Play stitch simulation':

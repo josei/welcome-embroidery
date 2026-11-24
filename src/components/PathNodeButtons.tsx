@@ -8,9 +8,9 @@ export function PathNodeButtons() {
   <>
    <button
     className="icon-button chrome-state"
-    aria-label="Add node at midpoint of selected segment (or double-click a path)"
-    title="Add node at midpoint of selected segment (or double-click a path)"
-    data-tooltip="Add node at midpoint of selected segment (or double-click a path)"
+    aria-label="Add node at the midpoint of the segment after the selected node"
+    title="Add node at the midpoint of the segment after the selected node"
+    data-tooltip="Add node at the midpoint of the segment after the selected node"
     id="nodeAdd"
     hidden={disabled.add}
     onClick={() => nodeActions.add()}

@@ -8,6 +8,7 @@ import {documentNow} from './documentState.js';
 import {selState,setSelection} from './selectionState.js';
 import {interactionNow,setInteraction} from './interactionState.js';
 import {nodeButtonsState,nodeActions} from './nodeButtonsState.js';
+import {editModeNow} from './editModeState.js';
 import {snapObjState} from './snapObjState.js';
 
 const NS='http://www.w3.org/2000/svg';
@@ -207,10 +208,11 @@ export function createCanvasEditing(api){
   }
 
   // The node buttons (PathNodeButtons.tsx) call these: each one edits the selected path, as it did from app.js.
-  nodeActions.add=()=>{const o=selectedObject();if(o?.kind!=='path')return;
+  // Acts only inside the node editor: outside it the control is hidden, and a shape must not change from a stray call.
+  nodeActions.add=()=>{const o=selectedObject();if(o?.kind!=='path'||!editModeNow())return;
     const i=selState().selNode??0,a=o.points[i],b=o.points[(i+1)%o.points.length];
     if(!b||(!o.closed&&i>=o.points.length-1)){api.toast(t('Select a node that has a following segment, or double-click the path.'));return;}
-    api.commit([{op:'insert_path_point',id:o.id,index:i+1,x:(a[0]+b[0])/2,y:(a[1]+b[1])/2}],()=>{setSelection({selNode: i+1});});};
+    api.commit([{op:'insert_path_point',id:o.id,index:i+1,x:(a[0]+b[0])/2,y:(a[1]+b[1])/2}],()=>{setSelection({selNode: i+1});},t('Add node'));};
   nodeActions.del=deleteNode;
   nodeActions.smooth=()=>{const o=selectedObject(),i=selState().selNode;
     if(o?.kind==='path'&&i!==null)api.commit([{op:'set_path_node_type',id:o.id,index:i,type:'smooth'}]);};
