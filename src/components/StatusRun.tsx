@@ -5,13 +5,16 @@ import {viewMode} from '../viewMode.js';
 import {toastActions} from '../toastState.js';
 import {useCompactLayout} from '../compactLayout';
 import {usePhoneWidth} from '../phoneSheetState.js';
-import {Figure} from './Figure';
 import {MeasureReadout} from './MeasureReadout';
 
 // The status run below the canvas. Its text and the issues button come from statusState. On a phone or tablet the issues
 // button shows its count with the warning triangle when the design has issues, or a lightbulb when it has only sewing
-// tips; the full text stays as its accessible name and tooltip. The count keeps its needle in every state, and over the hoop in Stitches view it stays empty, because the
-// playback bar already names the stitch count there.
+// tips; the full text stays as its accessible name and tooltip. On a phone or tablet the design count is a glyph with its
+// number, and over the hoop in Stitches view it stays empty, because the playback bar already names the stitch count there.
+// The glyph the phone or tablet count shows for each design state. Each state has its own shape, so it reads without hover,
+// and the error mark is not the triangle the issues button uses, so the two controls on one screen never share a glyph.
+const COUNT_GLYPHS = {ready: '#i-run', working: '#i-working', idle: '#i-idle', error: '#i-error'} as const;
+
 export function StatusRun() {
  const s = useSyncExternalStore(statusState.subscribe, statusState.get);
  // On a phone or tablet the design count is an icon and its number, in the warning colour when the design has an error; the
@@ -30,7 +33,10 @@ export function StatusRun() {
     <span id="count" className="error" />
    ) : figure ? (
     <span id="count" className={s.countError ? 'count-figure error' : 'count-figure'} onClick={() => statusActions.compile()}>
-     <Figure icon="i-needle" value={figure.value} label={figure.text} />
+     <span className="figure" role="img" aria-label={figure.text} title={figure.text}>
+      <svg className="icon" aria-hidden="true" focusable="false"><use href={COUNT_GLYPHS[figure.glyph]} /></svg>
+      {figure.value ? <span aria-hidden="true">{figure.value}</span> : null}
+     </span>
     </span>
    ) : (
     <span id="count" className={s.countError ? 'error' : undefined} onClick={() => statusActions.compile()}>{s.count}</span>

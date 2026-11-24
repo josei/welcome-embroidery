@@ -255,6 +255,15 @@ export function EditorIcons() {
           <rect x={"4"} y={"5"} width={"16"} height={"14"} rx={"1"} />
           <path d={"M4 9l4-4M4 14l9-9M4 19l14-14M9 19l11-11M14 19l6-6"} />
         </symbol>
+        <symbol id={"i-working"} viewBox={"0 0 24 24"}>
+          <path d={"M6 12h.01M12 12h.01M18 12h.01"} strokeWidth={"3"} strokeLinecap={"round"} />
+        </symbol>
+        <symbol id={"i-idle"} viewBox={"0 0 24 24"}>
+          <path d={"M7 12h10"} strokeWidth={"2.4"} strokeLinecap={"round"} />
+        </symbol>
+        <symbol id={"i-error"} viewBox={"0 0 24 24"}>
+          <path d={"M12 3.5a8.5 8.5 0 1 0 0 17 8.5 8.5 0 0 0 0-17zM9 9l6 6M15 9l-6 6"} />
+        </symbol>
         <symbol id={"i-run"} viewBox={"0 0 24 24"}>
           <path d={"M3 12h3M10 12h4M18 12h3"} strokeWidth={"2.4"} />
         </symbol>

@@ -32,13 +32,13 @@ async function assertFits(locator,maxHeight=34){
 }
 
 for(const lang of ['es','en']) for(const [w,h] of [[390,844],[844,390],[768,1024]]){
- test(`${w}x${h} ${lang}: an object past the hoop shows the count with a needle and the chip with a warning triangle`,async({page})=>{
+ test(`${w}x${h} ${lang}: an object past the hoop shows the count with the error mark and the chip with a warning triangle`,async({page})=>{
   page.on('dialog',d=>d.accept());
   await page.setViewportSize({width:w,height:h});
   await openDesign(page, lang, true);
   const count=page.locator('#count');
   await expect(count).toHaveClass(/count-figure error/);
-  await expect(count.locator('svg use')).toHaveAttribute('href','#i-needle');
+  await expect(count.locator('svg use')).toHaveAttribute('href','#i-error');
   const label=await count.locator('.figure').getAttribute('aria-label');
   expect(label).toMatch(lang==='es'?/sobrepasa/:/past the hoop/);
   const chip=page.locator('#issuesBtn');

@@ -32,3 +32,16 @@ export function issueObjectIds({issues = [], tips = []}) {
 export function issueCount(lists) {
   return issueObjectIds(lists).length;
 }
+
+/**
+ * Which glyph the phone or tablet count shows: `ready` when the design compiled with nothing outside the hoop, `working`
+ * while a compile is pending, `idle` when there is nothing to sew yet, and `error` when the compile failed or an object is
+ * past the hoop.
+ * @param {{plan: {errors?: unknown[]} | null | undefined, compileError: string | null | undefined, hasObjects: boolean}} input
+ * @returns {'ready' | 'working' | 'idle' | 'error'}
+ */
+export function designCountGlyph({plan, compileError, hasObjects}) {
+  if (compileError) return 'error';
+  if (!plan) return hasObjects ? 'working' : 'idle';
+  return plan.errors?.length ? 'error' : 'ready';
+}

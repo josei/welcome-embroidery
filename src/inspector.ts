@@ -9,7 +9,7 @@ import {setTransformFields, transformActions} from './transformState.js';
 import {setLetteringFields} from './letteringFieldsState.js';
 import {pivotActions, pivotState} from './pivotState.js';
 import {setStatus} from './statusState.js';
-import {designCountState, issueCount} from './statusCount.js';
+import {designCountGlyph, designCountState, issueCount} from './statusCount.js';
 import {syncTextInspector} from './letteringFonts.js';
 import {sewTime} from './appHelpers.js';
 import {t, lang} from './i18n.js';
@@ -141,7 +141,8 @@ export function syncInspector({plan, compileError, tips}: {plan: PlanInfo | null
         ? designView ? `${countLabel(plan, formatCount(plan.count, lang))} · ${plan.errors[0]}` : plan.errors[0]
         : designView ? `${countLabel(plan, formatCount(plan.count, lang))} · ${t('Ready to sew')}` : null;
   const countState = designCountState({plan, compileError});
-  if (countText !== null) setStatus({count: countText, countFigure: countState.figure && plan ? {text: countText, value: formatCount(plan.count, lang)} : undefined});
+  const glyph = designCountGlyph({plan, compileError, hasObjects: documentNow().doc.objects.length > 0});
+  if (countText !== null) setStatus({count: countText, countFigure: {text: countText, value: plan ? formatCount(plan.count, lang) : '', glyph}});
   setStatus({countError: countState.error});
   const errs = plan?.issues || [];
   setStatus({

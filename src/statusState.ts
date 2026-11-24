@@ -2,12 +2,18 @@ import {createStore} from './store.js';
 import {formatNumber} from './decimalText.js';
 import {lang} from './i18n.js';
 
+/** The status run's design count glyph: ready to sew, compiling, nothing to sew yet, or an error. */
+export type CountGlyph = 'ready' | 'working' | 'idle' | 'error';
+
 /** The status run below the canvas: cursor position, design count, issues button, and playback text. app.js changes it. */
 export interface StatusRun {
   cursor: string;
   count: string;
-  /** The count as an icon and its number, set with the same text as `count`; the status run shows it on phones and tablets. */
-  countFigure?: {text: string; value: string};
+  /**
+   * The count as a glyph, with its number when there is a plan, set with the same text as `count`. Phones and tablets show
+   * this in place of the sentence; the sentence stays as its accessible name and tooltip.
+   */
+  countFigure?: {text: string; value: string; glyph: CountGlyph};
   countError: boolean;
   issuesHidden: boolean;
   issuesText: string;
