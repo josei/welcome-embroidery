@@ -264,7 +264,8 @@ label[hidden],button[hidden],.sel-hint[hidden]{display:none!important}
 .floating .tb-start{position:relative}
 .floating .tb-start::before{content:'';position:absolute;left:-2px;top:5px;bottom:5px;width:1px;background:#e3e6e1}
 .floating #grid{grid-column:span 2;width:100%;height:30px;margin:0;padding:0 12px 0 2px;box-sizing:border-box;appearance:none;-webkit-appearance:none;text-align:center;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='5' viewBox='0 0 8 5'%3E%3Cpath d='M0 0h8L4 5z' fill='%2353635b'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 6px center}
-@media (min-width:601px) and (max-width:1100px),(max-width:600px) and (orientation:landscape){.canvas .floating{grid-template-columns:repeat(14,26px);gap:6px 3px}.canvas .floating .icon-button{width:26px;min-width:26px;height:26px}.canvas .floating #grid{font-size:var(--fs-caption);height:26px}}
+@media (min-width:601px) and (max-width:1100px),(max-width:600px) and (orientation:landscape){.canvas .floating{grid-template-columns:repeat(14,26px);gap:6px 3px}.canvas .floating .icon-button{min-width:26px;height:26px}.canvas .floating #grid{font-size:var(--fs-caption);height:26px}}
+@media (min-width:1025px) and (max-width:1100px){.canvas .floating .icon-button{width:26px}}
 .sew-tips{margin:0 0 12px;padding:8px 10px;border:1px solid #ecd9a1;border-radius:8px;background:#fff8e1;color:#6b5314;font-size:var(--fs-body);line-height:1.45}.sew-tips[hidden]{display:none}.sew-tips b{display:block;font-size:var(--fs-caption);letter-spacing:.07em;text-transform:uppercase;margin-bottom:3px}.sew-tips p{margin:0 0 4px}
 
 /* Phones and small tablets (900px and narrower): the canvas leads and the tool and inspector panels stack below it; the page scrolls instead of the panes.
@@ -301,7 +302,7 @@ body{height:auto;min-height:0;overflow-x:hidden;overflow-y:auto}
 .canvas{height:62vh;height:62dvh;min-height:340px}
 .canvas .floating{left:8px;right:8px;top:28px;width:auto;max-width:none;transform:none;justify-content:start;overflow-x:auto;scrollbar-width:none;grid-template-columns:repeat(14,30px);gap:6px 4px;padding:6px}
 @media (min-width:601px) and (max-width:1100px){.canvas .floating{display:flex;flex-wrap:wrap;justify-content:center;align-content:center;overflow-x:visible}.canvas .floating #grid{width:64px;grid-column:auto}}
-.canvas .floating .icon-button{width:30px;min-width:30px;height:30px}
+.canvas .floating .icon-button{min-width:30px;height:30px}
 .zoombar{left:8px;bottom:8px}
 .layout main>footer{height:auto;min-height:56px;flex-wrap:wrap;padding:8px 12px;gap:8px 10px}
 #cursorPosition{display:none}
@@ -670,7 +671,7 @@ input[type=checkbox]{accent-color:var(--teal)}
 .canvas .zoombar .icon-button,.canvas .zoombar .zoom-pct,.canvas .zoombar .zoom-fit,.canvas .zoombar .zoom-text{min-width:44px;width:auto;height:44px;min-height:44px}.canvas .zoombar .zoom-pct,.canvas .zoombar .zoom-fit,.canvas .zoombar .zoom-text{padding:0 6px}
 @media (max-width:600px) and (orientation:landscape){
 .canvas .floating{grid-template-columns:repeat(14,44px);gap:6px 4px}
-.canvas .floating .icon-button{width:44px;min-width:44px;height:44px}
+.canvas .floating .icon-button{min-width:44px;height:44px}
 .canvas .floating #grid{grid-column:span 2;width:100%;height:44px}
 .canvas .floating .grid-chip{width:44px;min-width:44px;height:44px;min-height:44px;grid-column:span 2}
 }
@@ -736,7 +737,7 @@ body{height:100vh;height:100dvh;min-height:0;overflow:hidden}
    switch, and a preset drawn under it takes the switch's taps. The presets drop below the switch. */
 #previewView{top:68px}
 .canvas .floating{left:72px;right:auto;display:flex;flex-wrap:wrap;gap:4px;max-width:calc(100% - 96px);grid-template-columns:none}
-.canvas .floating .icon-button,.canvas .floating button{width:44px;min-width:44px;height:44px;min-height:44px}
+.canvas .floating .icon-button,.canvas .floating button{min-width:44px;height:44px;min-height:44px}
 .top #name{min-height:44px;height:44px;width:100%;min-width:0}
 .top .export-split{height:44px}.top #export{height:44px;min-height:44px}
 .top .edit-tools{gap:0}
@@ -829,7 +830,7 @@ body{height:100vh;height:100dvh;min-height:0;overflow:hidden;overscroll-behavior
 .layout main>.floating[hidden]{display:none}
 /* Rows at phone portrait: canvas, selection bar, playback, dock, status line. Each is placed by row, so a hidden bar or playback
    leaves an empty row of no height instead of moving the dock and status line up into its place. */
-.layout main>.floating .icon-button{width:44px;min-width:44px;height:44px;flex:none}
+.layout main>.floating .icon-button{min-width:44px;height:44px;flex:none}
 .layout main>.floating>#snap,.layout main>.floating>#snapObj,.layout main>.floating>#gridCycle,.layout main>.floating>#grid{display:none}
 /* The playback bar takes two rows at phone portrait. Reset and play, and the time and stitch readout beside them, fill the
    first; the timeline spans the whole width under them, so the track is as wide as the bar instead of the 160 px that was
@@ -929,7 +930,7 @@ body{height:100dvh;min-height:0;overflow:hidden}
 .canvas .tool-rail .rail-label{display:none}
 .canvas .tool-rail .icon-button{width:44px;min-width:44px;height:44px;min-height:44px;flex:none}
 .canvas .floating{position:absolute;top:6px;left:8px;right:auto;bottom:auto;z-index:5;display:flex;flex-direction:row;flex-wrap:nowrap;align-items:center;justify-content:flex-start;align-content:center;gap:4px;width:auto;max-width:calc(100% - 120px);height:44px;max-height:none;margin:0;padding:0 6px;transform:none;overflow-x:auto;overflow-y:hidden;background:#fff;border:1px solid var(--field-line);border-radius:10px;grid-template-columns:none;scrollbar-width:none}
-.canvas .floating .icon-button{width:44px;min-width:44px;height:44px;min-height:44px;flex:none}
+.canvas .floating .icon-button{min-width:44px;height:44px;min-height:44px;flex:none}
 .canvas .floating #grid,.canvas .floating .grid-chip{grid-column:auto;width:auto;height:44px;min-height:44px;min-width:44px;flex:none}
 .canvas .floating .tb-start::before{display:none}
 .canvas .zoombar{position:absolute;left:auto;right:8px;top:auto;bottom:8px;z-index:5;width:auto;height:44px;margin:0;padding:0 4px;justify-content:center;border:1px solid var(--field-line);border-radius:10px;box-shadow:none;background:#fff}
@@ -1013,7 +1014,7 @@ body{height:100dvh;min-height:0;overflow:hidden}
 @media (max-width:1024px){.floating .bar-edit{display:inline-flex;align-items:center;justify-content:center}.floating .bar-direct{display:none}.top .edit-tools #duplicate,.top .edit-tools #remove{display:none}}
 /* On tablets the toggle carries its word beside the glyph, since a plus in a square alone does not say it adds to the selection. */
 .floating .bar-word{display:none}
-@media (max-width:1024px){.floating #selectToggle{width:auto;min-width:30px;padding:0 7px 0 5px;display:inline-flex;align-items:center;gap:3px}.floating #selectToggle .bar-word{display:inline;font-size:var(--fs-caption);line-height:1;white-space:nowrap;color:#4d5a54}.floating #selectToggle[aria-pressed=true] .bar-word{color:var(--teal-deep)}}
+@media (max-width:1024px){.floating .icon-button{width:auto}.floating .bar-word{display:block;padding:0 6px;font-size:var(--fs-caption);line-height:1;white-space:nowrap;color:#4d5a54}.floating .icon-button[aria-pressed=true] .bar-word{color:var(--teal-deep)}}
 .arrange-sheet{position:fixed;z-index:20;width:min(256px,calc(100vw - 16px));max-height:calc(100dvh - 80px);overflow-y:auto;padding:8px;background:#fff;border:1px solid var(--field-line);border-radius:10px;box-shadow:0 6px 22px #1d292526;display:flex;flex-direction:column;gap:8px}
 .arrange-group{display:flex;flex-direction:column;gap:4px}
 .arrange-title{margin:0;padding:2px 4px;font-size:var(--fs-caption);font-weight:var(--fw-emphasis);color:#66726c;text-transform:uppercase;letter-spacing:.04em}
@@ -1174,7 +1175,7 @@ body{height:100dvh;min-height:0;overflow:hidden}
 .layout>#layersSheet #objects{flex:1 1 auto;min-height:0;overflow-y:auto;overscroll-behavior:contain;margin:0}
 }
 /* The bar opens with its first button, so a divider above or beside that button would be a stray line. */
-@media (min-width:601px) and (max-width:1024px){.canvas .floating>:first-child.tb-start::before{display:none}}
+@media (max-width:1024px){.canvas .floating>:first-child.tb-start::before{display:none}}
 
 /* A touch screen has no hover, but the browser keeps a tapped control in its hover state until the next tap. Its grey
    border and fill made the tapped Shape tile look selected next to the active tool, so under touch the hover state is not
@@ -1262,7 +1263,7 @@ html[lang="es"] .layout main>.tool-rail .rail-label{font-size:10px;letter-spacin
 .layout .hoop-edit select,.layout .hoop-edit input:not([type=checkbox]),.layout .hoop-edit button,#hoopRotate{height:44px;min-height:44px;min-width:44px}
 .canvas .tool-rail .icon-button,.layout main>.tool-rail .icon-button{width:44px;min-width:44px;height:44px;min-height:44px}
 .canvas .canvas-views .segmented button{min-height:44px}
-.canvas .floating .icon-button,.canvas .floating button{width:44px;min-width:44px;height:44px;min-height:44px}
+.canvas .floating .icon-button,.canvas .floating button{min-width:44px;height:44px;min-height:44px}
 .top a.logo{height:44px;min-height:44px}
 .top #fileMenu,.top #editMenu,.top #arrangeMenu,.top #viewMenu,.canvas .canvas-views .segmented button{min-width:44px}
 .layout main>footer .messages-btn,.layout main:not(.design-view)>footer>#messagesBtn{height:44px;min-height:44px;min-width:44px}
@@ -1377,7 +1378,8 @@ html[lang="es"] .layout main>.tool-rail .rail-label{font-size:10px;letter-spacin
 /* The portrait phone selection bar is the same floating pill as the landscape phone and tablet bar: a rounded, bordered, shadowed
    pill centred under the canvas, not a full-width strip with its icons pushed left. */
 @media (max-width:600px) and (orientation:portrait){
-.layout main>.floating.phone-selection{width:max-content;height:44px;margin:4px auto;padding:0 6px;border:1px solid var(--field-line);border-radius:10px;box-shadow:0 4px 18px #1d292518;justify-content:center;overflow:hidden}
+.layout main>.floating.phone-selection{position:relative;isolation:isolate;width:max-content;height:52px;margin:0 auto;padding:4px 6px;border:0;justify-content:center}
+.layout main>.floating.phone-selection::before{content:'';position:absolute;z-index:-1;top:4px;bottom:4px;left:0;right:0;background:#fff;border:1px solid var(--field-line);border-radius:10px;box-shadow:0 4px 18px #1d292518}
 }
 
 /* On phones and tablets the Export button in the top bar is an icon, the desktop's export glyph, in a 44 px square.

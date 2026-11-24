@@ -299,18 +299,21 @@ export function EditorLayout() {
                  <svg className={"icon"}>
                    <use href={"#i-copy"} />
                  </svg>
+                 <span className={"bar-word"}>{t('Duplicate')}</span>
                </ActionButton>
                <ActionButton flag="remove" className={"icon-button chrome-state"} id={"barDelete"} aria-label={deleteLabel} title={deleteLabel}
                  data-tooltip={deleteLabel} onClick={() => toolbarActions.remove()}>
                  <svg className={"icon"}>
                    <use href={"#i-delete"} />
                  </svg>
+                 <span className={"bar-word"}>{t('Delete')}</span>
                </ActionButton>
                <button className={"icon-button chrome-state"} id={"barProperties"} aria-label={propertiesLabel} title={propertiesLabel}
                  data-tooltip={propertiesLabel} onClick={() => togglePhoneSheet('properties')}>
                  <svg className={"icon"}>
                    <use href={"#i-sliders"} />
                  </svg>
+                 <span className={"bar-word"}>{t('Properties')}</span>
                </button>
              </div>
  );
