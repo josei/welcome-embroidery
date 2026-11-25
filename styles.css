@@ -939,7 +939,7 @@ body{height:100dvh;min-height:0;overflow:hidden}
 .canvas .canvas-text-hint,.canvas #canvasHint,.canvas .canvas-hint{bottom:56px;left:8px;right:auto;max-width:calc(100% - 140px)}
 /* The lettering caption is anchored at the left edge, so it must not keep the centring shift of .canvas-hint: that pushed it under the tool rail. */
 .canvas .canvas-text-hint{transform:none}
-.layout main>footer{position:relative;flex:none;height:44px;min-height:44px;margin:0;padding:0 196px 0 8px;display:flex;flex-wrap:nowrap;align-items:center;gap:8px;overflow:visible;border-top:0;box-shadow:inset 0 1px 0 #e3e6e1;background:#fff}
+.layout main>footer{position:relative;flex:none;height:44px;min-height:44px;margin:0;padding:0 8px;display:flex;flex-wrap:nowrap;align-items:center;gap:8px;overflow:visible;border-top:0;box-shadow:inset 0 1px 0 #e3e6e1;background:#fff}
 .layout main>footer .messages-btn{min-height:44px;min-width:44px;padding:0 12px}
 .layout main>footer>.playback-bar{flex:1 1 auto;min-width:0;height:44px}
 /* In the Stitches and 3D views the playback bar takes a row of its own above the status row, so the colour strip and the
@@ -1356,6 +1356,13 @@ html[lang="es"] .layout main>.tool-rail .rail-label{font-size:10px;letter-spacin
 .layout main:not(.design-view) .playback-bar .playback-track{display:contents}
 .layout main:not(.design-view) .playback-bar .playback-slider{grid-column:4;grid-row:1;min-width:0}
 .layout main:not(.design-view) .playback-bar .playback-summary{grid-column:3 / 5;grid-row:2;white-space:nowrap;overflow:visible;text-overflow:clip}
+}
+/* The status row is one line whatever its text. A status item whose width would not fit would break onto a third line, and the footer
+   then pushes the playback row up into the zoom bar. Each item therefore starts from zero width and grows only to its own natural
+   width, so it shows in full when there is room and truncates with an ellipsis when there is not. Messages keeps its width. */
+@media (min-width:601px) and (max-width:1024px) and (min-height:501px){
+.layout main:not(.design-view)>footer>*:not(.playback-bar):not(#toast):not(#messagesBtn):not(#issuesBtn){flex:1 1 0;width:auto;min-width:0;max-width:max-content;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.layout main:not(.design-view)>footer>#messagesBtn,.layout main:not(.design-view)>footer>#issuesBtn{flex:0 0 auto}
 }
 /* Layer rows in the Layers list keep the type word and the stitch count on one line at every width; the count stays whole. */
 .object-row .row-tag{display:flex;min-width:0;white-space:nowrap}
