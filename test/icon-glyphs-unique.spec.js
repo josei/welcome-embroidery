@@ -89,3 +89,37 @@ test('the Save and Save As, Front and Back, Messages and Issues rows each have t
  expect(await glyph('menuMessages')).toEqual(['#i-msg']);
   expect(await glyph('menuToFront')).not.toEqual(await glyph('menuToBack'));
 });
+
+// The phone Menu's Edit rows and the selection bar's buttons are one screen with a selection. Duplicate is the same command
+// in both places, so it shares the desktop's glyph; Copy is a different command and must not share any glyph on the screen.
+test('phone Copy has its own glyph, and Duplicate matches the selection bar (390x844, en)',async({page})=>{
+ await page.addInitScript(()=>{delete window.showSaveFilePicker;});
+ await page.setViewportSize({width:390,height:844});
+ await page.goto('/');
+ await expect(page.locator('header.top #name')).toBeVisible();
+ await page.locator('#phoneMenu').click();
+ await page.locator('#menuLayers').click();
+ await page.locator('.object-row').first().click();
+ await page.locator('#phoneMenu').click();
+ const headings=page.locator('#phoneMenuList button.menu-section[aria-expanded="false"]');
+ while(await headings.count()>0)await headings.first().click();
+ const menu=page.locator('#phoneMenuList');
+ const rows=menu.locator('button[role="menuitem"]:not(.menu-section)');
+ const bar=page.locator('.floating.phone-selection button');
+ const entries=[];
+ for(const [locator,prefix] of [[rows,'menu'],[bar,'bar']]){
+  for(let i=0;i<await locator.count();i++){
+   const r=locator.nth(i);
+   if(!await r.isVisible())continue;
+   entries.push({name:(await r.getAttribute('id'))??(await r.getAttribute('aria-label'))??prefix,glyphs:await glyphsOf(r)});
+  }
+ }
+ // Duplicate, Delete and Properties are the same command in the Menu and on the selection bar, so each pair may share a
+ // glyph. Any other shared glyph is a defect.
+ const sameCommand=[['barDuplicate','menuDuplicate'],['barDelete','menuDelete'],['barProperties','menuProperties']].map(p=>p.sort().join('|'));
+ const clashes=duplicates(entries).filter(([,names])=>!sameCommand.includes([...names].sort().join('|')));
+ expect(clashes).toEqual([]);
+ expect(await glyphsOf(page.locator('#menuCopy'))).toEqual(['#i-copy-text']);
+ expect(await glyphsOf(page.locator('#menuDuplicate'))).toEqual(['#i-copy']);
+ expect(await glyphsOf(page.locator('#barDuplicate').first())).toEqual(['#i-copy']);
+});

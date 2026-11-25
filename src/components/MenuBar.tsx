@@ -363,7 +363,7 @@ const VIEW_ROWS = [
 
 /** The Edit rows a phone lists: the desktop Edit menu's rows minus the palette (which the search field opens). */
 const PHONE_EDIT_ICONS: Record<string, string> = {
- menuUndo: 'i-undo', menuRedo: 'i-redo', menuCut: 'i-cut', menuCopy: 'i-copy', menuPaste: 'i-paste', menuDuplicate: 'i-dup',
+ menuUndo: 'i-undo', menuRedo: 'i-redo', menuCut: 'i-cut', menuCopy: 'i-copy-text', menuPaste: 'i-paste', menuDuplicate: 'i-copy',
  menuSelectAll: 'i-select-all', menuRepeat: 'i-repeat', menuDelete: 'i-delete',
 };
 

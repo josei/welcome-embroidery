@@ -19,9 +19,6 @@ export function EditorIcons() {
         <symbol id={"i-paste"} viewBox={"0 0 24 24"}>
           <path d={"M9 4h6v3H9zM8 6H6v14h12V6h-2"} />
         </symbol>
-        <symbol id={"i-dup"} viewBox={"0 0 24 24"}>
-          <path d={"M9 9h10v10H9zM5 15V5h10"} />
-        </symbol>
         <symbol id={"i-select-all"} viewBox={"0 0 24 24"}>
           <path d={"M4 8V4h4M16 4h4v4M20 16v4h-4M8 20H4v-4"} />
         </symbol>
@@ -118,6 +115,9 @@ export function EditorIcons() {
         <symbol id={"i-copy"} viewBox={"0 0 24 24"}>
           <rect x={"8"} y={"8"} width={"12"} height={"12"} rx={"2"} />
           <path d={"M16 8V5a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h3"} />
+        </symbol>
+        <symbol id={"i-copy-text"} viewBox={"0 0 24 24"}>
+          <path d={"M6 3h8l4 4v14H6zM14 3v4h4M9 12h6M9 15h6M9 18h4"} />
         </symbol>
         <symbol id={"i-delete"} viewBox={"0 0 24 24"}>
           <path d={"M4 7h16M9 7V4h6v3m3 0-1 13H7L6 7m3 3v7m6-7v7"} />
