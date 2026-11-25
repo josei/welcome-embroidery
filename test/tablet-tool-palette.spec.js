@@ -33,11 +33,11 @@ for(const lang of ['en','es']) test(`tablet tool palette uses the desktop's icon
  expect(tablet.map(t=>t.name),'same accessible name for every tool').toEqual(desktop.map(t=>t.name));
 });
 
-for(const lang of ['en','es']) test(`tablet tool palette shows no visible text labels at 768x1024 (${lang})`,async({page})=>{
+for(const lang of ['en','es']) test(`tablet tool palette shows a word under every tool at 768x1024 (${lang})`,async({page})=>{
  await open(page,768,1024,lang);
  const tools=await palette(page);
  expect(tools.length).toBeGreaterThan(10);
- for(const t of tools) expect(t.labels,`${t.id} shows no text`).toEqual([]);
+ for(const t of tools) expect(t.labels.length,`${t.id} shows its word`).toBe(1);
 });
 
 for(const lang of ['en','es']) test(`every tablet tool button is at least 44 px at 768x1024 (${lang})`,async({page})=>{

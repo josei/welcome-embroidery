@@ -19,7 +19,7 @@ const viewButtons=page=>page.locator('.canvas-views button[data-view]').evaluate
 })));
 
 for(const lang of ['en','es']){
- test(`tablet portrait 768x1024 ${lang}: page does not scroll, targets 44px, rail is icon-only`,async({page})=>{
+ test(`tablet portrait 768x1024 ${lang}: page does not scroll, targets 44px, rail shows a word per tool`,async({page})=>{
   const errors=[];page.on('pageerror',e=>errors.push(e.message));
   await page.setViewportSize({width:768,height:1024});
   await page.goto(`/?lang=${lang}`);
@@ -31,8 +31,9 @@ for(const lang of ['en','es']){
   const small=await page.evaluate(()=>{const sel='.top button, .top input, .tool-rail button, .canvas .floating button, .canvas .zoombar button, .canvas .canvas-views button, .layers-head button, #layersSheet button, #inspector button, #inspector input:not([type=checkbox]):not(.sr-only), #inspector select:not(.sr-only)';
    return [...document.querySelectorAll(sel)].filter(e=>{const r=e.getBoundingClientRect();return r.width>0&&r.height>0&&getComputedStyle(e).display!=='none'&&(r.width<43.5||r.height<43.5)}).map(e=>(e.id||e.className||e.tagName)+' '+Math.round(e.getBoundingClientRect().width)+'x'+Math.round(e.getBoundingClientRect().height));});
   expect(small,'controls under 44x44').toEqual([]);
-  const labels=await page.evaluate(()=>[...document.querySelectorAll('.tool-rail .rail-label')].filter(e=>getComputedStyle(e).display!=='none').map(e=>e.textContent));
-  expect(labels,'the tool rail shows no text labels').toEqual([]);
+  const labels=await page.evaluate(()=>[...document.querySelectorAll('.tool-rail .rail-label')].filter(e=>getComputedStyle(e).display!=='none').map(e=>e.textContent.trim()));
+  expect(labels.length,'every tool on the rail shows its word').toBeGreaterThan(10);
+  expect(labels.every(Boolean),'no tool word is empty').toBe(true);
   const rail=await rect(page,'.tool-rail');
   expect(Math.round(rail.width)).toBe(64);
   expect(errors).toEqual([]);

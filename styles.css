@@ -752,8 +752,12 @@ body{height:100vh;height:100dvh;min-height:0;overflow:hidden}
 .layout>#layersSheet .layers-head .inspector-toggle,.layout>#inspector .drawer-head{display:none}
 .canvas{flex:1 1 0;height:auto;min-height:0}
 .canvas .tool-rail{position:absolute;left:0;top:0;bottom:0;width:64px;max-height:none;z-index:4;display:flex;flex-direction:column;align-items:stretch;gap:4px;padding:6px 4px;overflow-y:auto;overscroll-behavior:contain;background:#fff;border-right:1px solid #e3e6e1}
-.canvas .tool-rail>button.icon-button,.canvas .tool-rail>.icon-button{width:44px;min-width:44px;height:44px;min-height:44px;align-self:center;flex-direction:column;align-items:center;justify-content:center;gap:2px}
-.canvas .tool-rail .rail-label{display:none}
+.canvas .tool-rail>button.icon-button,.canvas .tool-rail>.icon-button{width:56px;min-width:56px;height:44px;min-height:44px;align-self:center;flex-direction:column;align-items:center;justify-content:center;gap:2px}
+/* Each tile shows its word under the glyph, as the phone tool dock does, so a first-time user reads Polygon, Photo, Star and
+   Trace without hovering. The word is the same shared tile (.rail-label) the phone dock uses. */
+.canvas .tool-rail .rail-label{display:block;max-width:100%;overflow:hidden;white-space:nowrap;line-height:1.1;color:#4d5a54}
+.canvas .tool-rail .icon-button.active-tool .rail-label{color:var(--teal-deep)}
+.canvas .tool-rail .icon-button .icon{width:20px;height:20px}
 .canvas #art{inset:0 0 0 64px;width:calc(100% - 64px)!important}
 .canvas #rulerTop,.canvas #rulerLeft,.canvas .ruler-corner{left:64px}
 .canvas .zoombar{left:auto;right:12px;bottom:12px;top:auto}
@@ -1200,11 +1204,13 @@ label:has(> input[type=checkbox]){display:flex;align-items:center;gap:8px}
 @media (max-width:1024px){
 /* Six tiles share a 360 px phone. The sides and gaps are narrow enough, and the label a little tighter, that "Seleccionar" fits its tile. */
 .layout main>.tool-rail{padding-left:4px;padding-right:4px;gap:1px}
-.layout main>.tool-rail .rail-label{font-size:10.5px;letter-spacing:-.02em}
+/* The label box fills its tile and centres its word, so the box is never narrower than the text: negative tracking
+   can push the ink past a shrink-wrapped box, which overflow:hidden then clips. */
+.layout main>.tool-rail .rail-label,.canvas .tool-rail .rail-label{font-size:10.5px;letter-spacing:-.02em;width:100%;text-align:center}
 /* Spanish labels are longer ("Seleccionar", "Rectángulo"): a touch smaller keeps a visible margin inside each tile. */
 /* Spanish dock labels run wider than English ones ("Seleccionar" is the longest), so every tile's label is set a half pixel
    smaller and tighter: at 360 px the longest label then keeps about 4 px clear of each side of its tile. */
-html[lang="es"] .layout main>.tool-rail .rail-label{font-size:9.5px;letter-spacing:-.04em}
+html[lang="es"] .layout main>.tool-rail .rail-label,html[lang="es"] .canvas .tool-rail .rail-label{font-size:9.5px;letter-spacing:-.04em}
 }
 
 /* Stitches and 3D on a landscape phone and on tablets. The status row keeps one progress state, the compile or issue text,
