@@ -7,6 +7,7 @@ import {setSewingCounts} from './sewingCountsState.js';
 import {setThreadTotals} from './threadTotalsState.js';
 import {setCompileIssue} from './compileIssueState.js';
 import {setExportRefusal, EMPTY_EXPORT_REASON} from './exportDialogState.js';
+import {t} from './i18n.js';
 import {editor} from './editorContext.js';
 
 const worker = new Worker(new URL('./worker.js', import.meta.url), {type: 'module'});
@@ -151,7 +152,7 @@ async function compileDocument(manual) {
     if (result.plan.revision !== revision || revision !== documentNow().doc.revision) return;
     plan = result.plan;
     lastPlan = plan;
-    setExportRefusal(plan.errors.join(' '));
+    setExportRefusal(plan.errors.map((/** @type {string} */ e) => t(e)).join(' '));
     setSewingCounts(plan.objectCounts || {});
     setThreadTotals(plan.threads);
     compileError = '';

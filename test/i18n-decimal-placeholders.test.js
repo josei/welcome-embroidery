@@ -35,6 +35,14 @@ test('English keeps the dot in every placeholder', async () => {
    'Wildflower extends 86.5 mm past the hoop. Move it or choose a larger hoop.');
 });
 
+test('the past-the-hoop distance reads with the comma in Spanish and the dot in English', async () => {
+ const sentence = 'Logo extends 267.4 mm past the hoop. Move it or choose a larger hoop.';
+ const es = await translatorFor('es');
+ assert.equal(es(sentence), 'Logo sobrepasa el bastidor en 267,4 mm. Muévelo o elige un bastidor más grande.');
+ const en = await translatorFor('en');
+ assert.equal(en(sentence), sentence);
+});
+
 test('the hoop size reads with the comma in Spanish and the dot in English', () => {
  assert.equal(hoopSizeText([267.4, 200], 'es'), '267,4×200');
  assert.equal(hoopSizeText([267.4, 200], 'en'), '267.4×200');
