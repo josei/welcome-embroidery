@@ -15,7 +15,8 @@ import {mountPinGuide} from './pinGuideCommands.js';
 import {mountThreadControls} from './threadControls.js';
 import {mountAutosave} from './autosave.js';
 import {mountDesktopClose} from './desktopClose.js';
-import {documentState} from './documentState.js';
+import {documentState, documentNow} from './documentState.js';
+import {hoopSize} from './engine.js';
 import {mountSewingTips} from './sewingTips.js';
 import {mountRowActions} from './stitchRowActions.js';
 import {mountAgentBridge} from './agentBridge.js';
@@ -71,15 +72,29 @@ configureLettering({edit, transact, toast, render, reveal: () => editor.canvas?.
 // the canvas measures it.
 /** @type {{cx: number, cy: number, s: number} | null} */
 let viewBeforeSheet = null;
+// The hoop's size when the sheet opened. A hoop change made while a sheet is open refits the view (Fit hoop runs on every change),
+// so closing the sheet must keep that fit rather than put back the view from before the change.
+let hoopBeforeSheet = '';
 let lastSheet = 'none';
+const hoopKey = () => {
+  const {w, h} = hoopSize(documentNow().doc);
+  return `${w}x${h}`;
+};
 // The Properties button folds the right column on desktop and tablet landscape; the hoop is re-centred in the wider canvas
 // when the column changes size. (Phone sheets do not use this path.)
 inspectorOpenState.subscribe(() => editor.canvas?.recentreOnNextResize());
 phoneSheetState.subscribe(() => {
   const sheet = phoneSheetState.get();
   if (sheet === lastSheet) return;
-  if (lastSheet === 'none') viewBeforeSheet = editor.canvas?.viewport() ?? null;
-  else if (viewBeforeSheet) editor.canvas?.setViewport(viewBeforeSheet);
+  if (lastSheet === 'none') {
+    viewBeforeSheet = editor.canvas?.viewport() ?? null;
+    hoopBeforeSheet = hoopKey();
+  } else if (hoopKey() !== hoopBeforeSheet) {
+    // The hoop was resized or rotated under the sheet: keep the refit view and start from it for the next sheet.
+    viewBeforeSheet = null;
+    editor.canvas?.fitHoop();
+    hoopBeforeSheet = hoopKey();
+  } else if (viewBeforeSheet) editor.canvas?.setViewport(viewBeforeSheet);
   lastSheet = sheet;
   if (sheet === 'none') {
     viewBeforeSheet = null;
