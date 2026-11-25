@@ -115,6 +115,27 @@ export function EditorLayout() {
  const hand = useSyncExternalStore(handModeState.subscribe, handModeState.get);
  const panning = useSyncExternalStore(panningState.subscribe, panningState.get);
  const deletingGuide = useSyncExternalStore(deletingGuideState.subscribe, deletingGuideState.get);
+ // The Layers list is a scroll region on a phone: the sheet marks itself while rows lie past its bottom edge, so the
+ // edge fades and shows that more rows can be reached by scrolling. Once the list is read to its end, the mark is cleared.
+ useEffect(() => {
+  const sheet = document.getElementById('layersSheet');
+  if (!sheet) return;
+  const update = () => {
+   sheet.dataset.more = String(sheet.scrollTop + sheet.clientHeight < sheet.scrollHeight - 2);
+  };
+  update();
+  sheet.addEventListener('scroll', update, {passive: true});
+  const resize = new ResizeObserver(update);
+  resize.observe(sheet);
+  // Rows change with the document, and the sheet's class changes when it opens or closes (a hidden sheet has no size).
+  const content = new MutationObserver(update);
+  content.observe(sheet, {childList: true, subtree: true, characterData: true, attributes: true, attributeFilter: ['class']});
+  return () => {
+   sheet.removeEventListener('scroll', update);
+   resize.disconnect();
+   content.disconnect();
+  };
+ }, []);
  // An open sheet puts focus on its heading (not a field, so no keyboard opens on a phone), and Escape closes it.
  // Closing returns focus to the opener (closePhoneSheet).
  useEffect(() => {

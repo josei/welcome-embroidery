@@ -1456,3 +1456,8 @@ html[lang="es"] .layout main>.tool-rail .rail-label{font-size:10px;letter-spacin
 .layout main>footer>#issuesBtn.issues-indicator.warning{color:var(--warn)}
 .layout main>footer>#issuesBtn.issues-indicator .icon{width:16px;height:16px;flex:none;vertical-align:baseline}
 .layout main>footer>button#issuesBtn.issues-indicator:not([hidden]){cursor:pointer;height:44px;min-width:44px;min-height:44px}
+/* A phone Layers sheet that scrolls past its bottom edge fades that edge, so the cut-off row reads as more to scroll to. The fade
+   is the sheet's own background, so it stays at the visible bottom while the rows move under it, and it goes once the list ends. */
+@media (max-width:600px) and (orientation:portrait),(max-height:500px) and (pointer:coarse){
+.layout>aside.panel.sheet-open[data-more=true]{background:linear-gradient(to bottom,#fff calc(100% - 40px),#eef1ef 100%) #fff}
+}
