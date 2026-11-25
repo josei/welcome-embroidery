@@ -42,6 +42,7 @@ export function issueCount(lists) {
  */
 export function designCountGlyph({plan, compileError, hasObjects}) {
   if (compileError) return 'error';
-  if (!plan) return hasObjects ? 'working' : 'idle';
+  if (!hasObjects) return 'idle';
+  if (!plan) return 'working';
   return plan.errors?.length ? 'error' : 'ready';
 }

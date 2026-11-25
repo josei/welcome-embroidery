@@ -14,8 +14,17 @@ async function openDesign(page, lang, shapes){
  await page.goto(`/?lang=${lang}`);
  await page.evaluate(d=>localStorage.setItem('welcome.autosave:'+sessionStorage.getItem('welcome.tabId'),JSON.stringify({doc:d,clean:false,savedAt:Date.now()})),doc);
  await page.goto(`/?lang=${lang}`);
- await page.locator('#restoreYes').click();
- if(shapes) await expect(page.locator('.object-row')).toHaveCount(1);
+ if(shapes){
+  await page.locator('#restoreYes').click();
+  await expect(page.locator('.object-row')).toHaveCount(1);
+ }else{
+  // With no objects the editor offers no restore, so the sample design loads; remove it to reach an empty design.
+  await expect(page.locator('.object-row')).not.toHaveCount(0);
+  await page.locator('body').click({position:{x:1,y:1}});
+  await page.keyboard.press('Control+a');
+  await page.keyboard.press('Delete');
+  await expect(page.locator('.object-row')).toHaveCount(0);
+ }
 }
 
 // The text a reader sees in the count: every text node, ignoring the accessible name the glyph carries.

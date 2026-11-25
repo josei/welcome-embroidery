@@ -133,16 +133,20 @@ export function syncInspector({plan, compileError, tips}: {plan: PlanInfo | null
   // The status line shows one state. In the stitch and 3D views the simulation owns it (simulation.js), so this sets it
   // there only when there is no plan or a compile failed.
   const designView = viewMode.get() === 'design';
+  // A document with no objects has nothing to sew, whatever the empty plan says: it shows the idle glyph and no number.
+  const hasObjects = documentNow().doc.objects.length > 0;
   const countText = compileError
     ? t('⚠ Can\'t compile: {e}', {e: t(compileError)})
-    : !plan
-      ? documentNow().doc.objects.length ? 'Compiling…' : 'Nothing to sew yet'
-      : plan.errors.length
-        ? designView ? `${countLabel(plan, formatCount(plan.count, lang))} · ${plan.errors[0]}` : plan.errors[0]
-        : designView ? `${countLabel(plan, formatCount(plan.count, lang))} · ${t('Ready to sew')}` : null;
+    : !hasObjects
+      ? 'Nothing to sew yet'
+      : !plan
+        ? 'Compiling…'
+        : plan.errors.length
+          ? designView ? `${countLabel(plan, formatCount(plan.count, lang))} · ${plan.errors[0]}` : plan.errors[0]
+          : designView ? `${countLabel(plan, formatCount(plan.count, lang))} · ${t('Ready to sew')}` : null;
   const countState = designCountState({plan, compileError});
-  const glyph = designCountGlyph({plan, compileError, hasObjects: documentNow().doc.objects.length > 0});
-  if (countText !== null) setStatus({count: countText, countFigure: {text: countText, value: plan ? formatCount(plan.count, lang) : '', glyph}});
+  const glyph = designCountGlyph({plan, compileError, hasObjects});
+  if (countText !== null) setStatus({count: countText, countFigure: {text: countText, value: plan && hasObjects ? formatCount(plan.count, lang) : '', glyph}});
   setStatus({countError: countState.error});
   const errs = plan?.issues || [];
   setStatus({
