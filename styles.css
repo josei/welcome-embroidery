@@ -606,7 +606,6 @@ html[data-input="touch"] button:focus-visible,html[data-input="touch"] #art:focu
 @media (max-width:600px) and (orientation:landscape){.top{height:48px}}
 @media (max-width:600px){
 .top .sep,.top .logo,.top #new,.top #open,.top #importMachine,.top #save,.top #duplicate,.top #remove,.top #helpBtn,.top #settingsBtn{display:none}
-.top .file-menu-list .menu-note{padding:8px 12px;font-size:var(--fs-caption);color:#5c625e;line-height:1.4;white-space:normal;overflow-wrap:anywhere}
 /* The blank-design reason takes no room in the bar, so the design name keeps its width beside Export. It is not drawn: a tap
    on Export shows it as a toast (Header.tsx), and the sentence stays in the DOM for screen readers. */
 .top{position:relative;z-index:7}
@@ -985,6 +984,8 @@ body{height:100dvh;min-height:0;overflow:hidden}
 #phoneMenuList .menu-section{display:flex;align-items:center;gap:12px;width:100%;min-height:44px;margin:0;padding:12px 10px 4px;border:0;background:none;text-align:left;color:#66726c;cursor:pointer}
 #phoneMenuList .menu-section:hover:not(:disabled){background:none}
 #phoneMenuList .menu-section .menu-icon{color:#66726c}
+#phoneMenuList .menu-section .menu-status{flex:none;display:inline-flex;margin-left:auto;color:#66726c}
+#phoneMenuList .menu-section .menu-status .icon{width:20px;height:20px}
 /* A landscape phone is only 390 px tall: the tighter heading and title spacing lets the first Menu section (View: Layers, Properties and
    the 2D, Stitches and 3D rows) sit in the list with no scrolling. */
 @media (max-height:500px){#phoneMenuList .menu-heading{padding:6px 10px 0}#phoneMenuList .menu-title{margin-bottom:0}}

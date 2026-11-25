@@ -153,17 +153,18 @@ test('390 x 844 es: the status mark is a picture, not a control, and a tap shows
  await expect(page.locator('.toast-item',{hasText:WORDS.es.autosaved})).toHaveCount(0);
 });
 
-test('390 x 844 es: the File group of the Menu opens with the save status as a line of text',async({page})=>{
+test('390 x 844 es: the File heading of the Menu carries the save status as an indicator, not a row',async({page})=>{
  await page.setViewportSize({width:390,height:844});
  await page.goto('/?lang=es');
  await expect(page.locator('.canvas')).toBeVisible();
  await page.locator('#phoneMenu').click();
- const note=page.locator('#phoneMenuList .menu-note');
- await expect(note).toHaveText(WORDS.es.autosaved);
- await expect(note).toHaveAttribute('role','status');
- expect(await note.evaluate(e=>e.closest('button'))).toBeNull();
- const first=await page.locator('#menuSection-File + *').evaluate(e=>e.className);
- expect(first,'the status line is the first row under the File heading').toContain('menu-note');
+ const heading=page.locator('#menuSection-File');
+ const mark=heading.locator('.menu-status');
+ await expect(mark).toHaveAttribute('role','img');
+ await expect(mark).toHaveAttribute('aria-label',WORDS.es.autosaved);
+ await expect(mark).toHaveAttribute('title',WORDS.es.autosaved);
+ await expect(page.locator('#phoneMenuList .menu-note')).toHaveCount(0);
+ expect(await mark.evaluate(e=>e.closest('button')?.tagName)).toBe('BUTTON');
  await page.screenshot({path:'test-results/save-status-menu-file-390x844-es.png'});
 });
 

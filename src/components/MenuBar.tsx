@@ -32,7 +32,7 @@ import {agentLinkState} from '../agentLinkState';
 import {viewActions, viewMode} from '../viewMode.js';
 import {documentState, documentNow} from '../documentState.js';
 import {saveState} from '../saveState.js';
-import {saveStatusWords} from '../saveMark.js';
+import {saveStatusIcon, saveStatusWords} from '../saveMark.js';
 import {menuReason, NEEDS_ONE, NEEDS_TWO, NEEDS_THREE} from '../menuReasons.js';
 import {useTabletPortrait} from '../tabletLayoutState.js';
 
@@ -62,13 +62,9 @@ interface Entry {
  * hides the rows under it. */
 interface Heading {
  heading: string;
- section?: {id: string; open: boolean; toggle: () => void};
+ section?: {id: string; open: boolean; toggle: () => void; status?: {icon: string; label: string}};
 }
-/** A line of visible text that is not a command, such as the save status in the phone menu. */
-interface Note {
- note: string;
-}
-type Row = Entry | Heading | Note | '-';
+type Row = Entry | Heading | '-';
 
 // A dropdown: a header button that opens a list of entries. Keyboard: Enter, Space or ArrowDown on the header opens it and
 // focuses the first enabled item (ArrowUp, the last); ArrowUp and ArrowDown move between enabled items and wrap; Home and End
@@ -194,11 +190,11 @@ function Dropdown({id, label, rows, iconOnly, onOpen, sharedReasons}: {id: strin
         <button key={`head${i}`} type="button" role="menuitem" id={row.section.id} aria-expanded={row.section.open} className="menu-heading menu-section" onClick={row.section.toggle}>
          <svg className="icon menu-icon" aria-hidden="true"><use href={row.section.open ? '#i-chevron' : '#i-chevron-right'} /></svg>
          <span>{row.heading}</span>
+         {row.section.status && <span className="menu-status" role="img" aria-label={row.section.status.label} title={row.section.status.label}><svg className="icon" aria-hidden="true"><use href={`#${row.section.status.icon}`} /></svg></span>}
         </button>
        );
       }
       if ('heading' in row) return <div key={`head${i}`} role="presentation" className="menu-heading">{row.heading}</div>;
-      if ('note' in row) return <div key={`note${i}`} role="status" className="menu-note">{row.note}</div>;
       const shared = Boolean(sharedReasons) && row.disabled;
       return (
        <button key={row.id} type="button" role="menuitem" id={row.id} disabled={row.disabled && !sharedReasons}
@@ -398,15 +394,15 @@ export function PhoneMenu() {
  const nodes = useSyncExternalStore(nodeButtonsState.subscribe, nodeButtonsState.get);
  const selectAdd = useSyncExternalStore(multiSelectState.subscribe, multiSelectState.get);
  const reasonCtx = useReasonContext();
- // Which groups are unfolded. Exactly one starts open each time the Menu opens: Arrange when something is selected, since its
- // rows act on the selection, otherwise File, so New, Open and Export are one tap away on a fresh profile. A tap on a heading
- // shows or hides its rows. A folded group keeps its heading.
- const defaultUnfolded = (selected: boolean): Record<string, boolean> => (selected ? {Arrange: true} : {File: true});
+ // Which groups are unfolded when the Menu opens. View opens too, so Layers, Properties and the view switch are one tap away. The
+ // second group is Arrange when something is selected, since its rows act on the selection, otherwise File, so New, Open and
+ // Export are one tap away on a fresh profile. A tap on a heading shows or hides its rows. A folded group keeps its heading.
+ const defaultUnfolded = (selected: boolean): Record<string, boolean> => (selected ? {View: true, Arrange: true} : {View: true, File: true});
  const [unfolded, setUnfolded] = useState<Record<string, boolean>>(() => defaultUnfolded(reasonCtx.count > 0));
- const group = (name: string, groupRows: Row[]): Row[] => {
+ const group = (name: string, groupRows: Row[], status?: {icon: string; label: string}): Row[] => {
   const open = Boolean(unfolded[name]);
   const id = `menuSection-${name.replace(/\W+/g, '-')}`;
-  return [{heading: t(name), section: {id, open, toggle: () => setUnfolded(u => ({...u, [name]: !open}))}}, ...(open ? groupRows : [])];
+  return [{heading: t(name), section: {id, open, toggle: () => setUnfolded(u => ({...u, [name]: !open})), status}}, ...(open ? groupRows : [])];
  };
  // The reason a disabled row gives. Every disabled row has one; the generic line is only a fallback.
  const why = (id: string) => menuReason(id, reasonCtx) ?? t(NEEDS_ONE);
@@ -414,12 +410,11 @@ export function PhoneMenu() {
   id: `menuView-${v.id}`, label: t(v.label), icon: v.icon, state: view === v.id ? t('Shown now') : undefined, run: () => viewActions.choose(v.id),
  }));
  // A portrait tablet always shows Layers, Properties and the 2D, Stitches and 3D switch on screen, so the Menu leaves them out.
- const panelAndViewRows: Row[] = tablet ? [] : [
-  {heading: t('View')},
+ const panelAndViewRows: Row[] = tablet ? [] : group('View', [
   {id: 'menuLayers', label: t('Layers'), icon: 'i-layers', state: sheet === 'layers' ? t('Shown now') : undefined, run: () => togglePhoneSheet('layers')},
   {id: 'menuProperties', label: t('Properties'), icon: 'i-sliders', state: sheet === 'properties' ? t('Shown now') : undefined, run: () => togglePhoneSheet('properties')},
   ...viewRows,
- ];
+ ]);
  // The drawing tools the canvas bar and More tools panel held on a phone. They run the same commands as those controls.
  // The add-to-selection row is listed on a tablet only: a phone's selection bar carries the toggle, so the Menu leaves it out there.
  const addSelectRow: Entry[] = tablet ? [
@@ -461,8 +456,6 @@ export function PhoneMenu() {
   ...panelAndViewRows,
   ...issuesRows,
   ...group('File', [
-   // The save status in words, as a line of text: it is not a command, so it has no icon, run or disabled style.
-   {note: saveStatusWords(saveDoc.dirty, saveMark.savedAt, saveMark.savedFileName, t)},
    // The file inputs are hidden in the header; a click on them opens the same pickers as the Open and Import buttons did.
    {id: 'menuNew', label: t('New'), icon: 'i-new', run: () => newProject()},
    {id: 'menuOpen', label: t('Open'), icon: 'i-open', run: () => document.getElementById('file')?.click()},
@@ -470,7 +463,11 @@ export function PhoneMenu() {
    ...saveRows().filter((r): r is Entry => typeof r === 'object' && 'id' in r)
     .map(r => ({...r, label: r.id === 'menuSave' ? t('Save') : t('Save As'), icon: r.id === 'menuSave' ? 'i-save' : 'i-save-as', hint: undefined})),
    {id: 'menuExport', label: t('Export'), icon: 'i-export', run: () => openExportDialog()},
-  ]),
+  ], {
+   // The save status is an indicator on the File heading, not a row: its glyph shows the state and its label gives the sentence.
+   icon: saveStatusIcon(saveDoc.dirty, saveMark.savedAt, saveMark.savedFileName),
+   label: saveStatusWords(saveDoc.dirty, saveMark.savedAt, saveMark.savedFileName, t),
+  }),
   ...group('Edit', edit),
   ...group('Tools', toolRows),
   ...group('Nodes', nodeRows),
