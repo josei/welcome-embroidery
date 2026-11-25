@@ -42,7 +42,8 @@ try {
       const dir = path.join(outRoot, sanitise(walk.name), `${lang}-${w}x${h}`);
       await fs.rm(dir, {recursive: true, force: true});
       await fs.mkdir(dir, {recursive: true});
-      const context = await browser.newContext({viewport: {width: w, height: h}});
+      // Touch input, as on a real phone or tablet: phone sizes also emulate a mobile device, so hover-only controls show as they do on a touch screen.
+      const context = await browser.newContext({viewport: {width: w, height: h}, hasTouch: true, isMobile: w < 768});
       const page = await context.newPage();
       page.setDefaultTimeout(10000); // a step that cannot find its control fails, rather than waiting for ever
       const errors = [];

@@ -6,7 +6,9 @@ export default {
   steps: [
     {name: 'start', run: async () => {}},
     {name: 'select-object', run: async page => {
-      await page.locator('#rect').click();
+      await openPanel(page, 'layers');
+      await page.locator('.object-row[data-id="leaf"]').click();
+      await closePanel(page, '#layersSheet');
       await page.locator('.sel-box').waitFor();
     }},
     {name: 'open-properties', run: page => openPanel(page, 'properties')},
