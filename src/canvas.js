@@ -178,11 +178,13 @@ export function createCanvas(/** @type {any} */ api){
   function drawAngle(/** @type {any} */ spot,/** @type {any} */ deg,label=/** @type {string|null} */(null)){drawAngleHandle(overlay,spot,deg,label,vp.s);}
   // The rotate knob sits 22 px above the frame. When that lands under the save strip at the top of the screen, the knob goes
   // below the frame instead, so it stays reachable. Returns true when the knob should be drawn below.
+  // Distance in screen px from the frame's edge to the rotate knob. At 24 the knob sits 24 px from the top-middle handle.
+  const KNOB_PX=24;
   function knobUnderBar(/** @type {any} */ f,/** @type {number} */ k){
     const bar=document.querySelector('.top'),m=overlay.getScreenCTM?.();
     if(!bar||!m)return false;
     const clear=bar.getBoundingClientRect().bottom+(parseFloat(getComputedStyle(bar).marginBottom)||0);
-    const [x,y]=toWorld(f,0,-f.H/2-22*k);
+    const [x,y]=toWorld(f,0,-f.H/2-KNOB_PX*k);
     return m.b*x+m.d*y+m.f-5<clear;
   }
   function refresh(f0=/** @type {any} */(null),note=/** @type {string|null} */(null)){
@@ -200,7 +202,8 @@ export function createCanvas(/** @type {any} */ api){
     // middle, so on a small object it never covers the lettering there. A mouse keeps the square centred on the handle.
     // The press rule in handleClaim.js still decides between a handle and the body.
     const reach=(/** @type {number} */ d)=>d>0?[0,44*k]:d<0?[-44*k,0]:[-22*k,22*k];
-    for(const [name,fx,fy] of HANDLES){if(name.length===1&&((name==='n'||name==='s')?f.W*vp.s<30:f.H*vp.s<30))continue;const [x,y]=
+    // A mid-edge handle is left off when its side is under 48 screen px, so each handle stays 24 px from the next.
+    for(const [name,fx,fy] of HANDLES){if(name.length===1&&((name==='n'||name==='s')?f.W*vp.s<48:f.H*vp.s<48))continue;const [x,y]=
       toWorld(f,(fx-.5)*f.W,(fy-.5)*f.H),rot=f.rot?`rotate(${f.rot*180/Math.PI} ${x} ${y})`:'';
       const [ox0,ox1]=touchPointer()?reach(fx-.5):[-22*k,22*k],[oy0,oy1]=touchPointer()?reach(fy-.5):[-22*k,22*k];
       overlay.append(el('rect',{class:'sel-hit','data-hit':name,x:x+ox0,y:y+oy0,width:ox1-ox0,height:oy1-oy0,transform:rot}));
@@ -209,7 +212,7 @@ export function createCanvas(/** @type {any} */ api){
       {class:'sel-handle','data-handle':name,tabindex:0,role:'button','aria-label':HANDLE_LABEL[name],x:x-hs,y:y-hs,width:hs*2,height:hs*2,transform:
       f.rot?`rotate(${f.rot*180/Math.PI} ${x} ${y})`:''}));}
     const below=knobUnderBar(f,k),side=below?.5:-.5,rr=touchPointer()?Math.min(5,Math.max(2.5,small*.2)):5;
-    const top=toWorld(f,0,side*f.H),rot=toWorld(f,0,side*f.H+(below?22:-22)*k);overlay.append(el('line',{class:'sel-stem',x1:top[0],y1:top[1],x2:rot[0],y2:rot[1]}));
+    const top=toWorld(f,0,side*f.H),rot=toWorld(f,0,side*f.H+(below?KNOB_PX:-KNOB_PX)*k);overlay.append(el('line',{class:'sel-stem',x1:top[0],y1:top[1],x2:rot[0],y2:rot[1]}));
       overlay.append(el('circle',{class:'sel-hit','data-hit':'rot',cx:rot[0],cy:rot[1],r:22*k}),
       el('circle',{class:'sel-handle sel-rotate','data-handle':'rot',tabindex:0,role:'button','aria-label':HANDLE_LABEL.rot,cx:rot[0],cy:rot[1],r:rr*k}));
     {const spot=angleSpot(f);if(spot)drawAngle(spot,spot.deg);}

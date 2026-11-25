@@ -87,6 +87,10 @@ export function startCanvasText(o: EditableObject, fresh = false) {
   const b = objectBounds(o);
   const [x0, y0] = wired().toScreen(b[0], b[1]);
   const [x1, y1] = wired().toScreen(b[2], b[3]);
+  // The box is centred on the lettering, so its middle sits over the middle of the letters whatever their size. A box
+  // anchored to the lettering's left edge pushed its centre past the letters' right edge when the lettering was small.
+  const width = Math.max(180, x1 - x0 + 24);
+  const height = Math.max(44, Math.min(160, y1 - y0 + 20));
   setInteraction({
     canvasText: {
       id: o.id,
@@ -94,10 +98,10 @@ export function startCanvasText(o: EditableObject, fresh = false) {
       fresh,
       typed: false,
       maxLength: isRegistryFont(o.font) ? 120 : 24,
-      left: Math.max(26, x0 - 8),
-      top: Math.max(26, y0 - 10),
-      width: Math.max(180, x1 - x0 + 24),
-      height: Math.max(44, Math.min(160, y1 - y0 + 20)),
+      left: Math.max(26, (x0 + x1) / 2 - width / 2),
+      top: Math.max(26, (y0 + y1) / 2 - height / 2),
+      width,
+      height,
     },
   });
   // Redraws the object under the box, so its own drawing and handles are hidden while the box is open.
