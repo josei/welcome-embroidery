@@ -208,12 +208,14 @@ export function EditorLayout() {
                  <svg className={"icon"}>
                    <use href={"#i-copy"} />
                  </svg>
+                 <span className={"bar-word"}>{t('Duplicate')}</span>
                </ActionButton>
                <ActionButton flag="remove" className={"icon-button chrome-state bar-edit"} id={"barDelete"} aria-label={deleteLabel} title={deleteLabel}
                  data-tooltip={deleteLabel} onClick={() => toolbarActions.remove()}>
                  <svg className={"icon"}>
                    <use href={"#i-delete"} />
                  </svg>
+                 <span className={"bar-word"}>{t('Delete')}</span>
                </ActionButton>
                <ArrangeSheet />
                {/* The Arrange sheet holds these at every size. From 1025px the bar also keeps them as direct buttons, where it has room. */}
@@ -305,6 +307,7 @@ export function EditorLayout() {
                  <svg className={"icon"}>
                    <use href={"#i-node-edit"} />
                  </svg>
+                 <span className={"bar-word"}>{t('Edit nodes')}</span>
                </ActionButton>
                <PathNodeButtons />
              </div>
