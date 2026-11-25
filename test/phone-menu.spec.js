@@ -64,8 +64,10 @@ for(const [width,height] of SIZES) for(const lang of ['en','es']){
   }
   for(const id of ['menuNew','menuOpen','menuImport','menuSave','menuSaveAs','menuExport','menuUndo','menuRedo','menuCut','menuCopy','menuPaste','menuDuplicate','menuSelectAll','menuRepeat','menuGrid','menuSnap','menuFitHoop','menuSettings','menuMessages','menuHelp','menuAlignLeft','menuFlipH','menuToFront','menuUnion','menuDelete',
    // The canvas bar and the More tools panel used to hold these on a phone; the Menu is their one home now.
-   'menuEditNodes','menuNodeAdd','menuNodeDelete','menuNodeSmooth','menuNodeCorner','menuGroup','menuUngroup','menuClip','menuUnclip','menuTextOnPath','menuTextOffPath','menuEllipse','menuPolygon','menuStar','menuPen','menuTrace','menuPhoto','menuLayers','menuProperties'])
+   'menuEditNodes','menuNodeAdd','menuNodeDelete','menuNodeSmooth','menuNodeCorner','menuGroup','menuUngroup','menuClip','menuUnclip','menuTextOnPath','menuTextOffPath','menuEllipse','menuPolygon','menuStar','menuPen','menuTrace','menuPhoto','menuLayers'])
    expect(rows.map(r=>r.id),`${id} is listed`).toContain(id);
+  // This sheet opens with an object selected, and the selection bar's Properties control is the route then.
+  expect(rows.map(r=>r.id),'no Properties row while an object is selected').not.toContain('menuProperties');
   expect(rows.map(r=>r.id),'no keyboard-shortcut sheet row on a phone').not.toContain('menuShortcuts');
   // The sheet scrolls inside itself; the page never does.
   const doc=await page.evaluate(()=>({sh:document.documentElement.scrollHeight,ih:innerHeight,sw:document.documentElement.scrollWidth,iw:innerWidth}));

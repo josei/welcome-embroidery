@@ -66,8 +66,8 @@ for(const [w,h] of SIZES){
      await pg.goto(`/?lang=${lang}`);
      await expect(pg.locator('.canvas')).toBeVisible();
      await pg.locator('#rect').click({timeout:5000}).catch(()=>{});
-     await pg.locator('#phoneMenu').click({timeout:5000});
-     await pg.locator(sheet==='layers'?'#menuLayers':'#menuProperties').click({timeout:5000});
+     if(sheet==='layers'){await pg.locator('#phoneMenu').click({timeout:5000});await pg.locator('#menuLayers').click({timeout:5000});}
+     else await pg.locator('#barProperties').click({timeout:5000});
      await expect(pg.locator('.layout>aside.panel.sheet-open')).toBeVisible();
      const list=await measure(pg);
      const bad=list.filter(c=>c.w<44||c.h<44).map(c=>`${c.name} ${c.w}x${c.h}`);

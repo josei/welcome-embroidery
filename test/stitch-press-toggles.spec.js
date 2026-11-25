@@ -46,8 +46,7 @@ for(const [width,height] of PHONES) for(const lang of ['en','es']){
   await page.setViewportSize({width,height});
   await page.goto(lang==='en'?'/':`/?lang=${lang}`);
   await page.locator('#rect').click();
-  await page.locator('#phoneMenu').click();
-  await page.locator('#menuProperties').click();
+  await page.locator('#barProperties').click();
   await expect(page.locator('#inspector')).toHaveClass(/sheet-open/);
   await page.evaluate(()=>{const s=document.getElementById('type');s.value='fill';s.dispatchEvent(new Event('change',{bubbles:true}));});
 

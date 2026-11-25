@@ -21,8 +21,7 @@ for(const lang of ['en','es']){
   for(const [w,h] of [[375,667],[390,844]]){
    await page.setViewportSize({width:w,height:h});
    await addRectangle(page,lang);
-   await page.locator('#phoneMenu').click();
-   await page.locator('#menuProperties').click();
+   await page.locator('#barProperties').click();
    await expect(page.locator('#inspector')).toHaveClass(/sheet-open/);
    // Opening the sheet is a user action, so the rectangle's confirmation is gone and no toast can sit over a field.
    await expect(page.locator('#toast .toast-item')).toHaveCount(0);

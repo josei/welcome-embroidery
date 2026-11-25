@@ -12,8 +12,7 @@ for(const lang of ['en','es']){
    await page.goto(lang==='en'?'/':'/?lang=es');
    await page.locator('#rect').click();
    if(width<=600){
-    await page.locator('#phoneMenu').click();
-    await page.locator('#menuProperties').click();
+    await page.locator('#barProperties').click();
    }
    await page.evaluate(()=>new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r))));
    const words=page.locator('span.switch-state:visible');

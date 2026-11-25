@@ -64,8 +64,7 @@ async function addRectangle(page){
 async function openProperties(page){
  if(await page.locator('#inspector').isVisible())return;
  if(await page.locator('#phoneMenu').isVisible()){
-  await page.locator('#phoneMenu').click();
-  await page.locator('#menuProperties').click();
+  await page.locator('#barProperties').click();
   await expect(page.locator('#inspector.sheet-open')).toBeVisible();
  }else if(await page.locator('#propertiesBtn').isVisible()){
   await page.locator('#propertiesBtn').click();

@@ -45,10 +45,10 @@ test('the tablet Menu leaves out the Layers, Properties and view rows that stay 
  expect(ids).toEqual(expect.arrayContaining(['menuGrid','menuSnap','menuSnapObjects','menuFitHoop','menuSave','menuUndo']));
 });
 
-test('the phone Menu keeps Layers, Properties and the view switch at the top',async({page})=>{
+test('with an object selected, the phone Menu keeps Layers and the view switch at the top',async({page})=>{
  await openMenu(page,PHONE);
  const ids=(await menuIds(page)).filter(id=>!id.startsWith('menuSection-'));
- expect(ids.slice(0,6)).toEqual(['menuCommandPalette','menuLayers','menuProperties','menuView-design','menuView-stitches','menuView-preview']);
+ expect(ids.slice(0,5)).toEqual(['menuCommandPalette','menuLayers','menuView-design','menuView-stitches','menuView-preview']);
 });
 
 test('the phone Menu is under 2,000 px tall in English as it opens',async({page})=>{

@@ -12,8 +12,7 @@ for(const [width,height] of SIZES) for(const lang of ['en','es']){
   await page.goto(lang==='en'?'/':`/?lang=${lang}`);
   await page.locator('#rect').click();
   if(width<=600){
-   await page.locator('#phoneMenu').click();
-   await page.locator('#menuProperties').click();
+   await page.locator('#barProperties').click();
    await expect(page.locator('#inspector')).toHaveClass(/sheet-open/);
   }
   await page.locator('#type').selectOption('fill');

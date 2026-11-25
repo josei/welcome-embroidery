@@ -110,8 +110,7 @@ const openLettering=async(page,lang,w,h)=>{
  }else await page.locator('#font').evaluate(el=>{el.value='ttf/pacifico';el.dispatchEvent(new Event('change',{bubbles:true}));});
  // On a phone the lettering controls live in the Properties sheet, opened from the Menu.
  if(await page.locator('#phoneMenu').isVisible()){
-  await page.locator('#phoneMenu').click();
-  await page.locator('#menuProperties').click();
+  await page.locator('#barProperties').click();
   await expect(page.locator('#inspector')).toHaveClass(/sheet-open/);
  }
  await expect(page.locator('#textBold')).toBeEnabled();

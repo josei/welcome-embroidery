@@ -75,8 +75,9 @@ test('the Save and Save As, Front and Back, Messages and Issues rows each have t
  await page.locator('#phoneMenu').click();
  await page.locator('#menuLayers').click();
  await page.locator('.object-row').first().click();
- await page.locator('#phoneMenu').click();
- await page.locator('#menuProperties').click();
+ // The Layers sheet covers the selection bar, so it closes before the bar's Properties control is tapped.
+ await page.locator('#layersSheet .close-control').click();
+ await page.locator('#barProperties').click();
  await page.locator('#posX').fill('300');
  await page.locator('#posX').press('Tab');
  await expect(page.locator('#count')).toHaveClass(/error/);

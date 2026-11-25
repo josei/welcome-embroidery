@@ -48,8 +48,9 @@ async function expectSelectionInView(page){
 }
 
 async function openProperties(page){
- await page.locator('#phoneMenu').click();
- await page.locator('#menuProperties').click();
+ // A selected object's Properties is the selection bar's control; with nothing selected it is the Menu row.
+ if(await page.locator('#barProperties').isVisible()) await page.locator('#barProperties').click();
+ else{await page.locator('#phoneMenu').click();await page.locator('#menuProperties').click();}
  await expect(page.locator('#inspector')).toHaveClass(/sheet-open/);
  await page.evaluate(()=>new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r))));
 }

@@ -49,8 +49,10 @@ const OLD_COMMANDS={
  clipBtn:'menuClip', unclipBtn:'menuUnclip', textOnPath:'menuTextOnPath', textOffPath:'menuTextOffPath', editNodes:'menuEditNodes',
  nodeAdd:'menuNodeAdd', nodeDel:'menuNodeDelete', nodeSmooth:'menuNodeSmooth', nodeCorner:'menuNodeCorner',
  ellipse:'menuEllipse', polygon:'menuPolygon', star:'menuStar', traceBtn:'menuTrace', photo:'menuPhoto', pen:'menuPen',
- moreLayers:'menuLayers', moreProperties:'menuProperties',
+ moreLayers:'menuLayers',
 };
+// moreProperties has no Menu row while an object is selected: the selection bar's Properties control is its route then.
+
 // The align, flip and boolean buttons of the bar had Menu rows already.
 const ARRANGE_ROWS=['menuAlignLeft','menuAlignHCenter','menuAlignRight','menuAlignTop','menuAlignVCenter','menuAlignBottom',
  'menuFlipH','menuFlipV','menuSubtract','menuUnion','menuIntersect'];

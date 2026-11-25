@@ -73,8 +73,8 @@ for(const [w,h] of SIZES){
    await drawAndSelect(page,lang);
    if(await page.locator('.object-row').first().isVisible())await page.locator('.object-row').first().click();
    if(!(await page.locator('#inspector').isVisible()) && await page.locator('#phoneMenu').isVisible()){
-    await page.locator('#phoneMenu').click();
-    await page.locator('#menuProperties').click();
+    await page.locator('#layersSheet .close-control').click();
+    await page.locator('#barProperties').click();
    }else if(!(await page.locator('#inspector').isVisible()) && await page.locator('#propertiesBtn').isVisible()){
     await page.locator('#propertiesBtn').click();
    }

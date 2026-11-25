@@ -18,8 +18,9 @@ async function openPhone(page,width,height){
 const rectOf=(page,selector)=>page.locator(selector).evaluate(e=>{const r=e.getBoundingClientRect();return {left:r.left,top:r.top,right:r.right,bottom:r.bottom};});
 
 async function openProperties(page){
- await page.locator('#phoneMenu').click();
- await page.locator('#menuProperties').click();
+ // A selected object's Properties is the selection bar's control; with nothing selected it is the Menu row.
+ if(await page.locator('#barProperties').isVisible()) await page.locator('#barProperties').click();
+ else{await page.locator('#phoneMenu').click();await page.locator('#menuProperties').click();}
  await expect(page.locator('#inspector')).toHaveClass(/sheet-open/);
  // The reveal waits a frame and then the canvas animates nothing, so one more frame settles the view.
  await page.evaluate(()=>new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r))));

@@ -167,11 +167,9 @@ for(const {name,width,height} of VIEWPORTS) for(const lang of LOCALES){
   if(sheetsInMenu&&await open(page,page.locator('#phoneMenu'))){
    await page.locator('#menuLayers').click();
    await check(page,testInfo,'Layers sheet','aside.sheet-open');
-   // Properties sheet: select an object so Properties has its full set of controls, then open it. Opening the Menu closes the
-   // Layers sheet first.
+   // Properties sheet: select an object so Properties has its full set of controls, then open it from the selection bar.
    await page.locator('.object-row').first().click().catch(()=>{});
-   await page.locator('#phoneMenu').click();
-   await page.locator('#menuProperties').click();
+   await page.locator('#barProperties').click();
    await check(page,testInfo,'Properties sheet','aside.sheet-open');
    await page.keyboard.press('Escape');
   }

@@ -410,9 +410,14 @@ export function PhoneMenu() {
   id: `menuView-${v.id}`, label: t(v.label), icon: v.icon, state: view === v.id ? t('Shown now') : undefined, run: () => viewActions.choose(v.id),
  }));
  // A portrait tablet always shows Layers, Properties and the 2D, Stitches and 3D switch on screen, so the Menu leaves them out.
+ // With an object selected, the selection bar's Properties control is the phone's one route, so the Menu row is listed only
+ // when nothing is selected: that is the only phone route to the Document section (hoop preset, size, rotate).
+ const menuPropertiesRows: Row[] = reasonCtx.count === 0 ? [
+  {id: 'menuProperties', label: t('Properties'), icon: 'i-sliders', state: sheet === 'properties' ? t('Shown now') : undefined, run: () => togglePhoneSheet('properties')},
+ ] : [];
  const panelAndViewRows: Row[] = tablet ? [] : group('View', [
   {id: 'menuLayers', label: t('Layers'), icon: 'i-layers', state: sheet === 'layers' ? t('Shown now') : undefined, run: () => togglePhoneSheet('layers')},
-  {id: 'menuProperties', label: t('Properties'), icon: 'i-sliders', state: sheet === 'properties' ? t('Shown now') : undefined, run: () => togglePhoneSheet('properties')},
+  ...menuPropertiesRows,
   ...viewRows,
  ]);
  // The drawing tools the canvas bar and More tools panel held on a phone. They run the same commands as those controls.

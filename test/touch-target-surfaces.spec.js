@@ -61,6 +61,7 @@ async function openFontPicker(page,lang){
  const field=page.locator('#letteringText');
  if(!(await field.isVisible())){
   if(await page.locator('#propertiesBtn').isVisible())await page.locator('#propertiesBtn').click();
+  else if(await page.locator('#barProperties').isVisible())await page.locator('#barProperties').click();
   if(!(await field.isVisible())){await page.locator('#phoneMenu').click();await (await revealMenuRow(page.locator('#phoneMenuList'),'menuProperties')).click();}
  }
  await expect(field).toBeVisible();
