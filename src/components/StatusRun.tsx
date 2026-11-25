@@ -25,6 +25,9 @@ export function StatusRun() {
  const stitchView = useSyncExternalStore(viewMode.subscribe, viewMode.get) !== 'design';
  const figure = compact && s.countFigure && s.countFigure.text === s.count ? s.countFigure : null;
  const hideOverHoop = compact && stitchView && s.countError;
+ // On a phone or tablet the issues chip is an indicator like the count: the same 16 px glyph and text, in the warning colour
+ // only when the design has real issues, so the states differ by glyph and number without hover.
+ const issuesClass = compact ? (s.issuesWarning ? 'issues-btn issues-indicator warning' : 'issues-btn issues-indicator') : 'issues-btn';
  return (
   <>
    <span id="cursorPosition">{s.cursor}</span>
@@ -42,13 +45,13 @@ export function StatusRun() {
     <span id="count" className={s.countError ? 'error' : undefined} onClick={() => statusActions.compile()}>{s.count}</span>
    )}
    {phone && compact ? (
-    <span id="issuesBtn" className="issues-btn" hidden={s.issuesHidden} role="img" aria-label={s.issuesText}
+    <span id="issuesBtn" className={issuesClass} hidden={s.issuesHidden} role="img" aria-label={s.issuesText}
      title={`${s.issuesText}\n${s.issuesTitle}`}>
      <svg className="icon" aria-hidden="true" focusable="false"><use href={s.issuesWarning ? '#i-issues' : '#i-tip'} /></svg>
      <span aria-hidden="true">{s.issuesCount}</span>
     </span>
    ) : compact ? (
-    <button type="button" id="issuesBtn" className="issues-btn" hidden={s.issuesHidden} aria-label={s.issuesText}
+    <button type="button" id="issuesBtn" className={issuesClass} hidden={s.issuesHidden} aria-label={s.issuesText}
      title={`${s.issuesText}\n${s.issuesTitle}`} onClick={() => statusActions.issues()}>
      <svg className="icon" aria-hidden="true" focusable="false"><use href={s.issuesWarning ? '#i-issues' : '#i-tip'} /></svg>
      <span aria-hidden="true">{s.issuesCount}</span>

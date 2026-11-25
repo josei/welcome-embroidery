@@ -51,10 +51,12 @@ for(const lang of ['es','en']) for(const [w,h] of [[390,844],[844,390],[768,1024
   // In Stitches view the playback bar names the count, so the status count stays empty over the hoop.
   await expect(count).toBeEmpty();
   await expect(chip.locator('svg use')).toHaveAttribute('href','#i-issues');
-  // The chip keeps the stitch view's 44 px touch target, and it is a pill, not an upright capsule.
+  // The chip keeps the stitch view's 44 px touch target. It is an indicator in the status row, with no outline or fill.
   const box=await chip.boundingBox();
-  expect(box.height,'chip is one line at the touch target').toBeLessThanOrEqual(44);
-  expect(box.width,'chip is wider than it is tall').toBeGreaterThanOrEqual(48);
+  expect(box.height,'chip fits within the touch target height').toBeLessThanOrEqual(44);
+  const drawn=await chip.evaluate(el=>{const s=getComputedStyle(el);return {border:s.borderTopWidth,fill:s.backgroundColor};});
+  expect(drawn.border,'chip has no outline').toBe('0px');
+  expect(drawn.fill,'chip has no fill').toMatch(/rgba\(0, 0, 0, 0\)|transparent/);
  });
 }
 

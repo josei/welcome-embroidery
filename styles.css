@@ -1448,3 +1448,11 @@ html[lang="es"] .layout main>.tool-rail .rail-label{font-size:10px;letter-spacin
 .chrome-state:focus-visible:not([data-quiet-focus]),.canvas .zoombar>.chrome-state:focus-visible:not([data-quiet-focus]){outline:2px solid var(--teal);outline-offset:2px;z-index:8}
 .chrome-state[data-quiet-focus]:not(.active-tool):focus-visible{background:transparent;border-color:transparent;box-shadow:none;color:#66726c}
 .tool-row .chrome-state[data-quiet-focus]:not(.active-tool):focus-visible{background:#f6f7f5}
+
+/* On a phone or tablet the issues chip is an indicator in the status row, drawn like the design count beside it: the 16 px glyph
+   and its number in the row's text colour, and the warning colour only when the design has real issues. It has no outline or
+   fill, so it fits the row's 26 px line. A tablet's chip is a button and keeps the 44 px touch target. */
+.layout main>footer>#issuesBtn.issues-indicator:not([hidden]){display:inline-flex;align-items:center;justify-content:center;gap:4px;flex:none;margin:0;padding:0;border:0;border-radius:0;background:transparent;color:inherit;height:26px;min-height:0;min-width:0;line-height:26px;font-size:var(--fs-caption);font-variant-numeric:tabular-nums;white-space:nowrap}
+.layout main>footer>#issuesBtn.issues-indicator.warning{color:var(--warn)}
+.layout main>footer>#issuesBtn.issues-indicator .icon{width:16px;height:16px;flex:none;vertical-align:baseline}
+.layout main>footer>button#issuesBtn.issues-indicator:not([hidden]){cursor:pointer;height:44px;min-width:44px;min-height:44px}
