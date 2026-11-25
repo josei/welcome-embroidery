@@ -460,9 +460,9 @@ export function t(s,vars){
   const e=exact.get(s);
   if(e!==undefined)out=e;
   else for(const r of rx){const m=r.re.exec(s);
-    if(m){const v=Object.fromEntries(r.names.map((n,i)=>[n,n==='n'?countText(t(m[i+1]),lang):t(m[i+1])]));out=r.out.replace(/\{(\w+)\}/g,(_,n)=>v[n]);break;}}
+    if(m){const v=Object.fromEntries(r.names.map((n,i)=>[n,/^[whn]$/.test(n)?countText(t(m[i+1]),lang):t(m[i+1])]));out=r.out.replace(/\{(\w+)\}/g,(_,n)=>v[n]);break;}}
  }
- return vars?out.replace(/\{(\w+)\}/g,(_,n)=>vars[n]??''):out;
+ return vars?out.replace(/\{(\w+)\}/g,(_,n)=>/^[whn]$/.test(n)&&lang==='es'?countText(String(vars[n]??''),lang):vars[n]??''):out;
 }
 const ATTRS=['title','aria-label','data-tooltip','placeholder'];
 /** @type {Set<string|undefined>} */

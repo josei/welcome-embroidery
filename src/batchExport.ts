@@ -5,6 +5,7 @@ import {arrayState} from './arrayState.js';
 import {batchNames, batchState, setBatchFields} from './batchState.js';
 import {download, designLabel, exportStem, forWorker} from './appHelpers.js';
 import {t, lang} from './i18n.js';
+import {hoopSizeText} from './decimalText.js';
 
 /** What the batch export needs from the editor, supplied by app.js. */
 export interface BatchApi {
@@ -55,7 +56,7 @@ export function syncBatchInfo() {
         ? '{perHoop} copies fit one {hoop} mm hoop ({cols} × {rows}). {copies} copies need 1 hoop.'
         : '{perHoop} copies fit one {hoop} mm hoop ({cols} × {rows}). {copies} copies need {hoops} hoop(s).', {
         perHoop: p.perHoop,
-        hoop: `${p.hoop[0]}×${p.hoop[1]}`,
+        hoop: hoopSizeText(p.hoop, lang),
         cols: p.cols,
         rows: p.rows,
         copies,

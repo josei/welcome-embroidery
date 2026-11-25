@@ -38,6 +38,16 @@ export function fieldText(stored, language, unit = 'mm') {
 }
 
 /**
+ * A hoop size as "width×height", with the decimal separator of the UI language: "267,4×200" in Spanish, "267.4×200" in English.
+ * @param {number[]} hoop  [width, height] in mm
+ * @param {string} language  'en' or 'es'
+ * @returns {string}
+ */
+export function hoopSizeText(hoop, language) {
+ return `${decimalText(String(hoop[0]), language)}×${decimalText(String(hoop[1]), language)}`;
+}
+
+/**
  * A number with a fixed number of decimal places and thousands grouping in the UI language's style: "1,234.5" in English,
  * "1.234,5" in Spanish. The grouping is always applied, so a four-digit count groups the same way in both languages.
  * It never follows the browser's locale: the interface language decides the separators.

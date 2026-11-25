@@ -142,7 +142,7 @@ export function syncInspector({plan, compileError, tips}: {plan: PlanInfo | null
       : !plan
         ? 'Compiling…'
         : plan.errors.length
-          ? designView ? `${countLabel(plan, formatCount(plan.count, lang))} · ${plan.errors[0]}` : plan.errors[0]
+          ? designView ? `${countLabel(plan, formatCount(plan.count, lang))} · ${t(plan.errors[0])}` : t(plan.errors[0])
           : designView ? `${countLabel(plan, formatCount(plan.count, lang))} · ${t('Ready to sew')}` : null;
   const countState = designCountState({plan, compileError});
   const glyph = designCountGlyph({plan, compileError, hasObjects});
@@ -171,7 +171,7 @@ export function syncInspector({plan, compileError, tips}: {plan: PlanInfo | null
           }) +
         ' · ' +
         (lang === 'es' && sewTime(plan) === '1 min' ? t('about 1 min to sew') : t('about {t} to sew', {t: sewTime(plan)})) +
-        (plan.errors.length ? ' · ' + plan.errors.join(' ') : '')
+        (plan.errors.length ? ' · ' + plan.errors.map(e => t(e)).join(' ') : '')
       : compileError
         ? t('⚠ Can\'t compile: {e}', {e: t(compileError)})
         : documentNow().doc.objects.length ? 'Compiling…' : 'No generated stitches.',
