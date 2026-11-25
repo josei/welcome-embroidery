@@ -125,6 +125,9 @@ export function EditorIcons() {
         <symbol id={"i-reset"} viewBox={"0 0 24 24"}>
           <path transform={"translate(-0.03 -0.99)"}  d={"M4 4v6h6M5 10a8 8 0 1 1-1 5"} />
         </symbol>
+        <symbol id={"i-view-cube"} viewBox={"0 0 24 24"}>
+          <path d={"M12 3 20 7.5v9L12 21l-8-4.5v-9ZM4 7.5l8 4.5 8-4.5M12 12v9"} />
+        </symbol>
         <symbol id={"i-play"} viewBox={"0 0 24 24"}>
           <path d={"M8 5v14l11-7Z"} fill={"currentColor"} stroke={"none"} />
         </symbol>

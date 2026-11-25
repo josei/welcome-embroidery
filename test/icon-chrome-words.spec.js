@@ -56,14 +56,19 @@ for(const lang of ['en','es']) test(`390x844 ${lang}: every icon-only control in
  }
 });
 
-test('390x844 es: the status figure and the 3D hint keep their sentences as names',async({page})=>{
+test('390x844 es: the status figure keeps its sentence, and the 3D hint is three named glyphs',async({page})=>{
  await page.setViewportSize({width:390,height:844});
  await seed(page,'es');
  await expect(page.locator('#count .figure')).toHaveAttribute('aria-label',/puntadas · listo para bordar/);
  await page.locator('#phoneMenu').tap();
  await page.locator('#menuView-preview').tap();
  await expect(page.locator('#preview3d')).toHaveAttribute('data-instances',/^[1-9]\d*$/,{timeout:8000});
- await expect(page.locator('#previewHint')).toHaveText('Arrastra para orbitar · pellizca · doble toque para restablecer');
+ await expect(page.locator('#previewHint .hint-glyph')).toHaveText(['','','']);
+ await expect(page.locator('#previewHint .hint-glyph').nth(0)).toHaveAttribute('aria-label','Arrastra para orbitar');
+ await expect(page.locator('#previewHint .hint-glyph').nth(1)).toHaveAttribute('aria-label','Pellizca para hacer zoom');
+ await expect(page.locator('#previewHint .hint-glyph').nth(2)).toHaveAttribute('aria-label','Doble toque para restablecer');
+ await expect(page.locator('#previewHint .hint-glyph').nth(2)).toHaveAttribute('title','Doble toque para restablecer');
+ await expect(page.locator('#previewHint .hint-word')).toHaveText(['Restablecer']);
  await expect(page.locator('#showPull')).toHaveAttribute('aria-label','Mostrar la tracción de la tela');
 });
 

@@ -12,11 +12,24 @@ export function PreviewPanel() {
  // A touch screen has no scroll wheel or double-click, so its hint names the gestures it has.
  const touch = useSyncExternalStore(inputMode.subscribe, inputMode.get) === 'touch';
  const compact = useCompactLayout();
- const hint = touch ? t('Drag to orbit · pinch to zoom · double-tap to reset') : t('Drag to orbit · scroll to zoom · double-click to reset');
+ // The hint is three glyphs, each named in full by aria-label and title: orbit (the Hand's glyph), zoom, and reset. Reset is a cube, not the playback Restart arrow.
+ const hint: [string, string, string?][] = [
+  ['i-hand', t('Drag to orbit'), undefined],
+  ['i-zoom-in', touch ? t('Pinch to zoom') : t('Scroll to zoom'), undefined],
+  // The cube is not a universal reset symbol, so the reset item carries its word beside it.
+  ['i-view-cube', touch ? t('Double-tap to reset') : t('Double-click to reset'), t('Reset')],
+ ];
  const pullLabel = t('Show pull for the fabric');
  return (
   <>
-   <div id="previewHint" hidden={!preview.threeD}>{hint}</div>
+   <div id="previewHint" hidden={!preview.threeD}>
+    {hint.map(([glyph, label, word]) => (
+     <span key={glyph} className="hint-item">
+      <span className="hint-glyph" role="img" aria-label={label} title={label}><svg className="icon" aria-hidden="true" focusable="false"><use href={`#${glyph}`} /></svg></span>
+      {word && <span className="hint-word" aria-hidden="true">{word}</span>}
+     </span>
+    ))}
+   </div>
    <div id="previewView" className="segmented" hidden={!preview.threeD} role="group" aria-label={t('3D view')}>
     {VIEWS.map(([view, label]) => (
      <button key={view} type="button" aria-pressed={preview.view === view && !preview.orbited} onClick={() => previewActions.chooseView(view)}>{t(label)}</button>
