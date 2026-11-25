@@ -48,7 +48,7 @@ test('the Export footer button style is the same at every size',async({page})=>{
   const m=await footerAt(page,size,FOOTER_DIALOG);
   styles[`${FOOTER_DIALOG.name} ${size.width}`]=m.style;
  }
- // Export's footer has a Download button first; its last button (Cancel) is the one compared.
+ // Export's footer is its one Download button, so that is the button compared.
  const reference=styles[`${FOOTER_DIALOG.name} 1440`];
  for(const [key,style] of Object.entries(styles)) expect(style,key).toEqual(reference);
 });

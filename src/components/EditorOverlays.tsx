@@ -198,38 +198,34 @@ export function EditorOverlays() {
           </code>
         </p>
         <p id={"exportNotice"}>
-          {"Exporting does not save your project. Use Save to keep it as a .welcome file."}
+          {"Export does not save your project. Not yet sewn."}
         </p>
-        <p id={"exportSewnNotice"}>
-          {"Nothing here has been sewn on a real machine yet."}
-        </p>
-        <div id={"worksheetRow"} className={"check-row"} hidden={!MACHINE_FORMATS.includes(exportFormat.format)}>
-          <label>
+        <div id={"worksheetRow"} hidden={!MACHINE_FORMATS.includes(exportFormat.format)}>
+          <label className={"check-row"}>
             <input
               type={"checkbox"}
               id={"withWorksheet"}
               checked={exportDialog.withWorksheet}
               onChange={e => setExportDialog({withWorksheet: e.target.checked})}
             />
-            {" Also download the sewing worksheet"}
+            {" " + t("Also download the sewing worksheet")}
           </label>
-          <label>
+          <label htmlFor={"withWorksheetFormat"}>
             {t("Worksheet format")}
-            {" "}
-            <select
-              id={"withWorksheetFormat"}
-              onKeyDown={keepEnterOnSelect}
-              value={exportDialog.worksheetFormat}
-              onChange={e => setExportDialog({worksheetFormat: e.target.value === 'svg' ? 'svg' : 'text'})}
-            >
-              <option value={"text"}>
-                {"Text (.txt)"}
-              </option>
-              <option value={"svg"}>
-                {"SVG (printable)"}
-              </option>
-            </select>
           </label>
+          <select
+            id={"withWorksheetFormat"}
+            onKeyDown={keepEnterOnSelect}
+            value={exportDialog.worksheetFormat}
+            onChange={e => setExportDialog({worksheetFormat: e.target.value === 'svg' ? 'svg' : 'text'})}
+          >
+            <option value={"text"}>
+              {"Text (.txt)"}
+            </option>
+            <option value={"svg"}>
+              {"SVG (printable)"}
+            </option>
+          </select>
         </div>
         {exportProblem ? (
           <p id={"exportError"} role={"alert"} className={"export-error"}>
@@ -244,9 +240,6 @@ export function EditorOverlays() {
             onClick={e => { e.preventDefault(); void exportCurrent(); }}
           >
             {exportDialog.busy ? t("Downloading…") : t('Download {fmt} file', {fmt: exportKind(exportFormat.format)})}
-          </button>
-          <button>
-            {"Cancel"}
           </button>
         </div>
       </form>

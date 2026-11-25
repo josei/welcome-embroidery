@@ -19,9 +19,9 @@ test('landing page Spanish copy carries the sentence', () => {
   assert.ok(js.includes(`"n4": "${SENTENCE}"`), 'en entry in site/i18n.js');
 });
 
-test('export dialog shows the sentence and translates it to Spanish', () => {
+test('export dialog shows its one-line notice and translates it to Spanish', () => {
   const tsx = read('src/components/EditorOverlays.tsx');
-  assert.ok(tsx.includes(`{"${SENTENCE}"}`), 'export dialog renders the sentence');
+  assert.ok(tsx.includes(`{"Export does not save your project. Not yet sewn."}`), 'export dialog renders the notice');
   const i18n = read('src/i18n.js');
-  assert.ok(i18n.includes(`'${SENTENCE}':'${SPANISH}'`), 'es-ES dialog translation in src/i18n.js');
+  assert.ok(i18n.includes(`'Export does not save your project. Not yet sewn.':'Exportar no guarda tu proyecto. Aún sin bordar.'`), 'es-ES dialog translation in src/i18n.js');
 });

@@ -53,7 +53,6 @@ test('the Export dialog has the same buttons, selects and fills at phone and des
   const cs=el=>{const c=getComputedStyle(el);return {background:c.backgroundColor,color:c.color,radius:c.borderRadius,border:c.borderTopWidth,font:c.fontFamily};};
   return {
    download:cs(document.querySelector('#download')),
-   cancel:cs([...document.querySelectorAll('#exportDialog button')].find(b=>b.textContent.trim()==='Cancel')),
    select:cs(document.querySelector('#format')),
    fileName:cs(document.querySelector('#exportFileStem')),
   };

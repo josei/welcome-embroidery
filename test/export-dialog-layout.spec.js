@@ -15,16 +15,12 @@ async function measureDialog(page,width,height,lang){
   const box=el=>{const b=el.getBoundingClientRect();return {x:b.x,y:b.y,w:b.width,h:b.height};};
   const d=document.querySelector('#exportDialog');
   const download=document.querySelector('#download');
-  const cancel=[...d.querySelectorAll('.dialog-actions>button')].find(b=>b!==download);
   const lines=el=>{const r=document.createRange();r.selectNodeContents(el);return new Set([...r.getClientRects()].map(x=>Math.round(x.top))).size;};
   return {
    dialog:box(d),
    download:box(download),
-   cancel:box(cancel),
    downloadLines:lines(download),
-   cancelLines:lines(cancel),
    downloadOverflow:download.scrollWidth>download.clientWidth,
-   cancelOverflow:cancel.scrollWidth>cancel.clientWidth,
    select:box(document.querySelector('#format')),
    fileStem:box(document.querySelector('#exportFileStem')),
   };
@@ -35,13 +31,11 @@ async function measureDialog(page,width,height,lang){
 }
 
 for(const lang of ['en','es']) for(const size of [{width:390,height:844},{width:768,height:1024}]){
- test(`Download and Cancel stack full width, each at most the dialog width, at ${size.width}x${size.height} (${lang})`,async({page})=>{
+ test(`Download is the one footer button, full width and 44 px tall, at ${size.width}x${size.height} (${lang})`,async({page})=>{
   const m=await measureDialog(page,size.width,size.height,lang);
-  expect(m.download.y,'Download above Cancel').toBeLessThan(m.cancel.y);
-  expect(Math.abs(m.download.x-m.cancel.x),'same left edge').toBeLessThan(1);
-  expect(m.download.w,'Download as wide as the footer').toBeCloseTo(m.cancel.w,0);
+  expect(Math.abs(m.download.x-m.fileStem.x),'same left edge as the fields').toBeLessThan(1);
+  expect(m.download.w,'Download as wide as the fields').toBeCloseTo(m.fileStem.w,0);
   expect(m.download.h,'Download is a 44 px touch target').toBeGreaterThanOrEqual(44);
-  expect(m.cancel.h,'Cancel is a 44 px touch target').toBeGreaterThanOrEqual(44);
  });
 
  test(`no Export dialog button label wraps or overflows at ${size.width}x${size.height} (${lang})`,async({page})=>{
@@ -56,15 +50,12 @@ for(const lang of ['en','es']) for(const size of [{width:390,height:844},{width:
    await page.locator('#format').selectOption(format);
    const m=await page.evaluate(()=>{
     const download=document.querySelector('#download');
-    const cancel=[...document.querySelectorAll('#exportDialog .dialog-actions>button')].find(b=>b!==download);
     const lines=el=>{const r=document.createRange();r.selectNodeContents(el);return new Set([...r.getClientRects()].map(x=>Math.round(x.top))).size;};
-    return {label:download.textContent.trim(),downloadLines:lines(download),cancelLines:lines(cancel),
-     downloadOverflow:download.scrollWidth>download.clientWidth,cancelOverflow:cancel.scrollWidth>cancel.clientWidth};
+    return {label:download.textContent.trim(),downloadLines:lines(download),
+     downloadOverflow:download.scrollWidth>download.clientWidth};
    });
    expect(m.downloadLines,`"${m.label}" on one line`).toBe(1);
-   expect(m.cancelLines,'Cancel label on one line').toBe(1);
    expect(m.downloadOverflow,`"${m.label}" fits its button`).toBe(false);
-   expect(m.cancelOverflow).toBe(false);
   }
  });
 }
@@ -82,6 +73,4 @@ test('the desktop Export dialog keeps its card width, field widths and stacked a
  expect(d.select.w,'select width').toBeCloseTo(292,0);
  expect(d.fileStem.w,'file-name width').toBeCloseTo(292,0);
  expect(d.download.w,'Download width').toBeCloseTo(292,0);
- expect(d.cancel.w,'Cancel width').toBeCloseTo(292,0);
- expect(d.cancel.y,'Cancel below Download on desktop').toBeGreaterThan(d.download.y+d.download.h-1);
 });

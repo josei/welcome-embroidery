@@ -28,13 +28,13 @@ for(const layout of SIZES) for(const lang of ['en','es']){
  });
 }
 
-test('Cancel still closes Export at the tablet size',async({page})=>{
+test('the × closes Export at the tablet size',async({page})=>{
  await page.setViewportSize({width:768,height:1024});
  await page.goto('/?lang=en');
  await expect(page.locator('.canvas')).toBeVisible();
  await page.locator('#export').click();
  await expect(page.locator('#exportDialog')).toBeVisible();
- await page.locator('#exportDialog').getByRole('button',{name:'Cancel'}).click();
+ await page.locator('#exportDialog').getByRole('button',{name:'Close'}).click();
  await expect(page.locator('#exportDialog')).toBeHidden();
  await expect(page.locator('#export')).toBeFocused();
 });
