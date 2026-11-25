@@ -92,14 +92,14 @@ for(const lang of ['en','es']){
   expect(errors).toEqual([]);
  });
 
- test(`the zoom bar is the desktop's horizontal bar at the canvas's bottom left at 390x844 (${lang})`,async({page})=>{
+ test(`the zoom bar is the desktop's horizontal bar centred at the canvas's bottom at 390x844 (${lang})`,async({page})=>{
   await openEditor(page,lang);
   const g=await regions(page);
   const ids=['zoomOut','zoomPct','zoomIn','handTool','zoomFit','zoomAll'];
   const boxes=await Promise.all(ids.map(id=>page.locator(`#${id}`).boundingBox()));
   for(let i=1;i<ids.length;i++){expect(Math.abs(boxes[i].y-boxes[0].y),`${ids[i]} on the same row`).toBeLessThan(1);expect(boxes[i].x,`${ids[i]} after ${ids[i-1]}`).toBeGreaterThan(boxes[i-1].x);}
   const bar=await page.locator('.canvas .zoombar').boundingBox();
-  expect(bar.x,'bar left edge 8 px from the canvas').toBeCloseTo(g.canvas.x+8,0);
+  expect(bar.x+bar.width/2,'bar centred on the canvas').toBeCloseTo(g.canvas.x+g.canvas.w/2,0);
   expect(bar.y+bar.height,'bar bottom edge 8 px from the canvas').toBeCloseTo(g.canvas.b-8,0);
   for(const b of boxes) expect(b.height,'zoom button is 44 px tall').toBeGreaterThanOrEqual(44);
  });

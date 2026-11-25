@@ -1202,7 +1202,9 @@ label:has(> input[type=checkbox]){display:flex;align-items:center;gap:8px}
 .layout main>.tool-rail{padding-left:4px;padding-right:4px;gap:1px}
 .layout main>.tool-rail .rail-label{font-size:10.5px;letter-spacing:-.02em}
 /* Spanish labels are longer ("Seleccionar", "Rectángulo"): a touch smaller keeps a visible margin inside each tile. */
-html[lang="es"] .layout main>.tool-rail .rail-label{font-size:10px;letter-spacing:-.03em}
+/* Spanish dock labels run wider than English ones ("Seleccionar" is the longest), so every tile's label is set a half pixel
+   smaller and tighter: at 360 px the longest label then keeps about 4 px clear of each side of its tile. */
+html[lang="es"] .layout main>.tool-rail .rail-label{font-size:9.5px;letter-spacing:-.04em}
 }
 
 /* Stitches and 3D on a landscape phone and on tablets. The status row keeps one progress state, the compile or issue text,
@@ -1386,7 +1388,9 @@ html[lang="es"] .layout main>.tool-rail .rail-label{font-size:10px;letter-spacin
 /* The portrait phone selection bar is the same floating pill as the landscape phone and tablet bar: a rounded, bordered, shadowed
    pill centred under the canvas, not a full-width strip with its icons pushed left. */
 @media (max-width:600px) and (orientation:portrait){
-.layout main>.floating.phone-selection{position:relative;isolation:isolate;width:max-content;height:52px;margin:0 auto;padding:4px 6px;border:0;justify-content:center}
+/* The zoom bar and the selection bar share the canvas's centre line, so the two bars stacked over the dock line up. */
+.canvas .zoombar,.layout main>.floating.phone-selection{left:0;right:0;width:max-content;margin:0 auto}
+.layout main>.floating.phone-selection{position:relative;isolation:isolate;height:52px;padding:4px 6px;border:0;justify-content:center}
 .layout main>.floating.phone-selection::before{content:'';position:absolute;z-index:-1;top:4px;bottom:4px;left:0;right:0;background:#fff;border:1px solid var(--field-line);border-radius:10px;box-shadow:0 4px 18px #1d292518}
 }
 
