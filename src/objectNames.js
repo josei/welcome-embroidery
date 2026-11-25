@@ -1,3 +1,5 @@
+import {t} from './i18n.js';
+
 // Names for copies: Copy, Paste and Duplicate give "<base> 2", "<base> 3", ... where the base is the name without its
 // trailing " copy" or number, so copies never stack into "Rectangle copy copy". The number is the lowest one not
 // already used by an object in the document.
@@ -51,4 +53,27 @@ export function objectLabel(o, form = 'start') {
 export function letteringName(text) {
   const first = String(text ?? '').split('\n')[0];
   return first ? `Text "${first}"` : 'Text';
+}
+
+/**
+ * Whether a lettering object's name is the one the engine gave it, so typing new text may rename it. A name the user
+ * typed in Layers is not automatic and is kept.
+ * @param {string | undefined} name the object's current name
+ * @param {string | undefined} text the text it was named from
+ * @returns {boolean}
+ */
+export function isAutomaticLetteringName(name, text) {
+  return name === 'Text' || name === letteringName(text);
+}
+
+/**
+ * The name a lettering object shows in Layers, in the UI language: the stored name with its type word and quoted text
+ * translated, as in Texto "Hola". Other names are shown as they are stored.
+ * @param {string | undefined} name the stored name
+ * @returns {string}
+ */
+export function letteringLayerName(name) {
+  if (name === 'Text') return t('Text');
+  const quoted = /^Text "(.*)"$/s.exec(name ?? '');
+  return quoted ? t('Text "{t}"', {t: quoted[1]}) : name ?? '';
 }

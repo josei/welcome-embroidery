@@ -12,6 +12,7 @@ import {lang, t} from '../i18n.js';
 import {selectionChange} from '../objectListSelection.js';
 import type {Click} from '../objectListSelection.js';
 import {formatCount} from '../decimalText.js';
+import {letteringLayerName} from '../objectNames.js';
 import {useCompactLayout} from '../compactLayout';
 import {Figure} from './Figure';
 import {CloseButton} from './CloseButton';
@@ -168,7 +169,7 @@ function ObjectRow({o, depth, selected, dropping, renaming, count, warning, onRe
  onToggleVisible: () => void;
  onToggleLock: () => void;
 }) {
- const name = o.name || o.kind;
+ const name = o.kind === 'text' ? letteringLayerName(o.name) || o.kind : o.name || o.kind;
  const hidden = o.visible === false, locked = Boolean(o.locked);
  const drop = dropping && (dropping.after ? 'drop-after' : 'drop-before');
  const cls = ['object-row', selected && 'selected', hidden && 'is-hidden', locked && 'is-locked', drop].filter(Boolean).join(' ');

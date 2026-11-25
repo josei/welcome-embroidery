@@ -10,7 +10,7 @@ import {flipObjects,mapPathPoints,normAngle,objById,objectBounds,refreshPathBoun
 import {hoopSize} from './hoops.js';
 import {refreshAlong,alongPoints,pathSig} from './pathFollow.js';
 import {refreshClips} from './clipMasks.js';
-import {copyName,letteringName} from './objectNames.js';
+import {copyName,letteringName,isAutomaticLetteringName} from './objectNames.js';
 import {booleanShapes,knifeShape,offsetShape,strokeToShape,isClosedShape,appliqueGroup} from './shapeOps.js';
 import {removeSmallHoles,removeSmallIslands} from './cleanup.js';
 import {roundPathCorners,arrayCopies,simplifyPath,splitPath,joinPaths,reorderObject,redworkGroup,replaceThread,sortByColor,nodeFraction} from './editOps.js';
@@ -83,6 +83,8 @@ function applyOperation(doc,op){
       undefined)doc.settings[k]=op[k];}
     else if(op.op==='rename_document')doc.name=op.name;
     else if(op.op==='set_object'){const o=doc.objects.find(v=>v.id===op.id);if(!o)throw Error(`Unknown object: ${op.id}`);
+      // Typed text renames lettering only while its name is still the automatic one, so a name typed in Layers survives.
+      const automaticName=o.kind==='text'&&isAutomaticLetteringName(o.name,o.text);
       for(
       const k of ['stitch','thread','name','text','font','border','borderThread','satinWidth','angle','spacing','visible','locked','stitchLength','stagger',
       'underlayType','underlayInset','underlaySpacing','startAt','endAt','fillMethod','guide','radius','radii','satinWidthEnd','raised','buttonhole',
@@ -93,7 +95,7 @@ function applyOperation(doc,op){
       undefined){if(op[k]===null)delete o[k];else o[k]=op[k];if(op.radius!==undefined&&op.radii===undefined)delete o.radii;}
       if(o.kind==='text'&&(['text','font',...TEXT_OPTION_KEYS].some(k=>op[k]!==undefined))){const f=isRegistryFont(o.font)?getFont(o.font):null;
         if(f&&op.font!==undefined&&op.h===undefined&&!(o.h>=f.size*f.minScale&&o.h<=f.size*f.maxScale))o.h=f.size;o.w=
-        measureText(o.text,o.font||'welcome-mono/1',o.h,o);if(op.text!==undefined&&typeof op.text==='string')o.name=letteringName(op.text);}if(
+        measureText(o.text,o.font||'welcome-mono/1',o.h,o);if(op.text!==undefined&&typeof op.text==='string'&&op.name===undefined&&automaticName)o.name=letteringName(op.text);}if(
         o.kind==='stitch_layer'&&op.thread!==undefined)o.threadOverrides=
         Object.fromEntries(o.threads.map((/** @type {any} */ _,/** @type {any} */ i)=>[i,op.thread]));}
     else if(op.op==='set_path_point'){const o=doc.objects.find(v=>v.id===op.id);
