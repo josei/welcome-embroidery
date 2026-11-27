@@ -95,6 +95,10 @@ export function EditorOverlays() {
     </dialog>
     {" "}
     <div id={"fontPanel"} className={"font-panel"} role={"dialog"} aria-label={"Choose a font"} hidden={true}>
+      <div className={"sheet-head font-head"}>
+        <h2 className={"sheet-title"}>{t('Choose a font')}</h2>
+        <CloseButton id={"fontClose"} />
+      </div>
       <input id={"fontSearch"} type={"search"} placeholder={"Search 195 fonts…"} aria-label={"Search fonts"} />
       <div id={"fontChips"} className={"chips"} role={"group"} aria-label={"Font categories"}>
       </div>

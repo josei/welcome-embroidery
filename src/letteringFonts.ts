@@ -332,6 +332,7 @@ export function initFontPicker() {
     search: byId('fontSearch') as HTMLInputElement,
     chips: byId('fontChips'),
     list: byId('fontList'),
+    closeButton: byId('fontClose'),
     loadFile: byId('fontLoadFile'),
     fileInput: byId('fontFile') as HTMLInputElement,
     getIndex: pickerIndex,

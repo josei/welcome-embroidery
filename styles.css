@@ -1086,7 +1086,11 @@ body{height:100dvh;min-height:0;overflow:hidden}
 .font-panel input[type=search]{min-height:44px}
 .font-panel .chips{flex:0 0 auto;flex-wrap:nowrap;min-height:44px;overflow-x:auto;overscroll-behavior-x:contain;padding-bottom:2px}
 .font-panel .chip{flex:0 0 auto;display:inline-flex;align-items:center;justify-content:center;min-width:44px;min-height:44px;padding:0 14px;white-space:nowrap}
+.font-panel .chips.more-right{-webkit-mask-image:linear-gradient(to right,#000 calc(100% - 36px),transparent);mask-image:linear-gradient(to right,#000 calc(100% - 36px),transparent)}
 }
+/* The font picker's heading row: the title and the shared × close, one row tall at every size. */
+.font-panel .font-head{display:flex;justify-content:space-between;align-items:center;gap:8px;min-height:44px;margin:0}
+.font-panel .font-head .sheet-title{flex:1 1 auto;min-width:0;margin:0}
 
 /* Phone and tablet: every control in the Settings dialog is 44 px tall, from the language buttons and the agent button
    to Close. A sewing-tip row's label is the tap target for its tick, so the whole row grows and the 4 px gap stays. */

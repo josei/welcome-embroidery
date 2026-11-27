@@ -65,6 +65,7 @@ export function drawPreview(/** @type {any} */ svg,/** @type {any} */ fid,/** @t
  * @property {HTMLInputElement} search
  * @property {HTMLElement} chips
  * @property {HTMLElement} list
+ * @property {HTMLElement} closeButton the picker's × control in its heading row
  * @property {HTMLElement} loadFile
  * @property {HTMLInputElement} fileInput
  * @property {() => any[]} getIndex
@@ -77,7 +78,7 @@ export function drawPreview(/** @type {any} */ svg,/** @type {any} */ fid,/** @t
  */
 /** @param {FontPickerDeps} deps */
 export function createFontPicker(
-  {button,buttonPreview,buttonName,panel,search,chips,list,loadFile,fileInput,getIndex,getCurrent,getSample,getColor,ensureLoaded,onPick,onLoadFile}){
+  {button,buttonPreview,buttonName,panel,search,chips,list,closeButton,loadFile,fileInput,getIndex,getCurrent,getSample,getColor,ensureLoaded,onPick,onLoadFile}){
   let open=false,category='all',active=-1;
   /** @type {any[]} */
   let rows=[];
@@ -94,6 +95,7 @@ export function createFontPicker(
     b.setAttribute('aria-pressed',String(id===category));b.onclick=()=>
     {category=id;[...chips.children].forEach((/** @type {any} */ c)=>c.setAttribute('aria-pressed',String(c.dataset.cat===id)));renderList();};return b;}));
   function renderList(){
+    chipEdge();
     observer?.disconnect();list.replaceChildren();rows=[];const cur=getCurrent(),items=visible();
     observer=
       new IntersectionObserver(entries=>
@@ -139,6 +141,12 @@ export function createFontPicker(
   search.focus();
   }
   function close(){if(!open)return;open=false;panel.hidden=true;button.setAttribute('aria-expanded','false');observer?.disconnect();button.focus();}
+  closeButton.onclick=()=>close();
+  // The category chips scroll sideways on a phone. While more of them lie past the right edge, the row fades out there, so the
+  // cut-off chip reads as more to scroll to. The fade goes once the row is scrolled to its end.
+  const chipEdge=()=>chips.classList.toggle('more-right',chips.scrollLeft+chips.clientWidth<chips.scrollWidth-2);
+  chips.addEventListener('scroll',chipEdge,{passive:true});
+  addEventListener('resize',chipEdge);
   button.onclick=()=>open?close():show();
   search.oninput=()=>renderList();
   panel.addEventListener('keydown',(/** @type {any} */ e)=>
