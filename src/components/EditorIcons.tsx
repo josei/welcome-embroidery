@@ -255,8 +255,10 @@ export function EditorIcons() {
           <path d={"M12 3v18M8 7 3 12l5 5zM16 7l5 5-5 5z"} />
         </symbol>
         <symbol id={"i-arrange"} viewBox={"0 0 24 24"}>
-          <rect x={"3"} y={"3"} width={"11"} height={"11"} rx={"1"} />
-          <rect x={"10"} y={"10"} width={"11"} height={"11"} rx={"1"} />
+          <rect x={"3"} y={"3"} width={"8"} height={"8"} rx={"1"} />
+          <rect x={"13"} y={"3"} width={"8"} height={"8"} rx={"1"} />
+          <rect x={"3"} y={"13"} width={"8"} height={"8"} rx={"1"} />
+          <rect x={"13"} y={"13"} width={"8"} height={"8"} rx={"1"} />
         </symbol>
         <symbol id={"i-fill"} viewBox={"0 0 24 24"}>
           <rect x={"4"} y={"5"} width={"16"} height={"14"} rx={"1"} />

@@ -82,3 +82,28 @@ for(const lang of ['en','es']){
   expect(errors).toEqual([]);
  });
 }
+
+// Each control in the tablet bar has its own glyph. Duplicate uses the same glyph as the desktop Duplicate,
+// because it is the same command, and Arrange has a glyph of its own.
+test('the tablet selection bar gives every control a different glyph, and Duplicate the desktop glyph, at 768x1024',async({page})=>{
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));page.on('dialog',d=>d.accept().catch(()=>{}));
+ await page.setViewportSize({width:1280,height:800});
+ await page.goto('/');
+ await expect(page.locator('header.top #duplicate')).toBeVisible();
+ const desktopDuplicate=await page.locator('header.top #duplicate use').getAttribute('href');
+
+ await page.setViewportSize({width:SIZE[0],height:SIZE[1]});
+ await page.goto('/');
+ await page.locator('#rect').click();
+ const glyphs={};
+ for(const id of CONTROLS){
+  await expect(page.locator(`#${id}`),`${id} is shown`).toBeVisible();
+  glyphs[id]=await page.locator(`#${id} use`).getAttribute('href');
+ }
+ expect(new Set(Object.values(glyphs)).size,`tablet bar glyphs ${JSON.stringify(glyphs)} are all different`).toBe(CONTROLS.length);
+ // Different ids can still hold the same drawing, so the shapes are compared too.
+ const shapes=await page.evaluate(ids=>ids.map(h=>document.querySelector(h).outerHTML.replace(/\s+/g,' ')),Object.values(glyphs));
+ expect(new Set(shapes).size,'the tablet bar glyphs are drawn differently').toBe(CONTROLS.length);
+ expect(glyphs.barDuplicate).toBe(desktopDuplicate);
+ expect(errors).toEqual([]);
+});
