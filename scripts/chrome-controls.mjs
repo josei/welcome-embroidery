@@ -130,11 +130,12 @@ export function discoverChromeControls(page) {
       if (!box) continue;
       const glyph = union([...el.querySelectorAll('svg')].map(s => s.getBoundingClientRect())
         .filter(r => r.width > 0 && r.height > 0));
-      if (!glyph) continue;
       const text = labelRects(el);
+      // A word-only control (the view switch, the desktop menu headers) is checked too when it carries the shared style.
+      if (!glyph && !(el.classList.contains('chrome-state') && text.length)) continue;
       const labelWords = (el.innerText || '').trim().split(/\s+/).filter(Boolean);
       if (labelWords.length > maxWords) continue;
-      const group = union([glyph, ...text]);
+      const group = union([...(glyph ? [glyph] : []), ...text]);
       const cx = (box.left + box.right) / 2, cy = (box.top + box.bottom) / 2;
       const gx = (group.left + group.right) / 2, gy = (group.top + group.bottom) / 2;
       el.setAttribute('data-chrome-guard', String(index));
@@ -148,7 +149,7 @@ export function discoverChromeControls(page) {
         selectable: el.classList.contains('chrome-state') || el.hasAttribute('aria-pressed'),
         selectedAtRest: el.classList.contains('active-tool') || el.getAttribute('aria-pressed') === 'true',
         box: {left: box.left, top: box.top, right: box.right, bottom: box.bottom},
-        glyph: {left: glyph.left, top: glyph.top, right: glyph.right, bottom: glyph.bottom},
+        glyph: {left: (glyph || group).left, top: (glyph || group).top, right: (glyph || group).right, bottom: (glyph || group).bottom},
         offsetX: gx - cx,
         offsetY: gy - cy,
       });

@@ -170,7 +170,7 @@ function Dropdown({id, label, rows, iconOnly, onOpen, sharedReasons}: {id: strin
  return (
   <div className="file-menu" ref={wrap} onKeyDown={onKeyDown}>
    <button ref={trigger} type="button" id={id} aria-haspopup="menu" aria-expanded={open} aria-controls={open ? `${id}List` : undefined}
-    className={iconOnly ? 'icon-button chrome-state menu-trigger' : undefined} aria-label={iconOnly ? label : undefined} title={iconOnly ? label : undefined}
+    className={iconOnly ? 'icon-button chrome-state menu-trigger' : 'chrome-state'} aria-label={iconOnly ? label : undefined} title={iconOnly ? label : undefined}
     onClick={e => {
      // A click with no pointer (detail 0) came from the keyboard: Enter or Space opens the menu and focuses its first item.
      const keyboard = e.detail === 0;

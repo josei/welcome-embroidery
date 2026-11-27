@@ -17,7 +17,7 @@ export function ViewSwitch() {
     <button
      key={view.id}
      data-view={view.id}
-     className={current === view.id ? 'active' : undefined}
+     className={current === view.id ? 'chrome-state active' : 'chrome-state'}
      aria-pressed={current === view.id}
      onClick={() => viewActions.choose(view.id)}
     >
