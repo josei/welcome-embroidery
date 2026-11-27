@@ -10,6 +10,7 @@ import {zoomActions, zoomPercent} from '../zoomState.js';
 import {handModeState} from '../canvasModeState.js';
 import {selectionState} from '../selectionState.js';
 import {multiSelectState} from '../multiSelectState.js';
+import {interactionState} from '../interactionState.js';
 import {togglePhoneSheet} from '../phoneSheetState.js';
 import {ChromeTile} from './ChromeTile';
 
@@ -135,20 +136,28 @@ function useTool() {
  return useSyncExternalStore(toolMode.subscribe, toolMode.get);
 }
 
+// Whether a lettering box is open over the canvas. While it is, the Text tile is the selected one, and the Select tile is not,
+// so the dock never shows two tiles selected at once.
+function useEditingText() {
+ return useSyncExternalStore(interactionState.subscribe, interactionState.get).canvasText != null;
+}
+
 export function PhoneDock() {
  const current = useTool();
+ const editingText = useEditingText();
+ const selectOn = current === 'select' && !editingText;
  const touch = useSyncExternalStore(inputMode.subscribe, inputMode.get) === 'touch';
  const path = pathTile(current, touch);
  return (
   <div className="phone-dock tool-row tool-rail" role="toolbar" aria-label={t('Tools')}>
    <ChromeTile id="select" icon="select" label={t('Select')} name={t('Select ({shortcut})', {shortcut: shortcutFor('select')})}
-    selected={current === 'select'} pressed={current === 'select'} onClick={() => toolActions.press('select')} />
+    selected={selectOn} pressed={selectOn} onClick={() => toolActions.press('select')} />
    <ChromeTile id="rect" icon="rect" label={t('Rectangle')} name={t('Add rectangle ({shortcut})', {shortcut: shortcutFor('rect')})}
     onClick={event => addShape('rect', event.detail === 0)} />
    <ChromeTile id="path" icon="path" label={path.word} name={path.name} selected={current === 'path'} pressed={current === 'path'}
     onClick={() => toolActions.press('path')} />
    <ChromeTile id="letter" icon="text" label={t('Text')} name={t('Add lettering ({shortcut})', {shortcut: shortcutFor('letter')})}
-    onClick={event => addShape('text', event.detail === 0)} />
+    selected={editingText} pressed={editingText} onClick={event => addShape('text', event.detail === 0)} />
    <ChromeTile id="line" icon="line" label={t('Line')} name={t('Line ({shortcut}, drag)', {shortcut: shortcutFor('line')})}
     selected={current === 'line'} pressed={current === 'line'} onClick={() => toolActions.press('line')} />
   </div>
@@ -157,10 +166,12 @@ export function PhoneDock() {
 
 export function LandscapeRail() {
  const current = useTool();
+ const editingText = useEditingText();
+ const selectOn = current === 'select' && !editingText;
  return (
   <div className="tool-rail landscape-rail" role="toolbar" aria-label={t('Tools')}>
    <ChromeTile id="select" icon="select" label={t('Select')} name={t('Select ({shortcut})', {shortcut: shortcutFor('select')})}
-    selected={current === 'select'} pressed={current === 'select'} onClick={() => toolActions.press('select')} />
+    selected={selectOn} pressed={selectOn} onClick={() => toolActions.press('select')} />
    <ChromeTile id="rect" icon="rect" label={t('Rectangle')} name={t('Add rectangle ({shortcut})', {shortcut: shortcutFor('rect')})}
     onClick={event => addShape('rect', event.detail === 0)} />
    <ChromeTile id="ellipse" icon="ellipse" label={t('Ellipse')} name={t('Add ellipse ({shortcut})', {shortcut: shortcutFor('ellipse')})}
@@ -168,7 +179,7 @@ export function LandscapeRail() {
    <ChromeTile id="path" icon="path" label={t('Path')} name={t('Draw path ({shortcut})', {shortcut: shortcutFor('path')})}
     selected={current === 'path'} pressed={current === 'path'} onClick={() => toolActions.press('path')} />
    <ChromeTile id="letter" icon="text" label={t('Text')} name={t('Add lettering ({shortcut})', {shortcut: shortcutFor('letter')})}
-    onClick={event => addShape('text', event.detail === 0)} />
+    selected={editingText} pressed={editingText} onClick={event => addShape('text', event.detail === 0)} />
    <ChromeTile id="line" icon="line" label={t('Line')} name={t('Line ({shortcut}, drag)', {shortcut: shortcutFor('line')})}
     selected={current === 'line'} pressed={current === 'line'} onClick={() => toolActions.press('line')} />
   </div>

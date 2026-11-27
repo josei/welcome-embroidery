@@ -4,6 +4,7 @@ import {toolActions, toolMode} from '../toolMode.js';
 import {inputMode} from '../inputMode.js';
 import {gridSnapActions, gridSnapState} from '../gridSnapState.js';
 import {toolbarActions} from '../toolbarCommands.js';
+import {interactionState} from '../interactionState.js';
 import {focusStitchType} from '../focusStitchType.js';
 import {shortcutFor} from '../shortcutTable.js';
 import {t} from '../i18n.js';
@@ -53,12 +54,20 @@ export function ToolButtons() {
  return <><LineTool /><MeasureTool /><PolygonTool /><StarTool /></>;
 }
 
+// Whether a lettering box is open over the canvas. While it is, the Text button is the selected one and Select is not,
+// so the tool row never shows two buttons selected at once.
+function useEditingText() {
+ return useSyncExternalStore(interactionState.subscribe, interactionState.get).canvasText != null;
+}
+
 // The select and pen buttons, each in its place in the tool row. The active class comes from toolMode.
 export function SelectTool() {
  const current = useSyncExternalStore(toolMode.subscribe, toolMode.get);
+ const editingText = useEditingText();
+ const selectOn = current === 'select' && !editingText;
  const tip = t('Select ({shortcut})', {shortcut: shortcutFor('select')});
  return (
-  <button aria-pressed={current === 'select'} className={toolClass(current, 'select')} onClick={() =>
+  <button aria-pressed={selectOn} className={selectOn ? 'icon-button chrome-state active-tool' : 'icon-button chrome-state'} onClick={() =>
     toolActions.press(
     'select')} aria-label={tip} title={tip} data-tooltip={tip} id="select"><svg className="icon"><use href="#i-select"/></svg><span className="rail-label">{t('Select')}</span></button>
  );
@@ -91,11 +100,14 @@ export function PathTool() {
 }
 
 // The add rectangle, ellipse and lettering buttons. Each adds its shape through the same canvas command as before.
-// Adding is a one-shot action, so it is never armed: aria-pressed is always false. It still leaves any drawing tool
+// Adding is a one-shot action, so it is never armed: aria-pressed is false, except that the lettering button shows
+// as selected while its box is open (see useEditingText). It still leaves any drawing tool
 // first, so the Select button is the pressed one after the object is placed. `tip` is the tooltip, which names the key.
 export function AddShapeButton({kind, id, label, icon, tip, short}: {kind: 'rect' | 'ellipse' | 'text'; id: string; label: string; icon: string; tip: string; short: string}) {
+ const editingText = useEditingText();
+ const selected = kind === 'text' && editingText;
  return (
-  <button aria-pressed={false} className="icon-button chrome-state" id={id} aria-label={label} title={tip} data-tooltip={tip} onClick={event => {
+  <button aria-pressed={selected} className={selected ? 'icon-button chrome-state active-tool' : 'icon-button chrome-state'} id={id} aria-label={label} title={tip} data-tooltip={tip} onClick={event => {
     toolActions.press('select');
     toolbarActions.addShape(kind);
     // A keyboard add (detail 0) moves focus to the new shape's Stitch type controls, so the next key works on it. Lettering
