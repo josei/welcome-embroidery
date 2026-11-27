@@ -1,5 +1,4 @@
-// Each chrome control's hover, selected, focus and pressed states change pixels only inside the control's box plus its
-// focus outline, and each state visibly differs from rest. Only a margin around the box is compared, and the states are
+// Each chrome control's hover, selected, focus and pressed states change pixels only inside the control's box, and each state visibly differs from rest. Only a margin around the box is compared, and the states are
 // forced through the DevTools protocol so the pointer and focus stay where they are. A command button has no selected
 // state, and one that is already selected at rest has nothing to add, so neither is checked for selected.
 import {test, before, after} from 'node:test';
@@ -23,7 +22,7 @@ after(async () => {
 });
 
 for (const lang of LANGS) for (const [width, height] of CHROME_SIZES) {
-  test(`chrome state changes stay inside each control's box and outline at ${width}x${height} (${lang})`, async () => {
+  test(`chrome state changes stay inside each control's box at ${width}x${height} (${lang})`, async () => {
     const {context, page} = await openEditor(browser, server.base, {width, height, lang});
     const forcer = makeStateForcer(page);
     try {
@@ -32,12 +31,8 @@ for (const lang of LANGS) for (const [width, height] of CHROME_SIZES) {
       const problems = [];
       for (const c of controls) {
         const name = `${c.name} (${c.index})`;
-        await forcer.clear();
-        // The focus outline's width and offset set how far past the box a state may draw.
-        await forcer.set(c.index, 'focus-visible');
-        const {width: outlineWidth, offset: outlineOffset} = await forcer.outlineOf(c.index);
-        await forcer.clear();
-        const allowance = outlineWidth + Math.max(0, outlineOffset);
+        // Nothing may draw past the box: focus rings are inset, so the allowance is zero.
+        const allowance = 0;
 
         const box = await boxOf(page, c.index);
         const rest = await captureAround(page, box);

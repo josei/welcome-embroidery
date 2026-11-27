@@ -10,7 +10,7 @@ import {chromium} from '@playwright/test';
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 
 // The standard sizes chrome is judged at, and the languages the editor ships in.
-export const CHROME_SIZES = [[360, 640], [390, 844], [844, 390], [768, 1024], [1600, 1000]];
+export const CHROME_SIZES = [[360, 640], [390, 844], [844, 390], [768, 1024], [1440, 900], [1600, 1000]];
 export const STANDARD_SIZES = CHROME_SIZES.slice(0, 4);
 export const LANGS = ['en', 'es'];
 
