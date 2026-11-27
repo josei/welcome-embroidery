@@ -1,7 +1,8 @@
+import {revealMenuRow} from './menu-reveal.js';
 import {test,expect} from '@playwright/test';
 
-// Two phone edges. In landscape (844x390) the footer has no Messages pill: the top-bar issues button opens Messages instead. In portrait (390x844) the unsaved dot is an 8 px dot before the design name, and the
-// name starts after it, so the dot is never half under the field.
+// Two phone edges. In landscape (844x390) the phone has no status row: Messages is a Menu row. In portrait (390x844) the unsaved
+// mark sits in the design name's field, and the name keeps its edges when the mark appears.
 
 test.beforeEach(async({page})=>{await page.addInitScript(()=>{delete window.showSaveFilePicker;});});
 
@@ -18,11 +19,14 @@ async function makeDirty(page){
 }
 
 for(const lang of ['en','es']){
- test(`landscape 844x390 ${lang}: the footer Messages pill is absent, so no pill can clip`,async({page})=>{
+ test(`landscape 844x390 ${lang}: Messages is a Menu row, not a pill on the status line`,async({page})=>{
   await page.setViewportSize({width:844,height:390});
   await page.goto(`/?lang=${lang}`);
   await expect(page.locator('.canvas')).toBeVisible();
+  // A landscape phone has no status row: the design's count is under its name and Messages is in the Menu.
   await expect(page.locator('#messagesBtn')).toHaveCount(0);
+  await page.locator('#phoneMenu').click();
+  await expect(await revealMenuRow(page.locator('#phoneMenuList'),'menuMessages')).toHaveCount(1);
  });
 
  test(`portrait 390x844 ${lang}: the unsaved status shows as a caption and the name does not move`,async({page})=>{

@@ -48,7 +48,7 @@ const OLD_COMMANDS={
  barDuplicate:'menuDuplicate', barDelete:'menuDelete', group:'menuGroup', ungroup:'menuUngroup',
  clipBtn:'menuClip', unclipBtn:'menuUnclip', textOnPath:'menuTextOnPath', textOffPath:'menuTextOffPath', editNodes:'menuEditNodes',
  nodeAdd:'menuNodeAdd', nodeDel:'menuNodeDelete', nodeSmooth:'menuNodeSmooth', nodeCorner:'menuNodeCorner',
- ellipse:'menuEllipse', polygon:'menuPolygon', star:'menuStar', traceBtn:'menuTrace', photo:'menuPhoto', pen:'menuPen',
+ ellipse:'menuEllipse', polygon:'menuPolygon', star:'menuStar', traceBtn:'menuTrace', photo:'menuPhoto', pen:'menuPen', measure:'menuMeasure',
  moreLayers:'menuLayers',
 };
 // moreProperties has no Menu row while an object is selected: the selection bar's Properties control is its route then.
@@ -66,7 +66,8 @@ for(const [width,height] of SIZES){
   const duplicates=bar.filter(id=>menu.includes(id));
   expect(duplicates,'bottom-bar controls that also appear in the Menu').toEqual([]);
   // Only the tool palette and the view-mode and playback controls are in the bottom bar.
-  const allowed=new Set(['select','rect','path','letter','line','measure','play','resetPlayback','seek']);
+  // The landscape rail's Ellipse is a tool tile too; Measure is in the Menu now.
+  const allowed=new Set(['select','rect','ellipse','path','letter','line','play','resetPlayback','seek']);
   const extra=bar.filter(id=>!allowed.has(id));
   expect(extra,'bottom bar holds no command controls').toEqual([]);
   expect(errors).toEqual([]);
@@ -82,7 +83,8 @@ for(const [width,height] of SIZES){
  test(`every command the removed controls offered is a Menu row at ${width}x${height}`,async({page})=>{
   const errors=await openEditor(page,width,height,'en');
   const menu=await menuIds(page);
-  const missing=Object.entries(OLD_COMMANDS).filter(([, row])=>!menu.includes(row)).map(([old])=>old);
+  // On a landscape phone Ellipse is on the rail, so its Menu row is left out there.
+  const missing=Object.entries(OLD_COMMANDS).filter(([old, row])=>!(old==='ellipse'&&width>height)&&!menu.includes(row)).map(([old])=>old);
   expect(missing,'old controls with no Menu row').toEqual([]);
   for(const row of ARRANGE_ROWS) expect(menu,`${row} is in the Menu`).toContain(row);
   expect(errors).toEqual([]);

@@ -2,15 +2,16 @@
 // Where the floating toolbar and an open phone sheet cover the canvas, so the view can keep content clear of them.
 
 /**
- * The canvas pixels the tool rail covers on the left, on a tablet in landscape. The rail docks on the canvas's left edge, just
- * inside the ruler, so Fit hoop and Fit all fit the hoop into the space beside it and a new shape is never drawn under it.
- * Other sizes keep the rail over the margin, so this is 0 there. Mirrors the media query in styles.css.
+ * The canvas pixels the tool rail covers on the left, in landscape (a tablet or a landscape phone). The rail docks on the canvas's
+ * left edge, just inside the ruler, so Fit hoop and Fit all fit the hoop into the space beside it and a new shape is never drawn
+ * under it. Portrait sizes keep the rail out of the canvas (phones) or over the margin (tablets), so this is 0 there.
+ * Mirrors the landscape rules in styles.css.
  * @param {HTMLElement} container the canvas element
  * @returns {{top: number, right: number, bottom: number, left: number}}
  */
 export function railInset(container) {
   const inset = {top: 0, right: 0, bottom: 0, left: 0};
-  if (!globalThis.matchMedia?.('(min-width: 601px) and (max-width: 1100px) and (orientation: landscape) and (min-height: 501px)').matches) return inset;
+  if (!globalThis.matchMedia?.('(orientation: landscape) and (max-width: 1100px)').matches) return inset;
   const c = container.getBoundingClientRect();
   const r = document.querySelector('.canvas .tool-rail')?.getBoundingClientRect();
   if (r && r.width && r.height && r.left - c.left < 40) inset.left = Math.max(0, r.right - c.left + 8 - RULER_PX);

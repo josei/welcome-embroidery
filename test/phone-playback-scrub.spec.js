@@ -55,7 +55,7 @@ const geometry=page=>page.evaluate(()=>{
   play:box(document.querySelector('#play')),
   timeScroll:{scrollWidth:document.querySelector('#playbackTime').scrollWidth,clientWidth:document.querySelector('#playbackTime').clientWidth},
   stitchesScroll:{scrollWidth:document.querySelector('#playbackStitches').scrollWidth,clientWidth:document.querySelector('#playbackStitches').clientWidth},
-  footer:box(document.querySelector('.layout main>footer')),
+  dock:document.querySelector('.phone-dock')?box(document.querySelector('.phone-dock')):null,
   viewport:{w:innerWidth,h:innerHeight},
   pageScroll:{scrollWidth:document.documentElement.scrollWidth,clientWidth:document.documentElement.clientWidth},
  };
@@ -145,11 +145,12 @@ for(const lang of ['en','es']) for(const view of ['stitches','preview']){
   expect(errors).toEqual([]);
  });
 
- test(`the status line stays clear of the playback bar and the labels stay on one line, ${view} view (${lang})`,async({page})=>{
+ test(`the playback bar stays clear of the tool dock and the labels stay on one line, ${view} view (${lang})`,async({page})=>{
   test.setTimeout(120000);
   const errors=await openView(page,...PHONE,lang,view);
   const g=await geometry(page);
-  expect(g.phone.b,'the playback bar ends above the status line').toBeLessThanOrEqual(g.footer.t);
+  // The tool dock is hidden in the 3D view (as before), so the check holds where the dock is shown.
+  if(view==='stitches') expect(g.phone.b,'the playback bar ends above the tool dock').toBeLessThanOrEqual(g.dock.t);
   expect(g.timeScroll.scrollWidth,`time readout "${await page.locator('#playbackTime').textContent()}"`).toBeLessThanOrEqual(g.timeScroll.clientWidth);
   expect(g.stitchesScroll.scrollWidth,`stitch readout "${await page.locator('#playbackStitches').textContent()}"`).toBeLessThanOrEqual(g.stitchesScroll.clientWidth);
   expect(await linesOf(page,'#playbackTime'),'time readout on one line').toBe(1);

@@ -51,7 +51,8 @@ for(const [width,height] of PHONES) test(`opening Layers keeps the selection in 
  await page.goto('/?lang=en');
  await page.locator('#rect').tap();
  await expect(page.locator('.sel-box')).toBeVisible();
- await page.locator('#zoomIn').click();await page.locator('#zoomIn').click();
+ // With an object selected the zoom commands are in the % tile's menu.
+ for(let i=0;i<2;i++){await page.locator('#zoomPct').click();await page.locator('[role=menuitem]').filter({hasText:/^(Zoom in|Acercar)$/}).click();}
  const before=await viewBox(page);
  await openLayers(page);
  await expectSelectionInView(page);

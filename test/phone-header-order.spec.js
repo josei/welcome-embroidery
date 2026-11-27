@@ -26,7 +26,8 @@ for(const [width,height] of SIZES) for(const lang of ['en','es']) {
   if(width<height){
    await expect(page.locator('.tool-rail').first()).toBeVisible();
    const buttons=await page.locator('.tool-rail').first().locator('button').count();
-   expect(buttons).toBe(6);
+   // The dock holds the five drawing tools; Measure moved to the Menu's Tools group.
+   expect(buttons).toBe(5);
   } else {
    await expect(page.locator('#play')).toBeVisible();
    await expect(page.locator('.tool-rail').first()).toBeHidden();

@@ -41,7 +41,10 @@ const centreOf=async element=>{
 
 // Back to 100 %, then one notch at the leaf's centre, so the drag happens at the percentage it is measured at.
 async function zoomTo(page,shape,percent){
- await page.locator('#zoomPct').click();
+ // With an object selected the % tile opens the zoom menu, where 100% is a row.
+ const pct=page.locator('#zoomPct');
+ if(await pct.getAttribute('aria-expanded')!==null){await pct.click();await page.locator('[role=menuitem]').filter({hasText:/^100%$/}).click();}
+ else await pct.click();
  const {x,y}=await centreOf(shape);
  await page.mouse.move(x,y);
  await page.mouse.wheel(0,notchFor(percent));

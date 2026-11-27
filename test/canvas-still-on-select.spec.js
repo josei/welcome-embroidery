@@ -80,7 +80,7 @@ test('390x844: a touch tap on the leaf leaves the hoop where it was',async({brow
  await page.touchscreen.tap(leaf.left+leaf.width/2,leaf.top+leaf.height/2);
  await expect.poll(()=>selectedIds(page)).toEqual(['leaf']);
  // The phone bar sits in its own strip under the canvas, not over it, so it can't cover the drawing.
- await expect(page.locator('.layout main>.floating.phone-selection')).toBeVisible();
+ await expect(page.locator('.context-bar')).toBeVisible();
  await expectFixed(hoop,await hoopBox(page),'the hoop');
  await expectFixed(leaf,await leafBox(page),'the leaf');
  expect(errors).toEqual([]);

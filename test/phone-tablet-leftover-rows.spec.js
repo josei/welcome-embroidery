@@ -36,7 +36,7 @@ test('phone Stitches and 3D have no empty status row under the dock',async({page
  for(const view of ['stitches','preview']){
   await phoneView(page,view);
   await expect(page.locator('.phone-playback')).toBeVisible();
-  await expect(page.locator('main>footer')).toHaveCSS('height','0px');
+  await expect(page.locator('main>footer')).toHaveCount(0);
   const playback=await box(page,'.phone-playback');
   const canvas=await box(page,'.canvas');
   expect(Math.round(canvas.bottom),`${view}: canvas ends where the playback row starts`).toBeLessThanOrEqual(Math.round(playback.top)+1);
@@ -50,15 +50,15 @@ test('phone Stitches and 3D have no empty status row under the dock',async({page
  }
 });
 
-test('a compile error shows on the top bar count line, and the footer stays 0 px',async({page})=>{
+test('phone Stitches shows the stitch count in the top bar, not a status row',async({page})=>{
  test.setTimeout(120000);
  await openDesign(page,390,844);
  await draw(page,'#rect');
  await phoneView(page,'stitches');
- await expect(page.locator('main>footer')).toHaveCSS('height','0px');
- await page.evaluate(()=>{const c=document.querySelector('#count');c.textContent='⚠ Test message';});
- await expect(page.locator('.top #count')).toHaveText('⚠ Test message');
- await expect(page.locator('main>footer')).toHaveCSS('height','0px');
+ // The count is the second line under the design name; the bottom of the screen has no status row to hold it.
+ await expect(page.locator('header.top .top-status')).toHaveCount(1);
+ await expect(page.locator('header.top #count')).toHaveCount(1);
+ await expect(page.locator('main>footer')).toHaveCount(0);
 });
 
 test('tablet portrait Layers rows are never cut under the count',async({page})=>{

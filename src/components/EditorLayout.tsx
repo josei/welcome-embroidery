@@ -44,7 +44,8 @@ import {StitchRunRows} from './StitchRunRows';
 import {StitchSatinEndRows} from './StitchSatinEndRows';
 import {StitchTypeRows} from './StitchTypeRows';
 import {ThreadPlan} from './ThreadPlan';
-import {LineTool, MeasureTool, PathTool, PenTool, SelectTool, ToolButtons} from './ToolButtons';
+import {PathTool, PenTool, SelectTool, ToolButtons} from './ToolButtons';
+import {ContextBar, LandscapeRail, PhoneDock} from './ContextBar';
 import {TransformPanel} from './TransformPanel';
 import {ObjectList, ObjectListHead} from './ObjectList';
 import {PhotoStitch} from './PhotoStitch';
@@ -84,8 +85,6 @@ const subscribeLandscapePhone = (listen: () => void) => {
 const landscapePhoneNow = () => window.matchMedia(LANDSCAPE_PHONE_QUERY).matches;
 const duplicateLabel = t('Duplicate selected object');
 const deleteLabel = t('Delete selected object');
-const propertiesLabel = t('Properties');
-const selectionBarLabel = t('Selected object');
 
 // The editor layout: the object list, the canvas and the inspector. Rendered by React; ids match the markup it
 // replaced, because the keyboard shortcuts and tests address them.
@@ -160,28 +159,17 @@ export function EditorLayout() {
  }, [selectedId]);
  const canvasClass = ['canvas', hand && 'hand', snapping && 'snapping', (gridShown || snapping) && 'grid-shown', view === 'preview' && 'preview-mode', panning && 'panning',
   deletingGuide && 'deleting-guide'].filter(Boolean).join(' ');
- // At phone portrait the dock is one row of six tool buttons, each with its label under the icon. The other drawing tools
- // (Ellipse, Polygon, Star, Trace, Photo stitch, Pen) and the commands of the canvas bar are in the phone Menu (MenuBar.tsx).
- const phoneDock = (
-   <div className={"tool-row tool-rail"} aria-label={"Tools"}>
-     <SelectTool />
-     <AddShapeButton kind={"rect"} id={"rect"} label={"Add rectangle"} icon={"rect"} tip={t('Add rectangle ({shortcut})', {shortcut: shortcutFor('rect')})} short={t('Rectangle')} />
-     <PathTool />
-     <AddShapeButton kind={"text"} id={"letter"} label={"Add lettering"} icon={"text"} tip={t('Add lettering ({shortcut})', {shortcut: shortcutFor('letter')})} short={t('Text')} />
-     <LineTool />
-     <MeasureTool />
-   </div>
-  );
- const deskToolRail = (
+ // The desktop and tablet tool rail. Phones use PhoneDock (portrait) or LandscapeRail (landscape), which share one tile component.
+ const toolRail = (
    <>
              <div className={"tool-row tool-rail"} aria-label={"Tools"}>
                <SelectTool />
                <AddShapeButton kind={"rect"} id={"rect"} label={"Add rectangle"} icon={"rect"} tip={t('Add rectangle ({shortcut})', {shortcut: shortcutFor('rect')})} short={t('Rectangle')} />
-               {landscapePhone ? null : <AddShapeButton kind={"ellipse"} id={"ellipse"} label={"Add ellipse"} icon={"ellipse"} tip={t('Add ellipse ({shortcut})', {shortcut: shortcutFor('ellipse')})} short={t('Ellipse')} />}
+               <AddShapeButton kind={"ellipse"} id={"ellipse"} label={"Add ellipse"} icon={"ellipse"} tip={t('Add ellipse ({shortcut})', {shortcut: shortcutFor('ellipse')})} short={t('Ellipse')} />
                <PathTool />
                <AddShapeButton kind={"text"} id={"letter"} label={"Add lettering"} icon={"text"} tip={t('Add lettering ({shortcut})', {shortcut: shortcutFor('letter')})} short={t('Text')} />
-               {landscapePhone ? <><LineTool /><MeasureTool /></> : <ToolButtons />}
-               {landscapePhone ? null : <button
+               <ToolButtons />
+               <button
                  className={"icon-button chrome-state"}
                  id={"traceBtn"}
                  aria-label={"Trace a picture into filled shapes"}
@@ -192,13 +180,13 @@ export function EditorLayout() {
                  <svg className={"icon"}>
                    <use href={"#i-trace"} />
                  </svg><span className={"rail-label"}>{t('Trace')}</span>
-               </button>}
-               {landscapePhone ? null : <PhotoStitch />}
-               {landscapePhone ? null : <PenTool />}
+               </button>
+               <PhotoStitch />
+               <PenTool />
              </div>
    </>
   );
- const toolRail = phone ? phoneDock : deskToolRail;
+ const phoneChrome = phone || landscapePhone;
  const floatingBar = (
              <div className={"floating"} role={"toolbar"} aria-label={"Canvas tools"} hidden={(compact || narrow || phone) && (!hasSelection || (phone && view !== 'design'))}>
                {/* Select, Duplicate, Delete and Arrange lead the bar. On phones the bar is not shown at all: its commands are in the Menu. */}
@@ -312,35 +300,6 @@ export function EditorLayout() {
                <PathNodeButtons />
              </div>
   );
- // On a phone the selection bar carries the add-to-selection toggle with its word and the three commands a selected object needs,
- // so they are one tap away. The Menu does not list the toggle on a phone, so it has one route on screen. It is shown only
- // with a selection, as on the tablet. Portrait phones place it as a strip above the dock; landscape phones float it over the canvas.
- const phoneBar = (
-             <div className={"floating phone-selection"} role={"toolbar"} aria-label={selectionBarLabel} hidden={!hasSelection || view !== 'design'}>
-               <SelectToggleButton />
-               <ActionButton flag="duplicate" className={"icon-button chrome-state"} id={"barDuplicate"} aria-label={duplicateLabel} title={duplicateLabel}
-                 data-tooltip={duplicateLabel} onClick={() => toolbarActions.duplicate()}>
-                 <svg className={"icon"}>
-                   <use href={"#i-copy"} />
-                 </svg>
-                 <span className={"bar-word"}>{t('Duplicate')}</span>
-               </ActionButton>
-               <ActionButton flag="remove" className={"icon-button chrome-state"} id={"barDelete"} aria-label={deleteLabel} title={deleteLabel}
-                 data-tooltip={deleteLabel} onClick={() => toolbarActions.remove()}>
-                 <svg className={"icon"}>
-                   <use href={"#i-delete"} />
-                 </svg>
-                 <span className={"bar-word"}>{t('Delete')}</span>
-               </ActionButton>
-               <button className={"icon-button chrome-state"} id={"barProperties"} aria-label={propertiesLabel} title={propertiesLabel}
-                 data-tooltip={propertiesLabel} onClick={() => togglePhoneSheet('properties')}>
-                 <svg className={"icon"}>
-                   <use href={"#i-sliders"} />
-                 </svg>
-                 <span className={"bar-word"}>{t('Properties')}</span>
-               </button>
-             </div>
- );
   // The object stitch rows. With nothing selected they set the defaults for new objects and sit in the Document section.
   const stitchSection = (
     <section id={"secStitch"} data-sec={""} hidden={layout.secStitch}>
@@ -378,7 +337,7 @@ export function EditorLayout() {
       {/* A portrait tablet keeps Layers and Properties in one right-hand column, as the desktop does; the panels are always both open. */}
       <main className={view === 'design' ? 'design-view' : undefined}>
         <div className={canvasClass}>
-          {phone ? null : toolRail}
+          {phone ? null : landscapePhone ? <LandscapeRail /> : toolRail}
           {/* The 2D / Stitches / 3D switch sits over the canvas at every width that shows the canvas, as it does on the desktop. */}
           <div className={"canvas-views"}>
             <ViewSwitch />
@@ -392,10 +351,9 @@ export function EditorLayout() {
           <canvas id={"preview3d"} hidden={true} aria-label={"3D thread preview. Drag to orbit, scroll to zoom, double-click to reset."}>
           </canvas>
           <CanvasHint />
-          <ZoomBar />
+          {phoneChrome ? null : <ZoomBar />}
           <PreviewPanel />
           {phone || landscapePhone ? null : floatingBar}
-          {landscapePhone ? phoneBar : null}
           <svg id={"art"} viewBox={"-60 -60 120 120"} tabIndex={0} role={"application"} aria-label={designName(canvasDoc.doc.objects ?? [], canvasCounts)} {...referenceCanvasHandlers}>
             <defs>
               <pattern id={"linen"} width={"2.6"} height={"2.6"} patternUnits={"userSpaceOnUse"}>
@@ -419,14 +377,16 @@ export function EditorLayout() {
           </svg>
           <CanvasTextEditor />
         </div>
-        {phone ? phoneBar : null}
-        {phone && view !== 'design' ? <div className={"phone-playback"}><PlaybackBar /></div> : null}
-        {phone ? toolRail : null}
+        {/* Phones have one bar under the canvas: the context bar, or the playback bar in Stitches view. The dock is the row under it. */}
+        {phoneChrome ? (view === 'design' ? <ContextBar /> : <div className={"phone-playback"} role={"toolbar"} aria-label={t('Playback')}><PlaybackBar /></div>) : null}
+        {phone ? <PhoneDock /> : null}
+        {phoneChrome ? <ToastStack /> : (
         <footer>
           <ToastStack />
-          {phone ? null : <PlaybackBar />}
+          <PlaybackBar />
           <StatusRun />
         </footer>
+        )}
       </main>
       <aside className={[inspectorOpen || tablet ? "panel" : "panel inspector-collapsed", phoneSheet === 'properties' && 'sheet-open'].filter(Boolean).join(' ')} id={"inspector"} aria-label={t('Properties')}>
         <div className={"sheet-head"}>

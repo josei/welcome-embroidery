@@ -1,7 +1,7 @@
 import {test,expect} from '@playwright/test';
 
-// On a phone the Menu's Issues row is the one route to the sewing tips. The status line's issues chip only counts them, and
-// the tip card with its warning text shows in the Properties sheet.
+// On a phone the Menu's Issues row selects the object with the sewing tip, and its warning text shows in the Properties sheet. The
+// issues chip under the design name counts the issues and opens Messages.
 
 test.beforeEach(async({page})=>{await page.addInitScript(()=>{delete window.showSaveFilePicker;});});
 
@@ -28,22 +28,15 @@ test('390x844 es: the Menu Issues row opens the sewing tip with its warning text
  await expect(page.locator('#sewTips')).toContainText('Rectángulo sale del bastidor de 400×400 mm.');
 });
 
-test('390x844 es: the top-bar issues button opens Messages and does not open the Properties sheet', async({page})=>{
+test('390x844 es: the status line issues chip counts the issue and opens Messages', async({page})=>{
  page.on('dialog',d=>d.accept());
  await page.setViewportSize({width:390,height:844});
  await openSquareOutsideHoop(page,'es');
- const chip=page.locator('button#issuesBtn');
+ const chip=page.locator('#issuesBtn');
  await expect(chip).toHaveText('1');
+ await expect(page.locator('button#issuesBtn')).toHaveCount(1);
  await chip.click();
- await expect(page.locator('#messagesDialog')).toHaveAttribute('open','');
+ await expect(page.locator('#messagesDialog[open]')).toHaveCount(1);
+ await page.keyboard.press('Escape');
  await expect(page.locator('#inspector')).not.toHaveClass(/sheet-open/);
-});
-
-test('390x844 es: the Menu Issues row is absent when the design has no issues', async({page})=>{
- await page.setViewportSize({width:390,height:844});
- await page.goto('/?lang=es');
- await expect(page.locator('header.top #name')).toBeVisible();
- await page.locator('#phoneMenu').click();
- await expect(page.locator('#menuLayers')).toBeVisible();
- await expect(page.locator('#menuIssues')).toHaveCount(0);
 });

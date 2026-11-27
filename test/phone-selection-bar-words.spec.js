@@ -26,7 +26,7 @@ for(const [width,height] of SIZES){
    await page.setViewportSize({width,height});
    await page.goto(lang==='en'?'/':`/?lang=${lang}`);
    await page.locator('#rect').tap();
-   const bar=page.locator('.phone-selection');
+   const bar=page.locator('.context-bar');
    await expect(bar).toBeVisible();
 
    const barBox=await bar.boundingBox();
@@ -35,13 +35,14 @@ for(const [width,height] of SIZES){
    expect(barBox.y>=0 && barBox.y+barBox.height<=viewport.height,'the bar stays inside the viewport down').toBe(true);
    expect(await bar.evaluate(e=>e.scrollWidth<=e.clientWidth+1),'the bar does not overflow').toBe(true);
    if(lang==='es' && width===360){
-    expect(viewport.width-barBox.width,'at 360 px es the bar keeps at least 40 px spare').toBeGreaterThanOrEqual(40);
+    // The context bar spans the phone's width, so its Spanish words have the full column rather than a floating pill's spare.
+    expect(barBox.width,'at 360 px es the bar spans the width').toBeCloseTo(viewport.width,0);
    }
 
    const metrics=[];
    for(const id of CONTROLS){
     const button=page.locator(`#${id}`);
-    const word=button.locator('.bar-word');
+    const word=button.locator('.bar-word, .tile-word');
     await expect(button,`${id} is shown`).toBeVisible();
     await expect(word,`${id} shows its word`).toBeVisible();
     await expect(word).toHaveText(WORDS[lang][id]);

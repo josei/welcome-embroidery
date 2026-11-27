@@ -1,7 +1,7 @@
 import {test,expect} from '@playwright/test';
 
-// At 844x390 landscape the zoom bar sits in the canvas's right-hand column, clear of the hoop at its default fit, in both the
-// design and Stitches views. The Stitches playback readouts are not cut off by it, in English and Spanish.
+// At 844x390 landscape the context bar runs along the bottom of the canvas column, clear of the hoop at its default fit, in both
+// the design and Stitches views. It holds the zoom stepper (or the zoom menu with an object selected). The Stitches playback readouts are not cut off by it, in English and Spanish.
 const LANDSCAPE=[844,390];
 
 test.beforeEach(async({page})=>{await page.addInitScript(()=>{delete window.showSaveFilePicker;});});
@@ -26,17 +26,17 @@ const clipped=(page,selectors)=>page.evaluate(sels=>sels.flatMap(s=>{
 }),selectors);
 
 for(const lang of ['en','es']){
- test(`the zoom bar stays off the hoop at the default fit (${lang})`,async({page})=>{
+ test(`the context bar stays off the hoop at the default fit (${lang})`,async({page})=>{
   await openEditor(page,lang);
-  expect(overlaps(await box(page,'.canvas .zoombar'),await box(page,'#hoopOuter'))).toBe(false);
+  expect(overlaps(await box(page,'.context-bar'),await box(page,'#hoopOuter'))).toBe(false);
  });
 
- test(`the zoom bar stays off the hoop in the Stitches view (${lang})`,async({page})=>{
+ test(`the playback bar stays off the hoop in the Stitches view (${lang})`,async({page})=>{
   await openEditor(page,lang);
   await page.locator('#phoneMenu').click();
   await page.locator('#phoneMenuList button, #phoneMenuList [role=menuitem]').filter({hasText:lang==='en'?'Stitches':'Puntadas'}).first().click();
   await expect(page.locator('.layout main:not(.design-view)')).toHaveCount(1);
-  expect(overlaps(await box(page,'.canvas .zoombar'),await box(page,'#hoopOuter'))).toBe(false);
+  expect(overlaps(await box(page,'.phone-playback'),await box(page,'#hoopOuter'))).toBe(false);
  });
 
  test(`the Stitches playback text and status line are not truncated (${lang})`,async({page})=>{

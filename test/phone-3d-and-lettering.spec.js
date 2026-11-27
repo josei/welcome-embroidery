@@ -85,7 +85,7 @@ async function handleCoverage(page){
 
 async function placeBloom(page){
  await openView(page,390,844,'design');
- await page.locator('.tool-rail #letter').tap();
+ await page.locator('#letter').tap();
  await expect(page.locator('#canvasText')).toBeVisible();
  await page.locator('#canvasText').tap();
  await page.keyboard.press('Control+A');
@@ -108,7 +108,9 @@ test('no resize handle covers lettering whose box is 30 to 44 px tall on a phone
  for(let i=0;i<6;i++){
   const r=await handleCoverage(page);
   if(r.height>=30)break;
-  await page.locator('#zoomIn').tap();
+  // Zoom in from the stepper, or from the % tile's menu when the lettering leaves an object selected.
+  if(await page.locator('#zoomIn').isVisible()) await page.locator('#zoomIn').tap();
+  else {await page.locator('#zoomPct').tap();await page.locator('[role=menuitem]').filter({hasText:/^(Zoom in|Acercar)$/}).tap();}
   await page.waitForTimeout(150);
  }
  const r=await handleCoverage(page);
@@ -122,7 +124,7 @@ for(const lang of ['en','es']) test(`the lettering save hint does not cover new 
  page.on('dialog',d=>d.accept());
  await page.setViewportSize({width:390,height:844});
  await page.goto(lang==='en'?'/':`/?lang=${lang}`);
- await page.locator('.tool-rail #letter').tap();
+ await page.locator('#letter').tap();
  await expect(page.locator('#canvasText')).toBeVisible();
  await page.locator('#canvasText').tap();
  await page.keyboard.press('Control+A');
@@ -135,6 +137,6 @@ for(const lang of ['en','es']) test(`the lettering save hint does not cover new 
   const overlap=hint.x<b.x+b.width&&hint.x+hint.width>b.x&&hint.y<b.y+b.height&&hint.y+hint.height>b.y;
   expect(overlap,'hint does not sit over the design or the new lettering').toBe(false);
  }
- const zoom=await page.locator('.zoombar').boundingBox();
+ const zoom=await page.locator('.context-bar').boundingBox();
  expect(hint.y+hint.height,'hint sits above the zoom bar').toBeLessThanOrEqual(zoom.y);
 });

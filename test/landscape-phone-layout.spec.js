@@ -25,6 +25,9 @@ const smallControls=page=>page.evaluate(()=>{
   const r=e.getBoundingClientRect();
   if(r.width<=0||r.height<=0) continue;
   if(r.bottom<=0||r.top>=innerHeight||r.right<=0||r.left>=innerWidth) continue; // off screen (skip link)
+  // The design name is a text field in a 44 px top bar that also holds the status line under it, so the field is 24 px tall: the
+  // WCAG 2.5.8 minimum for a text field, not the 44 px of a button.
+  if(e.id==='name') continue;
   if(Math.min(r.width,r.height)<44) out.push(`${e.tagName}#${e.id} ${Math.round(r.width)}x${Math.round(r.height)}`);
  }
  return out;
@@ -33,7 +36,7 @@ const smallControls=page=>page.evaluate(()=>{
 // Boxes of the fixed regions, in CSS px.
 const regions=page=>page.evaluate(()=>{
  const b=s=>{const e=document.querySelector(s);if(!e)return null;const r=e.getBoundingClientRect();return {l:r.left,t:r.top,r:r.right,b:r.bottom};};
- return {top:b('.top'),rail:b('.tool-rail'),canvas:b('.layout main>.canvas'),footer:b('.layout main>footer'),
+ return {top:b('.top'),rail:b('.tool-rail'),canvas:b('.layout main>.canvas'),footer:b('.context-bar'),
   sheet:b('#layersSheet.sheet-open')||b('#inspector.sheet-open')};
 });
 
@@ -86,13 +89,13 @@ for(const lang of ['en','es']){
   expect(overlaps(R.footer,R.canvas)).toBe(false);
   const controls=await page.evaluate(()=>{
    const c=document.querySelector('.layout main>.canvas').getBoundingClientRect();
-   const f=document.querySelector('.layout main>footer').getBoundingClientRect();
+   const f=document.querySelector('.context-bar').getBoundingClientRect();
    const rail=document.querySelector('.tool-rail').getBoundingClientRect();
    const hits=[];
    for(const e of document.querySelectorAll('.canvas .zoombar button,.canvas .floating button,.sheet-bar button,.top button')){
     const r=e.getBoundingClientRect();if(r.width<=0)continue;
     if(Math.min(r.right,rail.right)>Math.max(r.left,rail.left)&&Math.min(r.bottom,rail.bottom)>Math.max(r.top,rail.top)) hits.push('rail '+e.id);
-    if(r.bottom>f.top+0.5&&!e.closest('footer')&&!e.closest('.sheet-bar')) hits.push('footer '+e.id);
+    if(r.bottom>f.top+0.5&&!e.closest('.context-bar')&&!e.closest('.sheet-bar')) hits.push('footer '+e.id);
    }
    return hits;
   });
@@ -129,7 +132,7 @@ for(const lang of ['en','es']){
    const rb=rail.getBoundingClientRect();
    const cells=[...rail.querySelectorAll(':scope>button')].filter(b=>getComputedStyle(b).display!=='none').map(b=>{const c=b.getBoundingClientRect();return {id:b.id,l:c.left,t:c.top,r:c.right,b:c.bottom,w:c.width,h:c.height};});
    return {top:rb.top,bottom:rb.bottom,sh:rail.scrollHeight,ch:rail.clientHeight,sw:rail.scrollWidth,cw:rail.clientWidth,cells,
-    footerTop:document.querySelector('.layout main>footer').getBoundingClientRect().top,
+    footerTop:document.querySelector('.context-bar').getBoundingClientRect().top,
     topBar:document.querySelector('.top').getBoundingClientRect().bottom};
   });
   // The rail starts directly under the top bar.
@@ -138,7 +141,7 @@ for(const lang of ['en','es']){
   expect(r.sh).toBeLessThanOrEqual(r.ch);
   expect(r.sw).toBeLessThanOrEqual(r.cw);
   const ids=r.cells.map(c=>c.id);
-  for(const id of ['select','rect','path','letter','line','measure']) expect(ids).toContain(id);
+  for(const id of ['select','rect','ellipse','path','letter','line']) expect(ids).toContain(id);
   const menu=await (async()=>{await page.locator('#phoneMenu').click();const list=page.locator('#phoneMenuList');await expect(list).toBeVisible();const rows=await list.locator('[role="menuitem"]').evaluateAll(els=>els.map(e=>e.id));await page.keyboard.press('Escape');return rows;})();
   expect(ids.filter(id=>menu.includes(id)),'rail controls that also appear in the Menu').toEqual([]);
   expect(ids,'the rail holds the six tools only').toHaveLength(6);
@@ -160,7 +163,9 @@ for(const lang of ['en','es']){
   await expect(page.locator('#toolMore')).toHaveCount(0);
   await expect(page.locator('#moreToolsSheet')).toHaveCount(0);
   await page.locator('#phoneMenu').click();
-  for(const id of ['menuEllipse','menuPolygon','menuStar','menuTrace','menuPhoto','menuPen']) await expect(await revealMenuRow(page.locator('#phoneMenuList'),id)).toHaveCount(1);
+  // Ellipse is on the rail here, so the Menu leaves it out; Measure is in the Menu's Tools group beside the shape tools.
+  await expect(page.locator('#menuEllipse')).toHaveCount(0);
+  for(const id of ['menuPolygon','menuStar','menuTrace','menuPhoto','menuPen','menuMeasure']) await expect(await revealMenuRow(page.locator('#phoneMenuList'),id)).toHaveCount(1);
   await page.keyboard.press('Escape');
  });
 }

@@ -18,11 +18,13 @@ for(const lang of ['en','es']){
  });
 }
 
-test('the tool rail and selection bar take no extra offset at 844x390 (en)',async({page})=>{
+test('the tool rail takes no extra offset under the top bar at 844x390 (en)',async({page})=>{
  await page.setViewportSize({width:844,height:390});
  await page.goto('/');
  await expect(page.locator('.tool-rail')).toBeVisible();
  await page.screenshot({path:'test-results/landscape/landscape-844x390-en.png'});
+ // The rail sits in the canvas column, which starts directly under the top bar, so its own offset is zero.
  const top=await page.evaluate(()=>getComputedStyle(document.querySelector('.tool-rail')).top);
- expect(top).toBe(`${(await page.locator('header.top').boundingBox()).height}px`);
+ expect(top).toBe('0px');
+ expect((await page.locator('.tool-rail').boundingBox()).y).toBeCloseTo((await page.locator('header.top').boundingBox()).height,0);
 });

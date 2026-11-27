@@ -35,6 +35,7 @@ import {saveState} from '../saveState.js';
 import {saveStatusIcon, saveStatusWords} from '../saveMark.js';
 import {menuReason, NEEDS_ONE, NEEDS_TWO, NEEDS_THREE} from '../menuReasons.js';
 import {useTabletPortrait} from '../tabletLayoutState.js';
+import {useLandscapeRail} from './ContextBar';
 
 // The menu bar's dropdowns. Each item runs the same command as its toolbar button, context-menu row or keyboard shortcut,
 // and is disabled exactly when that command does not apply, using the same flags the toolbar uses. Nothing here is removed
@@ -417,6 +418,7 @@ export function PhoneMenu() {
  const view = useSyncExternalStore(viewMode.subscribe, viewMode.get);
  const gridRows = useGridSnapRows();
  const sheet = useSyncExternalStore(phoneSheetState.subscribe, phoneSheetState.get);
+ const landscapeRail = useLandscapeRail();
  const status = useSyncExternalStore(statusState.subscribe, statusState.get);
  const saveDoc = useSyncExternalStore(documentState.subscribe, documentState.get);
  const saveMark = useSyncExternalStore(saveState.subscribe, saveState.get);
@@ -458,12 +460,14 @@ export function PhoneMenu() {
  ] : [];
  const toolRows: Entry[] = [
   ...addSelectRow,
-  {id: 'menuEllipse', label: t('Ellipse'), icon: 'i-ellipse', run: () => { toolActions.press('select'); toolbarActions.addShape('ellipse'); }},
+  ...(landscapeRail ? [] : [{id: 'menuEllipse', label: t('Ellipse'), icon: 'i-ellipse', run: () => { toolActions.press('select'); toolbarActions.addShape('ellipse'); }}]),
   {id: 'menuPolygon', label: t('Polygon'), icon: 'i-polygon', run: () => toolActions.press('polygon')},
   {id: 'menuStar', label: t('Star'), icon: 'i-star', run: () => toolActions.press('star')},
   {id: 'menuPen', label: t('Pen'), icon: 'i-pen', run: () => toolActions.press('pen')},
   {id: 'menuTrace', label: t('Trace'), icon: 'i-trace', run: () => setTraceDialogOpen(true)},
   {id: 'menuPhoto', label: t('Photo stitch'), icon: 'i-photo', run: () => photoInput.current?.click()},
+  // Measure left the phone dock for the Menu, beside the other shape tools.
+  {id: 'menuMeasure', label: t('Measure'), icon: 'i-measure', run: () => toolActions.press('measure')},
  ];
  // Path-node commands. Each one needs a path with a node selected, and says which of those is missing.
  const nodeRows: Entry[] = [
@@ -481,8 +485,8 @@ export function PhoneMenu() {
   {id: 'menuTextOnPath', label: t('Text on path'), icon: 'i-text-path', disabled: actions.textOnPath, reason: why('menuTextOnPath'), run: () => selectionToolbarActions.textOnPath()},
   {id: 'menuTextOffPath', label: t('Detach text'), icon: 'i-text-detach', disabled: actions.textOffPath, reason: why('menuTextOffPath'), run: () => selectionToolbarActions.textOffPath()},
  ];
- // At phone width the status line's issues chip is only an indicator, so the Menu carries the Issues row: it selects the first
- // object with a tip and opens the Properties sheet, where the tips show.
+ // The Menu's Issues row selects the first object with a tip and opens the Properties sheet, where the tips show. The issues chip
+ // in the top bar opens Messages instead.
  const issuesRows: Row[] = phone && !status.issuesHidden ? [
   {id: 'menuIssues', label: t('Issues'), icon: 'i-issues', state: status.issuesText, run: () => { statusActions.issues(); openPhoneSheet('properties'); }},
  ] : [];

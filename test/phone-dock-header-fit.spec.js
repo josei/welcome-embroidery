@@ -7,7 +7,8 @@ test.use({hasTouch:true});
 
 test.beforeEach(async({page})=>{await page.addInitScript(()=>{delete window.showSaveFilePicker;});});
 
-const TILE_FILL='rgb(246, 247, 245)';
+// A dock tile at rest has no fill of its own: the tile is transparent on the bar, and only the armed or hovered tile takes one.
+const TILE_FILL='rgba(0, 0, 0, 0)';
 
 for(const lang of ['en','es']){
  test(`Fit centres the hoop on a 390x844 phone (${lang})`,async({page})=>{
@@ -24,13 +25,14 @@ for(const lang of ['en','es']){
   page.on('dialog',d=>d.accept());
   await page.setViewportSize({width:390,height:844});
   await page.goto(`/?lang=${lang}`);
-  await page.locator('.tool-rail #letter').click();
+  await page.locator('#letter').click();
   await expect(page.locator('#canvasText')).toBeVisible();
   await page.keyboard.type('Hi');
   await page.keyboard.press('Control+Enter');
   await expect(page.locator('#canvasText')).toBeHidden();
-  const fills=await page.locator('.layout main>.tool-rail .icon-button:not(.active-tool)').evaluateAll(
-   tiles=>tiles.map(t=>getComputedStyle(t).backgroundColor));
+  // The tile under the pointer shows its hover fill, so the rest fill is read from the tiles the pointer is not on.
+  const fills=await page.locator('.phone-dock .chrome-tile:not(.is-selected)').evaluateAll(
+   tiles=>tiles.filter(t=>!t.matches(':hover')).map(t=>getComputedStyle(t).backgroundColor));
   expect(fills.length).toBeGreaterThan(0);
   for(const fill of fills) expect(fill).toBe(TILE_FILL);
   await page.screenshot({path:`test-results/phone-dock-after-lettering-${lang}.png`});
@@ -64,8 +66,8 @@ for(const lang of ['en','es']){
   await page.setViewportSize({width:390,height:844});
   await page.goto(`/?lang=${lang}`);
   await expect(page.locator('header.top')).toBeVisible();
-  const pads=await page.locator('.layout main>.tool-rail .icon-button').evaluateAll(tiles=>tiles.map(t=>{
-   const label=t.querySelector('.rail-label');
+  const pads=await page.locator('.phone-dock .chrome-tile').evaluateAll(tiles=>tiles.map(t=>{
+   const label=t.querySelector('.tile-word');
    const tr=t.getBoundingClientRect(),lr=label.getBoundingClientRect();
    return {text:label.textContent,pad:Math.min(lr.left-tr.left,tr.right-lr.right)};
   }));

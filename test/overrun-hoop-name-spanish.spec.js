@@ -34,11 +34,10 @@ test('an object past the hoop is named in Spanish on a 390 by 844 phone: status 
  const visible=await figure.locator('span[aria-hidden="true"]').innerText();
  expect(visible.trim()).toMatch(/^[\d.,]+$/);
  expect(visible).not.toContain('bastidor');
- await page.locator('footer').screenshot({path:`${SHOTS}/status-line-390x844-es.png`});
+ await page.locator('header.top').screenshot({path:`${SHOTS}/status-line-390x844-es.png`});
 
- await page.locator('#phoneMenu').click();
- await page.screenshot({path:`${SHOTS}/menu-390x844-es.png`});
- await page.locator('#menuProperties').click();
+ // With an object selected the Properties route is the context bar's tile (the Menu has no Properties row then).
+ await page.locator('#barProperties').click();
  await expect(page.locator('#inspector')).toHaveClass(/sheet-open/);
  const stats=page.locator('#stats');
  await expect(stats).toContainText(sentence);

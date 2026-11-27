@@ -1,8 +1,8 @@
 import {test,expect} from '@playwright/test';
 
-// The Stitches view and the Export card fit a landscape phone (844x390) and a tablet in portrait (820x1180): the hoop, the zoom
-// bar and the Messages pill are all on screen without overlapping, the zoom bar is the one row used at other sizes with All,
-// Messages has a margin from the bottom edge, and the Export Download button is in view.
+// The Stitches view and the Export card fit a landscape phone (844x390) and a tablet in portrait (820x1180): the hoop and the
+// playback bar are on screen without overlapping, the playback bar sits clear of the top bar, the tablet's Messages pill keeps a
+// margin from the bottom edge, and the Export Download button is in view. A landscape phone's Messages is a Menu row.
 const LANDSCAPE=[844,390],TABLET=[820,1180];
 
 test.beforeEach(async({page})=>{await page.addInitScript(()=>{delete window.showSaveFilePicker;});});
@@ -32,30 +32,29 @@ const box=(page,selector)=>page.evaluate(s=>{
 const overlaps=(a,b)=>a&&b&&Math.min(a.r,b.r)-Math.max(a.l,b.l)>0.5&&Math.min(a.b,b.b)-Math.max(a.t,b.t)>0.5;
 
 for(const lang of ['en','es']){
- test(`landscape Stitches: the hoop sits inside the canvas, clear of the zoom bar (${lang})`,async({page})=>{
+ test(`landscape Stitches: the hoop sits inside the canvas, clear of the playback bar (${lang})`,async({page})=>{
   await openEditor(page,LANDSCAPE,lang);
   await openStitches(page,LANDSCAPE,lang);
-  const canvas=await box(page,'.layout main:not(.design-view) .canvas'),hoop=await box(page,'#hoopOuter'),zoom=await box(page,'.canvas .zoombar');
+  const canvas=await box(page,'.layout main:not(.design-view) .canvas'),hoop=await box(page,'#hoopOuter'),zoom=await box(page,'.phone-playback');
   expect(hoop.t).toBeGreaterThanOrEqual(canvas.t);
   expect(hoop.b).toBeLessThanOrEqual(canvas.b);
   expect(hoop.l).toBeGreaterThanOrEqual(canvas.l);
   expect(hoop.r).toBeLessThanOrEqual(canvas.r);
   expect(overlaps(zoom,hoop)).toBe(false);
-  expect(zoom.b).toBeLessThanOrEqual(canvas.b);
+  // The playback bar runs along the bottom of the canvas column, directly under the canvas.
+  expect(Math.abs(zoom.t-canvas.b)).toBeLessThan(1);
   await page.screenshot({path:`test-results/landscape-stitches-${lang}.png`});
  });
 
- test(`landscape Stitches: the zoom bar is one row with All, clear of the top bar (${lang})`,async({page})=>{
+ test(`landscape Stitches: the playback bar sits under the canvas, clear of the top bar (${lang})`,async({page})=>{
   await openEditor(page,LANDSCAPE,lang);
   await openStitches(page,LANDSCAPE,lang);
-  const zoom=await box(page,'.canvas .zoombar'),all=await box(page,'.canvas .zoombar #zoomAll'),top=await box(page,'.top');
-  expect(zoom.t).toBeGreaterThanOrEqual(top.b);
-  expect(Math.abs(all.t-(await box(page,'.canvas .zoombar #zoomOut')).t)).toBeLessThan(1);
-  expect(all.r).toBeLessThanOrEqual(zoom.r);
-  expect(zoom.r-zoom.l).toBeGreaterThan(zoom.b-zoom.t);
+  const playback=await box(page,'.phone-playback'),top=await box(page,'.top');
+  expect(playback.t).toBeGreaterThanOrEqual(top.b);
+  expect(playback.r-playback.l).toBeGreaterThan(playback.b-playback.t);
  });
 
- for(const [name,size] of [['landscape',LANDSCAPE],['tablet',TABLET]]){
+ for(const [name,size] of [['tablet',TABLET]]){
   test(`Messages keeps a margin from the bottom edge at ${name} size in Stitches (${lang})`,async({page})=>{
    await openEditor(page,size,lang);
    await openStitches(page,size,lang);

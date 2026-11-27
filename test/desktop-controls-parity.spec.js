@@ -13,7 +13,7 @@ const SIZES=[
 
 async function snapshot(page){
  return page.evaluate(()=>{
-  const style=(el,props)=>{const cs=getComputedStyle(el);return Object.fromEntries(props.map(p=>[p,cs.getPropertyValue(p)]));};
+  const style=(el,props)=>{if(!el)return null;const cs=getComputedStyle(el);return Object.fromEntries(props.map(p=>[p,cs.getPropertyValue(p)]));};
   const exp=document.querySelector('#export');
   const zoom=[...document.querySelectorAll('.zoombar > button, .zoombar > span.sep')];
   return {
@@ -23,6 +23,8 @@ async function snapshot(page){
    zoomClasses:zoom.map(b=>b.className),
    zoomIcons:[...document.querySelectorAll('.zoombar use')].map(u=>u.getAttribute('href')),
    zoomBarStyle:style(document.querySelector('.zoombar'),['border-top-width','border-radius','background-color','font-family']),
+   // The phone context bar's stepper is a tile (not a desktop zoom bar), so it is compared by its glyphs.
+   stepIcons:['zoomOut','zoomIn'].map(id=>document.querySelector(`#${id} use`)?.getAttribute('href')??null),
   };
  });
 }
@@ -41,6 +43,10 @@ for(const lang of ['en','es']) test(`Export and the zoom bar share the desktop's
   const s=shots[name];
   expect(s.exportIds,`${name} Export split buttons`).toEqual(desk.exportIds);
   expect(s.exportStyle,`${name} Export fill and type`).toEqual(desk.exportStyle);
+  if(name.startsWith('phone')){
+   expect(s.stepIcons,`${name} zoom stepper glyphs`).toEqual(desk.stepIcons);
+   continue;
+  }
   expect(s.zoomIds,`${name} zoom bar controls`).toEqual(desk.zoomIds);
   expect(s.zoomClasses,`${name} zoom bar classes`).toEqual(desk.zoomClasses);
   expect(s.zoomIcons,`${name} zoom bar icons`).toEqual(desk.zoomIcons);

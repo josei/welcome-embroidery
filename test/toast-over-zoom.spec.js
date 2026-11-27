@@ -9,7 +9,7 @@ const newDesign=async page=>{
  if(await page.locator('#discardDialog[open]').count())await page.locator('#discardDiscard').click();
 };
 // The visible zoom bar buttons' boxes.
-const zoomButtons=page=>page.locator('.zoombar button').filter({visible:true});
+const zoomButtons=page=>page.locator('.context-bar button').filter({visible:true});
 
 test('one confirmation stays clear of the zoom bar on a 390×844 phone in Spanish',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));

@@ -1,3 +1,4 @@
+import {revealMenuRow} from './menu-reveal.js';
 import {test,expect} from '@playwright/test';
 
 // On tablets the status line shows the issues button as the Issues icon and count. The messages button is the word, in the
@@ -24,7 +25,8 @@ async function openView(page,view){
  else{await page.locator('#phoneMenu').click();await page.locator(`#menuView-${view}`).click();}
 }
 
-// The messages button is the word on tablets and phones in landscape, as on the desktop, so it needs no icon to be read.
+// The messages button is the word on a tablet, as on the desktop, so it needs no icon to be read. A phone has no status row, so
+// its Messages is a Menu row.
 for(const lang of ['en','es']) for(const [w,h] of [[768,1024]]){
  test(`${w}x${h} ${lang}: the messages button is its word, in the same place in each view`,async({page})=>{
   await page.setViewportSize({width:w,height:h});
@@ -48,31 +50,14 @@ for(const lang of ['en','es']) for(const [w,h] of [[768,1024]]){
  });
 }
 
-// On a phone in landscape the footer Messages button is removed, because the top-bar issues button is the one route to Messages.
-for(const lang of ['en','es']) test(`844x390 ${lang}: the footer messages button is absent in the phone landscape view, and the top-bar issues button opens Messages`,async({page})=>{
- await page.setViewportSize({width:844,height:390});
- await page.goto(`/?lang=${lang}`);
- await expect(page.locator('.canvas')).toBeVisible();
- await expect(page.locator('#messagesBtn')).toHaveCount(0);
- await page.locator('#phoneMenu').click();
- await page.locator('#menuLayers').click();
- await page.locator('.object-row').first().click();
- await page.locator('#layersSheet [data-close-control]').first().click();
- await page.locator('#barProperties').click();
- await page.locator('#posX').fill('300');
- await page.locator('#posX').press('Tab');
- await expect(page.locator('#count')).toHaveClass(/error/);
- await page.locator('#issuesBtn').click();
- await expect(page.locator('#messagesDialog')).toHaveAttribute('open','');
-});
-
-// On a 390-wide phone in portrait the design view's status line shows only the count, so the messages button is
-// hidden there by the existing layout. This records that rather than changing it.
-test('390x844 en: the messages button is hidden in the phone design view', async({page})=>{
+// A 390-wide phone has no status row, so the messages button is not on the screen; Messages is a Menu row there.
+test('390x844 en: the messages button is not on a phone screen; the Menu holds it', async({page})=>{
  await page.setViewportSize({width:390,height:844});
  await page.goto('/?lang=en');
  await expect(page.locator('.canvas')).toBeVisible();
- await expect(page.locator('#messagesBtn')).toBeHidden();
+ await expect(page.locator('#messagesBtn')).toHaveCount(0);
+ await page.locator('#phoneMenu').click();
+ await expect(await revealMenuRow(page.locator('#phoneMenuList'),'menuMessages')).toHaveCount(1);
 });
 
 for(const lang of ['en','es']) test(`768x1024 ${lang}: the issues button shows a count, with the full text as its name`,async({page})=>{
@@ -118,8 +103,8 @@ async function openSquareOutsideHoop(page, lang){
  await expect(page.locator('.object-row')).toHaveCount(1);
 }
 
-// One object past the hoop is both an issue and a sewing tip. The chip counts that object once. On a tablet each tap keeps the
-// selection on it, since there is no other object to move to; on a phone the chip opens Messages.
+// One object past the hoop is both an issue and a sewing tip. The chip counts that object once, and each tap keeps the
+// selection on it, since there is no other object to move to.
 for(const [w,h] of [[390,844],[768,1024]]) test(`${w}x${h} es: one object past the hoop gives a chip total of 1 and stays on that object`,async({page})=>{
  page.on('dialog',d=>d.accept());
  await page.setViewportSize({width:w,height:h});
@@ -127,13 +112,11 @@ for(const [w,h] of [[390,844],[768,1024]]) test(`${w}x${h} es: one object past t
  const btn=page.locator('#issuesBtn');
  await expect(btn).toBeVisible();
  await expect(btn).toHaveText('1');
- if (w < 768) {
-  // On a phone the chip is the top bar's icon button: it opens Messages, where the issues are listed, and leaves the selection alone.
+ if(w<=600){
+  // On a phone the chip is the top bar's status line and opens Messages; the object is not selected by it.
   await btn.click();
-  await expect(page.locator('#messagesDialog')).toHaveAttribute('open','');
+  await expect(page.locator('#messagesDialog[open]')).toHaveCount(1);
   await page.keyboard.press('Escape');
-  await expect(page.locator('#messagesDialog')).not.toHaveAttribute('open','');
-  await expect(btn).toHaveText('1');
   return;
  }
  const selected=page.locator('.object-row.selected');

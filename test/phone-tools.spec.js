@@ -29,12 +29,10 @@ for(const [width,height] of PHONES) for(const lang of ['en','es']){
   const errors=await openEditor(page,width,height,lang);
   // The page itself never scrolls sideways.
   expect(await page.evaluate(()=>document.documentElement.scrollWidth-innerWidth),'no page overflow').toBeLessThanOrEqual(0);
-  const rail=page.locator('.tool-rail');
+  const rail=page.locator('.phone-dock');
   const box=await rail.boundingBox();
-  const canvas=await page.locator('.canvas').boundingBox();
-  // The strip sits inside the canvas and inside the window.
-  expect(box.x,'strip starts inside the canvas').toBeGreaterThanOrEqual(canvas.x);
-  expect(box.x+box.width,'strip ends inside the canvas').toBeLessThanOrEqual(canvas.x+canvas.width+0.5);
+  // The dock sits under the canvas and inside the window.
+  expect(box.x,'strip starts inside the window').toBeGreaterThanOrEqual(0);
   expect(box.x+box.width,'strip ends inside the window').toBeLessThanOrEqual(width);
   // It either fits the width or scrolls sideways inside its own box.
   const scroll=await rail.evaluate(e=>({sw:e.scrollWidth,cw:e.clientWidth,ox:getComputedStyle(e).overflowX}));
@@ -53,8 +51,8 @@ for(const [width,height] of PHONES) for(const lang of ['en','es']){
 
 // At phone portrait the tool dock is six buttons on one row, each with its label under the icon. Ellipse, Polygon, Star,
 // Trace, Photo stitch and Pen are in the Menu, with the canvas-bar commands, so nothing scrolls sideways and there is no More panel.
-const DOCK=['select','rect','path','letter','line','measure'];
-const MENU_TOOLS=['menuEllipse','menuPolygon','menuStar','menuPen','menuTrace','menuPhoto'];
+const DOCK=['select','rect','path','letter','line'];
+const MENU_TOOLS=['menuEllipse','menuPolygon','menuStar','menuPen','menuTrace','menuPhoto','menuMeasure'];
 const openMenu=async page=>{
  const list=page.locator('#phoneMenuList');
  if(!(await list.isVisible())) await page.locator('#phoneMenu').click();
@@ -63,9 +61,9 @@ const openMenu=async page=>{
 };
 test('the dock tools are reachable and become active at 375px, and the Menu arms the rest',async({page})=>{
  const errors=await openEditor(page,375,667);
- const rail=page.locator('.tool-rail');
+ const rail=page.locator('.phone-dock');
  // Dock tools: each one is armed, so its button reports aria-pressed="true".
- for(const id of ['select','line','measure','path']){
+ for(const id of ['select','line','path']){
   const btn=rail.locator(`#${id}`);
   await btn.click();
   await expect(btn,`${id} becomes active`).toHaveAttribute('aria-pressed','true');
@@ -99,10 +97,10 @@ test('the dock tools are reachable and become active at 375px, and the Menu arms
  expect(errors).toEqual([]);
 });
 
-for(const [width,height] of [[390,844],[360,740]]) for(const lang of ['en','es']) test(`the dock holds six buttons on one row and the Menu holds the other tools at ${width}x${height} (${lang})`,async({page})=>{
+for(const [width,height] of [[390,844],[360,740]]) for(const lang of ['en','es']) test(`the dock holds five buttons on one row and the Menu holds the other tools at ${width}x${height} (${lang})`,async({page})=>{
  const errors=await openEditor(page,width,height,lang);
- expect(await page.locator('.tool-rail button[id]').evaluateAll(els=>els.map(e=>e.id)),'dock buttons').toEqual(DOCK);
- const rail=page.locator('.tool-rail');
+ expect(await page.locator('.phone-dock button[id]').evaluateAll(els=>els.map(e=>e.id)),'dock buttons').toEqual(DOCK);
+ const rail=page.locator('.phone-dock');
  expect(await rail.evaluate(e=>e.scrollWidth<=e.clientWidth),'the dock does not scroll sideways').toBe(true);
  expect(await page.evaluate(()=>document.documentElement.scrollWidth-innerWidth),'no page overflow').toBeLessThanOrEqual(0);
  for(const id of DOCK){
@@ -113,7 +111,7 @@ for(const [width,height] of [[390,844],[360,740]]) for(const lang of ['en','es']
  }
  // Every dock button has its label under the icon, and no label clips.
  for(const id of DOCK){
-  const label=rail.locator(`#${id} .rail-label`);
+  const label=rail.locator(`#${id} .tile-word`);
   await expect(label,`${id} label is shown`).toBeVisible();
   expect(await label.evaluate(e=>e.scrollWidth<=e.clientWidth),`${id} label does not clip`).toBe(true);
  }

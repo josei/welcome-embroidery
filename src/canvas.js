@@ -300,12 +300,13 @@ export function createCanvas(/** @type {any} */ api){
       if(touches.size>1||state?.type!=='move'||state.pid!==pid)return;
       cancelState();openObjectMenu(x,y,o,p);},500)};
   }
-  // On a touch screen the dock (portrait) or rail (landscape) covers the canvas's edge and the canvas does not scroll, so a
-  // dragged object is kept clear of it. A mouse keeps the floating desktop rail over the canvas, so it is not clamped there.
+  // On a touch screen the rail (landscape) covers the canvas's left edge and the canvas does not scroll, so a dragged object is
+  // kept clear of it. The phone bars sit below the canvas, so they never cover it. A mouse keeps the floating desktop rail over
+  // the canvas, so it is not clamped there.
   function keepMoveOnCanvas(/** @type {number[]} */ box,/** @type {number} */ dx,/** @type {number} */ dy){
     if(!globalThis.matchMedia?.('(pointer: coarse)').matches)return [dx,dy];
     const sr=svg.getBoundingClientRect();
-    const bars=[...document.querySelectorAll('.tool-rail,.zoombar,.phone-selection')].map(n=>n.getBoundingClientRect()).filter(r=>r.width&&r.height);
+    const bars=[...document.querySelectorAll('.tool-rail,.zoombar')].map(n=>n.getBoundingClientRect()).filter(r=>r.width&&r.height);
     // The frame's handles and rotate stem reach about 27 px past the bounding box, so the box is kept this far inside the
     // visible area; otherwise the bottom handles would be clipped at the edge.
     const m=30,v=visibleCanvasRect(sr,bars),visible={left:v.left+m,top:v.top+m,right:v.right-m,bottom:v.bottom-m};

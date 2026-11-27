@@ -16,16 +16,18 @@ async function openPhone(page,width,height,lang='en'){
 }
 
 for(const [width,height] of PHONES){
- test(`the selection bar is hidden with nothing selected at ${width}x${height}`,async({page})=>{
+ test(`the selection commands are hidden with nothing selected at ${width}x${height}`,async({page})=>{
   const errors=await openPhone(page,width,height);
-  await expect(page.locator('.phone-selection')).toBeHidden();
+  // The context bar is always shown on a phone; with nothing selected its object commands are not.
+  await expect(page.locator('#barDuplicate')).toBeHidden();
+  await expect(page.locator('#barProperties')).toBeHidden();
   expect(errors).toEqual([]);
  });
 
  test(`Duplicate, Delete and Properties are one tap away with a selection at ${width}x${height}`,async({page})=>{
   const errors=await openPhone(page,width,height);
   await page.locator('#rect').tap();
-  const bar=page.locator('.phone-selection');
+  const bar=page.locator('.context-bar');
   await expect(bar).toBeVisible();
   const viewport=page.viewportSize();
   for(const id of ['barDuplicate','barDelete','barProperties']){

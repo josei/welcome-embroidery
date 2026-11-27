@@ -49,7 +49,7 @@ for(const [width,height] of SIZES) for(const lang of ['en','es']){
   await page.locator('#rect').click();
   await page.locator('#rect').click();
   await expect(rows).toHaveCount(start+2);
-  const toggle=page.locator('.phone-selection #selectToggle');
+  const toggle=page.locator('.context-bar #selectToggle');
   await expect(toggle).toHaveAttribute('aria-pressed','false');
   await toggle.click();
   await expect(toggle).toHaveAttribute('aria-pressed','true');
@@ -62,7 +62,8 @@ for(const [width,height] of SIZES) for(const lang of ['en','es']){
   const target=await page.evaluate(()=>{
     const els=[...document.querySelectorAll('#shapes > *')].map(e=>({e,r:e.getBoundingClientRect()}));
     const other=els.reduce((a,b)=>(b.r.right>a.r.right?b:a));
-    for(const [fx,fy] of [[.5,.5],[.3,.3],[.7,.3],[.3,.7],[.7,.7]]){
+    const grid=[];for(const fx of [.5,.2,.8,.1,.9])for(const fy of [.5,.2,.8,.1,.9])grid.push([fx,fy]);
+    for(const [fx,fy] of grid){
       const x=other.r.left+other.r.width*fx,y=other.r.top+other.r.height*fy;
       const hit=document.elementFromPoint(x,y);
       if(hit&&other.e.contains(hit)) return {x,y};

@@ -815,11 +815,6 @@ body{height:100vh;height:100dvh;min-height:0;overflow:hidden;overscroll-behavior
 .layout main{display:grid;grid-template-columns:minmax(0,1fr);grid-template-rows:minmax(0,1fr) auto auto auto auto;flex:1 1 0;order:0;width:100%;min-width:0;min-height:0;position:relative;overflow:hidden}
 .layout main>.canvas{grid-row:1;height:auto;min-height:0;position:relative;overflow:hidden;overscroll-behavior:none;touch-action:none}
 .canvas>#rulerTop,.canvas>#rulerLeft,.canvas>.ruler-corner,.canvas .canvas-views{display:none}
-.canvas .zoombar{position:absolute;left:auto;top:auto;right:12px;bottom:12px;z-index:5;display:flex;flex-direction:column;align-items:center;gap:6px;width:auto;height:auto;margin:0;padding:0;border:0;border-radius:0;background:none;box-shadow:none}
-.canvas .zoombar>button{width:44px;min-width:44px;height:44px;min-height:44px;padding:0;background:#fff;border:1px solid var(--field-line);border-radius:10px;box-shadow:0 4px 16px #1d292514}
-.canvas .zoombar #zoomIn{order:1}
-.canvas .zoombar #zoomOut{order:2}
-.canvas .zoombar #zoomFit{order:3}
 .canvas-hint{bottom:168px}
 /* On a portrait phone the lettering save hint sits just above the zoom bar, not at the height of the other canvas hints,
    where it covered the design's lower lettering. */
@@ -844,30 +839,20 @@ body{height:100vh;height:100dvh;min-height:0;overflow:hidden;overscroll-behavior
 .layout main>.phone-playback .playback-time span{white-space:nowrap;overflow:visible;text-overflow:clip}
 .layout main>.phone-playback .playback-track{grid-column:1/-1;grid-row:2;min-width:0}
 .layout main>.phone-playback .playback-summary{white-space:normal;overflow:visible;text-overflow:clip}
-.layout main>.tool-rail{grid-row:4;position:static;inset:auto;z-index:auto;display:flex;flex-direction:row;flex-wrap:nowrap;align-items:center;justify-content:flex-start;align-content:center;gap:4px;width:auto;height:calc(56px + env(safe-area-inset-bottom));max-height:none;max-width:none;margin:0;padding:6px 8px calc(6px + env(safe-area-inset-bottom));box-sizing:border-box;overflow-x:auto;overflow-y:hidden;scrollbar-width:none;border:0;border-top:1px solid #e3e6e1;border-radius:0;background:#fff;box-shadow:none}
-.layout main>.tool-rail .icon-button{width:44px;min-width:44px;height:44px;flex:none}
 .layout main:has(.canvas.preview-mode)>.tool-rail{display:none}
 /* At phone portrait the dock is six buttons on one row, each with its label under the
    icon. The six share the row at 44 px minimum, so the dock never scrolls sideways. The other tools are in the Menu. */
-.layout main>.tool-rail{overflow:hidden;gap:2px}
-.layout main>.tool-rail .icon-button{flex:1 1 0;flex-direction:column;align-items:center;justify-content:center;gap:2px;width:auto;min-width:44px;height:44px;min-height:44px;overflow:hidden}
-.layout main>.tool-rail .icon-button .icon{width:20px;height:20px;flex:none}
-.layout main>.tool-rail .rail-label{display:block;max-width:100%;overflow:hidden;white-space:nowrap;font-size:11px;line-height:1.1;color:#4d5a54}
-.layout main>.tool-rail .icon-button.active-tool .rail-label{color:var(--teal-deep)}
-.layout main>footer{grid-row:5;position:relative;flex:none;height:0;min-height:0;margin:0;padding:0;overflow:visible;border:0}
-.layout main>footer>:not(#toast){display:none}
-/* Toasts stack above the contextual bar, so they never cover the dock (56 px) or the bar (52 px). The footer is 0 px on a
-   phone portrait, so the toast's anchor is the footer's bottom edge: 56 + 52 + an 8 px gap, plus the 54 px the zoom bar
-   takes in the design view, gives 170 px. */
-#toast{bottom:170px;margin-bottom:0}
 /* An open phone sheet covers the bottom half of the screen, so a toast that appeared over its fields would hide them. While a
    sheet is open the toast rises to sit just above the sheet's top edge (the sheet is 50dvh tall, anchored to the bottom). */
-.layout:has(>aside.panel.sheet-open) main>footer>#toast{bottom:calc(50dvh + 8px)}
-/* The Stitches and 3D views add the playback row under the canvas, so the toast rises by the row's height (47 px more than
-   the design view) and stays clear of the zoom bar inside the shorter canvas. */
-.layout main:not(.design-view)>footer>#toast{bottom:217px}
-/* The footer holds no status row on a phone: the count and the issues button live in the top bar. Only the toast stays
-   visible in the footer, and it hangs from the footer's bottom edge. */
+/* The Stitches and 3D views add the playback row under the canvas: 101 px, since the timeline spans the bar's width
+   under the controls and the readout. The toast keeps its anchor above the status line, so it moves up by the same
+   amount and stays clear of the zoom bar inside the shorter canvas. */
+/* In the Stitches and 3D views the status line has no text of its own (the playback row above it carries the count), so the
+   empty row is removed and the canvas takes its height. A message in the count, such as a compile error, brings the row back.
+   Toasts hang from the row's bottom edge, which does not move. */
+.layout main:not(.design-view)>footer:has(#count:empty):has(#issuesBtn[hidden]){height:0;min-height:0;padding:0;border-top:0}
+/* With only sewing tips the count is empty but the chip shows, so the row is kept at the chip's touch-target height. */
+.layout main:not(.design-view)>footer:has(#count:empty):has(#issuesBtn:not([hidden])){min-height:44px}
 }
 
 /* A landscape phone (844x390, any landscape
@@ -909,38 +894,20 @@ body{height:100dvh;min-height:0;overflow:hidden}
 .drawer-head{display:none}
 .layout>.panel:last-child.sheet-open .drawer-head{display:none}
 .layout main{position:absolute;top:0;left:0;right:0;bottom:0;display:flex;flex-direction:column;min-height:0;width:auto;margin:0;order:0}
-.canvas{position:relative;flex:1 1 0;height:auto;min-height:0;margin-left:104px;overflow:hidden}
+.canvas{position:relative;flex:1 1 0;height:auto;min-height:0;margin-left:0;overflow:hidden}
 .canvas #rulerTop,.canvas #rulerLeft,.canvas .ruler-corner{display:none}
 .canvas .canvas-views{display:none}
-.canvas .tool-rail{position:fixed;left:0;top:var(--top-bar-h);bottom:0;right:auto;z-index:6;width:104px;height:auto;max-height:none;margin:0;padding:6px;display:grid;grid-template-columns:44px 44px;grid-auto-rows:44px;grid-auto-flow:row;align-content:start;justify-content:center;gap:4px;border:0;border-radius:0;box-shadow:2px 0 8px rgba(0,0,0,.08);background:#fff;overflow:hidden;transform:none;order:0}
-/* On a landscape phone the rail holds Choose, Shape, Path, Text, Line and Measure: six
-   44 px cells in two columns, three rows, which fit the 302 px between the top bar and the status line with no scroll. The other
-   tools and the commands are in the Menu. Rail labels are hidden here: the icons are the cells, and each keeps its name. */
-.canvas .tool-rail .rail-label{display:none}
-.canvas .tool-rail .icon-button{width:44px;min-width:44px;height:44px;min-height:44px;flex:none}
 .canvas .floating{position:absolute;top:6px;left:8px;right:auto;bottom:auto;z-index:5;display:flex;flex-direction:row;flex-wrap:nowrap;align-items:center;justify-content:flex-start;align-content:center;gap:4px;width:auto;max-width:calc(100% - 120px);height:44px;max-height:none;margin:0;padding:0 6px;transform:none;overflow-x:auto;overflow-y:hidden;background:#fff;border:1px solid var(--field-line);border-radius:10px;grid-template-columns:none;scrollbar-width:none}
 .canvas .floating .icon-button{min-width:44px;height:44px;min-height:44px;flex:none}
 .canvas .floating #grid,.canvas .floating .grid-chip{grid-column:auto;width:auto;height:44px;min-height:44px;min-width:44px;flex:none}
 .canvas .floating .tb-start::before{display:none}
-.canvas .zoombar{position:absolute;left:auto;right:8px;top:auto;bottom:8px;z-index:5;width:auto;height:44px;margin:0;padding:0 4px;justify-content:center;border:1px solid var(--field-line);border-radius:10px;box-shadow:none;background:#fff}
-.canvas .zoombar .icon-button,.canvas .zoombar .zoom-pct,.canvas .zoombar .zoom-fit,.canvas .zoombar .zoom-text{min-width:44px;width:auto;height:44px;min-height:44px}.canvas .zoombar .zoom-pct,.canvas .zoombar .zoom-fit,.canvas .zoombar .zoom-text{padding:0 6px}
-.canvas .zoombar .icon-button{width:44px}
 .canvas .canvas-text-hint,.canvas #canvasHint,.canvas .canvas-hint{bottom:56px;left:8px;right:auto;max-width:calc(100% - 140px)}
 /* The lettering caption is anchored at the left edge, so it must not keep the centring shift of .canvas-hint: that pushed it under the tool rail. */
 .canvas .canvas-text-hint{transform:none}
-.layout main>footer{position:relative;flex:none;height:auto;min-height:0;margin:0;padding:0 8px;display:flex;flex-wrap:nowrap;align-items:center;gap:8px;overflow:visible;border-top:0;box-shadow:inset 0 1px 0 #e3e6e1;background:#fff}
-.layout main>footer .messages-btn{min-height:44px;min-width:44px;padding:0 12px}
-.layout main>footer>.playback-bar{flex:1 1 auto;min-width:0;height:44px}
-/* In the Stitches and 3D views the playback bar sits at the bottom edge of the window and takes the full footer width, so the
-   colour strip and the play button never sit over the sheets or the rail. Its height grows to fit the timeline and readout. */
-.layout main:not(.design-view)>footer>.playback-bar{flex:1 1 100%;height:auto;min-height:45px}
-/* The Messages and Issues buttons keep their width and stay on the status row, so a long status text can only shrink the count. */
-.layout main:not(.design-view)>footer>#issuesBtn,.layout main:not(.design-view)>footer>#messagesBtn{flex:0 0 auto;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;height:44px;min-height:44px}
-.layout main:not(.design-view)>footer>#count,.layout main:not(.design-view)>footer>#playbackProgress{flex:1 1 0;min-width:0;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 /* Stitches and 3D have no drawing palette on a landscape phone: the palette would reach over the playback buttons and leave an
    empty column beside the 3D view. The canvas takes the full width. */
-.layout main:not(.design-view) .canvas .tool-rail{display:none}
 .layout main:not(.design-view) .canvas{margin-left:0}
+.layout main:not(.design-view) .canvas .tool-rail{display:none}
 
 #toast{margin-bottom:64px;z-index:50}
 .row-btn,.row-eye,.row-lock{width:44px;min-width:44px;height:44px;min-height:44px}
@@ -1193,15 +1160,14 @@ label:has(> input[type=checkbox]){display:flex;align-items:center;gap:8px}
 
 /* Phone and tablet tool tiles are the desktop tool row's tiles: the grey fill, and the teal stripe on the armed tool. */
 @media (max-width:1024px){
-/* Six tiles share a 360 px phone. The sides and gaps are narrow enough, and the label a little tighter, that "Seleccionar" fits its tile. */
-.layout main>.tool-rail{padding-left:4px;padding-right:4px;gap:1px}
 /* The label box fills its tile and centres its word, so the box is never narrower than the text: negative tracking
    can push the ink past a shrink-wrapped box, which overflow:hidden then clips. */
-.layout main>.tool-rail .rail-label,.canvas .tool-rail .rail-label{font-size:10.5px;letter-spacing:-.02em;width:100%;text-align:center}
+/* Tablet rail words only; the phone tiles set their own word size (ChromeTile). */
+.canvas .tool-rail .rail-label{font-size:10.5px;letter-spacing:-.02em;width:100%;text-align:center}
 /* Spanish labels are longer ("Seleccionar", "Rectángulo"): a touch smaller keeps a visible margin inside each tile. */
 /* Spanish dock labels run wider than English ones ("Seleccionar" is the longest), so every tile's label is set a half pixel
    smaller and tighter: at 360 px the longest label then keeps about 4 px clear of each side of its tile. */
-html[lang="es"] .layout main>.tool-rail .rail-label,html[lang="es"] .canvas .tool-rail .rail-label{font-size:9.5px;letter-spacing:-.04em}
+html[lang="es"] .canvas .tool-rail .rail-label{font-size:9.5px;letter-spacing:-.04em}
 }
 
 /* Stitches and 3D on a landscape phone and on tablets. The status row keeps one progress state, the compile or issue text,
@@ -1383,14 +1349,6 @@ html[lang="es"] .layout main>.tool-rail .rail-label,html[lang="es"] .canvas .too
 .canvas #previewView{top:24px}
 .canvas #previewPull{top:80px}
 }
-/* The portrait phone selection bar is the same floating pill as the landscape phone and tablet bar: a rounded, bordered, shadowed
-   pill centred under the canvas, not a full-width strip with its icons pushed left. */
-@media (max-width:600px) and (orientation:portrait){
-/* The zoom bar and the selection bar share the canvas's centre line, so the two bars stacked over the dock line up. */
-.canvas .zoombar,.layout main>.floating.phone-selection{left:0;right:0;width:max-content;margin:0 auto}
-.layout main>.floating.phone-selection{position:relative;isolation:isolate;height:52px;padding:4px 6px;border:0;justify-content:center}
-.layout main>.floating.phone-selection::before{content:'';position:absolute;z-index:-1;top:4px;bottom:4px;left:0;right:0;background:#fff;border:1px solid var(--field-line);border-radius:10px;box-shadow:0 4px 18px #1d292518}
-}
 
 /* On phones and tablets the Export button in the top bar is an icon, the desktop's export glyph, in a 44 px square.
    The word stays in the accessible name, so the name field keeps the room the word took. Desktop keeps the word. */
@@ -1464,6 +1422,52 @@ html[lang="es"] .layout main>.tool-rail .rail-label,html[lang="es"] .canvas .too
 .layout>aside.panel.sheet-open[data-more=true]{background:linear-gradient(to bottom,#fff calc(100% - 40px),#eef1ef 100%) #fff}
 }
 
+/* Phone chrome. The context bar under the canvas, the tool dock (portrait) and the tool rail (landscape) are built from one
+   tile, .chrome-tile: a glyph over a word, or a glyph alone. Every tile on a phone has the same height, radius and fill, and
+   its selected state is drawn inside the tile (a mint fill with a 1 px teal border inset), so no bar carries a side stripe.
+   The top bar carries the stitch count and the issues chip under the design name (.top-status). */
+.chrome-tile{box-sizing:border-box;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;min-width:0;height:44px;min-height:44px;margin:0;padding:2px 4px;border:0;border-radius:8px;background:transparent;color:#4d5a54;font:inherit;cursor:pointer;overflow:hidden;-webkit-tap-highlight-color:transparent}
+.chrome-tile .icon{width:20px;height:20px;flex:none}
+.chrome-tile .tile-word{display:block;max-width:100%;overflow:hidden;white-space:nowrap;font-size:11px;line-height:1.1;letter-spacing:0;text-align:center}
+@media (hover:hover){.chrome-tile:hover:not(:disabled){background:#eef1ec;color:var(--teal)}}
+.chrome-tile:active:not(:disabled){background:#e1e7df}
+.chrome-tile.is-selected,.chrome-tile[aria-pressed=true]{background:var(--teal-soft);color:var(--teal-deep);box-shadow:inset 0 0 0 1px var(--teal)}
+.chrome-tile.is-selected:hover:not(:disabled),.chrome-tile[aria-pressed=true]:hover:not(:disabled){background:#cde7de}
+.chrome-tile[aria-expanded=true]{background:#eef1ec;color:var(--teal-deep);box-shadow:inset 0 0 0 1px var(--teal)}
+.chrome-tile:focus-visible{outline:2px solid var(--teal);outline-offset:-2px}
+.chrome-tile:disabled{opacity:.45;cursor:default}
+.context-bar{box-sizing:border-box;flex:none;display:flex;align-items:center;justify-content:space-between;gap:6px;height:56px;padding:4px 6px;background:#fff;border-top:1px solid #e3e6e1}
+.context-tiles,.context-zoom{display:flex;align-items:center;gap:2px;min-width:0}
+.context-tiles{flex:1 1 auto;min-width:0;overflow:hidden}
+.context-tiles .chrome-tile{flex:1 1 0;max-width:84px;padding:2px 0}
+.context-zoom{flex:none}
+.context-zoom .chrome-tile{width:44px}
+.zoom-menu-wrap{position:relative;display:flex}
+.zoom-menu{position:absolute;right:0;bottom:calc(100% + 6px);z-index:20;display:flex;flex-direction:column;min-width:200px;padding:4px;background:#fff;border:1px solid var(--field-line);border-radius:10px;box-shadow:0 4px 18px #1d292518}
+.zoom-menu button{display:flex;align-items:center;height:44px;padding:0 12px;border:0;border-radius:6px;background:transparent;color:#3c423e;font:inherit;text-align:left;white-space:nowrap;cursor:pointer}
+.zoom-menu button:hover{background:#eef1ec;color:var(--teal)}
+.zoom-menu button[aria-checked=true]{background:var(--teal-soft);color:var(--teal-deep)}
+.phone-dock{box-sizing:border-box;flex:none;display:flex;align-items:stretch;gap:0;margin:0;height:calc(56px + env(safe-area-inset-bottom));padding:6px 2px calc(6px + env(safe-area-inset-bottom));background:#fff;border-top:1px solid #e3e6e1}
+.phone-dock .chrome-tile{flex:1 1 0;min-width:0;padding:2px 0}
+.phone-dock .chrome-tile .tile-word{letter-spacing:-.01em}
+.layout main>.context-bar,.layout main>.phone-playback{grid-row:2}
+.layout main>.phone-dock{grid-row:3}
+.layout main>.phone-playback{padding:4px 8px;flex:none}
+/* The toast rises above the bar and the dock on a phone; it is a sibling of the canvas, so it anchors to the main column. */
+@media (max-width:600px) and (orientation:portrait){
+.layout main{position:relative}
+#toast{bottom:calc(52px + 56px + 8px + env(safe-area-inset-bottom));margin-bottom:0}
+.layout:has(>aside.panel.sheet-open) #toast{bottom:calc(50dvh + 8px)}
+}
+@media (orientation:landscape) and (max-height:500px) and (max-width:1000px){
+#toast{bottom:60px;margin-bottom:0}
+.layout:has(>aside.panel.sheet-open) #toast{bottom:calc(50dvh + 8px)}
+/* The landscape phone's tool rail is a column of six tiles along the canvas's left edge, labelled with words. */
+.canvas .tool-rail.landscape-rail{position:absolute;left:0;top:0;bottom:0;right:auto;z-index:6;width:84px;height:auto;max-height:none;margin:0;padding:4px;display:flex;flex-direction:column;flex-wrap:nowrap;align-items:stretch;justify-content:flex-start;gap:2px;overflow-y:auto;box-sizing:border-box;background:#fff;border:0;border-right:1px solid #e3e6e1;border-radius:0;box-shadow:none}
+.canvas .landscape-rail .chrome-tile{width:100%;height:44px;min-height:44px;flex:none;padding:2px 0}
+/* The canvas column fills the layout below the top bar and ends at the context bar. */
+.layout main>.canvas{flex:1 1 0;height:auto;min-height:0}
+}
 /* The phone top bar (a phone in portrait, or a landscape phone): one row of 44 px controls on a bar --top-bar-h tall. The design name
    is one 44 px field with two lines, the name and its save mark on the first and the stitch count on the second. The input covers the
    whole field and keeps its text on the first line, so a tap on the name or on the count renames. The count is an indicator (it

@@ -226,8 +226,8 @@ for(const lang of ['en','es']){
   expect(errors).toEqual([]);
  });
 }
-// On a landscape phone (667x375 and 844x390, touch) the page fits the window in English and Spanish, the top bar stays on one
-// row, and the tool column is icons only. Each tool keeps its accessible name, so a screen reader still announces it.
+// On a landscape phone (667x375 and 844x390, touch) the page fits the window in English and Spanish and the top bar stays on one
+// row. The tool rail is a column of six tiles, each with its word under the icon, and each keeps its accessible name.
 test.describe('landscape phone',()=>{
 test.use({isMobile:true,hasTouch:true});
 for(const [width,height] of [[667,375],[844,390]]) for(const lang of ['en','es']){
@@ -245,10 +245,10 @@ for(const [width,height] of [[667,375],[844,390]]) for(const lang of ['en','es']
   for(const t of info.tops) expect(Math.abs(t-info.tops[0]),'child top within the bar row').toBeLessThan(12);
   expect(info.height,'bar height is one row').toBeLessThanOrEqual(58);
   expect(info.overflow,'no horizontal overflow in the bar').toBeLessThanOrEqual(0);
-  // Icons only: no visible text in the tool rail or the canvas tool bar. The grid chip's "mm" text is clipped to 1px, and its name is kept.
+  // Each rail tile has its word; the canvas tool bar (the context bar) has none of its own on this list.
   const tools=await page.evaluate(()=>{
    const out=[];
-   for(const b of document.querySelectorAll('.canvas .tool-rail button, .canvas .floating:not(.phone-selection) button')){
+   for(const b of document.querySelectorAll('.canvas .tool-rail button, .canvas .floating:not(.context-bar) button')){
     if(!b.getBoundingClientRect().width)continue;
     const label=b.querySelector('.grid-label');
     const text=label?(label.getBoundingClientRect().width>1?label.textContent:''):b.innerText.trim();
@@ -258,7 +258,7 @@ for(const [width,height] of [[667,375],[844,390]]) for(const lang of ['en','es']
   });
   expect(tools.length,'tool buttons shown').toBe(6);
   for(const t of tools){
-   expect(t.text,`${t.id} shows no visible text`).toBe('');
+   expect(t.text,`${t.id} shows its word`).not.toBe('');
    expect(t.name,`${t.id} keeps an accessible name`).not.toBe('');
   }
   expect(errors).toEqual([]);

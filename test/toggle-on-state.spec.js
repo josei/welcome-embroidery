@@ -1,6 +1,6 @@
 import {test,expect} from '@playwright/test';
 
-// Every on state in the chrome is the same treatment: the pale teal fill, teal border and 3 px teal bar on the left.
+// Every on state in the chrome is the same treatment: the pale teal fill and a 1 px teal border drawn inside the tile.
 // The 3D hint is plain text, so it has no button role and no pill.
 test.beforeEach(async({page})=>{await page.addInitScript(()=>{delete window.showSaveFilePicker;});});
 
@@ -17,10 +17,10 @@ test('the Hand tool on state matches the tool tiles at 390x844 in Spanish',async
  await expect(hand).toHaveAttribute('aria-pressed','true');
  await page.mouse.move(0,0);
  const onHand=await ON_STATE(hand);
- const tile=page.locator('.layout main>.tool-rail .icon-button.active-tool').first();
+ const tile=page.locator('.phone-dock .chrome-tile.is-selected').first();
  const onTile=await ON_STATE(tile);
  expect(onHand,'Hand tool on state equals a tool tile on state').toEqual(onTile);
- expect(onHand.shadow,'on state has the teal bar').toMatch(/3px 0px 0px 0px inset/);
+ expect(onHand.shadow,'on state has the teal border inside the tile').toMatch(/1px 0px 0px 0px inset|0px 0px 0px 1px inset/);
  expect(offHand.shadow,'off and on differ without hover').not.toEqual(onHand.shadow);
  await page.screenshot({path:'test-results/hand-on-390-es.png'});
 });
@@ -36,7 +36,7 @@ test('the Select toggle on state uses the shared tool on state at 390x844 in Spa
  await expect(sel).toHaveAttribute('aria-pressed','true');
  await page.mouse.move(0,0);
  const on=await ON_STATE(sel);
- expect(on.shadow).toMatch(/3px 0px 0px 0px inset/);
+ expect(on.shadow).toMatch(/1px 0px 0px 0px inset|0px 0px 0px 1px inset/);
  expect(on.bg).toBe('rgb(225, 241, 236)');
 });
 

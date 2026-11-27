@@ -91,6 +91,7 @@ for(const [width,height] of [[390,844],[768,1024]]) {
   const box=await chip.boundingBox();
   expect(box.x+box.width,'chip inside the screen').toBeLessThanOrEqual(width);
   expect(box.y+box.height,'chip inside the screen').toBeLessThanOrEqual(height);
-  expect(box.height,'chip keeps its height').toBeGreaterThanOrEqual(20);
+  // The chip is the top bar's second line, 16 px tall with its 14 px glyph.
+  expect(box.height,'chip keeps its height').toBeGreaterThanOrEqual(16);
  });
 }

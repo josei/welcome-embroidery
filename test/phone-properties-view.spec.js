@@ -11,6 +11,11 @@ test.beforeEach(async({page})=>{await page.addInitScript(()=>{delete window.show
 const viewBox=page=>page.locator('#art').getAttribute('viewBox').then(v=>v.split(' ').map(Number));
 const rectOf=(page,selector)=>page.locator(selector).evaluate(e=>{const r=e.getBoundingClientRect();return {left:r.left,top:r.top,right:r.right,bottom:r.bottom};});
 
+// One zoom step in: the stepper's + with nothing selected, or the % tile's Zoom in row with an object selected.
+async function zoomIn(page){
+ if(await page.locator('#zoomIn').isVisible()) await page.locator('#zoomIn').click();
+ else{await page.locator('#zoomPct').click();await page.locator('[role=menuitem]').filter({hasText:/^(Zoom in|Acercar)$/}).click();}
+}
 async function openPhone(page,width,height,lang){
  const errors=[];page.on('pageerror',e=>errors.push(e.message));page.on('dialog',d=>d.accept());
  await page.setViewportSize({width,height});
@@ -61,7 +66,7 @@ for(const lang of LANGS)for(const [width,height] of PHONES){
   await page.locator('#rect').tap();
   await expect(page.locator('.sel-box')).toBeVisible();
   // Zoom in and pan so the selection is off screen before the sheet opens.
-  await page.locator('#zoomIn').click();await page.locator('#zoomIn').click();
+  for(let i=0;i<2;i++) await zoomIn(page);
   const canvas=await rectOf(page,'.canvas');
   await page.mouse.move((canvas.left+canvas.right)/2,(canvas.top+canvas.bottom)/2);
   await page.mouse.wheel(700,0);
@@ -79,7 +84,7 @@ for(const lang of LANGS)for(const [width,height] of PHONES){
 
  test(`a shape added while Properties is open lands in the visible part (${lang} ${width}x${height})`,async({page})=>{
   const errors=await openPhone(page,width,height,lang);
-  await page.locator('#zoomIn').click();await page.locator('#zoomIn').click();await page.locator('#zoomIn').click();
+  for(let i=0;i<3;i++) await zoomIn(page);
   await openProperties(page);
   // The Add rectangle button sits under the sheet on a phone, so it is clicked as a DOM event here.
   await page.locator('#rect').evaluate(e=>e.click());

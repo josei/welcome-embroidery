@@ -104,14 +104,14 @@ for(const lang of ['en','es']){
  test(`a landscape phone has no selection bar and keeps its selection commands in the Menu (${lang})`,async({page})=>{
   const errors=await openEditor(page,844,390,lang);
   await page.locator('#rect').click();
-  await expect(page.locator('.phone-selection'),'the selection bar is shown with a selection').toBeVisible();
+  await expect(page.locator('.context-bar'),'the selection bar is shown with a selection').toBeVisible();
 
   // The commands the bar carries below desktop are all reachable as Menu rows.
   await page.locator('#phoneMenu').click();
   for(const id of ['menuDuplicate','menuDelete','menuGroup','menuClip'])
    await expect(await revealMenuRow(page.locator('#phoneMenuList'),id),`${id} is a Menu row`).toHaveCount(1);
   // The add-to-selection toggle is on the phone bar, not in the Menu.
-  await expect(page.locator('.phone-selection #selectToggle'),'the toggle is on the phone bar').toBeVisible();
+  await expect(page.locator('.context-bar #selectToggle'),'the toggle is on the phone bar').toBeVisible();
   expect(errors).toEqual([]);
  });
 }

@@ -68,24 +68,15 @@ for(const [w,h] of SIZES) for(const lang of ['en','es']) for(const overrun of [f
  });
 }
 
-// On the landscape phone the footer has no Messages button: the top-bar issues button is the route, so an overrun status cannot push a second one out of reach.
-for(const lang of ['en','es']) {
- test(`the footer has no Messages button on the landscape phone with an overrun status (844x390 ${lang})`,async({page})=>{
-  await openStitches(page,844,390,lang,{overrun:true});
-  await expect(page.locator('#messagesBtn')).toHaveCount(0);
- });
-}
-
-// On the landscape phone and the tablet the status row holds one progress state (the compile or issue text) and the Messages
-// pill. The playback row above already reports the simulation, so the status row leaves its count slot empty.
-const ONE_ROW=[[844,390],[768,1024]];
+// On the tablet the status row holds one progress state (the compile or issue text) and the Messages pill. The playback row above
+// already reports the simulation, so the status row leaves its count slot empty. A phone has no status row: its count is in the top bar.
+const ONE_ROW=[[768,1024]];
 for(const [w,h] of ONE_ROW) for(const lang of ['en','es']) {
- test(`the status row shows one progress state, with Messages only on tablet (${w}x${h} ${lang})`,async({page})=>{
+ test(`the status row shows one progress state beside Messages (${w}x${h} ${lang})`,async({page})=>{
   await openStitches(page,w,h,lang);
   const shown=await page.locator('#playbackProgress').isVisible();
   expect(shown).toBe(false);
-  if(w===768) await expect(page.locator('#messagesBtn')).toBeVisible();
-  else await expect(page.locator('#messagesBtn')).toHaveCount(0);
+  await expect(page.locator('#messagesBtn')).toBeVisible();
   await expect(page.locator('#playbackStitches')).toBeVisible();
   await expect(page.locator('#count')).toHaveText('');
  });

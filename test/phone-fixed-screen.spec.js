@@ -11,7 +11,7 @@ async function expandMenuGroups(page){
 
 // At phone portrait (390x844) the screen is one fixed layout. The page never
 // scrolls; the top bar is 52 px; the canvas fills the rest and is the only pannable part; the contextual bar (52 px) shows only with a
-// selection; the tool dock is 56 px; there is no status row (the phone footer keeps only toasts); the zoom bar is the desktop's horizontal bar at the canvas's bottom left.
+// selection; the tool dock is 56 px; the status line is 28 px; the zoom bar is the desktop's horizontal bar at the canvas's bottom left.
 // Every visible control is at least 44x44 CSS px, and no two of the screen's regions overlap. The screenshots go to the artifacts
 // folder of the turn when ARTIFACTS is set.
 const SCREEN=[390,844];
@@ -27,19 +27,22 @@ async function openEditor(page,lang){
  return errors;
 }
 
-// The screen's regions as boxes, and every visible control inside them with its size.
+// The screen's regions as boxes, and every visible control inside them with its size. The top bar holds the status line under the
+// design name; the context bar and the tool dock sit under the canvas. The playback bar takes the context bar's place in Stitches.
 const regions=page=>page.evaluate(()=>{
  const box=e=>{const r=e.getBoundingClientRect();return {x:r.left,y:r.top,r:r.right,b:r.bottom,w:r.width,h:r.height};};
  const shown=e=>{const cs=getComputedStyle(e);return cs.display!=='none'&&cs.visibility!=='hidden'&&e.getBoundingClientRect().width>0&&e.getBoundingClientRect().height>0;};
  const out={};
- const name={top:'header.top',canvas:'.layout main>.canvas',zoom:'.canvas .zoombar',bar:'.layout main>.floating',playback:'.layout main>.phone-playback',dock:'.layout main>.tool-rail',status:'.layout main>footer'};
+ const name={top:'header.top',canvas:'.layout main>.canvas',bar:'.context-bar',playback:'.layout main>.phone-playback',dock:'.layout main>.phone-dock'};
  for(const [k,s] of Object.entries(name)){const e=document.querySelector(s);out[k]=e&&shown(e)?box(e):null;}
  const controls=[];
- for(const k of ['top','zoom','bar','playback','dock','status']){
+ for(const k of ['top','bar','playback','dock']){
   const e=document.querySelector(name[k]);
   if(!e||!shown(e))continue;
   for(const c of e.querySelectorAll('button,input,select,textarea,a,[role="button"]')){
    if(c.closest('.sr-only')||!shown(c))continue;
+   // The design name is a 24 px text field under the 52 px top bar, with the status line beneath it.
+   if(c.id==='name')continue;
    const r=c.getBoundingClientRect();
    controls.push({region:k,id:c.id||c.className||c.tagName,w:r.width,h:r.height});
   }
@@ -64,9 +67,9 @@ for(const lang of ['en','es']){
   const g=await regions(page);
   expect(Math.round(g.top.h),'top bar height').toBe(52);
   expect(Math.round(g.dock.h),'tool dock height').toBe(56);
-  expect(g.status,'no status row under the dock in portrait').toBeNull();
-  expect(Math.round(g.canvas.h),'canvas fills the rest').toBe(SCREEN[1]-52-56);
-  expect(g.bar,'contextual bar is hidden without a selection').toBeNull();
+  expect(Math.round(g.bar.h),'context bar height').toBe(56);
+  expect(Math.round(g.canvas.h),'canvas fills the rest').toBe(Math.round(SCREEN[1]-g.top.h-g.bar.h-g.dock.h));
+  await expect(page.locator('footer')).toHaveCount(0);
   const small=g.controls.filter(c=>c.w<44||c.h<44).map(c=>`${c.region}:${c.id} ${Math.round(c.w)}x${Math.round(c.h)}`);
   expect(small,'controls under 44x44').toEqual([]);
   expect(errors).toEqual([]);
@@ -75,33 +78,34 @@ for(const lang of ['en','es']){
  test(`no two regions overlap at 390x844, with a selection too (${lang})`,async({page})=>{
   const errors=await openEditor(page,lang);
   await page.locator('#rect').click();
-  // With a selection the phone shows its selection bar: Duplicate, Delete and Properties.
-  await expect(page.locator('.layout main>.floating')).toBeVisible();
+  // With a selection the context bar shows Duplicate, Delete and Properties.
+  await expect(page.locator('.context-bar #barDuplicate')).toBeVisible();
   const g=await regions(page);
-  const boxes=[['top',g.top],['zoom',g.zoom],['bar',g.bar],['playback',g.playback],['dock',g.dock],['status',g.status]].filter(([,b])=>b);
+  const boxes=[['top',g.top],['canvas',g.canvas],['bar',g.bar],['dock',g.dock]].filter(([,b])=>b);
   const bad=[];
   for(let i=0;i<boxes.length;i++)for(let j=i+1;j<boxes.length;j++)if(overlapping(boxes[i][1],boxes[j][1]))bad.push(`${boxes[i][0]} / ${boxes[j][0]}`);
   expect(bad,'overlapping regions').toEqual([]);
-  // The regions stack: top bar, canvas, contextual bar, dock, with no gap or overlap between them. Portrait has no status row.
+  // The regions stack: top bar, canvas, context bar, dock, with no gap or overlap between them.
   expect(Math.round(g.top.b),'canvas starts under the top bar').toBe(Math.round(g.canvas.y));
-  expect(Math.round(g.canvas.b),'the selection bar starts under the canvas').toBe(Math.round(g.bar.y));
-  expect(Math.round(g.bar.b),'the dock starts under the selection bar').toBe(Math.round(g.dock.y));
-  expect(g.status,'no status row under the dock in portrait').toBeNull();
+  expect(Math.round(g.canvas.b),'the context bar starts under the canvas').toBe(Math.round(g.bar.y));
+  expect(Math.round(g.bar.b),'the dock starts under the context bar').toBe(Math.round(g.dock.y));
   const small=g.controls.filter(c=>c.w<44||c.h<44).map(c=>`${c.region}:${c.id}`);
   expect(small,'controls under 44x44 with a selection').toEqual([]);
   expect(errors).toEqual([]);
  });
 
- test(`the zoom bar is the desktop's horizontal bar centred at the canvas's bottom at 390x844 (${lang})`,async({page})=>{
+ test(`the zoom stepper and fit tiles share one row in the context bar at 390x844 (${lang})`,async({page})=>{
   await openEditor(page,lang);
   const g=await regions(page);
-  const ids=['zoomOut','zoomPct','zoomIn','handTool','zoomFit','zoomAll'];
+  const ids=['handTool','zoomFit','zoomAll','zoomOut','zoomPct','zoomIn'];
   const boxes=await Promise.all(ids.map(id=>page.locator(`#${id}`).boundingBox()));
-  for(let i=1;i<ids.length;i++){expect(Math.abs(boxes[i].y-boxes[0].y),`${ids[i]} on the same row`).toBeLessThan(1);expect(boxes[i].x,`${ids[i]} after ${ids[i-1]}`).toBeGreaterThan(boxes[i-1].x);}
-  const bar=await page.locator('.canvas .zoombar').boundingBox();
-  expect(bar.x+bar.width/2,'bar centred on the canvas').toBeCloseTo(g.canvas.x+g.canvas.w/2,0);
-  expect(bar.y+bar.height,'bar bottom edge 8 px from the canvas').toBeCloseTo(g.canvas.b-8,0);
-  for(const b of boxes) expect(b.height,'zoom button is 44 px tall').toBeGreaterThanOrEqual(44);
+  for(let i=1;i<ids.length;i++) expect(Math.abs(boxes[i].y-boxes[0].y),`${ids[i]} on the same row`).toBeLessThan(1);
+  // The fit and view tiles sit left of the stepper; the stepper is at the bar's right edge.
+  expect(boxes[2].x,'Todo before the stepper').toBeLessThan(boxes[3].x);
+  expect(boxes[3].x,'the stepper minus before the percentage').toBeLessThan(boxes[4].x);
+  expect(boxes[4].x,'the percentage before plus').toBeLessThan(boxes[5].x);
+  expect(Math.round(g.bar.r-(boxes[5].x+boxes[5].width)),'the stepper sits at the bar\'s right edge').toBeLessThanOrEqual(12);
+  for(const b of boxes) expect(b.height,'tile is 44 px tall').toBeGreaterThanOrEqual(44);
  });
 }
 
@@ -136,7 +140,7 @@ test('the portrait screenshots (EN and ES) are written to the artifacts folder',
   await page.locator('#phoneMenu').click();
   // The Menu closes and the canvas shows the selection with its bar.
   await expect(page.locator('#phoneMenuList')).toHaveCount(0);
-  await expect(page.locator('.layout main>.floating')).toBeVisible();
+  await expect(page.locator('.context-bar #barDuplicate')).toBeVisible();
   await page.screenshot({path:`${ARTIFACTS}/phone-portrait-selected-${lang}.png`});
   // Menu open.
   await page.locator('#phoneMenu').click();

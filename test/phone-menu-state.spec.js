@@ -86,7 +86,7 @@ test('the phone Menu lists the drawing tools under Tools and the node commands u
   }
   return out;
  });
- expect(groups.Tools).toEqual(['menuEllipse','menuPolygon','menuStar','menuPen','menuTrace','menuPhoto']);
+ expect(groups.Tools).toEqual(['menuEllipse','menuPolygon','menuStar','menuPen','menuTrace','menuPhoto','menuMeasure']);
  expect(groups.Nodes).toEqual(['menuEditNodes','menuNodeAdd','menuNodeDelete','menuNodeSmooth','menuNodeCorner']);
 });
 
@@ -169,7 +169,7 @@ for(const size of [PHONE,TABLET]){
   const tap=async loc=>{actions++;await loc.click();};
   await tap(page.locator('#phoneMenu'));
   await tap(page.locator('#menuNew'));
-  await tap(page.locator('.tool-rail #letter'));
+  await tap(page.locator('#letter'));
   await tap(page.locator('.canvas'));
   await page.keyboard.type('WE');
   actions++;

@@ -18,15 +18,16 @@ async function addLettering(page,width,height,lang){
 }
 
 for(const [width,height] of SIZES) for(const lang of ['en','es']){
- test(`the text box and hint fit a ${width}x${height} phone and the zoom bar is uncovered (${lang})`,async({page})=>{
+ test(`the text box and hint fit a ${width}x${height} phone and the context bar is uncovered (${lang})`,async({page})=>{
   const errors=await addLettering(page,width,height,lang);
   const box=await page.locator('#canvasText').boundingBox();
   expect(box.x,'box left edge inside the viewport').toBeGreaterThanOrEqual(0);
   expect(box.x+box.width,'box right edge inside the viewport').toBeLessThanOrEqual(width);
   const hint=await page.locator('#canvasTextHint').boundingBox();
-  const zoom=await page.locator('.zoombar').boundingBox();
+  // On a phone the bar under the canvas holds the zoom stepper, so the hint must stay clear of that bar.
+  const zoom=await page.locator('.context-bar').boundingBox();
   const overlap=hint.x<zoom.x+zoom.width&&hint.x+hint.width>zoom.x&&hint.y<zoom.y+zoom.height&&hint.y+hint.height>zoom.y;
-  expect(overlap,'hint does not cover the zoom bar').toBe(false);
+  expect(overlap,'hint does not cover the context bar').toBe(false);
   expect(errors).toEqual([]);
  });
 }

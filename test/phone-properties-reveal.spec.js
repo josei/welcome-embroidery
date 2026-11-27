@@ -84,7 +84,7 @@ for(const [width,height] of PHONES){
   await page.mouse.up();
   const frame=await rectOf(page,'.sel-box');
   const obstacles=[];
-  for(const sel of ['.zoombar','.phone-selection']){
+  for(const sel of ['.zoombar','.context-bar']){
    const count=await page.locator(sel).count();
    for(let i=0;i<count;i++){
     const r=await page.locator(sel).nth(i).evaluate(e=>{const b=e.getBoundingClientRect();return b.width&&b.height?{left:b.left,top:b.top,right:b.right,bottom:b.bottom}:null;});

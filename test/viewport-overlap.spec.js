@@ -90,7 +90,8 @@ const measure=scope=>{
    const top=document.elementFromPoint(x,y);
    if(top&&top!==e&&!e.contains(top))cover=top;
   }
-  if(cover)coverFailures.push(`${name(e)} is covered by ${name(cover)}`);
+  // The design name's save mark sits over the field's right padding, on purpose, so it is not a control covering the name.
+  if(cover&&!(e.id==='name'&&cover.closest('.name-field')))coverFailures.push(`${name(e)} is covered by ${name(cover)}`);
  }
  const hits=[];
  for(let i=0;i<controls.length;i++)for(let j=i+1;j<controls.length;j++){

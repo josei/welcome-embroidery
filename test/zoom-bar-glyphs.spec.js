@@ -1,9 +1,10 @@
 import {test,expect} from '@playwright/test';
 
-// On a phone or tablet the canvas zoom bar's fit buttons show the fit glyph only, with no word, in both languages and at
-// every width up to the tablet breakpoint. Each keeps its full command name as its accessible name, and the Spanish bar
-// stays inside the canvas.
+// On a phone the context bar under the canvas holds the view tiles (Hand, Hoop, All) beside the zoom stepper. Each tile has its
+// glyph and its word, and keeps its full command name as its accessible name. The Spanish bar stays inside the window.
 const SIZES=[[390,844],[844,390],[768,1024]];
+// The context bar is the phone's; the tablet keeps the zoom bar on its canvas.
+const PHONE_SIZES=[[390,844],[844,390]];
 
 async function openEditor(page,lang,[w,h]){
  const errors=[];page.on('pageerror',e=>errors.push(e.message));page.on('dialog',d=>d.accept().catch(()=>{}));
@@ -14,27 +15,27 @@ async function openEditor(page,lang,[w,h]){
  return errors;
 }
 
-for(const lang of ['en','es'])for(const size of SIZES){
- test(`the zoom bar shows no words at ${size.join('x')} (${lang})`,async({page})=>{
+for(const lang of ['en','es'])for(const size of PHONE_SIZES){
+ test(`the phone context bar shows each view tile's glyph and word at ${size.join('x')} (${lang})`,async({page})=>{
   const errors=await openEditor(page,lang,size);
   const fit=page.locator('#zoomFit'), all=page.locator('#zoomAll');
   await expect(fit).toBeVisible();
   await expect(all).toBeVisible();
-  expect((await fit.textContent()).trim(),'Fit hoop text').toBe('');
-  expect((await all.textContent()).trim(),'Fit everything text').toBe('');
+  // The words come from the same tile component as the dock; each tile's own word is its visible text.
+  expect((await fit.locator('.tile-word').textContent()).trim(),'Hoop word').toBe(lang==='en'?'Hoop':'Bastidor');
+  expect((await all.locator('.tile-word').textContent()).trim(),'All word').toBe(lang==='en'?'All':'Todo');
   expect(await fit.locator('use').getAttribute('href')).toBe('#i-fit');
   expect(await all.locator('use').getAttribute('href')).toBe('#i-fit-all');
   expect(await fit.locator('use').getAttribute('href')).not.toBe(await all.locator('use').getAttribute('href'));
   expect(errors).toEqual([]);
  });
 
- test(`the zoom bar fits inside the canvas at ${size.join('x')} (${lang})`,async({page})=>{
+ test(`the phone context bar fits inside the window at ${size.join('x')} (${lang})`,async({page})=>{
   const errors=await openEditor(page,lang,size);
-  const bar=await page.locator('.canvas .zoombar').boundingBox();
-  const canvas=await page.locator('.canvas').boundingBox();
-  expect(bar.x).toBeGreaterThanOrEqual(canvas.x);
-  expect(bar.x+bar.width).toBeLessThanOrEqual(canvas.x+canvas.width);
-  const overflow=await page.locator('.canvas .zoombar').evaluate(el=>el.scrollWidth-el.clientWidth);
+  const bar=await page.locator('.context-bar').boundingBox();
+  expect(bar.x).toBeGreaterThanOrEqual(0);
+  expect(bar.x+bar.width).toBeLessThanOrEqual(size[0]);
+  const overflow=await page.locator('.context-bar').evaluate(el=>el.scrollWidth-el.clientWidth);
   expect(overflow).toBeLessThanOrEqual(0);
   expect(errors).toEqual([]);
  });

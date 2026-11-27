@@ -106,7 +106,7 @@ test('phone Copy has its own glyph, and Duplicate matches the selection bar (390
  while(await headings.count()>0)await headings.first().click();
  const menu=page.locator('#phoneMenuList');
  const rows=menu.locator('button[role="menuitem"]:not(.menu-section)');
- const bar=page.locator('.floating.phone-selection button');
+ const bar=page.locator('.context-bar button');
  const entries=[];
  for(const [locator,prefix] of [[rows,'menu'],[bar,'bar']]){
   for(let i=0;i<await locator.count();i++){
