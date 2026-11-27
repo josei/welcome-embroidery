@@ -16,6 +16,8 @@ import {projectSaveAs} from './projectIO.js';
 import {setShortcutsOpen} from './shortcutsState.js';
 import {enterEdit} from './canvasText.js';
 import {editor} from './editorContext.js';
+import {hoopActions} from './hoopState.js';
+import {zoomActions} from './zoomState';
 import {t} from './i18n.js';
 import {shortcutForCommand} from './shortcutTable.js';
 import {setPaletteOpen} from './commandPaletteState.js';
@@ -35,6 +37,11 @@ export interface PaletteCommand {
    * to get that message. The palette and menus still show it disabled and never run it.
    */
   explainsWhenDisabled?: boolean;
+  /**
+   * Extra words the palette also matches, untranslated, so a command can be found by a word its label does not use. Both
+   * languages share them: the hoop commands are found by "hoop" in English and "bastidor" in Spanish alike.
+   */
+  keywords?: string[];
 }
 
 /** A command as the palette shows it: translated label, shortcut from the table, and whether it can run now. */
@@ -43,6 +50,7 @@ export interface PaletteRow {
   label: string;
   shortcut: string;
   enabled: boolean;
+  keywords?: string[];
 }
 
 /** Presses a toolbar button by id: the shortcut and menu paths share the button's own handler. */
@@ -53,6 +61,8 @@ function press(id: string) {
 const hasSelection = () => selState().multi.size > 0;
 const oneSelected = () => selState().multi.size === 1;
 const always = () => true;
+/** Words that find the hoop commands in either language: "bastidor" is the Spanish for hoop, and "bas" finds it too. */
+const HOOP_KEYWORDS = ['hoop', 'bastidor'];
 
 /** Converts the selected shapes to paths, leaving paths and stitch layers as they are. */
 function convertSelectionToPath() {
@@ -123,6 +133,8 @@ export const COMMANDS: PaletteCommand[] = [
   {id: 'fitAll', label: 'Fit everything', run: () => editor.canvas.fitAll(), enabled: always},
   {id: 'fitSelection', label: 'Zoom to selection', run: () => editor.canvas.fitSelection(), enabled: always},
   {id: 'zoom100', label: 'Zoom to 100%', run: () => editor.canvas.zoomTo100(), enabled: always},
+  {id: 'fitHoop', label: 'Fit hoop', run: () => zoomActions.fitHoop(), enabled: always, keywords: HOOP_KEYWORDS},
+  {id: 'rotateHoop', label: 'Rotate hoop', run: () => hoopActions.rotate(), enabled: always, keywords: HOOP_KEYWORDS},
   {id: 'zoomIn', label: 'Zoom in', run: () => editor.canvas.zoomAt(1.25), enabled: always},
   {id: 'zoomOut', label: 'Zoom out', run: () => editor.canvas.zoomAt(1 / 1.25), enabled: always},
   tool('select', 'Select tool'),
@@ -194,6 +206,7 @@ export function paletteRows(query: string): {recent: PaletteRow[]; all: PaletteR
     label: t(command.label),
     shortcut: shortcutForCommand(command.id),
     enabled: command.enabled(),
+    keywords: command.keywords,
   });
   const remembered = recentCommands(COMMANDS, commandMemory.get().recent).map(view);
   const all = filterCommands(COMMANDS.map(view), query);

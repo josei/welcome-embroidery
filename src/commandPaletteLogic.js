@@ -9,6 +9,7 @@ export const RECENT_LIMIT = 5;
  * @typedef {object} PaletteEntry
  * @property {string} id
  * @property {string} label the text the user sees, already translated
+ * @property {string[]} [keywords] extra words the query also matches (not translated)
  */
 
 /**
@@ -22,7 +23,8 @@ export const RECENT_LIMIT = 5;
 export const EMPTY_MEMORY = {recent: [], lastEdit: null};
 
 /**
- * The commands whose label contains the query, ignoring case. An empty query matches everything, in list order.
+ * The commands whose label, or one of whose keywords, contains the query, ignoring case. An empty query matches everything,
+ * in list order.
  * @template {PaletteEntry} T
  * @param {T[]} commands
  * @param {string} query
@@ -31,7 +33,8 @@ export const EMPTY_MEMORY = {recent: [], lastEdit: null};
 export function filterCommands(commands, query) {
   const needle = query.trim().toLowerCase();
   if (!needle) return commands;
-  return commands.filter(command => command.label.toLowerCase().includes(needle));
+  return commands.filter(command =>
+    command.label.toLowerCase().includes(needle) || (command.keywords ?? []).some(word => word.toLowerCase().includes(needle)));
 }
 
 /**

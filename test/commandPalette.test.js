@@ -19,6 +19,13 @@ test('filtering is case-insensitive and matches a substring anywhere in the labe
   assert.deepEqual(filterCommands(commands, '  left ').map(c => c.id), ['alignLeft'], 'surrounding spaces are ignored');
 });
 
+test('a command found by one of its keywords, in any case, matches the query', () => {
+  const hoop = [{id: 'fitHoop', label: 'Fit hoop', keywords: ['hoop', 'bastidor']}, {id: 'copy', label: 'Copy'}];
+  assert.deepEqual(filterCommands(hoop, 'BAS').map(c => c.id), ['fitHoop']);
+  assert.deepEqual(filterCommands(hoop, 'hoop').map(c => c.id), ['fitHoop']);
+  assert.deepEqual(filterCommands(hoop, 'copy').map(c => c.id), ['copy']);
+});
+
 test('an empty query lists every command in order, and a miss lists none', () => {
   assert.equal(filterCommands(commands, '').length, commands.length);
   assert.equal(filterCommands(commands, 'zzz').length, 0);

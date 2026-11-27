@@ -6,6 +6,17 @@ import {paletteRows, runCommand} from '../commandRegistry';
 import type {PaletteRow} from '../commandRegistry';
 import {paletteState, setPaletteActive, setPaletteOpen, setPaletteQuery} from '../commandPaletteState';
 
+// The width the phone and tablet styles stop at, or a coarse pointer: those screens are touched, so keycaps are not shown.
+const TOUCH_LAYOUT_QUERY = '(max-width: 1024px), (pointer: coarse)';
+function subscribeTouchLayout(callback: () => void) {
+ const query = window.matchMedia(TOUCH_LAYOUT_QUERY);
+ query.addEventListener('change', callback);
+ return () => query.removeEventListener('change', callback);
+}
+function useTouchLayout(): boolean {
+ return useSyncExternalStore(subscribeTouchLayout, () => window.matchMedia(TOUCH_LAYOUT_QUERY).matches);
+}
+
 // The command palette: a search box over every command the menus, toolbar and shortcuts run. Recent (the last five runs)
 // shows at the top while the box is empty. Up and Down move the selection, Enter runs it, Escape closes. A command that does
 // not apply now stays in the list, greyed out, and Enter on it does nothing.
@@ -14,6 +25,8 @@ export function CommandPalette() {
  const ref = useRef<HTMLDialogElement>(null);
  const input = useRef<HTMLInputElement>(null);
  useModalDialog(ref, open);
+ // Keycaps are for a keyboard: a touch screen has none, so its rows show the command alone.
+ const touch = useTouchLayout();
 
  // Each time the palette opens, focus goes to the search box (the store has already emptied it).
  useEffect(() => {
@@ -67,7 +80,7 @@ export function CommandPalette() {
         aria-disabled={!row.enabled} className={`palette-row${position === current ? ' is-active' : ''}${row.enabled ? '' : ' is-disabled'}`}
         onMouseMove={() => setPaletteActive(position)} onClick={() => run(row)}>
        <span>{row.label}</span>
-       {row.shortcut && <kbd>{row.shortcut}</kbd>}
+       {row.shortcut && !touch && <kbd>{row.shortcut}</kbd>}
       </li>
      );
     })}
