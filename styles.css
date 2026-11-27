@@ -1319,9 +1319,9 @@ html[lang="es"] .layout main>.tool-rail .rail-label,html[lang="es"] .canvas .too
 
 /* On a mouse desktop the Hide and Lock buttons float over a layer's right end instead of taking a column of their own, so the name
    keeps the whole width of the Layers column. A layer whose Hide or Lock is on keeps that end clear for the icon it shows. The
-   buttons take the background of the row's state so the icon reads cleanly over the name's end. While a row is hovered or focused,
-   its name wraps before the buttons, so the ellipsis of a long name stays visible; the name's box does not move. A group's caret is
-   not floated. */
+   buttons take the background of the row's state so the icon reads cleanly over the name's end. The row keeps that end clear in every
+   state, so a long name's ellipsis and the type and count line both stop before the buttons; the name's box does not move. A group's
+   caret is not floated. */
 @media (min-width:1101px) and (hover:hover){
 .object-line:not(.group-line){display:block}
 .object-line:not(.group-line) .row-btn{position:absolute;top:50%;translate:0 -50%;background:#fff}
@@ -1330,9 +1330,12 @@ html[lang="es"] .layout main>.tool-rail .rail-label,html[lang="es"] .canvas .too
 .object-line:not(.group-line):hover .row-btn,.object-line:not(.group-line):focus-within .row-btn{background:#f1f5f1}
 .object-line:has(>.object-row.selected) .row-btn{background:var(--teal-soft)}
 .object-line:not(.group-line):hover .row-btn:hover{background:#dfe9e3}
-.object-line:not(.group-line):hover>.object-row:not(.is-hidden):not(.is-locked) .row-name,.object-line:not(.group-line):focus-within>.object-row:not(.is-hidden):not(.is-locked) .row-name{padding-right:58px}
 .object-line:has(>.object-row.is-hidden) .row-eye{opacity:1}
-.object-line:has(>.object-row.is-hidden)>.object-row,.object-line:has(>.object-row.is-locked)>.object-row{padding-right:58px}
+/* The row reserves the buttons' width in every state, so the name and the type and count line both stop before them. */
+.object-line:not(.group-line)>.object-row{padding-right:58px}
+/* The type and count line wraps when the column is too narrow for both, so the count moves to its own line instead of running under
+   the buttons. */
+.object-line:not(.group-line) .object-row .row-tag{flex-wrap:wrap}
 }
 /* On the desktop the stitch count sits on one line and is never clipped: the playback bar's counter column takes the width the
    text needs, and the track gives up the room. */
