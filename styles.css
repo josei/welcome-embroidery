@@ -990,6 +990,10 @@ body{height:100dvh;min-height:0;overflow:hidden}
 #phoneMenuList .menu-section .menu-icon{color:#66726c}
 #phoneMenuList .menu-section .menu-status{flex:none;display:inline-flex;margin-left:auto;color:#66726c}
 #phoneMenuList .menu-section .menu-status .icon{width:20px;height:20px}
+/* A row whose reason is its group's line keeps the reason in the DOM and its title, but does not draw it again on the phone Menu. */
+#phoneMenuList .menu-reason-quiet{display:none}
+/* The one reason line a group draws, under its heading. It starts where the heading's name starts (padding, chevron and gap). */
+#phoneMenuList .menu-group-reason{display:block;padding:0 10px 6px 42px;white-space:normal;overflow-wrap:anywhere}
 /* A landscape phone is only 390 px tall: the tighter heading and title spacing lets the first Menu section (View: Layers, Properties and
    the 2D, Stitches and 3D rows) sit in the list with no scrolling. */
 @media (max-height:500px){#phoneMenuList .menu-heading{padding:6px 10px 0}#phoneMenuList .menu-title{margin-bottom:0}}

@@ -1,4 +1,4 @@
-import {useEffect, useRef, useState, useSyncExternalStore} from 'react';
+import {Fragment, useEffect, useRef, useState, useSyncExternalStore} from 'react';
 import {toolActions} from '../toolMode.js';
 import {toolbarActions} from '../toolbarCommands';
 import {multiSelectState} from '../multiSelectState';
@@ -167,6 +167,33 @@ function Dropdown({id, label, rows, iconOnly, onOpen, sharedReasons}: {id: strin
  // One reason line for a shared-reason menu (Edit): it is drawn on the row the pointer or focus is on, else the first disabled row.
  const disabledRows = rows.filter((r): r is Entry => typeof r === 'object' && 'id' in r && Boolean(r.disabled && r.reason));
  const reasonRowId = sharedReasons ? (disabledRows.find(r => r.id === notedId) ?? disabledRows[0])?.id : undefined;
+ // The phone Menu draws one reason line per group, under its heading: the reason most of the group's disabled rows give. A row
+ // draws its own reason only when it differs from that line, and always keeps it as its tooltip.
+ const groupReasons = new Map<number, string>();
+ // A row draws its own reason on the phone Menu only when it differs from its group's line, so no reason is lost and none is repeated.
+ const rowReasonShown = new Set<string>();
+ if (id === 'phoneMenu') {
+  let heading = -1;
+  let tally = new Map<string, number>();
+  let pending: Entry[] = [];
+  const close = () => {
+   let best: string | undefined;
+   for (const [reason, count] of tally) if (best === undefined || count > (tally.get(best) ?? 0)) best = reason;
+   if (heading >= 0 && best !== undefined) groupReasons.set(heading, best);
+   for (const row of pending) if (row.reason !== best) rowReasonShown.add(row.id);
+   pending = [];
+  };
+  rows.forEach((row, i) => {
+   if (row === '-') return;
+   if ('heading' in row) { close(); heading = i; tally = new Map(); return; }
+   if (row.disabled && row.reason) {
+    tally.set(row.reason, (tally.get(row.reason) ?? 0) + 1);
+    pending.push(row);
+   }
+  });
+  close();
+ }
+ const quietRowReasons = id === 'phoneMenu';
  return (
   <div className="file-menu" ref={wrap} onKeyDown={onKeyDown}>
    <button ref={trigger} type="button" id={id} aria-haspopup="menu" aria-expanded={open} aria-controls={open ? `${id}List` : undefined}
@@ -186,19 +213,23 @@ function Dropdown({id, label, rows, iconOnly, onOpen, sharedReasons}: {id: strin
       if (row === '-') return <hr key={`sep${i}`} className="menu-sep" />;
       if ('heading' in row && row.section) {
        // A folding group's heading is a menu item, so arrow keys reach it. Enter or a tap folds or unfolds the group and keeps the Menu open.
+       const groupReason = row.section.open ? groupReasons.get(i) : undefined;
        return (
-        <button key={`head${i}`} type="button" role="menuitem" id={row.section.id} aria-expanded={row.section.open} className="menu-heading menu-section" onClick={row.section.toggle}>
-         <svg className="icon menu-icon" aria-hidden="true"><use href={row.section.open ? '#i-chevron' : '#i-chevron-right'} /></svg>
-         <span>{row.heading}</span>
-         {row.section.status && <span className="menu-status" role="img" aria-label={row.section.status.label} title={row.section.status.label}><svg className="icon" aria-hidden="true"><use href={`#${row.section.status.icon}`} /></svg></span>}
-        </button>
+        <Fragment key={`head${i}`}>
+         <button type="button" role="menuitem" id={row.section.id} aria-expanded={row.section.open} className="menu-heading menu-section" onClick={row.section.toggle}>
+          <svg className="icon menu-icon" aria-hidden="true"><use href={row.section.open ? '#i-chevron' : '#i-chevron-right'} /></svg>
+          <span>{row.heading}</span>
+          {row.section.status && <span className="menu-status" role="img" aria-label={row.section.status.label} title={row.section.status.label}><svg className="icon" aria-hidden="true"><use href={`#${row.section.status.icon}`} /></svg></span>}
+         </button>
+         {groupReason && <small className="menu-reason menu-group-reason">{groupReason}</small>}
+        </Fragment>
        );
       }
       if ('heading' in row) return <div key={`head${i}`} role="presentation" className="menu-heading">{row.heading}</div>;
       const shared = Boolean(sharedReasons) && row.disabled;
       return (
        <button key={row.id} type="button" role="menuitem" id={row.id} disabled={row.disabled && !sharedReasons}
-        aria-disabled={shared || undefined} title={shared ? row.reason : undefined}
+        aria-disabled={shared || undefined} title={shared || (quietRowReasons && row.disabled) ? row.reason : undefined}
         onFocus={() => { if (shared) setNotedId(row.id); }} onPointerEnter={() => { if (shared) setNotedId(row.id); }}
         className={[row.key || row.icon ? 'menu-item' : '', row.className].filter(Boolean).join(' ') || undefined} aria-pressed={row.pressed}
         onClick={() => { if (!row.disabled) choose(row); }}>
@@ -207,7 +238,7 @@ function Dropdown({id, label, rows, iconOnly, onOpen, sharedReasons}: {id: strin
         {row.key && <kbd>{row.key}</kbd>}
         {row.state && <small className="menu-state">{row.state}</small>}
         {row.hint && <small>{row.hint}</small>}
-        {(sharedReasons ? row.id === reasonRowId : row.disabled && row.reason) && <small className="menu-reason">{row.reason}</small>}
+        {(sharedReasons ? row.id === reasonRowId : row.disabled && row.reason) && <small className={quietRowReasons && !rowReasonShown.has(row.id) ? 'menu-reason menu-reason-quiet' : 'menu-reason'}>{row.reason}</small>}
        </button>
       );
      })}
@@ -352,7 +383,7 @@ export function ViewMenu() {
  * On a phone the Menu is the only navigation: the canvas bar's commands and the More tools panel are listed here too. The File
  * group opens with the save status as its first line. */
 const VIEW_ROWS = [
- {id: 'design', label: '2D', icon: 'i-rect'},
+ {id: 'design', label: '2D', icon: 'i-view-2d'},
  {id: 'stitches', label: 'Stitches', icon: 'i-run'},
  {id: 'preview', label: '3D', icon: 'i-spiral'},
 ] as const;

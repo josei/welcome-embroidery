@@ -78,3 +78,51 @@ for(const [width,height] of SIZES) for(const lang of ['en','es']){
   expect(errors).toEqual([]);
  });
 }
+
+// The Menu's rows and headings, in order, with the glyph each row draws and the reason lines each group shows.
+async function menuContents(page){
+ return page.locator('#phoneMenuList').evaluate(list=>{
+  const out=[];
+  for(const el of list.children){
+   if(el.classList.contains('menu-heading')) out.push({heading:el.textContent.trim()});
+   else if(el.classList.contains('menu-group-reason')) out.push({groupReason:el.textContent.trim()});
+   else if(el.matches('[role="menuitem"]')) out.push({id:el.id,href:el.querySelector('svg use')?.getAttribute('href')??null,drawnReason:[...el.querySelectorAll('.menu-reason')].filter(r=>r.getClientRects().length).map(r=>r.textContent.trim()).join('')});
+  }
+  return out;
+ });
+}
+
+for(const [width,height] of SIZES){
+ test(`no two Menu rows draw the same glyph at ${width}x${height}`,async({page})=>{
+  await openEditor(page,width,height,'en');
+  await page.locator('#phoneMenu').click();
+  await expandMenuGroups(page);
+  const rows=(await menuContents(page)).filter(r=>r.id);
+  const byGlyph=new Map();
+  for(const row of rows){
+   expect(row.href,`${row.id} draws a glyph`).toBeTruthy();
+   byGlyph.set(row.href,[...(byGlyph.get(row.href)??[]),row.id]);
+  }
+  const shared=[...byGlyph.entries()].filter(([,ids])=>ids.length>1);
+  expect(shared,'rows sharing a glyph').toEqual([]);
+ });
+
+ test(`each Menu group shows its reason line at most once with every group open at ${width}x${height}`,async({page})=>{
+  await openEditor(page,width,height,'en');
+  await page.locator('#phoneMenu').click();
+  await expandMenuGroups(page);
+  const contents=await menuContents(page);
+  let group=null;let groupLine=null;const perGroup=new Map();
+  for(const item of contents){
+   if(item.heading!==undefined){group=item.heading;groupLine=null;perGroup.set(group,0);}
+   else if(item.groupReason!==undefined){groupLine=item.groupReason;perGroup.set(group,perGroup.get(group)+1);}
+   else if(item.id&&item.drawnReason){
+    // A row repeats its reason only when it differs from its group's line.
+    expect(item.drawnReason,`${item.id} reason differs from ${group}'s line`).not.toBe(groupLine);
+   }
+  }
+  expect(perGroup.size,'the Menu has groups').toBeGreaterThan(5);
+  for(const [name,count] of perGroup) expect(count,`${name} shows at most one reason line`).toBeLessThanOrEqual(1);
+  expect(contents.filter(r=>r.groupReason!==undefined&&!r.groupReason).length,'every reason line has text').toBe(0);
+ });
+}

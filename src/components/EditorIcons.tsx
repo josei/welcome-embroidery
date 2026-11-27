@@ -95,6 +95,10 @@ export function EditorIcons() {
         <symbol id={"i-rect"} viewBox={"0 0 24 24"}>
           <rect x={"4"} y={"5"} width={"16"} height={"14"} rx={"1"} />
         </symbol>
+        <symbol id={"i-view-2d"} viewBox={"0 0 24 24"}>
+          <path d={"M4 3.5v17h16.5"} />
+          <rect x={"9"} y={"8"} width={"9"} height={"8"} rx={"1"} />
+        </symbol>
         <symbol id={"i-ellipse"} viewBox={"0 0 24 24"}>
           <ellipse cx={"12"} cy={"12"} rx={"8"} ry={"6"} />
         </symbol>
