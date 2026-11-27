@@ -10,11 +10,19 @@ async function onScreen(page, selector) {
   });
 }
 
+// While an object is selected the Menu hides its Properties row, and the selection bar's Properties control opens the sheet instead.
+const BAR_BUTTON = {properties: '#barProperties'};
+
 export async function openPanel(page, which) {
   const sheet = SHEETS[which];
   if (await onScreen(page, sheet)) return;
-  await page.locator('#phoneMenu').click();
-  await page.locator(MENU_ROW[which]).click();
+  const bar = BAR_BUTTON[which];
+  if (bar && await page.locator(bar).isVisible()) {
+    await page.locator(bar).click();
+  } else {
+    await page.locator('#phoneMenu').click();
+    await page.locator(MENU_ROW[which]).click();
+  }
   await page.waitForFunction(s => document.querySelector(s)?.classList.contains('sheet-open'), sheet);
 }
 
