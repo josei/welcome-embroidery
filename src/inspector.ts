@@ -42,7 +42,7 @@ interface InspectorObject {
 }
 
 /** The count with its label: an imported layer's count is the export's (or the planned count when no stitch export applies). */
-function countLabel(plan: PlanInfo, n: string): string {
+function countLabel(plan: PlanInfo, n: number): string {
   if (plan.exportFormat) return t('{n} stitches in the {f} export', {n, f: plan.exportFormat});
   return t(plan.planned ? '{n} planned stitches' : '{n} stitches', {n});
 }
@@ -142,8 +142,8 @@ export function syncInspector({plan, compileError, tips}: {plan: PlanInfo | null
       : !plan
         ? 'Compiling…'
         : plan.errors.length
-          ? designView ? `${countLabel(plan, formatCount(plan.count, lang))} · ${t(plan.errors[0])}` : t(plan.errors[0])
-          : designView ? `${countLabel(plan, formatCount(plan.count, lang))} · ${t('Ready to sew')}` : null;
+          ? designView ? `${countLabel(plan, plan.count)} · ${t(plan.errors[0])}` : t(plan.errors[0])
+          : designView ? `${countLabel(plan, plan.count)} · ${t('Ready to sew')}` : null;
   const countState = designCountState({plan, compileError});
   const glyph = designCountGlyph({plan, compileError, hasObjects});
   if (countText !== null) setStatus({count: countText, countFigure: {text: countText, value: plan && hasObjects ? formatCount(plan.count, lang) : '', glyph}});
@@ -163,7 +163,7 @@ export function syncInspector({plan, compileError, tips}: {plan: PlanInfo | null
   });
   setInspectorText({
     summary: plan
-      ? countLabel(plan, formatCount(plan.count, lang)) +
+      ? countLabel(plan, plan.count) +
           ' · ' +
           t(lang === 'es' && plan.threads.colours === 1 ? '{m} m estimated thread · {c} color used' : '{m} m estimated thread · {c} colors used', {
             m: formatNumber(plan.threads.lengthMm / 1000, lang, 1),

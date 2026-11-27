@@ -1,5 +1,5 @@
 // @ts-check
-import {ES_ADDITIONS} from './i18nAdditions.js';import {countText} from './decimalText.js';
+import {ES_ADDITIONS} from './i18nAdditions.js';import {countText, formatCount} from './decimalText.js';
 // Tiny UI translation layer: English is the source language, Spanish is looked up by exact string.
 // Static markup and dynamically written text/attributes are translated by a DOM walker + observer; strings with numbers use {name} placeholders.
 export const ES={...ES_ADDITIONS,
@@ -462,7 +462,8 @@ export function t(s,vars){
   else for(const r of rx){const m=r.re.exec(s);
     if(m){const v=Object.fromEntries(r.names.map((n,i)=>[n,/^[whn]$/.test(n)?countText(t(m[i+1]),lang):t(m[i+1])]));out=r.out.replace(/\{(\w+)\}/g,(_,n)=>v[n]);break;}}
  }
- return vars?out.replace(/\{(\w+)\}/g,(_,n)=>/^[whn]$/.test(n)&&lang==='es'?countText(String(vars[n]??''),lang):vars[n]??''):out;
+ // A whole count of a thousand or more is grouped in the UI language ("1.102" in Spanish, "1,102" in English), so callers pass the number.
+ return vars?out.replace(/\{(\w+)\}/g,(_,n)=>{const v=vars[n];if(typeof v==='number'&&Number.isInteger(v)&&Math.abs(v)>=1000)return formatCount(v,lang);return /^[whn]$/.test(n)&&lang==='es'?countText(String(v??''),lang):v??'';}):out;
 }
 const ATTRS=['title','aria-label','data-tooltip','placeholder'];
 /** @type {Set<string|undefined>} */

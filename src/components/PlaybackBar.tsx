@@ -32,7 +32,7 @@ export function PlaybackBar() {
  }, []);
  const groups = groupColourMarkers(p.spans, p.seekMax, trackPx);
  const playLabel = p.playing ? t('Pause stitch simulation') : p.hasPlan ? t('Play stitch simulation') : t('Compile and play stitch simulation');
- const sewnText = p.ready ? t('Ready to simulate') : t('{n} of {m} stitches', {n: formatCount(p.sewn, lang), m: formatCount(p.count, lang)});
+ const sewnText = p.ready ? t('Ready to simulate') : t('{n} of {m} stitches', {n: p.sewn, m: p.count});
  const changesText = p.colourChanges === 1 ? t('1 color change') : t('{n} color changes', {n: p.colourChanges});
  const trimsText = p.trims === 1 ? t('1 trim') : t('{n} trims', {n: p.trims});
  const metresText = t('{m} m thread', {m: formatNumber(p.metres, lang, 1)});
@@ -60,9 +60,9 @@ export function PlaybackBar() {
    <div className="playback-time">
     <span id="playbackTime">{`${blockTimeLabel(p.sewnSeconds)} / ${blockTimeLabel(p.totalSeconds)}`}</span>
     {compact ? (
-     <span id="playbackStitches"><Figure icon="i-needle" value={sewnFigure} label={t('Stitch {n} of {m}', {n: formatCount(p.sewn, lang), m: formatCount(p.count, lang)})} /></span>
+     <span id="playbackStitches"><Figure icon="i-needle" value={sewnFigure} label={t('Stitch {n} of {m}', {n: p.sewn, m: p.count})} /></span>
     ) : (
-     <span id="playbackStitches">{t('Stitch {n} of {m}', {n: formatCount(p.sewn, lang), m: formatCount(p.count, lang)})}</span>
+     <span id="playbackStitches">{t('Stitch {n} of {m}', {n: p.sewn, m: p.count})}</span>
     )}
    </div>
    <div className="playback-track">

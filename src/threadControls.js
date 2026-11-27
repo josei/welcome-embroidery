@@ -13,7 +13,7 @@ import {download, exportStem} from './appHelpers.js';
 import {lang, t} from './i18n.js';
 import {getPlan, getCompileError, compileNow} from './compileService.js';
 import {editor} from './editorContext.js';
-import {formatCount, formatNumber} from './decimalText.js';
+import {formatNumber} from './decimalText.js';
 
 const THREAD_SELECT_IDS = ['#thread', '#blendThread', '#blendPalette0', '#blendPalette1', '#blendPalette2', '#blendPalette3'];
 /** @type {HTMLSelectElement[]} */
@@ -90,7 +90,7 @@ export function renderPlan() {
     name.textContent = `${i + 1}. ${threadName(block.thread)}`;
     const count = document.createElement('span');
     count.className = 'n';
-    count.textContent = `${t('{n} stitches', {n: formatCount(block.stitches, lang)})} · ${formatNumber(block.mm / 1000, lang, 2)} m · ` +
+    count.textContent = `${t('{n} stitches', {n: block.stitches})} · ${formatNumber(block.mm / 1000, lang, 2)} m · ` +
     `${blockTimeLabel(blockSeconds(block))}`;
     row.append(swatch, name, count);
     row.append(pick);

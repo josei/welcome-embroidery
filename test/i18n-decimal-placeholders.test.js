@@ -48,3 +48,12 @@ test('the hoop size reads with the comma in Spanish and the dot in English', () 
  assert.equal(hoopSizeText([267.4, 200], 'en'), '267.4×200');
  assert.equal(hoopSizeText([110, 110], 'es'), '110×110');
 });
+
+test('a whole count of a thousand or more is grouped in the UI language', async () => {
+ const es = await translatorFor('es');
+ assert.equal(es('{n} stitches', {n: 1102}), '1.102 puntadas');
+ assert.equal(es('{n} of {m} stitches', {n: 2687, m: 12345}), '2.687 de 12.345 puntadas');
+ const en = await translatorFor('en');
+ assert.equal(en('{n} stitches', {n: 1102}), '1,102 stitches');
+ assert.equal(en('{n} stitches', {n: 42}), '42 stitches');
+});
