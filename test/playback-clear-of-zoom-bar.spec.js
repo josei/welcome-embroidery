@@ -55,7 +55,22 @@ for(const [w,h] of SIZES){
    await page.screenshot({path:`test-results/playback-clear-${w}x${h}-${lang}.png`});
   });
 
+  test(`the footer holds only the playback row on the landscape phone, at the window edge (${w}x${h} ${lang})`,async({page})=>{
+   test.skip(w!==844,'tablet keeps the Messages status row (checked below)');
+   test.setTimeout(120000);
+   await openStitchesWithDrawing(page,w,h,lang);
+   await expect(page.locator('#messagesBtn')).toHaveCount(0);
+   const m=await page.evaluate(()=>{
+    const footer=document.querySelector('.layout main:not(.design-view)>footer').getBoundingClientRect();
+    const bar=document.querySelector('.playback-bar').getBoundingClientRect();
+    return {barBottom:Math.round(bar.bottom),footerBottom:Math.round(footer.bottom),windowH:window.innerHeight};
+   });
+   expect(m.barBottom,'playback row bottom is at the window edge').toBeGreaterThanOrEqual(m.windowH-1);
+   expect(m.footerBottom,'footer bottom is at the window edge').toBeGreaterThanOrEqual(m.windowH-1);
+  });
+
   test(`Messages is on the status row, at the footer's right edge, at ${w}x${h} in ${lang}`,async({page})=>{
+   test.skip(w!==768,'landscape phone has no footer Messages button');
    test.setTimeout(120000);
    await openStitchesWithDrawing(page,w,h,lang);
    const m=await page.evaluate(()=>{

@@ -8,7 +8,7 @@ test.beforeEach(async({page})=>{
  page.on('dialog',d=>d.accept());
 });
 
-const SIZES=[[360,640],[844,390]];
+const SIZES=[[360,640],[844,260]];
 
 async function openLayers(page,lang,w,h){
  await page.setViewportSize({width:w,height:h});
@@ -40,6 +40,19 @@ function layout(){
    const b=c.getBoundingClientRect();return {w:Math.round(b.width),h:Math.round(b.height),inView:b.right<=sb.right&&b.left>=sb.left};
   }),
  };
+}
+
+// In landscape the sheet runs to the window's bottom edge, so the five rows fit and no cue is right. The overflow case
+// is then read in a shorter window, where the rows run past the edge.
+for(const lang of ['en','es']){
+ test(`Layers sheet shows no scroll cue when all rows fit at 844x390 in ${lang}`,async({page})=>{
+  await openLayers(page,lang,844,390);
+  await expect.poll(()=>page.evaluate(()=>document.getElementById("layersSheet").dataset.more)).toBe("false");
+  const fit=await page.evaluate(layout);
+  expect(fit.rows.length,'rows').toBe(5);
+  expect(fit.rows.at(-1).bottom,'last row is visible without scrolling').toBeLessThanOrEqual(fit.sheetBottom);
+  expect(fit.more,'no cue when every row is visible').toBe('false');
+ });
 }
 
 for(const [w,h] of SIZES){

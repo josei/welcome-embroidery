@@ -11,7 +11,7 @@ async function expandMenuGroups(page){
 
 // At phone portrait (390x844) the screen is one fixed layout. The page never
 // scrolls; the top bar is 52 px; the canvas fills the rest and is the only pannable part; the contextual bar (52 px) shows only with a
-// selection; the tool dock is 56 px; the status line is 28 px; the zoom bar is the desktop's horizontal bar at the canvas's bottom left.
+// selection; the tool dock is 56 px; there is no status row (the phone footer keeps only toasts); the zoom bar is the desktop's horizontal bar at the canvas's bottom left.
 // Every visible control is at least 44x44 CSS px, and no two of the screen's regions overlap. The screenshots go to the artifacts
 // folder of the turn when ARTIFACTS is set.
 const SCREEN=[390,844];
@@ -64,8 +64,8 @@ for(const lang of ['en','es']){
   const g=await regions(page);
   expect(Math.round(g.top.h),'top bar height').toBe(52);
   expect(Math.round(g.dock.h),'tool dock height').toBe(56);
-  expect(Math.round(g.status.h),'status line height').toBe(28);
-  expect(Math.round(g.canvas.h),'canvas fills the rest').toBe(SCREEN[1]-52-56-28);
+  expect(g.status,'no status row under the dock in portrait').toBeNull();
+  expect(Math.round(g.canvas.h),'canvas fills the rest').toBe(SCREEN[1]-52-56);
   expect(g.bar,'contextual bar is hidden without a selection').toBeNull();
   const small=g.controls.filter(c=>c.w<44||c.h<44).map(c=>`${c.region}:${c.id} ${Math.round(c.w)}x${Math.round(c.h)}`);
   expect(small,'controls under 44x44').toEqual([]);
@@ -82,11 +82,11 @@ for(const lang of ['en','es']){
   const bad=[];
   for(let i=0;i<boxes.length;i++)for(let j=i+1;j<boxes.length;j++)if(overlapping(boxes[i][1],boxes[j][1]))bad.push(`${boxes[i][0]} / ${boxes[j][0]}`);
   expect(bad,'overlapping regions').toEqual([]);
-  // The regions stack: top bar, canvas, contextual bar, dock, status line, with no gap or overlap between them.
+  // The regions stack: top bar, canvas, contextual bar, dock, with no gap or overlap between them. Portrait has no status row.
   expect(Math.round(g.top.b),'canvas starts under the top bar').toBe(Math.round(g.canvas.y));
   expect(Math.round(g.canvas.b),'the selection bar starts under the canvas').toBe(Math.round(g.bar.y));
   expect(Math.round(g.bar.b),'the dock starts under the selection bar').toBe(Math.round(g.dock.y));
-  expect(Math.round(g.dock.b),'the status line starts under the dock').toBe(Math.round(g.status.y));
+  expect(g.status,'no status row under the dock in portrait').toBeNull();
   const small=g.controls.filter(c=>c.w<44||c.h<44).map(c=>`${c.region}:${c.id}`);
   expect(small,'controls under 44x44 with a selection').toEqual([]);
   expect(errors).toEqual([]);

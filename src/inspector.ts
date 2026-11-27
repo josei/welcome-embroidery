@@ -78,6 +78,8 @@ export interface InspectorApi {
 }
 
 let api: InspectorApi | null = null;
+// The last count the design showed, kept while a recompile is in progress (see the status figure below).
+let lastCountValue = '';
 
 /** The wired editor commands. app.js calls configureInspector before the first render. */
 function wired(): InspectorApi {
@@ -146,7 +148,12 @@ export function syncInspector({plan, compileError, tips}: {plan: PlanInfo | null
           : designView ? `${countLabel(plan, plan.count)} · ${t('Ready to sew')}` : null;
   const countState = designCountState({plan, compileError});
   const glyph = designCountGlyph({plan, compileError, hasObjects});
-  if (countText !== null) setStatus({count: countText, countFigure: {text: countText, value: plan && hasObjects ? formatCount(plan.count, lang) : '', glyph}});
+  // The figure keeps the last count while the design compiles (no plan yet), dimmed beside the working glyph, so the number does not
+  // vanish and come back. A design with nothing in it, or one that failed to compile, shows no number.
+  if (plan && hasObjects) lastCountValue = formatCount(plan.count, lang);
+  if (!hasObjects) lastCountValue = '';
+  const countValue = hasObjects && (plan || !compileError) ? lastCountValue : '';
+  if (countText !== null) setStatus({count: countText, countFigure: {text: countText, value: countValue, glyph}});
   setStatus({countError: countState.error});
   const errs = plan?.issues || [];
   setStatus({

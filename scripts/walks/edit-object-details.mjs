@@ -17,6 +17,13 @@ export default {
       await width.fill('30');
       await width.press('Enter');
     }},
+    {name: 'move-past-hoop', run: async page => {
+      // Moved so its right edge runs past the 400 mm hoop: the editor reports one issue, and the top bar shows it.
+      const x = page.locator('#posX');
+      await x.fill('390');
+      await x.press('Enter');
+      await page.locator('#issuesBtn').waitFor();
+    }},
     {name: 'close-properties', run: page => closePanel(page, '#inspector')},
   ],
 };

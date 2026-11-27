@@ -28,13 +28,14 @@ test('390x844 es: the Menu Issues row opens the sewing tip with its warning text
  await expect(page.locator('#sewTips')).toContainText('Rectángulo sale del bastidor de 400×400 mm.');
 });
 
-test('390x844 es: the status line issues chip is an indicator, not a second route', async({page})=>{
+test('390x844 es: the top-bar issues button opens Messages and does not open the Properties sheet', async({page})=>{
  page.on('dialog',d=>d.accept());
  await page.setViewportSize({width:390,height:844});
  await openSquareOutsideHoop(page,'es');
- const chip=page.locator('#issuesBtn');
+ const chip=page.locator('button#issuesBtn');
  await expect(chip).toHaveText('1');
- await expect(page.locator('button#issuesBtn')).toHaveCount(0);
+ await chip.click();
+ await expect(page.locator('#messagesDialog')).toHaveAttribute('open','');
  await expect(page.locator('#inspector')).not.toHaveClass(/sheet-open/);
 });
 

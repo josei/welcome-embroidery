@@ -6,7 +6,8 @@ import {revealMenuRow} from './menu-reveal.js';
 // one tap to choose, and the save status words are in the Menu. The canvas bar and the More tools panel are gone on a phone: their commands are in the Menu too.
 // At desktop widths nothing leaves the bar.
 const PHONES=[[375,667],[390,844]];
-const BAR_CONTROLS=['#phoneMenu','#name','#undo','#redo','#export','#unsavedMark'];
+// The stitch count sits on the name field's second line, so it is a top-bar indicator and is listed here.
+const BAR_CONTROLS=['#phoneMenu','#name','#undo','#redo','#export','#unsavedMark','.figure'];
 
 test.beforeEach(async({page})=>{await page.addInitScript(()=>{delete window.showSaveFilePicker;});});
 
@@ -23,12 +24,12 @@ const visibleBarIds=page=>page.locator('header.top button, header.top input, hea
  .map(e=>e.id||e.className).filter(Boolean));
 
 for(const [width,height] of PHONES) for(const lang of ['en','es']){
- test(`the phone top bar holds Menu, name, status icon, undo, redo and Export at ${width}x${height} (${lang})`,async({page})=>{
+ test(`the phone top bar holds Menu, name, status icon, stitch count, undo, redo and Export at ${width}x${height} (${lang})`,async({page})=>{
   const errors=await openEditor(page,width,height,lang);
   await page.locator('#rect').click();
   const ids=await visibleBarIds(page);
-  expect(ids.sort(),'visible top-bar controls').toEqual([...BAR_CONTROLS].map(s=>s.slice(1)).sort());
-  for(const sel of BAR_CONTROLS) await expect(page.locator(sel),`${sel} is shown`).toBeVisible();
+  expect(ids.sort(),'visible top-bar controls').toEqual([...BAR_CONTROLS].map(s=>s.replace(/^[#.]/,'')).sort());
+  for(const sel of BAR_CONTROLS) await expect(page.locator(sel).first(),`${sel} is shown`).toBeVisible();
   const h=await page.locator('header.top').evaluate(e=>e.getBoundingClientRect().height);
   expect(Math.abs(h-52),'top bar height is 52 px').toBeLessThanOrEqual(1);
   expect(errors).toEqual([]);

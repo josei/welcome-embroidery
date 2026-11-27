@@ -265,7 +265,7 @@ export function EditorIcons() {
           <path d={"M4 9l4-4M4 14l9-9M4 19l14-14M9 19l11-11M14 19l6-6"} />
         </symbol>
         <symbol id={"i-working"} viewBox={"0 0 24 24"}>
-          <path d={"M6 12h.01M12 12h.01M18 12h.01"} strokeWidth={"3"} strokeLinecap={"round"} />
+          <path d={"M12 3.5a8.5 8.5 0 1 0 8.5 8.5"} strokeWidth={"2.4"} strokeLinecap={"round"} />
         </symbol>
         <symbol id={"i-idle"} viewBox={"0 0 24 24"}>
           <path d={"M7 12h10"} strokeWidth={"2.4"} strokeLinecap={"round"} />

@@ -16,11 +16,12 @@ import {dirtyMark, saveStatusIcon, saveStatusWords} from '../saveMark.js';
 import {toolbarActions} from '../toolbarCommands.js';
 import {t} from '../i18n.js';
 import {ArrangeMenu, EditMenu, FileMenu, PhoneMenu, ViewMenu} from './MenuBar';
+import {TopIssues, TopStatusLine} from './StatusRun';
 import {useCompactLayout} from '../compactLayout';
 import {usePhoneMenu} from '../phoneSheetState.js';
 import {useTabletPortrait} from '../tabletLayoutState.js';
 // The project name field: it shows the document name, and a committed change is an edit (see documentActions).
-function ProjectName({status}: {status?: ReactNode}) {
+function ProjectName({status, line}: {status?: ReactNode; line?: ReactNode}) {
  const {doc, dirty} = useSyncExternalStore(documentState.subscribe, documentState.get);
  const shown = t(doc.name ?? '');
  const field = useDraftInput(shown, text => documentActions.rename(text === shown ? (doc.name ?? '') : text));
@@ -32,7 +33,8 @@ function ProjectName({status}: {status?: ReactNode}) {
  // The wrapper carries the shown name for the narrow-width ellipsis (styles.css): an input cannot show one itself. On a phone
  // or tablet the save status sits inside the wrapper, after the input, so it follows the name's text.
  return (
-  <span className="name-field" data-shown={shown}><input id="name" aria-label={t('Design name')} {...field} />{status}</span>
+  // On a phone the count is the field's second line: the input covers both lines, so a tap on the name or the count renames.
+  <span className={line ? 'name-field has-line' : 'name-field'} data-shown={shown}><input id="name" aria-label={t('Design name')} {...field} />{status}{line}</span>
  );
 }
 
@@ -187,7 +189,7 @@ export function Header() {
       aria-label="Import JEF / VP3…" title="Import JEF / VP3…" data-tooltip="Import JEF / VP3…" onClick={() => machineFile.current?.click()}><svg className="icon"><use href="#i-import"/></svg></button><button className="icon-button chrome-state" id="save" aria-label={saveLabel}
       title={saveLabel} data-tooltip={saveLabel} onClick={() => projectSave()}><svg className="icon"><use href="#i-save"/></svg></button><span className="sep" aria-hidden="true" /><div className="edit-tools"><HistoryButton undo /><HistoryButton /><ActionButton flag="duplicate" className="icon-button chrome-state" id="duplicate"
       aria-label="Duplicate selected object" title={duplicateTip} data-tooltip={duplicateTip} onClick={() => toolbarActions.duplicate()}><svg className="icon"><use href="#i-copy"/></svg></ActionButton><ActionButton flag="remove" className="icon-button chrome-state" id="remove"
-      aria-label="Delete selected object" title={deleteTip} data-tooltip={deleteTip} onClick={() => toolbarActions.remove()}><svg className="icon"><use href="#i-delete"/></svg></ActionButton></div><span className="sep" aria-hidden="true" /><ProjectName status={iconOnly ? <SaveStatus /> : null} />{iconOnly ? null : <SaveStatus />}<span className="sep" aria-hidden="true" /><ExportSplit /><button className="icon-button chrome-state" id="helpBtn" aria-label="Keyboard shortcuts (?)"
+      aria-label="Delete selected object" title={deleteTip} data-tooltip={deleteTip} onClick={() => toolbarActions.remove()}><svg className="icon"><use href="#i-delete"/></svg></ActionButton></div><span className="sep" aria-hidden="true" />{phone ? <span className="top-design"><ProjectName status={<SaveStatus />} line={<TopStatusLine />} /><TopIssues /></span> : <ProjectName status={iconOnly ? <SaveStatus /> : null} />}{iconOnly ? null : <SaveStatus />}<span className="sep" aria-hidden="true" /><ExportSplit /><button className="icon-button chrome-state" id="helpBtn" aria-label="Keyboard shortcuts (?)"
       title="Keyboard shortcuts (?)" data-tooltip="Keyboard shortcuts (?)"><svg className="icon"><use href="#i-keys"/></svg></button><button type="button" className={settingsButtonClass(agent)}
       id="settingsBtn" aria-label="Settings" title={settingsTip(agent)} data-tooltip="Settings" onClick={() => setSettingsOpen(true)}><svg className="icon"><use href="#i-gear"/></svg></button><input id="file" ref={projectFile} type="file"
       accept=".welcome,.welcome,.svg,.dxf,application/json,image/svg+xml" hidden onChange={async e =>

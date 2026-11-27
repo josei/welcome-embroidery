@@ -475,7 +475,9 @@ html[data-input="touch"] button:focus-visible,html[data-input="touch"] #art:focu
 .layout main>footer>#cursorPosition,.layout main>footer>#count,.layout main>footer>#playbackProgress,.layout main>footer>#needlePosition,.layout main>footer>#messagesBtn{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-variant-numeric:tabular-nums}
 #cursorPosition{width:15.5em;max-width:100%}
 /* The count is a 15em slot that grows to its text, so the Spanish status ("N puntadas · listo para bordar") is not cut off on landscape and tablet. */
-#count{min-width:15em;width:auto;max-width:100%}
+#count{width:auto;max-width:100%}
+/* The footer count keeps a minimum width so its number does not jump; the phone top bar count has no minimum and fits its name field. */
+.layout main>footer>#count{min-width:15em}
 #playbackProgress{width:14em;min-width:0;max-width:100%}
 #needlePosition{width:14em;min-width:0;max-width:100%}
 .playback-bar .playback-time{width:10.5em;min-width:0;overflow:hidden}
@@ -659,8 +661,6 @@ input[type=checkbox]{accent-color:var(--teal)}
 .top .icon-button.labelled{width:44px;min-width:44px}
 .top .export-split{height:44px}
 .top .export-split #export{min-height:44px;height:100%}
-.top #name{height:44px;min-height:44px}
-.top .name-field{min-height:44px;display:flex;align-items:center;flex:1 1 0;min-width:0;width:auto}
 @media (max-width:600px) and (orientation:landscape){
 .canvas .tool-rail{bottom:68px}
 .canvas #canvasHint{bottom:184px}
@@ -686,9 +686,6 @@ input[type=checkbox]{accent-color:var(--teal)}
 }
 @media (max-width:600px){
 .layout>aside input:not([type=checkbox]):not([type=range]):not(.sr-only),.layout>.panel input:not([type=checkbox]):not([type=range]):not(.sr-only),.layout .hoop-edit input{min-height:44px}
-}
-@media (max-width:600px){
-.top .name-field #name{width:100%;flex:1 1 auto;min-width:0;height:44px}
 }
 /* At 360 px and narrower the bar's gaps and the Export label tighten, so the design name keeps a 44 px box on a 360 px screen. */
 @media (max-width:360px) and (orientation:landscape){
@@ -811,10 +808,10 @@ body{height:100vh;height:100dvh;min-height:0;overflow:hidden}
 @media (min-width:601px) and (max-width:1024px) and (orientation:portrait),(min-width:601px) and (max-width:900px) and (orientation:landscape){
 .object-row{gap:6px}
 }
-@media (max-width:600px) and (orientation:portrait){
+@media (max-width:600px) and (orientation:portrait){:root{--top-bar-h:52px}
 body{height:100vh;height:100dvh;min-height:0;overflow:hidden;overscroll-behavior:none}
-.top{height:52px;padding:0 6px;gap:4px;box-sizing:border-box;flex:none}
-.layout{display:flex;flex-direction:column;grid-template-columns:none;height:calc(100vh - 52px);height:calc(100dvh - 52px);min-height:0;overflow:hidden}
+.top{height:var(--top-bar-h);padding:0 6px;gap:4px;box-sizing:border-box;flex:none}
+.layout{display:flex;flex-direction:column;grid-template-columns:none;height:calc(100vh - var(--top-bar-h));height:calc(100dvh - var(--top-bar-h));min-height:0;overflow:hidden}
 .layout main{display:grid;grid-template-columns:minmax(0,1fr);grid-template-rows:minmax(0,1fr) auto auto auto auto;flex:1 1 0;order:0;width:100%;min-width:0;min-height:0;position:relative;overflow:hidden}
 .layout main>.canvas{grid-row:1;height:auto;min-height:0;position:relative;overflow:hidden;overscroll-behavior:none;touch-action:none}
 .canvas>#rulerTop,.canvas>#rulerLeft,.canvas>.ruler-corner,.canvas .canvas-views{display:none}
@@ -857,28 +854,20 @@ body{height:100vh;height:100dvh;min-height:0;overflow:hidden;overscroll-behavior
 .layout main>.tool-rail .icon-button .icon{width:20px;height:20px;flex:none}
 .layout main>.tool-rail .rail-label{display:block;max-width:100%;overflow:hidden;white-space:nowrap;font-size:11px;line-height:1.1;color:#4d5a54}
 .layout main>.tool-rail .icon-button.active-tool .rail-label{color:var(--teal-deep)}
-.layout main>footer{grid-row:5;position:relative;flex:none;height:28px;min-height:0;margin:0;padding:0 12px;box-sizing:border-box;display:flex;align-items:center;gap:8px;overflow:visible;background:#fff;border:0;border-top:1px solid #e3e6e1}
-.layout main>footer>:not(#count):not(#toast):not(#issuesBtn){display:none}
-.layout main>footer>#count{flex:1 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;line-height:26px;font-size:var(--fs-caption)}
-/* The issues chip sits beside the count in the bar, so a design past the hoop shows its warning count on a phone. */
-.layout main>footer>#issuesBtn{flex:none;margin:0;padding:0 8px;line-height:18px;font-size:var(--fs-caption);white-space:nowrap}
-/* Toasts stack above the contextual bar, so they never cover the dock (56 px) or the bar (52 px)
-   and the status line (28 px) stays the anchor: 28 + 56 + 52 + an 8 px gap. In the design view the zoom bar sits on the canvas
-   bottom, 8 px up and 46 px tall, so the toast rises a further 54 px above the bar's top edge (198 px). */
-#toast{bottom:198px;margin-bottom:0}
+.layout main>footer{grid-row:5;position:relative;flex:none;height:0;min-height:0;margin:0;padding:0;overflow:visible;border:0}
+.layout main>footer>:not(#toast){display:none}
+/* Toasts stack above the contextual bar, so they never cover the dock (56 px) or the bar (52 px). The footer is 0 px on a
+   phone portrait, so the toast's anchor is the footer's bottom edge: 56 + 52 + an 8 px gap, plus the 54 px the zoom bar
+   takes in the design view, gives 170 px. */
+#toast{bottom:170px;margin-bottom:0}
 /* An open phone sheet covers the bottom half of the screen, so a toast that appeared over its fields would hide them. While a
    sheet is open the toast rises to sit just above the sheet's top edge (the sheet is 50dvh tall, anchored to the bottom). */
 .layout:has(>aside.panel.sheet-open) main>footer>#toast{bottom:calc(50dvh + 8px)}
-/* The Stitches and 3D views add the playback row under the canvas: 101 px, since the timeline spans the bar's width
-   under the controls and the readout. The toast keeps its anchor above the status line, so it moves up by the same
-   amount and stays clear of the zoom bar inside the shorter canvas. */
-.layout main:not(.design-view)>footer>#toast{bottom:245px}
-/* In the Stitches and 3D views the status line has no text of its own (the playback row above it carries the count), so the
-   empty row is removed and the canvas takes its height. A message in the count, such as a compile error, brings the row back.
-   Toasts hang from the row's bottom edge, which does not move. */
-.layout main:not(.design-view)>footer:has(#count:empty):has(#issuesBtn[hidden]){height:0;min-height:0;padding:0;border-top:0}
-/* With only sewing tips the count is empty but the chip shows, so the row is kept at the chip's touch-target height. */
-.layout main:not(.design-view)>footer:has(#count:empty):has(#issuesBtn:not([hidden])){min-height:44px}
+/* The Stitches and 3D views add the playback row under the canvas, so the toast rises by the row's height (47 px more than
+   the design view) and stays clear of the zoom bar inside the shorter canvas. */
+.layout main:not(.design-view)>footer>#toast{bottom:217px}
+/* The footer holds no status row on a phone: the count and the issues button live in the top bar. Only the toast stays
+   visible in the footer, and it hangs from the footer's bottom edge. */
 }
 
 /* A landscape phone (844x390, any landscape
@@ -887,27 +876,24 @@ body{height:100vh;height:100dvh;min-height:0;overflow:hidden;overscroll-behavior
    and the canvas on the right. The status line is the bottom 44 px. Layers and Properties open as 320 px right-edge sheets over
    the canvas, from the Menu, and never overlap the rail. Every visible control is 44 px square or
    more. The rulers, the 2D / Stitches / 3D switch (Menu > View on phones) and the zoom and canvas toolbars move with the layout.
-   Status line is 44 px, not 28 px: its Messages button is a 44 px control, so it cannot fit a 28 px row.
    Desktop and the portrait layouts do not match this query, so they are unchanged. */
-@media (orientation:landscape) and (max-height:500px) and (max-width:1000px){
+@media (orientation:landscape) and (max-height:500px) and (max-width:1000px){:root{--top-bar-h:45px}
 /* The sheets are #layersSheet and #inspector: their id rules (tablet and desktop) outrank the classes above, so the landscape sheet sets its box again here. */
-.layout>#layersSheet.sheet-open,.layout>#inspector.sheet-open{display:flex;flex-direction:column;position:fixed;top:44px;bottom:44px;left:auto;right:0;width:320px;height:auto;max-height:none;margin:0;padding:10px 12px 12px;overflow-y:auto;overscroll-behavior:contain;z-index:40;background:#fff;border:0;border-left:1px solid #e3e6e1;border-radius:0;box-shadow:-6px 0 24px #1d292533}
+.layout>#layersSheet.sheet-open,.layout>#inspector.sheet-open{display:flex;flex-direction:column;position:fixed;top:var(--top-bar-h);bottom:0;left:auto;right:0;width:320px;height:auto;max-height:none;margin:0;padding:10px 12px 12px;overflow-y:auto;overscroll-behavior:contain;z-index:40;background:#fff;border:0;border-left:1px solid #e3e6e1;border-radius:0;box-shadow:-6px 0 24px #1d292533}
 body{height:100dvh;min-height:0;overflow:hidden}
-.top{position:fixed;top:0;left:0;right:0;z-index:7;height:44px;min-height:44px;flex-wrap:nowrap;gap:4px;padding:0 6px;overflow:hidden}
+.top{position:fixed;top:0;left:0;right:0;z-index:7;height:var(--top-bar-h);min-height:var(--top-bar-h);flex-wrap:nowrap;gap:4px;padding:0 6px;overflow:hidden}
 .top .logo,.top .sep,.top #new,.top #open,.top #importMachine,.top #save,.top #duplicate,.top #remove,.top #helpBtn,.top #settingsBtn{display:none}
 .top .file-menu>button,.top .icon-button,.top #undo,.top #redo,.top #settingsBtn,.top #export{min-width:44px;height:44px;min-height:44px}
 .top .icon-button{width:44px}
 .top .file-menu>button{padding:6px 6px}
 .top .export-split{height:44px}
 .top .export-split #export{min-height:44px;height:100%}
-.top .name-field{display:flex;align-items:center;flex:1 1 0;min-width:0;height:44px}
-.top #name{flex:1 1 0;min-width:0;height:44px;min-height:44px}
 .top .export-reason{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;margin:0}
-.layout{display:block;height:auto;grid-template-columns:none;position:fixed;top:44px;left:0;right:0;bottom:0;overflow:hidden}
+.layout{display:block;height:auto;grid-template-columns:none;position:fixed;top:var(--top-bar-h);left:0;right:0;bottom:0;overflow:hidden}
 .layout>aside.panel:first-child{display:none}
-.layout>aside.panel:first-child.sheet-open{display:flex;flex-direction:column;position:fixed;top:44px;bottom:44px;right:0;left:auto;z-index:40;width:320px;height:auto;max-height:none;margin:0;padding:10px 12px 12px;overflow-y:auto;overscroll-behavior:contain;background:#fff;border:0;border-left:1px solid #e3e6e1;border-radius:0;box-shadow:-6px 0 24px #1d292533}
+.layout>aside.panel:first-child.sheet-open{display:flex;flex-direction:column;position:fixed;top:var(--top-bar-h);bottom:0;right:0;left:auto;z-index:40;width:320px;height:auto;max-height:none;margin:0;padding:10px 12px 12px;overflow-y:auto;overscroll-behavior:contain;background:#fff;border:0;border-left:1px solid #e3e6e1;border-radius:0;box-shadow:-6px 0 24px #1d292533}
 .layout>.panel:last-child{display:none}
-.layout>.panel:last-child.sheet-open{display:flex;flex-direction:column;position:fixed;top:44px;bottom:44px;right:0;left:auto;z-index:40;width:320px;height:auto;max-height:none;margin:0;padding:10px 12px 12px;overflow-y:auto;overscroll-behavior:contain;background:#fff;border:0;border-left:1px solid #e3e6e1;border-radius:0;box-shadow:-6px 0 24px #1d292533}
+.layout>.panel:last-child.sheet-open{display:flex;flex-direction:column;position:fixed;top:var(--top-bar-h);bottom:0;right:0;left:auto;z-index:40;width:320px;height:auto;max-height:none;margin:0;padding:10px 12px 12px;overflow-y:auto;overscroll-behavior:contain;background:#fff;border:0;border-left:1px solid #e3e6e1;border-radius:0;box-shadow:-6px 0 24px #1d292533}
 .layout>.panel.inspector-collapsed:last-child{display:none}
 .layout>aside.panel:first-child.sheet-open>.layers-head,.layout>aside.panel:first-child.sheet-open>.sheet-head{flex-wrap:nowrap}
 .layers-head{flex-wrap:nowrap;align-items:center;gap:8px;min-width:0}
@@ -926,7 +912,7 @@ body{height:100dvh;min-height:0;overflow:hidden}
 .canvas{position:relative;flex:1 1 0;height:auto;min-height:0;margin-left:104px;overflow:hidden}
 .canvas #rulerTop,.canvas #rulerLeft,.canvas .ruler-corner{display:none}
 .canvas .canvas-views{display:none}
-.canvas .tool-rail{position:fixed;left:0;top:44px;bottom:44px;right:auto;z-index:6;width:104px;height:auto;max-height:none;margin:0;padding:6px;display:grid;grid-template-columns:44px 44px;grid-auto-rows:44px;grid-auto-flow:row;align-content:start;justify-content:center;gap:4px;border:0;border-radius:0;box-shadow:2px 0 8px rgba(0,0,0,.08);background:#fff;overflow:hidden;transform:none;order:0}
+.canvas .tool-rail{position:fixed;left:0;top:var(--top-bar-h);bottom:0;right:auto;z-index:6;width:104px;height:auto;max-height:none;margin:0;padding:6px;display:grid;grid-template-columns:44px 44px;grid-auto-rows:44px;grid-auto-flow:row;align-content:start;justify-content:center;gap:4px;border:0;border-radius:0;box-shadow:2px 0 8px rgba(0,0,0,.08);background:#fff;overflow:hidden;transform:none;order:0}
 /* On a landscape phone the rail holds Choose, Shape, Path, Text, Line and Measure: six
    44 px cells in two columns, three rows, which fit the 302 px between the top bar and the status line with no scroll. The other
    tools and the commands are in the Menu. Rail labels are hidden here: the icons are the cells, and each keeps its name. */
@@ -942,15 +928,12 @@ body{height:100dvh;min-height:0;overflow:hidden}
 .canvas .canvas-text-hint,.canvas #canvasHint,.canvas .canvas-hint{bottom:56px;left:8px;right:auto;max-width:calc(100% - 140px)}
 /* The lettering caption is anchored at the left edge, so it must not keep the centring shift of .canvas-hint: that pushed it under the tool rail. */
 .canvas .canvas-text-hint{transform:none}
-.layout main>footer{position:relative;flex:none;height:44px;min-height:44px;margin:0;padding:0 8px;display:flex;flex-wrap:nowrap;align-items:center;gap:8px;overflow:visible;border-top:0;box-shadow:inset 0 1px 0 #e3e6e1;background:#fff}
+.layout main>footer{position:relative;flex:none;height:auto;min-height:0;margin:0;padding:0 8px;display:flex;flex-wrap:nowrap;align-items:center;gap:8px;overflow:visible;border-top:0;box-shadow:inset 0 1px 0 #e3e6e1;background:#fff}
 .layout main>footer .messages-btn{min-height:44px;min-width:44px;padding:0 12px}
 .layout main>footer>.playback-bar{flex:1 1 auto;min-width:0;height:44px}
-/* In the Stitches and 3D views the playback bar takes a row of its own above the status row, so the colour strip and the
-   play button never sit over the status text. The rail and the right-edge sheets stop at the top of that row. The status row
-   keeps its 44 px height, and a long status (an issue such as a design past the hoop) is cut with an ellipsis inside the row
-   rather than running past the right edge. The design view keeps its single 44 px status line. */
-.layout main:not(.design-view)>footer{height:90px;min-height:90px;flex-wrap:wrap;align-content:flex-start;row-gap:0}
-.layout main:not(.design-view)>footer>.playback-bar{order:-1;flex:1 1 100%;height:45px;min-height:45px}
+/* In the Stitches and 3D views the playback bar sits at the bottom edge of the window and takes the full footer width, so the
+   colour strip and the play button never sit over the sheets or the rail. Its height grows to fit the timeline and readout. */
+.layout main:not(.design-view)>footer>.playback-bar{flex:1 1 100%;height:auto;min-height:45px}
 /* The Messages and Issues buttons keep their width and stay on the status row, so a long status text can only shrink the count. */
 .layout main:not(.design-view)>footer>#issuesBtn,.layout main:not(.design-view)>footer>#messagesBtn{flex:0 0 auto;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;height:44px;min-height:44px}
 .layout main:not(.design-view)>footer>#count,.layout main:not(.design-view)>footer>#playbackProgress{flex:1 1 0;min-width:0;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -977,7 +960,7 @@ body{height:100dvh;min-height:0;overflow:hidden}
 /* The phone Menu is a 44 px icon button in the top bar. It opens a full-height sheet that
    scrolls inside itself, so the page never scrolls. Every row is one line, with an icon, and at least 44 px tall. */
 .top .file-menu>button.menu-trigger{width:44px;min-width:44px;height:44px;min-height:44px;padding:0;justify-content:center}
-#phoneMenuList{position:fixed;top:52px;left:0;right:0;bottom:0;width:auto;min-width:0;max-height:none;height:auto;border:0;border-radius:0;box-shadow:none;padding:8px;overflow-y:auto;overscroll-behavior:contain;z-index:40}
+#phoneMenuList{position:fixed;top:var(--top-bar-h,52px);left:0;right:0;bottom:0;width:auto;min-width:0;max-height:none;height:auto;border:0;border-radius:0;box-shadow:none;padding:8px;overflow-y:auto;overscroll-behavior:contain;z-index:40}
 #phoneMenuList .menu-search{background:#f1f3ef}
 #phoneMenuList .menu-item{display:flex;align-items:center;justify-content:flex-start;gap:12px;min-height:44px;white-space:nowrap}
 #phoneMenuList .menu-item>span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -1008,7 +991,7 @@ body{height:100dvh;min-height:0;overflow:hidden}
 /* On a landscape phone the Menu is one 320 px column of icon-and-label rows, not a full-width sheet. */
 #phoneMenuList{right:auto;width:320px;max-width:100vw}
 /* The Menu starts below the 44 px top bar, so a tap on the bar dismisses it, and the 2D / Stitches / 3D switch is in Menu > View only. */
-#phoneMenuList{top:44px}
+#phoneMenuList{top:var(--top-bar-h)}
 .canvas .canvas-views{display:none}
 }
 
@@ -1171,7 +1154,7 @@ body{height:100dvh;min-height:0;overflow:hidden}
 /* A landscape phone (844x390) uses the same zoom bar as the other sizes: one row along the canvas's bottom edge, with the
    percentage, hand tool and All. Fit hoop leaves that band clear (see LANDSCAPE_BAR_RESERVE in canvas.js), so the bar does not
    cover the hoop, and the playback readouts keep their width. */
-@media (orientation:landscape) and (max-height:500px) and (max-width:1000px){
+@media (orientation:landscape) and (max-height:500px) and (max-width:1000px){:root{--top-bar-h:45px}
 .layout main:not(.design-view) .playback-bar .playback-time{width:max-content;min-width:0;flex:none;overflow:visible}
 .layout main:not(.design-view) .playback-bar .playback-time span{overflow:visible;text-overflow:clip;white-space:nowrap}
 }
@@ -1252,8 +1235,8 @@ html[lang="es"] .layout main>.tool-rail .rail-label,html[lang="es"] .canvas .too
 .top .name-field:not(:focus-within) #name{color:inherit}
 /* The input takes the same type as the hidden copy that sizes the field (the heading size, as on desktop). At 16 px the input text
    is wider than that copy, so the field would clip the name's last word. */
-.top .name-field #name{position:absolute;top:0;bottom:0;left:0;right:0;width:auto;height:100%;min-width:0;padding:0 48px 0 8px;font-size:var(--fs-heading);line-height:1.3;text-overflow:ellipsis}
-.top .save-status{position:relative;z-index:1;flex:none;display:flex;align-items:center;justify-content:center;width:44px;height:44px;margin:0 6px 0 0;padding:0;border:0;background:none;color:#66726c}
+.top .name-field #name{position:absolute;top:0;bottom:0;left:0;right:0;width:auto;height:100%;min-width:0;padding:0 32px 0 8px;font-size:var(--fs-heading);line-height:1.3;text-overflow:ellipsis}
+.top .save-status{position:relative;z-index:1;flex:none;display:flex;align-items:center;justify-content:center;width:24px;height:24px;margin:0 6px 0 2px;padding:0;border:0;background:none;color:#66726c}
 .top .save-status .icon{width:20px;height:20px}
 .top .save-status.saved{color:var(--teal)}.top .save-status.unsaved{color:#8a5a00}
 }
@@ -1274,7 +1257,6 @@ html[lang="es"] .layout main>.tool-rail .rail-label,html[lang="es"] .canvas .too
 .top .icon-button,.top #undo,.top #redo,.top #helpBtn,.top #settingsBtn{width:44px;min-width:44px;height:44px}
 .top #new,.top #open,.top #importMachine,.top #save{min-width:44px;height:44px}
 .top #fileMenu,.top #editMenu,.top #arrangeMenu,.top #viewMenu,.top #export,.top .export-split{height:44px}
-.top #name{height:44px;min-height:44px}
 .layers-head .inspector-toggle{min-height:44px}
 .row-btn,.row-eye,.row-lock{width:44px;min-width:44px;height:44px;min-height:44px}
 .layout .hoop-edit select,.layout .hoop-edit input:not([type=checkbox]),.layout .hoop-edit button,#hoopRotate{height:44px;min-height:44px;min-width:44px}
@@ -1311,11 +1293,10 @@ html[lang="es"] .layout main>.tool-rail .rail-label,html[lang="es"] .canvas .too
 .layout:has(>.panel.inspector-collapsed:last-child){grid-template-columns:300px minmax(0,1fr)}
 }
 
-/* Phone and tablet: the status line is pinned to the footer's bottom edge, so the Messages pill sits in the same place in the 2D,
-   Stitches and 3D views. A landscape phone's footer is 98 px tall to hold the playback row beside the status line. */
+/* Phone and tablet: the footer's content is pinned to its bottom edge, so the Messages pill sits in the same place in the 2D,
+   Stitches and 3D views. */
 @media (max-width:1024px){.layout main:not(.design-view)>footer{padding-bottom:0;align-content:flex-end}}
 @media (min-width:601px) and (max-width:1024px) and (orientation:portrait){.layout main:not(.design-view)>footer{height:115px;min-height:115px}}
-@media (max-width:1024px) and (orientation:landscape) and (max-height:500px){.layout main:not(.design-view)>footer{height:98px;min-height:98px}}
 
 /* A layer name runs to two lines at most and then ends in an ellipsis, at every size, so a long or translated name never makes a
    row three or four lines high. The full name is still in the row's accessible name and its title on hover. */
@@ -1424,7 +1405,6 @@ html[lang="es"] .layout main>.tool-rail .rail-label,html[lang="es"] .canvas .too
    sits inside the name field, after the name's text (see the save status block below). */
 @media (max-width:600px) and (orientation:portrait){
 .top{gap:2px;padding:0 3px}
-.top .name-field{min-width:0}
 }
 
 
@@ -1482,4 +1462,25 @@ html[lang="es"] .layout main>.tool-rail .rail-label,html[lang="es"] .canvas .too
    is the sheet's own background, so it stays at the visible bottom while the rows move under it, and it goes once the list ends. */
 @media (max-width:600px) and (orientation:portrait),(max-height:500px) and (pointer:coarse){
 .layout>aside.panel.sheet-open[data-more=true]{background:linear-gradient(to bottom,#fff calc(100% - 40px),#eef1ef 100%) #fff}
+}
+
+/* The phone top bar (a phone in portrait, or a landscape phone): one row of 44 px controls on a bar --top-bar-h tall. The design name
+   is one 44 px field with two lines, the name and its save mark on the first and the stitch count on the second. The input covers the
+   whole field and keeps its text on the first line, so a tap on the name or on the count renames. The count is an indicator (it
+   passes taps through); the issues button is a top-bar icon button, drawn as Undo is. */
+@media (max-width:600px),(max-height:500px) and (max-width:900px){
+.top .top-design{display:flex;align-items:center;flex:1 1 0;min-width:0;gap:2px}
+.top .name-field{height:44px}
+.top .name-field.has-line{display:grid;grid-template-columns:minmax(0,auto) auto minmax(0,1fr);grid-template-rows:24px 16px;align-content:center;align-items:center;justify-items:start;min-width:0}
+.top .name-field.has-line::before{grid-row:1;grid-column:1}
+.top .name-field.has-line>.save-status{grid-row:1;grid-column:2}
+.top .name-field.has-line #name{padding-bottom:16px}
+.top .top-status{grid-row:2;grid-column:1 / -1;position:relative;display:flex;align-items:center;gap:4px;min-width:0;max-width:100%;padding-left:8px;font-size:var(--fs-caption);line-height:16px;color:#4d5a54;font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden;pointer-events:none}
+.top .top-status .figure{gap:4px;min-width:0}
+.top .top-status .figure .icon{width:14px;height:14px;flex:none}
+.top .top-status .error,.top .top-status .count-figure.error{color:var(--warn)}
+.top .top-status .figure-stale{opacity:.55}
+.top .issues-tile[hidden]{display:none}
+.top .issues-tile.warning{color:var(--warn)}
+.top .issues-count{font-size:var(--fs-caption);line-height:1;font-variant-numeric:tabular-nums}
 }

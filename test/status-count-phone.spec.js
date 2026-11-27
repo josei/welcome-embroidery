@@ -55,8 +55,16 @@ for(const lang of ['es','en']) for(const [w,h] of [[390,844],[844,390],[768,1024
   const box=await chip.boundingBox();
   expect(box.height,'chip fits within the touch target height').toBeLessThanOrEqual(44);
   const drawn=await chip.evaluate(el=>{const s=getComputedStyle(el);return {border:s.borderTopWidth,fill:s.backgroundColor};});
-  expect(drawn.border,'chip has no outline').toBe('0px');
-  expect(drawn.fill,'chip has no fill').toMatch(/rgba\(0, 0, 0, 0\)|transparent/);
+  if (Math.min(w,h) < 600) {
+   // On a phone the issues button is the top bar's own icon button: the same size, outline, fill and corner as Undo.
+   const undo=await page.locator('#undo').evaluate(el=>{const s=getComputedStyle(el);return {border:s.borderTopWidth,fill:s.backgroundColor,radius:s.borderTopLeftRadius};});
+   const chipStyle=await chip.evaluate(el=>{const s=getComputedStyle(el);return {border:s.borderTopWidth,fill:s.backgroundColor,radius:s.borderTopLeftRadius};});
+   expect(chipStyle,"issues button is drawn as the top bar's Undo button").toEqual(undo);
+   expect(box.width,'issues button is as wide as Undo').toBeCloseTo((await page.locator('#undo').boundingBox()).width,0);
+  } else {
+   expect(drawn.border,'chip has no outline').toBe('0px');
+   expect(drawn.fill,'chip has no fill').toMatch(/rgba\(0, 0, 0, 0\)|transparent/);
+  }
  });
 }
 

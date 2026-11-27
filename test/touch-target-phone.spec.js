@@ -88,6 +88,25 @@ for(const [w,h] of dims){
  }
 }
 
+// With issues showing, the issues button joins the top bar, so it is measured with the rest of the bar.
+for(const [w,h] of [[360,640],[390,844],[844,390]]) for(const lang of ['en','es']){
+ test(`phone controls are at least 44 px with issues showing at ${w}x${h} (${lang})`,async({page})=>{
+  const errors=[];page.on('pageerror',e=>errors.push(e.message));page.on('dialog',d=>d.accept());
+  await page.setViewportSize({width:w,height:h});
+  // Restores a design with three squares past the 400 mm hoop, from the autosave the editor offers back.
+  const {initialDocument,applyOperations}=await import('../src/engine.js');
+  const doc=initialDocument();doc.objects=[];doc.hoop=400;doc.name='Probe';doc.revision=1;
+  applyOperations(doc,[300,325,350].map((x,i)=>({op:'add_shape',id:'s'+i,kind:'rect',x,y:0,width:20,height:15.1,thread:'#cc3333',stitch:'fill'})));
+  await page.goto(`/?lang=${lang}`);
+  await page.evaluate(d=>localStorage.setItem('welcome.autosave:'+sessionStorage.getItem('welcome.tabId'),JSON.stringify({doc:d,clean:false,savedAt:Date.now()})),doc);
+  await page.goto(`/?lang=${lang}`);
+  await page.locator('#restoreYes').click();
+  await expect(page.locator('#issuesBtn')).toBeVisible();
+  await check(page,`${w}x${h} ${lang} issues showing`,w);
+  expect(errors).toEqual([]);
+ });
+}
+
 // The screenshot for the PR: the top bar and tool row at 390 by 844 in English.
 test('phone top bar and tool row at 390x844 (en) for the PR screenshot',async({page})=>{
  await page.setViewportSize({width:390,height:844});

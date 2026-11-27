@@ -50,15 +50,15 @@ test('phone Stitches and 3D have no empty status row under the dock',async({page
  }
 });
 
-test('phone Stitches keeps a compile error in the status row',async({page})=>{
+test('a compile error shows on the top bar count line, and the footer stays 0 px',async({page})=>{
  test.setTimeout(120000);
  await openDesign(page,390,844);
  await draw(page,'#rect');
  await phoneView(page,'stitches');
- // With no error the row collapses; the empty-count rule must not hide a message that is shown.
  await expect(page.locator('main>footer')).toHaveCSS('height','0px');
  await page.evaluate(()=>{const c=document.querySelector('#count');c.textContent='⚠ Test message';});
- await expect(page.locator('main>footer')).toHaveCSS('height','28px');
+ await expect(page.locator('.top #count')).toHaveText('⚠ Test message');
+ await expect(page.locator('main>footer')).toHaveCSS('height','0px');
 });
 
 test('tablet portrait Layers rows are never cut under the count',async({page})=>{

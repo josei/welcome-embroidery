@@ -1,7 +1,6 @@
 import {test,expect} from '@playwright/test';
 
-// Two phone edges. In landscape (844x390) the Messages button is the whole 44 px status line, and its full box, border
-// included, lies inside the window. In portrait (390x844) the unsaved dot is an 8 px dot before the design name, and the
+// Two phone edges. In landscape (844x390) the footer has no Messages pill: the top-bar issues button opens Messages instead. In portrait (390x844) the unsaved dot is an 8 px dot before the design name, and the
 // name starts after it, so the dot is never half under the field.
 
 test.beforeEach(async({page})=>{await page.addInitScript(()=>{delete window.showSaveFilePicker;});});
@@ -19,17 +18,11 @@ async function makeDirty(page){
 }
 
 for(const lang of ['en','es']){
- test(`landscape 844x390 ${lang}: the Messages pill's full box lies inside the window`,async({page})=>{
+ test(`landscape 844x390 ${lang}: the footer Messages pill is absent, so no pill can clip`,async({page})=>{
   await page.setViewportSize({width:844,height:390});
   await page.goto(`/?lang=${lang}`);
   await expect(page.locator('.canvas')).toBeVisible();
-  const pill=await rect(page,'#messagesBtn');
-  const vh=await page.evaluate(()=>innerHeight);
-  const vw=await page.evaluate(()=>innerWidth);
-  expect(pill.b,'bottom border is inside the window').toBeLessThanOrEqual(vh);
-  expect(pill.t,'top edge is inside the window').toBeGreaterThanOrEqual(0);
-  expect(pill.r,'right edge is inside the window').toBeLessThanOrEqual(vw);
-  expect(pill.b-pill.t,'pill keeps its 44 px touch height').toBeCloseTo(44,0);
+  await expect(page.locator('#messagesBtn')).toHaveCount(0);
  });
 
  test(`portrait 390x844 ${lang}: the unsaved status shows as a caption and the name does not move`,async({page})=>{

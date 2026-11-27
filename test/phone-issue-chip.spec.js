@@ -1,7 +1,7 @@
 import {test,expect} from '@playwright/test';
 import {mkdirSync} from 'node:fs';
 
-// On a phone or tablet the issues chip is an indicator in the status row, drawn like the design count beside it. It has the
+// On a phone the issues chip is a top-bar button, and on a tablet an indicator in the status row beside the count. It has the
 // same glyph size and text colour, nothing outside the row, and no outline. Its states differ without hover: no issues hides
 // it, one issue shows the glyph with 1, and several show the glyph with their count.
 
