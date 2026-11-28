@@ -1,8 +1,9 @@
 import {test,expect} from '@playwright/test';
+import {revealMenuRow} from './menu-reveal.js';
 
 // The Stitches view and the Export card fit a landscape phone (844x390) and a tablet in portrait (820x1180): the hoop and the
-// playback bar are on screen without overlapping, the playback bar sits clear of the top bar, the tablet's Messages pill keeps a
-// margin from the bottom edge, and the Export Download button is in view. A landscape phone's Messages is a Menu row.
+// playback bar are on screen without overlapping, the playback bar sits clear of the top bar, and the tablet's Messages is in the Menu, not the
+// footer. The Export Download button is in view. A landscape phone's Messages is a Menu row.
 const LANDSCAPE=[844,390],TABLET=[820,1180];
 
 test.beforeEach(async({page})=>{await page.addInitScript(()=>{delete window.showSaveFilePicker;});});
@@ -54,16 +55,16 @@ for(const lang of ['en','es']){
   expect(playback.r-playback.l).toBeGreaterThan(playback.b-playback.t);
  });
 
- for(const [name,size] of [['tablet',TABLET]]){
-  test(`Messages keeps a margin from the bottom edge at ${name} size in Stitches (${lang})`,async({page})=>{
-   await openEditor(page,size,lang);
-   await openStitches(page,size,lang);
-   const msg=await box(page,'#messagesBtn'),footer=await box(page,'.layout main:not(.design-view)>footer');
-   expect(footer.b-msg.b).toBeGreaterThanOrEqual(6);
-   expect(msg.b).toBeLessThanOrEqual(footer.b);
-   await page.screenshot({path:`test-results/${name}-stitches-${lang}.png`});
-  });
- }
+ // A portrait tablet has no Messages button in its footer: the footer holds only the playback bar in Stitches, and Messages is a Menu row.
+ test(`Stitches at tablet size: the footer holds no Messages button, the Menu does (${lang})`,async({page})=>{
+  await openEditor(page,TABLET,lang);
+  await openStitches(page,TABLET,lang);
+  await expect(page.locator('#messagesBtn')).toHaveCount(0);
+  await page.locator('#phoneMenu').click();
+  const row=await revealMenuRow(page.locator('#phoneMenuList'),'menuMessages');
+  await expect(row).toBeVisible();
+  await page.screenshot({path:`test-results/tablet-stitches-${lang}.png`});
+ });
 
  test(`Export at 844x390: the Download button is in view with the other controls (${lang})`,async({page})=>{
   await openEditor(page,LANDSCAPE,lang);

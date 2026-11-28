@@ -55,7 +55,8 @@ for(const lang of ['es','en']) for(const [w,h] of [[390,844],[844,390],[768,1024
   const box=await chip.boundingBox();
   expect(box.height,'chip fits within the touch target height').toBeLessThanOrEqual(44);
   const drawn=await chip.evaluate(el=>{const s=getComputedStyle(el);return {border:s.borderTopWidth,fill:s.backgroundColor};});
-  if (Math.min(w,h) < 600) {
+  // A phone and a portrait tablet draw the chip in the top bar, as its own icon button.
+  if (Math.min(w,h) < 600 || w === 768) {
    // On a phone the issues button is the top bar's own icon button: the same size, outline, fill and corner as Undo.
    const undo=await page.locator('#undo').evaluate(el=>{const s=getComputedStyle(el);return {border:s.borderTopWidth,fill:s.backgroundColor,radius:s.borderTopLeftRadius};});
    const chipStyle=await chip.evaluate(el=>{const s=getComputedStyle(el);return {border:s.borderTopWidth,fill:s.backgroundColor,radius:s.borderTopLeftRadius};});

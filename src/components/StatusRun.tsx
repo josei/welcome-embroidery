@@ -5,12 +5,13 @@ import {viewMode} from '../viewMode.js';
 import {toastActions} from '../toastState.js';
 import {useCompactLayout} from '../compactLayout';
 import {usePhoneMenu} from '../phoneSheetState.js';
+import {useTabletPortrait} from '../tabletLayoutState.js';
 import {MeasureReadout} from './MeasureReadout';
 
 // The status run below the canvas. Its text and the issues button come from statusState. On a tablet the issues button shows its
 // count with the warning triangle when the design has issues, or a lightbulb when it has only sewing tips; the full text stays as
 // its accessible name and tooltip. On a tablet the design count is a glyph with its number, and over the hoop in Stitches view it
-// stays empty, because the playback bar already names the stitch count there. On a phone both live in the top bar instead.
+// stays empty, because the playback bar already names the stitch count there. On a phone and a portrait tablet both live in the top bar instead.
 // The glyph the count shows for each design state. Each state has its own shape, so it reads without hover, and the error mark is
 // not the triangle the issues button uses, so the two controls on one screen never share a glyph.
 const COUNT_GLYPHS = {ready: '#i-run', working: '#i-working', idle: '#i-idle', error: '#i-error'} as const;
@@ -37,9 +38,11 @@ export function StatusRun() {
  // On a tablet the design count is an icon and its number, in the warning colour when the design has an error; the full sentence
  // stays as the name and tooltip, and the issues button beside it counts the problems.
  const compact = useCompactLayout();
- // On a phone the count, the issues button and the Messages button are in the top bar (TopStatusLine, TopIssues), so the footer
- // leaves them out. Messages is one route on a phone, the top-bar issues button, in both orientations.
- const topBar = usePhoneMenu();
+ // On a phone and a portrait tablet the count and the issues button are in the top bar (TopStatusLine, TopIssues), so the footer
+ // leaves them out, and so does the Messages button: the Menu holds Messages on both.
+ const phoneTop = usePhoneMenu();
+ const tabletTop = useTabletPortrait();
+ const topBar = phoneTop || tabletTop;
  const stitchView = useSyncExternalStore(viewMode.subscribe, viewMode.get) !== 'design';
  const figure = compact && s.countFigure && s.countFigure.text === s.count ? s.countFigure : null;
  const hideOverHoop = compact && stitchView && s.countError;

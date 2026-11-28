@@ -25,31 +25,6 @@ async function openView(page,view){
  else{await page.locator('#phoneMenu').click();await page.locator(`#menuView-${view}`).click();}
 }
 
-// The messages button is the word on a tablet, as on the desktop, so it needs no icon to be read. A phone has no status row, so
-// its Messages is a Menu row.
-for(const lang of ['en','es']) for(const [w,h] of [[768,1024]]){
- test(`${w}x${h} ${lang}: the messages button is its word, in the same place in each view`,async({page})=>{
-  await page.setViewportSize({width:w,height:h});
-  await page.goto(`/?lang=${lang}`);
-  await expect(page.locator('.canvas')).toBeVisible();
-  const btn=page.locator('#messagesBtn');
-  await expect(btn).toBeVisible();
-  await expect(btn).toHaveText(lang==='es'?'Mensajes':'Messages');
-  await expect(btn.locator('svg')).toHaveCount(0);
-  const at=async()=>{const b=await btn.boundingBox();return {x:Math.round(b.x),y:Math.round(b.y)};};
-  const start=await at();
-  await openView(page,'stitches');
-  await expect(page.locator('#play')).toBeVisible();
-  expect(await at(),'position in Stitches view').toEqual(start);
-  await openView(page,'preview');
-  await expect(page.locator('#messagesBtn')).toBeVisible();
-  expect(await at(),'position in 3D view').toEqual(start);
-  await openView(page,'design');
-  await expect(page.locator('#messagesBtn')).toBeVisible();
-  expect(await at(),'position back in 2D view').toEqual(start);
- });
-}
-
 // A 390-wide phone has no status row, so the messages button is not on the screen; Messages is a Menu row there.
 test('390x844 en: the messages button is not on a phone screen; the Menu holds it', async({page})=>{
  await page.setViewportSize({width:390,height:844});
@@ -78,7 +53,7 @@ for(const lang of ['en','es']) test(`768x1024 ${lang}: the issues button shows a
  expect(box.width,'hit area width').toBeGreaterThanOrEqual(44);
  expect(box.height,'hit area height').toBeGreaterThanOrEqual(44);
  expect(await btn.getAttribute('title')).toContain(label);
- await expect(btn).toHaveClass(/issues-btn/);
+ await expect(btn).toHaveClass(/issues-tile/);
 });
 
 test('1280x800 en: the issues button and messages button keep their words', async({page})=>{
@@ -112,8 +87,8 @@ for(const [w,h] of [[390,844],[768,1024]]) test(`${w}x${h} es: one object past t
  const btn=page.locator('#issuesBtn');
  await expect(btn).toBeVisible();
  await expect(btn).toHaveText('1');
- if(w<=600){
-  // On a phone the chip is the top bar's status line and opens Messages; the object is not selected by it.
+ if(w<=600||w===768){
+  // On a phone and a portrait tablet the chip is in the top bar and opens Messages; the object is not selected by it.
   await btn.click();
   await expect(page.locator('#messagesDialog[open]')).toHaveCount(1);
   await page.keyboard.press('Escape');

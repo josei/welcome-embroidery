@@ -766,6 +766,8 @@ body{height:100vh;height:100dvh;min-height:0;overflow:hidden}
 /* Every inspector and status-line control is 44x44 px to tap at tablet portrait. The glyph inside may stay
    small; the element's box is the hit area. The status line grows from 28 to 44 px so the Messages button fits its height. */
 .layout main>footer{height:44px;min-height:44px}
+/* The design view's count and issues are in the top bar, so the footer keeps no row of its own there; the toasts still anchor to it. */
+.layout main.design-view>footer{height:0;min-height:0;padding:0;border-top:0;box-shadow:none}
 .layout main>footer .messages-btn{height:44px;min-height:44px;min-width:44px;padding:0 12px}
 /* In the Stitches and 3D views the playback bar takes a row of its own above the status line, so the play button, the
    colour strip and the stitch count never sit over the zoom bar or the status text. The zoom bar stays inside the canvas,
@@ -1313,6 +1315,11 @@ html[lang="es"] .canvas .tool-rail .rail-label{font-size:9.5px;letter-spacing:-.
 @media (min-width:601px) and (max-width:1024px) and (min-height:501px){
 .layout main:not(.design-view)>footer{height:116px;min-height:116px;padding-right:8px;padding-bottom:0;align-content:flex-end}
 }
+/* A portrait tablet's Stitches and 3D footer holds the 62 px playback row alone: the count and issues are in the top bar, so no
+   status row sits under it. The footer shrinks to the row, and the canvas above it takes the space. */
+@media (min-width:601px) and (max-width:1024px) and (orientation:portrait) and (min-height:501px){
+.layout main:not(.design-view)>footer{height:74px;min-height:74px;align-content:center}
+}
 @media (min-width:601px) and (max-width:1024px) and (orientation:landscape) and (min-height:501px){
 .layout main:not(.design-view) .playback-bar .playback-summary{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.3}
 }
@@ -1472,8 +1479,8 @@ html[lang="es"] .canvas .tool-rail .rail-label{font-size:9.5px;letter-spacing:-.
    is one 44 px field with two lines, the name and its save mark on the first and the stitch count on the second. The input covers the
    whole field and keeps its text on the first line, so a tap on the name or on the count renames. The count is an indicator (it
    passes taps through); the issues button is a top-bar icon button, drawn as Undo is. */
-@media (max-width:600px),(max-height:500px) and (max-width:900px){
-.top .top-design{display:flex;align-items:center;flex:1 1 0;min-width:0;gap:2px}
+@media (max-width:600px),(max-height:500px) and (max-width:900px),(min-width:601px) and (max-width:1024px) and (orientation:portrait){
+.top .top-design{display:flex;align-items:center;flex:1 1 0;min-width:0;gap:2px;overflow:hidden}
 .top .name-field{height:44px}
 .top .name-field.has-line{display:grid;grid-template-columns:minmax(0,auto) auto minmax(0,1fr);grid-template-rows:24px 16px;align-content:center;align-items:center;justify-items:start;min-width:0}
 .top .name-field.has-line::before{grid-row:1;grid-column:1}
@@ -1487,4 +1494,11 @@ html[lang="es"] .canvas .tool-rail .rail-label{font-size:9.5px;letter-spacing:-.
 .top .issues-tile[hidden]{display:none}
 .top .issues-tile.warning{color:var(--warn)}
 .top .issues-count{font-size:var(--fs-caption);line-height:1;font-variant-numeric:tabular-nums}
+}
+
+/* On a portrait tablet the floating selection bar and the zoom bar share one height and one border, and the stitch playback bar
+   under the canvas has the same top border as the other bars, so the bars read as one row of chrome. */
+@media (min-width:601px) and (max-width:1024px) and (orientation:portrait){
+.canvas .floating{height:46px;box-sizing:border-box;padding-top:0;padding-bottom:0}
+.layout main:not(.design-view)>footer{border-top:1px solid var(--field-line)}
 }

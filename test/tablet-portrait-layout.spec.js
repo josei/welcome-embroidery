@@ -46,8 +46,8 @@ for(const lang of ['en','es']){
   const top=await rect(page,'.top');
   expect(Math.round(top.height)).toBe(56);
   const status=await rect(page,'.layout main>footer');
-  // The status line is 44 px so its Messages button is a 44 px target.
-  expect(Math.round(status.height)).toBe(44);
+  // The design view has no status row under the canvas: the count and the issues chip are in the top bar.
+  expect(Math.round(status.height)).toBe(0);
   const canvas=await rect(page,'.canvas');
   const rail=await rect(page,'.tool-rail');
   const art=await rect(page,'#art');

@@ -30,7 +30,7 @@ const expectFixed=(before,after,name)=>{
 };
 
 // The leaf sits under this point on a fresh 768x1024 tablet.
-const LEAF_POINT={x:228,y:520};
+const LEAF_POINT={x:203,y:544};
 
 for(const pointer of ['touch','mouse']){
  test(`768x1024: a ${pointer} tap on the leaf leaves the hoop where it was`,async({page})=>{

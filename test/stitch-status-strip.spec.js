@@ -68,17 +68,15 @@ for(const [w,h] of SIZES) for(const lang of ['en','es']) for(const overrun of [f
  });
 }
 
-// On the tablet the status row holds one progress state (the compile or issue text) and the Messages pill. The playback row above
-// already reports the simulation, so the status row leaves its count slot empty. A phone has no status row: its count is in the top bar.
+// A portrait tablet has no status row under the canvas: the count and the issues chip are in the top bar, and Messages is a Menu
+// row. The playback row above holds the simulation's readouts, so nothing in the strip repeats the count.
 const ONE_ROW=[[768,1024]];
 for(const [w,h] of ONE_ROW) for(const lang of ['en','es']) {
- test(`the status row shows one progress state beside Messages (${w}x${h} ${lang})`,async({page})=>{
+ test(`the playback row holds the simulation and there is no Messages button (${w}x${h} ${lang})`,async({page})=>{
   await openStitches(page,w,h,lang);
-  const shown=await page.locator('#playbackProgress').isVisible();
-  expect(shown).toBe(false);
-  await expect(page.locator('#messagesBtn')).toBeVisible();
+  expect(await page.locator('#playbackProgress').isVisible()).toBe(false);
+  await expect(page.locator('#messagesBtn')).toHaveCount(0);
   await expect(page.locator('#playbackStitches')).toBeVisible();
-  await expect(page.locator('#count')).toHaveText('');
  });
 
  test(`the status text and the thread summary are not cut off (${w}x${h} ${lang})`,async({page})=>{

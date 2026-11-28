@@ -1,4 +1,5 @@
 import {test,expect} from '@playwright/test';
+import {revealMenuRow} from './menu-reveal.js';
 
 // On a portrait tablet (768x1024) the Stitches view puts the playback bar on a row of its own above the status line. The
 // play button then sits clear of the zoom bar, the stitch label beside it is read whole, the Messages button stays inside
@@ -76,14 +77,15 @@ for(const lang of ['en','es']){
   expect(time.scrollWidth,`"${time.text}" is cut off`).toBeLessThanOrEqual(time.clientWidth+0.5);
  });
 
- test(`the Messages button is inside the window (${where})`,async({page})=>{
+ // The status row is gone on a portrait tablet: the count and issues are in the top bar, and Messages is a row in the Menu.
+ test(`Messages is in the Menu, not on a status row (${where})`,async({page})=>{
   await openStitches(page,lang);
-  const {messages,viewport}=await boxes(page);
-  expect(messages).not.toBeNull();
-  expect(messages.l).toBeGreaterThanOrEqual(0);
-  expect(messages.t).toBeGreaterThanOrEqual(0);
-  expect(messages.r).toBeLessThanOrEqual(viewport.w);
-  expect(messages.b).toBeLessThanOrEqual(viewport.h);
+  const {messages}=await boxes(page);
+  expect(messages).toBeNull();
+  await page.locator('#phoneMenu').click();
+  const row=await revealMenuRow(page.locator('#phoneMenuList'),'menuMessages');
+  await row.scrollIntoViewIfNeeded();
+  await expect(row).toBeVisible();
  });
 
  test(`every control in the playback bar is 44 px (${where})`,async({page})=>{
